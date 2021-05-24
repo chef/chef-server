@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.5.0 -->
-## [14.5.0](https://github.com/chef/chef-server/tree/14.5.0) (2021-05-23)
+<!-- latest_release 14.5.1 -->
+## [14.5.1](https://github.com/chef/chef-server/tree/14.5.1) (2021-05-24)
 
 #### Merged Pull Requests
-- Remove the need for rest-client and mixlib-install in omnibus [#2492](https://github.com/chef/chef-server/pull/2492) ([tas50](https://github.com/tas50))
+- Cleanup the docs / man pages from postgresql install [#2502](https://github.com/chef/chef-server/pull/2502) ([tas50](https://github.com/tas50))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.4.4 -->
 ### Changes since 14.4.4 release
 
 #### Merged Pull Requests
+- Cleanup the docs / man pages from postgresql install [#2502](https://github.com/chef/chef-server/pull/2502) ([tas50](https://github.com/tas50)) <!-- 14.5.1 -->
 - Remove the need for rest-client and mixlib-install in omnibus [#2492](https://github.com/chef/chef-server/pull/2492) ([tas50](https://github.com/tas50)) <!-- 14.5.0 -->
 - Chef Manage should be verified on ipv4 &amp; ipv6 setup [#2478](https://github.com/chef/chef-server/pull/2478) ([jashaik](https://github.com/jashaik)) <!-- 14.4.7 -->
 - Revert &quot;Build and test on RHEL 8&quot; [#2497](https://github.com/chef/chef-server/pull/2497) ([tas50](https://github.com/tas50)) <!-- 14.4.6 -->
