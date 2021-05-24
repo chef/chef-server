@@ -158,8 +158,13 @@ link '/opt/opscode/embedded/elasticsearch/config' do
   to elasticsearch_conf_dir
 end
 
+# While Restoring the chef server backup, enable is always successful 
+# but start is not which is the root cause of restore issue.
+# So added retries for making sure the elasticsearch runit service is running
 component_runit_service 'elasticsearch' do
   action [:enable, :start]
+  retries 10
+  retry_delay 1
 end
 
 include_recipe 'private-chef::elasticsearch_index'
