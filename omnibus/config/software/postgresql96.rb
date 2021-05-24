@@ -55,5 +55,9 @@ build do
     Dir.glob("#{install_dir}/embedded/postgresql/#{short_version}/bin/*").sort.each do |bin|
       link bin, "#{install_dir}/embedded/bin/#{File.basename(bin)}"
     end
+
+    delete "#{install_dir}/embedded/postgresql/#{short_version}/share/doc"
+    delete "#{install_dir}/embedded/postgresql/#{short_version}/share/man"
+
   end
 end
