@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.5.1 -->
-## [14.5.1](https://github.com/chef/chef-server/tree/14.5.1) (2021-05-24)
+<!-- latest_release 14.5.2 -->
+## [14.5.2](https://github.com/chef/chef-server/tree/14.5.2) (2021-05-25)
 
 #### Merged Pull Requests
-- Cleanup the docs / man pages from postgresql install [#2502](https://github.com/chef/chef-server/pull/2502) ([tas50](https://github.com/tas50))
+- Bump omnibus-software from `a13ce9b` to `6b77f49` in /omnibus [#2505](https://github.com/chef/chef-server/pull/2505) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.4.4 -->
 ### Changes since 14.4.4 release
 
 #### Merged Pull Requests
+- Bump omnibus-software from `a13ce9b` to `6b77f49` in /omnibus [#2505](https://github.com/chef/chef-server/pull/2505) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.5.2 -->
 - Cleanup the docs / man pages from postgresql install [#2502](https://github.com/chef/chef-server/pull/2502) ([tas50](https://github.com/tas50)) <!-- 14.5.1 -->
 - Remove the need for rest-client and mixlib-install in omnibus [#2492](https://github.com/chef/chef-server/pull/2492) ([tas50](https://github.com/tas50)) <!-- 14.5.0 -->
 - Chef Manage should be verified on ipv4 &amp; ipv6 setup [#2478](https://github.com/chef/chef-server/pull/2478) ([jashaik](https://github.com/jashaik)) <!-- 14.4.7 -->
