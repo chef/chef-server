@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.5.3 -->
-## [14.5.3](https://github.com/chef/chef-server/tree/14.5.3) (2021-05-25)
+<!-- latest_release 14.5.4 -->
+## [14.5.4](https://github.com/chef/chef-server/tree/14.5.4) (2021-05-27)
 
 #### Merged Pull Requests
-- Bump omnibus-software from `6b77f49` to `b1e7b08` in /omnibus [#2508](https://github.com/chef/chef-server/pull/2508) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Add retries to the elasticsearch/redis service starts to resolve restore issues [#2504](https://github.com/chef/chef-server/pull/2504) ([jashaik](https://github.com/jashaik))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.4.4 -->
 ### Changes since 14.4.4 release
 
 #### Merged Pull Requests
+- Add retries to the elasticsearch/redis service starts to resolve restore issues [#2504](https://github.com/chef/chef-server/pull/2504) ([jashaik](https://github.com/jashaik)) <!-- 14.5.4 -->
 - Bump omnibus-software from `6b77f49` to `b1e7b08` in /omnibus [#2508](https://github.com/chef/chef-server/pull/2508) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.5.3 -->
 - Bump omnibus-software from `a13ce9b` to `6b77f49` in /omnibus [#2505](https://github.com/chef/chef-server/pull/2505) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.5.2 -->
 - Cleanup the docs / man pages from postgresql install [#2502](https://github.com/chef/chef-server/pull/2502) ([tas50](https://github.com/tas50)) <!-- 14.5.1 -->
