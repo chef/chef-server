@@ -82,6 +82,8 @@ component_runit_service 'redis_lb'
 # Restart the redis_lb runit service.
 runit_service 'redis_lb' do
   action :restart
+  retries 10
+  retry_delay 1
   only_if { is_data_master? }
 end
 
