@@ -125,11 +125,8 @@ db_round_trip(Config) ->
     ?assert(erlang:is_integer(RecIDFromDB)),
 
     %% and modulo a few things, it should be equal to what we inserted
-    ChecksumsFromDB = RecFromDB#oc_chef_cookbook_artifact_version.checksums,
     ModifiedRecFromDB = RecFromDB#oc_chef_cookbook_artifact_version{id = undefined,
-                                                                    server_api_version = ?API_MIN_VER,
-                                                                    %% they get reversed when saving
-                                                                    checksums = lists:reverse(ChecksumsFromDB)},
+                                                                    server_api_version = ?API_MIN_VER},
     OriginalCreatedAt = CBAVRecord#oc_chef_cookbook_artifact_version.created_at,
     DateTimeCreatedAt = {datetime, ec_date:parse(erlang:binary_to_list(OriginalCreatedAt))},
     ModifiedCBAVRecord = CBAVRecord#oc_chef_cookbook_artifact_version{created_at = DateTimeCreatedAt,
