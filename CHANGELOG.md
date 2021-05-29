@@ -1,17 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.5.5 -->
-## [14.5.5](https://github.com/chef/chef-server/tree/14.5.5) (2021-05-29)
+<!-- latest_release 14.5.6 -->
+## [14.5.6](https://github.com/chef/chef-server/tree/14.5.6) (2021-05-29)
 
 #### Merged Pull Requests
-- Bump omnibus-software from `b1e7b08` to `606edf8` in /omnibus [#2513](https://github.com/chef/chef-server/pull/2513) ([dependabot[bot]](https://github.com/dependabot[bot]))
-- Bump chefstyle from 2.0.3 to 2.0.4 in /src/chef-server-ctl [#2512](https://github.com/chef/chef-server/pull/2512) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Upgrade rails to 4.2.11.3 for CVE fixes [#2494](https://github.com/chef/chef-server/pull/2494) ([tas50](https://github.com/tas50))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.4.4 -->
 ### Changes since 14.4.4 release
 
 #### Merged Pull Requests
+- Upgrade rails to 4.2.11.3 for CVE fixes [#2494](https://github.com/chef/chef-server/pull/2494) ([tas50](https://github.com/tas50)) <!-- 14.5.6 -->
 - Bump omnibus-software from `b1e7b08` to `606edf8` in /omnibus [#2513](https://github.com/chef/chef-server/pull/2513) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.5.5 -->
 - Bump chefstyle from 2.0.3 to 2.0.4 in /src/chef-server-ctl [#2512](https://github.com/chef/chef-server/pull/2512) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.5.4 -->
 - Add retries to the elasticsearch/redis service starts to resolve restore issues [#2504](https://github.com/chef/chef-server/pull/2504) ([jashaik](https://github.com/jashaik)) <!-- 14.5.4 -->
