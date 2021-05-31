@@ -243,7 +243,13 @@ cookbook_file File.join(nginx_addon_dir, 'README.md') do
 end
 
 # Set up runit service for nginx component
-component_runit_service 'nginx'
+# While Restoring the chef server backup, start is not always successful.
+# So added retries for making sure the nginx runit service is running
+component_runit_service 'nginx' do
+  action [:enable, :start]
+  retries 10
+  retry_delay 1
+end
 
 # log rotation
 template '/etc/opscode/logrotate.d/nginx' do
