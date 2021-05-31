@@ -64,6 +64,11 @@ if mode == "api" then
 end
 
 
+-- This check is of not much value as the list of ip not to be allowed
+-- is more than the list of ips to be allowed in maintenance mode
+-- if we should remove this call, then we need to handle the ngx.shared.maint_data
+-- refresh logic correctly, currently as far as I know we are not setting the
+-- 'maint_data' set in redis
 -- global maint mode && address NOT excluded? no can do, muchacho
 if config.is_in_maint_mode_for_addr(remote_addr) then
   ngx.exit(ngx.HTTP_SERVICE_UNAVAILABLE)
@@ -78,6 +83,9 @@ local route = routes.resolve_uri(mode, uri)
 if not route.route_id then
   ngx.exit(ngx.HTTP_NOT_FOUND)
 end
+
+-- adding the flag to ignore 503 route level check
+route.maint_ip_allowed = config.is_addr_allowed_in_maint_mode(remote_addr)
 
 -- Load restrictions and darklaunch constraints for this org.
 -- note that org name may not be valid - we'll use an appropriate default if it's not,

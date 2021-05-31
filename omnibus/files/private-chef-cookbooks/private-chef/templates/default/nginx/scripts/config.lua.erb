@@ -122,10 +122,10 @@ end
 -- Examines the shared_dict provided and determine if it needs updating
 -- based on expiry time.  If so, it clears all entries and refreshes
 -- the dict data from redis
-local function refresh_expiring_set(shared_dict, name, interval)
+local function refresh_expiring_set(shared_dict, redis_set_name, interval)
   local updated_at = shared_dict:get("updated_at");
   if updated_at == nil or (ngx.now() - updated_at) >= interval then
-    ok, updated_data = redis_fetch_set(name)
+    ok, updated_data = redis_fetch_set(redis_set_name)
     if ok then
        shared_dict:flush_all();
        for index, key in ipairs(updated_data) do
@@ -157,13 +157,20 @@ function config.is_route_darklaunched(route_id)
   return maint:get("dl_" .. route_id)
 end
 
--- return true if the given address is maintenance mode
--- whitelist
-function config.is_addr_whitelisted(component, remote_addr)
+-- return true if ip needs to be allowed in maintenance mode
+-- gets the data by redis call
+function config.is_addr_allowed_in_maint_mode(remote_addr)
+  ok, allowed_ips_list = redis_fetch_set("xmaint_allowed_ips_list")
+--  for k, v in pairs(allowed_ips_list) do ngx.log(ngx.ERR, "inside maint_whitelisted with : ", v) end
+  if ok then
+    for k, v in pairs(allowed_ips_list) do
+      if v == remote_addr then return true end
+    end
+  end
   return false
 end
 
-
+-- need to change by using 'banned_ips' shared dict or calling the redis directly
 function config.is_addr_banned(remote_addr)
   return false
 end

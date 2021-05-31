@@ -43,10 +43,8 @@ upstream_resolver.tarpitify = function(route_id, org_config, internal)
 end
 
 upstream_resolver.acct_erchef_fun = function(route)
-  if route.org_config["couchdb_" .. route.endpoint] == 0 then
-    return "erchef"
-  end
-  return "acct"
+--  returns "erchef" as we moved away from 'opscode_account'
+  return "erchef"
 end
 
 -- If this is an internal non API vhost , the caller must also ensure that route.internal == true
