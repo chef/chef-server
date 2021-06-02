@@ -14,6 +14,8 @@ aliases = ["/ctl_chef_backend.html"]
     weight = 20
 +++
 
+{{% EOL_backend %}}
+
 The Chef Infra Server backend HA cluster includes a command-line utility
 named chef-backend-ctl. This command-line tool is used to manage the
 Chef Infra Server backend HA cluster, start and stop individual

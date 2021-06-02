@@ -14,6 +14,8 @@ aliases = ["/backend_failure_recovery.html", "/backend_failure_recovery/"]
     weight = 20
 +++
 
+{{% EOL_backend %}}
+
 This document contains the recommended actions for responding to
 failures in your Chef Backend cluster.
 

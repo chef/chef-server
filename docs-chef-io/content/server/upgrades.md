@@ -128,6 +128,8 @@ If you are running a Chef Infra Server release prior to 12.3.0 please contact Ch
 
 ### Chef Backend Install
 
+{{% EOL_backend %}}
+
 The Chef Infra Server can operate in a high availability configuration that provides automated load balancing and failover for stateful components in the system architecture.
 
 To upgrade your Chef Backend installation, see [High Availability: Upgrade to Chef Backend 2]({{< relref "upgrade_server_ha_v2" >}}).
