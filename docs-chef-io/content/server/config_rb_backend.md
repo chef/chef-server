@@ -14,9 +14,7 @@ aliases = ["/config_rb_backend.html", "/config_rb_backend/"]
     weight = 30
 +++
 
-{{< warning >}}
 {{% EOL_backend %}}
-{{< /warning >}}
 
 ## chef-backend.rb Options
 

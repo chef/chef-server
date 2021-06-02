@@ -57,9 +57,7 @@ chef-server-ctl restore /path/to/tar/archive.tar.gz
 
 ## Backup and restore a Chef Backend install
 
-{{< warning >}}
 {{% EOL_backend %}}
-{{< /warning >}}
 
 In a disaster recovery scenario, the backup and restore processes allow
 you to restore a data backup into a newly built cluster. It is not

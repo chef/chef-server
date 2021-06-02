@@ -14,9 +14,7 @@ aliases = ["/install_server_ha.html"]
     weight = 20
 +++
 
-{{< warning >}}
 {{% EOL_backend %}}
-{{< /warning >}}
 
 This topic introduces the underlying concepts behind the architecture of
 the high availability Chef Infra Server cluster. The topic then

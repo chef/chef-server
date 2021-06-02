@@ -14,9 +14,7 @@ aliases = ["/install_server_tiered.html", "/install_server_tiered/"]
     weight = 50
 +++
 
-{{< warning >}}
 {{% EOL_backend %}}
-{{< /warning >}}
 
 This topic describes how to set up the Chef Infra Server with a single
 back end and multiple load-balanced frontend servers.
