@@ -35,6 +35,8 @@ dependency "haproxy"
 dependency "pg-gem" # used by private-chef-ctl reconfigure
 dependency "elasticsearch" # used by search
 
+# we need a newer rubygems to support bundler 2.1.4. We can remove this when we upgrade to Ruby 2.7
+dependency "rubygems"
 # make sure we have the bundler necessary for the chef install we're using
 dependency "bundler"
 # moved earlier because it is external to this repo and pinned, so should change infrequently
