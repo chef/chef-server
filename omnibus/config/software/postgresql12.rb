@@ -31,7 +31,6 @@ dependency "config_guess"
 
 source url: "https://ftp.postgresql.org/pub/source/v#{version}/postgresql-#{version}.tar.bz2"
 version("12.5") { source sha256: "bd0d25341d9578b5473c9506300022de26370879581f5fddd243a886ce79ff95" }
-version("9.6.15") { source sha256: "3cd9fe9af247167f863030842c1a57f58bdf3e5d50a94997d34a802b6032170a" }
 
 relative_path "postgresql-#{version}"
 
