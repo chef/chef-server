@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.5.10 -->
-## [14.5.10](https://github.com/chef/chef-server/tree/14.5.10) (2021-06-10)
+<!-- latest_release 14.5.11 -->
+## [14.5.11](https://github.com/chef/chef-server/tree/14.5.11) (2021-06-10)
 
 #### Merged Pull Requests
-- Update Elasticsearch to 6.8.16 [#2528](https://github.com/chef/chef-server/pull/2528) ([tas50](https://github.com/tas50))
+- Bump omnibus-software from `606edf8` to `e86bf08` in /omnibus [#2529](https://github.com/chef/chef-server/pull/2529) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.4.4 -->
 ### Changes since 14.4.4 release
 
 #### Merged Pull Requests
+- Bump omnibus-software from `606edf8` to `e86bf08` in /omnibus [#2529](https://github.com/chef/chef-server/pull/2529) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.5.11 -->
 - Update Elasticsearch to 6.8.16 [#2528](https://github.com/chef/chef-server/pull/2528) ([tas50](https://github.com/tas50)) <!-- 14.5.10 -->
 - Update Openresty to 1.19.3.2 [#2527](https://github.com/chef/chef-server/pull/2527) ([tas50](https://github.com/tas50)) <!-- 14.5.9 -->
 - Bump toml from 0.2.0 to 0.3.0 in /src/chef-server-ctl [#2516](https://github.com/chef/chef-server/pull/2516) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.5.8 -->
