@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.5.8 -->
-## [14.5.8](https://github.com/chef/chef-server/tree/14.5.8) (2021-06-09)
+<!-- latest_release 14.5.9 -->
+## [14.5.9](https://github.com/chef/chef-server/tree/14.5.9) (2021-06-10)
 
 #### Merged Pull Requests
-- Bump toml from 0.2.0 to 0.3.0 in /src/chef-server-ctl [#2516](https://github.com/chef/chef-server/pull/2516) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Update Openresty to 1.19.3.2 [#2527](https://github.com/chef/chef-server/pull/2527) ([tas50](https://github.com/tas50))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.4.4 -->
 ### Changes since 14.4.4 release
 
 #### Merged Pull Requests
+- Update Openresty to 1.19.3.2 [#2527](https://github.com/chef/chef-server/pull/2527) ([tas50](https://github.com/tas50)) <!-- 14.5.9 -->
 - Bump toml from 0.2.0 to 0.3.0 in /src/chef-server-ctl [#2516](https://github.com/chef/chef-server/pull/2516) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.5.8 -->
 - deprecation note added to the chef backend docs [#2515](https://github.com/chef/chef-server/pull/2515) ([dishanktiwari2501](https://github.com/dishanktiwari2501)) <!-- 14.5.7 -->
 - Upgrade rails to 4.2.11.3 for CVE fixes [#2494](https://github.com/chef/chef-server/pull/2494) ([tas50](https://github.com/tas50)) <!-- 14.5.6 -->
