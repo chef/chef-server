@@ -15,7 +15,7 @@
 #
 
 name "elasticsearch"
-default_version "6.8.15"
+default_version "6.8.16"
 
 dependency "server-open-jre"
 
@@ -25,9 +25,9 @@ skip_transitive_dependency_licensing true
 
 relative_path "elasticsearch-#{version}"
 
-version "6.8.15" do
+version "6.8.16" do
   source url: "https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-oss-#{version}.tar.gz",
-         sha512: "7e6a819339ac6043af218f9d97d5d68c50ac46900e4293e7fa18992f7a50b10b0ab2434e26ff0dc1546204ae7526de8ac6ef6545fc0db9c862ceeaa0d96c56f5"
+         sha512: "0f46c69136312d535ccff4663655500538ffc924bbe50350c2eed3372609a28e642bb906cbb9a631af5fa10568a16c1a630ef181c383ee247c98325ddc85e04c"
 end
 
 version "7.9.3" do
