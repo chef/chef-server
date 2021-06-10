@@ -208,3 +208,25 @@ chef-server/src/bookshelf/rebar.lock
 chef-server/src/oc_erchef/rebar.lock
 chef-server/src/oc_bifrost/rebar.lock
 ```
+
+## Buildkite Artifacts (omnibus/adhoc)
+
+Build artifacts are no longer automatically published to artifactory, in order to speed up pipeline runs in cases where artifacts aren't needed.  To publish an artifact in Artifactory's unstable channel, you must first set the Buildkite environment variable `PUBLISH_TO_ARTIFACTORY=true`. (**Buildkite web UI > New Build > Options** opens the Environment Variables settings).
+
+It may be possible to have the artifacts for the nightlies published to artifactory by adding an environment variable to .expeditor/config.yml (untested):
+
+```
+diff --git a/.expeditor/config.yml b/.expeditor/config.yml
+index 36962f703..ac772214e 100644
+--- a/.expeditor/config.yml
++++ b/.expeditor/config.yml
+@@ -43,6 +43,7 @@ pipelines:
+  - omnibus/adhoc:
+       definition: .expeditor/release.omnibus.yml
+       env:
+         - ADHOC: true
++        - PUBLISH_TO_ARTIFACTORY: true
+   - post-promote:
+       description: "Generate and upload release manifest"
+       definition: .expeditor/post-promote.pipeline.yml
+```
