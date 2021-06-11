@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.5.12 -->
-## [14.5.12](https://github.com/chef/chef-server/tree/14.5.12) (2021-06-10)
+<!-- latest_release 14.5.13 -->
+## [14.5.13](https://github.com/chef/chef-server/tree/14.5.13) (2021-06-11)
 
 #### Merged Pull Requests
-- Add an omnibus definition to cleanup leftover ruby files in the install [#2503](https://github.com/chef/chef-server/pull/2503) ([tas50](https://github.com/tas50))
+- Bump omnibus-software from `e86bf08` to `70979e9` in /omnibus [#2532](https://github.com/chef/chef-server/pull/2532) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.4.4 -->
 ### Changes since 14.4.4 release
 
 #### Merged Pull Requests
+- Bump omnibus-software from `e86bf08` to `70979e9` in /omnibus [#2532](https://github.com/chef/chef-server/pull/2532) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.5.13 -->
 - Add an omnibus definition to cleanup leftover ruby files in the install [#2503](https://github.com/chef/chef-server/pull/2503) ([tas50](https://github.com/tas50)) <!-- 14.5.12 -->
 - Bump omnibus-software from `606edf8` to `e86bf08` in /omnibus [#2529](https://github.com/chef/chef-server/pull/2529) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.5.11 -->
 - Update Elasticsearch to 6.8.16 [#2528](https://github.com/chef/chef-server/pull/2528) ([tas50](https://github.com/tas50)) <!-- 14.5.10 -->
