@@ -1,9 +1,10 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release unreleased -->
-## Unreleased
+<!-- latest_release 14.5.14 -->
+## [14.5.14](https://github.com/chef/chef-server/tree/14.5.14) (2021-06-15)
 
 #### Merged Pull Requests
+- adding error message for reindexing [#2509](https://github.com/chef/chef-server/pull/2509) ([vinay-satish](https://github.com/vinay-satish))
 - Bump test-kitchen from 2.11.2 to 2.12.0 in /omnibus [#2531](https://github.com/chef/chef-server/pull/2531) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
@@ -11,6 +12,7 @@
 ### Changes since 14.4.4 release
 
 #### Merged Pull Requests
+- adding error message for reindexing [#2509](https://github.com/chef/chef-server/pull/2509) ([vinay-satish](https://github.com/vinay-satish)) <!-- 14.5.14 -->
 - Bump test-kitchen from 2.11.2 to 2.12.0 in /omnibus [#2531](https://github.com/chef/chef-server/pull/2531) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.5.13 -->
 - Bump omnibus-software from `e86bf08` to `70979e9` in /omnibus [#2532](https://github.com/chef/chef-server/pull/2532) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.5.13 -->
 - Add an omnibus definition to cleanup leftover ruby files in the install [#2503](https://github.com/chef/chef-server/pull/2503) ([tas50](https://github.com/tas50)) <!-- 14.5.12 -->
