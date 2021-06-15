@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.5.18 -->
-## [14.5.18](https://github.com/chef/chef-server/tree/14.5.18) (2021-06-15)
+<!-- latest_release 14.5.19 -->
+## [14.5.19](https://github.com/chef/chef-server/tree/14.5.19) (2021-06-15)
 
 #### Merged Pull Requests
-- Bump berkshelf from 7.2.0 to 7.2.1 in /omnibus [#2534](https://github.com/chef/chef-server/pull/2534) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Allow preventing user&#39;s from changing their e-mail with new `allow_email_update_only_from_manage` config [#2400](https://github.com/chef/chef-server/pull/2400) ([jashaik](https://github.com/jashaik))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.4.4 -->
 ### Changes since 14.4.4 release
 
 #### Merged Pull Requests
+- Allow preventing user&#39;s from changing their e-mail with new `allow_email_update_only_from_manage` config [#2400](https://github.com/chef/chef-server/pull/2400) ([jashaik](https://github.com/jashaik)) <!-- 14.5.19 -->
 - Bump berkshelf from 7.2.0 to 7.2.1 in /omnibus [#2534](https://github.com/chef/chef-server/pull/2534) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.5.18 -->
 - Bump redis from 4.2.5 to 4.3.1 in /src/chef-server-ctl [#2530](https://github.com/chef/chef-server/pull/2530) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.5.17 -->
 - Bump berkshelf from 7.2.0 to 7.2.1 in /src/chef-server-ctl [#2533](https://github.com/chef/chef-server/pull/2533) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.5.16 -->
