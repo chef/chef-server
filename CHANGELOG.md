@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.5.15 -->
-## [14.5.15](https://github.com/chef/chef-server/tree/14.5.15) (2021-06-15)
+<!-- latest_release 14.5.16 -->
+## [14.5.16](https://github.com/chef/chef-server/tree/14.5.16) (2021-06-15)
 
 #### Merged Pull Requests
-- Add retries to the nginx service starts to resolve restore issues [#2524](https://github.com/chef/chef-server/pull/2524) ([jashaik](https://github.com/jashaik))
+- Bump berkshelf from 7.2.0 to 7.2.1 in /src/chef-server-ctl [#2533](https://github.com/chef/chef-server/pull/2533) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.4.4 -->
 ### Changes since 14.4.4 release
 
 #### Merged Pull Requests
+- Bump berkshelf from 7.2.0 to 7.2.1 in /src/chef-server-ctl [#2533](https://github.com/chef/chef-server/pull/2533) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.5.16 -->
 - Add retries to the nginx service starts to resolve restore issues [#2524](https://github.com/chef/chef-server/pull/2524) ([jashaik](https://github.com/jashaik)) <!-- 14.5.15 -->
 - adding error message for reindexing [#2509](https://github.com/chef/chef-server/pull/2509) ([vinay-satish](https://github.com/vinay-satish)) <!-- 14.5.14 -->
 - Bump test-kitchen from 2.11.2 to 2.12.0 in /omnibus [#2531](https://github.com/chef/chef-server/pull/2531) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.5.13 -->
