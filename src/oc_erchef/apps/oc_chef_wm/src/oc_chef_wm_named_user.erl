@@ -49,6 +49,7 @@
          malformed_request_message/3,
          request_type/0,
          validate_request/3,
+         verify_update_request/5,
          finalize_update_body/3 ]).
 
 
@@ -178,12 +179,69 @@ from_json(Req, #base_state{resource_args = invitation_response,
                     {true, chef_wm_util:set_json_body(Req1, EJResponse), State1}
             end
     end;
-from_json(Req, #base_state{server_api_version = ?API_v0,
-                           resource_state = #user_state{ chef_user = User, user_data = UserData}} = State) ->
-    oc_chef_wm_key_base:update_object_embedded_key_data_v0(Req, State, User, UserData);
-from_json(Req, #base_state{resource_state = #user_state{ chef_user = User, user_data = UserData}} = State) ->
+from_json(Req, #base_state{server_api_version = ApiVersion, resource_state =
+    #user_state{ chef_user = #chef_user{email = OrigEmail0} = User, user_data = UserData0}} = State) ->
+    % After this change all the email addresses stored in lowercase
+    % If any email already exist with case sensitive, We transform it into lower for comparison
+    % And treat them unique. if a new user trying to use the same email with different case
+    % then rejecting it
+    UserData =
+    case ej:get({<<"email">>}, UserData0) of
+        undefined ->
+            UserData0;
+        Email ->
+            ej:set({<<"email">>}, UserData0, string:lowercase(Email))
+    end,
+    OrigEmail =
+    case OrigEmail0 of
+        undefined -> OrigEmail0;
+        null -> undefined;
+        _ -> string:lowercase(OrigEmail0)
+    end,
+    NewEmail = ej:get({<<"email">>}, UserData),
+    EmailUpdateConfig = envy:get(oc_chef_wm, allow_email_update_only_from_manage, boolean),
+    %% check if the request originated from the webui or client (client /knife)
+    RequestOrigin = wrq:get_req_header("x-ops-request-source", Req),
     % in v1+ keys may only be updated via the keys endpoint.
-    oc_chef_wm_base:update_from_json(Req, State, User, UserData).
+
+    % Input arguments for case
+    % OrigEmail - Original Email
+    % NewEmail - From Update record
+    % RequestOrigin - Request originated from webui or clinet
+    % EmailUpdateConfig - allow_email_update_only_from_manage config value
+    % ApiVersion - API version
+    case verify_update_request(OrigEmail, NewEmail, RequestOrigin,
+        EmailUpdateConfig, ApiVersion) of
+        {ok, Mod, Fun} ->
+            Mod:Fun(Req, State, User, UserData);
+        _ ->
+            {{halt, 403}, chef_wm_util:set_json_body(Req, email_update_error_message()),
+                    State#base_state{log_msg = <<"Use chef-manage/Chef Manage to change user email">>}}
+    end.
+
+
+verify_update_request(OrigEmail, NewEmail, RequestOrigin, EmailUpdateConfig, ApiVersion) ->
+    % Different case clauses
+    % case 1 &  2- Orginal Email is same or undefined then Update
+    % case 3 & 4 - Request from Chef Manage/ Web then then Update
+    % case 5 & 6 - Request is not from Chef Manage/Web & allow_email_update_only_from_manage false then Update
+    % Other cases - Reject with 403
+    case {NewEmail, RequestOrigin, EmailUpdateConfig, ApiVersion} of
+        {OEmail, _, _, ?API_v0} when OEmail =:= OrigEmail; OEmail =:= undefined ->
+            {ok, oc_chef_wm_key_base, update_object_embedded_key_data_v0};
+        {OEmail, _, _, _} when OEmail =:= OrigEmail; OEmail =:= undefined ->
+            {ok, oc_chef_wm_base, update_from_json};
+        {_, "web", _, ?API_v0} ->
+            {ok, oc_chef_wm_key_base, update_object_embedded_key_data_v0};
+        {_, "web", _, _} ->
+            {ok, oc_chef_wm_base, update_from_json};
+        {_, _, false, ?API_v0} ->
+            {ok, oc_chef_wm_key_base, update_object_embedded_key_data_v0};
+        {_, _, false, _} ->
+            {ok, oc_chef_wm_base, update_from_json};
+        _ ->
+            halt
+    end.
 
 finalize_update_body(Req, _State, BodyEJ) ->
     %% Custom json body needed to maintain compatibility with opscode-account behavior.
@@ -269,6 +327,9 @@ delete_resource(Req, #base_state{chef_db_context = DbContext,
 conflict_message(Name) ->
     Msg = iolist_to_binary([<<"User '">>, Name, <<"' already exists">>]),
     {[{<<"error">>, [Msg]}]}.
+
+email_update_error_message() ->
+    {[{<<"error">>, <<"Use chef-manage/Chef Manage to change user email">>}]}.
 
 malformed_request_message(Any, _Req, _state) ->
     error({unexpected_malformed_request_message, Any}).

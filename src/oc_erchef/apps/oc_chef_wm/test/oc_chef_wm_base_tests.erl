@@ -224,6 +224,242 @@ verify_request_signature_test_() ->
        end}
      ]}.
 
+verify_email_updates_test_() ->
+        {foreach,
+     fun() ->
+             meck:new(oc_chef_wm_named_user, [non_strict])
+     end,
+     fun(_) ->
+             meck:unload(oc_chef_wm_named_user)
+     end,
+     [
+      {"No email change in the user update request from web/chef-manage",
+       fun() ->
+               OrigEmail = <<"user@example.com">>,
+               NewEmail = <<"user@example.com">>,
+               RequestOrigin = "web",
+               EmailUpdateConfig = false, 
+               ApiVersion = 0,
+               meck:expect(oc_chef_wm_named_user, verify_update_request, fun(_, _, _, _, _) ->
+                                                              {ok, oc_chef_wm_key_base, update_object_embedded_key_data_v0}
+                                                      end),
+               oc_chef_wm_named_user:verify_update_request(OrigEmail, NewEmail, 
+                       RequestOrigin, EmailUpdateConfig, ApiVersion),
+               ?assert(meck:validate(oc_chef_wm_named_user))
+       end},
+      {"Email change in the user update request from web/chef-manage",
+       fun() ->
+               OrigEmail = <<"user@example.com">>,
+               NewEmail = <<"user2@example.com">>,
+               RequestOrigin = "web",
+               EmailUpdateConfig = false, 
+               ApiVersion = 0,
+               meck:expect(oc_chef_wm_named_user, verify_update_request, fun(_, _, _, _, _) ->
+                                                              {ok, oc_chef_wm_key_base, update_object_embedded_key_data_v0}
+                                                      end),
+               oc_chef_wm_named_user:verify_update_request(OrigEmail, NewEmail, 
+                       RequestOrigin, EmailUpdateConfig, ApiVersion),
+               ?assert(meck:validate(oc_chef_wm_named_user))
+       end},
+       {"No email change in the user update request from command line/Knife",
+       fun() ->
+               OrigEmail = <<"user@example.com">>,
+               NewEmail = <<"user@example.com">>,
+               RequestOrigin = "knife",
+               EmailUpdateConfig = false, 
+               ApiVersion = 0,
+               meck:expect(oc_chef_wm_named_user, verify_update_request, fun(_, _, _, _, _) ->
+                                                              {ok, oc_chef_wm_key_base, update_object_embedded_key_data_v0}
+                                                      end),
+               oc_chef_wm_named_user:verify_update_request(OrigEmail, NewEmail, 
+                       RequestOrigin, EmailUpdateConfig, ApiVersion),
+               ?assert(meck:validate(oc_chef_wm_named_user))
+       end},
+      {"Email change in the user update request from command line/Knife",
+       fun() ->
+               OrigEmail = <<"user@example.com">>,
+               NewEmail = <<"user2@example.com">>,
+               RequestOrigin = "knife",
+               EmailUpdateConfig = false, 
+               ApiVersion = 0,
+               meck:expect(oc_chef_wm_named_user, verify_update_request, fun(_, _, _, _, _) ->
+                                                              {ok, oc_chef_wm_key_base, update_object_embedded_key_data_v0}
+                                                      end),
+               oc_chef_wm_named_user:verify_update_request(OrigEmail, NewEmail, 
+                       RequestOrigin, EmailUpdateConfig, ApiVersion),
+               ?assert(meck:validate(oc_chef_wm_named_user))
+       end},
+       {"No email change in the user update request from web/chef-manage when allow_email_update_only_from_manage is true",
+       fun() ->
+               OrigEmail = <<"user@example.com">>,
+               NewEmail = <<"user@example.com">>,
+               RequestOrigin = "web",
+               EmailUpdateConfig = true, 
+               ApiVersion = 0,
+               meck:expect(oc_chef_wm_named_user, verify_update_request, fun(_, _, _, _, _) ->
+                                                              {ok, oc_chef_wm_key_base, update_object_embedded_key_data_v0}
+                                                      end),
+               oc_chef_wm_named_user:verify_update_request(OrigEmail, NewEmail, 
+                       RequestOrigin, EmailUpdateConfig, ApiVersion),
+               ?assert(meck:validate(oc_chef_wm_named_user))
+       end},
+      {"Email change in the user update request from web/chef-manage when allow_email_update_only_from_manage is true",
+       fun() ->
+               OrigEmail = <<"user@example.com">>,
+               NewEmail = <<"user2@example.com">>,
+               RequestOrigin = "web",
+               EmailUpdateConfig = true, 
+               ApiVersion = 0,
+               meck:expect(oc_chef_wm_named_user, verify_update_request, fun(_, _, _, _, _) ->
+                                                              {ok, oc_chef_wm_key_base, update_object_embedded_key_data_v0}
+                                                      end),
+               oc_chef_wm_named_user:verify_update_request(OrigEmail, NewEmail, 
+                       RequestOrigin, EmailUpdateConfig, ApiVersion),
+               ?assert(meck:validate(oc_chef_wm_named_user))
+       end},
+       {"No email change in the user update request from command line/Knife when allow_email_update_only_from_manage is true",
+       fun() ->
+               OrigEmail = <<"user@example.com">>,
+               NewEmail = <<"user@example.com">>,
+               RequestOrigin = "knife",
+               EmailUpdateConfig = true, 
+               ApiVersion = 0,
+               meck:expect(oc_chef_wm_named_user, verify_update_request, fun(_, _, _, _, _) ->
+                                                              halt
+                                                      end),
+               oc_chef_wm_named_user:verify_update_request(OrigEmail, NewEmail, 
+                       RequestOrigin, EmailUpdateConfig, ApiVersion),
+               ?assert(meck:validate(oc_chef_wm_named_user))
+       end},
+      {"Email change in the user update request from command line/Knife when allow_email_update_only_from_manage is true",
+       fun() ->
+               OrigEmail = <<"user@example.com">>,
+               NewEmail = <<"user2@example.com">>,
+               RequestOrigin = "knife",
+               EmailUpdateConfig = true, 
+               ApiVersion = 0,
+               meck:expect(oc_chef_wm_named_user, verify_update_request, fun(_, _, _, _, _) ->
+                                                              halt
+                                                      end),
+               oc_chef_wm_named_user:verify_update_request(OrigEmail, NewEmail, 
+                       RequestOrigin, EmailUpdateConfig, ApiVersion),
+               ?assert(meck:validate(oc_chef_wm_named_user))
+       end},
+       %% For API version V1
+       {"No email change in the user update request from web/chef-manage API v1",
+       fun() ->
+               OrigEmail = <<"user@example.com">>,
+               NewEmail = <<"user@example.com">>,
+               RequestOrigin = "web",
+               EmailUpdateConfig = false, 
+               ApiVersion = 1,
+               meck:expect(oc_chef_wm_named_user, verify_update_request, fun(_, _, _, _, _) ->
+                                                              {ok, oc_chef_wm_base, update_from_json}
+                                                      end),
+               oc_chef_wm_named_user:verify_update_request(OrigEmail, NewEmail, 
+                       RequestOrigin, EmailUpdateConfig, ApiVersion),
+               ?assert(meck:validate(oc_chef_wm_named_user))
+       end},
+      {"Email change in the user update request from web/chef-manage API v1",
+       fun() ->
+               OrigEmail = <<"user@example.com">>,
+               NewEmail = <<"user2@example.com">>,
+               RequestOrigin = "web",
+               EmailUpdateConfig = false, 
+               ApiVersion = 1,
+               meck:expect(oc_chef_wm_named_user, verify_update_request, fun(_, _, _, _, _) ->
+                                                              {ok, oc_chef_wm_base, update_from_json}
+                                                      end),
+               oc_chef_wm_named_user:verify_update_request(OrigEmail, NewEmail, 
+                       RequestOrigin, EmailUpdateConfig, ApiVersion),
+               ?assert(meck:validate(oc_chef_wm_named_user))
+       end},
+       {"No email change in the user update request from command line/Knife API v1",
+       fun() ->
+               OrigEmail = <<"user@example.com">>,
+               NewEmail = <<"user@example.com">>,
+               RequestOrigin = "knife",
+               EmailUpdateConfig = false, 
+               ApiVersion = 1,
+               meck:expect(oc_chef_wm_named_user, verify_update_request, fun(_, _, _, _, _) ->
+                                                              {ok, oc_chef_wm_base, update_from_json}
+                                                      end),
+               oc_chef_wm_named_user:verify_update_request(OrigEmail, NewEmail, 
+                       RequestOrigin, EmailUpdateConfig, ApiVersion),
+               ?assert(meck:validate(oc_chef_wm_named_user))
+       end},
+      {"Email change in the user update request from command line/Knife API v1",
+       fun() ->
+               OrigEmail = <<"user@example.com">>,
+               NewEmail = <<"user2@example.com">>,
+               RequestOrigin = "knife",
+               EmailUpdateConfig = false, 
+               ApiVersion = 1,
+               meck:expect(oc_chef_wm_named_user, verify_update_request, fun(_, _, _, _, _) ->
+                                                              {ok, oc_chef_wm_base, update_from_json}
+                                                      end),
+               oc_chef_wm_named_user:verify_update_request(OrigEmail, NewEmail, 
+                       RequestOrigin, EmailUpdateConfig, ApiVersion),
+               ?assert(meck:validate(oc_chef_wm_named_user))
+       end},
+       {"No email change in the user update request from web/chef-manage when allow_email_update_only_from_manage is true API v1",
+       fun() ->
+               OrigEmail = <<"user@example.com">>,
+               NewEmail = <<"user@example.com">>,
+               RequestOrigin = "web",
+               EmailUpdateConfig = true, 
+               ApiVersion = 1,
+               meck:expect(oc_chef_wm_named_user, verify_update_request, fun(_, _, _, _, _) ->
+                                                              {ok, oc_chef_wm_base, update_from_json}
+                                                      end),
+               oc_chef_wm_named_user:verify_update_request(OrigEmail, NewEmail, 
+                       RequestOrigin, EmailUpdateConfig, ApiVersion),
+               ?assert(meck:validate(oc_chef_wm_named_user))
+       end},
+      {"Email change in the user update request from web/chef-manage when allow_email_update_only_from_manage is true API v1",
+       fun() ->
+               OrigEmail = <<"user@example.com">>,
+               NewEmail = <<"user2@example.com">>,
+               RequestOrigin = "web",
+               EmailUpdateConfig = true, 
+               ApiVersion = 1,
+               meck:expect(oc_chef_wm_named_user, verify_update_request, fun(_, _, _, _, _) ->
+                                                              {ok, oc_chef_wm_base, update_from_json}
+                                                      end),
+               oc_chef_wm_named_user:verify_update_request(OrigEmail, NewEmail, 
+                       RequestOrigin, EmailUpdateConfig, ApiVersion),
+               ?assert(meck:validate(oc_chef_wm_named_user))
+       end},
+       {"No email change in the user update request from command line/Knife when allow_email_update_only_from_manage is true API v1",
+       fun() ->
+               OrigEmail = <<"user@example.com">>,
+               NewEmail = <<"user@example.com">>,
+               RequestOrigin = "knife",
+               EmailUpdateConfig = true, 
+               ApiVersion = 1,
+               meck:expect(oc_chef_wm_named_user, verify_update_request, fun(_, _, _, _, _) ->
+                                                              halt
+                                                      end),
+               oc_chef_wm_named_user:verify_update_request(OrigEmail, NewEmail, 
+                       RequestOrigin, EmailUpdateConfig, ApiVersion),
+               ?assert(meck:validate(oc_chef_wm_named_user))
+       end},
+      {"Email change in the user update request from command line/Knife when allow_email_update_only_from_manage is true API v1",
+       fun() ->
+               OrigEmail = <<"user@example.com">>,
+               NewEmail = <<"user2@example.com">>,
+               RequestOrigin = "knife",
+               EmailUpdateConfig = true, 
+               ApiVersion = 1,
+               meck:expect(oc_chef_wm_named_user, verify_update_request, fun(_, _, _, _, _) ->
+                                                              halt
+                                                      end),
+               oc_chef_wm_named_user:verify_update_request(OrigEmail, NewEmail, 
+                       RequestOrigin, EmailUpdateConfig, ApiVersion),
+               ?assert(meck:validate(oc_chef_wm_named_user))
+       end}
+     ]}.
+
 make_req_data() ->
     #wm_reqdata{}.
 

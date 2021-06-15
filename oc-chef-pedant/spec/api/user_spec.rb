@@ -170,7 +170,7 @@ describe "users", :users do
               })
           end
 
-          context "when there's another user with that mail (different case)" do
+          context "when there's another user with that mail (different case)", :email_case_insensitive do
             let(:username_two) { "user_for_email_tests_two" }
             let(:email_two) { "useR@aOl.com" }
             let(:user_options_two) do
@@ -182,25 +182,42 @@ describe "users", :users do
                 }
               }
             end
+            let(:user_two) do
+              {
+                "username" => username_two,
+                "email" => email_two,
+                "first_name" => username,
+                "last_name" => username,
+                "display_name" => username,
+                "password" => "foobar"
+              }
+            end
 
             let(:filtered_users_body) do
               { username => "#{request_url}/#{username}",
-                username_two => "#{request_url}/#{username_two}",
               }
             end
 
             before :each do
-              @user2 = platform.create_user(username_two, user_options_two)
+              begin
+                platform.create_user(username_two, user_options_two)
+              rescue StandardError => e  
+                puts e
+                puts "Username or email address already in use."
+              end
             end
 
-            after :each do
-              platform.delete_user(@user2)
-            end
-
-            it "finds both users by this email" do
+            it "finds only one users by this email" do
               get("#{request_url}?email=#{email}", platform.superuser).should look_like({
                   :status => 200,
                   :body_exact => filtered_users_body
+              })
+            end
+
+            it "conflict when trying to create a user with duplicate case-insensitive email address." do
+              post(request_url, platform.superuser, :payload => user_two).should look_like({
+                  :status => 409,
+                  :body_exact => {"error"=>["Username or email address already in use."]}
               })
             end
           end

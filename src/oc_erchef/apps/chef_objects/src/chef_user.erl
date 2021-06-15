@@ -316,7 +316,16 @@ common_user_validation(EJ, User, Operation) ->
     end,
     % Ensure the user can't set this - we make use of it in some cases by setting it internally
     EJ1 = ej:delete({<<"id">>}, EJ),
-    {ok, EJ1}.
+    % Setting the email to lower case for uniqueness,
+    % test@chef.io and TEST@chef.io are considered to be the same email addresses in user creation
+    EJ2 =
+    case ej:get({<<"email">>}, EJ1) of
+        undefined ->
+            EJ1;
+        Email ->
+            ej:set({<<"email">>}, EJ1, string:lowercase(Email))
+    end,
+    {ok, EJ2}.
 
 external_auth_uid(EJson, #chef_user{external_authentication_uid = ExtAuthUid}) ->
     case ej:get({<<"external_authentication_uid">>}, EJson) of
