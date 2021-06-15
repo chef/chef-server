@@ -41,9 +41,21 @@
 %%   2 - Invalid organization name given
 %%
 main(Args) ->
-    init_network(),
-    [Command, OrgInfo, Context] = validate_args(Args),
-    perform(Command, Context, OrgInfo).
+    try
+      init_network(),
+      [Command, OrgInfo, Context] = validate_args(Args),
+      perform(Command, Context, OrgInfo)
+    catch 
+        error:{badmatch,{error,{conn_failed,{error,econnrefused}}}} ->
+            io:format("~n Unable to start new erlang node due to network issue~n Please check if the localhost is resolved to 127.0.0.1 or check if firewall is blocking the connection~n");
+        error:{badmatch,{error,{already_started,Pid}}} ->
+            io:format("~n The reindexing task is running in other process with PID - ~p~n Please kill the other process with erlang command `exit(~p, normal).` and restart the Chef Infra server~n", [Pid, Pid]);
+        error:{badmatch,{error,{{shutdown,{failed_to_start_child,net_kernel,_Error}},_Detail}}} ->
+            io:format("~n The epmd process might not have been started ~n Try running the command `epmd -names` and restart the Chef Infra server~n");
+        Type:Message ->
+            io:format("~n Caught ~p with the message ~p~n Please try again after restarting the Chef Infra Server ~n", [Type, Message])
+    end.
+
 
 %% @doc Ensure that the arguments are all valid, meaning a recognized action is specified,
 %% and the given organization name actually exists.  If everything checks out, return the
