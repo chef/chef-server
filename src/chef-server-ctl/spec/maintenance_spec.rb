@@ -35,18 +35,4 @@ describe "chef-server-ctl maintenance" do
     end
   end
 
-#   need to install redis in the test environment
-#   context "Mode on" do
-#     it "should turn on the maintenance mode" do
-#       expect { @helper.run_test_omnibus_command(command, ["on"]) }
-#         .to output(/name: default\nexpired: false/).to_stdout
-#     end
-#   end
-#
-#   context "Mode off" do
-#     it "should turn off the maintenance mode" do
-#       expect { @helper.run_test_omnibus_command(command, ["off"]) }
-#         .to output(/name: default\nexpired: false/).to_stdout
-#     end
-#   end
 end

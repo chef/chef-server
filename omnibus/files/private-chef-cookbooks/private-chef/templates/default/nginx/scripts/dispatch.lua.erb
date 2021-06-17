@@ -84,7 +84,7 @@ if not route.route_id then
   ngx.exit(ngx.HTTP_NOT_FOUND)
 end
 
--- adding the flag to ignore 503 route level check
+-- add the flag to ignore 503 route level check
 route.maint_ip_allowed = config.is_addr_allowed_in_maint_mode(remote_addr)
 
 -- Load restrictions and darklaunch constraints for this org.
