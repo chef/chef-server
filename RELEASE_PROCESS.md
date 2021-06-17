@@ -154,7 +154,8 @@ https://buildkite.com/chef/chef-chef-server-master-habitat-build
 ### Building and Releasing the Release
 
 1. Select a version from the `current` channel that you wish to promote to `stable`. Make sure that this version has gone through the upgrade testing.
-1. Use expeditor to promote the build.  The expeditor command is of the form:
+2. Make sure you are part of the slack group `release-promoters`. If not added, make a request for the same in the `who-do-i-ask-about` channel.
+3. Use expeditor to promote the build.  The expeditor command is of the form:
 
         /expeditor promote ORG/REPO:BRANCH VERSION
 
