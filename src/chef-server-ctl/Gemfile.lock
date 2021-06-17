@@ -33,7 +33,7 @@ GEM
     ast (2.4.2)
     bcrypt (3.1.16)
     bcrypt_pbkdf (1.1.0)
-    berkshelf (7.2.1)
+    berkshelf (7.2.2)
       chef (>= 15.7.32)
       chef-config
       cleanroom (~> 1.0)
@@ -129,7 +129,7 @@ GEM
     faraday-excon (1.1.0)
     faraday-net_http (1.0.1)
     faraday-net_http_persistent (1.1.0)
-    ffi (1.15.1)
+    ffi (1.15.3)
     ffi-libarchive (1.0.17)
       ffi (~> 1.0)
     ffi-yajl (2.4.0)
