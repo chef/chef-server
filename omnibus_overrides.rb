@@ -13,3 +13,5 @@ override :cpanminus, version: "1.7004" # 1.9019 breaks installs currently
 override :logrotate, version: "3.9.2" # 3.18.0 patches fail
 
 override :openresty, version: "1.19.3.2"
+
+override :'pg-gem', version: "0.18.4"

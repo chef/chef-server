@@ -1,7 +1,7 @@
 GIT
   remote: https://github.com/chef/omnibus-software.git
-  revision: 70979e935eb4fc95023921b2a8842653edb8b509
-  branch: master
+  revision: 3759dd3b0acbae9c2adb5c6a401c1d21a0d99972
+  branch: praj/update_pg-gem
   specs:
     omnibus-software (4.0.0)
       omnibus (>= 8.0.0)
