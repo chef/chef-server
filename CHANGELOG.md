@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.5.20 -->
-## [14.5.20](https://github.com/chef/chef-server/tree/14.5.20) (2021-06-15)
+<!-- latest_release 14.5.21 -->
+## [14.5.21](https://github.com/chef/chef-server/tree/14.5.21) (2021-06-21)
 
 #### Merged Pull Requests
-- Update haproxy 1.6 -&gt; 1.8 [#2490](https://github.com/chef/chef-server/pull/2490) ([tas50](https://github.com/tas50))
+- Add a cadence bad + docs [#2552](https://github.com/chef/chef-server/pull/2552) ([tas50](https://github.com/tas50))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.4.4 -->
 ### Changes since 14.4.4 release
 
 #### Merged Pull Requests
+- Add a cadence bad + docs [#2552](https://github.com/chef/chef-server/pull/2552) ([tas50](https://github.com/tas50)) <!-- 14.5.21 -->
 - Update haproxy 1.6 -&gt; 1.8 [#2490](https://github.com/chef/chef-server/pull/2490) ([tas50](https://github.com/tas50)) <!-- 14.5.20 -->
 - Allow preventing user&#39;s from changing their e-mail with new `allow_email_update_only_from_manage` config [#2400](https://github.com/chef/chef-server/pull/2400) ([jashaik](https://github.com/jashaik)) <!-- 14.5.19 -->
 - Bump berkshelf from 7.2.0 to 7.2.1 in /omnibus [#2534](https://github.com/chef/chef-server/pull/2534) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.5.18 -->
