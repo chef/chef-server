@@ -54,6 +54,9 @@ This configuration file has the following general settings:
 :   Set to `true` to run the server in FIPS compliance mode. Set to
     `false` to force the server to run without FIPS compliance mode.
     Default value is whatever the kernel is configured to.
+    NOTE: For `chef-server-ctl reindex <options>` to work in versions of Infra Server before 14.5,
+    when `nginx['enable_non_ssl'] = false` and `fips = true`
+    `export CSC_LB_URL=https://127.0.0.1`
 
 `insecure_addon_compat`
 
@@ -588,6 +591,9 @@ This configuration file has the following settings for `nginx`:
 :   Allow port 80 redirects to port 443. When this value is set to
     `true`, load balancers on the front-end hardware are allowed to do
     SSL termination of the WebUI and API. Default value: `false`.
+    NOTE: For `chef-server-ctl reindex <options>` to work in versions of Infra Server before 14.5,
+    when `nginx['enable_non_ssl'] = false` and `fips = true`
+    `export CSC_LB_URL=https://127.0.0.1`
 
 `nginx['enable_stub_status']`
 
