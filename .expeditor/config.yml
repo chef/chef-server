@@ -47,35 +47,6 @@ pipelines:
       description: "Generate and upload release manifest"
       definition: .expeditor/post-promote.pipeline.yml
 
-# These actions are taken, in order they are specified, anytime a Pull Request is merged.
-merge_actions:
-  - built_in:bump_version:
-      post_commit: false
-      ignore_labels:
-        - "Expeditor: Skip Version Bump"
-        - "Expeditor: Skip All"
-        - "Aspect: Documentation"
-  - built_in:update_changelog:
-      post_commit: false
-      ignore_labels:
-        - "Expeditor: Skip Changelog"
-        - "Expeditor: Skip All"
-        - "Aspect: Documentation"
-  - trigger_pipeline:omnibus/release:
-      post_commit: true
-      ignore_labels:
-        - "Expeditor: Skip Omnibus"
-        - "Expeditor: Skip All"
-        - "Aspect: Documentation"
-      only_if: built_in:bump_version
-  - trigger_pipeline:habitat/build:
-      post_commit: true
-      ignore_labels:
-        - "Expeditor: Skip Habitat"
-        - "Expeditor: Skip All"
-        - "Aspect: Documentation"
-      only_if: built_in:bump_version
-
 # These actions are taken, in the order specified, when an Omnibus artifact is promoted
 # within Chef's internal artifact storage system.
 #
@@ -117,11 +88,40 @@ subscriptions:
   - workload: buildkite_build_passed:{{agent_id}}:post-promote:*
     actions:
       - purge_packages_chef_io_fastly:{{target_channel}}/chef-server/latest
+  # These actions are taken, in order they are specified, anytime a Pull Request is merged.
+  - workload: pull_request_merged:{{github_repo}}:{{release_branch}}:*
+    actions:
+      - built_in:bump_version:
+          post_commit: false
+          ignore_labels:
+            - "Expeditor: Skip Version Bump"
+            - "Expeditor: Skip All"
+            - "Aspect: Documentation"
+      - built_in:update_changelog:
+          post_commit: false
+          ignore_labels:
+            - "Expeditor: Skip Changelog"
+            - "Expeditor: Skip All"
+            - "Aspect: Documentation"
+      - trigger_pipeline:omnibus/release:
+          post_commit: true
+          ignore_labels:
+            - "Expeditor: Skip Omnibus"
+            - "Expeditor: Skip All"
+            - "Aspect: Documentation"
+          only_if: built_in:bump_version
+      - trigger_pipeline:habitat/build:
+          post_commit: true
+          ignore_labels:
+            - "Expeditor: Skip Habitat"
+            - "Expeditor: Skip All"
+            - "Aspect: Documentation"
+          only_if: built_in:bump_version
+  - workload: project_promoted:{{agent_id}}:*
+    actions:
+      - built_in:promote_artifactory_artifact
 
-promote:
-  actions:
-    - built_in:promote_artifactory_artifact
-  channels:
-    - unstable
-    - current
-    - stable
+artifact_channels:
+  - unstable
+  - current
+  - stable
