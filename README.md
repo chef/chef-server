@@ -1,7 +1,7 @@
 # Chef Server
 
 [![Build Status](https://badge.buildkite.com/ccdefb69f938db51cb23f092e54030aa41608e6472cfe4aa7e.svg)](https://buildkite.com/chef/chef-chef-server-master-omnibus-adhoc)
-[![](https://img.shields.io/badge/Release%20Policy-Cadence%20Release-brightgreen.svg)](https://github.com/chef/chef/blob/master/docs/dev/design_documents/client_release_cadence.md)
+[![](https://img.shields.io/badge/Release%20Policy-Cadence%20Release-brightgreen.svg)](https://github.com/chef/chef-server/blob/master/dev-docs/release_cadence.md)
 
 **Umbrella Project**: [Chef Infra](https://github.com/chef/chef-oss-practices/blob/master/projects/chef-infra-server.md)
 
