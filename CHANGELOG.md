@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.5.23 -->
-## [14.5.23](https://github.com/chef/chef-server/tree/14.5.23) (2021-06-22)
+<!-- latest_release 14.5.24 -->
+## [14.5.24](https://github.com/chef/chef-server/tree/14.5.24) (2021-06-22)
 
 #### Merged Pull Requests
-- Set the default FIPS lb url to https to resolve failures during upgrades [#2556](https://github.com/chef/chef-server/pull/2556) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Update all deps to current [#2538](https://github.com/chef/chef-server/pull/2538) ([tas50](https://github.com/tas50))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.4.4 -->
 ### Changes since 14.4.4 release
 
 #### Merged Pull Requests
+- Update all deps to current [#2538](https://github.com/chef/chef-server/pull/2538) ([tas50](https://github.com/tas50)) <!-- 14.5.24 -->
 - Set the default FIPS lb url to https to resolve failures during upgrades [#2556](https://github.com/chef/chef-server/pull/2556) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.5.23 -->
 - Disable updating email from oc-id [#2553](https://github.com/chef/chef-server/pull/2553) ([antima-gupta](https://github.com/antima-gupta)) <!-- 14.5.22 -->
 - Add a cadence bad + docs [#2552](https://github.com/chef/chef-server/pull/2552) ([tas50](https://github.com/tas50)) <!-- 14.5.21 -->
