@@ -21,7 +21,8 @@ class ProfilesController < ApplicationController
     # Note that if an email address is provided, don't update it right away.
     # Instead send a confirmation email and let that email link update the
     # email address.
-    #update note
+    # update note
+    # params are coming as string from user profile form.
     params[:user].reject! { |k| k == "email" }
 
     if @user.update_attributes(params[:user])
