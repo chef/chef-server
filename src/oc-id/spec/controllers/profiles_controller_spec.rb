@@ -73,6 +73,13 @@ describe ProfilesController do
       expect(response).to redirect_to(profile_path)
     end
 
+
+    it "should not update user's email" do
+      put :update, user:  put_user.merge(email: 'abc@test.com')
+
+      expect(assigns(:user).email).not_to eq('abc@test.com')
+    end
+
     it 'renders the show template if the update failed' do
       allow(logged_in_user).to receive(:chef).and_raise(StandardError)
       put :update, user: put_user

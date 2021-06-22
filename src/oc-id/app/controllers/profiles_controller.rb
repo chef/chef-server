@@ -22,7 +22,7 @@ class ProfilesController < ApplicationController
     # Instead send a confirmation email and let that email link update the
     # email address.
     #update note
-    params[:user].reject! { |k| k == :email }
+    params[:user].reject! { |k| k == "email" }
 
     if @user.update_attributes(params[:user])
       message = I18n.t('profile.update_successful')
