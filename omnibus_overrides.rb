@@ -6,7 +6,7 @@ override :erlang, version: "22.2"
 override :'omnibus-ctl', version: "master"
 override :chef, version: "v15.17.4"
 override :ohai, version: "v15.12.0"
-override :ruby, version: "2.6.7"
+override :ruby, version: "2.7.3"
 override :perl, version: "5.18.1"
 
 override :cpanminus, version: "1.7004" # 1.9019 breaks installs currently
