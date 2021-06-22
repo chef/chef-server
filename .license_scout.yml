@@ -153,6 +153,10 @@ fallbacks:
     - name: core/bundler
       license_id: MIT
       license_content: https://raw.githubusercontent.com/bundler/bundler/master/LICENSE.md
+  perl_cpanm:
+    - name: sqitch
+      license_id: MIT
+      license_content: https://raw.githubusercontent.com/sqitchers/sqitch/develop/LICENSE.md
 
 exceptions:
   erlang:
@@ -214,4 +218,3 @@ exceptions:
       reason: Exception made by Chef Legal
     - name: core/nss-myhostname
       reason: Exception made by Chef Legal
-
