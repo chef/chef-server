@@ -26,6 +26,8 @@ http {
   # logged to the request log.
   log_not_found off;
 
+  error_page 301 400 401 402 403 405 406 407 408 409 410 411 412 413 414 415 416 417
+      418 421 422 423 424 425 426 428 429 431 451 500 501 502 504 505 506 507 508 510 511 = @errorrespfilter;
   server_names_hash_bucket_size <%= @server_names_hash_bucket_size %>;
 
   sendfile <%= @sendfile %>;
@@ -148,6 +150,13 @@ http {
             more_clear_headers Server;
             access_log /var/log/opscode/nginx/rewrite-port-80.log;
             return 301 https://$host$request_uri;
+            location @errorrespfilter {
+              return 301 https://$host$request_uri;
+              header_filter_by_lua_block { ngx.header.content_length = nil }
+              body_filter_by_lua '
+              ngx.arg[1] = ngx.re.sub(ngx.arg[1],"openresty", "chef")
+              ';
+            }
           }
       <%- end -%>
     <%-  end %>
