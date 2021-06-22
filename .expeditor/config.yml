@@ -18,11 +18,12 @@ github:
   # The file where our CHANGELOG is kept. This file is updated automatically with
   # details from the Pull Request via the `built_in:update_changelog` merge_action.
   changelog_file: "CHANGELOG.md"
-  release_branch:
-    - master:
-        version_constraint: 14*
-    - chef-server-13:
-        version_constraint: 13*
+
+release_branches:
+  - master:
+      version_constraint: 14*
+  - chef-server-13:
+      version_constraint: 13*
 
 # Habitat + Docker exporting
 
@@ -45,35 +46,6 @@ pipelines:
   - integration_test:
       description: "Instructions: https://github.com/chef/chef-server/blob/master/.expeditor/README.md"
       definition: .expeditor/integration_test.pipeline.yml
-
-# These actions are taken, in order they are specified, anytime a Pull Request is merged.
-merge_actions:
-  - built_in:bump_version:
-      post_commit: false
-      ignore_labels:
-        - "Version: Skip Bump"
-        - "Expeditor: Skip All"
-        - "Expeditor: ACC Only"
-  - built_in:update_changelog:
-      post_commit: false
-      ignore_labels:
-        - "Changelog: Skip Update"
-        - "Expeditor: Skip All"
-        - "Expeditor: ACC Only"
-  - trigger_pipeline:omnibus/release:
-      post_commit: true
-      ignore_labels:
-        - "Omnibus: Skip Build"
-        - "Expeditor: Skip All"
-        - "Expeditor: ACC Only"
-      only_if: built_in:bump_version
-  - trigger_pipeline:habitat/build:
-      post_commit: true
-      ignore_labels:
-        - "Omnibus: Skip Build"
-        - "Expeditor: Skip All"
-        - "Expeditor: ACC Only"
-      only_if: built_in:bump_version
 
 # These actions are taken, in the order specified, when an Omnibus artifact is promoted
 # within Chef's internal artifact storage system.
@@ -119,11 +91,40 @@ subscriptions:
   - workload: buildkite_build_failed:{{agent_id}}:integration_test:*
     actions:
       - bash:.expeditor/integration_test.pipeline.sh
-
-promote:
-  actions:
-    - built_in:promote_artifactory_artifact
-  channels:
-    - unstable
-    - current
-    - stable
+  # These actions are taken, in order they are specified, anytime a Pull Request is merged.
+  - workload: pull_request_merged:{{github_repo}}:{{release_branch}}:*
+    actions:
+      - built_in:bump_version:
+          post_commit: false
+          ignore_labels:
+            - "Version: Skip Bump"
+            - "Expeditor: Skip All"
+            - "Expeditor: ACC Only"
+      - built_in:update_changelog:
+          post_commit: false
+          ignore_labels:
+            - "Changelog: Skip Update"
+            - "Expeditor: Skip All"
+            - "Expeditor: ACC Only"
+      - trigger_pipeline:omnibus/release:
+          post_commit: true
+          ignore_labels:
+            - "Omnibus: Skip Build"
+            - "Expeditor: Skip All"
+            - "Expeditor: ACC Only"
+          only_if: built_in:bump_version
+      - trigger_pipeline:habitat/build:
+          post_commit: true
+          ignore_labels:
+            - "Omnibus: Skip Build"
+            - "Expeditor: Skip All"
+            - "Expeditor: ACC Only"
+          only_if: built_in:bump_version
+  - workload: project_promoted:{{agent_id}}:*
+    actions:
+      - built_in:promote_artifactory_artifact
+  
+artifact_channels:
+  - unstable
+  - current
+  - stable
