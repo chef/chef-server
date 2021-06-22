@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.5.25 -->
-## [14.5.25](https://github.com/chef/chef-server/tree/14.5.25) (2021-06-22)
+<!-- latest_release 14.5.26 -->
+## [14.5.26](https://github.com/chef/chef-server/tree/14.5.26) (2021-06-22)
 
 #### Merged Pull Requests
-- Bump omnibus-software from `70979e9` to `c626aa2` in /omnibus [#2550](https://github.com/chef/chef-server/pull/2550) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump license_scout to 1.2.13 and chef-zero to 15.0.7 [#2559](https://github.com/chef/chef-server/pull/2559) ([tas50](https://github.com/tas50))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.4.4 -->
 ### Changes since 14.4.4 release
 
 #### Merged Pull Requests
+- Bump license_scout to 1.2.13 and chef-zero to 15.0.7 [#2559](https://github.com/chef/chef-server/pull/2559) ([tas50](https://github.com/tas50)) <!-- 14.5.26 -->
 - Bump omnibus-software from `70979e9` to `c626aa2` in /omnibus [#2550](https://github.com/chef/chef-server/pull/2550) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.5.25 -->
 - Update all deps to current [#2538](https://github.com/chef/chef-server/pull/2538) ([tas50](https://github.com/tas50)) <!-- 14.5.24 -->
 - Set the default FIPS lb url to https to resolve failures during upgrades [#2556](https://github.com/chef/chef-server/pull/2556) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.5.23 -->
