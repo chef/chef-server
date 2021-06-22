@@ -214,7 +214,7 @@
     location @errorrespfilter {
       header_filter_by_lua_block { ngx.header.content_length = nil }
       body_filter_by_lua '
-      ngx.arg[1] = ngx.re.sub(ngx.arg[1],"openresty", "chef")
+      ngx.arg[1] = ngx.re.sub(ngx.arg[1],"openresty", "")
       ';
     }
   }

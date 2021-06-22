@@ -42,4 +42,10 @@ describe "Headers", :headers do
       end
     end
   end # context "Request Headers"
+
+    context "Verify nginx default error responses", :nginx_default_error do
+    it "openresty tag should not be present in the nginx default error responses" do
+      get(request_url.sub!('https', 'http'), superuser).to_s.should_not loosely_match(/.*openresty.*/)
+    end
+  end # context "Verify nginx default error response"
 end # describe "Headers"
