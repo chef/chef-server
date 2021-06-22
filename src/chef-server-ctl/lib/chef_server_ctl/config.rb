@@ -20,7 +20,7 @@ module ChefServerCtl
     DEFAULT_KNIFE_CONFIG_FILE = "/etc/opscode/pivotal.rb".freeze
     DEFAULT_KNIFE_BIN = "/opt/opscode/embedded/bin/knife".freeze
     DEFAULT_LB_URL = "https://127.0.0.1".freeze
-    DEFAULT_FIPS_LB_URL = "http://127.0.0.1".freeze
+    DEFAULT_FIPS_LB_URL = "https://127.0.0.1".freeze
     DEFAULT_ERCHEF_REINDEX_SCRIPT = "/opt/opscode/embedded/service/opscode-erchef/bin/reindex-opc-organization".freeze
     DOC_PATENT_MSG = <<-DOC.freeze
 
