@@ -120,6 +120,7 @@ ruby_block 'set_lb_redis_values' do
     # a brief maint mode to avoid potential misrouting when
     # we delete old keys.
     redis.hset 'dl_default', '503_mode', true
+    next until redis.spop('banned_ips').nil?
     next until redis.spop('xmaint_allowed_ips_list').nil?
     keys = redis.hkeys 'dl_default'
 
@@ -132,6 +133,11 @@ ruby_block 'set_lb_redis_values' do
 
     redis.pipelined do
       # Now we're clear to repopulate from configuration.
+      unless banned_ips.nil?
+        banned_ips.each do |ip|
+          redis.sadd   'banned_ips', ip
+        end
+      end
       xmaint_allowed_ips_list&.each do |ip|
         redis.sadd 'xmaint_allowed_ips_list', ip
       end

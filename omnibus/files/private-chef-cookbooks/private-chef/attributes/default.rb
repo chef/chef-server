@@ -440,6 +440,12 @@ default['private_chef']['lb']['access_by_lua_file'] = false
 # Load balancer route configuration
 ###
 default['private_chef']['lb']['xdl_defaults']['503_mode'] = false
+default['private_chef']['lb']['xdl_defaults']['couchdb_containers'] = false
+default['private_chef']['lb']['xdl_defaults']['couchdb_groups'] = false
+default['private_chef']['lb']['xdl_defaults']['couchdb_acls'] = false
+default['private_chef']['lb']['xdl_defaults']['couchdb_association_requests'] = false
+default['private_chef']['lb']['xdl_defaults']['couchdb_organizations'] = false
+default['private_chef']['lb']['xdl_defaults']['couchdb_associations'] = false
 default['private_chef']['lb']['xmaint_allowed_ips_list'] = [ '127.0.0.1' ]
 
 ####

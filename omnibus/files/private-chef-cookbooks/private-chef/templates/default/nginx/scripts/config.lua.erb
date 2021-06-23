@@ -161,7 +161,7 @@ end
 -- gets the data by redis call
 function config.is_addr_allowed_in_maint_mode(remote_addr)
   ok, allowed_ips_list = redis_fetch_set("xmaint_allowed_ips_list")
---  for k, v in pairs(allowed_ips_list) do ngx.log(ngx.ERR, "inside maint_whitelisted with : ", v) end
+--  for k, v in pairs(allowed_ips_list) do ngx.log(ngx.ERR, "inside maint_allowlisted with : ", v) end
   if ok then
     for k, v in pairs(allowed_ips_list) do
       if v == remote_addr then return true end
