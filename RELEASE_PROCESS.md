@@ -171,6 +171,12 @@ Example:
   done, the release is available to the public via the APT and YUM
   repositories and downloads.chef.io.
 
+### Update the chef.io docsite Release notes:
+
+This is a manual process until [filed issue](https://github.com/chef/chef-web-docs/issues/3247) is done.
+Create a PR in the chef-web-docs repo with the notes from the Pending Release notes.
+e.g: https://github.com/chef/chef-web-docs/pull/3248
+
 ### Announce the release post-promote to the following channels:
     - #a2-release-coordinate
     - #chef-server
