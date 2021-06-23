@@ -1,54 +1,52 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.5.29 -->
-## [14.5.29](https://github.com/chef/chef-server/tree/14.5.29) (2021-06-23)
-
-#### Merged Pull Requests
-- Update chef-zero to latest release to include --skip=nginx_default_error [#2563](https://github.com/chef/chef-server/pull/2563) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+<!-- latest_release -->
 <!-- latest_release -->
 
-<!-- release_rollup since=14.4.4 -->
-### Changes since 14.4.4 release
-
-#### Merged Pull Requests
-- Update chef-zero to latest release to include --skip=nginx_default_error [#2563](https://github.com/chef/chef-server/pull/2563) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.5.29 -->
-- Fixing the force push: Do not display chef and add test [#2560](https://github.com/chef/chef-server/pull/2560) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.5.28 -->
-- Filtering the webserver information in the nginx default error responses [#2539](https://github.com/chef/chef-server/pull/2539) ([jashaik](https://github.com/jashaik)) <!-- 14.5.27 -->
-- Bump license_scout to 1.2.13 and chef-zero to 15.0.7 [#2559](https://github.com/chef/chef-server/pull/2559) ([tas50](https://github.com/tas50)) <!-- 14.5.26 -->
-- Bump omnibus-software from `70979e9` to `c626aa2` in /omnibus [#2550](https://github.com/chef/chef-server/pull/2550) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.5.25 -->
-- Update all deps to current [#2538](https://github.com/chef/chef-server/pull/2538) ([tas50](https://github.com/tas50)) <!-- 14.5.24 -->
-- Set the default FIPS lb url to https to resolve failures during upgrades [#2556](https://github.com/chef/chef-server/pull/2556) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.5.23 -->
-- Disable updating email from oc-id [#2553](https://github.com/chef/chef-server/pull/2553) ([antima-gupta](https://github.com/antima-gupta)) <!-- 14.5.22 -->
-- Add a cadence bad + docs [#2552](https://github.com/chef/chef-server/pull/2552) ([tas50](https://github.com/tas50)) <!-- 14.5.21 -->
-- Update haproxy 1.6 -&gt; 1.8 [#2490](https://github.com/chef/chef-server/pull/2490) ([tas50](https://github.com/tas50)) <!-- 14.5.20 -->
-- Allow preventing user&#39;s from changing their e-mail with new `allow_email_update_only_from_manage` config [#2400](https://github.com/chef/chef-server/pull/2400) ([jashaik](https://github.com/jashaik)) <!-- 14.5.19 -->
-- Bump berkshelf from 7.2.0 to 7.2.1 in /omnibus [#2534](https://github.com/chef/chef-server/pull/2534) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.5.18 -->
-- Bump redis from 4.2.5 to 4.3.1 in /src/chef-server-ctl [#2530](https://github.com/chef/chef-server/pull/2530) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.5.17 -->
-- Bump berkshelf from 7.2.0 to 7.2.1 in /src/chef-server-ctl [#2533](https://github.com/chef/chef-server/pull/2533) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.5.16 -->
-- Add retries to the nginx service starts to resolve restore issues [#2524](https://github.com/chef/chef-server/pull/2524) ([jashaik](https://github.com/jashaik)) <!-- 14.5.15 -->
-- adding error message for reindexing [#2509](https://github.com/chef/chef-server/pull/2509) ([vinay-satish](https://github.com/vinay-satish)) <!-- 14.5.14 -->
-- Bump test-kitchen from 2.11.2 to 2.12.0 in /omnibus [#2531](https://github.com/chef/chef-server/pull/2531) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.5.13 -->
-- Bump omnibus-software from `e86bf08` to `70979e9` in /omnibus [#2532](https://github.com/chef/chef-server/pull/2532) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.5.13 -->
-- Add an omnibus definition to cleanup leftover ruby files in the install [#2503](https://github.com/chef/chef-server/pull/2503) ([tas50](https://github.com/tas50)) <!-- 14.5.12 -->
-- Bump omnibus-software from `606edf8` to `e86bf08` in /omnibus [#2529](https://github.com/chef/chef-server/pull/2529) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.5.11 -->
-- Update Elasticsearch to 6.8.16 [#2528](https://github.com/chef/chef-server/pull/2528) ([tas50](https://github.com/tas50)) <!-- 14.5.10 -->
-- Update Openresty to 1.19.3.2 [#2527](https://github.com/chef/chef-server/pull/2527) ([tas50](https://github.com/tas50)) <!-- 14.5.9 -->
-- Bump toml from 0.2.0 to 0.3.0 in /src/chef-server-ctl [#2516](https://github.com/chef/chef-server/pull/2516) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.5.8 -->
-- deprecation note added to the chef backend docs [#2515](https://github.com/chef/chef-server/pull/2515) ([dishanktiwari2501](https://github.com/dishanktiwari2501)) <!-- 14.5.7 -->
-- Upgrade rails to 4.2.11.3 for CVE fixes [#2494](https://github.com/chef/chef-server/pull/2494) ([tas50](https://github.com/tas50)) <!-- 14.5.6 -->
-- Bump omnibus-software from `b1e7b08` to `606edf8` in /omnibus [#2513](https://github.com/chef/chef-server/pull/2513) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.5.5 -->
-- Bump chefstyle from 2.0.3 to 2.0.4 in /src/chef-server-ctl [#2512](https://github.com/chef/chef-server/pull/2512) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.5.4 -->
-- Add retries to the elasticsearch/redis service starts to resolve restore issues [#2504](https://github.com/chef/chef-server/pull/2504) ([jashaik](https://github.com/jashaik)) <!-- 14.5.4 -->
-- Bump omnibus-software from `6b77f49` to `b1e7b08` in /omnibus [#2508](https://github.com/chef/chef-server/pull/2508) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.5.3 -->
-- Bump omnibus-software from `a13ce9b` to `6b77f49` in /omnibus [#2505](https://github.com/chef/chef-server/pull/2505) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.5.2 -->
-- Cleanup the docs / man pages from postgresql install [#2502](https://github.com/chef/chef-server/pull/2502) ([tas50](https://github.com/tas50)) <!-- 14.5.1 -->
-- Remove the need for rest-client and mixlib-install in omnibus [#2492](https://github.com/chef/chef-server/pull/2492) ([tas50](https://github.com/tas50)) <!-- 14.5.0 -->
-- Chef Manage should be verified on ipv4 &amp; ipv6 setup [#2478](https://github.com/chef/chef-server/pull/2478) ([jashaik](https://github.com/jashaik)) <!-- 14.4.7 -->
-- Revert &quot;Build and test on RHEL 8&quot; [#2497](https://github.com/chef/chef-server/pull/2497) ([tas50](https://github.com/tas50)) <!-- 14.4.6 -->
-- Build and test on RHEL 8 [#2495](https://github.com/chef/chef-server/pull/2495) ([tas50](https://github.com/tas50)) <!-- 14.4.5 -->
+<!-- release_rollup -->
 <!-- release_rollup -->
 
 <!-- latest_stable_release -->
+## [14.5.29](https://github.com/chef/chef-server/tree/14.5.29) (2021-06-23)
+
+#### Merged Pull Requests
+- Build and test on RHEL 8 [#2495](https://github.com/chef/chef-server/pull/2495) ([tas50](https://github.com/tas50))
+- Revert &quot;Build and test on RHEL 8&quot; [#2497](https://github.com/chef/chef-server/pull/2497) ([tas50](https://github.com/tas50))
+- Chef Manage should be verified on ipv4 &amp; ipv6 setup [#2478](https://github.com/chef/chef-server/pull/2478) ([jashaik](https://github.com/jashaik))
+- Remove the need for rest-client and mixlib-install in omnibus [#2492](https://github.com/chef/chef-server/pull/2492) ([tas50](https://github.com/tas50))
+- Cleanup the docs / man pages from postgresql install [#2502](https://github.com/chef/chef-server/pull/2502) ([tas50](https://github.com/tas50))
+- Bump omnibus-software from `a13ce9b` to `6b77f49` in /omnibus [#2505](https://github.com/chef/chef-server/pull/2505) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump omnibus-software from `6b77f49` to `b1e7b08` in /omnibus [#2508](https://github.com/chef/chef-server/pull/2508) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Add retries to the elasticsearch/redis service starts to resolve restore issues [#2504](https://github.com/chef/chef-server/pull/2504) ([jashaik](https://github.com/jashaik))
+- Bump chefstyle from 2.0.3 to 2.0.4 in /src/chef-server-ctl [#2512](https://github.com/chef/chef-server/pull/2512) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump omnibus-software from `b1e7b08` to `606edf8` in /omnibus [#2513](https://github.com/chef/chef-server/pull/2513) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Upgrade rails to 4.2.11.3 for CVE fixes [#2494](https://github.com/chef/chef-server/pull/2494) ([tas50](https://github.com/tas50))
+- deprecation note added to the chef backend docs [#2515](https://github.com/chef/chef-server/pull/2515) ([dishanktiwari2501](https://github.com/dishanktiwari2501))
+- Bump toml from 0.2.0 to 0.3.0 in /src/chef-server-ctl [#2516](https://github.com/chef/chef-server/pull/2516) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Update Openresty to 1.19.3.2 [#2527](https://github.com/chef/chef-server/pull/2527) ([tas50](https://github.com/tas50))
+- Update Elasticsearch to 6.8.16 [#2528](https://github.com/chef/chef-server/pull/2528) ([tas50](https://github.com/tas50))
+- Bump omnibus-software from `606edf8` to `e86bf08` in /omnibus [#2529](https://github.com/chef/chef-server/pull/2529) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Add an omnibus definition to cleanup leftover ruby files in the install [#2503](https://github.com/chef/chef-server/pull/2503) ([tas50](https://github.com/tas50))
+- Bump omnibus-software from `e86bf08` to `70979e9` in /omnibus [#2532](https://github.com/chef/chef-server/pull/2532) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump test-kitchen from 2.11.2 to 2.12.0 in /omnibus [#2531](https://github.com/chef/chef-server/pull/2531) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- adding error message for reindexing [#2509](https://github.com/chef/chef-server/pull/2509) ([vinay-satish](https://github.com/vinay-satish))
+- Add retries to the nginx service starts to resolve restore issues [#2524](https://github.com/chef/chef-server/pull/2524) ([jashaik](https://github.com/jashaik))
+- Bump berkshelf from 7.2.0 to 7.2.1 in /src/chef-server-ctl [#2533](https://github.com/chef/chef-server/pull/2533) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump redis from 4.2.5 to 4.3.1 in /src/chef-server-ctl [#2530](https://github.com/chef/chef-server/pull/2530) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump berkshelf from 7.2.0 to 7.2.1 in /omnibus [#2534](https://github.com/chef/chef-server/pull/2534) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Allow preventing user&#39;s from changing their e-mail with new `allow_email_update_only_from_manage` config [#2400](https://github.com/chef/chef-server/pull/2400) ([jashaik](https://github.com/jashaik))
+- Update haproxy 1.6 -&gt; 1.8 [#2490](https://github.com/chef/chef-server/pull/2490) ([tas50](https://github.com/tas50))
+- Add a cadence bad + docs [#2552](https://github.com/chef/chef-server/pull/2552) ([tas50](https://github.com/tas50))
+- Disable updating email from oc-id [#2553](https://github.com/chef/chef-server/pull/2553) ([antima-gupta](https://github.com/antima-gupta))
+- Set the default FIPS lb url to https to resolve failures during upgrades [#2556](https://github.com/chef/chef-server/pull/2556) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Update all deps to current [#2538](https://github.com/chef/chef-server/pull/2538) ([tas50](https://github.com/tas50))
+- Bump omnibus-software from `70979e9` to `c626aa2` in /omnibus [#2550](https://github.com/chef/chef-server/pull/2550) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump license_scout to 1.2.13 and chef-zero to 15.0.7 [#2559](https://github.com/chef/chef-server/pull/2559) ([tas50](https://github.com/tas50))
+- Filtering the webserver information in the nginx default error responses [#2539](https://github.com/chef/chef-server/pull/2539) ([jashaik](https://github.com/jashaik))
+- Fixing the force push: Do not display chef and add test [#2560](https://github.com/chef/chef-server/pull/2560) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Update chef-zero to latest release to include --skip=nginx_default_error [#2563](https://github.com/chef/chef-server/pull/2563) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+<!-- latest_stable_release -->
+
 ## [14.4.4](https://github.com/chef/chef-server/tree/14.4.4) (2021-05-20)
 
 #### Merged Pull Requests
@@ -72,7 +70,6 @@
 - Update PostgreSQL 9.6.21 -&gt; 9.6.22 [#2482](https://github.com/chef/chef-server/pull/2482) ([tas50](https://github.com/tas50))
 - Bump Elasticsearch 6.8.14 -&gt; 6.8.15 / 7.9.1 -&gt; 7.9.3 [#2481](https://github.com/chef/chef-server/pull/2481) ([tas50](https://github.com/tas50))
 - Disable nginx server tokens everywhere [#2463](https://github.com/chef/chef-server/pull/2463) ([tas50](https://github.com/tas50))
-<!-- latest_stable_release -->
 
 ## [14.3.14](https://github.com/chef/chef-server/tree/14.3.14) (2021-04-22)
 
