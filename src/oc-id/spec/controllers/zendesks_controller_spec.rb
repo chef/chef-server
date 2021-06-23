@@ -42,7 +42,7 @@ describe ZendesksController do
         end
 
         it 'redirects to the zendesk SSO URL' do
-          expect(controller).to receive(:zendesk_sso_url).with('testuser', 'testreturnto')
+          expect(controller).to receive(:zendesk_sso_url).with(testuser, 'testreturnto')
           get 'show', params: { return_to: 'testreturnto' }
         end
       end
