@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.5.28 -->
-## [14.5.28](https://github.com/chef/chef-server/tree/14.5.28) (2021-06-22)
+<!-- latest_release 14.5.29 -->
+## [14.5.29](https://github.com/chef/chef-server/tree/14.5.29) (2021-06-23)
 
 #### Merged Pull Requests
-- Fixing the force push: Do not display chef and add test [#2560](https://github.com/chef/chef-server/pull/2560) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Update chef-zero to latest release to include --skip=nginx_default_error [#2563](https://github.com/chef/chef-server/pull/2563) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.4.4 -->
 ### Changes since 14.4.4 release
 
 #### Merged Pull Requests
+- Update chef-zero to latest release to include --skip=nginx_default_error [#2563](https://github.com/chef/chef-server/pull/2563) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.5.29 -->
 - Fixing the force push: Do not display chef and add test [#2560](https://github.com/chef/chef-server/pull/2560) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.5.28 -->
 - Filtering the webserver information in the nginx default error responses [#2539](https://github.com/chef/chef-server/pull/2539) ([jashaik](https://github.com/jashaik)) <!-- 14.5.27 -->
 - Bump license_scout to 1.2.13 and chef-zero to 15.0.7 [#2559](https://github.com/chef/chef-server/pull/2559) ([tas50](https://github.com/tas50)) <!-- 14.5.26 -->
