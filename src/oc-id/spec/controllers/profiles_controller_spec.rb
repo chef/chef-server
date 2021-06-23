@@ -75,7 +75,7 @@ describe ProfilesController do
 
 
     it "should not update user's email" do
-      put :update, user:  put_user.merge(email: 'abc@test.com')
+      put :update, params: { user:  put_user.merge(email: 'abc@test.com') }
 
       expect(assigns(:user).email).not_to eq('abc@test.com')
     end
@@ -255,7 +255,6 @@ describe ProfilesController do
  #     end
  #   end
  # end
->>>>>>> 5884729c7... Comment out the change_email tests
 
   describe 'PUT #change_password' do
     it 'redirects to the profile page if the update succeeded' do
