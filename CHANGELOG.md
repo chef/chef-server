@@ -1,9 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release -->
+<!-- latest_release 14.5.30 -->
+## [14.5.30](https://github.com/chef/chef-server/tree/14.5.30) (2021-06-25)
+
+#### Merged Pull Requests
+- Bump chefstyle from 2.0.4 to 2.0.5 in /src/chef-server-ctl [#2568](https://github.com/chef/chef-server/pull/2568) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
-<!-- release_rollup -->
+<!-- release_rollup since=14.5.29 -->
+### Changes since 14.5.29 release
+
+#### Merged Pull Requests
+- Bump chefstyle from 2.0.4 to 2.0.5 in /src/chef-server-ctl [#2568](https://github.com/chef/chef-server/pull/2568) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.5.30 -->
 <!-- release_rollup -->
 
 <!-- latest_stable_release -->
