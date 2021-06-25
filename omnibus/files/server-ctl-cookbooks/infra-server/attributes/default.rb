@@ -83,6 +83,8 @@ default['private_chef']['user']['username'] = 'opscode'
 default['private_chef']['user']['shell'] = '/usr/sbin/nologin'
 # The home directory for the chef services user
 default['private_chef']['user']['home'] = '/opt/opscode/embedded'
+# The home directory for the chef services user
+default['private_chef']['user']['nginx_no_root'] = false
 
 ####
 # Service data_dir, etc_dir, log_directory perms

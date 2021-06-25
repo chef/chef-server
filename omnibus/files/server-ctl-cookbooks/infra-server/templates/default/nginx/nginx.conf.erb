@@ -1,4 +1,6 @@
+<% unless node['private_chef']['user']['nginx_no_root'] %>
 user <%= node['private_chef']['user']['username'] %> <%= node['private_chef']['user']['username']%>;
+<% end %>
 worker_processes <%= @worker_processes %>;
 error_log /var/log/opscode/nginx/error.log<%= node['private_chef']['lb']['debug'] ? " debug" : "" %>;
 # Enviroment variables that we wish to access while running must be declared here,

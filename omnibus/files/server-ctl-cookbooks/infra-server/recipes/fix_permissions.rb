@@ -24,3 +24,14 @@ end
 execute "find #{GEM_PATH} -perm /u=r,g=r,o=r ! -perm /u=x -exec chmod 644 {} \\;" do
   user 'root'
 end
+
+[
+  '/opt/opscode/embedded/nginx',
+  "#{node['private_chef']['nginx']['dir']}",
+  "#{node['private_chef']['nginx']['log_directory']}",
+].each do |nginx_no_root_perms_fix_path|
+  execute "find #{nginx_no_root_perms_fix_path} -user 'root' -exec chown #{node['private_chef']['user']['username']} {} \\;" do
+    user 'root'
+    only_if { node['private_chef']['user']['nginx_no_root'] }
+  end
+end

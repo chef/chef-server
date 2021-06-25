@@ -828,6 +828,14 @@ Chef Infra Server versions earlier than 14.5 configured with `nginx['enable_non_
     Possible values: greater than or equal to `31536000` and less than or equal to `63072000`.
     Default value: `31536000` (1 year).
 
+`user['nginx_no_root']`
+
+:   Boolean, default `false`.  Specifies that `nginx` processes, including the `master` process, should not
+    run as the `root` user on a system and will instead run as `user['username']` (defaults to `opscode`).
+    **REQUIRES** that `nginx['ssl_port']` and `nginx['non_ssl_port']` options are configured to non-privileged
+    ports greater than `1024` or that the local system is otherwise allowed to bind to privileged ports
+    with the user `user['username']`.
+
 ### oc_bifrost
 
 {{< reusable_text_versioned file="server_services_bifrost" >}}
