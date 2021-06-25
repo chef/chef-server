@@ -83,7 +83,7 @@ default['private_chef']['user']['username'] = 'opscode'
 default['private_chef']['user']['shell'] = '/usr/sbin/nologin'
 # The home directory for the chef services user
 default['private_chef']['user']['home'] = '/opt/opscode/embedded'
-# The home directory for the chef services user
+# Whether nginx should be configured to not use the root user
 default['private_chef']['user']['nginx_no_root'] = false
 
 ####
