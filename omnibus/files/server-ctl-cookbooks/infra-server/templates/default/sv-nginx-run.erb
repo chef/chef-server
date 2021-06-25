@@ -2,7 +2,7 @@
 exec 2>&1
 exec /opt/opscode/embedded/bin/veil-env-helper -o DATA_COLLECTOR_TOKEN=data_collector.token -s REDIS_PASSWORD=redis_lb.password -- \
   chpst \
-  <% if node['private_chef']['user']['nginx_no_root'] %>
+  <% if node['private_chef']['nginx']['nginx_no_root'] %>
   -U <%= node['private_chef']['user']['username'] %> \
   -u <%= node['private_chef']['user']['username'] %> \
   <% end %>

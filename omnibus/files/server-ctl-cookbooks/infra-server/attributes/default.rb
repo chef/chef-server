@@ -83,8 +83,6 @@ default['private_chef']['user']['username'] = 'opscode'
 default['private_chef']['user']['shell'] = '/usr/sbin/nologin'
 # The home directory for the chef services user
 default['private_chef']['user']['home'] = '/opt/opscode/embedded'
-# Whether nginx should be configured to not use the root user
-default['private_chef']['user']['nginx_no_root'] = false
 
 ####
 # Service data_dir, etc_dir, log_directory perms
@@ -530,6 +528,8 @@ default['private_chef']['nginx']['pivotal_ssl_client_cert'] = false
 default['private_chef']['nginx']['pivotal_ssl_client_key'] = false
 # default['private_chef']['nginx']['ssl_client_ca'] = "/etc/something/foo.ca.pem"
 default['private_chef']['nginx']['ssl_verify_depth'] = 2
+# Whether nginx should be configured to not use the root user
+default['private_chef']['nginx']['nginx_no_root'] = false
 
 ###
 # PostgreSQL

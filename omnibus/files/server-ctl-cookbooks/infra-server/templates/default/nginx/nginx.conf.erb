@@ -1,4 +1,4 @@
-<% unless node['private_chef']['user']['nginx_no_root'] %>
+<% unless node['private_chef']['nginx']['nginx_no_root'] %>
 user <%= node['private_chef']['user']['username'] %> <%= node['private_chef']['user']['username']%>;
 <% end %>
 worker_processes <%= @worker_processes %>;
