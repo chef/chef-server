@@ -1,6 +1,6 @@
 pkg_name=openresty-noroot
 pkg_origin=chef
-pkg_version=1.13.6.2
+pkg_version=1.19.3.2
 pkg_description="Scalable Web Platform by Extending NGINX with Lua"
 pkg_maintainer="The Chef Server Maintainers <support@chef.io>"
 pkg_license=('BSD-2-Clause')
@@ -8,7 +8,7 @@ pkg_source=https://openresty.org/download/openresty-${pkg_version}.tar.gz
 pkg_dirname=openresty-${pkg_version}
 pkg_filename=openresty-${pkg_version}.tar.gz
 pkg_upstream_url=http://openresty.org/
-pkg_shasum=946e1958273032db43833982e2cec0766154a9b5cb8e67868944113208ff2942
+pkg_shasum=ce40e764990fbbeb782e496eb63e214bf19b6f301a453d13f70c4f363d1e5bb9
 pkg_deps=(
   core/bzip2
   core/coreutils
@@ -35,8 +35,7 @@ pkg_exports=(
 )
 pkg_exposes=(port)
 
-# TODO: current version is 1.0.1, we should try updating
-lpeg_version="0.12"
+lpeg_version="1.0.1"
 lpeg_source="http://www.inf.puc-rio.br/~roberto/lpeg/lpeg-${lpeg_version}.tar.gz"
 
 do_prepare() {
