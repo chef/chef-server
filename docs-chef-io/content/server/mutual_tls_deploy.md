@@ -6,15 +6,52 @@ draft = true
 
 [menu]
   [menu.server]
-    title = "Mutual TLS"
-    identifier = "server/security/mutual_tls_deploy"
-    parent = "server/security"
+    title = "Deploy Mutual TLS Certificates"
+    identifier = "server/security/certs/mutual_tls_deploy"
+    parent = "server/security/certs"
+    weight = 30
 
 +++
 
+Now that we have a proper server certificate (chain) we will add that to our Chef Server and restart the server to incorporate it. Connect to your Chef Server from your chef workstation again.
+
+[Reference]: https://docs.chef.io/server/server_security/
+
+## Securing your Chef Server with your New Certificate Chain file
+
+
+
+We need to create a Chef Server configuration file if you haven't already done so.
+
+```bash
+touch /etc/opscode/chef-server.rb
+```
+
+In that file add these lines.
+
+```bash
+nginx['ssl_certificate'] = '/your/path/intermediate/certs/4thcafe.com.pem';
+nginx['ssl_certificate_key'] = '/your/path/intermediate/private/4thcafe.com.key.pem';
+```
+
+nginx['ssl_certificate'] = '/your/path/intermediate/certs/4thcafe.com.pem';
+: This is the certificate of a specific Chef Infra server
+
+nginx['ssl_certificate_key'] = '/your/path/intermediate/private/4thcafe.com.key.pem'
+: This is the private key for the Chef Infra Server certificate
+
+
+```bash
+sudo chef-server-ctl reconfigure
+```
+
+### Test a Connection to your Chef Server
+
+If you open a browser instance and try to connect to your Chef Server now you should get the expected error that the certificate is not trusted.
+
 ### Add the Root CA, Intermediate CA and Server Certs to your local System
 
-Now you need to add the certificates from your new Root and Intermediate CA to your chef workstation.
+Now you need to add the certificates from your new Root and Intermediate CA to your workstation.
 
 ##### MacOS:
 
@@ -110,6 +147,12 @@ nginx['ssl_client_ca'] = "/your/path/ca.cert.pem"
 nginx['ssl_verify_depth'] = 2
 ```
 
+ca.cert.pem
+: The root ca
+
+ssl_verify_depth = 2
+: default depth to follow for verifying certificate authority
+
 Now we need to update Chef Server to accept that last change. Run this again:
 
 ```bash
@@ -131,3 +174,4 @@ ssl_client_cert = "C:\\opscode\\billg.cert.pem"
 ssl_client_key = "C:\\opscode\\billg.key.pem"
 ssl_verify_mode = 'verify_peer'
 ```
+

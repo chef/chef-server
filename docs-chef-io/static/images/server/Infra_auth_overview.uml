@@ -1,0 +1,15 @@
+@startuml
+rectangle "Chef Infra Client" as client #EF9600 {
+  component client.pem
+  }
+
+rectangle "Chef Infra Server" as server #92C1E9
+node node as node #ECEFF1
+
+client.pem -> server
+server -> node
+client.pem -> node: bootstrap
+server <- node
+
+
+@enduml
