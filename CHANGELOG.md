@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.6.2 -->
-## [14.6.2](https://github.com/chef/chef-server/tree/14.6.2) (2021-07-01)
+<!-- latest_release 14.6.3 -->
+## [14.6.3](https://github.com/chef/chef-server/tree/14.6.3) (2021-07-01)
 
 #### Merged Pull Requests
-- Bump omnibus from `87db446` to `8b50107` in /omnibus [#2573](https://github.com/chef/chef-server/pull/2573) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump appbundler from 0.13.2 to 0.13.4 in /src/chef-server-ctl [#2575](https://github.com/chef/chef-server/pull/2575) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.5.29 -->
 ### Changes since 14.5.29 release
 
 #### Merged Pull Requests
+- Bump appbundler from 0.13.2 to 0.13.4 in /src/chef-server-ctl [#2575](https://github.com/chef/chef-server/pull/2575) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.6.3 -->
 - Bump omnibus from `87db446` to `8b50107` in /omnibus [#2573](https://github.com/chef/chef-server/pull/2573) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.6.2 -->
 - Bump activesupport from 6.1.3.2 to 6.1.4 in /oc-chef-pedant [#2571](https://github.com/chef/chef-server/pull/2571) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.6.1 -->
 - Upgrade rails from 4.2.11 to 6.0 [#2535](https://github.com/chef/chef-server/pull/2535) ([antima-gupta](https://github.com/antima-gupta)) <!-- 14.6.0 -->
