@@ -25,7 +25,7 @@ class ProfilesController < ApplicationController
     # params are coming as string from user profile form.
     params[:user].reject! { |k| k == "email" }
 
-    if @user.update_attributes(params[:user])
+    if @user.update_attributes(user_params)
       message = I18n.t('profile.update_successful')
       message << "\n" + I18n.t('profile.email_change_sent') if updated_email
       redirect_to profile_path, :notice => message
@@ -115,5 +115,11 @@ class ProfilesController < ApplicationController
       Settings.secret_key_base,
       params[:email],
     ).valid_for?(params[:signature])
+  end
+  
+
+  # When creating a new ActiveRecord model, only the permitted attributes are passed into the model
+  def user_params
+    params.require(:user).permit(:username,:first_name,:last_name,:middle_name,:public_key,:private_key,:display_name,:password)
   end
 end

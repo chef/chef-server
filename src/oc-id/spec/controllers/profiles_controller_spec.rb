@@ -47,7 +47,7 @@ describe ProfilesController do
     before { get :show }
 
     it 'succeeds' do
-      expect(response).to be_success
+      expect(response).to have_http_status(:success)
     end
 
     it 'renders the show template' do
@@ -68,21 +68,21 @@ describe ProfilesController do
     end
 
     it 'redirects to the profile page if the update succeeded' do
-      put :update, user: put_user
+      put :update, params: { user: put_user }
 
       expect(response).to redirect_to(profile_path)
     end
 
 
     it "should not update user's email" do
-      put :update, user:  put_user.merge(email: 'abc@test.com')
+      put :update, params: { user:  put_user.merge(email: 'abc@test.com') }
 
       expect(assigns(:user).email).not_to eq('abc@test.com')
     end
 
     it 'renders the show template if the update failed' do
       allow(logged_in_user).to receive(:chef).and_raise(StandardError)
-      put :update, user: put_user
+      put :update, params: { user: put_user }
 
       expect(response).to render_template('show')
     end
@@ -258,9 +258,10 @@ describe ProfilesController do
 
   describe 'PUT #change_password' do
     it 'redirects to the profile page if the update succeeded' do
-      put :change_password, :current_password => 'haha',
-                            :new_password => 'password',
-                            :password_confirmation => 'password'
+      put :change_password, params: { :current_password => 'haha',
+                              :new_password => 'password',
+                              :password_confirmation => 'password'
+                            }
 
       expect(response).to redirect_to(profile_path)
     end
@@ -290,7 +291,7 @@ describe ProfilesController do
     end
 
     it 'succeeds' do
-      expect(response).to be_success
+      expect(response).to have_http_status(:success)
     end
 
     context 'pem file' do
