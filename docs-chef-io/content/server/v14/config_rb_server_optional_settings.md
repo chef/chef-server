@@ -55,11 +55,9 @@ This configuration file has the following general settings:
     `false` to force the server to run without FIPS compliance mode.
     Default: The value in the kernel configuration.
 
-    {{< note >}}
-
-    Chef Infra Server versions earlier than 14.5 configured with `nginx['enable_non_ssl'] = false` and `fips = true` require `export CSC_LB_URL=https://127.0.0.1` to run the command `chef-server-ctl reindex <options>`
-
-    {{< /note >}}
+{{< note  spaces=4 >}}
+Chef Infra Server versions earlier than 14.5 configured with `nginx['enable_non_ssl'] = false` and `fips = true` require `export CSC_LB_URL=https://127.0.0.1` to run the command `chef-server-ctl reindex <options>`
+{{< /note >}}
 
 `insecure_addon_compat`
 
@@ -594,11 +592,9 @@ This configuration file has the following settings for `nginx`:
 :   Allow port 80 redirects to port 443. Set to
     `true`, to enable SSL termination by the front-end hardware load balancers for WebUI and API endpoints. Default value: `false`.
 
-    {{< note >}}
-
-    Chef Infra Server versions earlier than 14.5 configured with `nginx['enable_non_ssl'] = false` and `fips = true` require `export CSC_LB_URL=https://127.0.0.1` to run the command `chef-server-ctl reindex <options>`
-
-    {{< /note >}}
+{{< note  spaces=4 >}}
+Chef Infra Server versions earlier than 14.5 configured with `nginx['enable_non_ssl'] = false` and `fips = true` require `export CSC_LB_URL=https://127.0.0.1` to run the command `chef-server-ctl reindex <options>`
+{{< /note >}}
 
 `nginx['enable_stub_status']`
 
