@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.5.32 -->
-## [14.5.32](https://github.com/chef/chef-server/tree/14.5.32) (2021-07-01)
+<!-- latest_release 14.5.33 -->
+## [14.5.33](https://github.com/chef/chef-server/tree/14.5.33) (2021-07-01)
 
 #### Merged Pull Requests
-- Bump veil from `ac0a762` to `ea2be98` in /src/oc_bifrost/oc-bifrost-pedant [#2572](https://github.com/chef/chef-server/pull/2572) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Update openresty to v1.19.3.2 in habitat builds [#2574](https://github.com/chef/chef-server/pull/2574) ([gscho](https://github.com/gscho))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.5.29 -->
 ### Changes since 14.5.29 release
 
 #### Merged Pull Requests
+- Update openresty to v1.19.3.2 in habitat builds [#2574](https://github.com/chef/chef-server/pull/2574) ([gscho](https://github.com/gscho)) <!-- 14.5.33 -->
 - Bump veil from `ac0a762` to `ea2be98` in /src/oc_bifrost/oc-bifrost-pedant [#2572](https://github.com/chef/chef-server/pull/2572) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.5.32 -->
 - Zei/adding docs [#2517](https://github.com/chef/chef-server/pull/2517) ([vinay-satish](https://github.com/vinay-satish)) <!-- 14.5.31 -->
 - Bump chefstyle from 2.0.4 to 2.0.5 in /src/chef-server-ctl [#2568](https://github.com/chef/chef-server/pull/2568) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.5.30 -->
