@@ -1198,6 +1198,15 @@ This configuration file has the following settings for
 
 This configuration file has the following settings for `opscode-erchef`:
 
+`opscode_erchef["allow_email_update_only_from_manage"]`
+
+:   Set to `true`, users can only update their email from the Chef management console.
+    Set to `false`, users can update their email using knife and the Chef management console.
+
+    Default value : `false`.
+
+    **New in Chef Infra Server 14.5**
+
 `opscode_erchef['auth_skew']`
 
 :   Default value: `900`.
