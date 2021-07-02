@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.6.5 -->
-## [14.6.5](https://github.com/chef/chef-server/tree/14.6.5) (2021-07-01)
+<!-- latest_release 14.6.6 -->
+## [14.6.6](https://github.com/chef/chef-server/tree/14.6.6) (2021-07-02)
 
 #### Merged Pull Requests
-- Document update for new allow_email_update_only_from_manage config [#2545](https://github.com/chef/chef-server/pull/2545) ([jashaik](https://github.com/jashaik))
+- Convert cookbook HWRPs/LWRPs to customer resources [#2579](https://github.com/chef/chef-server/pull/2579) ([tas50](https://github.com/tas50))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.5.29 -->
 ### Changes since 14.5.29 release
 
 #### Merged Pull Requests
+- Convert cookbook HWRPs/LWRPs to customer resources [#2579](https://github.com/chef/chef-server/pull/2579) ([tas50](https://github.com/tas50)) <!-- 14.6.6 -->
 - Document update for new allow_email_update_only_from_manage config [#2545](https://github.com/chef/chef-server/pull/2545) ([jashaik](https://github.com/jashaik)) <!-- 14.6.5 -->
 - Bump activesupport from 6.1.3.2 to 6.1.4 in /src/oc_bifrost/oc-bifrost-pedant [#2569](https://github.com/chef/chef-server/pull/2569) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.6.4 -->
 - Bump appbundler from 0.13.2 to 0.13.4 in /src/chef-server-ctl [#2575](https://github.com/chef/chef-server/pull/2575) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.6.3 -->
