@@ -1,4 +1,4 @@
-require_relative '../../libraries/chef_backend.rb'
+require_relative '../../libraries/chef_backend'
 
 describe ChefBackend do
   describe '#configured_members' do

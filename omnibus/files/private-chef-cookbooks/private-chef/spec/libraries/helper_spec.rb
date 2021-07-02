@@ -1,4 +1,4 @@
-require_relative '../../libraries/helper.rb'
+require_relative '../../libraries/helper'
 
 describe OmnibusHelper do
   before do

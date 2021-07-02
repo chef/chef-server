@@ -81,7 +81,6 @@ else
     PrivateChef.from_file(chef_server_path)
   end
 
-
   if PrivateChef['opscode_solr4']['external']
     node.default['private_chef']['elasticsearch']['enable'] = false
   end

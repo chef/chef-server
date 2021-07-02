@@ -1,4 +1,4 @@
-require_relative '../../libraries/private_chef.rb'
+require_relative '../../libraries/private_chef'
 require 'chef/log'
 
 def expect_existing_secrets

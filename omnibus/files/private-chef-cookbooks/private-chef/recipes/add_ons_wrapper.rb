@@ -88,7 +88,7 @@ node['private_chef']['addons']['packages'].each do |pkg|
     block do
       pkg_file = if ::File.directory?(addon_path)
                    # find the newest package of each name if 'addon_path' is a directory
-                   Dir["#{addon_path}/#{pkg}*.#{OmnibusHelper.new(node).platform_package_suffix}"].sort_by { |f| File.mtime(f) }.last
+                   Dir["#{addon_path}/#{pkg}*.#{OmnibusHelper.new(node).platform_package_suffix}"].max_by { |f| File.mtime(f) }
                  else
                    # use the full path to the package
                    addon_path
@@ -102,6 +102,6 @@ node['private_chef']['addons']['packages'].each do |pkg|
       %w(rhel suse) => Chef::Provider::Package::Rpm
     )
     source lazy { pkg_file }
-    notifies :run, "ruby_block[addon_install_notification_#{pkg}]", :immediate
+    notifies :run, "ruby_block[addon_install_notification_#{pkg}]", :immediately
   end
 end

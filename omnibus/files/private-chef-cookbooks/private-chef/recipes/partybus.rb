@@ -80,7 +80,7 @@ ruby_block 'migration-level file sanity check' do
       raise message
     end
   end
-  not_if 'test -f /var/opt/opscode/upgrades/migration-level'
+  not_if { ::File.exist?('/var/opt/opscode/upgrades/migration-level') }
   action :nothing
   if OmnibusHelper.has_been_bootstrapped?
     subscribes :run, 'private-chef_pg_upgrade[upgrade_if_necessary]', :delayed

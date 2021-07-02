@@ -1,13 +1,13 @@
 # frozen_string_literal: true
 
-require_relative '../../libraries/elasticsearch.rb'
+require_relative '../../libraries/elasticsearch'
 
 describe Elasticsearch do
   describe '#memory_size' do
     context '4gb server' do
       let(:node) do
         {
-          memory: { total: '4039772kB' }
+          memory: { total: '4039772kB' },
         }
       end
 
@@ -19,7 +19,7 @@ describe Elasticsearch do
     context '64gb server' do
       let(:node) do
         {
-          memory: { total: '67108864kB' }
+          memory: { total: '67108864kB' },
         }
       end
 
@@ -30,7 +30,7 @@ describe Elasticsearch do
     context '512gb server' do
       let(:node) do
         {
-          memory: { total: '536870912kB' }
+          memory: { total: '536870912kB' },
         }
       end
 

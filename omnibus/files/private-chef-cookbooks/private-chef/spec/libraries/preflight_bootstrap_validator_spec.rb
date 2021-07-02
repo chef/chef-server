@@ -13,9 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-require_relative '../../libraries/preflight_bootstrap_validator.rb'
-require_relative '../../libraries/private_chef.rb'
-require_relative '../../libraries/helper.rb'
+require_relative '../../libraries/preflight_bootstrap_validator'
+require_relative '../../libraries/private_chef'
+require_relative '../../libraries/helper'
 
 describe BootstrapPreflightValidator do
   let(:node_object) { { 'private_chef' => {}, 'previous_run' => {} } }

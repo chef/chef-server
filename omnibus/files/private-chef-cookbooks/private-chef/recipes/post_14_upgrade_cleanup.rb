@@ -27,13 +27,13 @@ private_chef_package_cleaner 'rabbitmq' do
   directories [
     node['private_chef']['rabbitmq']['dir'],
     node['private_chef']['rabbitmq']['data_dir'],
-    node['private_chef']['rabbitmq']['log_directory']
+    node['private_chef']['rabbitmq']['log_directory'],
   ]
 end
 
 private_chef_package_cleaner 'opscode-expander' do
   directories [
     node['private_chef']['opscode-expander']['dir'],
-    node['private_chef']['opscode-expander']['log_directory']
+    node['private_chef']['opscode-expander']['log_directory'],
   ]
 end

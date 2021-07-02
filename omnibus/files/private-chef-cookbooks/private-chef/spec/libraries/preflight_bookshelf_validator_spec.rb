@@ -13,9 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-require_relative '../../libraries/preflight_bookshelf_validator.rb'
-require_relative '../../libraries/private_chef.rb'
-require_relative '../../libraries/helper.rb'
+require_relative '../../libraries/preflight_bookshelf_validator'
+require_relative '../../libraries/private_chef'
+require_relative '../../libraries/helper'
 
 describe BookshelfPreflightValidator do
   context 'storage_type_unchanged validation' do

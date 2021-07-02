@@ -1,4 +1,4 @@
-require_relative './warnings.rb'
+require_relative './warnings'
 
 class NginxErb
   attr_reader :node
@@ -87,13 +87,13 @@ class NginxErb
     listen_addr = ''
     if node['private_chef']['nginx']['enable_ipv6']
       listen_addr = '[::]:'
-      if options[:ipv6_only]
-        # Listen on IPv6 only, leaving IPv4 addresses alone.
-        listen_opts << ' ipv6only=on'
-      else
-        # Listen on both IPv4, and IPv6.
-        listen_opts << ' ipv6only=off'
-      end
+      listen_opts << if options[:ipv6_only]
+                       # Listen on IPv6 only, leaving IPv4 addresses alone.
+                       ' ipv6only=on'
+                     else
+                       # Listen on both IPv4, and IPv6.
+                       ' ipv6only=off'
+                     end
     end
     # Listen on IPv4 only.
     "listen #{listen_addr}#{listen_port}#{listen_opts};"
@@ -111,25 +111,24 @@ class NginxErb
 
   def time_format
     time_format = node['private_chef']['nginx']['time_format']
-    unless( time_format == 'time_iso8601' or time_format == 'time_local')
-        'time_iso8601'
+    if (time_format == 'time_iso8601') || (time_format == 'time_local')
+      time_format
     else
-        time_format
+      'time_iso8601'
     end
   end
 
-
   def get_max_age_for_hsts
     max_age = node['private_chef']['nginx']['hsts_max_age']
-    unless( max_age.is_a? Numeric and max_age >= 31536000 and max_age <= 63072000)
-        ChefServer::Warnings.warn <<~EOF
+    if max_age.is_a?(Numeric) && (max_age >= 31536000) && (max_age <= 63072000)
+      max_age
+    else
+      ChefServer::Warnings.warn <<~EOF
           The HSTS max_age parameter should be a Numeric value in seconds
           greater than or equal to 1 year (31536000) and less than or equal to 2 years (63072000)
           setting the max-age to 31536000
           EOF
-        31536000
-    else
-        max_age
+      31536000
     end
   end
 end
