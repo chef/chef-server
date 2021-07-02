@@ -13,21 +13,35 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
-default_action :create
-
-attribute :database,
+property :database,
   kind_of: String,
-  name_attribute: true
+  name_property: true
 
-attribute :owner,
+property :owner,
   kind_of: String,
   required: false
 
-attribute :template,
+property :template,
   kind_of: String,
   default: 'template0'
 
-attribute :encoding,
+property :encoding,
   kind_of: String,
   default: 'UTF-8'
+
+# NOTE:
+#
+# Uses the value of node['private_chef']['postgresql']['username'] as
+# the user to run the database-creation psql command
+
+action :create do
+  EcPostgres.with_connection(node) do |connection|
+    result = connection.exec("SELECT datname FROM pg_database WHERE datname='#{new_resource.database}'")
+    if result.ntuples == 0
+      converge_by("Create database #{new_resource.database}") do
+        owner = "WITH OWNER #{new_resource.owner}" if new_resource.owner
+        connection.exec("CREATE DATABASE \"#{new_resource.database}\" #{owner} TEMPLATE #{new_resource.template} ENCODING '#{new_resource.encoding}';")
+      end
+    end
+  end
+end
