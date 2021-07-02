@@ -13,13 +13,38 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-default_action :deploy
 
-attribute :name,           kind_of: String, required: true, name_attribute: true
-attribute :database,       kind_of: String, required: true
-attribute :username,       kind_of: String
-attribute :password,       kind_of: String, required: false, default: ''
-attribute :target_version, kind_of: String
-attribute :hostname,       kind_of: String, required: true
-attribute :port,           kind_of: Integer, required: true
-attribute :sslmode,        kind_of: String, required: false, default: 'disable'
+property :database,       kind_of: String, required: true
+property :username,       kind_of: String
+property :password,       kind_of: String, required: false, default: ''
+property :target_version, kind_of: String
+property :hostname,       kind_of: String, required: true
+property :port,           kind_of: Integer, required: true
+property :sslmode,        kind_of: String, required: false, default: 'disable'
+
+action :deploy do
+  target = new_resource.target_version ? "--to-target #{new_resource.target_version}" : ''
+  converge_by "Deploying schema from #{new_resource.name}" do
+    execute "sqitch_deploy_#{new_resource.name}" do
+      command <<-EOM.gsub(/\s+/, ' ').strip!
+        sqitch --engine pg
+               --db-name #{new_resource.database}
+               --db-host #{new_resource.hostname}
+               --db-port #{new_resource.port}
+               --db-user #{new_resource.username}
+               --top-dir #{new_resource.name}
+               deploy #{target} --verify
+      EOM
+      environment 'PERL5LIB' => '/opt/opscode/embedded/lib', # force us to use omnibus perl
+                  'LD_LIBRARY_PATH' => '/opt/opscode/embedded/lib', # force us to use omnibus libraries
+                  'PGPASSWORD' => new_resource.password,
+                  'PGSSLMODE' => new_resource.sslmode
+
+      # Sqitch Return Codes
+      # 0 - when changes are applied
+      # 1 - when everything is ok but no changes were made
+      # 2(+?) - when an error occurs.
+      returns [0, 1]
+    end
+  end
+end
