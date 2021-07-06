@@ -16,8 +16,8 @@
 # See http://rubydoc.info/gems/rspec-core/RSpec/Core/Configuration
 
 # add the directory above spec to the load_path
-$:<< File.join(File.dirname(__FILE__), '..')
-$:<< File.join(File.dirname(__FILE__), './helpers')
+$: << File.join(File.dirname(__FILE__), "..")
+$: << File.join(File.dirname(__FILE__), "./helpers")
 
 RSpec.configure do |config|
   # rspec-expectations config goes here. You can use an alternate

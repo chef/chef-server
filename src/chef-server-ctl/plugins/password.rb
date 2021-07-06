@@ -4,8 +4,8 @@
 # All Rights Reserved
 #
 
-require 'highline/import'
-require 'shellwords'
+require "highline/import"
+require "shellwords"
 
 knife_config = ::ChefServerCtl::Config.knife_config_file
 knife_cmd    = "#{::ChefServerCtl::Config.knife_bin} opc user password"
@@ -30,7 +30,7 @@ add_command_under_category "password", "organization-and-user-management", "Set 
       STDERR.puts "Passwords did not match"
       exit 1
     end
-    if password == '' && ldap_authentication_enabled?
+    if password == "" && ldap_authentication_enabled?
       example_cmd = "'chef-server-ctl password #{username} --enable-external-auth'"
       STDERR.puts "You entered a blank password. If you were trying to enable ldap try #{example_cmd}?"
       exit 1
@@ -38,10 +38,10 @@ add_command_under_category "password", "organization-and-user-management", "Set 
 
     # if ldap is enabled, we just put this user in recovery mode and change his/her password
     message = if ldap_authentication_enabled?
-      "User enabled for system recovery and the user's password has been changed."
-    else # if ldap isn't being used, we simply changed the password
-      "User's password has been updated."
-    end
+                "User enabled for system recovery and the user's password has been changed."
+              else # if ldap isn't being used, we simply changed the password
+                "User's password has been updated."
+              end
 
     # enable system recovery and update the password
     run_knife_opc_cmd("#{knife_cmd} #{Shellwords.escape(username)} #{Shellwords.escape(password)} -c #{knife_config}", message)
@@ -72,6 +72,6 @@ def ldap_authentication_enabled?
   if ::ChefServerCtl::Config.habitat_mode
     false
   else
-    running_config['private_chef']['ldap'] && running_config['private_chef']['ldap']['enabled']
+    running_config["private_chef"]["ldap"] && running_config["private_chef"]["ldap"]["enabled"]
   end
 end

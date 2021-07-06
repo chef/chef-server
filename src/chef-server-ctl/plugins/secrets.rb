@@ -1,4 +1,4 @@
-require 'mixlib/shellout'
+require "mixlib/shellout"
 
 add_command_under_category "set-db-superuser-password", "Secrets Management", "Add or change DB superuser password", 2 do
   confirm_continue!("WARN: Manually setting the DB superuser password is only supported for external postgresql instances")
@@ -12,37 +12,37 @@ KNOWN_CREDENTIALS = {
   "redis_lb" => ["password"],
   "drbd" => ["shared_secret"],
   "keepalived" => ["vrrp_instance_password"],
-  "opscode_erchef" => ["sql_password", "sql_ro_password", "stats_password"],
-  "oc_bifrost" => ["superuser_id", "sql_password", "sql_ro_password"],
-  "oc_id" => ["secret_key_base", "sql_password", "sql_ro_password"],
-  "bookshelf" => ["access_key_id", "secret_access_key", "sql_password", "sql_ro_password"],
-  "manage" => ["secret_key_base", "secret_token"],
-  "saml" => ["client_id", "client_secret"],
-  "push-jobs-server" => ["pushy_priv_key", "pushy_pub_key", "sql_password", "sql_ro_password"],
-  "opscode-reporting" => ["sql_password", "sql_ro_password"],
+  "opscode_erchef" => %w{sql_password sql_ro_password stats_password},
+  "oc_bifrost" => %w{superuser_id sql_password sql_ro_password},
+  "oc_id" => %w{secret_key_base sql_password sql_ro_password},
+  "bookshelf" => %w{access_key_id secret_access_key sql_password sql_ro_password},
+  "manage" => %w{secret_key_base secret_token},
+  "saml" => %w{client_id client_secret},
+  "push-jobs-server" => %w{pushy_priv_key pushy_pub_key sql_password sql_ro_password},
+  "opscode-reporting" => %w{sql_password sql_ro_password},
 }
 
 SERVICES_REQUIRING_RESTART = {
-  "bookshelf.access_key_id" => ["opscode-erchef", "bookshelf"],
-  "bookshelf.secret_access_key" => ["opscode-erchef", "bookshelf"],
+  "bookshelf.access_key_id" => %w{opscode-erchef bookshelf},
+  "bookshelf.secret_access_key" => %w{opscode-erchef bookshelf},
   "bookshelf.sql_password" => ["bookshelf"],
   "chef-server.superuser_key" => ["opscode-reporting"],
   "chef-server.webui_key" => ["oc_id"],
-  "chef-server.webui_pub_key" => ["opscode-erchef", "opscode-reporting"],
-  "data_collector.token" => ["opscode-erchef", "nginx"],
+  "chef-server.webui_pub_key" => %w{opscode-erchef opscode-reporting},
+  "data_collector.token" => %w{opscode-erchef nginx},
   "ldap.bind_password" => ["opscode-erchef"],
   "manage.secret_key_base" => ["chef-manage"],
   "manage.secret_token" => ["chef-manage"],
   "oc_bifrost.sql_password" => ["oc_bifrost"],
-  "oc_bifrost.superuser_id" => ["opscode-erchef", "oc_bifrost", "opscode-chef-mover"],
+  "oc_bifrost.superuser_id" => %w{opscode-erchef oc_bifrost opscode-chef-mover},
   "oc_id.secret_key_base" => ["oc_id"],
   "oc_id.sql_password" => ["oc_id"],
   "opscode-reporting.sql_password" => ["opscode-reporting"],
-  "opscode_erchef.sql_password" => ["opscode-erchef", "opscode-chef-mover"],
+  "opscode_erchef.sql_password" => %w{opscode-erchef opscode-chef-mover},
   "push-jobs-server.pushy_priv_key" => ["opscode-push-jobs-server"],
   "push-jobs-server.pushy_pub_key" => ["opscode-push-jobs-server"],
   "push-jobs-server.sql_password" => ["opscode-push-jobs-server"],
-  "redis_lb.password" => ["opscode-chef-mover", "nginx", "redis_lb"],
+  "redis_lb.password" => %w{opscode-chef-mover nginx redis_lb},
   "saml.client_id" => ["chef-manage"],
   "saml.client_secret" => ["chef-manage"],
 }
@@ -88,16 +88,16 @@ def is_known_credential(group, name)
 end
 
 def confirm_continue!(message)
-  require 'highline'
+  require "highline"
   return if ARGV.delete("--yes")
 
   STDERR.puts message
-  if !HighLine.agree("Would you like to continue (y/n)? ")
+  unless HighLine.agree("Would you like to continue (y/n)? ")
     exit(0)
   end
 end
 
-def set_secret_(group, key, secret, with_restart=nil)
+def set_secret_(group, key, secret, with_restart = nil)
   credentials.add(group, key, value: secret, frozen: true, force: true)
   credentials.save
 
@@ -125,13 +125,13 @@ end
 
 def restart_manage_or_other_service(service)
   if service == "chef-manage"
-    Mixlib::ShellOut.new("chef-manage-ctl restart", :env => { "SVDIR" => MANAGE_SVDIR }).run_command
+    Mixlib::ShellOut.new("chef-manage-ctl restart", env: { "SVDIR" => MANAGE_SVDIR }).run_command
   else
     run_sv_command_for_service("restart", service)
   end
 end
 
-def capture_secret_value(env_key, prompt='secret', password_arg = nil)
+def capture_secret_value(env_key, prompt = "secret", password_arg = nil)
   if password_arg
     password_arg
   elsif ENV[env_key]
