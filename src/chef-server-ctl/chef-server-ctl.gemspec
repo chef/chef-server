@@ -28,7 +28,7 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency "rb-readline"
 
   # investigate what it would take to upgrade this...
-  spec.add_runtime_dependency "pg", "~> 0.17", ">= 0.17.1"
+  spec.add_runtime_dependency "pg", '~> 1.2', '>= 1.2.3'
 
   spec.add_runtime_dependency "redis"
   # TODO
@@ -52,7 +52,7 @@ Gem::Specification.new do |spec|
   # tools we bundle in the chef-server install and include here so we can have a single Gemfile.lock
   # for the overall chef-server "app"
   spec.add_runtime_dependency "knife-ec-backup"
-  spec.add_runtime_dependency "chef_fixie"
+  spec.add_runtime_dependency "chef_fixie_shahid" #Note: replace with chef_fixie after fixing the chef_fixie pipelines
 
   # Used to resolve download urls
   spec.add_runtime_dependency "mixlib-install"
