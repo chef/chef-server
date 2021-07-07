@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.6.12 -->
-## [14.6.12](https://github.com/chef/chef-server/tree/14.6.12) (2021-07-07)
+<!-- latest_release 14.6.13 -->
+## [14.6.13](https://github.com/chef/chef-server/tree/14.6.13) (2021-07-07)
 
 #### Merged Pull Requests
-- Bump rake from 13.0.3 to 13.0.4 in /src/chef-server-ctl [#2590](https://github.com/chef/chef-server/pull/2590) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump addressable from 2.7.0 to 2.8.0 in /oc-chef-pedant [#2586](https://github.com/chef/chef-server/pull/2586) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.5.29 -->
 ### Changes since 14.5.29 release
 
 #### Merged Pull Requests
+- Bump addressable from 2.7.0 to 2.8.0 in /oc-chef-pedant [#2586](https://github.com/chef/chef-server/pull/2586) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.6.13 -->
 - Bump rake from 13.0.3 to 13.0.4 in /src/chef-server-ctl [#2590](https://github.com/chef/chef-server/pull/2590) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.6.12 -->
 - Bump omnibus-software from `c626aa2` to `b02a8c3` in /omnibus [#2591](https://github.com/chef/chef-server/pull/2591) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.6.11 -->
 - Bump chefstyle from 2.0.5 to 2.0.6 in /src/chef-server-ctl [#2593](https://github.com/chef/chef-server/pull/2593) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.6.10 -->
