@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.6.6 -->
-## [14.6.6](https://github.com/chef/chef-server/tree/14.6.6) (2021-07-02)
+<!-- latest_release 14.6.7 -->
+## [14.6.7](https://github.com/chef/chef-server/tree/14.6.7) (2021-07-07)
 
 #### Merged Pull Requests
-- Convert cookbook HWRPs/LWRPs to customer resources [#2579](https://github.com/chef/chef-server/pull/2579) ([tas50](https://github.com/tas50))
+- Bump test-kitchen from 2.12.0 to 3.0.0 in /omnibus [#2587](https://github.com/chef/chef-server/pull/2587) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.5.29 -->
 ### Changes since 14.5.29 release
 
 #### Merged Pull Requests
+- Bump test-kitchen from 2.12.0 to 3.0.0 in /omnibus [#2587](https://github.com/chef/chef-server/pull/2587) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.6.7 -->
 - Convert cookbook HWRPs/LWRPs to customer resources [#2579](https://github.com/chef/chef-server/pull/2579) ([tas50](https://github.com/tas50)) <!-- 14.6.6 -->
 - Document update for new allow_email_update_only_from_manage config [#2545](https://github.com/chef/chef-server/pull/2545) ([jashaik](https://github.com/jashaik)) <!-- 14.6.5 -->
 - Bump activesupport from 6.1.3.2 to 6.1.4 in /src/oc_bifrost/oc-bifrost-pedant [#2569](https://github.com/chef/chef-server/pull/2569) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.6.4 -->
