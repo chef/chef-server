@@ -37,7 +37,7 @@ jobs:
     - name: Scan
       continue-on-error: true
       run: |
-        brakeman -f sarif -o output.sarif.json src/oc-id
+        brakeman -f sarif -o output.sarif.json src/oc-id --skip-files habitat/
 
     # Upload the SARIF file generated in the previous step
     - name: Upload SARIF
