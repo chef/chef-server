@@ -1,0 +1,36 @@
+---
+name: ctl-cookbook-testing
+
+'on':
+  pull_request:
+  push:
+    branches:
+      - master
+
+jobs:
+  cookstyle:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: ruby/setup-ruby@v1
+      with:
+        working-directory: omnibus/files/private-chef-cookbooks/private-chef/
+        ruby-version: 2.6
+        bundler-cache: true
+    - uses: r7kamura/rubocop-problem-matchers-action@v1 # this shows the failures in the PR
+    - name: run cookstyle
+      run: bundle exec cookstyle .
+      working-directory: omnibus/files/private-chef-cookbooks/private-chef/
+  chefspec:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: ruby/setup-ruby@v1
+      with:
+        working-directory: omnibus/files/private-chef-cookbooks/private-chef/
+        ruby-version: 2.6
+        bundler-cache: true
+    - uses: r7kamura/rubocop-problem-matchers-action@v1 # this shows the failures in the PR
+    - name: run chefspec
+      run: bundle exec rspec
+      working-directory: omnibus/files/private-chef-cookbooks/private-chef/
