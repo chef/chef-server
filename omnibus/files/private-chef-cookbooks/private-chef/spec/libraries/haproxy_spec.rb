@@ -1,4 +1,4 @@
-require_relative '../../libraries/haproxy.rb'
+require_relative '../../libraries/haproxy'
 
 #
 # FakeSocket pretends to be an HAProxy staus socket.  It understand

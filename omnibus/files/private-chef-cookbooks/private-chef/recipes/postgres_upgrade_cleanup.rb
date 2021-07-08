@@ -23,7 +23,7 @@
 execute 'remove_old_postgres_data_directory' do
   cleanup_script = "#{node['private_chef']['postgresql']['data_dir']}/delete_old_cluster.sh"
   command cleanup_script
-  only_if { File.exist? cleanup_script }
+  only_if { ::File.exist? cleanup_script }
   # The script itself is idempotent; it just runs an 'rm -Rf' on the
   # old $PG_DATA directory
 end

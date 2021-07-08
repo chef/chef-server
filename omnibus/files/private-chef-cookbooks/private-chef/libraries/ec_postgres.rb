@@ -65,8 +65,6 @@ class EcPostgres
     end
   end
 
-  private
-
   def self.as_user(user)
     # Find the user in the password database.
     u = (user.is_a? Integer) ? Etc.getpwuid(user) : Etc.getpwnam(user)

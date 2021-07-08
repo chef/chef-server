@@ -38,12 +38,10 @@ class BootstrapPreflightValidator < PreflightValidator
         # been put there by someone else.
         fail_with err_BOOT011_pivotal_user_does_not_exist
       end
-    else
-      if pivotal_user_exists?
-        # If we're running bootstrap, we need to make sure that nobody else
-        # has created the pivotal user.
-        fail_with err_BOOT010_pivotal_user_exists
-      end
+    elsif pivotal_user_exists?
+      fail_with err_BOOT010_pivotal_user_exists
+      # If we're running bootstrap, we need to make sure that nobody else
+      # has created the pivotal user.
     end
 
     # TODO:

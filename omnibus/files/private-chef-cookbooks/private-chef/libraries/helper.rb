@@ -106,46 +106,46 @@ class OmnibusHelper
         'analysis': {
           'analyzer': {
             'default': {
-              'type': 'whitespace'
-            }
-          }
+              'type': 'whitespace',
+            },
+          },
         },
         'number_of_shards':
           node['private_chef']['elasticsearch']['shard_count'],
         'number_of_replicas':
-          node['private_chef']['elasticsearch']['replica_count']
+          node['private_chef']['elasticsearch']['replica_count'],
       },
       'mappings': {
         '_source': {
-          'enabled': false
+          'enabled': false,
         },
         'properties': {
           'X_CHEF_database_CHEF_X': {
             'type': 'keyword',
             'index': true,
-            'norms': false
+            'norms': false,
           },
           'X_CHEF_type_CHEF_X': {
             'type': 'keyword',
             'index': true,
-            'norms': false
+            'norms': false,
           },
           'X_CHEF_id_CHEF_X': {
             'type': 'keyword',
             'index': true,
-            'norms': false
+            'norms': false,
           },
           'data_bag': {
             'type': 'keyword',
             'index': true,
-            'norms': false
+            'norms': false,
           },
           'content': {
             'type': 'text',
-            'index': true
-          }
-        }
-      }
+            'index': true,
+          },
+        },
+      },
     }
   end
 
@@ -155,14 +155,14 @@ class OmnibusHelper
         'analysis' => {
           'analyzer' => {
             'default' => {
-              'type' => 'whitespace'
-            }
-          }
+              'type' => 'whitespace',
+            },
+          },
         },
         'number_of_shards' =>
           node['private_chef']['elasticsearch']['shard_count'],
         'number_of_replicas' =>
-          node['private_chef']['elasticsearch']['replica_count']
+          node['private_chef']['elasticsearch']['replica_count'],
       },
       'mappings' => {
         'object' => {
@@ -172,33 +172,33 @@ class OmnibusHelper
             'X_CHEF_database_CHEF_X' => {
               'type' => 'keyword',
               'norms' => {
-                'enabled' => false
-              }
+                'enabled' => false,
+              },
             },
             'X_CHEF_type_CHEF_X' => {
               'type' => 'keyword',
               'norms' => {
-                'enabled' => false
-              }
+                'enabled' => false,
+              },
             },
             'X_CHEF_id_CHEF_X' => {
               'type' => 'keyword',
               'norms' => {
-                'enabled' => false
-              }
+                'enabled' => false,
+              },
             },
             'data_bag' => {
               'type' => 'keyword',
               'norms' => {
-                'enabled' => false
-              }
+                'enabled' => false,
+              },
             },
             'content' => {
-              'type' => 'text'
-            }
-          }
-        }
-      }
+              'type' => 'text',
+            },
+          },
+        },
+      },
     }
   end
 
@@ -208,14 +208,14 @@ class OmnibusHelper
         'analysis' => {
           'analyzer' => {
             'default' => {
-              'type' => 'whitespace'
-            }
-          }
+              'type' => 'whitespace',
+            },
+          },
         },
         'number_of_shards' =>
           node['private_chef']['elasticsearch']['shard_count'],
         'number_of_replicas' =>
-          node['private_chef']['elasticsearch']['replica_count']
+          node['private_chef']['elasticsearch']['replica_count'],
       },
       'mappings' => {
         'object' => {
@@ -226,34 +226,34 @@ class OmnibusHelper
               'type' => 'string',
               'index' => 'not_analyzed',
               'norms' => {
-                'enabled' => false
-              }
+                'enabled' => false,
+              },
             },
             'X_CHEF_type_CHEF_X' => {
               'type' => 'string',
               'index' => 'not_analyzed',
               'norms' => {
-                'enabled' => false
-              }
+                'enabled' => false,
+              },
             },
             'X_CHEF_id_CHEF_X' => {
               'type' => 'string',
               'index' => 'not_analyzed',
               'norms' => {
-                'enabled' => false
-              }
+                'enabled' => false,
+              },
             },
             'data_bag' => {
               'type' => 'string',
               'index' => 'not_analyzed',
               'norms' => {
-                'enabled' => false
-              }
+                'enabled' => false,
+              },
             },
-            'content' => { 'type' => 'string', 'index' => 'analyzed' }
-          }
-        }
-      }
+            'content' => { 'type' => 'string', 'index' => 'analyzed' },
+          },
+        },
+      },
     }
   end
 
@@ -296,7 +296,7 @@ class OmnibusHelper
   end
 
   def db_connection_uri
-    db_protocol = "postgres"
+    db_protocol = 'postgres'
     db_user     = node['private_chef']['opscode-erchef']['sql_connection_user'] || node['private_chef']['opscode-erchef']['sql_user']
     db_password = PrivateChef.credentials.get('opscode_erchef', 'sql_password')
     db_vip      = vip_for_uri('postgresql')
@@ -306,7 +306,7 @@ class OmnibusHelper
   end
 
   def bifrost_db_connection_uri
-    db_protocol = "postgres"
+    db_protocol = 'postgres'
     db_user     = node['private_chef']['oc_bifrost']['sql_connection_user'] || node['private_chef']['oc_bifrost']['sql_user']
     db_password = PrivateChef.credentials.get('oc_bifrost', 'sql_password')
     db_vip      = vip_for_uri('postgresql')

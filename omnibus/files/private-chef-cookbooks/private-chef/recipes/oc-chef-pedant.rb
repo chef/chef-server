@@ -48,7 +48,7 @@ end
 ssl_version = allowed_versions.first.gsub('.', '_').to_sym
 
 # In the older version of FIPS, TLS directives were not supported and hence it had to be connected to http
-# currently FIPS supports https. 
+# currently FIPS supports https.
 # If enable_non_ssl is set to false in nginx, the reindexing fails when it tries to make a http connection
 # https://github.com/chef/chef-server/blob/fd06de39ffcc65e06f03c99a2301f295ad43e526/src/chef-server-ctl/lib/chef_server_ctl/config.rb#L23
 reindex_endpoint = node['private_chef']['nginx']['enable_non_ssl'] ? 'http://127.0.0.1' : 'https://127.0.0.1'

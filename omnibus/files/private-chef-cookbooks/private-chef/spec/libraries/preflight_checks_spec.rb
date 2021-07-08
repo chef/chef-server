@@ -14,8 +14,8 @@
 # limitations under the License.
 #
 
-require_relative '../../libraries/private_chef.rb'
-require_relative '../../libraries/helper.rb'
+require_relative '../../libraries/private_chef'
+require_relative '../../libraries/helper'
 
 describe PreflightChecks do
   let(:credentials) { double('Credentials') }

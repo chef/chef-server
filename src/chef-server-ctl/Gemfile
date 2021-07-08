@@ -2,6 +2,5 @@ source "https://rubygems.org"
 
 gemspec
 
-gem 'chef', "= 15.17.4"
-gem 'chef-utils', "= 15.17.4" # mixlib-shellout currently floats on anything < 16.7.23
+gem 'chef', "= 16.13.16"
 gem "toml" # for habitat-land

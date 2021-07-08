@@ -21,7 +21,7 @@ require 'chef/mash'
 require 'chef/json_compat'
 require 'chef/mixin/deep_merge'
 require 'veil'
-require_relative './warnings.rb'
+require_relative './warnings'
 
 module PrivateChef
   extend(Mixlib::Config)
@@ -534,10 +534,8 @@ module PrivateChef
           raise "Invalid ldap configuration: unknown value #{ldap_encryption} for deprecated ldap['encryption'] option. "\
                 "Please set ldap['ssl_enabled'] = true or ldap['tls_enabled'] = true instead"
         end
-      else
-        if ssl_enabled && tls_enabled
-          raise "Invalid ldap configuration: ldap['ssl_enabled'] and ldap['tls_enabled'] are mutually exclusive."
-        end
+      elsif ssl_enabled && tls_enabled
+        raise "Invalid ldap configuration: ldap['ssl_enabled'] and ldap['tls_enabled'] are mutually exclusive."
       end
       PrivateChef['ldap']['ssl_enabled'] = ssl_enabled
       PrivateChef['ldap']['tls_enabled'] = tls_enabled
@@ -621,10 +619,10 @@ module PrivateChef
       # customers to have to update their configuration, so we copy over
       # opscode_solr4 external configuration if it exists.
       keys_to_migrate = {
-        "external" => "external",
-        "external_url" => "external_url",
-        "elasticsearch_shard_count" => "shard_count",
-        "elasticsearch_replica_count" => "replica_count"
+        'external' => 'external',
+        'external_url' => 'external_url',
+        'elasticsearch_shard_count' => 'shard_count',
+        'elasticsearch_replica_count' => 'replica_count',
       }
       keys_to_migrate.each do |old, new|
         if opscode_solr4.key?(old) && !elasticsearch.key?(new)

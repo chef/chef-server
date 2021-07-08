@@ -51,10 +51,10 @@ class ChefServerDataBootstrap
     password = PrivateChef.credentials.get('opscode_erchef', 'sql_password')
     # don't we need 'db_superuser' => username below also? (see: omnibus/files/private-chef-cookbooks/private-chef/libraries/ec_postgres.rb)
     EcPostgres.with_connection(node, 'opscode_chef', 'db_connection_superuser' => username, 'db_superuser_password' => password) do |conn|
-        create_superuser_in_erchef(conn)
-        create_server_admins_global_group_in_erchef(conn)
-        create_global_container_in_erchef(conn, 'organizations', orgs_authz_id)
-        create_global_container_in_erchef(conn, 'users', users_authz_id)
+      create_superuser_in_erchef(conn)
+      create_server_admins_global_group_in_erchef(conn)
+      create_global_container_in_erchef(conn, 'organizations', orgs_authz_id)
+      create_global_container_in_erchef(conn, 'users', users_authz_id)
     end
   end
 

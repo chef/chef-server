@@ -101,7 +101,7 @@ file "#{oc_id_config_dir}/production.yml" do
   owner OmnibusHelper.new(node).ownership['owner']
   group OmnibusHelper.new(node).ownership['group']
   mode '640'
-  content mutable_hash.to_yaml
+  content YAML.dump(mutable_hash)
   notifies :restart, 'component_runit_service[oc_id]'
 end
 

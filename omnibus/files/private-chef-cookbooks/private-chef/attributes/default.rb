@@ -68,8 +68,11 @@ default['private_chef']['addons']['packages'] =
 default['private_chef']['addons']['ubuntu_supported_codenames'] =
   %w(lucid precise trusty)
 default['private_chef']['addons']['ubuntu_distribution'] =
-  node['private_chef']['addons']['ubuntu_supported_codenames'].include?(node['lsb']['codename']) ?
-  node['lsb']['codename'] : 'lucid'
+  if node['private_chef']['addons']['ubuntu_supported_codenames'].include?(node['lsb']['codename'])
+    node['lsb']['codename']
+  else
+    'lucid'
+  end
 
 ####
 # The Chef User that services run as
@@ -173,7 +176,7 @@ elasticsearch['enable_gc_log'] = false
 elasticsearch['initial_cluster_join_timeout'] = 90
 elasticsearch['shard_count'] = 5
 elasticsearch['replica_count'] = 1
-#elasticsearch['es_version'] = '6.8.14'
+# elasticsearch['es_version'] = '6.8.14'
 
 # each item in this list will be placed as-is into java_opts config file.
 # entries are set in chef-server.rb as
@@ -581,7 +584,7 @@ shared_buffer_autocalc_mb = ([quarter_mem, pg_autocalc_max].min / 1024).to_i
 default['private_chef']['postgresql']['shared_buffers'] = "#{shared_buffer_autocalc_mb}MB"
 default['private_chef']['postgresql']['work_mem'] = '8MB'
 default['private_chef']['postgresql']['effective_cache_size'] = "#{(node['memory']['total'].to_i / 2) / 1024}MB"
-# Note: the checkpoint_segments setting was removed.
+# NOTE: the checkpoint_segments setting was removed.
 # https://www.postgresql.org/docs/9.6/static/release-9-5.html says
 #   max_wal_size = (3 * checkpoint_segments) * 16MB
 # would be a usable conversion rule, but it also says the new setting's default

@@ -1,6 +1,6 @@
-require_relative '../../libraries/helper.rb'
-require_relative '../../libraries/preflight_checks.rb'
-require_relative '../../libraries/preflight_postgres_validator.rb'
+require_relative '../../libraries/helper'
+require_relative '../../libraries/preflight_checks'
+require_relative '../../libraries/preflight_postgres_validator'
 
 class PG
   # dummy class for exception mocking, without requiring installation
@@ -137,7 +137,7 @@ describe PostgresqlPreflightValidator do
       end
 
       context 'when the connection is refused' do
-        let (:pg_exception) { PG::ConnectionBad.new('FATAL: could not connect to server: Connection refused') }
+        let(:pg_exception) { PG::ConnectionBad.new('FATAL: could not connect to server: Connection refused') }
 
         it 'fails with a CSPG010 error' do
           expect(postgres_validator).to receive(:err_CSPG010_postgres_not_available).and_return('cspg010 error')
@@ -148,7 +148,7 @@ describe PostgresqlPreflightValidator do
       end
 
       context 'when password authentication fails' do
-        let (:pg_exception) { PG::ConnectionBad.new('FATAL: password authentication failed for user "fakeuser"') }
+        let(:pg_exception) { PG::ConnectionBad.new('FATAL: password authentication failed for user "fakeuser"') }
 
         it 'does not raise an error' do
           expect(postgres_validator).to_not receive(:fail_with)
@@ -157,7 +157,7 @@ describe PostgresqlPreflightValidator do
       end
 
       context 'when we connect but cannot find the role/database' do
-        let (:pg_exception) { PG::ConnectionBad.new('FATAL: role "chef_server_conn_test" does not exist') }
+        let(:pg_exception) { PG::ConnectionBad.new('FATAL: role "chef_server_conn_test" does not exist') }
 
         it 'does not raise an error' do
           expect(postgres_validator).to_not receive(:fail_with)
@@ -166,7 +166,7 @@ describe PostgresqlPreflightValidator do
       end
 
       context 'when we connect but cannot authenticate due to pg_hba settings' do
-        let (:pg_exception) { PG::ConnectionBad.new('FATAL: no pg_hba.conf entry for host "1.2.3.4"') }
+        let(:pg_exception) { PG::ConnectionBad.new('FATAL: no pg_hba.conf entry for host "1.2.3.4"') }
 
         it 'does not raise an error' do
           expect(postgres_validator).to_not receive(:fail_with)
@@ -174,17 +174,17 @@ describe PostgresqlPreflightValidator do
         end
       end
 
-      context "when we connect to Azure PostgreSQL" do
-        let (:pg_exception) { PG::ConnectionBad.new('FATAL:  Invalid Username specified. Please check the Username and retry connection. The Username should be in <username@hostname> format.') }
+      context 'when we connect to Azure PostgreSQL' do
+        let(:pg_exception) { PG::ConnectionBad.new('FATAL:  Invalid Username specified. Please check the Username and retry connection. The Username should be in <username@hostname> format.') }
 
-        it "does not raise an error" do
+        it 'does not raise an error' do
           expect(postgres_validator).to_not receive(:fail_with)
           expect { postgres_validator.connectivity_validation }.to_not raise_error
         end
       end
 
-      context "when we receive an unexpected error" do
-        let (:pg_exception) { PG::ConnectionBad.new("FATAL: something funky happened") }
+      context 'when we receive an unexpected error' do
+        let(:pg_exception) { PG::ConnectionBad.new('FATAL: something funky happened') }
 
         it 'raises a CSPG999 error' do
           expect(postgres_validator).to receive(:fail_with).with('CSPG999: FATAL: something funky happened')
@@ -204,8 +204,8 @@ describe PostgresqlPreflightValidator do
   context '#backend_validation' do
     context 'when determining what it should validate' do
       describe 'when this is the first run and secrets exist' do
-        let (:first_run_response) { true }
-        let (:secrets_exists_response) { true }
+        let(:first_run_response) { true }
+        let(:secrets_exists_response) { true }
         it 'does not check for existing databases or roles' do
           expect(postgres_validator).to_not receive(:backend_verify_named_db_not_present)
           expect(postgres_validator).to_not receive(:backend_verify_cs_roles_not_present)
@@ -214,8 +214,8 @@ describe PostgresqlPreflightValidator do
       end
 
       describe 'when this is not the first run and secrets exist' do
-        let (:first_run_response) { false }
-        let (:secrets_exists_response) { true }
+        let(:first_run_response) { false }
+        let(:secrets_exists_response) { true }
         it 'does check for existing databases and roles' do
           expect(postgres_validator).to_not receive(:backend_verify_named_db_not_present)
           expect(postgres_validator).to_not receive(:backend_verify_cs_roles_not_present)
@@ -224,8 +224,8 @@ describe PostgresqlPreflightValidator do
       end
 
       describe 'when this is the first run and no secrets exist' do
-        let (:first_run_response) { true }
-        let (:secrets_exists_response) { false }
+        let(:first_run_response) { true }
+        let(:secrets_exists_response) { false }
         it 'does check for existing databases and roles' do
           expect(postgres_validator)
             .to receive(:backend_verify_cs_roles_not_present)
@@ -238,8 +238,8 @@ describe PostgresqlPreflightValidator do
       end
 
       describe 'when this is not the first run and no secrets exist' do
-        let (:first_run_response) { false }
-        let (:secrets_exists_response) { false }
+        let(:first_run_response) { false }
+        let(:secrets_exists_response) { false }
         it 'does not check for existing databases or roles' do
           expect(postgres_validator).to_not receive(:backend_verify_named_db_not_present)
           expect(postgres_validator).to_not receive(:backend_verify_cs_roles_not_present)

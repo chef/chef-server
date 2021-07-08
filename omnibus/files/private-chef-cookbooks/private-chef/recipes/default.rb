@@ -147,17 +147,15 @@ include_recipe 'private-chef::fix_permissions'
     component_runit_service service do
       action :disable
     end
+  elsif node['private_chef'][service]['enable']
+    include_recipe "private-chef::#{service}"
   else
-    if node['private_chef'][service]['enable']
-      include_recipe "private-chef::#{service}"
-    else
-      # bootstrap isn't a service, nothing to disable.
-      next if service == 'bootstrap'
+    # bootstrap isn't a service, nothing to disable.
+    next if service == 'bootstrap'
 
-      # All non-enabled services get disabled;
-      component_runit_service service do
-        action :disable
-      end
+    # All non-enabled services get disabled;
+    component_runit_service service do
+      action :disable
     end
   end
 end

@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require_relative './preflight_checks.rb'
+require_relative './preflight_checks'
 
 class RequiredRecipePreflightValidator < PreflightValidator
   def initialize(node)

@@ -93,8 +93,6 @@ do_install() {
 
   export GEM_HOME="${pkg_prefix}/vendor/bundle"
   mkdir -p "$GEM_HOME"
-  gem install bundler:1.17.2
-
 
   { git ls-files; git ls-files --exclude-standard --others; } \
       | _tar_pipe_app_cp_to "$HOME"

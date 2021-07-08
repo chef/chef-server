@@ -49,7 +49,7 @@ end
 file '/etc/sysctl.conf' do
   user 'root'
   action :touch
-  not_if { File.exist?('/etc/sysctl.conf') }
+  not_if { ::File.exist?('/etc/sysctl.conf') }
 end
 
 sysctl 'vm.max_map_count' do
@@ -77,7 +77,6 @@ sysctl 'vm.max_map_count' do
   notifies :run, 'execute[sysctl-reload]', :immediately
 end
 
-
 # Remove the old env config to ensre it's not left over after an upgrade.
 directory '/opt/opscode/service/elasticsearch/env' do
   action :delete
@@ -88,7 +87,7 @@ template config_file do
   owner OmnibusHelper.new(node).ownership['owner']
   group OmnibusHelper.new(node).ownership['group']
   mode '0644'
-  variables (lazy { elasticsearch.to_hash })
+  variables(lazy { elasticsearch.to_hash })
   force_unlink true
   notifies :restart, 'component_runit_service[elasticsearch]', :delayed
 end
@@ -115,11 +114,11 @@ heap_size = if node['private_chef']['opscode-solr4'] &&
 
 jvm_config_file = File.join(elasticsearch_conf_dir, 'jvm.options')
 
-jvm_source = if node['private_chef']['elasticsearch']['es_version'].to_f > 7.0 
-              'elasticsearch_jvm_es7.opts.erb'
-            else
-              'elasticsearch_jvm.opts.erb'
-            end
+jvm_source = if node['private_chef']['elasticsearch']['es_version'].to_f > 7.0
+               'elasticsearch_jvm_es7.opts.erb'
+             else
+               'elasticsearch_jvm.opts.erb'
+             end
 
 template jvm_config_file do
   source jvm_source
@@ -158,7 +157,7 @@ link '/opt/opscode/embedded/elasticsearch/config' do
   to elasticsearch_conf_dir
 end
 
-# While Restoring the chef server backup, enable is always successful 
+# While Restoring the chef server backup, enable is always successful
 # but start is not which is the root cause of restore issue.
 # So added retries for making sure the elasticsearch runit service is running
 component_runit_service 'elasticsearch' do

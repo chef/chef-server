@@ -62,7 +62,6 @@ directory '/opt/opscode/sv/opscode-expander-reindexer' do
   recursive true
 end
 
-
 component_runit_service 'opscode-expander' do
   action :disable
 end
