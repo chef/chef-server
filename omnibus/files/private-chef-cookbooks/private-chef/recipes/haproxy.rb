@@ -54,7 +54,7 @@ end
 
 chef_backend_members = begin
                          Chef::Log.info('Attempting Chef Backend Member Discovery')
-                         if members = get_chef_backend_cluster_members
+                         if members = get_chef_backend_cluster_members # rubocop: disable Lint/AssignmentInCondition
                            Chef::Log.info('Using Chef Backend members discovered via etcd')
                            members
                          else

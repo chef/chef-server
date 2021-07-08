@@ -150,7 +150,7 @@ EOF
     end
 
     it 'generates secrets' do
-      rendered_config = config_for('api.chef.io')
+      rendered_config = config_for('api.chef.io') # rubocop: disable Lint/UselessAssignment
       expect(PrivateChef.credentials.exist?('redis_lb', 'password')).to eq(true)
     end
 
