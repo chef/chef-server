@@ -17,7 +17,7 @@ class HAProxyStatus
 
   def read_until_end(socket)
     ret = []
-    while line = socket.gets
+    while line = socket.gets # rubocop: disable Lint/AssignmentInCondition
       ret << line
     end
     ret
