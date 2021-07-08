@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.6.15 -->
-## [14.6.15](https://github.com/chef/chef-server/tree/14.6.15) (2021-07-08)
+<!-- latest_release 14.6.16 -->
+## [14.6.16](https://github.com/chef/chef-server/tree/14.6.16) (2021-07-08)
 
 #### Merged Pull Requests
-- Bump rake from 13.0.4 to 13.0.5 in /omnibus [#2600](https://github.com/chef/chef-server/pull/2600) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Upgrade Ruby to 2.7 and embedded chef-client to 16.13 [#2576](https://github.com/chef/chef-server/pull/2576) ([tas50](https://github.com/tas50))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.5.29 -->
 ### Changes since 14.5.29 release
 
 #### Merged Pull Requests
+- Upgrade Ruby to 2.7 and embedded chef-client to 16.13 [#2576](https://github.com/chef/chef-server/pull/2576) ([tas50](https://github.com/tas50)) <!-- 14.6.16 -->
 - Bump rake from 13.0.4 to 13.0.5 in /omnibus [#2600](https://github.com/chef/chef-server/pull/2600) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.6.15 -->
 - Bump rake from 13.0.3 to 13.0.4 in /oc-chef-pedant [#2589](https://github.com/chef/chef-server/pull/2589) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.6.14 -->
 - Bump addressable from 2.7.0 to 2.8.0 in /oc-chef-pedant [#2586](https://github.com/chef/chef-server/pull/2586) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.6.13 -->
