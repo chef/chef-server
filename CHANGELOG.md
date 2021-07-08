@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.6.14 -->
-## [14.6.14](https://github.com/chef/chef-server/tree/14.6.14) (2021-07-07)
+<!-- latest_release 14.6.15 -->
+## [14.6.15](https://github.com/chef/chef-server/tree/14.6.15) (2021-07-08)
 
 #### Merged Pull Requests
-- Bump rake from 13.0.3 to 13.0.4 in /oc-chef-pedant [#2589](https://github.com/chef/chef-server/pull/2589) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump rake from 13.0.4 to 13.0.5 in /omnibus [#2600](https://github.com/chef/chef-server/pull/2600) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.5.29 -->
 ### Changes since 14.5.29 release
 
 #### Merged Pull Requests
+- Bump rake from 13.0.4 to 13.0.5 in /omnibus [#2600](https://github.com/chef/chef-server/pull/2600) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.6.15 -->
 - Bump rake from 13.0.3 to 13.0.4 in /oc-chef-pedant [#2589](https://github.com/chef/chef-server/pull/2589) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.6.14 -->
 - Bump addressable from 2.7.0 to 2.8.0 in /oc-chef-pedant [#2586](https://github.com/chef/chef-server/pull/2586) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.6.13 -->
 - Bump rake from 13.0.3 to 13.0.4 in /src/chef-server-ctl [#2590](https://github.com/chef/chef-server/pull/2590) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.6.12 -->
