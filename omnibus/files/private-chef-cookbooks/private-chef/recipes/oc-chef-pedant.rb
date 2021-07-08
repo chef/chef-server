@@ -33,7 +33,6 @@ pedant_log_dir = node['private_chef']['oc-chef-pedant']['log_directory']
 end
 
 pedant_config = File.join(pedant_etc_dir, 'pedant_config.rb')
-helper = OmnibusHelper.new(node)
 
 # Snag the first supported protocol version by our ruby installation
 ssl_protocols = node['private_chef']['nginx']['ssl_protocols']
