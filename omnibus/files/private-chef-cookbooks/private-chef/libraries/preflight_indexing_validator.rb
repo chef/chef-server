@@ -72,7 +72,7 @@ class IndexingPreflightValidator < PreflightValidator
     es_heap_size = cs_elasticsearch_attr['heap_size'] || node_elasticsearch_attr['heap_size']
     solr_heap_size = cs_solr_attr['heap_size'] || 0
 
-    using_sorl = false
+    using_solr = false
     heap_size = if solr_heap_size > es_heap_size
                   using_solr = true
                   solr_heap_size

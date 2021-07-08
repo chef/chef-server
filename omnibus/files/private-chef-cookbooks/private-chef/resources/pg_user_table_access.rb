@@ -30,9 +30,7 @@ property :access_profile,
   equal_to: %i(write read),
   required: true
 
-# NOTE:
-#
-# Uses the value of node['private_chef']['postgresql']['db_connection_superuser'] and ['db_superuser_password]
+# NOTE: Uses the value of node['private_chef']['postgresql']['db_connection_superuser'] and ['db_superuser_password]
 # to make the connection to the postgres server.
 
 action :create do

@@ -23,11 +23,11 @@
 # A simple `/etc/cron.hourly/` script now controlls the rotation so we'll
 # cleanup all legacy crontabs.
 #
-file '/etc/cron.d/opc_log_cleanup' do
+cron_d 'opc_log_cleanup' do
   action :delete
 end
 
-file '/etc/cron.d/opc_logrotate.cron' do
+cron_d 'opc_logrotate.cron' do
   action :delete
 end
 # END LEGACY CRONTAB CLEANUP

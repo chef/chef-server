@@ -29,9 +29,7 @@ property :encoding,
   kind_of: String,
   default: 'UTF-8'
 
-# NOTE:
-#
-# Uses the value of node['private_chef']['postgresql']['username'] as
+# NOTE: Uses the value of node['private_chef']['postgresql']['username'] as
 # the user to run the database-creation psql command
 
 action :create do
