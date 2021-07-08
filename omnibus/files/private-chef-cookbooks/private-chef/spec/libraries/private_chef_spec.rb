@@ -150,7 +150,6 @@ EOF
     end
 
     it 'generates secrets' do
-      rendered_config = config_for('api.chef.io')
       expect(PrivateChef.credentials.exist?('redis_lb', 'password')).to eq(true)
     end
 
