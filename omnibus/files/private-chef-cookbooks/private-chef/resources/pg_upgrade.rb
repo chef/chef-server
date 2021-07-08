@@ -173,8 +173,9 @@ action_class do
       action :nothing # can this just be 'action :stop'?
     end
 
-    log 'Shutting down PostgreSQL for update' do
+    notify_group 'Shutting down PostgreSQL for update' do
       notifies :stop, 'component_runit_service[postgresql]', :immediately
+      action :run
     end
   end
 
