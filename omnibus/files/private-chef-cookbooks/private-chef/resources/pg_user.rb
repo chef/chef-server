@@ -30,9 +30,7 @@ property :local_connection,
   kind_of: [TrueClass, FalseClass],
   default: false
 
-# NOTE:
-#
-# Uses the value of node['private_chef']['postgresql']['username'] as
+# NOTE: Uses the value of node['private_chef']['postgresql']['username'] as
 # the user to run the user-creation psql command
 
 action :create do

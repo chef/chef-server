@@ -16,9 +16,7 @@
 
 # That's right folks, there are no attributes.
 
-# NOTE:
-#
-# Uses the value of certain node attributes in the course of execution.
+# NOTE: Uses the value of certain node attributes in the course of execution.
 #
 # * node['previous_run']['postgresql']['data_dir']: the PostgreSQL
 #   data directory on the last Chef run

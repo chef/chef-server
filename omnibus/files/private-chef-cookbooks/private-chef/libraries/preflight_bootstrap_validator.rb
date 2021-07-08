@@ -44,8 +44,7 @@ class BootstrapPreflightValidator < PreflightValidator
       # has created the pivotal user.
     end
 
-    # TODO:
-    # If the pivotal key file exists locally:
+    # TODO: If the pivotal key file exists locally:
     #  - fetch pivotal public key(s) from opscode_chef keys view + users
     #  - extract public key from local pivotal.pem
     #   * If we fail with an auth error at this time, it means that either the
@@ -106,8 +105,7 @@ class BootstrapPreflightValidator < PreflightValidator
     end
   end
 
-  # TODO:
-  # These error messages and condition will need further refinement, details, and validation.
+  # TODO: These error messages and condition will need further refinement, details, and validation.
   def err_BOOT001_missing_pivotal_key
     <<~EOM
       BOOT001: Your configuration indicates that you are starting this node
