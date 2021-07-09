@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.6.17 -->
-## [14.6.17](https://github.com/chef/chef-server/tree/14.6.17) (2021-07-08)
+<!-- latest_release 14.6.18 -->
+## [14.6.18](https://github.com/chef/chef-server/tree/14.6.18) (2021-07-09)
 
 #### Merged Pull Requests
-- Cookstyle fixes for the ctl command [#2601](https://github.com/chef/chef-server/pull/2601) ([tas50](https://github.com/tas50))
+- Bump rake from 13.0.5 to 13.0.6 in /omnibus [#2605](https://github.com/chef/chef-server/pull/2605) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.5.29 -->
 ### Changes since 14.5.29 release
 
 #### Merged Pull Requests
+- Bump rake from 13.0.5 to 13.0.6 in /omnibus [#2605](https://github.com/chef/chef-server/pull/2605) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.6.18 -->
 - Cookstyle fixes for the ctl command [#2601](https://github.com/chef/chef-server/pull/2601) ([tas50](https://github.com/tas50)) <!-- 14.6.17 -->
 - Upgrade Ruby to 2.7 and embedded chef-client to 16.13 [#2576](https://github.com/chef/chef-server/pull/2576) ([tas50](https://github.com/tas50)) <!-- 14.6.16 -->
 - Bump rake from 13.0.4 to 13.0.5 in /omnibus [#2600](https://github.com/chef/chef-server/pull/2600) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.6.15 -->
