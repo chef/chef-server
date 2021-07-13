@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.6.21 -->
-## [14.6.21](https://github.com/chef/chef-server/tree/14.6.21) (2021-07-13)
+<!-- latest_release 14.6.22 -->
+## [14.6.22](https://github.com/chef/chef-server/tree/14.6.22) (2021-07-13)
 
 #### Merged Pull Requests
-- Bump addressable from 2.7.0 to 2.8.0 in /src/oc-id [#2609](https://github.com/chef/chef-server/pull/2609) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump rake from 13.0.4 to 13.0.6 in /oc-chef-pedant [#2603](https://github.com/chef/chef-server/pull/2603) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.5.29 -->
 ### Changes since 14.5.29 release
 
 #### Merged Pull Requests
+- Bump rake from 13.0.4 to 13.0.6 in /oc-chef-pedant [#2603](https://github.com/chef/chef-server/pull/2603) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.6.22 -->
 - Bump addressable from 2.7.0 to 2.8.0 in /src/oc-id [#2609](https://github.com/chef/chef-server/pull/2609) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.6.21 -->
 - Bump addressable from 2.7.0 to 2.8.0 in /src/chef-server-ctl [#2610](https://github.com/chef/chef-server/pull/2610) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.6.20 -->
 - Update Ruby to 2.7.4 [#2602](https://github.com/chef/chef-server/pull/2602) ([tas50](https://github.com/tas50)) <!-- 14.6.19 -->
