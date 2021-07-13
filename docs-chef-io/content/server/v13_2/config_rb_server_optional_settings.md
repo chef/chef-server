@@ -53,7 +53,13 @@ This configuration file has the following general settings:
 
 :   Set to `true` to run the server in FIPS compliance mode. Set to
     `false` to force the server to run without FIPS compliance mode.
-    Default value is whatever the kernel is configured to.
+    Default: The kernel configuration FIPS value.
+
+{{< note  spaces=4 >}}
+
+Chef Infra Server versions earlier than 14.5 that are configured with `nginx['enable_non_ssl'] = false` and `fips = true` require `export CSC_LB_URL=https://127.0.0.1` to run the command `chef-server-ctl reindex <options>`
+
+{{< /note >}}
 
 <div id="config_rb_server_insecure_addon_compat" markdown="1">
 
@@ -611,6 +617,10 @@ This configuration file has the following settings for `nginx`:
     `true`, load balancers on the front-end hardware are allowed to do
     SSL termination of the WebUI and API. Default value: `false`.
 
+{{< note  spaces=4 >}}
+Chef Infra Server versions earlier than 14.5 configured with `nginx['enable_non_ssl'] = false` and `fips = true` require `export CSC_LB_URL=https://127.0.0.1` to run the command `chef-server-ctl reindex <options>`
+{{< /note >}}
+
 `nginx['enable_stub_status']`
 
 :   Enables the Nginx `stub_status` module. See
@@ -743,7 +753,7 @@ This configuration file has the following settings for `nginx`:
 `nginx['ssl_protocols']`
 
 :   The SSL protocol versions that are enabled. For enhanced security set
-    this value to `'TLSv1.2'`. TLS 1.2 is supported on Chef Infra Client 10.16.4 
+    this value to `'TLSv1.2'`. TLS 1.2 is supported on Chef Infra Client 10.16.4
     and later on Linux, Unix, and macOS, and on Chef Infra Client 12.8 and later on
     Windows. If it is necessary to support these older end-of-life
     Chef Infra Client releases, set this value to `'TLSv1.1 TLSv1.2'`.

@@ -53,7 +53,11 @@ This configuration file has the following general settings:
 
 :   Set to `true` to run the server in FIPS compliance mode. Set to
     `false` to force the server to run without FIPS compliance mode.
-    Default value is whatever the kernel is configured to.
+    Default: The value in the kernel configuration.
+
+{{< note  spaces=4 >}}
+Chef Infra Server versions earlier than 14.5 configured with `nginx['enable_non_ssl'] = false` and `fips = true` require `export CSC_LB_URL=https://127.0.0.1` to run the command `chef-server-ctl reindex <options>`
+{{< /note >}}
 
 `insecure_addon_compat`
 
@@ -585,9 +589,12 @@ This configuration file has the following settings for `nginx`:
 
 `nginx['enable_non_ssl']`
 
-:   Allow port 80 redirects to port 443. When this value is set to
-    `true`, load balancers on the front-end hardware are allowed to do
-    SSL termination of the WebUI and API. Default value: `false`.
+:   Allow port 80 redirects to port 443. Set to
+    `true`, to enable SSL termination by the front-end hardware load balancers for WebUI and API endpoints. Default value: `false`.
+
+{{< note  spaces=4 >}}
+Chef Infra Server versions earlier than 14.5 configured with `nginx['enable_non_ssl'] = false` and `fips = true` require `export CSC_LB_URL=https://127.0.0.1` to run the command `chef-server-ctl reindex <options>`
+{{< /note >}}
 
 `nginx['enable_stub_status']`
 
@@ -724,7 +731,7 @@ This configuration file has the following settings for `nginx`:
     Starting with Chef Infra Server 14.3, this value defaults to `'TLSv1.2'` for
     enhanced security. Previous releases defaulted to `'TLSv1 TLSv1.1 TLSv1.2'`,
     which allowed for less secure SSL connections. TLS 1.2 is supported on
-    Chef Infra Client 10.16.4 and later on Linux, Unix, and macOS, and on Chef 
+    Chef Infra Client 10.16.4 and later on Linux, Unix, and macOS, and on Chef
     Infra Client 12.8 and later on Windows. If it is necessary to support these older end-of-life
     Chef Infra Client releases, set this value to `'TLSv1.1 TLSv1.2'`.
 
