@@ -32,7 +32,6 @@ dependency "openssl-fips-config" if fips_mode?
 dependency "postgresql96"
 dependency "redis" # dynamic routing controls
 dependency "haproxy"
-dependency "pg-gem" # used by private-chef-ctl reconfigure
 dependency "elasticsearch" # used by search
 
 # moved earlier because it is external to this repo and pinned, so should change infrequently

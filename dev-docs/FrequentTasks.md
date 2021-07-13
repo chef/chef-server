@@ -135,6 +135,34 @@ directory.
 11) If other gems need updating, go back to step 6, otherwise you are
 done.
 
+### Steps to Update the PG Gem in chef-server
+
+1) `cd` to the directory containing the .gemspec in chef-server-ctl for PG gem update.
+
+2) Rename or otherwise backup and delete the Gemfile.lock.
+
+3) Edit the .gemspec file to update the PG gem(s).
+
+4) chef-server-ctl depends on PG gem and chef_fixie which also depends on the PG gem.
+
+5) Make sure to update chef_fixie gem in the rubygem.org with same PG gem version otherwise chef-server-ctl fails with dependency conflict error.
+
+5) After publishing the `chef_fixie`, The chef-server gemspec changes can be tested in dev vm
+
+6) `ssh` into a dev vm.  Do `sudo -i` or otherwise login as root.
+
+6) `cd` to the directory containing the edited .gemspec
+file, using /host as the root directory, e.g. /host/src/chef-server-ctl.
+
+7) generate .gem file
+```
+/opt/opscode/embedded/bin/gem build *.gemspec
+```
+8) install .gem file
+```
+/opt/opscode/embedded/bin/gem install *.gem
+```
+
 ## Updating Chef Client
 
 - Ensure that the versions in the following locations are consistent.
