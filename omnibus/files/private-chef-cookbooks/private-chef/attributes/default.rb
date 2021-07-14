@@ -431,8 +431,8 @@ default['private_chef']['lb_internal']['account_port'] = 9685
 default['private_chef']['lb']['redis_connection_timeout'] = 1000
 default['private_chef']['lb']['redis_keepalive_timeout'] = 2000
 default['private_chef']['lb']['redis_connection_pool_size'] = 250
-default['private_chef']['lb']['maint_refresh_interval'] = 600
-default['private_chef']['lb']['ban_refresh_interval'] = 600
+default['private_chef']['lb']['maint_refresh_interval'] = 600 # the data from redis to the shared memory in lua may take up to 600 sec
+default['private_chef']['lb']['ban_refresh_interval'] = 600 # not used
 default['private_chef']['lb']['chef_min_version'] = 10
 default['private_chef']['lb']['access_by_lua_file'] = false
 
@@ -446,6 +446,7 @@ default['private_chef']['lb']['xdl_defaults']['couchdb_acls'] = false
 default['private_chef']['lb']['xdl_defaults']['couchdb_association_requests'] = false
 default['private_chef']['lb']['xdl_defaults']['couchdb_organizations'] = false
 default['private_chef']['lb']['xdl_defaults']['couchdb_associations'] = false
+default['private_chef']['lb']['xmaint_allowed_ips_list'] = [ '127.0.0.1' ]
 
 ####
 # Nginx

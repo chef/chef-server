@@ -33,8 +33,9 @@ response[503] = {}
 -- are handled here.
 --
 response[503].default = function(route)
-  if route.org_config["503_mode"] == 1 or
-     config.is_route_in_maint_mode(route.route_id) then
+--  ngx.log(ngx.ERR, "allowlist check is ", (not route.maint_ip_allowed))
+  if (not route.maint_ip_allowed) and
+     (route.org_config["503_mode"] == 1 or config.is_route_in_maint_mode(route.route_id)) then
      return true
    end
   return false

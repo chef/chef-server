@@ -113,6 +113,7 @@ ruby_block 'set_lb_redis_values' do
                       port: redis_data['port'],
                       password: PrivateChef.credentials.get('redis_lb', 'password'))
     xdl = node['private_chef']['lb']['xdl_defaults']
+    xmaint_allowed_ips_list = node['private_chef']['lb']['xmaint_allowed_ips_list']
     banned_ips = PrivateChef['banned_ips']
     maint_mode_ips = PrivateChef['maint_mode_whitelist_ips']
     # Ensure there is no stale data, but first institute
@@ -120,7 +121,7 @@ ruby_block 'set_lb_redis_values' do
     # we delete old keys.
     redis.hset 'dl_default', '503_mode', true
     next until redis.spop('banned_ips').nil?
-    next until redis.spop('maint_data').nil?
+    next until redis.spop('xmaint_allowed_ips_list').nil?
     keys = redis.hkeys 'dl_default'
 
     # Clear all dl_default keys except for the 503 mode we just set.
@@ -137,10 +138,8 @@ ruby_block 'set_lb_redis_values' do
           redis.sadd   'banned_ips', ip
         end
       end
-      unless maint_mode_ips.nil?
-        maint_mode_ips.each do |ip|
-          redis.sadd   'maint_data', ip
-        end
+      xmaint_allowed_ips_list&.each do |ip|
+        redis.sadd 'xmaint_allowed_ips_list', ip
       end
       # Note that we'll preserve 503 mode until everything is
       # populated.
