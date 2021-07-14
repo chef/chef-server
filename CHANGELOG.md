@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.6.25 -->
-## [14.6.25](https://github.com/chef/chef-server/tree/14.6.25) (2021-07-14)
+<!-- latest_release 14.6.26 -->
+## [14.6.26](https://github.com/chef/chef-server/tree/14.6.26) (2021-07-14)
 
 #### Merged Pull Requests
-- More updates from Ruby 2.6 -&gt; 2.7 [#2613](https://github.com/chef/chef-server/pull/2613) ([tas50](https://github.com/tas50))
+- Add chef-server-ctl maintenance sub command for controlling chef server for maintenance activities [#2337](https://github.com/chef/chef-server/pull/2337) ([vinay-satish](https://github.com/vinay-satish))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.5.29 -->
 ### Changes since 14.5.29 release
 
 #### Merged Pull Requests
+- Add chef-server-ctl maintenance sub command for controlling chef server for maintenance activities [#2337](https://github.com/chef/chef-server/pull/2337) ([vinay-satish](https://github.com/vinay-satish)) <!-- 14.6.26 -->
 - More updates from Ruby 2.6 -&gt; 2.7 [#2613](https://github.com/chef/chef-server/pull/2613) ([tas50](https://github.com/tas50)) <!-- 14.6.25 -->
 - Bump rake from 13.0.4 to 13.0.6 in /src/chef-server-ctl [#2604](https://github.com/chef/chef-server/pull/2604) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.6.24 -->
 - Bump addressable from 2.7.0 to 2.8.0 in /omnibus [#2612](https://github.com/chef/chef-server/pull/2612) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.6.23 -->
