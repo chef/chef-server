@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.6.29 -->
-## [14.6.29](https://github.com/chef/chef-server/tree/14.6.29) (2021-07-15)
+<!-- latest_release 14.6.30 -->
+## [14.6.30](https://github.com/chef/chef-server/tree/14.6.30) (2021-07-15)
 
 #### Merged Pull Requests
-- Bump newrelic_rpm from 7.1.0 to 7.2.0 in /src/oc-id [#2631](https://github.com/chef/chef-server/pull/2631) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump nokogiri from 1.11.4 to 1.11.7 in /src/oc-id [#2629](https://github.com/chef/chef-server/pull/2629) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.5.29 -->
 ### Changes since 14.5.29 release
 
 #### Merged Pull Requests
+- Bump nokogiri from 1.11.4 to 1.11.7 in /src/oc-id [#2629](https://github.com/chef/chef-server/pull/2629) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.6.30 -->
 - Bump newrelic_rpm from 7.1.0 to 7.2.0 in /src/oc-id [#2631](https://github.com/chef/chef-server/pull/2631) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.6.29 -->
 - oc-id: Update serverspec, rake and rdoc [#2616](https://github.com/chef/chef-server/pull/2616) ([tas50](https://github.com/tas50)) <!-- 14.6.28 -->
 - oc-id: Update rails to 6.0.4 [#2617](https://github.com/chef/chef-server/pull/2617) ([tas50](https://github.com/tas50)) <!-- 14.6.27 -->
