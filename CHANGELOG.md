@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.6.31 -->
-## [14.6.31](https://github.com/chef/chef-server/tree/14.6.31) (2021-07-15)
+<!-- latest_release 14.6.32 -->
+## [14.6.32](https://github.com/chef/chef-server/tree/14.6.32) (2021-07-15)
 
 #### Merged Pull Requests
-- Bump veil from `ac0a762` to `eb86d6e` in /src/oc-id [#2627](https://github.com/chef/chef-server/pull/2627) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Update markdown and copyrights in private cookbook content [#2578](https://github.com/chef/chef-server/pull/2578) ([tas50](https://github.com/tas50))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.5.29 -->
 ### Changes since 14.5.29 release
 
 #### Merged Pull Requests
+- Update markdown and copyrights in private cookbook content [#2578](https://github.com/chef/chef-server/pull/2578) ([tas50](https://github.com/tas50)) <!-- 14.6.32 -->
 - Bump veil from `ac0a762` to `eb86d6e` in /src/oc-id [#2627](https://github.com/chef/chef-server/pull/2627) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.6.31 -->
 - Bump nokogiri from 1.11.4 to 1.11.7 in /src/oc-id [#2629](https://github.com/chef/chef-server/pull/2629) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.6.30 -->
 - Bump newrelic_rpm from 7.1.0 to 7.2.0 in /src/oc-id [#2631](https://github.com/chef/chef-server/pull/2631) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.6.29 -->
