@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.6.27 -->
-## [14.6.27](https://github.com/chef/chef-server/tree/14.6.27) (2021-07-15)
+<!-- latest_release 14.6.28 -->
+## [14.6.28](https://github.com/chef/chef-server/tree/14.6.28) (2021-07-15)
 
 #### Merged Pull Requests
-- oc-id: Update rails to 6.0.4 [#2617](https://github.com/chef/chef-server/pull/2617) ([tas50](https://github.com/tas50))
+- oc-id: Update serverspec, rake and rdoc [#2616](https://github.com/chef/chef-server/pull/2616) ([tas50](https://github.com/tas50))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.5.29 -->
 ### Changes since 14.5.29 release
 
 #### Merged Pull Requests
+- oc-id: Update serverspec, rake and rdoc [#2616](https://github.com/chef/chef-server/pull/2616) ([tas50](https://github.com/tas50)) <!-- 14.6.28 -->
 - oc-id: Update rails to 6.0.4 [#2617](https://github.com/chef/chef-server/pull/2617) ([tas50](https://github.com/tas50)) <!-- 14.6.27 -->
 - Add chef-server-ctl maintenance sub command for controlling chef server for maintenance activities [#2337](https://github.com/chef/chef-server/pull/2337) ([vinay-satish](https://github.com/vinay-satish)) <!-- 14.6.26 -->
 - More updates from Ruby 2.6 -&gt; 2.7 [#2613](https://github.com/chef/chef-server/pull/2613) ([tas50](https://github.com/tas50)) <!-- 14.6.25 -->
