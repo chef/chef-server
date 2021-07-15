@@ -299,7 +299,7 @@ GEM
     net-telnet (0.1.1)
     newrelic_rpm (7.1.0)
     nio4r (2.5.7)
-    nokogiri (1.11.4)
+    nokogiri (1.11.7)
       mini_portile2 (~> 2.5.0)
       racc (~> 1.4)
     ohai (8.26.1)
@@ -507,7 +507,7 @@ DEPENDENCIES
   mailcatcher
   mixlib-authentication (~> 1.3)
   newrelic_rpm
-  nokogiri (= 1.11.4)
+  nokogiri (= 1.11.7)
   omniauth (~> 1.3.2)
   omniauth-chef!
   pg (>= 0.18, < 2.0)
