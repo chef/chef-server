@@ -1,20 +1,91 @@
 +++
-title = "Authentication"
+title = "Server Authentication"
 draft = false
 
 gh_repo = "chef-server"
 
 [menu]
   [menu.server]
-    title = "Authentication"
-    identifier = "server/overview/Authentication"
-    parent = "server/overview"
+    title = "Server Authentication"
+    identifier = "server/security/authentication"
+    parent = "server/security"
     weight = 40
 +++
 
-{{% chef_auth %}}
+Chef Infra Server uses the Chef Infra Server REST API to communicate with the Chef Workstation and the nodes that it manages. Chef Infra Server uses authentication to ensure that only trusted users have access to your infrastructure.
 
-{{% chef_auth_authentication %}}
+## Overview
+
+The Chef Infra Server uses **public-key** cryptography, also called _asymmetric_ cryptography, for authentication with the Chef Infra Client.
+
+You create your public and private key pair during your Chef Infra Client setup. The public key is stored on the Chef Infra Server, while the private key is returned to the user for safe keeping. (The private key is a `.pem` file located in the `.chef` directory or in `/etc/chef`.)
+
+TLS Authentication
+
+**Transport Layer Security** authentication is the process that clients and servers use to communicate securely over a network. TLS Authentication is required for servers and optional for clients. The prerequisites for TLS Authentication are:
+* public/private keypairs on both the client and the server
+* valid digital certificates
+
+<img src="/images/server/TLS_authentication.svg" alt="Diagram of TLS Handshake" />
+
+TCP handshake: Opens a communication tunnel between the client and server
+
+TLS Authentication
+1. Client Hello: maximum supported TLS version, supported cipher suites, random number
+1. Server Hello: designates TLS version and cipher suite, random number. Sends a TLS Alert failure notification if the server doesn't support any of the client's TLS versions or cipher suites
+1. Server Certificate: with the server public key attached to it.
+1. Server Key Exchange: Parameters for key exchange and a digital signature. A digital signature is a set of the previous messages between summarized with the hash from the encryption suite and encrypted using the encrypted with the server's private key.
+The client verifies that the server's certificate and decrypts the server signature with the server's public key sent in the Server Certificate Message
+1. Server Hello Done: The server signals that it is finished with plain text messages
+
+1. Client Key Exchange: (Can send signed certificate if you need to authenticate the clients) sends public value for Diffie-Hellman process. Server and client both have the same pre-master secret, which they combine with the random number. They use that to derive any key material.
+1. Change cipher spec: Signals is the last unencrypted message.
+1. Client Finished: All of the previous messages, summarized with the hash from the encryption suite and encrypted using the encrypted with the key that it has derived
+1. Change cipher spec: Signals is the last unencrypted message.
+1. ServerFinished: All of the previous messages, summarized with the hash from the encryption suite and encrypted using the encrypted with the key that it has derived
+
+Produces:
+- Shared secret to encrypt communication
+- Authentication of the server
+- Proof that the communication is secure by matching the finished messages and supplying random numbers in the 'Hello' messages.
+
+
+TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
+
+TLS: Transport Layer Security
+ECDHE: Elliptic Curfe Diffie-Hellman Encryption
+RSA: Public Key encryption
+AES: Cipher
+128: Key size
+GCM: Mode of operation (see aes explained video)
+SHA256: Hash function
+
+What Ciphers?
+Secret key?
+Authentication PK
+Rubust : MITM, Replay, Downgrade
+
+the Chef Infra Server API, which is a REST API that allows requests to
+be made to the Chef Infra Server. Only authenticated requests will be
+authorized. Most of the time, and especially when using knife, Chef
+Infra Client, or the Chef Infra Server web interface, the use of the
+Chef Infra Server API is transparent. In some cases, the use of the Chef
+Infra Server API requires more detail, such as when making the request
+in Ruby code, with a knife plugin, or when using cURL.
+
+The authentication process ensures the Chef Infra Server responds only
+to requests made by trusted users. Public key encryption is used by the
+Chef Infra Server.
+
+Both Chef Infra Client and `knife` use the Chef Infra Server API when
+communicating with the Chef Infra Server. The `chef-validator` uses the
+Chef Infra Server API, but only during the first Chef Infra Client run
+on a node.
+
+Each request to the Chef Infra Server from those executables sign a
+special group of HTTP headers with the private key. The Chef Infra
+Server then uses the public key to verify the headers and verify the
+contents.
 
 ## Public and Private Keys
 
@@ -26,7 +97,11 @@ gh_repo = "chef-server"
 
 #### Chef Infra Client
 
-{{% security_key_pairs_chef_client %}}
+Chef Infra Client authenticates with the Chef Infra Server using RSA
+public key-pairs each time a Chef Infra Client needs access to data that
+is stored on the Chef Infra Server. This prevents any node from
+accessing data that it shouldn't and it ensures that only nodes that are
+properly registered with the Chef Infra Server can be managed.
 
 #### Knife
 
@@ -189,38 +264,6 @@ it similar to the following:
 ```bash
 bash chef_api_request GET "/clients"
 ```
-
-**PyChef**
-
-An API request can be made using PyChef, which is a Python library that
-meets the `Mixlib::Authentication` requirements so that it can easily
-interact with the Chef Infra Server. The following example shows how an
-authenticated request can be made using the Chef Infra Server API and
-PyChef:
-
-```python
-from chef import autoconfigure, Node
-
-api = autoconfigure()
-n = Node('web1')
-print n['fqdn']
-n['myapp']['version'] = '1.0'
-n.save()
-```
-
-and the following example shows how to make API calls directly:
-
-```python
-from chef import autoconfigure
-
-api = autoconfigure()
-print api.api_request('GET', '/clients')
-```
-
-The previous examples assume that the current working directory is such
-that PyChef can find a valid configuration file in the same manner as
-Chef Infra Client or knife. For more about PyChef, see:
-<https://github.com/coderanger/pychef>.
 
 **Ruby**
 

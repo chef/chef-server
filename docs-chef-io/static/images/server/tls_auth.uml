@@ -1,0 +1,18 @@
+@startuml
+Title TLS Authentication
+Client <[#black]--> Server: TCP connection
+group Phase 1
+Client -> Server: ClientHello
+Client <[#blue]-- Server: ServerHello
+Client <[#blue]-- Server: Server Certificate
+Client <[#blue]-- Server: Server Hello Done
+end
+group Phase 2
+Client -> Server: Client Key Exchange
+Client -> Server: Change Cipher Spec
+Client -> Server: Client Finished
+Client <[#blue]-- Server: Change Cipher Spec
+Client <[#blue]-- Server: Server Finished
+end
+Client <[#black]--> Server: Encrypted communication
+@enduml
