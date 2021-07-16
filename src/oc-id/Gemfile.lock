@@ -26,7 +26,7 @@ GIT
 
 GIT
   remote: https://github.com/rails/sprockets-rails.git
-  revision: 1a0cf7a4572d0ee728d3dda2013d3305a77932f1
+  revision: 118ce60b1ffeb7a85640661b014cd2ee3c4e3e56
   specs:
     sprockets-rails (3.2.2)
       actionpack (>= 5.2)
