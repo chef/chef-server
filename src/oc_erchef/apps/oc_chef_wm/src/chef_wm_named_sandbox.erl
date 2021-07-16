@@ -99,6 +99,14 @@ from_json(Req, #base_state{reqid = ReqId,
         Req1 = chef_wm_util:set_json_body(Req, sandbox_to_ejson(Sandbox)),
         {true, Req1, State}
     catch
+        throw:{checksum_check_error, Errors} ->
+            % i am assuming here (need confirmation) that a 404 on committing an incomplete
+            % sandbox means we should return a 503 (service unavailable), which is what the
+            % pedant test wants.
+            Msg = iolist_to_binary([<<"Committed incomplete sandbox: ">>, io_lib:format("~p", [Errors])]),
+            EMsg = chef_wm_util:error_message_envelope(Msg),
+            {{halt, 503}, chef_wm_util:set_json_body(Req, EMsg), State};
+
         throw:{missing_checksums, Sums} ->
             SumList0 = iolist_to_binary([ <<(as_binary(S))/binary, ", ">> || S <- Sums]),
             SumList = binary:part(SumList0, {0, size(SumList0) - 2}),
@@ -141,7 +149,10 @@ validate_checksums_uploaded(ReqId, #chef_sandbox{id = _BoxId, checksums = Checks
             ok;
         {_, OverallErrorCount} when OverallErrorCount =/= 0 ->
             %% We had some errors :(
-            throw({checksum_check_error, OverallErrorCount});
+            %% gets a 404 when committing an incomplete sandbox
+            %% 404 winds up here. don't know if other errors
+            %% wind up here as well.
+            throw({checksum_check_error, Errors});
         {Missing, _} ->
             %% Some checksums were missing :(
             throw({missing_checksums, Missing})

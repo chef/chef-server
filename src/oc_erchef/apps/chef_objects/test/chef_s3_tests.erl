@@ -23,6 +23,55 @@
 -module(chef_s3_tests).
 
 -include_lib("eunit/include/eunit.hrl").
+-include_lib("erlcloud/include/erlcloud_aws.hrl").
+
+% construct url (scheme://host) from config
+-spec get_host_noport(aws_config()) -> string().
+get_host_noport(Config) ->
+    UrlRaw  = get_host_port(Config),
+    UrlTemp = string:trim(UrlRaw, trailing, "1234568790"),
+    string:trim(UrlTemp, trailing, ":").
+
+% construct url (scheme://host:port) from config
+-spec get_host_port(aws_config()) -> string().
+get_host_port(Config) ->
+    Url0 = erlcloud_s3:get_object_url("", "", Config),
+    Url1 = string:trim(Url0, trailing, "/"),
+    case Config#aws_config.s3_port of
+        80 ->
+            % won't contain port if port == 80, so add it
+            Url1 ++ ":80";
+        _ ->
+            Url1
+    end.
+
+% erlcloud, and therefore mini_s3, reconstructs the URL from the aws_config record.
+% thus, neither have any idea whether the original URL contained a port.  but this
+% module, among other things, tests whether the original URL, which may or may not
+% have contained a port, is being used.  therefore this function supplies the correct
+% URL (with or without port).
+port_or_no_port(InternalS3Url, ExternalS3Url) ->
+    case {InternalS3Url, ExternalS3Url} of
+        {_, host_header} ->
+            fun get_host_port/1;
+        _ ->
+            fun get_host_noport/1
+    end.
+
+% construct url from aws_config record
+get_host_test() ->
+    Config0 = mini_s3:new("", "", "http://1.2.3.4" ),
+    "http://1.2.3.4"      = get_host_noport(Config0),
+    "http://1.2.3.4:80"   = get_host_port(  Config0),
+    Config1 = mini_s3:new("", "", "https://1.2.3.4"),
+    "https://1.2.3.4"     = get_host_noport(Config1),
+    "https://1.2.3.4:443" = get_host_port(  Config1),
+    Config2 = mini_s3:new("", "", "http://1.2.3.4:443"),
+    "http://1.2.3.4"      = get_host_noport(Config2),
+    "http://1.2.3.4:443"  = get_host_port(  Config2),
+    Config3 = mini_s3:new("", "", "https://1.2.3.4:80"),
+    "https://1.2.3.4"     = get_host_noport(Config3),
+    "https://1.2.3.4:80"  = get_host_port(  Config3).
 
 base64_checksum_test_() ->
     TestData = [{<<"00ba0db453b47c4c0bb530cf8e481a70">>, <<"ALoNtFO0fEwLtTDPjkgacA==">>},
@@ -36,23 +85,12 @@ base64_checksum_test_() ->
      } || {MD5, Base64} <- TestData
     ].
 
-
 make_key_test() ->
     OrgId = <<"deadbeefdeadbeefdeadbeefdeadbeef">>,
     Checksum = <<"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb">>,
 
     ?assertEqual(chef_s3:make_key(OrgId, Checksum),
                  "organization-deadbeefdeadbeefdeadbeefdeadbeef/checksum-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb").
-
-%% There are no public API functions in mini_s3 for deserializing
-%% AWS config information
--record(config, {
-          s3_url="http://s3.amazonaws.com"::string(),
-          access_key_id::string(),
-          secret_access_key::string(),
-          bucket_access_type=virtual_hosted::mini_s3:bucket_access_type(),
-          ssl_options=[]::proplists:proplist()
-}).
 
 setup_chef_secrets() ->
     application:set_env(chef_secrets, provider, chef_secrets_mock_provider),
@@ -81,13 +119,19 @@ generate_presigned_url_uses_configured_s3_url_test_() ->
     OrgId = <<"deadbeefdeadbeefdeadbeefdeadbeef">>,
     Checksum = <<"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa">>,
     Lifetime = 3600,
-    Expect_s3_url = fun(ExpectMethod, ExpectUrl, ExpectLifetime) ->
+    Expect_s3_url = fun(ExpectMethod, ExpectUrl, _ExpectLifetime) ->
                             meck:expect(mini_s3, s3_url,
-                                        fun(HTTPMethod, Bucket, _Key, MyLifetime, _ContentMD5,
-                                            #config{s3_url = S3Url}) ->
+                                        fun(HTTPMethod, Bucket, _Key, _MyLifetime, _ContentMD5,
+                                            Config) ->
                                                 ?assertEqual(ExpectMethod, HTTPMethod),
                                                 ?assertEqual("testbucket", Bucket),
-                                                ?assertEqual(ExpectLifetime, MyLifetime),
+                                                % CODE REVIEW: disable expiry window. expiry windows were redone,
+                                                % and are now tested at: mini_s3 test/mini_s3_tests.erl
+                                                %?assertEqual(ExpectLifetime, MyLifetime),
+                                                {ok, InternalS3Url} = application:get_env(chef_objects, s3_url),
+                                                {ok, ExternalS3Url} = application:get_env(chef_objects, s3_external_url),
+                                                PortOrNoPort = port_or_no_port(InternalS3Url, ExternalS3Url),
+                                                S3Url = PortOrNoPort(Config),
                                                 ?assertEqual(ExpectUrl, S3Url),
                                                 stub_s3_url_response
                                         end)
