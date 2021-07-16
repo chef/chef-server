@@ -8,7 +8,7 @@ gem 'chef', '~> 12'
 gem 'jbuilder', '~> 2.7'
 gem 'jquery-rails'
 gem 'jwt' # For Zendesk SSO
-gem 'config', '~> 2.2', '>= 2.2.1'  # Replacement of rails_config gem
+gem 'config', '~> 3.1'            # Replacement of rails_config gem
 gem 'rb-readline', '~> 0.5.2', require: false
 gem 'sass-rails', '>= 4.0.3'
 gem 'turbolinks', '~> 5'
