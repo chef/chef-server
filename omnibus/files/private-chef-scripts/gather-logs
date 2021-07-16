@@ -29,7 +29,7 @@ then
 
     if [[ ! -e "/opt/$path/bin/$ctl_cmd" ]];
     then
-        echo "ERROR: Chef Server may not be installed."
+        echo "ERROR: Chef Infra Server may not be installed."
         exit 1
     fi
 elif [[ $type == 'OSC' ]];
@@ -187,17 +187,27 @@ umask > "$tmpdir/umask.txt"
 
 uptime > "$tmpdir/uptime.txt"
 
-cp "/proc/cpuinfo" "$tmpdir/cpuinfo.txt"
+mkdir -p "$tmpdir/proc/sys/crypto/"
 
-cp "/proc/meminfo" "$tmpdir/meminfo.txt"
+cp "/proc/cpuinfo" "$tmpdir/proc/cpuinfo"
 
-free -m > "$tmpdir/free-m.txt"
+cp "/proc/meminfo" "$tmpdir/proc/meminfo"
+
+cp "/proc/version" "$tmpdir/proc/version"
+
+cp "/proc/sys/crypto/fips_enabled" "$tmpdir/proc/sys/crypto/fips_enabled"
+
+free -m > "$tmpdir/free_m.txt"
 
 ps fauxww > "$tmpdir/ps_fauxww.txt"
 
-df -h >  "$tmpdir/df_h.txt"
+df -h > "$tmpdir/df_h.txt"
 
-df -i >  "$tmpdir/df_i.txt"
+df -i > "$tmpdir/df_i.txt"
+
+df -k > "$tmpdir/df_k.txt"
+
+/opt/opscode/bin/ohai > "$tmpdir/ohai.txt"
 
 if [[ -e /opt/opscode-manage/bin/opscode-manage-ctl ]];
 then
