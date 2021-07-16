@@ -170,7 +170,7 @@ GEM
     debug_inspector (1.1.0)
     deep_merge (1.2.1)
     diff-lcs (1.4.4)
-    doorkeeper (5.5.1)
+    doorkeeper (5.5.2)
       railties (>= 5)
     dry-configurable (0.12.1)
       concurrent-ruby (~> 1.0)
@@ -498,7 +498,7 @@ DEPENDENCIES
   chef (~> 12)
   coffee-rails (~> 5.0)
   config (~> 2.2, >= 2.2.1)
-  doorkeeper (~> 5.4)
+  doorkeeper (~> 5.5)
   factory_girl_rails (~> 4.4.0)
   foundation-rails!
   jbuilder (~> 2.7)
