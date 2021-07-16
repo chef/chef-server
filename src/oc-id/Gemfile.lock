@@ -1,12 +1,4 @@
 GIT
-  remote: https://github.com/chef/chef_secrets
-  revision: eb86d6ef1e3ac5c85a03b232050380cd00a1658c
-  specs:
-    veil (0.3.5)
-      bcrypt (~> 3.1)
-      pbkdf2
-
-GIT
   remote: https://github.com/chef/omniauth-chef
   revision: c1458cb8d531019cbacb4f57432a09c058346007
   tag: v0.3.0
@@ -14,24 +6,6 @@ GIT
     omniauth-chef (0.3.0)
       chef (~> 12)
       omniauth (~> 1.2)
-
-GIT
-  remote: https://github.com/foundation/foundation-rails.git
-  revision: 649f360696d8c80e8ba4952fb1bbe7048a2fd04c
-  tag: v5.5.3.2
-  specs:
-    foundation-rails (5.5.3.2)
-      railties (>= 3.1.0)
-      sass (>= 3.3.0, < 3.5)
-
-GIT
-  remote: https://github.com/rails/sprockets-rails.git
-  revision: 1a0cf7a4572d0ee728d3dda2013d3305a77932f1
-  specs:
-    sprockets-rails (3.2.2)
-      actionpack (>= 5.2)
-      activesupport (>= 5.2)
-      sprockets (>= 3.0.0)
 
 GEM
   remote: https://rubygems.org/
@@ -446,6 +420,10 @@ GEM
     sprockets (4.0.2)
       concurrent-ruby (~> 1.0)
       rack (> 1, < 3)
+    sprockets-rails (3.2.2)
+      actionpack (>= 4.0)
+      activesupport (>= 4.0)
+      sprockets (>= 3.0.0)
     sqlite3 (1.4.2)
     sqlite3-ruby (1.3.3)
       sqlite3 (>= 1.3.3)
@@ -478,6 +456,9 @@ GEM
       rack
       unicorn
     uuidtools (2.1.5)
+    veil (0.3.5)
+      bcrypt (~> 3.1)
+      pbkdf2
     websocket (1.2.9)
     websocket-driver (0.7.5)
       websocket-extensions (>= 0.1.0)
@@ -500,7 +481,7 @@ DEPENDENCIES
   config (~> 2.2, >= 2.2.1)
   doorkeeper (~> 5.4)
   factory_girl_rails (~> 4.4.0)
-  foundation-rails!
+  foundation-rails (= 5.5.3.2)
   jbuilder (~> 2.7)
   jquery-rails
   jwt
@@ -523,14 +504,14 @@ DEPENDENCIES
   sentry-raven
   spring
   spring-commands-rspec
-  sprockets-rails!
+  sprockets-rails (~> 3.2.2)
   therubyracer (~> 0.12.3)
   thor (~> 1.0, >= 1.0.1)
   timecop
   turbolinks (~> 5)
   uglifier (~> 4.2)
   unicorn-rails (~> 2.2, >= 2.2.1)
-  veil!
+  veil (~> 0.3.5)
 
 BUNDLED WITH
    2.2.19
