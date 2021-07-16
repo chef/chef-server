@@ -40,7 +40,7 @@ Pre-release, bump the major or minor version anytime a PR is being merged if the
 
 After a commit is merged to master, expeditor automatically bumps the patch version, and a build is automatically kicked-off on the Chef / [chef/chef-server:master] omnibus/release pipeline.  After the build and tests in buildkite pass, expeditor should put the build artifact in Artifactory's current channel.  Monitor the build's progress at chef-server-notify slack channel.
 
-3. Make sure the omnibus build to be promoted is present in Artifactory's current channel.  
+3. Confirm that the omnibus build to be promoted is present in Artifactory's current channel.
 One approach is to enter the following into a bash shell, where _version_ is the version number of the new release:
 ```
 $ mixlib-install download chef-server -c current -a x86_64 -p ubuntu -l 18.04 -v <version>
@@ -49,30 +49,37 @@ Starting download https://packages.chef.io/files/current/chef-server/14.2.23/ubu
 
 ### Testing the Release
 
-Every merge to chef-server master must be built, and this build must be tested with the full Umbrella automated integration test pipeline at https://buildkite.com/chef/chef-umbrella-master-chef-server-full.
+Every merge to chef-server master must be built, and this build must be tested with the full Umbrella automated integration test pipeline at https://buildkite.com/chef/chef-umbrella-master-chef-server-full (NOTE: use https://buildkite.com/chef/chef-umbrella-master-chef-server for testing the 12.17.15 upgrade path).
 The integration test run for the tag being shipped must be successful.
 
 Any Chef Infra Server release 12.17.15 or later should be able to upgrade directly to the latest release of 14. The nightly builds test upgrades to the latest current artifact from 12.17.15 and 13.2.0.  Releases prior to 12.17.15 must perform a stepped upgrade.  See: https://docs.chef.io/server/upgrades/#upgrade-matrix
 
-Test that the current stable release can successfully upgrade to the new release.
-
 Past stable releases:
 https://downloads.chef.io
 
+Using the step-by-step Umbrella testing process detailed below...
+
+1. Test that the 12.17.15 release can successfully upgrade to the new release (for this, use the pipeline at https://buildkite.com/chef/chef-umbrella-master-chef-server).
+1. Test that the 13.2.0   release can successfully upgrade to the new release.
+1. Test that the latest stable release can successfully upgrade to the new release.
+
 Umbrella Testing Step-by-Step:
 
-1. Navigate your web browser to https://buildkite.com/chef/chef-umbrella-master-chef-server
+1. Navigate your web browser to https://buildkite.com/chef/chef-umbrella-master-chef-server-full
 1. Select 'New Build'.
 1. Leave 'Branch' set to 'master'.
 1. Select 'Options' to expand the 'Environment Variables' field.
-1. Enter `INSTALL_VERSION=<version number>` into the 'Options | Environment Variables' field, where _version number_ is the stable  version number of the release you wish to test upgrading FROM (for example 14.0.65).
-1. Enter `UPGRADE_VERSION=<version number>` into the 'Options | Environment Variables' field, where _version number_ is the current version number of the release candidate you wish to test upgrading TO (for example 14.2.2).
+1. Enter `INSTALL_VERSION=<version number>` into the 'Options | Environment Variables' field, where _version number_ is the stable channel  version number of the release you wish to test upgrading FROM (for example 14.0.65).
+1. Enter `UPGRADE_VERSION=<version number>` into the 'Options | Environment Variables' field, where _version number_ is the current channel version number of the release candidate you wish to test upgrading TO (for example 14.2.2). This release candidate version number should come from the release pipeline build for the release you are doing.
 1. Optionally, fill-in the 'Message' field with something descriptive.
 1. Select 'Create Build'.
 
-Currently (05/21), the Umbrella pipeline does not perform a test login to Chef Manage, so this should be done manually.  One method is to run representative AWS and Azure Umbrella scenarios locally to get running server instances to test.Chef Manage should be verified on IPV4 and IPV6 setup.'chef-server-ctl install chef-manage' on the local setup will install the latest stable release of chef-manage. Where as umbrella if a version for chef-manage is not defined will pick the latest current (unstable) version.
+Currently (05/21), the Umbrella pipeline does not perform a test login to Chef Manage, so this should be done manually.  A successful test login should be verified on both IPV4 and IPV6 setups, and must use the latest stable version of Manage.  One method is to run representative AWS and Azure Umbrella scenarios from your local box to get running server instances to test.  For umbrella you should specify the Chef Manage version to install when creating the Umbrella scenario (see below), or it will pick the latest current (unstable) version.  For local non-Umbrella setups, `chef-server-ctl install chef-manage` will install the latest stable release of chef-manage.
 
-Typical scenario for AWS, where _version_ is the version number of the release candidate you are testing:
+Chef Manage releases:
+https://downloads.chef.io/tools/manage
+
+Typical Umbrella scenario for AWS, where _version_ is the version number of the release candidate you are testing, and _manage version_ is the latest stable version of Chef Manage:
 ```
 $ cd umbrella/chef-server/scenarios/aws
 $ okta_aws --all
@@ -83,10 +90,10 @@ Initializing modules...
 Downloading terraform-aws-modules/vpc/aws 2.77.0 for vpc...
 ...
 IPV4 Scenario:
-$ PLATFORM=ubuntu-18.04 INSTALL_VERSION=<version> UPGRADE_VERSION=<version> SCENARIO=standalone-fresh-install ENABLE_ADDON_PUSH_JOBS=false ENABLE_GATHER_LOGS_TEST=false ENABLE_PEDANT_TEST=false ENABLE_PSQL_TEST=false ENABLE_SMOKE_TEST=false ENABLE_IPV6=false make apply
+$ PLATFORM=ubuntu-18.04 INSTALL_VERSION=<version> UPGRADE_VERSION=<version> SCENARIO=standalone-fresh-install ENABLE_ADDON_PUSH_JOBS=false ENABLE_GATHER_LOGS_TEST=false ENABLE_PEDANT_TEST=false ENABLE_PSQL_TEST=false ENABLE_SMOKE_TEST=false MANAGE_VERSION=<manage_version> ENABLE_IPV6=false make apply
 
 IPV6 Scenario:
-$ PLATFORM=ubuntu-18.04 INSTALL_VERSION=<version> UPGRADE_VERSION=<version> SCENARIO=standalone-fresh-install ENABLE_ADDON_PUSH_JOBS=false ENABLE_GATHER_LOGS_TEST=false ENABLE_PEDANT_TEST=false ENABLE_PSQL_TEST=false ENABLE_SMOKE_TEST=false ENABLE_IPV6=true make apply
+$ PLATFORM=ubuntu-18.04 INSTALL_VERSION=<version> UPGRADE_VERSION=<version> SCENARIO=standalone-fresh-install ENABLE_ADDON_PUSH_JOBS=false ENABLE_GATHER_LOGS_TEST=false ENABLE_PEDANT_TEST=false ENABLE_PSQL_TEST=false ENABLE_SMOKE_TEST=false MANAGE_VERSION=<manage_version> ENABLE_IPV6=true make apply
 ```
 9. Obtain the DNS name of the ephemeral machine by observing the output of the boot-up.  A sample output is shown below:
 ```
@@ -112,7 +119,7 @@ null_resource.chef_server_config (remote-exec): BEGIN INSTALL CHEF SERVER
 15. Select the 'signed in as <username>' link in the upper-left. Confirm that the email is grayed-out.
 16. Clean-up:
 ```
-PLATFORM=ubuntu-18.04 INSTALL_VERSION=<version> UPGRADE_VERSION=<version> SCENARIO=standalone-fresh-install ENABLE_ADDON_PUSH_JOBS=false ENABLE_GATHER_LOGS_TEST=false ENABLE_PEDANT_TEST=false ENABLE_PSQL_TEST=false ENABLE_SMOKE_TEST=false ENABLE_IPV6=true make destroy
+PLATFORM=ubuntu-18.04 INSTALL_VERSION=<version> UPGRADE_VERSION=<version> SCENARIO=standalone-fresh-install ENABLE_ADDON_PUSH_JOBS=false ENABLE_GATHER_LOGS_TEST=false ENABLE_PEDANT_TEST=false ENABLE_PSQL_TEST=false ENABLE_SMOKE_TEST=false MANAGE_VERSION=<manage_version> ENABLE_IPV6=true make destroy
 ```
 Typical scenario for Azure, where _version_ is the version number of the release candidate you are testing:
 ```
@@ -120,20 +127,20 @@ $ cd umbrella/chef-server/scenarios/azure
 $ ARM_DEPT=Eng ARM_CONTACT=your_login_here make create-resource-group
 ...
 IPV4 Scenario:
-$ PLATFORM=ubuntu-18.04 INSTALL_VERSION=<version> UPGRADE_VERSION=<version> SCENARIO=external-postgresql ENABLE_ADDON_PUSH_JOBS=false ENABLE_GATHER_LOGS_TEST=false ENABLE_PEDANT_TEST=false ENABLE_PSQL_TEST=false ENABLE_SMOKE_TEST=false ENABLE_IPV6=false make apply
+$ PLATFORM=ubuntu-18.04 INSTALL_VERSION=<version> UPGRADE_VERSION=<version> SCENARIO=external-postgresql ENABLE_ADDON_PUSH_JOBS=false ENABLE_GATHER_LOGS_TEST=false ENABLE_PEDANT_TEST=false ENABLE_PSQL_TEST=false ENABLE_SMOKE_TEST=false MANAGE_VERSION=<manage_version> ENABLE_IPV6=false make apply
 
 IPV6 Scenario:
-$ PLATFORM=ubuntu-18.04 INSTALL_VERSION=<version> UPGRADE_VERSION=<version> SCENARIO=external-postgresql ENABLE_ADDON_PUSH_JOBS=false ENABLE_GATHER_LOGS_TEST=false ENABLE_PEDANT_TEST=false ENABLE_PSQL_TEST=false ENABLE_SMOKE_TEST=false ENABLE_IPV6=true make apply
+$ PLATFORM=ubuntu-18.04 INSTALL_VERSION=<version> UPGRADE_VERSION=<version> SCENARIO=external-postgresql ENABLE_ADDON_PUSH_JOBS=false ENABLE_GATHER_LOGS_TEST=false ENABLE_PEDANT_TEST=false ENABLE_PSQL_TEST=false ENABLE_SMOKE_TEST=false MANAGE_VERSION=<manage_version> ENABLE_IPV6=true make apply
 ```
 17. Perform the same login processes specified above for AWS.
 18. Clean-up:
 
 ```
 IPV4 Scenario:
-PLATFORM=ubuntu-18.04 INSTALL_VERSION=<version> UPGRADE_VERSION=<version> SCENARIO=external-postgresql ENABLE_ADDON_PUSH_JOBS=false ENABLE_GATHER_LOGS_TEST=false ENABLE_PEDANT_TEST=false ENABLE_PSQL_TEST=false ENABLE_SMOKE_TEST=false ENABLE_IPV6=false make destroy
+PLATFORM=ubuntu-18.04 INSTALL_VERSION=<version> UPGRADE_VERSION=<version> SCENARIO=external-postgresql ENABLE_ADDON_PUSH_JOBS=false ENABLE_GATHER_LOGS_TEST=false ENABLE_PEDANT_TEST=false ENABLE_PSQL_TEST=false ENABLE_SMOKE_TEST=false MANAGE_VERSION=<manage_version> ENABLE_IPV6=false make destroy
 
 IPV6 Scenario:
-PLATFORM=ubuntu-18.04 INSTALL_VERSION=<version> UPGRADE_VERSION=<version> SCENARIO=external-postgresql ENABLE_ADDON_PUSH_JOBS=false ENABLE_GATHER_LOGS_TEST=false ENABLE_PEDANT_TEST=false ENABLE_PSQL_TEST=false ENABLE_SMOKE_TEST=false ENABLE_IPV6=true make destroy
+PLATFORM=ubuntu-18.04 INSTALL_VERSION=<version> UPGRADE_VERSION=<version> SCENARIO=external-postgresql ENABLE_ADDON_PUSH_JOBS=false ENABLE_GATHER_LOGS_TEST=false ENABLE_PEDANT_TEST=false ENABLE_PSQL_TEST=false ENABLE_SMOKE_TEST=false MANAGE_VERSION=<manage_version> ENABLE_IPV6=true make destroy
 ```
 
 19. Any failures must be fixed before shipping a release, unless they are "known failures" or expected. A document at an unknown state of updatedness tracking known failures can be found at:  
