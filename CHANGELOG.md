@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.6.32 -->
-## [14.6.32](https://github.com/chef/chef-server/tree/14.6.32) (2021-07-15)
+<!-- latest_release 14.6.33 -->
+## [14.6.33](https://github.com/chef/chef-server/tree/14.6.33) (2021-07-16)
 
 #### Merged Pull Requests
-- Update markdown and copyrights in private cookbook content [#2578](https://github.com/chef/chef-server/pull/2578) ([tas50](https://github.com/tas50))
+- Bump rspec-rails from 4.1.2 to 5.0.1 in /src/oc-id [#2634](https://github.com/chef/chef-server/pull/2634) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.5.29 -->
 ### Changes since 14.5.29 release
 
 #### Merged Pull Requests
+- Bump rspec-rails from 4.1.2 to 5.0.1 in /src/oc-id [#2634](https://github.com/chef/chef-server/pull/2634) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.6.33 -->
 - Update markdown and copyrights in private cookbook content [#2578](https://github.com/chef/chef-server/pull/2578) ([tas50](https://github.com/tas50)) <!-- 14.6.32 -->
 - Bump veil from `ac0a762` to `eb86d6e` in /src/oc-id [#2627](https://github.com/chef/chef-server/pull/2627) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.6.31 -->
 - Bump nokogiri from 1.11.4 to 1.11.7 in /src/oc-id [#2629](https://github.com/chef/chef-server/pull/2629) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.6.30 -->
