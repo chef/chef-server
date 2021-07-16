@@ -56,7 +56,7 @@ class EcPostgres
     require 'pg'
     postgres = node['private_chef']['postgresql']
     as_user(postgres['username']) do
-      connection = ::PGconn.open('dbname' => database, :port => postgres['port'])
+      connection = ::PG::Connection.open('dbname' => database, :port => postgres['port'])
       begin
         yield connection
       ensure
