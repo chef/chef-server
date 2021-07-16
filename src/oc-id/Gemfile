@@ -40,7 +40,7 @@ group :node do
 end
 
 group :development, :test do
-  gem 'rspec-rails', '~> 4.0', '>= 4.0.1'
+  gem 'rspec-rails', '~> 5.0'
   gem 'rails-controller-testing'
   gem 'pry-byebug'
   gem 'mailcatcher'
