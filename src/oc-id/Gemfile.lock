@@ -1,11 +1,11 @@
 GIT
-  remote: https://github.com/MsysTechnologiesllc/omniauth-chef.git
-  revision: 2294d6b44ad2d9b20f5ea2fcda20f1b258406ad6
-  branch: antima/omniauth_version_update
+  remote: https://github.com/MsysTechnologiesllc/omniauth-chef
+  revision: a6fcca46d5677ea14d19c164069ab925b1b21a35
+  branch: antima/test_omniauth_version_update
   specs:
     omniauth-chef (0.4.0)
-      chef (~> 16)
-      omniauth (~> 2.0, >= 2.0.4)
+      chef (~> 15)
+      omniauth (~> 2.0)
 
 GIT
   remote: https://github.com/chef/chef_secrets
@@ -26,7 +26,7 @@ GIT
 
 GIT
   remote: https://github.com/rails/sprockets-rails.git
-  revision: 1a0cf7a4572d0ee728d3dda2013d3305a77932f1
+  revision: 118ce60b1ffeb7a85640661b014cd2ee3c4e3e56
   specs:
     sprockets-rails (3.2.2)
       actionpack (>= 5.2)
@@ -94,7 +94,7 @@ GEM
     addressable (2.8.0)
       public_suffix (>= 2.0.2, < 5.0)
     bcrypt (3.1.16)
-    bcrypt_pbkdf (1.1.0.rc1)
+    bcrypt_pbkdf (1.1.0)
     better_errors (2.9.1)
       coderay (>= 1.0.0)
       erubi (>= 1.0.0)
@@ -112,23 +112,22 @@ GEM
       rack-test (>= 0.6.3)
       regexp_parser (>= 1.5, < 3.0)
       xpath (~> 3.2)
-    chef (16.2.50)
+    chef (15.17.4)
       addressable
-      bcrypt_pbkdf (= 1.1.0.rc1)
+      bcrypt_pbkdf (~> 1.0)
       bundler (>= 1.10)
-      chef-config (= 16.2.50)
-      chef-utils (= 16.2.50)
-      chef-vault
+      chef-config (= 15.17.4)
+      chef-utils (= 15.17.4)
       chef-zero (>= 14.0.11)
-      diff-lcs (~> 1.2, >= 1.2.4)
+      diff-lcs (>= 1.2.4, < 1.4.0)
       ed25519 (~> 1.2)
       erubis (~> 2.7)
-      ffi (>= 1.9.25)
-      ffi-libarchive
+      ffi (~> 1.9, >= 1.9.25)
+      ffi-libarchive (~> 1.0, >= 1.0.3)
       ffi-yajl (~> 2.2)
       highline (>= 1.6.9, < 3)
       iniparse (~> 1.4)
-      license-acceptance (~> 1.0, >= 1.0.5)
+      license-acceptance (>= 1.0.5, < 3)
       mixlib-archive (>= 0.4, < 2.0)
       mixlib-authentication (>= 2.1, < 4)
       mixlib-cli (>= 2.1.1, < 3.0)
@@ -137,24 +136,22 @@ GEM
       net-sftp (>= 2.1.2, < 4.0)
       net-ssh (>= 4.2, < 7)
       net-ssh-multi (~> 1.2, >= 1.2.1)
-      ohai (~> 16.0)
-      pastel
+      ohai (~> 15.0)
       plist (~> 3.2)
       proxifier (~> 1.0)
       syslog-logger (~> 1.6)
       train-core (~> 3.2, >= 3.2.28)
       train-winrm (>= 0.2.5)
       tty-screen (~> 0.6)
-      uuidtools (~> 2.1.5)
-    chef-config (16.2.50)
+      uuidtools (>= 2.1.5, < 3.0)
+    chef-config (15.17.4)
       addressable
-      chef-utils (= 16.2.50)
+      chef-utils (= 15.17.4)
       fuzzyurl
       mixlib-config (>= 2.2.12, < 4.0)
       mixlib-shellout (>= 2.0, < 4.0)
       tomlrb (~> 1.2)
-    chef-utils (16.2.50)
-    chef-vault (4.1.0)
+    chef-utils (15.17.4)
     chef-zero (15.0.7)
       ffi-yajl (~> 2.2)
       hashie (>= 2.0, < 5.0)
@@ -180,24 +177,24 @@ GEM
     daemons (1.4.0)
     debug_inspector (1.1.0)
     deep_merge (1.2.1)
-    diff-lcs (1.4.4)
-    doorkeeper (5.5.2)
-      railties (>= 5)
+    diff-lcs (1.3)
+    doorkeeper (4.4.3)
+      railties (>= 4.2)
     dry-configurable (0.12.1)
       concurrent-ruby (~> 1.0)
       dry-core (~> 0.5, >= 0.5.0)
     dry-container (0.8.0)
       concurrent-ruby (~> 1.0)
       dry-configurable (~> 0.1, >= 0.1.3)
-    dry-core (0.6.0)
+    dry-core (0.7.1)
       concurrent-ruby (~> 1.0)
     dry-equalizer (0.3.0)
-    dry-inflector (0.2.0)
+    dry-inflector (0.2.1)
     dry-initializer (3.0.4)
     dry-logic (1.2.0)
       concurrent-ruby (~> 1.0)
       dry-core (~> 0.5, >= 0.5)
-    dry-schema (1.6.2)
+    dry-schema (1.7.0)
       concurrent-ruby (~> 1.0)
       dry-configurable (~> 0.8, >= 0.8.3)
       dry-core (~> 0.5, >= 0.5)
@@ -227,20 +224,24 @@ GEM
     factory_girl_rails (4.4.1)
       factory_girl (~> 4.4.0)
       railties (>= 3.0.0)
-    faraday (1.4.2)
+    faraday (1.5.1)
       faraday-em_http (~> 1.0)
       faraday-em_synchrony (~> 1.0)
       faraday-excon (~> 1.1)
+      faraday-httpclient (~> 1.0.1)
       faraday-net_http (~> 1.0)
       faraday-net_http_persistent (~> 1.1)
+      faraday-patron (~> 1.0)
       multipart-post (>= 1.2, < 3)
       ruby2_keywords (>= 0.0.4)
     faraday-em_http (1.0.0)
     faraday-em_synchrony (1.0.0)
     faraday-excon (1.1.0)
+    faraday-httpclient (1.0.1)
     faraday-net_http (1.0.1)
-    faraday-net_http_persistent (1.1.0)
-    ffi (1.15.1)
+    faraday-net_http_persistent (1.2.0)
+    faraday-patron (1.0.0)
+    ffi (1.15.3)
     ffi-libarchive (1.0.17)
       ffi (~> 1.0)
     ffi-yajl (2.4.0)
@@ -271,13 +272,13 @@ GEM
     json (2.5.1)
     jwt (2.2.3)
     kgio (2.11.4)
-    libv8 (3.16.14.19)
+    libv8 (3.16.14.19-x86_64-linux)
     libyajl2 (2.1.0)
-    license-acceptance (1.0.19)
+    license-acceptance (2.1.13)
       pastel (~> 0.7)
-      tomlrb (~> 1.2)
-      tty-box (~> 0.3)
-      tty-prompt (~> 0.18)
+      tomlrb (>= 1.2, < 3.0)
+      tty-box (~> 0.6)
+      tty-prompt (~> 0.20)
     little-plugger (1.1.4)
     logging (2.3.0)
       little-plugger (~> 1.1)
@@ -300,7 +301,6 @@ GEM
     marcel (1.0.1)
     method_source (1.0.0)
     mini_mime (1.1.0)
-    mini_portile2 (2.5.3)
     minitest (5.14.4)
     mixlib-archive (1.1.7)
       mixlib-log
@@ -327,13 +327,11 @@ GEM
       net-ssh-gateway (>= 1.2.0)
     newrelic_rpm (7.2.0)
     nio4r (2.5.7)
-    nokogiri (1.11.7)
-      mini_portile2 (~> 2.5.0)
+    nokogiri (1.11.7-x86_64-linux)
       racc (~> 1.4)
     nori (2.6.0)
-    ohai (16.13.0)
-      chef-config (>= 12.8, < 17)
-      chef-utils (>= 16.0, < 17)
+    ohai (15.12.0)
+      chef-config (>= 12.8, < 16)
       ffi (~> 1.9)
       ffi-yajl (~> 2.2)
       ipaddress
@@ -342,7 +340,7 @@ GEM
       mixlib-log (>= 2.0.1, < 4.0)
       mixlib-shellout (>= 2.0, < 4.0)
       plist (~> 3.1)
-      train-core
+      systemu (~> 2.6.4)
       wmi-lite (~> 1.0)
     omniauth (2.0.4)
       hashie (>= 3.4.6)
@@ -423,7 +421,7 @@ GEM
       rspec-mocks (~> 3.10)
       rspec-support (~> 3.10)
     rspec-support (3.10.2)
-    ruby2_keywords (0.0.4)
+    ruby2_keywords (0.0.5)
     rubyntlm (0.6.3)
     rubyzip (1.3.0)
     sass (3.4.25)
@@ -468,6 +466,7 @@ GEM
       unicode_utils (~> 1.4)
     strings-ansi (0.2.0)
     syslog-logger (1.6.8)
+    systemu (2.6.5)
     temple (0.8.2)
     therubyracer (0.12.3)
       libv8 (~> 3.16.14.15)
@@ -521,7 +520,7 @@ GEM
     unicorn-rails (2.2.1)
       rack
       unicorn
-    uuidtools (2.1.5)
+    uuidtools (2.2.0)
     webrick (1.7.0)
     websocket (1.2.9)
     websocket-driver (0.7.5)
@@ -552,17 +551,17 @@ GEM
     zeitwerk (2.4.2)
 
 PLATFORMS
-  ruby
+  x86_64-linux
 
 DEPENDENCIES
   better_errors
   bigdecimal (= 1.3.5)
   binding_of_caller
   capybara (~> 3.33)
-  chef (~> 16)
+  chef (~> 15)
   coffee-rails (~> 5.0)
   config (~> 2.2, >= 2.2.1)
-  doorkeeper (~> 5.4)
+  doorkeeper (~> 4.0)
   factory_girl_rails (~> 4.4.0)
   foundation-rails!
   jbuilder (~> 2.7)
@@ -572,7 +571,6 @@ DEPENDENCIES
   mixlib-authentication (>= 2.1, < 4)
   newrelic_rpm
   nokogiri (= 1.11.7)
-  omniauth (~> 2.0)
   omniauth-chef!
   pg (>= 0.18, < 2.0)
   pry-byebug
