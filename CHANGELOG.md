@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.6.33 -->
-## [14.6.33](https://github.com/chef/chef-server/tree/14.6.33) (2021-07-16)
+<!-- latest_release 14.6.34 -->
+## [14.6.34](https://github.com/chef/chef-server/tree/14.6.34) (2021-07-19)
 
 #### Merged Pull Requests
-- Bump rspec-rails from 4.1.2 to 5.0.1 in /src/oc-id [#2634](https://github.com/chef/chef-server/pull/2634) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Expand data gather-logs collects + better align with automate [#2645](https://github.com/chef/chef-server/pull/2645) ([tas50](https://github.com/tas50))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.5.29 -->
 ### Changes since 14.5.29 release
 
 #### Merged Pull Requests
+- Expand data gather-logs collects + better align with automate [#2645](https://github.com/chef/chef-server/pull/2645) ([tas50](https://github.com/tas50)) <!-- 14.6.34 -->
 - Bump rspec-rails from 4.1.2 to 5.0.1 in /src/oc-id [#2634](https://github.com/chef/chef-server/pull/2634) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.6.33 -->
 - Update markdown and copyrights in private cookbook content [#2578](https://github.com/chef/chef-server/pull/2578) ([tas50](https://github.com/tas50)) <!-- 14.6.32 -->
 - Bump veil from `ac0a762` to `eb86d6e` in /src/oc-id [#2627](https://github.com/chef/chef-server/pull/2627) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.6.31 -->
