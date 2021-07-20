@@ -176,7 +176,7 @@ then
     known_platform="rhel"
 elif [[ -f "/etc/os-release" ]] && grep -q "Amazon Linux 2" /etc/os-release;
 then
-    known_platform="aws"
+    known_platform="amazon"
     cat "/etc/os-release" >> "$tmpdir/platform_version.txt"
     cat "/etc/system-release-cpe" >> "$tmpdir/platform_version.txt"
 else
@@ -331,7 +331,7 @@ then
 
     rpm -qa | $installed_packages_grep >> "$installed_packages_file"
 
-elif [[ $known_platform == 'aws' ]];
+elif [[ $known_platform == 'amazon' ]];
 then
 
     rpm -qa | $installed_packages_grep >> "$installed_packages_file"
