@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.6.36 -->
-## [14.6.36](https://github.com/chef/chef-server/tree/14.6.36) (2021-07-19)
+<!-- latest_release 14.6.37 -->
+## [14.6.37](https://github.com/chef/chef-server/tree/14.6.37) (2021-07-20)
 
 #### Merged Pull Requests
-- Bump omnibus-software from `e9feb35` to `237c0a4` in /omnibus [#2642](https://github.com/chef/chef-server/pull/2642) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Rename aws to amazon in the gather-logs script [#2650](https://github.com/chef/chef-server/pull/2650) ([tas50](https://github.com/tas50))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.6.32 -->
 ### Changes since 14.6.32 release
 
 #### Merged Pull Requests
+- Rename aws to amazon in the gather-logs script [#2650](https://github.com/chef/chef-server/pull/2650) ([tas50](https://github.com/tas50)) <!-- 14.6.37 -->
 - Bump rspec-rails from 4.1.2 to 5.0.1 in /src/oc-id [#2634](https://github.com/chef/chef-server/pull/2634) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.6.33 -->
 - Expand data gather-logs collects + better align with automate [#2645](https://github.com/chef/chef-server/pull/2645) ([tas50](https://github.com/tas50)) <!-- 14.6.34 -->
 - Bump omnibus from `5c1b453` to `6d109b6` in /omnibus [#2643](https://github.com/chef/chef-server/pull/2643) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.6.35 -->
