@@ -226,13 +226,7 @@ su -m opscode -c 'ulimit -a' > "$tmpdir/ulimit_a_opscode.txt"
 ip addr show > "$tmpdir/ip_addr_show.txt"
 
 # ss(8) is the command for socket statistics that replaces netstat
-#RHEL5 only has netstat
-if which ss > /dev/null 2>&1
-then
-    ss -ontap > "$tmpdir/ss_ontap.txt"
-else
-    netstat -alntp > "$tmpdir/netstat_alntp.txt"
-fi
+ss -ontap > "$tmpdir/ss_ontap.txt"
 
 sysctl -a > "$tmpdir/sysctl_a.txt" 2>&1
 
