@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.7.0 -->
-## [14.7.0](https://github.com/chef/chef-server/tree/14.7.0) (2021-07-21)
+<!-- latest_release 14.7.1 -->
+## [14.7.1](https://github.com/chef/chef-server/tree/14.7.1) (2021-07-21)
 
 #### Merged Pull Requests
-- Further expand the information we gather in the gather-logs script [#2651](https://github.com/chef/chef-server/pull/2651) ([tas50](https://github.com/tas50))
+- Update oc-id omniauth gem to latest to resolve CVE-2015-9284 [#2653](https://github.com/chef/chef-server/pull/2653) ([antima-gupta](https://github.com/antima-gupta))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.6.32 -->
 ### Changes since 14.6.32 release
 
 #### Merged Pull Requests
+- Update oc-id omniauth gem to latest to resolve CVE-2015-9284 [#2653](https://github.com/chef/chef-server/pull/2653) ([antima-gupta](https://github.com/antima-gupta)) <!-- 14.7.1 -->
 - Further expand the information we gather in the gather-logs script [#2651](https://github.com/chef/chef-server/pull/2651) ([tas50](https://github.com/tas50)) <!-- 14.7.0 -->
 - Remove RHEL 5 check from the gather-logs script [#2649](https://github.com/chef/chef-server/pull/2649) ([tas50](https://github.com/tas50)) <!-- 14.6.38 -->
 - Rename aws to amazon in the gather-logs script [#2650](https://github.com/chef/chef-server/pull/2650) ([tas50](https://github.com/tas50)) <!-- 14.6.37 -->
