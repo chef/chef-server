@@ -199,6 +199,13 @@ archive_timeout = <%= node['private_chef']['postgresql']['archive_timeout'] %>		
 
 # These settings are ignored on a standby server
 
+# excerpts from release notes
+# postgresql 10:
+#   Reduce configuration changes necessary to perform streaming backup and replication (Magnus Hagander, Dang Minh Huong)
+#   Specifically, the defaults were changed for wal_level, max_wal_senders, max_replication_slots, and hot_standby to make
+#   them suitable for these usages out-of-the-box.
+# postgresql 12:
+#   Make max_wal_senders not count as part of max_connections
 max_wal_senders = 0		# max number of walsender processes
 				# (change requires restart)
 #wal_sender_delay = 1s		# walsender cycle time, 1-10000 milliseconds
