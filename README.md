@@ -38,7 +38,7 @@ This repository contains the core services that make up the Chef Server.
 `-- src
     |-- bookshelf: S3-compatible engine for storing cookbook data
     |-- chef-mover: data migration orchestrator used in upgrades
-    |-- oc-id: OAuth2 provider for extensions like Analytics or Supermarket
+    |-- oc-id: OAuth2 provider for extensions like Supermarket
     |-- oc_bifrost: Chef Server's authorization service
     |-- oc_erchef: The core REST API server
     |-- chef-server-ctl: The Chef Server's command line management utility

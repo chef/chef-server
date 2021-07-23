@@ -347,7 +347,7 @@ oc-id stands for opcode-identity. oc-id ships as part of the Chef server. It is 
 provider and is intended to be the place that a Chef user will manage their identity.\
 \
 oc-id does not factor into the permissions here. Instead the way it is is used is that other\
-applications that interact with the Chef server, such as the Supermarket and Analytics,\
+applications that interact with the Chef server, such as the Supermarket,\
 call out to oc-id when a user signs on. The user enters their login information into oc-id, \
 which then verifies this with the Chef server auth system. Once verified, oc-id issues a token\
 to the calling application and the application then uses this token as a user's authorization.\
