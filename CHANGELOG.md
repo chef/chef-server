@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.7.4 -->
-## [14.7.4](https://github.com/chef/chef-server/tree/14.7.4) (2021-07-23)
+<!-- latest_release 14.7.5 -->
+## [14.7.5](https://github.com/chef/chef-server/tree/14.7.5) (2021-07-23)
 
 #### Merged Pull Requests
-- Bump omnibus-software from `237c0a4` to `a4f73e4` in /omnibus [#2656](https://github.com/chef/chef-server/pull/2656) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Switch veil and omniauth-chef to gems not git sources [#2661](https://github.com/chef/chef-server/pull/2661) ([tas50](https://github.com/tas50))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.6.32 -->
 ### Changes since 14.6.32 release
 
 #### Merged Pull Requests
+- Switch veil and omniauth-chef to gems not git sources [#2661](https://github.com/chef/chef-server/pull/2661) ([tas50](https://github.com/tas50)) <!-- 14.7.5 -->
 - Bump omnibus-software from `237c0a4` to `a4f73e4` in /omnibus [#2656](https://github.com/chef/chef-server/pull/2656) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.7.4 -->
 - Bump chef from 16.13.16 to 17.3.48 in /oc-chef-pedant [#2657](https://github.com/chef/chef-server/pull/2657) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.7.3 -->
 - Bump chef from 17.2.29 to 17.3.48 in /src/oc-id [#2659](https://github.com/chef/chef-server/pull/2659) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.7.2 -->
