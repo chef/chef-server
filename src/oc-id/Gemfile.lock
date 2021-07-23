@@ -8,10 +8,10 @@ GIT
 
 GIT
   remote: https://github.com/chef/omniauth-chef
-  revision: a9a84686c9d72cd0a2693ff2d2d94697090364a4
+  revision: 0c2bda2b87154cf545c6e1a5df3582c1d2603155
   branch: master
   specs:
-    omniauth-chef (0.4.0)
+    omniauth-chef (0.4.1)
       chef (~> 17)
       omniauth (~> 2.0, >= 2.0.4)
 
@@ -257,7 +257,7 @@ GEM
     i18n (1.8.10)
       concurrent-ruby (~> 1.0)
     iniparse (1.5.0)
-    inspec-core (4.38.3)
+    inspec-core (4.38.9)
       addressable (~> 2.4)
       chef-telemetry (~> 1.0, >= 1.0.8)
       faraday (>= 0.9.0, < 1.5)
