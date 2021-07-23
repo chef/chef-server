@@ -1,21 +1,4 @@
 GIT
-  remote: https://github.com/chef/chef_secrets
-  revision: eb86d6ef1e3ac5c85a03b232050380cd00a1658c
-  specs:
-    veil (0.3.5)
-      bcrypt (~> 3.1)
-      pbkdf2
-
-GIT
-  remote: https://github.com/chef/omniauth-chef
-  revision: a9a84686c9d72cd0a2693ff2d2d94697090364a4
-  branch: master
-  specs:
-    omniauth-chef (0.4.0)
-      chef (~> 17)
-      omniauth (~> 2.0, >= 2.0.4)
-
-GIT
   remote: https://github.com/foundation/foundation-rails.git
   revision: 649f360696d8c80e8ba4952fb1bbe7048a2fd04c
   tag: v5.5.3.2
@@ -376,6 +359,9 @@ GEM
       hashie (>= 3.4.6)
       rack (>= 1.6.2, < 3)
       rack-protection
+    omniauth-chef (0.4.1)
+      chef (~> 17)
+      omniauth (~> 2.0, >= 2.0.4)
     parallel (1.20.1)
     parslet (1.8.2)
     pastel (0.8.0)
@@ -565,6 +551,9 @@ GEM
       rack
       unicorn
     uuidtools (2.2.0)
+    veil (0.3.5)
+      bcrypt (~> 3.1)
+      pbkdf2
     webrick (1.7.0)
     websocket (1.2.9)
     websocket-driver (0.7.5)
@@ -615,7 +604,7 @@ DEPENDENCIES
   mixlib-authentication (>= 2.1, < 4)
   newrelic_rpm
   nokogiri (= 1.11.7)
-  omniauth-chef!
+  omniauth-chef (~> 0.4)
   pg (>= 0.18, < 2.0)
   pry-byebug
   rails (~> 6.0.3, >= 6.0.3.2)
@@ -636,7 +625,7 @@ DEPENDENCIES
   turbolinks (~> 5)
   uglifier (~> 4.2)
   unicorn-rails (~> 2.2, >= 2.2.1)
-  veil!
+  veil (~> 0.3.5)
 
 BUNDLED WITH
    2.2.23
