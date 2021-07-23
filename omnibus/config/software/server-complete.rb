@@ -29,6 +29,7 @@ dependency "runit"
 dependency "openssl-fips-config" if fips_mode?
 
 # the backend
+dependency "postgresql96-bin" # for upgrading 9.6 -> 13.3
 dependency "postgresql13"
 dependency "redis" # dynamic routing controls
 dependency "haproxy"
