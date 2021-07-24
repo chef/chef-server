@@ -363,7 +363,7 @@ GEM
     unicode-display_width (2.0.0)
     unicode_utils (1.4.0)
     uuidtools (2.2.0)
-    veil (0.3.2)
+    veil (0.3.5)
       bcrypt (~> 3.1)
       pbkdf2
     webrick (1.7.0)
