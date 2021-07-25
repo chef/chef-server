@@ -77,6 +77,9 @@ PATH=/opt/$path/embedded/bin:$PATH
 
 mkdir -p "$tmpdir"
 
+# grab information on all the drive / mountpoints including if they are SSD or not
+`lsblk -o name,mountpoint,size,type,rota --json` > "$tmpdir/lsblk.txt"
+
 for i in /opt/{chef,$path}*/version-manifest.txt \
               /opt/$path/pc-version.txt \
               /etc/$path/$config_name \
