@@ -1,11 +1,12 @@
-# Chef Server Release Process
+# Chef Infra Server Release Process
 
 ## Document Purpose
 
 The purpose of this document is to describe the *current* release
 process such that any member of the team can do a release. As we
-improve the automation around the release process, the document should be updated such that it always has the exact steps required to release
-Chef Server.
+improve the automation around the release process, the document should
+be updated such that it always has the exact steps required to release
+Chef Infra Server.
 
 This document is NOT aspirational. We have a number of automation
 tools that we intend to use to improve the release release process;
@@ -20,7 +21,6 @@ In order to release, you will need the following accounts/permissions:
 
 - Chef Software Inc. Slack account
 - VPN account for Chef Software Inc.
-- Account on [https://discourse.chef.io](https://discourse.chef.io) using your Chef email address
 - Access to automate.chef.co
 
 :warning: If it is a Friday -- do we really need that release today? :warning:
@@ -29,15 +29,9 @@ In order to release, you will need the following accounts/permissions:
 
 ### Update Release Notes
 
-#### Update Wiki:
+#### Pending Release Notes In Wiki
 
 https://github.com/chef/chef-server/wiki/Pending-Release-Notes
-
-#### Update chef.io docsite
-
-This is a manual process until [filed issue](https://github.com/chef/chef-web-docs/issues/3247) is done.
-Create a PR in the chef-web-docs repo with the notes from the Pending Release notes.
-e.g: https://github.com/chef/chef-web-docs/pull/3248
 
 ### Getting the build to be released into current with a minor/major version bump
 
@@ -85,7 +79,7 @@ Umbrella Testing Step-by-Step:
 
 #### Chef Manage Testing
 
-Currently (05/21), the Umbrella pipeline does not perform a test login to Chef Manage, so this should be done manually.  A successful test login should be verified on both IPV4 and IPV6 setups, and must use the latest stable version of Manage.  One method is to run representative AWS and Azure Umbrella scenarios from your local box to get running server instances to test.  For umbrella you should specify the Chef Manage version to install when creating the Umbrella scenario (see below), or it will pick the latest unstable version (that's generally not what you want).  For local non-Umbrella setups, `chef-server-ctl install chef-manage` will install the latest stable release of chef-manage.
+Currently (07/21), the Umbrella pipeline does not perform a test login to Chef Manage, so this should be done manually.  A successful test login should be verified on both IPV4 and IPV6 setups, and must use the latest stable version of Manage.  One method is to run representative AWS and Azure Umbrella scenarios from your local box to get running server instances to test.  For umbrella you should specify the Chef Manage version to install when creating the Umbrella scenario (see below), or it will pick the latest unstable version (that's generally not what you want).  For local non-Umbrella setups, `chef-server-ctl install chef-manage` will install the latest stable release of chef-manage.
 
 Chef Manage releases:
 https://downloads.chef.io/tools/manage
@@ -122,8 +116,8 @@ null_resource.chef_server_config (remote-exec): echo -e '
 null_resource.chef_server_config (remote-exec): BEGIN INSTALL CHEF SERVER
 ```
 10. Navigate to `http://<hostname>` via web browser where _hostname_ is the DNS name of the emphemeral machine obtained in the previous step.
-11. Enter the username and password to test the login.  The username and password are stored in the following script:  
-    https://github.com/chef/umbrella/blob/master/chef-server/common/files/add_user.sh.  
+11. Enter the username and password to test the login.  The username and password are stored in the following script:
+    https://github.com/chef/umbrella/blob/master/chef-server/common/files/add_user.sh.
 12. Verify that the login is successful.
 13. Navigate to `http://<hostname>/id` via web browser where _hostname_ is the DNS name of the emphemeral machine obtained in the previous step.
 14. Login with the same user/password as the previous login step above.
@@ -157,13 +151,13 @@ PLATFORM=ubuntu-18.04 INSTALL_VERSION=<version> UPGRADE_VERSION=<version> SCENAR
 make destroy-resource-group
 ```
 
-19. Any failures must be fixed before shipping a release, unless they are "known failures" or expected. A document at an unknown state of updatedness tracking known failures can be found at:  
-https://docs.google.com/spreadsheets/d/10LZszYuAIlrk1acy0GRhrZMd0YohLTQWmcNIdY6XuZU/edit#gid=0  
+19. Any failures must be fixed before shipping a release, unless they are "known failures" or expected. A document at an unknown state of updatedness tracking known failures can be found at:
+https://docs.google.com/spreadsheets/d/10LZszYuAIlrk1acy0GRhrZMd0YohLTQWmcNIdY6XuZU/edit#gid=0
 Use chef.io account credentials to access it.
 Note that no changes other than CHANGELOG/RELEASE_NOTES changes should land on master between testing and releasing since we typically tag HEAD of master. If something large does land on master, the release tag you create should point specifically at the build that you tested. The git SHA of the build you are testing can be found in /opt/opscode/version-manifest.json.
 
-20. Make sure the Habitat builds for master are passing. These are kicked-off automatically on every merge. 
-Chef / [chef/chef-server:master] habitat/build / master  
+20. Make sure the Habitat builds for master are passing. These are kicked-off automatically on every merge.
+Chef / [chef/chef-server:master] habitat/build / master
 https://buildkite.com/chef/chef-chef-server-master-habitat-build
 
 #### Special Testing
@@ -198,10 +192,12 @@ Example:
   repositories and downloads.chef.io.
 
 ### Announce the release post-promote to the following channels:
+
     - #a2-release-coordinate
     - #chef-server
-    - #cft-announce  
-Copying/pasting a discourse link to the post-promote channels should suffice.  You can find the link here.  Note that this is NOT the link to copy/paste, this is a link where you can find the link to copy/paste:  
+    - #cft-announce
+
+Copying/pasting a discourse link to the post-promote channels should suffice.  You can find the link here.  Note that this is NOT the link to copy/paste, this is a link where you can find the link to copy/paste:
 https://discourse.chef.io/c/chef-release/9
 
 ### Automate
@@ -217,7 +213,7 @@ Chef Infra Server is now released.
 A sample release checklist depicting a release in progress:
 ```
 RELEASE CHECKLIST
-- updated release notes                     DONE [thanks Tim Smith]
+- updated release notes                     DONE
 - omnibus build in current channel          DONE
 - umbrella pipeline full
     12.17.15 -> 14.6.32                     PASS [failures but no release blockers]
@@ -239,7 +235,5 @@ RELEASE CHECKLIST
 - verify that manifest contains correct     FAIL
   release number
 - build and release the release             DONE
-- update the chef.io docsite Release notes  DONE
-  https://github.com/chef/chef-web-docs/pull/3286
 - Create automate issues                    DONE
 ```
