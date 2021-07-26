@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.7.8 -->
-## [14.7.8](https://github.com/chef/chef-server/tree/14.7.8) (2021-07-24)
+<!-- latest_release 14.7.9 -->
+## [14.7.9](https://github.com/chef/chef-server/tree/14.7.9) (2021-07-26)
 
 #### Merged Pull Requests
-- Bump veil from 0.3.2 to 0.3.5 in /src/chef-server-ctl [#2622](https://github.com/chef/chef-server/pull/2622) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Fix two failures in gather-logs [#2662](https://github.com/chef/chef-server/pull/2662) ([tas50](https://github.com/tas50))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.6.32 -->
 ### Changes since 14.6.32 release
 
 #### Merged Pull Requests
+- Fix two failures in gather-logs [#2662](https://github.com/chef/chef-server/pull/2662) ([tas50](https://github.com/tas50)) <!-- 14.7.9 -->
 - Bump veil from 0.3.2 to 0.3.5 in /src/chef-server-ctl [#2622](https://github.com/chef/chef-server/pull/2622) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.7.8 -->
 - Bump veil from `ea2be98` to `eb86d6e` in /src/oc_bifrost/oc-bifrost-pedant [#2619](https://github.com/chef/chef-server/pull/2619) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.7.7 -->
 - Bump selenium-webdriver from 2.53.4 to 3.142.7 in /src/oc-id [#2624](https://github.com/chef/chef-server/pull/2624) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.7.6 -->
