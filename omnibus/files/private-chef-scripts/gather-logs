@@ -45,24 +45,10 @@ then
     fi
 
     echo "Gathering logs from Open Source Chef server 11."
-elif [[ $type == 'Analytics' ]];
-then
-    path='opscode-analytics'
-    ctl_cmd='opscode-analytics-ctl'
-    config_name='opscode-analytics.rb'
-
-    if [[ ! -e "/opt/$path/bin/$ctl_cmd" ]];
-    then
-        echo "ERROR: Analytics server may not be installed."
-        exit 1
-    fi
-
-    echo "Gathering logs from Analytics server."
 else
-    echo "Usage: gather-logs [ CS | OSC | Analytics ]"
+    echo "Usage: gather-logs [ CS | OSC ]"
     echo "CS - Enterprise or Chef Server (default)"
     echo "OSC - Open Source Chef Server 11"
-    echo "Analytics - Opscode Analytics server"
     exit 1
 fi
 config_file_path="/etc/$path/$config_name"
@@ -136,24 +122,6 @@ then
         curl -k -s -X GET "https://localhost/_stats?format=text" status > "$tmpdir/chef_server_stats_endpoint.txt"
     fi
 fi
-
-# Try to determine with /tmp/.s.PGSQL.5432 if postgresql is running before gathering psql logs
-# There are two cases in which this could fail:
-# 1) We've configure postgresql to listen on a different local socket. Most users don't do this, but it is possible.
-# 2) Postgresql isn't running.
-# Since the general goal of this script is to collect whatever we can for support but not present confusing errors to
-# the user, we went for a test that covered (2) easily. If we can do something smart that would account for (1) that
-# would be cool, but my sense is that this is OK for now.
-
-if [[ -S "/tmp/.s.PGSQL.5432" ]]; then
-    if [[ $type == 'Analytics' ]];
-    then
-        echo "SELECT CURRENT_TIMESTAMP; SELECT * FROM pg_stat_activity;" | su -l chef-pgsql -c 'psql actions' > "$tmpdir/pg_stat_activity.txt"
-        echo "SELECT * FROM schema_migrations;" | su -l chef-pgsql -c 'psql actions' > "$tmpdir/actions_schema_migrations.txt"
-        su -m chef-pgsql -c 'ulimit -a'> "$tmpdir/ulimit_a_chef-pgsql.txt"
-    fi
-fi
-
 
 if [[ $type == 'CS' ]];
 then
@@ -288,9 +256,6 @@ fi
 if [[ $type == 'CS' ]];
 then
     fqdn="api_fqdn"
-elif [[ $type == 'Analytics' ]];
-then
-    fqdn="analytics_fqdn"
 fi
 backend_vip="backend_vip"
 tempname=`grep -E $fqdn $config_file_path | cut -d \" -f2`
