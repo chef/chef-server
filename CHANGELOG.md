@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.7.9 -->
-## [14.7.9](https://github.com/chef/chef-server/tree/14.7.9) (2021-07-26)
+<!-- latest_release 14.7.10 -->
+## [14.7.10](https://github.com/chef/chef-server/tree/14.7.10) (2021-07-26)
 
 #### Merged Pull Requests
-- Fix two failures in gather-logs [#2662](https://github.com/chef/chef-server/pull/2662) ([tas50](https://github.com/tas50))
+- Bump chefstyle from 2.0.6 to 2.0.7 in /src/chef-server-ctl [#2669](https://github.com/chef/chef-server/pull/2669) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.6.32 -->
 ### Changes since 14.6.32 release
 
 #### Merged Pull Requests
+- Bump chefstyle from 2.0.6 to 2.0.7 in /src/chef-server-ctl [#2669](https://github.com/chef/chef-server/pull/2669) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.7.10 -->
 - Fix two failures in gather-logs [#2662](https://github.com/chef/chef-server/pull/2662) ([tas50](https://github.com/tas50)) <!-- 14.7.9 -->
 - Bump veil from 0.3.2 to 0.3.5 in /src/chef-server-ctl [#2622](https://github.com/chef/chef-server/pull/2622) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.7.8 -->
 - Bump veil from `ea2be98` to `eb86d6e` in /src/oc_bifrost/oc-bifrost-pedant [#2619](https://github.com/chef/chef-server/pull/2619) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.7.7 -->
