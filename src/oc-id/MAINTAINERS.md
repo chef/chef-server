@@ -7,7 +7,7 @@ your pull request. Additionally, you need to not receive a veto from a
 Lieutenant or the Project Lead.
 
 Check out
-[How Chef is Maintained](https://github.com/opscode/chef-rfc/blob/master/rfc030-maintenance-policy.md#how-the-project-is-maintained)
+[How Chef is Maintained](https://github.com/chef/chef-rfc/blob/master/rfc030-maintenance-policy.md#how-the-project-is-maintained)
 for details on the process, how to become a maintainer, lieutenant, or the
 project lead.
 

@@ -24,7 +24,7 @@ module ChefServerCtl
     DEFAULT_ERCHEF_REINDEX_SCRIPT = "/opt/opscode/embedded/service/opscode-erchef/bin/reindex-opc-organization".freeze
     DOC_PATENT_MSG = <<-DOC.freeze
 
-Documentation: https://docs.chef.io/server_overview/
+Documentation: https://docs.chef.io/server/
 Patents:       https://www.chef.io/patents
 
     DOC

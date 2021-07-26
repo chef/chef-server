@@ -2413,7 +2413,7 @@ https://raw.githubusercontent.com/antirez/redis/2.8/00-RELEASENOTES
 * Expose `db_timeout` for sqerl in Erchef, bifrost and mover as a parameter
   that can be set in the "/etc/opscode/chef-server.rb" file for convenience.
   By default there is a hard coded value of 5 seconds (5000ms) as per:
-  [sqerl\_client.erl](https://github.com/opscode/sqerl/blob/master/src/sqerl_client.erl#L134)
+  [sqerl\_client.erl](https://github.com/chef/sqerl/blob/master/src/sqerl_client.erl#L134)
 * Select appropriate default port for LDAP and LDAPS (when encryption is
   selected, as previously user had to manually add port to make it work).
 * Expose `proxy_connect_timeout` for Nginx when it connects to the backends,
@@ -2976,7 +2976,7 @@ https://raw.githubusercontent.com/antirez/redis/2.8/00-RELEASENOTES
 ## 11.1.0 (2014-02-06)
 
 ### omnibus-ruby 1.3.0
-* https://github.com/opscode/omnibus-ruby/blob/master/CHANGELOG.md#130-december-6-2013
+* https://github.com/chef/omnibus-ruby/blob/master/CHANGELOG.md#130-december-6-2013
 
 ### omnibus-software 3d9d097332199fdafc3237c0ec11fcd784c11b4d
 * [keepalived] update to 1.2.9 + patch for Centos 5.5

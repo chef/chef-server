@@ -12,7 +12,7 @@ Authentication
 ----------
 
 These API use the same authentication scheme as the rest of chef; see
-http://docs.chef.io/api_chef_server.html for a description.
+https://docs.chef.io/server/api_chef_server/ for a description.
 
 Tasks Remaining
 ----------
@@ -36,14 +36,14 @@ an entity in authz; they are a way of providing a default set of permissions for
 object. Second, they serve as the source of the ACL used to authorize LIST and CREATE operations on
 objects.
 
-There's a container for every chef object type that has an ACL. At the present time these are: 
+There's a container for every chef object type that has an ACL. At the present time these are:
 'clients', 'containers, 'cookbooks',  'data', 'environments', 'groups', 'nodes', 'roles',
 'sandboxes'.
 These may be extended in the future. These are specific to an org, and each org as it's own
 copies. These are created when an org is created, and required for an org to function properly.
 
 There are also two global containers 'users' and 'organizations', used to regulate who can create
-and list these entities. 
+and list these entities.
 
 The actual container JSON object is very minimal:
 ```
@@ -126,7 +126,7 @@ TODO: Describe behavior when we fail validation for the structure.
 ##### Response
 
 The 'Location' header is set to `API_URL/organizations/ORGNAME/containers/NAME`, and the response
-body will be 
+body will be
 
 ```{ "uri" : "API_URL/organizations/ORGNAME/containers/NAME" }```
 
@@ -151,7 +151,7 @@ of authz acls, and most of the action will be done via the ACL resource.
 
 #### GET
 
-The GET method retrieves a container. It takes no parameters. 
+The GET method retrieves a container. It takes no parameters.
 
 Since the 'containerpath' field is in the process of being deprecated, it effectively returns no
 useful information beyond the name, which the requestor presumably already knows.
@@ -205,7 +205,7 @@ in model validation, and returns BadRequest. Containerpath can be updated and th
 perserved.
 
 In the opscode-account sql implementation, only containername can be changed; alterations to
-containerpath are ignored. 
+containerpath are ignored.
 TODO: test for SQL implmentations should verify we rename the object as opposed to creating a new
 one (probably with the same authz id).
 
@@ -260,4 +260,3 @@ s.match("/containers/", :method=>"get").to(:controller=>'containers', :action=>'
 s.match("/containers/:id", :id => /[\w\.-]+/, :method=>"get").to(:controller=>'containers', :action=>'show')
 s.match("/containers/:id", :id => /[\w\.-]+/, :method=>"put").to(:controller=>'containers', :action=>'update')
 s.match("/containers/:id", :id => /[\w\.-]+/, :method=>"delete").to(:controller=>'containers', :action=>'destroy')
-

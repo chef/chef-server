@@ -28,7 +28,7 @@ Once your repository is set up, you can start working on the code.
 
 Source:
 
-    https://github.com/opscode/chef_db
+    https://github.com/chef/chef_db
 
 Tickets/Issues:
 

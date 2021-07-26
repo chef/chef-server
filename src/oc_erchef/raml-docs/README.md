@@ -6,7 +6,7 @@ RAML, see: [raml.org](http://raml.org)
 ## State of oc_erchef RAML Documentation
 
 Official and complete documentation of the Chef Server API is hosted at
-[docs.chef.io](http://docs.chef.io/api_chef_server.html). We find RAML
+[docs.chef.io](https://docs.chef.io/server/api_chef_server/). We find RAML
 useful during development of new features, but at this time have no
 plans to make these docs official or comprehensive.
 
