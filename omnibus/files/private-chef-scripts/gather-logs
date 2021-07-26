@@ -76,6 +76,8 @@ PATH=$PATH:/bin:/sbin
 PATH=/opt/$path/embedded/bin:$PATH
 
 mkdir -p "$tmpdir"
+# make sure we have the full path in /proc created for the gather-logs bundle
+mkdir -p "$tmpdir/proc/sys/crypto/"
 
 for i in /opt/{chef,$path}*/version-manifest.txt \
               /opt/$path/pc-version.txt \
@@ -196,7 +198,6 @@ umask > "$tmpdir/umask.txt"
 uptime > "$tmpdir/uptime.txt"
 
 # gather FIPS mode enabled or not
-mkdir -p "$tmpdir/proc/sys/crypto/"
 cp "/proc/sys/crypto/fips_enabled" "$tmpdir/proc/sys/crypto/fips_enabled"
 
 # gather information on CPU count and installed memory
@@ -215,7 +216,7 @@ df -i > "$tmpdir/df_i.txt"
 df -k > "$tmpdir/df_k.txt"
 
 # gather hostname and dns information
-cp "/etc/resolve.conf" "$tmpdir/etc/resolve.conf"
+cp "/etc/resolv.conf" "$tmpdir/etc/resolv.conf"
 cp "/etc/hosts" "$tmpdir/etc/hosts"
 hostname > "$tmpdir/hostname.txt"
 hostname --fqdn > "$tmpdir/hostname_--fqdn.txt"
