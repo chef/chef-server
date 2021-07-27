@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.7.12 -->
-## [14.7.12](https://github.com/chef/chef-server/tree/14.7.12) (2021-07-27)
+<!-- latest_release 14.7.13 -->
+## [14.7.13](https://github.com/chef/chef-server/tree/14.7.13) (2021-07-27)
 
 #### Merged Pull Requests
-- gather-logs: Avoid errors in console on Ubuntu [#2671](https://github.com/chef/chef-server/pull/2671) ([tas50](https://github.com/tas50))
+- Antima/dependabot/bundler/src/oc id/rails 6.1.4 code changes [#2678](https://github.com/chef/chef-server/pull/2678) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.6.32 -->
 ### Changes since 14.6.32 release
 
 #### Merged Pull Requests
+- Antima/dependabot/bundler/src/oc id/rails 6.1.4 code changes [#2678](https://github.com/chef/chef-server/pull/2678) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.7.13 -->
 - gather-logs: Avoid errors in console on Ubuntu [#2671](https://github.com/chef/chef-server/pull/2671) ([tas50](https://github.com/tas50)) <!-- 14.7.12 -->
 - Remove old references to Chef Analytics [#2663](https://github.com/chef/chef-server/pull/2663) ([tas50](https://github.com/tas50)) <!-- 14.7.11 -->
 - Bump chefstyle from 2.0.6 to 2.0.7 in /src/chef-server-ctl [#2669](https://github.com/chef/chef-server/pull/2669) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.7.10 -->
