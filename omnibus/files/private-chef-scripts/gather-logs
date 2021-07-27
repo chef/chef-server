@@ -156,7 +156,7 @@ fi
 # version / os information we want regardless of platform
 cp "/proc/version" "$tmpdir/proc/version"
 cp "/etc/os-release" "$tmpdir/etc/os-release"
-cp "/etc/system-release" "$tmpdir/etc/system-release"
+cp "/etc/system-release" "$tmpdir/etc/system-release" 2>/dev/null
 uname -a > "$tmpdir/uname_a.txt"
 
 # gather the configured umask
@@ -166,7 +166,7 @@ umask > "$tmpdir/umask.txt"
 uptime > "$tmpdir/uptime.txt"
 
 # gather FIPS mode enabled or not
-cp "/proc/sys/crypto/fips_enabled" "$tmpdir/proc/sys/crypto/fips_enabled"
+cp "/proc/sys/crypto/fips_enabled" "$tmpdir/proc/sys/crypto/fips_enabled" 2>/dev/null
 
 # gather information on CPU count and installed memory
 cp "/proc/cpuinfo" "$tmpdir/proc/cpuinfo"
