@@ -49,7 +49,7 @@ action_class do
                       env_helper = 'veil-env-helper --use-file -s chef-server.webui_key -s oc_id.sql_password -s oc_id.secret_key_base'
                       rails_script = <<~EOF
                               app = Doorkeeper::Application.find_or_create_by(:name => "#{new_resource.name}");
-                              app.update_attributes(:redirect_uri => "#{new_resource.redirect_uri}");
+                              app.update(:redirect_uri => "#{new_resource.redirect_uri}");
                               puts app.to_json
                             EOF
                       # in order to account for rails logging, we take only the last line of output
