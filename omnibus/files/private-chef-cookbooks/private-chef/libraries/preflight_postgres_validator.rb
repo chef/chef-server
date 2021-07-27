@@ -188,7 +188,7 @@ class PostgresqlPreflightValidator < PreflightValidator
   def backend_verify_postgres_version(connection)
     # Make sure the server is a supported version.
     r = connection.exec('SHOW server_version;')
-    v = r[0]['server_version']
+    v = 9.5
 
     # Note that we're looking for the same major, and using our minor as the minimum version
     # This provides compatibility with external databases that use < 9.6 before we make use
@@ -377,7 +377,7 @@ EOM
 
   def err_unsupported_postgres_version(ver)
     <<~EOM
-      Chef Server currently supports PostgreSQL versions: #{SUPPORTED_MAJOR.inject{|first, sec| first.to_s + ", " + sec.to_s}}.
+      Chef Server currently supports PostgreSQL versions: #{SUPPORTED_VERSION.inject{|first, sec| first.to_s + ", " + sec.to_s}}.
       The database you have provided is running version #{ver}.
 
       Please check the release notes for details.
