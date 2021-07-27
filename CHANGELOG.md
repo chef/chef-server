@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.7.11 -->
-## [14.7.11](https://github.com/chef/chef-server/tree/14.7.11) (2021-07-26)
+<!-- latest_release 14.7.12 -->
+## [14.7.12](https://github.com/chef/chef-server/tree/14.7.12) (2021-07-27)
 
 #### Merged Pull Requests
-- Remove old references to Chef Analytics [#2663](https://github.com/chef/chef-server/pull/2663) ([tas50](https://github.com/tas50))
+- gather-logs: Avoid errors in console on Ubuntu [#2671](https://github.com/chef/chef-server/pull/2671) ([tas50](https://github.com/tas50))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.6.32 -->
 ### Changes since 14.6.32 release
 
 #### Merged Pull Requests
+- gather-logs: Avoid errors in console on Ubuntu [#2671](https://github.com/chef/chef-server/pull/2671) ([tas50](https://github.com/tas50)) <!-- 14.7.12 -->
 - Remove old references to Chef Analytics [#2663](https://github.com/chef/chef-server/pull/2663) ([tas50](https://github.com/tas50)) <!-- 14.7.11 -->
 - Bump chefstyle from 2.0.6 to 2.0.7 in /src/chef-server-ctl [#2669](https://github.com/chef/chef-server/pull/2669) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.7.10 -->
 - Fix two failures in gather-logs [#2662](https://github.com/chef/chef-server/pull/2662) ([tas50](https://github.com/tas50)) <!-- 14.7.9 -->
