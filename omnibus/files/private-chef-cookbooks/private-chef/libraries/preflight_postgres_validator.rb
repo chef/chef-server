@@ -377,7 +377,7 @@ EOM
 
   def err_unsupported_postgres_version(ver)
     <<~EOM
-      Chef Server currently supports PostgreSQL versions: #{SUPPORTED_VERSION.inject{|first, sec| first.to_s + ", " + sec.to_s}}.
+      Chef Server currently supports PostgreSQL version: #{SUPPORTED_VERSION}.
       The database you have provided is running version #{ver}.
 
       Please check the release notes for details.
