@@ -197,12 +197,10 @@ class PostgresqlPreflightValidator < PreflightValidator
     case
     when v == REQUIRED_VERSION || v == SUPPORTED_VERSION
         :ok
-    when v <  REQUIRED_VERSION
+    when v <  REQUIRED_VERSION || v > SUPPORTED_VERSION
         fail_with err_CSPG014_bad_postgres_version(v)
     when v <  SUPPORTED_VERSION
         ChefServer::Warnings.warn err_unsupported_postgres_version(v)
-    # else
-    #     "it's greater than unsupported version.  do we want to fail? or warn unsupported?"
     end
 
   end

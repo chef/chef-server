@@ -102,8 +102,8 @@ describe PostgresqlPreflightValidator do
       end
     end
 
-    context 'when external version is > 9.x' do
-      let(:version) { '10.0' }
+    context 'when external version is > 13.x' do
+      let(:version) { '14.0' }
 
       it 'fails with a CSPG014 error' do
         expect(postgres_validator).to receive(:fail_with).with(error_message)
