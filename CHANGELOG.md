@@ -1,39 +1,37 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.7.13 -->
-## [14.7.13](https://github.com/chef/chef-server/tree/14.7.13) (2021-07-27)
-
-#### Merged Pull Requests
-- Antima/dependabot/bundler/src/oc id/rails 6.1.4 code changes [#2678](https://github.com/chef/chef-server/pull/2678) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+<!-- latest_release -->
 <!-- latest_release -->
 
-<!-- release_rollup since=14.6.32 -->
-### Changes since 14.6.32 release
-
-#### Merged Pull Requests
-- Antima/dependabot/bundler/src/oc id/rails 6.1.4 code changes [#2678](https://github.com/chef/chef-server/pull/2678) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.7.13 -->
-- gather-logs: Avoid errors in console on Ubuntu [#2671](https://github.com/chef/chef-server/pull/2671) ([tas50](https://github.com/tas50)) <!-- 14.7.12 -->
-- Remove old references to Chef Analytics [#2663](https://github.com/chef/chef-server/pull/2663) ([tas50](https://github.com/tas50)) <!-- 14.7.11 -->
-- Bump chefstyle from 2.0.6 to 2.0.7 in /src/chef-server-ctl [#2669](https://github.com/chef/chef-server/pull/2669) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.7.10 -->
-- Fix two failures in gather-logs [#2662](https://github.com/chef/chef-server/pull/2662) ([tas50](https://github.com/tas50)) <!-- 14.7.9 -->
-- Bump veil from 0.3.2 to 0.3.5 in /src/chef-server-ctl [#2622](https://github.com/chef/chef-server/pull/2622) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.7.8 -->
-- Bump veil from `ea2be98` to `eb86d6e` in /src/oc_bifrost/oc-bifrost-pedant [#2619](https://github.com/chef/chef-server/pull/2619) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.7.7 -->
-- Bump selenium-webdriver from 2.53.4 to 3.142.7 in /src/oc-id [#2624](https://github.com/chef/chef-server/pull/2624) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.7.6 -->
-- Switch veil and omniauth-chef to gems not git sources [#2661](https://github.com/chef/chef-server/pull/2661) ([tas50](https://github.com/tas50)) <!-- 14.7.5 -->
-- Bump omnibus-software from `237c0a4` to `a4f73e4` in /omnibus [#2656](https://github.com/chef/chef-server/pull/2656) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.7.4 -->
-- Bump chef from 16.13.16 to 17.3.48 in /oc-chef-pedant [#2657](https://github.com/chef/chef-server/pull/2657) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.7.3 -->
-- Bump chef from 17.2.29 to 17.3.48 in /src/oc-id [#2659](https://github.com/chef/chef-server/pull/2659) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.7.2 -->
-- Update oc-id omniauth gem to latest to resolve CVE-2015-9284 [#2653](https://github.com/chef/chef-server/pull/2653) ([antima-gupta](https://github.com/antima-gupta)) <!-- 14.7.1 -->
-- Further expand the information we gather in the gather-logs script [#2651](https://github.com/chef/chef-server/pull/2651) ([tas50](https://github.com/tas50)) <!-- 14.7.0 -->
-- Remove RHEL 5 check from the gather-logs script [#2649](https://github.com/chef/chef-server/pull/2649) ([tas50](https://github.com/tas50)) <!-- 14.6.38 -->
-- Rename aws to amazon in the gather-logs script [#2650](https://github.com/chef/chef-server/pull/2650) ([tas50](https://github.com/tas50)) <!-- 14.6.37 -->
-- Bump rspec-rails from 4.1.2 to 5.0.1 in /src/oc-id [#2634](https://github.com/chef/chef-server/pull/2634) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.6.33 -->
-- Expand data gather-logs collects + better align with automate [#2645](https://github.com/chef/chef-server/pull/2645) ([tas50](https://github.com/tas50)) <!-- 14.6.34 -->
-- Bump omnibus from `5c1b453` to `6d109b6` in /omnibus [#2643](https://github.com/chef/chef-server/pull/2643) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.6.35 -->
-- Bump omnibus-software from `e9feb35` to `237c0a4` in /omnibus [#2642](https://github.com/chef/chef-server/pull/2642) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.6.36 -->
+<!-- release_rollup -->
 <!-- release_rollup -->
 
 <!-- latest_stable_release -->
+## [14.7.13](https://github.com/chef/chef-server/tree/14.7.13) (2021-07-28)
+
+#### Merged Pull Requests
+- Bump omnibus-software from `e9feb35` to `237c0a4` in /omnibus [#2642](https://github.com/chef/chef-server/pull/2642) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump omnibus from `5c1b453` to `6d109b6` in /omnibus [#2643](https://github.com/chef/chef-server/pull/2643) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Expand data gather-logs collects + better align with automate [#2645](https://github.com/chef/chef-server/pull/2645) ([tas50](https://github.com/tas50))
+- Bump rspec-rails from 4.1.2 to 5.0.1 in /src/oc-id [#2634](https://github.com/chef/chef-server/pull/2634) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Rename aws to amazon in the gather-logs script [#2650](https://github.com/chef/chef-server/pull/2650) ([tas50](https://github.com/tas50))
+- Remove RHEL 5 check from the gather-logs script [#2649](https://github.com/chef/chef-server/pull/2649) ([tas50](https://github.com/tas50))
+- Further expand the information we gather in the gather-logs script [#2651](https://github.com/chef/chef-server/pull/2651) ([tas50](https://github.com/tas50))
+- Update oc-id omniauth gem to latest to resolve CVE-2015-9284 [#2653](https://github.com/chef/chef-server/pull/2653) ([antima-gupta](https://github.com/antima-gupta))
+- Bump chef from 17.2.29 to 17.3.48 in /src/oc-id [#2659](https://github.com/chef/chef-server/pull/2659) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump chef from 16.13.16 to 17.3.48 in /oc-chef-pedant [#2657](https://github.com/chef/chef-server/pull/2657) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump omnibus-software from `237c0a4` to `a4f73e4` in /omnibus [#2656](https://github.com/chef/chef-server/pull/2656) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Switch veil and omniauth-chef to gems not git sources [#2661](https://github.com/chef/chef-server/pull/2661) ([tas50](https://github.com/tas50))
+- Bump selenium-webdriver from 2.53.4 to 3.142.7 in /src/oc-id [#2624](https://github.com/chef/chef-server/pull/2624) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump veil from `ea2be98` to `eb86d6e` in /src/oc_bifrost/oc-bifrost-pedant [#2619](https://github.com/chef/chef-server/pull/2619) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump veil from 0.3.2 to 0.3.5 in /src/chef-server-ctl [#2622](https://github.com/chef/chef-server/pull/2622) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Fix two failures in gather-logs [#2662](https://github.com/chef/chef-server/pull/2662) ([tas50](https://github.com/tas50))
+- Bump chefstyle from 2.0.6 to 2.0.7 in /src/chef-server-ctl [#2669](https://github.com/chef/chef-server/pull/2669) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Remove old references to Chef Analytics [#2663](https://github.com/chef/chef-server/pull/2663) ([tas50](https://github.com/tas50))
+- gather-logs: Avoid errors in console on Ubuntu [#2671](https://github.com/chef/chef-server/pull/2671) ([tas50](https://github.com/tas50))
+- Antima/dependabot/bundler/src/oc id/rails 6.1.4 code changes [#2678](https://github.com/chef/chef-server/pull/2678) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+<!-- latest_stable_release -->
+
 ## [14.6.32](https://github.com/chef/chef-server/tree/14.6.32) (2021-07-19)
 
 #### Merged Pull Requests
@@ -74,7 +72,6 @@
 - Bump nokogiri from 1.11.4 to 1.11.7 in /src/oc-id [#2629](https://github.com/chef/chef-server/pull/2629) ([dependabot[bot]](https://github.com/dependabot[bot]))
 - Bump veil from `ac0a762` to `eb86d6e` in /src/oc-id [#2627](https://github.com/chef/chef-server/pull/2627) ([dependabot[bot]](https://github.com/dependabot[bot]))
 - Update markdown and copyrights in private cookbook content [#2578](https://github.com/chef/chef-server/pull/2578) ([tas50](https://github.com/tas50))
-<!-- latest_stable_release -->
 
 ## [14.5.29](https://github.com/chef/chef-server/tree/14.5.29) (2021-06-23)
 
