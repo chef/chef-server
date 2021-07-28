@@ -1,9 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release -->
+<!-- latest_release 14.7.14 -->
+## [14.7.14](https://github.com/chef/chef-server/tree/14.7.14) (2021-07-28)
+
+#### Merged Pull Requests
+- Update pg gem to 1.2.3 [#2611](https://github.com/chef/chef-server/pull/2611) ([jashaik](https://github.com/jashaik))
 <!-- latest_release -->
 
-<!-- release_rollup -->
+<!-- release_rollup since=14.7.13 -->
+### Changes since 14.7.13 release
+
+#### Merged Pull Requests
+- Update pg gem to 1.2.3 [#2611](https://github.com/chef/chef-server/pull/2611) ([jashaik](https://github.com/jashaik)) <!-- 14.7.14 -->
 <!-- release_rollup -->
 
 <!-- latest_stable_release -->
