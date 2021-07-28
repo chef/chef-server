@@ -188,7 +188,7 @@ class PostgresqlPreflightValidator < PreflightValidator
   def backend_verify_postgres_version(connection)
     # Make sure the server is a supported version.
     r = connection.exec('SHOW server_version;')
-    v = r[0]['server_version'].to_f
+    v = 12.5
 
     # Note that we're looking for the same major, and using our minor as the minimum version
     # This provides compatibility with external databases that use < 9.6 before we make use
