@@ -13,7 +13,9 @@ provisioner:
 
 platforms:
   - name: ubuntu-18.04
-    run_list: apt::default
+    lifecycle:
+      pre_converge:
+      - remote: apt update
   - name: centos-7
     run_list:  yum-centos::default
   - name: sles-12
