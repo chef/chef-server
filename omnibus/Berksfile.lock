@@ -1,14 +1,15 @@
 DEPENDENCIES
-  apt
-  omnibus
+  omnibus (~> 6.0)
   yum-centos
   zip
 
 GRAPH
-  apt (7.4.0)
+  ark (6.0.2)
+    seven_zip (>= 3.1)
   chef-ingredient (3.3.0)
   chef-sugar (5.1.12)
-  git (10.1.0)
+  git (11.0.0)
+    ark (>= 0.0.0)
   homebrew (5.2.1)
   omnibus (6.0.0)
     chef-ingredient (>= 0.21.4)
