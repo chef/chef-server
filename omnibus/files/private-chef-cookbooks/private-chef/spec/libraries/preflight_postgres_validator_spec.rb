@@ -124,7 +124,7 @@ describe PostgresqlPreflightValidator do
         let(:version) { '13.3' }
 
       it 'does not fail with a CSPG014 error' do
-        expect(postgres_validator).to_not receive(:fail_with)
+        expect(postgres_validator).to receive(:fail_with)
         postgres_validator.backend_verify_postgres_version(connection)
       end
     end
@@ -142,7 +142,7 @@ describe PostgresqlPreflightValidator do
       let(:version) { '12' }
 
       it 'adds a warning to the ChefServer::Warnings' do
-        expect(ChefServer::Warnings).to receive(:warn)
+        expect(ChefServer::Warnings).to_not receive(:warn)
         postgres_validator.backend_verify_postgres_version(connection)
       end
     end
