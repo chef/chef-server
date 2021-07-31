@@ -18,7 +18,7 @@ add_command_under_category 'backup', 'general', 'Backup the Chef Server', 2 do
       options.agree_to_go_offline = true
     end
 
-    opts.on('--pg-options [string]', 'Additional options to pass to postgress during backups') do |pg_options|
+    opts.on('--pg-options [string]', 'Additional options to pass to PostgreSQL during backups') do |pg_options|
       options.pg_options = pg_options
     end
 
@@ -66,7 +66,7 @@ add_command_under_category 'restore', 'general', 'Restore the Chef Server from b
       options.agree_to_cleanse = 'yes'
     end
 
-    opts.on('--pg-options [string]', 'Additional options to pass to postgress during backups') do |pg_options|
+    opts.on('--pg-options [string]', 'Additional options to pass to PostgreSQL during backups') do |pg_options|
       options.pg_options = pg_options
     end
 
