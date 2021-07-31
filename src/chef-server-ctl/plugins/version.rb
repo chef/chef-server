@@ -14,7 +14,7 @@
 # limitations under the License.
 require 'json'
 
-add_command_under_category "version", "general", "Display current version of Chef Server.", 2 do
+add_command_under_category "version", "general", "Display current version of the Chef Infra Server.", 2 do
 
   begin
     # detect if running as a habitat service

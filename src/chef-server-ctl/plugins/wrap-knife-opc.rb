@@ -20,17 +20,17 @@ knife_cmd    = ::ChefServerCtl::Config.knife_bin
 cmd_args     = ARGV[1..-1]
 
 cmds = {
-  "org-create"      => ["create", "org", "Create an organization in the chef server."],
-  "org-delete"      => ["delete", "org", "Delete an organization in the chef server."],
-  "org-list"        => ["list", "org", "List all organizations in the chef server."],
-  "org-show"        => ["show", "org", "Show an organization in the chef server."],
+  "org-create"      => ["create", "org", "Create an organization in the Chef Infra Server."],
+  "org-delete"      => ["delete", "org", "Delete an organization in the Chef Infra Server."],
+  "org-list"        => ["list", "org", "List all organizations in the Chef Infra Server."],
+  "org-show"        => ["show", "org", "Show an organization in the Chef Infra Server."],
   "org-user-add"    => ["add", "org user", "Associate a user with an organization."],
   "org-user-remove" => ["remove", "org user", "Dissociate a user with an organization."],
-  "user-create"     => ["create", "user", "Create a user in the chef server."],
-  "user-delete"     => ["delete", "user", "Delete a user in the chef server."],
-  "user-edit"       => ["edit", "user", "Edit a user in the chef server."],
-  "user-list"       => ["list", "user", "List all users in the chef server."],
-  "user-show"       => ["show", "user", "Show a user in the chef server."],
+  "user-create"     => ["create", "user", "Create a user in the Chef Infra Server."],
+  "user-delete"     => ["delete", "user", "Delete a user in the Chef Infra Server."],
+  "user-edit"       => ["edit", "user", "Edit a user in the Chef Infra Server."],
+  "user-list"       => ["list", "user", "List all users in the Chef Infra Server."],
+  "user-show"       => ["show", "user", "Show a user in the Chef Infra Server."],
 }
 
 cmds.each do |cmd, args|
