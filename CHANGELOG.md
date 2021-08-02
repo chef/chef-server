@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.7.19 -->
-## [14.7.19](https://github.com/chef/chef-server/tree/14.7.19) (2021-08-02)
+<!-- latest_release 14.7.20 -->
+## [14.7.20](https://github.com/chef/chef-server/tree/14.7.20) (2021-08-02)
 
 #### Merged Pull Requests
-- Better describe what chef-server-ctl upgrade does [#2687](https://github.com/chef/chef-server/pull/2687) ([tas50](https://github.com/tas50))
+- Branding updates in the chef-server-ctl command [#2685](https://github.com/chef/chef-server/pull/2685) ([tas50](https://github.com/tas50))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.7.13 -->
 ### Changes since 14.7.13 release
 
 #### Merged Pull Requests
+- Branding updates in the chef-server-ctl command [#2685](https://github.com/chef/chef-server/pull/2685) ([tas50](https://github.com/tas50)) <!-- 14.7.20 -->
 - Better describe what chef-server-ctl upgrade does [#2687](https://github.com/chef/chef-server/pull/2687) ([tas50](https://github.com/tas50)) <!-- 14.7.19 -->
 - Fix incorrect spelling of PostgreSQL [#2686](https://github.com/chef/chef-server/pull/2686) ([tas50](https://github.com/tas50)) <!-- 14.7.18 -->
 - Bump omnibus-software from `a4f73e4` to `c172afb` in /omnibus [#2684](https://github.com/chef/chef-server/pull/2684) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.7.17 -->
