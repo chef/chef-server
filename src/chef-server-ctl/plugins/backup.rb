@@ -3,7 +3,7 @@ require 'chef/mixin/deep_merge'
 require 'optparse'
 require 'ostruct'
 
-add_command_under_category 'backup', 'general', 'Backup the Chef Server', 2 do
+add_command_under_category 'backup', 'general', 'Backup the Chef Infra Server', 2 do
   ensure_configured!
   ensure_rsync!
 
@@ -48,7 +48,7 @@ add_command_under_category 'backup', 'general', 'Backup the Chef Server', 2 do
   exit(0)
 end
 
-add_command_under_category 'restore', 'general', 'Restore the Chef Server from backup', 2 do
+add_command_under_category 'restore', 'general', 'Restore the Chef Infra Server from backup', 2 do
   ensure_rsync!
 
   options = OpenStruct.new
