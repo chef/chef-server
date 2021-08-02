@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.7.15 -->
-## [14.7.15](https://github.com/chef/chef-server/tree/14.7.15) (2021-07-28)
+<!-- latest_release 14.7.16 -->
+## [14.7.16](https://github.com/chef/chef-server/tree/14.7.16) (2021-08-02)
 
 #### Merged Pull Requests
-- Bump redis from 4.3.1 to 4.4.0 in /src/chef-server-ctl [#2680](https://github.com/chef/chef-server/pull/2680) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump omnibus from `6d109b6` to `9ffcd89` in /omnibus [#2683](https://github.com/chef/chef-server/pull/2683) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.7.13 -->
 ### Changes since 14.7.13 release
 
 #### Merged Pull Requests
+- Bump omnibus from `6d109b6` to `9ffcd89` in /omnibus [#2683](https://github.com/chef/chef-server/pull/2683) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.7.16 -->
 - Bump redis from 4.3.1 to 4.4.0 in /src/chef-server-ctl [#2680](https://github.com/chef/chef-server/pull/2680) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.7.15 -->
 - Update pg gem to 1.2.3 [#2611](https://github.com/chef/chef-server/pull/2611) ([jashaik](https://github.com/jashaik)) <!-- 14.7.14 -->
 <!-- release_rollup -->
