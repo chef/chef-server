@@ -140,18 +140,18 @@ end
 
 def do_upgrade(migration_state, migrations)
   pending_migrations = migrations.select{ |m| m > migration_state }.sort
-  log("Latest Database Migration Available: #{migrations.last}")
-  log("Database Migrations to Run: #{pending_migrations}")
+  log("Latest PostgreSQL Database Migration Available: #{migrations.last}")
+  log("Database PostgreSQL Database Migrations to Run: #{pending_migrations}")
 
   # run them through the DSL
   pending_migrations.each do |migration|
-    log("Current Database Migration Version: #{migration_state}")
+    log("Current PostgreSQL Database Migration Version: #{migration_state}")
     start_time = Time.now
-    log("Starting Database Migration #{migration}")
+    log("Starting PostgreSQL Database Migration #{migration}")
     migration.run_migration
     end_time = Time.now
     elapsed_time = end_time - start_time
-    log("Finished Database Migration #{migration} in #{elapsed_time.round(2)} seconds")
+    log("Finished PostgreSQL Database Migration #{migration} in #{elapsed_time.round(2)} seconds")
   end
 end
 
