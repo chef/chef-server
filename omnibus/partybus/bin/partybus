@@ -141,7 +141,7 @@ end
 def do_upgrade(migration_state, migrations)
   pending_migrations = migrations.select{ |m| m > migration_state }.sort
   log("Latest PostgreSQL Database Migration Available: #{migrations.last}")
-  log("Database PostgreSQL Database Migrations to Run: #{pending_migrations}")
+  log("Database PostgreSQL Database Migrations to Run: #{pending_migrations.empty? ? "none" : pending_migrations}")
 
   # run them through the DSL
   pending_migrations.each do |migration|
