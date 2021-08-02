@@ -150,7 +150,7 @@ module PrivateChef
 
         ChefServer::Warnings.warn <<~EOF
           The configuration parameter postgresql['#{setting}'] is no longer used
-          by Chef Server. To limit the amount of shared memory used by
+          by Chef Infra Server. To limit the amount of shared memory used by
           postgresql use postgresql['shared_buffers'] instead.
         EOF
       end
@@ -521,7 +521,7 @@ module PrivateChef
         end
       end
       if ldap_encryption
-        Chef::Log.warn("Please note that the ldap 'encryption' setting is deprecated as of Chef Server 12.0. Use either "\
+        Chef::Log.warn("Please note that the ldap 'encryption' setting is deprecated as of Chef Infra Server 12.0. Use either "\
                        "ldap['ssl_enabled'] = true or ldap['tls_enabled'] = true.")
         case ldap_encryption.to_s
         when 'simple_tls'
@@ -571,12 +571,12 @@ module PrivateChef
       when 'ha'
         Chef::Log.fatal <<~EOF
           DRBD_HA_002: Topology "ha" no longer supported.
-          The DRBD/keepalived based HA subsystem was deprecated as of Chef Server
+          The DRBD/keepalived based HA subsystem was deprecated as of Chef Infra Server
           12.9, and officially reached end of life on 2019-03-31. It has been
-          disabled in Chef Server 13.
+          disabled in Chef Infra Server 13.
 
           See this post for more details:
-          https://blog.chef.io/2018/10/02/end-of-life-announcement-for-drbd-based-ha-support-in-chef-server/
+          https://blog.chef.io/end-of-life-announcement-for-drbd-based-ha-support-in-chef-server
 
           What are my options?
 
@@ -585,8 +585,8 @@ module PrivateChef
           of a Chef Infra License.
 
           For more information on migrating from DRBD HA to Chef Backend or other HA, see this blog
-          post and webinar: Best Practices for Migrating your Chef Server at
-          https://blog.chef.io/2018/04/06/best-practices-for-migrating-your-chef-server/
+          post and webinar: Best Practices for Migrating your Chef Infra Server at
+          https://blog.chef.io/best-practices-for-migrating-your-chef-server
 
           Customers in cloud environments are also encouraged to look at AWS OpsWorks
           and the Chef Automate Managed Service for Azure.
