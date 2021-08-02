@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.7.21 -->
-## [14.7.21](https://github.com/chef/chef-server/tree/14.7.21) (2021-08-02)
+<!-- latest_release 14.7.22 -->
+## [14.7.22](https://github.com/chef/chef-server/tree/14.7.22) (2021-08-02)
 
 #### Merged Pull Requests
-- Add basic server usage information to gather-logs [#2666](https://github.com/chef/chef-server/pull/2666) ([tas50](https://github.com/tas50))
+- Improve migration logging a bit [#2670](https://github.com/chef/chef-server/pull/2670) ([tas50](https://github.com/tas50))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.7.13 -->
 ### Changes since 14.7.13 release
 
 #### Merged Pull Requests
+- Improve migration logging a bit [#2670](https://github.com/chef/chef-server/pull/2670) ([tas50](https://github.com/tas50)) <!-- 14.7.22 -->
 - Add basic server usage information to gather-logs [#2666](https://github.com/chef/chef-server/pull/2666) ([tas50](https://github.com/tas50)) <!-- 14.7.21 -->
 - Branding updates in the chef-server-ctl command [#2685](https://github.com/chef/chef-server/pull/2685) ([tas50](https://github.com/tas50)) <!-- 14.7.20 -->
 - Better describe what chef-server-ctl upgrade does [#2687](https://github.com/chef/chef-server/pull/2687) ([tas50](https://github.com/tas50)) <!-- 14.7.19 -->
