@@ -6,7 +6,7 @@
 require 'optparse'
 require 'ostruct'
 
-add_command_under_category "upgrade", "general", "Upgrade your private chef installation.", 2 do
+add_command_under_category "upgrade", "general", "Upgrade your Chef Infra Server 11 installation.", 2 do
 
   # Since this is evaled, need to have methods first so they can be picked up
 
