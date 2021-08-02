@@ -116,13 +116,13 @@ def infer_migration_state(migrations, force)
     # machine
     migration_16 = migrations.find {|m| m.major == 1 && m.minor == 16}
     if migration_16.run_check
-      log "Inferring migration level of Chef Server 12.0.0 (1.19) from presence of migration 16 and absence of migration 20"
+      log "Inferring migration level of Chef Infra Server 12.0.0 (1.19) from presence of migration 16 and absence of migration 20"
       migration_19 = migrations.find {|m| m.major == 1 && m.minor == 19}
       write_migration_state(migration_19)
       exit(0)
     end
 
-    # Since migrations 14-19 shipped as a set in Chef Server 12.0.0
+    # Since migrations 14-19 shipped as a set in Chef Infra Server 12.0.0
     # and since we don't support upgrades from versions before
     # migration 1.13, we either have 1.13 or we fail:
     migration_13 = migrations.find {|m| m.major == 1 && m.minor == 13}
@@ -131,7 +131,7 @@ def infer_migration_state(migrations, force)
       write_migration_state(migration_13)
       exit(0)
     else
-      log "Data appears to be from a version of Chef Server before Enterprise Chef 11.1 (migration 1.13)"
+      log "Data appears to be from a version of Chef Infra Server before Enterprise Chef 11.1 (migration 1.13)"
       log "Please contact Chef Support (support@chef.io) for help upgrading your Enterprise Chef installation."
       exit(1)
     end
@@ -170,7 +170,7 @@ File.open(Partybus.config.migration_state_file, File::RDWR | File::CREAT) do |f|
 
       if !migration_state_has_content?
         log "ERROR: migration-level not initialized."
-        log "ERROR: If this is an existing Chef Server install try running `chef-server-ctl rebuild-migration-state` and then retry the upgrade"
+        log "ERROR: If this is an existing Chef Infra Server install try running `chef-server-ctl rebuild-migration-state` and then retry the upgrade"
         exit(1)
       end
 
