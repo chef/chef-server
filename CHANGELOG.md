@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.7.17 -->
-## [14.7.17](https://github.com/chef/chef-server/tree/14.7.17) (2021-08-02)
+<!-- latest_release 14.7.18 -->
+## [14.7.18](https://github.com/chef/chef-server/tree/14.7.18) (2021-08-02)
 
 #### Merged Pull Requests
-- Bump omnibus-software from `a4f73e4` to `c172afb` in /omnibus [#2684](https://github.com/chef/chef-server/pull/2684) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Fix incorrect spelling of PostgreSQL [#2686](https://github.com/chef/chef-server/pull/2686) ([tas50](https://github.com/tas50))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.7.13 -->
 ### Changes since 14.7.13 release
 
 #### Merged Pull Requests
+- Fix incorrect spelling of PostgreSQL [#2686](https://github.com/chef/chef-server/pull/2686) ([tas50](https://github.com/tas50)) <!-- 14.7.18 -->
 - Bump omnibus-software from `a4f73e4` to `c172afb` in /omnibus [#2684](https://github.com/chef/chef-server/pull/2684) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.7.17 -->
 - Bump omnibus from `6d109b6` to `9ffcd89` in /omnibus [#2683](https://github.com/chef/chef-server/pull/2683) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.7.16 -->
 - Bump redis from 4.3.1 to 4.4.0 in /src/chef-server-ctl [#2680](https://github.com/chef/chef-server/pull/2680) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.7.15 -->
