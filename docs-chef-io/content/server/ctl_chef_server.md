@@ -451,7 +451,7 @@ This subcommand has the following options:
 `--with-restart`
 
 :   If any services depend on the secret being changed, attempt to
-    restart them after changing the secret. Added in Chef Server
+    restart them after changing the secret. Added in Chef Infra Server
     12.16.2.
 
 ### remove-secret
@@ -549,7 +549,7 @@ chef-server-ctl oc-id-show-app supermarket
 
 The `require-credential-rotation` subcommand takes the Chef Infra Server
 offline and requires a complete service credential rotation before the
-Chef server(s) in your cluster can restart again. Run
+Chef Infra Server(s) in your cluster can restart again. Run
 `rotate-shared-secrets` to create a new shared secret, salt, and
 generate the new service credentials. Then copy the secrets file to each
 Chef Infra Server and run `sudo chef-server-ctl reconfigure` on each
@@ -647,7 +647,7 @@ chef-server-ctl show-service-credentials
 
 The `cleanup-bifrost` subcommand removes unused authorization objects
 from the authorization database (called bifrost). These unused objects
-can accumulate on long-running Chef servers as a result of failed object
+can accumulate on long-running Chef Infra Servers as a result of failed object
 creation requests. For most users, the unused authorization objects do
 not substantially affect the performance of Chef Infra Server; however
 in certain situations it can be helpful to clean them up. This command
@@ -880,7 +880,7 @@ associated with the named service. This subcommand:
 -   Uses `psql` (the interactive terminal for PostgreSQL)
 -   Has read-only access by default
 -   Is the recommended way to interact with any PostgreSQL database that
-    is part of the Chef server
+    is part of the Chef Infra Server
 -   Automatically handles authentication
 
 **Syntax**
@@ -1018,12 +1018,12 @@ This subcommand has the following options:
 
 `-d DIRECTORY`, `--chef11-data-dir DIRECTORY`
 
-:   The directory in which Chef Server 11 data is located. Default
+:   The directory in which Chef Infra Server 11 data is located. Default
     value: a temporary directory.
 
 `-e DIRECTORY`, `--chef12-data-dir DIRECTORY`
 
-:   The directory in which Chef Server 12 data is located. Default
+:   The directory in which Chef Infra Server 12 data is located. Default
     value: a temporary directory.
 
 `-f FULL_NAME`, `--full-org-name FULL_NAME`
@@ -1039,8 +1039,8 @@ This subcommand has the following options:
 
 `-k KEY_PATH`, `--key KEY_PATH`
 
-:   The Chef Server 11 `admin.pem` key for the API client. This is the
-    key used to download Chef Server 11 data. Default value:
+:   The Chef Infra Server 11 `admin.pem` key for the API client. This is the
+    key used to download Chef Infra Server 11 data. Default value:
     `/etc/chef-server/admin.pem`.
 
 `-o ORG_NAME`, `--org-name ORG_NAME`
@@ -1053,7 +1053,7 @@ This subcommand has the following options:
 
 `-s URL`, `--chef11-server-url URL`
 
-:   The URL for the Chef Server version 11. Default value:
+:   The URL for the Chef Infra Server version 11. Default value:
     `https://localhost`.
 
 `-t NUMBER`, `--upload-threads NUMBER`
