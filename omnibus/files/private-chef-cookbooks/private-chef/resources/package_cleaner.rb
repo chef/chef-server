@@ -22,56 +22,36 @@
 
 # Completely clean up after a given service / package
 
-property :package,
-  kind_of: String,
-  name_property: true
+property :package, String, name_property: true
 
 # Directories that should be recursively removed
-property :directories,
-  kind_of: Array,
-  default: []
+property :directories, Array, default: []
 
 # Files that should be removed
-property :files,
-  kind_of: Array,
-  default: []
+property :files, Array, default: []
 
 # Links that should be unlinked
-property :links,
-  kind_of: Array,
-  default: []
+property :links, Array, default: []
 
 # Users created for this service that should be removed
-property :users,
-  kind_of: Array,
-  default: []
+property :users, Array, default: []
 
 # Groups created for this service that should be removed
-property :groups,
-  kind_of: Array,
-  default: []
+property :groups, Array, default: []
 
 # Some packages to be removed are also governed by runit services.  In
 # that case, we'll need to remove the control files, links, etc, for
 # those services
-property :is_service,
-  kind_of: [TrueClass, FalseClass],
-  default: true
+property :is_service, [true, false], default: true
 
 # Directory where runit service folders are dropped off.
-property :service_root,
-  kind_of: String,
-  default: '/opt/opscode/sv'
+property :service_root, String, default: '/opt/opscode/sv'
 
 # Directory where *links* to the runit service folders are dropped off
-property :service_link_root,
-  kind_of: String,
-  default: '/opt/opscode/service'
+property :service_link_root, String, default: '/opt/opscode/service'
 
 # Directory where links to the sv binary are dropped off
-property :service_init_link_root,
-  kind_of: String,
-  default: '/opt/opscode/init'
+property :service_init_link_root, String, default: '/opt/opscode/init'
 
 action :clean do
   remove_service if new_resource.is_service

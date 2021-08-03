@@ -14,17 +14,12 @@
 # limitations under the License.
 #
 
-property :username,
-  kind_of: String,
-  name_property: true
 
-property :database,
-  kind_of: String,
-  required: true
+property :username, String, name_property: true
 
-property :schema,
-  kind_of: String,
-  required: true
+property :database, String, required: true
+
+property :schema, String, required: true
 
 property :access_profile, Symbol, equal_to: %i(write read), required: true
 

@@ -18,9 +18,9 @@
 provides :oc_id_application
 resource_name :oc_id_application
 
-property :write_to_disk, kind_of: [TrueClass, FalseClass], default: false
+property :write_to_disk, [true, false], default: false
 
-property :redirect_uri, kind_of: String, required: true
+property :redirect_uri, String, required: true
 
 action :create do
   converge_by "create oc-id application '#{new_resource.name}'" do

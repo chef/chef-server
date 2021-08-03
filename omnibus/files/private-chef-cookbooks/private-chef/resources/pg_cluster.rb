@@ -14,9 +14,7 @@
 # limitations under the License.
 #
 
-property :data_dir,
-  kind_of: String,
-  name_property: true
+property :data_dir, String, name_property: true
 
 # NOTE: Uses the value of node['private_chef']['postgresql']['username'] as
 # the user to run the initdb command.  This user will also be the
