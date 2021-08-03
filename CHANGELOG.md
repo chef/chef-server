@@ -2445,7 +2445,7 @@ https://raw.githubusercontent.com/antirez/redis/2.8/00-RELEASENOTES
 * Add ability to configure SQL query timeout for Erchef, bifrost and mover.
 * Provide reasonable default for LDAP and LDAPS ports.
 * Deprecate ldap "encryption" setting and replace with
-  `ssl_enabled`/`tls_enabled`. Add further validation and sanity checks around
+  `ssl_enabled`/`tls_enabled`. Add further validation and basic checks around
   ldap settings, as well as deprecation warnings.
 * Add ability to configure timeout for connect() when connecting to backends.
 

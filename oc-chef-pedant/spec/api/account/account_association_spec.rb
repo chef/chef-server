@@ -366,7 +366,7 @@ describe "opscode-account user association", :association do
 
     context "and no association requests exist" do
       before do
-        # Sanity checks
+        # Basic checks
         no_invites_for_org
         no_invites_for_user(platform.bad_user)
       end

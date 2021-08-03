@@ -22,7 +22,7 @@ class AuthPreflightValidator < PreflightValidator
   end
 
   def run!
-    # Sanity check: for any configuration we should expect that
+    # Basic check: for any configuration we should expect that
     # both LDAP and SAML auth cannot be enabled simultaneously
     # across Chef Infra Server and Chef Manage
     validate_sane_state
@@ -37,7 +37,7 @@ class AuthPreflightValidator < PreflightValidator
       chef_manage = JSON.parse(IO.read('/var/opt/chef-manage/etc/chef-manage-running.json'))
     end
 
-    # Do a sanity check to make sure both SAML and LDAP are not enabled at the same time
+    # Do a basic check to make sure both SAML and LDAP are not enabled at the same time
     ldap_enabled = !(@user_ldap.nil? || @user_ldap.empty?)
     saml_enabled = chef_manage['chef-manage'] && chef_manage['chef-manage']['saml'] && chef_manage['chef-manage']['saml']['enabled']
 

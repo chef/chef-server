@@ -22,11 +22,11 @@ class SslPreflightValidator < PreflightValidator
   end
 
   def run!
-    verify_fips_sanity
+    validate_fips
     verify_cert_pair
   end
 
-  def verify_fips_sanity
+  def validate_fips
     if PrivateChef['fips'] && !fips_supported_ssl?
       fail_with <<~EOF
         You have enabled FIPS-mode in chef-server.rb but FIPS does not appear

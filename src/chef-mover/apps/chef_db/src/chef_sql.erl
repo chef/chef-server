@@ -837,7 +837,7 @@ non_uploaded_checksums(SandboxId, OrgId) when is_binary(SandboxId),
 fetch_object(Keys, RecordName, QueryName, RecordFields) ->
     FirstRecordTxfm = {first_as_record, [RecordName, RecordFields]},
     case sqerl:select(QueryName, Keys, FirstRecordTxfm) of
-        %% Awkward sanity check that we got back the expected record type here.
+        %% Awkward basic check that we got back the expected record type here.
         {ok, Object} when RecordName =:= element(1, Object) ->
             {ok, Object};
         {ok, none} ->
