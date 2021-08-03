@@ -14,21 +14,15 @@
 # limitations under the License.
 #
 
-property :username,
-  kind_of: String,
-  name_property: true
+provides :pg_user_table_access
 
-property :database,
-  kind_of: String,
-  required: true
+property :username, String, name_property: true
 
-property :schema,
-  kind_of: String,
-  required: true
+property :database, String, required: true
 
-property :access_profile,
-  equal_to: %i(write read),
-  required: true
+property :schema, String, required: true
+
+property :access_profile, Symbol, equal_to: %i(write read), required: true
 
 # NOTE: Uses the value of node['private_chef']['postgresql']['db_connection_superuser'] and ['db_superuser_password]
 # to make the connection to the postgres server.

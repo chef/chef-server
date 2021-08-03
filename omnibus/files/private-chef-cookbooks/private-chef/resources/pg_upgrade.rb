@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 
-# That's right folks, there are no attributes.
+# That's right folks, there are no properties.
 
 # NOTE: Uses the value of certain node attributes in the course of execution.
 #
@@ -60,6 +60,8 @@
 # creation and updating are separate steps (and we could conceivably
 # fail between them), we're going to drop off a sentinel file that we
 # can check to see if we've been migrated.
+
+provides :pg_upgrade
 
 action :upgrade do
   if upgrade_required?

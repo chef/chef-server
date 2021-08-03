@@ -14,13 +14,13 @@
 # limitations under the License.
 #
 
-property :database,       kind_of: String, required: true
-property :username,       kind_of: String
-property :password,       kind_of: String, required: false, default: ''
-property :target_version, kind_of: String
-property :hostname,       kind_of: String, required: true
-property :port,           kind_of: Integer, required: true
-property :sslmode,        kind_of: String, required: false, default: 'disable'
+property :database,       String, required: true
+property :username,       String
+property :password,       String, required: false, default: ''
+property :target_version, String
+property :hostname,       String, required: true
+property :port,           Integer, required: true
+property :sslmode,        String, required: false, default: 'disable'
 
 action :deploy do
   target = new_resource.target_version ? "--to-target #{new_resource.target_version}" : ''

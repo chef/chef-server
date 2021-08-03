@@ -14,6 +14,8 @@
 # limitations under the License.
 #
 
+provides :pg_user
+
 property :username,
   kind_of: String,
   name_property: true

@@ -19,11 +19,11 @@
 id_attrs = node['private_chef']['oc_id']
 
 # create users
-private_chef_pg_user id_attrs['sql_user'] do
+pg_user id_attrs['sql_user'] do
   password PrivateChef.credentials.get('oc_id', 'sql_password')
 end
 
-private_chef_pg_user id_attrs['sql_ro_user'] do
+pg_user id_attrs['sql_ro_user'] do
   password PrivateChef.credentials.get('oc_id', 'sql_ro_password')
 end
 
@@ -31,7 +31,7 @@ private_chef_pg_database 'oc_id' do
   owner id_attrs['sql_user']
 end
 
-private_chef_pg_user_table_access id_attrs['sql_ro_user'] do
+pg_user_table_access id_attrs['sql_ro_user'] do
   database 'oc_id'
   schema 'public'
   access_profile :read

@@ -18,12 +18,12 @@ bookshelf_attrs = node['private_chef']['bookshelf']
 postgres_attrs = node['private_chef']['postgresql']
 
 # create users
-private_chef_pg_user bookshelf_attrs['sql_user'] do
+pg_user bookshelf_attrs['sql_user'] do
   password PrivateChef.credentials.get('bookshelf', 'sql_password')
   superuser false
 end
 
-private_chef_pg_user bookshelf_attrs['sql_ro_user'] do
+pg_user bookshelf_attrs['sql_ro_user'] do
   password PrivateChef.credentials.get('bookshelf', 'sql_ro_password')
   superuser false
 end
@@ -35,13 +35,13 @@ private_chef_pg_database 'bookshelf' do
   notifies :deploy, 'private_chef_pg_sqitch[/opt/opscode/embedded/service/bookshelf/schema]', :immediately
 end
 
-private_chef_pg_user_table_access bookshelf_attrs['sql_user'] do
+pg_user_table_access bookshelf_attrs['sql_user'] do
   database 'bookshelf'
   schema 'public'
   access_profile :write
 end
 
-private_chef_pg_user_table_access bookshelf_attrs['sql_ro_user'] do
+pg_user_table_access bookshelf_attrs['sql_ro_user'] do
   database 'bookshelf'
   schema 'public'
   access_profile :read
