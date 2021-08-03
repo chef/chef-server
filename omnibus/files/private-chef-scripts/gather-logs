@@ -9,46 +9,19 @@ POSTGRESQL_UNIX_USER=${POSTGRESQL_UNIX_USER:=opscode-pgsql}
 modified_within_last_x_minutes=180
 tail_lines=10000
 
-type='CS'
-if [[ -n $1 ]];
-then
-    type=$1
-fi
-
 #Lets have a way to avoid things that take a while, like DNS
-if [[ -n $2  ]];
+if [[ -n $1  ]];
 then
     testing=true
 fi
 
-if [[ $type == 'CS' ]];
+path='opscode'
+ctl_cmd='private-chef-ctl'
+config_name='*chef*.rb'
+
+if [[ ! -e "/opt/$path/bin/$ctl_cmd" ]];
 then
-    path='opscode'
-    ctl_cmd='private-chef-ctl'
-    config_name='*chef*.rb'
-
-    if [[ ! -e "/opt/$path/bin/$ctl_cmd" ]];
-    then
-        echo "ERROR: Chef Infra Server may not be installed."
-        exit 1
-    fi
-elif [[ $type == 'OSC' ]];
-then
-    path='chef-server'
-    ctl_cmd='chef-server-ctl'
-    config_name='chef-server.rb'
-
-    if [[ ! -e "/opt/$path/bin/$ctl_cmd" ]];
-    then
-        echo "ERROR: Open Source Chef Server 11 may not be installed."
-        exit 1
-    fi
-
-    echo "Gathering logs from Open Source Chef server 11."
-else
-    echo "Usage: gather-logs [ CS | OSC ]"
-    echo "CS - Enterprise or Chef Server (default)"
-    echo "OSC - Open Source Chef Server 11"
+    echo "ERROR: Chef Infra Server may not be installed."
     exit 1
 fi
 config_file_path="/etc/$path/$config_name"
@@ -112,37 +85,32 @@ fi
 
 $ctl_cmd status > "$tmpdir/$ctl_cmd"_status.txt
 
-if [[ $type == 'CS' ]];
+
+STATSPW=$($ctl_cmd show-secret opscode_erchef stats_password)
+if [ -n "$STATSPW" ];
 then
-    STATSPW=$($ctl_cmd show-secret opscode_erchef stats_password)
-    if [ -n "$STATSPW" ];
-    then
-        curl -k -s -X GET "https://statsuser:$STATSPW@localhost/_stats?format=text" status > "$tmpdir/chef_server_stats_endpoint.txt"
-    else
-        curl -k -s -X GET "https://localhost/_stats?format=text" status > "$tmpdir/chef_server_stats_endpoint.txt"
-    fi
+    curl -k -s -X GET "https://statsuser:$STATSPW@localhost/_stats?format=text" status > "$tmpdir/chef_server_stats_endpoint.txt"
+else
+    curl -k -s -X GET "https://localhost/_stats?format=text" status > "$tmpdir/chef_server_stats_endpoint.txt"
 fi
 
-if [[ $type == 'CS' ]];
-then
-    # postgres server may be external - we'll go ahead and try to gather what we can in any case, and just capture errors to the output
-    # without showing them to the user
-    echo "SELECT CURRENT_TIMESTAMP; SELECT * FROM pg_stat_activity;" | chef-server-ctl psql oc_erchef --as-admin --options -tA > "$tmpdir/pg_stat_activity.txt" 2>&1
-    echo "SELECT * FROM sqitch.tags;" |  chef-server-ctl psql oc_erchef --as-admin --options -tA  > "$tmpdir/opscode_chef_sqitch_tags.txt" 2>&1
-    echo "SELECT * FROM sqitch.tags;" |  chef-server-ctl psql bifrost --as-admin --options -tA > "$tmpdir/bifrost_sqitch_tags.txt" 2>&1
+# postgres server may be external - we'll go ahead and try to gather what we can in any case, and just capture errors to the output
+# without showing them to the user
+echo "SELECT CURRENT_TIMESTAMP; SELECT * FROM pg_stat_activity;" | chef-server-ctl psql oc_erchef --as-admin --options -tA > "$tmpdir/pg_stat_activity.txt" 2>&1
+echo "SELECT * FROM sqitch.tags;" |  chef-server-ctl psql oc_erchef --as-admin --options -tA  > "$tmpdir/opscode_chef_sqitch_tags.txt" 2>&1
+echo "SELECT * FROM sqitch.tags;" |  chef-server-ctl psql bifrost --as-admin --options -tA > "$tmpdir/bifrost_sqitch_tags.txt" 2>&1
 
-    # gather usage information
-    mkdir -p "$tmpdir/infra_server_usage"
-    echo "SELECT count(DISTINCT org_id) FROM nodes;" |  chef-server-ctl psql oc_erchef --as-admin --options -tA > "$tmpdir/infra_server_usage/consumed_orgs.txt" 2>&1
-    echo "SELECT count(DISTINCT environment) FROM nodes WHERE NOT name='_default';" |  chef-server-ctl psql oc_erchef --as-admin --options -tA > "$tmpdir/infra_server_usage/consumed_environments.txt" 2>&1
-    echo "SELECT count(DISTINCT policy_group) FROM nodes;" |  chef-server-ctl psql oc_erchef --as-admin --options -tA > "$tmpdir/infra_server_usage/consumed_policy_group.txt" 2>&1
-    echo "SELECT count(DISTINCT policy_name) FROM nodes;" |  chef-server-ctl psql oc_erchef --as-admin --options -tA > "$tmpdir/infra_server_usage/consumed_policy_name.txt" 2>&1
-    echo "SELECT count(*) FROM nodes;" |  chef-server-ctl psql oc_erchef --as-admin --options -tA > "$tmpdir/infra_server_usage/consumed_nodes.txt" 2>&1
-    echo 'SELECT row_to_json(users) FROM (SELECT username, admin FROM "users") AS users;' |  chef-server-ctl psql oc_erchef --as-admin --options -tA > "$tmpdir/infra_server_usage/total_users.json" 2>&1
+# gather usage information
+mkdir -p "$tmpdir/infra_server_usage"
+echo "SELECT count(DISTINCT org_id) FROM nodes;" |  chef-server-ctl psql oc_erchef --as-admin --options -tA > "$tmpdir/infra_server_usage/consumed_orgs.txt" 2>&1
+echo "SELECT count(DISTINCT environment) FROM nodes WHERE NOT name='_default';" |  chef-server-ctl psql oc_erchef --as-admin --options -tA > "$tmpdir/infra_server_usage/consumed_environments.txt" 2>&1
+echo "SELECT count(DISTINCT policy_group) FROM nodes;" |  chef-server-ctl psql oc_erchef --as-admin --options -tA > "$tmpdir/infra_server_usage/consumed_policy_group.txt" 2>&1
+echo "SELECT count(DISTINCT policy_name) FROM nodes;" |  chef-server-ctl psql oc_erchef --as-admin --options -tA > "$tmpdir/infra_server_usage/consumed_policy_name.txt" 2>&1
+echo "SELECT count(*) FROM nodes;" |  chef-server-ctl psql oc_erchef --as-admin --options -tA > "$tmpdir/infra_server_usage/consumed_nodes.txt" 2>&1
+echo 'SELECT row_to_json(users) FROM (SELECT username, admin FROM "users") AS users;' |  chef-server-ctl psql oc_erchef --as-admin --options -tA > "$tmpdir/infra_server_usage/total_users.json" 2>&1
 
-    if [[ -S "/tmp/.s.PGSQL.5432" ]]; then
-        su -m $POSTGRESQL_UNIX_USER -c 'ulimit -a' > "$tmpdir/ulimit_a_opscode-pgsql.txt"
-    fi
+if [[ -S "/tmp/.s.PGSQL.5432" ]]; then
+    su -m $POSTGRESQL_UNIX_USER -c 'ulimit -a' > "$tmpdir/ulimit_a_opscode-pgsql.txt"
 fi
 
 # Retrieve Platform and Platform Version
@@ -263,10 +231,7 @@ then
 
 fi
 
-if [[ $type == 'CS' ]];
-then
-    fqdn="api_fqdn"
-fi
+fqdn="api_fqdn"
 backend_vip="backend_vip"
 tempname=`grep -E $fqdn $config_file_path | cut -d \" -f2`
 backend_fqdn=`grep -E $backend_vip $config_file_path | cut -d \" -f2`
@@ -295,20 +260,20 @@ then
 
 fi
 
+# gather important file permissions
 for fileperms in \
     /var/opt/$path* \
         /var/log/$path*; do
     ls -altuhR "$fileperms" >> "$tmpdir/perms.txt"
 done
 
-if [[ $type == 'CS' || $type == 'OSC' ]]; then
-    migration_level_file="$tmpdir/migration-level.txt"
-    migration_level_file_location="/var/opt/$path/upgrades/migration-level"
-    if [[ -f $migration_level_file_location  ]]; then
-        cat $migration_level_file_location >> "$migration_level_file"
-    else
-        echo "!!! Migration level file not found  !!!">> "$migration_level_file";
-    fi
+# gather the db migration level
+migration_level_file="$tmpdir/migration-level.txt"
+migration_level_file_location="/var/opt/$path/upgrades/migration-level"
+if [[ -f $migration_level_file_location  ]]; then
+    cat $migration_level_file_location >> "$migration_level_file"
+else
+    echo "!!! Migration level file not found  !!!">> "$migration_level_file";
 fi
 
 #What packages do we have installed on our supported platforms?
@@ -344,7 +309,7 @@ fi
 ## grep sql_ro_password /etc/opscode-reporting/opscode-reporting-running.json | sed -e 's/^.*"\(.*\)",$/\1opscode_reporting_ro/' | tr -d '\n' | md5sum | cut -d ' ' -f1 >> "$service_passwords_file"
 ##
 ##
-if [[ $type == 'CS' && $found_reporting ]];
+if [[ $found_reporting ]];
 then
     service_passwords_file="$tmpdir/service-passwords.txt"
     db_check="echo select passwd from pg_shadow where usename=\'first\'\; | su - $POSTGRESQL_UNIX_USER -c 'psql -U opscode-pgsql postgres -t -A' | sed 's/md5//'"
