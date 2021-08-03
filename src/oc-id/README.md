@@ -27,7 +27,7 @@ To run this app you'll need:
 
 For instructions on configuring the Chef identity that is included with Chef
 server, see the
-[chef-server.rb Settings documentation](https://docs.chef.io/config_rb_server_optional_settings.html#oc-id).
+[chef-server.rb Settings documentation](https://docs.chef.io/server/config_rb_server_optional_settings/#oc-id-14).
 
 [RailsConfig](https://github.com/railsconfig/rails_config) is used for
 application configuration. The defaults are in config/settings.yml. You can
@@ -51,7 +51,7 @@ Applications that can be authorize against oc-id can be managed by
 administrators by going to /id/oauth/applications.
 
 The redirect URL is for applications using
-[omniauth-chef-oauth2](https://github.com/opscode/omniauth-chef-oauth2) is
+[omniauth-chef-oauth2](https://github.com/chef/omniauth-chef-oauth2) is
 usually something like `https://host:port/auth/chef_oauth2/callback`.
 
 ## Development
@@ -77,7 +77,7 @@ Historically we built assets in the omnibus pipeline, but that has
 proven difficult because nodejs no longer supports all of our
 platforms. Instead we are committing assets to git. This isn't ideal,
 as it makes it harder alter assets in the dev-vm; they are
-now synchronized from the host. 
+now synchronized from the host.
 
 You can locally compile assets with the command:
 

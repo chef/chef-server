@@ -11,7 +11,7 @@ Authentication
 ----------
 
 This API uses the same authentication scheme as the rest of chef; see
-http://docs.chef.io/api_chef_server.html for a description.
+https://docs.chef.io/api_chef_server.html for a description.
 
 
 Tasks Remaining

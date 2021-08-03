@@ -28,7 +28,7 @@ Once your repository is set up, you can start working on the code.
 
 Source:
 
-    https://github.com/opscode/chef_objects
+    https://github.com/chef/chef_objects
 
 Tickets/Issues:
 

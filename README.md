@@ -18,7 +18,7 @@ This repository is the central repository for the Chef Server.
 
 If you want to file an issue about Chef Server or contribute a change, you're in the right place.
 
-If you need to file an issue against another Chef project, you can find a list of projects and where to file issues in the [community contributions section](https://docs.chef.io/community_contributions.html#issues-and-bug-reports) of the [Chef docs](https://docs.chef.io).
+If you need to file an issue against another Chef project, you can find a list of projects and where to file issues in the [community contributions section](https://docs.chef.io/community_contributions/#issues-and-bug-reports) of the [Chef docs](https://docs.chef.io).
 
 ## Getting Help
 

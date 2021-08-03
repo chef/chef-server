@@ -1,46 +1,30 @@
-# Chef Objects #
+# Chef Objects
 
-This library defines the internal objects used by chef.
+This library defines the internal objects used by Chef Infra Server.
 
-Chef is a system integration framework written in erlang and ruby and designed to bring the benefits of configuration management to your entire infrastructure.
+Chef Infra is a system integration framework written in Erlang and Ruby and designed to bring the benefits of configuration management to your entire infrastructure.
 
-The Chef Wiki is the definitive source of user documentation.
+The Chef Docs Site is the definitive source of user documentation.
 
-    http://wiki.chef.io/display/chef/Home
+    https://docs.chef.io
 
 This README focuses on developers who want to modify Chef source code.  For users who just want to run the latest and greatest Chef development version in their environment, see:
 
    [TODO: add URL when available for erlang chef build process]
 
-# DEVELOPMENT:
-
-Before working on the code, if you plan to contribute your changes, you need to read the Opscode Contributing document.
-
-    http://wiki.chef.io/display/chef/How+to+Contribute
-
-You will also need to set up the repository with the appropriate branches. We document the process on the Chef Wiki.
-
-    http://wiki.chef.io/display/chef/Working+with+git
-
-Once your repository is set up, you can start working on the code.
-
-# LINKS:
+## Links
 
 Source:
 
-    https://github.com/opscode/chef_objects
+    https://github.com/chef/chef-server
 
 Tickets/Issues:
 
-    http://tickets.chef.io/
+    https://github.com/chef/chef-server/issues
 
-Documentation:
+## License
 
-    http://wiki.chef.io/display/chef/Home/
-
-# LICENSE:
-
-Copyright 2011-2012 Opscode, Inc. All Rights Reserved.
+Copyright:: Chef Software, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License.  You may obtain a copy of the License at
 

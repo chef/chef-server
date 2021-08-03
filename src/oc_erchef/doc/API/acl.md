@@ -11,7 +11,7 @@ Authentication
 ----------
 
 This API uses the same authentication scheme as the rest of chef; see
-http://docs.chef.io/api_chef_server.html for a description.
+https://docs.chef.io/server/api_chef_server/ for a description.
 
 Tasks Remaining
 --------------
@@ -64,13 +64,13 @@ The two APIs available for these types
 Appended to the end of the appropriate path for the object type this returns the full ACL for an object.
 
 This is returned as a set of ACEs for each permission type (create,
-read, update, delete, grant, aka CRUDG). 
+read, update, delete, grant, aka CRUDG).
 { "create" : {"actors" : [ "user1" ...],
               "groups" : [ "group1" ... ] } ,
   "read" : ... ,
   "update" : ... ,
   "delete" : ... ,
-  "grant" : ... } 
+  "grant" : ... }
 
 The actors section contains both the _users_ and _clients_ by
 name. (NOTE: determine what happens when there is a user and client
@@ -96,11 +96,11 @@ It expects JSON of the form:
  "groups" : [ "group1" ... ] }
 
 The actors and groups are in the same format as returned in the GET
-above. 
+above.
 
 The authorization service manages the permissions for who can write an
 ACL; at this time we require 'grant' permission in the ACL to update
-it. 
+it.
 
 Implementation Notes
 ----------------
@@ -125,5 +125,3 @@ delivers most of the functionality early.
 The access policy (who can read/who can update) is determined in the
 bifrost\_wm\_acl\_action\_resource:auth_info function. Note that this
 resource also allows 'delete' which is not exposed to the end users.
-
-

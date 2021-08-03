@@ -303,7 +303,7 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
               'service[snuggle]'           => '0.0.1'  }
           ].each do |valid_provides|
 
-            # http://docs.chef.io/config_rb_metadata.html#provides
+            # https://docs.chef.io/config_rb_metadata/#provides
             context "with metadata.providing set to valid value #{valid_provides}" do
 
               let(:payload) { update_payload_metadata("providing", valid_provides) }

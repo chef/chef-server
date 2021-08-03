@@ -217,7 +217,7 @@ class PostgresqlPreflightValidator < PreflightValidator
       CSPG001: The value of postgresql['external'] must be set prior to the initial
                run of chef-server-ctl reconfigure and cannot be changed.
 
-               See https://docs.chef.io/error_messages.html#cspg001-changed-setting
+               See https://docs.chef.io/errors/#cspg001-changed-setting
                for more information on how you can transition an existing chef-server
                to a new instance configured for an external database and vice-versa.
     EOM
@@ -230,7 +230,7 @@ class PostgresqlPreflightValidator < PreflightValidator
                for external database support - please set it now and
                then re-run 'chef-server-ctl reconfigure'.
 
-               See https://docs.chef.io/server_components.html#postgresql-settings
+               See https://docs.chef.io/server/#postgresql-settings
                for more information.
     EOM
   end
@@ -242,7 +242,7 @@ class PostgresqlPreflightValidator < PreflightValidator
                for external database support - please run this now, then
                re-run 'chef-server-ctl reconfigure'.
 
-               See https://docs.chef.io/server_components.html#postgresql-settings
+               See https://docs.chef.io/server/#postgresql-settings
                for more information.
     EOM
   end
@@ -253,7 +253,7 @@ class PostgresqlPreflightValidator < PreflightValidator
                postgresql['vip'] to the host or IP of an external postgres database
                in chef-server.rb.
 
-               See https://docs.chef.io/server_components.html#postgresql-settings
+               See https://docs.chef.io/server/#postgresql-settings
                for more information.
     EOM
   end
@@ -265,7 +265,7 @@ class PostgresqlPreflightValidator < PreflightValidator
                you have configured postgresql['port'] if it's not the standard
                port 5432, then run 'chef-server-ctl reconfigure' again.
 
-               See https://docs.chef.io/error_messages.html#cspg010-cannot-connect
+               See https://docs.chef.io/errors/#cspg010-cannot-connect
                for more information about postgresql networking requirements.
     EOM
   end
@@ -278,7 +278,7 @@ CSPG011: I could not authenticate to #{cs_pg_attr['vip']} as
          chef-server.rb under "postgresql['db_superuser_password'] is correct
          for this user.
 
-         See https://docs.chef.io/error_messages.html#cspg011-cannot-authenticate
+         See https://docs.chef.io/errors/#cspg011-cannot-authenticate
          for more information.
 EOM
   end
@@ -292,7 +292,7 @@ CSPG012: There is a missing or incorrect pg_hba.conf entry for the
          allow the application accounts to connect from all Chef Infra Server
          nodes.
 
-         See https://docs.chef.io/error_messages.html#cspg012-incorrect-rules
+         See https://docs.chef.io/errors/#cspg012-incorrect-rules
          for more information.
 EOM
   end
@@ -303,7 +303,7 @@ EOM
                superuser access to the to the database specified.  At minimum, this
                user must be granted CREATE DATABASE and CREATE ROLE privileges.
 
-               See https://docs.chef.io/error_messages.html#cspg013-incorrect-permissions
+               See https://docs.chef.io/errors/#cspg013-incorrect-permissions
                for more information.
     EOM
   end
@@ -313,7 +313,7 @@ EOM
       CSPG014: Chef Infra Server currently requires PostgreSQL version #{REQUIRED_MAJOR}.#{REQUIRED_MINOR} or greater.
                The database you have provided is running version #{ver}.
 
-               See https://docs.chef.io/error_messages.html#cspg014-incorrect-version
+               See https://docs.chef.io/errors/#cspg014-incorrect-version
                for more information.
     EOM
   end
@@ -324,7 +324,7 @@ EOM
                template1 available.  Please create the template1 database before
                proceeding.
 
-               See https://docs.chef.io/error_messages.html#cspg015-missing-database
+               See https://docs.chef.io/errors/#cspg015-missing-database
                for more information.
     EOM
   end
@@ -334,7 +334,7 @@ EOM
       CSPG016: The Chef Infra Server database named '#{dbname}' already exists on the
                PostgreSQL server. Please remove it before proceeding.
 
-               See https://docs.chef.io/error_messages.html#cspg016-database-exists
+               See https://docs.chef.io/errors/#cspg016-database-exists
                for more information.
     EOM
   end
@@ -347,7 +347,7 @@ EOM
                troubleshooting link below for information about configuring
                Chef Infra Server to use an alternative user name.
 
-               See https://docs.chef.io/error_messages.html#cspg017-user-exists
+               See https://docs.chef.io/errors/#cspg017-user-exists
                for more information.
     EOM
   end

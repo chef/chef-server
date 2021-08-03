@@ -32,7 +32,7 @@ after [Bifrost][], the burning rainbow bridge to Asgard in Norse mythology.
 [opscode-authz][] API server.
 
 [Bifrost]:http://en.wikipedia.org/wiki/Bifrost
-[opscode-authz]:https://github.com/opscode/opscode-authz
+[opscode-authz]:https://github.com/chef/opscode-authz
 
 TODO
 ====

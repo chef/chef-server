@@ -49,7 +49,7 @@ Once your repository is set up, you can start working on the code.
 
 Source:
 
-    https://github.com/opscode/chef_authz
+    https://github.com/chef/chef_authz
 
 Tickets/Issues:
 
