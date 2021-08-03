@@ -23,12 +23,12 @@ postgres_attrs = node['private_chef']['postgresql']
 
 # create users
 
-private_chef_pg_user bifrost_attrs['sql_user'] do
+pg_user bifrost_attrs['sql_user'] do
   password PrivateChef.credentials.get('oc_bifrost', 'sql_password')
   superuser false
 end
 
-private_chef_pg_user bifrost_attrs['sql_ro_user'] do
+pg_user bifrost_attrs['sql_ro_user'] do
   password PrivateChef.credentials.get('oc_bifrost', 'sql_ro_password')
   superuser false
 end
@@ -40,13 +40,13 @@ private_chef_pg_database 'bifrost' do
   notifies :deploy, 'private_chef_pg_sqitch[/opt/opscode/embedded/service/oc_bifrost/db]', :immediately
 end
 
-private_chef_pg_user_table_access bifrost_attrs['sql_user'] do
+pg_user_table_access bifrost_attrs['sql_user'] do
   database 'bifrost'
   schema 'public'
   access_profile :write
 end
 
-private_chef_pg_user_table_access bifrost_attrs['sql_ro_user'] do
+pg_user_table_access bifrost_attrs['sql_ro_user'] do
   database 'bifrost'
   schema 'public'
   access_profile :read

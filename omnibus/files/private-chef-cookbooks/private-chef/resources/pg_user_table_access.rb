@@ -14,6 +14,7 @@
 # limitations under the License.
 #
 
+provides :pg_user_table_access
 
 property :username, String, name_property: true
 
