@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.7.29 -->
-## [14.7.29](https://github.com/chef/chef-server/tree/14.7.29) (2021-08-03)
+<!-- latest_release 14.7.30 -->
+## [14.7.30](https://github.com/chef/chef-server/tree/14.7.30) (2021-08-03)
 
 #### Merged Pull Requests
-- gather-logs: Remove support for specifying the server type / chef server 11 [#2672](https://github.com/chef/chef-server/pull/2672) ([tas50](https://github.com/tas50))
+- Add GitHub action for cookstyle/chefspec in ctl cookbook [#2595](https://github.com/chef/chef-server/pull/2595) ([tas50](https://github.com/tas50))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.7.13 -->
 ### Changes since 14.7.13 release
 
 #### Merged Pull Requests
+- Add GitHub action for cookstyle/chefspec in ctl cookbook [#2595](https://github.com/chef/chef-server/pull/2595) ([tas50](https://github.com/tas50)) <!-- 14.7.30 -->
 - gather-logs: Remove support for specifying the server type / chef server 11 [#2672](https://github.com/chef/chef-server/pull/2672) ([tas50](https://github.com/tas50)) <!-- 14.7.29 -->
 - More cleanup of the configuration cookbook [#2692](https://github.com/chef/chef-server/pull/2692) ([tas50](https://github.com/tas50)) <!-- 14.7.28 -->
 - Update partybus output private-chef -&gt; Infra Server [#2690](https://github.com/chef/chef-server/pull/2690) ([tas50](https://github.com/tas50)) <!-- 14.7.27 -->
