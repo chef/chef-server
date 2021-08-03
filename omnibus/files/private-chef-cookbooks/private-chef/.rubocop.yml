@@ -1,5 +1,6 @@
 AllCops:
   TargetRubyVersion: 2.7
+  TargetChefVersion: 16.13
 
 # We need to turn this on, but it's going to require testing
 Chef/Deprecations/ResourceWithoutUnifiedTrue:
