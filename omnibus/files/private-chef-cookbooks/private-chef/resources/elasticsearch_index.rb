@@ -16,7 +16,6 @@
 #
 
 provides :elasticsearch_index
-resource_name :elasticsearch_index
 
 property :index_name, String, name_property: true
 

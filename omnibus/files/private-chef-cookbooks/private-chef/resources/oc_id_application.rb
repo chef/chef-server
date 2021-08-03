@@ -16,7 +16,6 @@
 #
 
 provides :oc_id_application
-resource_name :oc_id_application
 
 property :write_to_disk, [true, false], default: false
 
