@@ -135,7 +135,7 @@ ruby_block 'set_lb_redis_values' do
       # Now we're clear to repopulate from configuration.
       unless banned_ips.nil?
         banned_ips.each do |ip|
-          redis.sadd   'banned_ips', ip
+          redis.sadd 'banned_ips', ip
         end
       end
       xmaint_allowed_ips_list&.each do |ip|

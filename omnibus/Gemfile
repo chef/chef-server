@@ -11,5 +11,4 @@ group :test do
   gem 'test-kitchen' # for Test Kitchen testing of the omnibus builds
   gem 'berkshelf' # depsolving the Test Kitchen suite
   gem 'rake'
-  gem 'chefspec' # for cookbook chefspec tests
 end

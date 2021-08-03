@@ -1,4 +1,5 @@
 source 'https://rubygems.org'
 
+gem 'cookstyle'
 gem 'chefspec'
-gem 'veil', git: 'https://github.com/chef/chef_secrets.git'
+gem 'veil'
