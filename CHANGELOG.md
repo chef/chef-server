@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.7.25 -->
-## [14.7.25](https://github.com/chef/chef-server/tree/14.7.25) (2021-08-03)
+<!-- latest_release 14.7.26 -->
+## [14.7.26](https://github.com/chef/chef-server/tree/14.7.26) (2021-08-03)
 
 #### Merged Pull Requests
-- Update docs.chef.io and GitHub links to avoid redirects or 404s [#2673](https://github.com/chef/chef-server/pull/2673) ([tas50](https://github.com/tas50))
+- Remove the word sanity from logs, tests, and comments [#2691](https://github.com/chef/chef-server/pull/2691) ([tas50](https://github.com/tas50))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.7.13 -->
 ### Changes since 14.7.13 release
 
 #### Merged Pull Requests
+- Remove the word sanity from logs, tests, and comments [#2691](https://github.com/chef/chef-server/pull/2691) ([tas50](https://github.com/tas50)) <!-- 14.7.26 -->
 - Update docs.chef.io and GitHub links to avoid redirects or 404s [#2673](https://github.com/chef/chef-server/pull/2673) ([tas50](https://github.com/tas50)) <!-- 14.7.25 -->
 - Improve logging when there are no DB migrations to run [#2688](https://github.com/chef/chef-server/pull/2688) ([tas50](https://github.com/tas50)) <!-- 14.7.24 -->
 - More Chef Server -&gt; Chef Infra Server branding updates [#2689](https://github.com/chef/chef-server/pull/2689) ([tas50](https://github.com/tas50)) <!-- 14.7.23 -->
