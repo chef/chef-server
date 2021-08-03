@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.7.28 -->
-## [14.7.28](https://github.com/chef/chef-server/tree/14.7.28) (2021-08-03)
+<!-- latest_release 14.7.29 -->
+## [14.7.29](https://github.com/chef/chef-server/tree/14.7.29) (2021-08-03)
 
 #### Merged Pull Requests
-- More cleanup of the configuration cookbook [#2692](https://github.com/chef/chef-server/pull/2692) ([tas50](https://github.com/tas50))
+- gather-logs: Remove support for specifying the server type / chef server 11 [#2672](https://github.com/chef/chef-server/pull/2672) ([tas50](https://github.com/tas50))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.7.13 -->
 ### Changes since 14.7.13 release
 
 #### Merged Pull Requests
+- gather-logs: Remove support for specifying the server type / chef server 11 [#2672](https://github.com/chef/chef-server/pull/2672) ([tas50](https://github.com/tas50)) <!-- 14.7.29 -->
 - More cleanup of the configuration cookbook [#2692](https://github.com/chef/chef-server/pull/2692) ([tas50](https://github.com/tas50)) <!-- 14.7.28 -->
 - Update partybus output private-chef -&gt; Infra Server [#2690](https://github.com/chef/chef-server/pull/2690) ([tas50](https://github.com/tas50)) <!-- 14.7.27 -->
 - Remove the word sanity from logs, tests, and comments [#2691](https://github.com/chef/chef-server/pull/2691) ([tas50](https://github.com/tas50)) <!-- 14.7.26 -->
