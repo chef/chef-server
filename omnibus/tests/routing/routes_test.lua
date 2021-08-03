@@ -195,7 +195,7 @@ for k,v in pairs(shared_chef_tests) do
   table.insert(api_tests, k, v)
   table.insert(int_chef_tests, k, v)
 end
--- A couple of sanity checks to ensure we're not going to accept things that shoudl go to acct
+-- A couple of basic checks to ensure we're not going to accept things that shoudl go to acct
 -- in chef-internal.  These same uris are valid for acct and external.
 table.insert(int_chef_tests, {"/organizations/testorg",             {nil}})
 

@@ -11,7 +11,7 @@ describe "Bulk Permission Tests" do
     # we don't restrict it).
 
     context "POST" do
-      context "sanity tests" do
+      context "basic tests" do
         context "permissions" do
           with_actors :shatner, :hasselhoff, :nemoy
           with_ace_on :hasselhoff, :read, :to => :shatner

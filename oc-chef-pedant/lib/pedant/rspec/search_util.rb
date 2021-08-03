@@ -132,7 +132,7 @@ module Pedant
 
             it "should have multiple #{object_type}s on the system (for our search to ignore)" do
               r = get(api_url("/#{object_type}s"), requestor)
-              r.should have_status_code 200 # sanity check
+              r.should have_status_code 200 # basic check
               parsed_body = parse(r)
 
               # Verifies there are other things that could potentially
@@ -206,7 +206,7 @@ module Pedant
         #
         # objects => An array of all the objects created
         def setup_multiple_objects(object_type, number_to_create=5)
-          # Basic sanity check
+          # Basic check
           valid_object_type?(object_type)
 
           # Make use of existing helper functions to create new
@@ -278,10 +278,10 @@ module Pedant
             let(:request_query_parameters){"q=name:#{search_target_name}"}
             let(:search_result_items){[send(object_block_symbol)]}
 
-            # This is just a sanity check
+            # This is just a basic check
             it "should have more than just the target of our #{object_type} search on the system" do
               r = get(api_url("/#{object_type}s"), requestor)
-              r.should have_status_code 200 # sanity check
+              r.should have_status_code 200 # basic check
               parsed_body = parse(r)
 
               # Verifies that our search target is there
@@ -306,10 +306,10 @@ module Pedant
             let(:request_query_parameters){"q=name:#{base_object_name}*"} # <- note the '*'
             let(:search_result_items){objects}
 
-            # Another sanity check
+            # Another basic check
             it "should have more than just the targets of our #{object_type} search on the system" do
               r = get(api_url("/#{object_type}s"), requestor)
-              r.should have_status_code 200 # sanity check
+              r.should have_status_code 200 # basic check
               parsed_body = parse(r)
 
               # Verifies there are other things that could potentially

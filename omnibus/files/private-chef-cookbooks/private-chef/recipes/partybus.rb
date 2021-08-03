@@ -60,7 +60,7 @@ execute 'set initial migration level' do
   subscribes :run, "file[#{OmnibusHelper.bootstrap_sentinel_file}]", :delayed
 end
 
-ruby_block 'migration-level file sanity check' do
+ruby_block 'migration-level file check' do
   block do
     begin
       ::JSON.parse(::File.read('/var/opt/opscode/upgrades/migration-level'))

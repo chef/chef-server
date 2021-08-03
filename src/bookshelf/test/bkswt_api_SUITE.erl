@@ -2,7 +2,7 @@
 %%-------------------------------------------------------------------
 %% @author Eric B Merritt <ericbmerritt@gmail.com>
 %% @author Mark Anderson <mark@chef.io>
-%% Copyright 2012-5 Opscode, Inc. All Rights Reserved.
+%% Copyright 2012-2021 Chef Software, Inc. All Rights Reserved.
 %%
 %% This file is provided to you under the Apache License,
 %% Version 2.0 (the "License"); you may not use this file
@@ -339,7 +339,7 @@ bucket_many(Config) ->
                          NewBuckets),
     ?assert(lists:all(fun(Val) -> ok == Val end, DRes)),
 
-    % sanity check
+    % basic check
     ?assertEqual(BucketsBefore, bucket_list(S3Conf)).
 
 bucket_encoding(doc) ->

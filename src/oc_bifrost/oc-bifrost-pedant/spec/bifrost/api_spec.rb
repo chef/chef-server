@@ -1,5 +1,5 @@
 describe "Pedant API" do
-  context "sanity check" do
+  context "basic check" do
     # What we are testing:
 
     # Here we take all of the patterns used in the other tests and
@@ -43,7 +43,7 @@ describe "Pedant API" do
               :grant  => {:actors => [:malkovich], :groups => []}
             }
             acl[action] = {:actors => [], :groups => []}
-          
+
             with_acl_on :shatner, acl
 
             it "does not have permission" do
@@ -95,7 +95,7 @@ describe "Pedant API" do
         }
 
         it "has no permissions" do
-          :malkovich.should_not directly_have_permission(:create).on(:actor, :shatner) 
+          :malkovich.should_not directly_have_permission(:create).on(:actor, :shatner)
           :malkovich.should_not directly_have_permission(:read).on(:actor, :shatner)
           :malkovich.should_not directly_have_permission(:update).on(:actor, :shatner)
           :malkovich.should_not directly_have_permission(:delete).on(:actor, :shatner)
@@ -116,7 +116,7 @@ describe "Pedant API" do
         }
 
         it "has all permissions" do
-          :hasselhoff.should directly_have_permission(:create).on(:actor, :shatner) 
+          :hasselhoff.should directly_have_permission(:create).on(:actor, :shatner)
           :hasselhoff.should directly_have_permission(:read).on(:actor, :shatner)
           :hasselhoff.should directly_have_permission(:update).on(:actor, :shatner)
           :hasselhoff.should directly_have_permission(:delete).on(:actor, :shatner)
@@ -157,7 +157,7 @@ describe "Pedant API" do
                 :grant  => {:actors => [:malkovich], :groups => []}
               }
               acl[action] = {:actors => [], :groups => []}
-          
+
               with_acl_on :gozer, acl
 
               it "does not have permission" do
@@ -212,7 +212,7 @@ describe "Pedant API" do
           }
 
           it "has no permissions" do
-            :malkovich.should_not directly_have_permission(:create).on(type, :gozer) 
+            :malkovich.should_not directly_have_permission(:create).on(type, :gozer)
             :malkovich.should_not directly_have_permission(:read).on(type, :gozer)
             :malkovich.should_not directly_have_permission(:update).on(type, :gozer)
             :malkovich.should_not directly_have_permission(:delete).on(type, :gozer)
@@ -234,7 +234,7 @@ describe "Pedant API" do
           }
 
           it "has all permissions" do
-            :hasselhoff.should directly_have_permission(:create).on(type, :gozer) 
+            :hasselhoff.should directly_have_permission(:create).on(type, :gozer)
             :hasselhoff.should directly_have_permission(:read).on(type, :gozer)
             :hasselhoff.should directly_have_permission(:update).on(type, :gozer)
             :hasselhoff.should directly_have_permission(:delete).on(type, :gozer)
@@ -243,5 +243,5 @@ describe "Pedant API" do
         end
       end
     end # for groups
-  end # sanity check
+  end # basic check
 end

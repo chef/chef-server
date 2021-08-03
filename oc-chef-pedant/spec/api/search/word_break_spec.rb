@@ -19,7 +19,7 @@ describe 'Search API endpoint', :search do
     # We're going to cycle a lot of tests here, so let's create just one item to meet all the data conditions
     # we want to validate.
     before :all do
-      # confirm 201 status as a sanity check
+      # confirm 201 status as a basic check
       n = new_node("search_supernode").tap do |node|
         SPECIAL_CHARS.each_char do |c|
           node["default"]["attrtest#{SPECIAL_CHARS.index(c)}"] = "hello#{c}world"

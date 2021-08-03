@@ -253,7 +253,7 @@ describe "Sandboxes API Endpoint", :sandboxes do
       pending 'fix this in Erchef'
       file1 = Pedant::Utility.new_random_file
       checksum = Pedant::Utility.checksum(file1)
-      
+
       sandbox = create_sandbox([file1])
       sandbox_id = sandbox["sandbox_id"]
       upload_to_sandbox(file1, sandbox).should look_like({
@@ -290,7 +290,7 @@ describe "Sandboxes API Endpoint", :sandboxes do
       commit_sandbox(sandbox).should look_like({
                                                  :status => 200,
                                                  :body => {
-                                                   # sanity checks
+                                                   # Basic checks
                                                    "guid" => sandbox_id,
                                                    "checksums" => [file1, file2].map{|f| Pedant::Utility.checksum(f)},
                                                    # This is the real test
@@ -302,13 +302,13 @@ describe "Sandboxes API Endpoint", :sandboxes do
     it "should not leak CouchDB '_rev' fields after committing a sandbox", :cleanup do
       file1 = Pedant::Utility.new_random_file
       file2 = Pedant::Utility.new_random_file
-      
+
       sandbox = create_sandbox([file1, file2])
       [file1, file2].each {|f| upload_to_sandbox(f, sandbox)}
-      
+
       r = commit_sandbox(sandbox)
       r.should have_status_code 200
-      
+
       json = parse(r)
       json.should_not have_key "_rev"
     end

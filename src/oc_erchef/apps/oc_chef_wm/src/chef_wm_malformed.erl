@@ -30,7 +30,7 @@
 
 %% @doc Handle common malformed request tasks with resource-specific callbacks
 %%
-%% This function does a sanity check on the authn headers (not verifying signing, but does
+%% This function does a basic check on the authn headers (not verifying signing, but does
 %% all checks it can without talking to a db).  It also checks for org existence and halts
 %% with 404 if the org is not found.  This doesn't strictly belong in malformed_request, but
 %% right now all of our resources need this check and end up needing it before

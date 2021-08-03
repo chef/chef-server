@@ -54,8 +54,8 @@ in the comment section.
 
 ### Overview
 
-For personal sanity, remove all .bundle and vendor directories before
-starting and after you complete the updates. 
+To avoid frustration, remove all .bundle and vendor directories before
+starting and after you complete the updates.
 
 The following Gemfile.locks need to be updated to do a complete
 sweep. We strongly recommend using bundler 1.17.x until bundler 2.1 is
@@ -204,7 +204,7 @@ file, using /host as the root directory, e.g. /host/src/chef-server-ctl.
   - cd chef-server/dev
   - vagrant up
   - vagrant ssh
-  - In another window/tab on the host machine 
+  - In another window/tab on the host machine
     - make changes to the rebar.config if needed
       and run sync to sync the changes with the dev-vm.
     - Make sure to stop the sync after it is complete.
