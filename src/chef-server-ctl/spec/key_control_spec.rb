@@ -15,9 +15,9 @@
 #
 
 require "omnibus_ctl_helper"
-require 'chef_server_ctl/helpers/key_ctl_helper'
-require 'chef_server_ctl/config'
-require 'chef/key'
+require "chef_server_ctl/helpers/key_ctl_helper"
+require "chef_server_ctl/config"
+require "chef/key"
 
 describe "chef-server-ctl *key(s)*" do
   before(:all) do
@@ -101,12 +101,12 @@ Tfuc9dUYsFjptWYrV6pfEQ+bgo1OGBXORBFcFL+2D7u9JYquKrMgosznHoEkQNLo
       before(:each) do
         allow(Chef::Key).to receive(:list_by_user).with("testuser").and_return(
           [
-            {"uri"=>"https://127.0.0.1/users/pivotal/keys/default",
-             "name"=>"default",
-             "expired"=>false},
-            {"uri"=>"https://127.0.0.1/users/pivotal/keys/key2",
-             "name"=>"key2",
-             "expired"=>true}
+            { "uri" => "https://127.0.0.1/users/pivotal/keys/default",
+             "name" => "default",
+             "expired" => false },
+            { "uri" => "https://127.0.0.1/users/pivotal/keys/key2",
+             "name" => "key2",
+             "expired" => true },
           ]
         )
 
@@ -119,7 +119,7 @@ Tfuc9dUYsFjptWYrV6pfEQ+bgo1OGBXORBFcFL+2D7u9JYquKrMgosznHoEkQNLo
         key2.expiration_date "2012-01-01T00:00:00Z"
         key2.public_key public_key
 
-        allow(Chef::Key).to receive(:list_by_user).with("testuser", inflate=true).and_return([["default", key1],["key2", key2]])
+        allow(Chef::Key).to receive(:list_by_user).with("testuser", inflate = true).and_return([["default", key1], ["key2", key2]])
       end
 
       it_should_behave_like "a key command with option parsing" do
@@ -146,7 +146,7 @@ Tfuc9dUYsFjptWYrV6pfEQ+bgo1OGBXORBFcFL+2D7u9JYquKrMgosznHoEkQNLo
       end
       context "when --verbose is passed" do
         it "should make a request to Chef::Key.list_by_user with inflate enabled" do
-          expect(Chef::Key).to receive(:list_by_user).with("testuser", inflate=true).at_least(:once)
+          expect(Chef::Key).to receive(:list_by_user).with("testuser", inflate = true).at_least(:once)
           @helper.run_test_omnibus_command("list-user-keys", ["testuser", "--verbose"])
         end
       end
@@ -156,12 +156,12 @@ Tfuc9dUYsFjptWYrV6pfEQ+bgo1OGBXORBFcFL+2D7u9JYquKrMgosznHoEkQNLo
       before(:each) do
         allow(Chef::Key).to receive(:list_by_client).with("testclient").and_return(
           [
-            {"uri"=>"https://127.0.0.1/organizations/testorg/clients/testclient/keys/default",
-             "name"=>"default",
-             "expired"=>false},
-            {"uri"=>"https://127.0.0.1/organizations/testorg/clients/testclient/keys/key2",
-             "name"=>"key2",
-             "expired"=>true}
+            { "uri" => "https://127.0.0.1/organizations/testorg/clients/testclient/keys/default",
+             "name" => "default",
+             "expired" => false },
+            { "uri" => "https://127.0.0.1/organizations/testorg/clients/testclient/keys/key2",
+             "name" => "key2",
+             "expired" => true },
           ]
         )
 
@@ -174,7 +174,7 @@ Tfuc9dUYsFjptWYrV6pfEQ+bgo1OGBXORBFcFL+2D7u9JYquKrMgosznHoEkQNLo
         key2.expiration_date "2012-01-01T00:00:00Z"
         key2.public_key public_key
 
-        allow(Chef::Key).to receive(:list_by_client).with("testclient", inflate=true).and_return([["default", key1],["key2", key2]])
+        allow(Chef::Key).to receive(:list_by_client).with("testclient", inflate = true).and_return([["default", key1], ["key2", key2]])
       end
 
       it_should_behave_like "a key command with option parsing" do
@@ -183,12 +183,12 @@ Tfuc9dUYsFjptWYrV6pfEQ+bgo1OGBXORBFcFL+2D7u9JYquKrMgosznHoEkQNLo
 
       it_should_behave_like "a key listing command" do
         let(:command)   { "list-client-keys" }
-        let(:arguments) { ["testorg", "testclient"] }
+        let(:arguments) { %w{testorg testclient} }
       end
       context "when valid arguments are passed to list-clinet-keys" do
-        it  "should pass the client to Chef::Key.list_by_client" do
+        it "should pass the client to Chef::Key.list_by_client" do
           expect(Chef::Key).to receive(:list_by_client).with("testclient").at_least(:once)
-          @helper.run_test_omnibus_command("list-client-keys", ["testorg", "testclient"])
+          @helper.run_test_omnibus_command("list-client-keys", %w{testorg testclient})
         end
       end
     end
@@ -204,7 +204,7 @@ Tfuc9dUYsFjptWYrV6pfEQ+bgo1OGBXORBFcFL+2D7u9JYquKrMgosznHoEkQNLo
         end
       end
     end
-  end #listing key commands
+  end # listing key commands
 
   describe "adding key commands" do
 
@@ -314,7 +314,7 @@ Tfuc9dUYsFjptWYrV6pfEQ+bgo1OGBXORBFcFL+2D7u9JYquKrMgosznHoEkQNLo
       it_should_behave_like "a key adding command" do
         let(:url)                   { "/organizations/testorg/clients/testclient/keys" }
         let(:command)               { "add-client-key" }
-        let(:base_arguments)        { ["testorg", "testclient"] }
+        let(:base_arguments)        { %w{testorg testclient} }
         let(:arguments)             { ["testorg", "testclient", "-p", public_key_path, "-k", "testkey"] }
         let(:arguments_no_keyname)  { ["testorg", "testclient", "-p", public_key_path] }
         let(:populate_key_command)  { :populate_client_key }
@@ -326,7 +326,7 @@ Tfuc9dUYsFjptWYrV6pfEQ+bgo1OGBXORBFcFL+2D7u9JYquKrMgosznHoEkQNLo
     context "when an invalid date is passed" do
       it "should fail with the proper error message" do
         expect do
-          @helper.run_test_omnibus_command("add-client-key",["testclient", "testorg", "-p", public_key_path,"-e", "invalid-date"])
+          @helper.run_test_omnibus_command("add-client-key", ["testclient", "testorg", "-p", public_key_path, "-e", "invalid-date"])
         end.to raise_error(SystemExit) { |e| expect(e.status).to eq(1) }
       end
     end
@@ -343,7 +343,7 @@ Tfuc9dUYsFjptWYrV6pfEQ+bgo1OGBXORBFcFL+2D7u9JYquKrMgosznHoEkQNLo
         end
       end
     end
-  end #adding key commands
+  end # adding key commands
 
   describe "deleting key commands" do
 
@@ -362,7 +362,7 @@ Tfuc9dUYsFjptWYrV6pfEQ+bgo1OGBXORBFcFL+2D7u9JYquKrMgosznHoEkQNLo
       it_should_behave_like "a key deleting command" do
         let(:url)       { "/users/testuser/keys/testkey" }
         let(:command)   { "delete-user-key" }
-        let(:arguments) { ["testuser", "testkey"] }
+        let(:arguments) { %w{testuser testkey} }
       end
 
       context "when a mandatory argument is missing to delete-user-key" do
@@ -387,7 +387,7 @@ Tfuc9dUYsFjptWYrV6pfEQ+bgo1OGBXORBFcFL+2D7u9JYquKrMgosznHoEkQNLo
       it_should_behave_like "a key deleting command" do
         let(:url)       { "/organizations/testorg/clients/testclient/keys/testkey" }
         let(:command)   { "delete-client-key" }
-        let(:arguments) { ["testorg", "testclient", "testkey"] }
+        let(:arguments) { %w{testorg testclient testkey} }
       end
 
       context "when a mandatory argument is missing to delete-client-key" do
@@ -403,10 +403,10 @@ Tfuc9dUYsFjptWYrV6pfEQ+bgo1OGBXORBFcFL+2D7u9JYquKrMgosznHoEkQNLo
         end
         context "when KEYNAME is missing" do
           it "should fail with the proper error message" do
-            mandatory_argument_should_exist "delete-client-key", "KEYNAME", ["testorg", "testclient"], 3
+            mandatory_argument_should_exist "delete-client-key", "KEYNAME", %w{testorg testclient}, 3
           end
         end
       end
     end
-  end #deleting key commands
+  end # deleting key commands
 end

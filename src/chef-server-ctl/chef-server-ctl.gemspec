@@ -1,5 +1,5 @@
 
-lib = File.expand_path("../lib", __FILE__)
+lib = File.expand_path("lib", __dir__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require "chef_server_ctl/version"
 
@@ -27,7 +27,7 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency "pry"
   spec.add_runtime_dependency "rb-readline"
 
-  spec.add_runtime_dependency "pg", '~> 1.2', '>= 1.2.3'
+  spec.add_runtime_dependency "pg", "~> 1.2", ">= 1.2.3"
 
   spec.add_runtime_dependency "redis"
   # TODO
@@ -51,7 +51,7 @@ Gem::Specification.new do |spec|
   # tools we bundle in the chef-server install and include here so we can have a single Gemfile.lock
   # for the overall chef-server "app"
   spec.add_runtime_dependency "knife-ec-backup"
-  spec.add_runtime_dependency "chef_fixie" 
+  spec.add_runtime_dependency "chef_fixie"
 
   # Used to resolve download urls
   spec.add_runtime_dependency "mixlib-install"

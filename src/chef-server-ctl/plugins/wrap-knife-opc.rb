@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'shellwords'
+require "shellwords"
 
 knife_config = ::ChefServerCtl::Config.knife_config_file
 knife_cmd    = ::ChefServerCtl::Config.knife_bin
@@ -38,7 +38,7 @@ cmds.each do |cmd, args|
   opc_noun = args[1]
   description = args[2]
   add_command_under_category cmd, "organization-and-user-management", description, 2 do
-    escaped_args = cmd_args.map {|a| Shellwords.escape(a) }.join(' ')
+    escaped_args = cmd_args.map { |a| Shellwords.escape(a) }.join(" ")
     status = run_command("#{knife_cmd} opc #{opc_noun} #{opc_cmd} #{escaped_args} -c #{knife_config}")
     exit status.exitstatus
   end

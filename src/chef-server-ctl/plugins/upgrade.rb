@@ -1,10 +1,10 @@
-#Copyright:: Copyright (c) 2012-2014 Chef Software, Inc.
+# Copyright:: Copyright (c) 2012-2014 Chef Software, Inc.
 #
 # All Rights Reserved
 #
 
-require 'optparse'
-require 'ostruct'
+require "optparse"
+require "ostruct"
 
 add_command_under_category "upgrade", "general", "Upgrade your Chef Infra Server installation after updating packages.", 2 do
 
@@ -40,11 +40,11 @@ add_command_under_category "upgrade", "general", "Upgrade your Chef Infra Server
 
       # This option matches the knife -s option
       opts.on("-s", "--chef11-server-url [url]", String, "The url of the Chef 11 server.  Defaults to #{@options.chef11_server_url}") do |url|
-         @options.chef11_server_url = url
+        @options.chef11_server_url = url
       end
 
       opts.on("-x", "--chef12-server-url [url]", String, "The url of the Chef 12 server.  Defaults to #{@options.chef12_server_url}") do |url|
-         @options.chef12_server_url = url
+        @options.chef12_server_url = url
       end
 
       # This option matches the knife -u option
@@ -93,7 +93,7 @@ add_command_under_category "upgrade", "general", "Upgrade your Chef Infra Server
     log "Would you like to upgrade? [yN]"
 
     answer = STDIN.gets.chomp
-    return answer == 'Y' || answer == 'y'
+    answer == "Y" || answer == "y"
   end
 
   def partybus_upgrade
@@ -129,7 +129,6 @@ add_command_under_category "upgrade", "general", "Upgrade your Chef Infra Server
       exit 1
     end
   end
-
 
   ### Start script ###
 
