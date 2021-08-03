@@ -24,7 +24,7 @@ class AuthPreflightValidator < PreflightValidator
   def run!
     # Sanity check: for any configuration we should expect that
     # both LDAP and SAML auth cannot be enabled simultaneously
-    # across Chef Server and Chef Manage
+    # across Chef Infra Server and Chef Manage
     validate_sane_state
   end
 
@@ -50,7 +50,7 @@ class AuthPreflightValidator < PreflightValidator
     <<~EOM
       AUTH001: Your configuration indicates that you are attempting to
                enable both LDAP and SAML authentication. Only one of these
-               authentication types can be enabled across Chef Server and
+               authentication types can be enabled across Chef Infra Server and
                Chef Manage simultaneously.
     EOM
   end

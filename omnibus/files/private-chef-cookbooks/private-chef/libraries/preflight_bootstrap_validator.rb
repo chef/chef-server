@@ -119,7 +119,7 @@ class BootstrapPreflightValidator < PreflightValidator
   def err_BOOT002_pivotal_key_exists
     <<~EOM
       BOOT002: Your configuration indicates that you are running an initial reconfigure
-               to bring your Chef Server online, but the file /etc/opscode/pivotal.pem
+               to bring your Chef Infra Server online, but the file /etc/opscode/pivotal.pem
                already exists.
 
                Pending: remediation walkthrough.
@@ -149,7 +149,7 @@ class BootstrapPreflightValidator < PreflightValidator
     <<~EOM
       BOOT005: Your configuration indicates that you may be starting this node
                as part of a cluster.  However, the superuser `pivotal` does not exist
-               within Chef Server.
+               within Chef Infra Server.
 
                Pending: remediation  walkthrough
     EOM

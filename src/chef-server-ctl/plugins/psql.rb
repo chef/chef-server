@@ -30,7 +30,7 @@ known_dbs['oc-id'] = known_dbs['oc_id']
 known_dbs['opscode-erchef'] = known_dbs['opscode_chef']
 
 
-add_command_under_category "psql", "Database", "Launches an interactive psql session with the service database you name. Add '--write' for write access and '--options <OPTIONS>' to specify psql options.", 2 do
+add_command_under_category "psql", "Database", "Launches an interactive PostgreSQL psql session with the service database you name. Add '--write' for write access and '--options <OPTIONS>' to specify psql options.", 2 do
 
   service_name = ARGV[1]
   write_arg = '--write'

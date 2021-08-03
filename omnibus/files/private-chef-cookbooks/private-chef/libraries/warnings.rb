@@ -13,7 +13,7 @@ module ChefServer
       puts <<~EOF
 
         The following warnings were encountered during the reconfiguration of
-        your Chef server:
+        your Chef Infra Server:
 
       EOF
       @@warnings.each do |msg|
