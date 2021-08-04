@@ -60,7 +60,7 @@ Chef Infra Server 14.8 upgraded PostgreSQL from 9.6 to 13.3. The 14.8 upgrade pr
 
 #### Upgrade Steps
 
-1. Follow the same instructions for upgrading to 14.
+1. Follow the same instructions for upgrading to Chef Infra Server 14.0.
 
 #### Post-upgrade steps
 
