@@ -46,21 +46,21 @@ The Chef Infra Server 14 upgrade does not automatically reindex existing externa
 
 ### Upgrading to 14.8.x
 
-Chef Infra Server 14.8 upgraded postgresql from 9.6 to 13.3. The Chef Infra Server 14.8 upgrade process requires downtime for vacuuming the database, upgrading and reindexing. There are a couple of extra steps that need to be considered dwhile upgrading from version lesser than 14.8 to version greater than 14.8. We estimate the whole upgrade operation with the recommendations will take 1 minutes for each 1000 nodes, but the it could take more time, depending on your server hardware and the complexity of your Chef data.
+Chef Infra Server 14.8 upgraded PostgreSQL from 9.6 to 13.3. The 14.8 upgrade process requires downtime for vacuuming, upgrading and reindexing the database. There are extra steps that need to be considered when upgrading from versions less than 14.8 to versions greater than 14.8. Using current recommendations, the entire upgrade operation could take 1 minute per 1000 nodes or longer, depending on your server hardware and the complexity of your Chef data.
 
 #### Pre-upgrade Recommendations
 
-1. Running Vacuum full is recommended if auto vacuuming is not set up, as this will reduce the size of the db by deleting the unwanted data. We estimate the vacuum full operation will take around 1 to 2 minutes per GB of data and it will also be dependent on the nature of the data also. There needs to be same amount of free space as that of the data base size for the successful vacuum full operation.
+1. Running vacuum full is recommended if auto vacuuming is not set up, as this will reduce the size of the database by deleting unnecessary data. The vacuum full operation could take around 1 to 2 minutes per GB of data, depending on the nature of the data. Additionally, the vacuum full operation will need an amount of free disk space at least as large as the size of your database.
 
     ```bash
     /usr/lib/postgresql/9.6/bin/vaccumedb --all --full
     ```
 
-2. Taking a chef-server-ctl backup or knife-ec-backup is recommended before starting the upgrade. The backup takes around 4 to 5 minutes per GB of data.
+2. Performing `chef-server-ctl backup` or `knife-ec-backup` is recommended before starting the upgrade. The backup takes around 4 to 5 minutes per GB of data.
 
-#### Upgrading steps
+#### Upgrade Steps
 
-1. Follow the same instructions for upgrading to 14
+1. Follow the same instructions for upgrading to 14.
 
 #### Post-upgrade steps
 
@@ -72,7 +72,7 @@ Chef Infra Server 14.8 upgraded postgresql from 9.6 to 13.3. The Chef Infra Serv
 
 #### Additional Information
 
-1. The estimations were done on the machine with 8 cores with 32 GB memory (t3.2xlarge EC2 machine).
+1. Estimates were performed on an 8 core 32 GB memory (t3.2xlarge EC2) machine.
 
 2. The down time for standalone scenario upgrade with 158G of unvacuumed data was about 5hr 15min.
 
