@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.8.1 -->
-## [14.8.1](https://github.com/chef/chef-server/tree/14.8.1) (2021-08-04)
+<!-- latest_release 14.8.2 -->
+## [14.8.2](https://github.com/chef/chef-server/tree/14.8.2) (2021-08-04)
 
 #### Merged Pull Requests
-- Test the system connectivity to the Internet in the gather logs [#2704](https://github.com/chef/chef-server/pull/2704) ([tas50](https://github.com/tas50))
+- Replace Opscode copyrights [#2703](https://github.com/chef/chef-server/pull/2703) ([tas50](https://github.com/tas50))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.7.13 -->
 ### Changes since 14.7.13 release
 
 #### Merged Pull Requests
+- Replace Opscode copyrights [#2703](https://github.com/chef/chef-server/pull/2703) ([tas50](https://github.com/tas50)) <!-- 14.8.2 -->
 - Test the system connectivity to the Internet in the gather logs [#2704](https://github.com/chef/chef-server/pull/2704) ([tas50](https://github.com/tas50)) <!-- 14.8.1 -->
 - Update PostgreSQL to 13.3 [#2577](https://github.com/chef/chef-server/pull/2577) ([lbakerchef](https://github.com/lbakerchef)) <!-- 14.8.0 -->
 - Improve chef-server-ctl help and docs [#2696](https://github.com/chef/chef-server/pull/2696) ([tas50](https://github.com/tas50)) <!-- 14.7.32 -->
