@@ -10,8 +10,7 @@ modified_within_last_x_minutes=180
 tail_lines=10000
 
 #Lets have a way to avoid things that take a while, like DNS
-if [[ -n $1  ]];
-then
+if [[ -n $1  ]]; then
     testing=true
 fi
 
@@ -19,8 +18,7 @@ path='opscode'
 ctl_cmd='private-chef-ctl'
 config_name='*chef*.rb'
 
-if [[ ! -e "/opt/$path/bin/$ctl_cmd" ]];
-then
+if [[ ! -e "/opt/$path/bin/$ctl_cmd" ]]; then
     echo "ERROR: Chef Infra Server may not be installed."
     exit 1
 fi
@@ -37,6 +35,8 @@ PATH=/opt/$path/embedded/bin:$PATH
 mkdir -p "$tmpdir"
 # make sure we have the full path in /proc created for the gather-logs bundle
 mkdir -p "$tmpdir/proc/sys/crypto/"
+# create the connectivity dir for proxy / supermarket access checks
+mkdir -p "$tmpdir/connectivity/"
 
 for i in /opt/{chef,$path}*/version-manifest.txt \
               /opt/$path/pc-version.txt \
@@ -60,8 +60,7 @@ for i in `find -L /var/log/${path}* -type f -mmin -"$modified_within_last_x_minu
 done
 
 # Add signing proxy log and elastic info from RDS if system is configured using https://github.com/chef-customers/aws_native_chef_server
-if [[ -f "/var/log/aws-signing-proxy/proxy.log" ]];
-then
+if [[ -f "/var/log/aws-signing-proxy/proxy.log" ]]; then
     mkdir -p "$tmpdir/var/log/aws-signing-proxy"
     tail -"$tail_lines" "/var/log/aws-signing-proxy/proxy.log" > "$tmpdir/var/log/aws-signing-proxy/proxy.log"
 fi
@@ -75,11 +74,9 @@ gather_es() {
 }
 ES_9200="$(curl -s -XGET 'http://localhost:9200/' | grep 'for Search')"
 ES_10144="$(curl -s -XGET 'http://localhost:10144/' | grep 'for Search')"
-if [[ -n $ES_9200 ]];
-then
+if [[ -n $ES_9200 ]]; then
     gather_es 9200
-elif [[ -n $ES_10144 ]];
-then
+elif [[ -n $ES_10144 ]]; then
     gather_es 10144
 fi
 
@@ -87,8 +84,7 @@ $ctl_cmd status > "$tmpdir/$ctl_cmd"_status.txt
 
 
 STATSPW=$($ctl_cmd show-secret opscode_erchef stats_password)
-if [ -n "$STATSPW" ];
-then
+if [ -n "$STATSPW" ]; then
     curl -k -s -X GET "https://statsuser:$STATSPW@localhost/_stats?format=text" status > "$tmpdir/chef_server_stats_endpoint.txt"
 else
     curl -k -s -X GET "https://localhost/_stats?format=text" status > "$tmpdir/chef_server_stats_endpoint.txt"
@@ -114,16 +110,13 @@ if [[ -S "/tmp/.s.PGSQL.5432" ]]; then
 fi
 
 # Retrieve Platform and Platform Version
-if [[ -f "/etc/lsb-release" ]] && grep -q DISTRIB_ID /etc/lsb-release;
-then
+if [[ -f "/etc/lsb-release" ]] && grep -q DISTRIB_ID /etc/lsb-release; then
     cp "/etc/lsb-release" "$tmpdir/platform_version.txt"
     known_platform="ubuntu"
-elif [[ -f "/etc/redhat-release" ]];
-then
+elif [[ -f "/etc/redhat-release" ]]; then
     cp "/etc/redhat-release" "$tmpdir/platform_version.txt"
     known_platform="rhel"
-elif [[ -f "/etc/os-release" ]] && grep -q "Amazon Linux 2" /etc/os-release;
-then
+elif [[ -f "/etc/os-release" ]] && grep -q "Amazon Linux 2" /etc/os-release; then
     known_platform="amazon"
     cat "/etc/os-release" >> "$tmpdir/platform_version.txt"
     cat "/etc/system-release-cpe" >> "$tmpdir/platform_version.txt"
@@ -173,14 +166,12 @@ ping -c 2 `hostname` > ping_-c_2_hostname.txt
 # gather everything ohai knows
 /opt/opscode/bin/ohai > "$tmpdir/ohai.txt"
 
-if [[ -e /opt/opscode-manage/bin/opscode-manage-ctl ]];
-then
+if [[ -e /opt/opscode-manage/bin/opscode-manage-ctl ]]; then
     /opt/opscode-manage/bin/opscode-manage-ctl status > "$tmpdir/opscode-manage-ctl_status.txt"
     found_manage=true
 fi
 
-if [[ -e /opt/opscode-reporting/bin/opscode-reporting-ctl ]];
-then
+if [[ -e /opt/opscode-reporting/bin/opscode-reporting-ctl ]]; then
     /opt/opscode-reporting/bin/opscode-reporting-ctl status > "$tmpdir/opscode-reporting-ctl_status.txt"
     found_reporting=true
 fi
@@ -201,8 +192,7 @@ function add_footer (){
     echo ""    >> "$1"
 }
 
-if [[ -z $testing ]];
-then
+if [[ -z $testing ]]; then
     # in the future we should remove this file since the data is now
     # gathered one file at a time to match Automate output
     name_resolution_file="$tmpdir/name-resolution.txt"
@@ -237,14 +227,11 @@ tempname=`grep -E $fqdn $config_file_path | cut -d \" -f2`
 backend_fqdn=`grep -E $backend_vip $config_file_path | cut -d \" -f2`
 
 #Didnt find a hostname above, so fallback
-if [[ -z $tempname ]];
-then
+if [[ -z $tempname ]]; then
     tempname=$hostname
 fi
 
-if [[ -z $testing ]];
-then
-
+if [[ -z $testing ]]; then
     echo '## Resolved Name + Time' >> "$name_resolution_file"
     echo $tempname >> "$name_resolution_file"
     for interval in `seq 1 5`; do
@@ -257,7 +244,6 @@ then
         { time /opt/$path/embedded/bin/ruby -e "require 'resolv'; start=Time.now; p Resolv.getaddress(\"$backend_fqdn\")" ; } >> "$name_resolution_file" 2>&1
         sleep 2;
     done
-
 fi
 
 # gather important file permissions
@@ -279,25 +265,14 @@ fi
 #What packages do we have installed on our supported platforms?
 installed_packages_file="$tmpdir/installed-packages.txt"
 installed_packages_grep="grep -i -E (chef|opscode)"
-if [[ $known_platform == 'rhel' ]];
-then
-
+if [[ $known_platform == 'rhel' ]]; then
     rpm -qa | $installed_packages_grep >> "$installed_packages_file"
-
-elif [[ $known_platform == 'amazon' ]];
-then
-
+elif [[ $known_platform == 'amazon' ]]; then
     rpm -qa | $installed_packages_grep >> "$installed_packages_file"
-
-elif [[ $known_platform == 'ubuntu' ]];
-then
-
+elif [[ $known_platform == 'ubuntu' ]]; then
     dpkg -l | $installed_packages_grep >> "$installed_packages_file"
-
 else
-
     echo "!!! Unknown platform !!!" >> "$installed_packages_file"
-
 fi
 
 ##
@@ -309,8 +284,7 @@ fi
 ## grep sql_ro_password /etc/opscode-reporting/opscode-reporting-running.json | sed -e 's/^.*"\(.*\)",$/\1opscode_reporting_ro/' | tr -d '\n' | md5sum | cut -d ' ' -f1 >> "$service_passwords_file"
 ##
 ##
-if [[ $found_reporting ]];
-then
+if [[ $found_reporting ]]; then
     service_passwords_file="$tmpdir/service-passwords.txt"
     db_check="echo select passwd from pg_shadow where usename=\'first\'\; | su - $POSTGRESQL_UNIX_USER -c 'psql -U opscode-pgsql postgres -t -A' | sed 's/md5//'"
     opscode_reporting_password=`echo $db_check | sed s@first@opscode_reporting@`
@@ -343,6 +317,22 @@ then
     echo `eval $opscode_reporting_etc_ro` >> "$service_passwords_file"
     add_footer "$service_passwords_file"
 
+fi
+
+# check if the system is proxied by checking if HTTPS_PROXY and HTTP_PROXY are unset or empty
+if [[ -z "$HTTPS_PROXY" || -z "$HTTP_PROXY" ]]; then # proxy not set
+    echo "0" > "${tmpdir}/connectivity/proxied.txt"
+else
+    echo "1" > "${tmpdir}/connectivity/proxied.txt"
+fi
+
+# check if a system can reach supermarket
+if curl https://supermarket.chef.io > /dev/null 2>&1; then
+    echo "1" > "${tmpdir}/connectivity/supermarket_accessible.txt"
+elif wget https://supermarket.chef.io -O $tmpdir/connectivity/supermarket_accessible.txt > /dev/null 2>&1; then
+    echo "1" > "${tmpdir}/connectivity/supermarket_accessible.txt"
+else
+    echo "0" > "${tmpdir}/connectivity/supermarket_accessible.txt"
 fi
 
 tar -C "${tmpdir%/*/*}" -czpf "$hostname-$timestamp.tar.gz" "$hostname/$timestamp/"
