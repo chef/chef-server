@@ -37,6 +37,8 @@ PATH=/opt/$path/embedded/bin:$PATH
 mkdir -p "$tmpdir"
 # make sure we have the full path in /proc created for the gather-logs bundle
 mkdir -p "$tmpdir/proc/sys/crypto/"
+# create the connectivity dir for proxy / supermarket access checks
+mkdir -p "$tmpdir/connectivity/"
 
 for i in /opt/{chef,$path}*/version-manifest.txt \
               /opt/$path/pc-version.txt \
@@ -343,6 +345,13 @@ then
     echo `eval $opscode_reporting_etc_ro` >> "$service_passwords_file"
     add_footer "$service_passwords_file"
 
+fi
+
+# check if the system is proxied by checking if HTTPS_PROXY and HTTP_PROXY are unset or empty
+if [[ -z "$HTTPS_PROXY" || -z "$HTTP_PROXY" ]]; then # proxy not set
+  echo "0" > $tmpdir/connectivity/proxied.txt
+else
+  echo "1" > $tmpdir/connectivity/proxied.txt
 fi
 
 tar -C "${tmpdir%/*/*}" -czpf "$hostname-$timestamp.tar.gz" "$hostname/$timestamp/"
