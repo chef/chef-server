@@ -354,6 +354,15 @@ else
   echo "1" > $tmpdir/connectivity/proxied.txt
 fi
 
+# check if a system can reach supermarket
+if curl https://supermarket.chef.io > /dev/null 2>&1; then
+  echo "1" > $tmpdir/connectivity/supermarket_accessible.txt
+elif wget https://supermarket.chef.io -O $tmpdir/connectivity/supermarket_accessible.txt > /dev/null 2>&1; then
+  echo "1" > $tmpdir/connectivity/supermarket_accessible.txt
+else
+  echo "0" > $tmpdir/connectivity/supermarket_accessible.txt
+fi
+
 tar -C "${tmpdir%/*/*}" -czpf "$hostname-$timestamp.tar.gz" "$hostname/$timestamp/"
 
 rm -rf "${tmpdir%/*/*}"
