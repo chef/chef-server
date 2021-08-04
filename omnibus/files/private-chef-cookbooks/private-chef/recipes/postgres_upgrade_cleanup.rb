@@ -32,3 +32,8 @@ directory '/var/log/opscode/postgresql/9.2' do
   recursive true
   action :delete
 end
+
+directory '/var/log/opscode/postgresql/9.6' do
+  recursive true
+  action :delete
+end
