@@ -44,6 +44,36 @@ Chef Infra Server 14 moved from Solr to Elasticsearch as its search index.
 
 The Chef Infra Server 14 upgrade does not automatically reindex existing external Elasticsearch installations.
 
+### Upgrading to 14.8.x
+
+Chef Infra Server 14.8 upgraded postgresql from 9.6 to 13.3. There are a couple of extra steps that need to be considered depending on the scenario.
+
+#### Upgrading steps
+
+1. Follow all the instructions for upgrading to 14
+
+2. Reindex the Chef Infra server
+
+    ```bash
+    /usr/lib/postgresql/13.3/bin/reindexdb --all
+    ```
+
+#### Recommendations
+
+1. Running Vacuum full is recommended if auto vacuuming is not set up, as this will reduce the size of the db by deleting the unwanted data. We estimate the vacuum full operation will take around 1 to 2 minutes per GB of data and it will also be dependent on the nature of the data also.
+
+    ```bash
+    /usr/lib/postgresql/9.6/bin/vaccumedb --all --full
+    ```
+
+2. Taking a chef-server-ctl backup or knife-ec-backup is recommended before starting the upgrade. The backup takes around 4 to 5 minutes per GB of data.
+
+#### Additional Information
+
+1. The estimations were done on the machine with 8 cores with 32 GB memory (t3.2xlarge EC2 machine).
+
+2. The down time for standalone scenario upgrade with 158G of unvacuumed data was about 5hr 15min.
+
 ### Upgrading to 12.17.15
 
 {{< warning >}}
@@ -240,3 +270,129 @@ Chef Infra Server 13 and 14 support the Chef Manage add-on. This add-on is [depr
 #### Use Local Packages
 
 {{% ctl_chef_server_install_features_manual %}}
+
+
+### External postgres upgrade
+
+In the external postgres setup, we will be having the postgress install outside the Chef Infra server. Upgradeing the Chef Infra server to 14.8 or later reguires to migrate the external postgres from 9.6 to 13.3 seperately.
+
+#### Recommended steps for the external postgres upgrade
+
+
+1. Back up your Chef Infra Server data before starting the upgrade process using [knife-ec-backup](https://github.com/chef/knife-ec-backup).
+
+2. Confirm that the Chef Infra Server services are operational:
+
+    ```bash
+    chef-server-ctl reconfigure
+    ```
+
+3. Download the desired Chef Infra Server version from the [Chef Infra Server Downloads](https://downloads.chef.io/products/chef-server) page.
+
+4. Stop the server:
+
+    ```bash
+    chef-server-ctl stop
+    ```
+
+5. Install the Chef Infra Server package:
+
+    To install with `dpkg`:
+
+    ```bash
+    dpkg -i /path/to/chef-server-core-<version>.deb
+    ```
+
+    To install with the RPM Package Manager:
+
+    ```bash
+    rpm -Uvh --nopostun /path/to/chef-server-core-<version>.rpm
+    ```
+
+6. Upgrade the server and accept the Chef Software license by entering `Yes` at the prompt:
+
+    ```bash
+    chef-server-ctl upgrade
+    ```
+
+    To accept the license and upgrade in one command:
+
+    ```bash
+    CHEF_LICENSE='accept' chef-server-ctl upgrade
+    ```
+
+7. Start Chef Infra Server:
+
+    ```bash
+    chef-server-ctl start
+    ```
+
+8. Update packages and install the new PostgreSQL 13.3 on the external postgres machine.
+
+9. Check if there are any differences in the config files.Make sure to update them if required
+
+    ```bash
+    diff /etc/postgresql/12/main/postgresql.conf /etc/postgresql/13/main/postgresql.conf
+    diff /etc/postgresql/12/main/pg_hba.conf /etc/postgresql/13/main/pg_hba.conf
+    ```
+
+10. Stop the PostgreSQL service.
+
+    ```bash
+    sudo systemctl stop postgresql.service
+    ```
+
+11. Logging in as postgres user, check clusters (notice the --check argument, this will not change any data).
+
+    ```bash
+    su postgres
+    /usr/lib/postgresql/13/bin/pg_upgrade \
+      --old-datadir=/var/lib/postgresql/9.6/main \
+      --new-datadir=/var/lib/postgresql/13/main \
+      --old-bindir=/usr/lib/postgresql/9.6/bin \
+      --new-bindir=/usr/lib/postgresql/13/bin \
+      --old-options '-c config_file=/etc/postgresql/9.6/main/postgresql.conf' \
+      --new-options '-c config_file=/etc/postgresql/13/main/postgresql.conf' \
+      --check
+    ```
+
+12. Migrate the data and logout of postgres user(without the --check argument).
+
+    ```bash
+    /usr/lib/postgresql/13/bin/pg_upgrade \
+      --old-datadir=/var/lib/postgresql/9.6/main \
+      --new-datadir=/var/lib/postgresql/13/main \
+      --old-bindir=/usr/lib/postgresql/9.6/bin \
+      --new-bindir=/usr/lib/postgresql/13/bin \
+      --old-options '-c config_file=/etc/postgresql/9.6/main/postgresql.conf' \
+      --new-options '-c config_file=/etc/postgresql/13/main/postgresql.conf'
+    exit
+    ```
+    
+13. Swap the ports for the old and new PostgreSQL versions.
+
+    ```bash
+    sudo vim /etc/postgresql/13/main/postgresql.conf
+    # change "port = 5433" to "port = 5432"
+
+    sudo vim /etc/postgresql/9.6/main/postgresql.conf
+    # change "port = 5432" to "port = 5433"
+    ```
+14. Start the PostgreSQL service.
+
+    ```bash
+    sudo systemctl start postgresql.service
+    ```
+
+15. Log in as the postgres user again and Check the new PostgreSQL version.
+
+    ```bash
+    sudo su postgres
+    psql -c "SELECT version();"
+    ```
+
+16. Check the status in the Chef Infra server machine
+
+    ```bash
+    chef-server-ctl status
+    ```
