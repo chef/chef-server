@@ -2,7 +2,7 @@
 %% ex: ts=4 sw=4 et
 %% @author Seth Falcon <seth@chef.io>
 %% @author Christopher Maier <cm@chef.io>
-%% Copyright 2012 Opscode, Inc. All Rights Reserved.
+%% Copyright Chef Software, Inc. All Rights Reserved.
 %%
 %% This file is provided to you under the Apache License,
 %% Version 2.0 (the "License"); you may not use this file
@@ -218,4 +218,3 @@ set_key_pair_test_() ->
              end
              || Type <- [key, cert] ],
     lists:flatten(Tests).
-

@@ -3,7 +3,7 @@
 %% @author James Casey <james@chef.io>
 %% @doc interface to the certificate generation service
 %%
-%% Copyright 2012 Opscode, Inc. All Rights Reserved.
+%% Copyright Chef Software, Inc. All Rights Reserved.
 %%
 %% This file is provided to you under the Apache License,
 %% Version 2.0 (the "License"); you may not use this file
@@ -82,5 +82,3 @@ check_http_response(Code, Headers, Body) ->
         "5" ++ _Digits ->
             throw({error, {server_error, {Code, Headers, Body}}})
     end.
-
-

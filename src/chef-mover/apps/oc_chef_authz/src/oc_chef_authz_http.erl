@@ -3,7 +3,7 @@
 %% @author Kevin Smith <kevin@chef.io>
 %% @doc oc_chef_authz's interface to the authz server
 %%
-%% Copyright 2011-2013 Opscode, Inc. All Rights Reserved.
+%% Copyright Chef Software, Inc. All Rights Reserved.
 %%
 %% This file is provided to you under the Apache License,
 %% Version 2.0 (the "License"); you may not use this file

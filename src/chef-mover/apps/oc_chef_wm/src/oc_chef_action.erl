@@ -3,7 +3,7 @@
 %%
 %% @author James Casey <james@chef.io>
 %%
-%% Copyright 2013-2014 Chef Software, Inc. All Rights Reserved.
+%% Copyright Chef Software, Inc. All Rights Reserved.
 %%
 %% This file is provided to you under the Apache License,
 %% Version 2.0 (the "License"); you may not use this file
@@ -339,4 +339,3 @@ req_header(Name, Req) ->
         Header ->
             iolist_to_binary(Header)
     end.
-

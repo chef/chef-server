@@ -2,7 +2,7 @@
 %% ex: ts=4 sw=4 et
 %% @author Seth Falcon <seth@chef.io>
 %% @author Kevin Smith <kevin@chef.io>
-%% Copyright 2011-2012 Opscode, Inc. All Rights Reserved.
+%% Copyright Chef Software, Inc. All Rights Reserved.
 %%
 %% This file is provided to you under the Apache License,
 %% Version 2.0 (the "License"); you may not use this file
@@ -86,4 +86,3 @@ bunnyc_spec(VHost, Host, Port, User, Password, ExchangeName) ->
 server_for_vhost(VHost) ->
     Bin = erlang:iolist_to_binary([<<"chef_index_queue">>, VHost]),
     erlang:binary_to_atom(Bin, utf8).
-    

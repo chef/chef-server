@@ -1,5 +1,5 @@
 #
-# Copyright:: Copyright (c) 2012 Opscode, Inc.
+# Copyright:: Copyright (c) Chef Software, Inc.
 #
 # All Rights Reserved
 #

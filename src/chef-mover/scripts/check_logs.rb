@@ -3,7 +3,7 @@
 # @author Mark Anderson <mark@chef.io>
 # @author Marc Paradise <marc@chef.io>
 #
-# Copyright 2013 Opscode Inc
+# Copyright Chef Software, Inc.
 # All Rights Reserved
 #
 # This script will serve two purposes:
@@ -13,7 +13,7 @@
 #    that will not be captured as failing conditions at time of the migration.
 # 2) output a condensed, more easily readable log file containing details of issues that it
 #    does discover. This (plus the associated console/error logs) should be provided to
-#    Opscode Support in the event of failed migration(s).
+#    Chef Support in the event of failed migration(s).
 #
 # Exit code:
 #
@@ -493,5 +493,3 @@ else
     exit 0
   end
 end
-
-

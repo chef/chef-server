@@ -2,7 +2,7 @@
 %% ex: ts=4 sw=4 et
 %% @author Douglas Triggs <doug@chef.io>
 %% @author Seth Falcon <seth@chef.io>
-%% Copyright 2012 Opscode, Inc. All Rights Reserved.
+%% Copyright Chef Software, Inc. All Rights Reserved.
 %%
 %% This file is provided to you under the Apache License,
 %% Version 2.0 (the "License"); you may not use this file
@@ -450,5 +450,3 @@ value_or_undefined(Key, Data) ->
 -spec(list(#chef_client{}, chef_object:select_callback()) -> chef_object:select_return()).
 list(#chef_client{org_id = OrgId}, CallbackFun) ->
     CallbackFun({list_query(), [OrgId], [name]}).
-
-

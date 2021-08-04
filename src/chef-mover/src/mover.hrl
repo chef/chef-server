@@ -14,7 +14,7 @@
 %% License for the specific language governing permissions and limitations under
 %% the License.
 %%-------------------------------------------------------------------
-%% @copyright (C) 2013, Opscode Inc.
+%% @copyright (C) Chef Software, Inc..
 %%
 
 -define(PHASE_1_MIGRATION_COMPONENTS,

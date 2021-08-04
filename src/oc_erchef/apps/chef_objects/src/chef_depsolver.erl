@@ -4,7 +4,7 @@
 %%
 %% Regex from chef_json_validator.erl
 %% @author Marc Paradise <marc@chef.io>
-%% Copyright 2012-2013 Opscode, Inc. All Rights Reserved.
+%% Copyright Chef Software, Inc. All Rights Reserved.
 %%
 %% This file is provided to you under the Apache License,
 %% Version 2.0 (the "License"); you may not use this file
@@ -124,4 +124,3 @@ solve_dependencies(AllVersions, EnvConstraints, Cookbooks) ->
 
 depsolver_timeout() ->
     envy:get(chef_objects, depsolver_timeout, ?DEFAULT_DEPSOLVER_TIMEOUT, non_neg_integer).
-
