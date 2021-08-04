@@ -2,7 +2,7 @@
 %% ex: ts=4 sw=4 et
 %% @author Seth Falcon <seth@chef.io>
 %% @author Christopher Maier <cm@chef.io>
-%% Copyright 2012 Opscode, Inc. All Rights Reserved.
+%% Copyright Chef Software, Inc. All Rights Reserved.
 %%
 %% This file is provided to you under the Apache License,
 %% Version 2.0 (the "License"); you may not use this file
@@ -169,5 +169,3 @@ semantic_duplication_test_() ->
 
 parse_date_test() ->
     ?assertEqual(?INFINITY_TIMESTAMP, chef_object_base:parse_date(<<"infinity">>)).
-
-

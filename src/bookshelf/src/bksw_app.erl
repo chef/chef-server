@@ -1,4 +1,4 @@
-%% @copyright 2019 Opscode, Inc. All Rights Reserved
+%% @copyright 2019 Chef Software, Inc. All Rights Reserved
 %% @author Tim Dysinger <dysinger@chef.io>
 %%
 %% Licensed to the Apache Software Foundation (ASF) under one or more

@@ -6,7 +6,7 @@
 %%
 %% Regex used in erchef
 %%
-%% Copyright 2012 Opscode, Inc. All Rights Reserved.
+%% Copyright Chef Software, Inc. All Rights Reserved.
 %%
 %% This file is provided to you under the Apache License,
 %% Version 2.0 (the "License"); you may not use this file
@@ -134,5 +134,3 @@ regex_for(user_name) ->
                             <<"Malformed user name. Must only contain a-z, 0-9, _, or -">>);
 regex_for(non_blank_string) ->
    generate_regex_msg_tuple(?ANCHOR_REGEX(?NON_BLANK_REGEX), <<"Field must have a non-empty string value">>).
-
-

@@ -1,7 +1,7 @@
 %% -*- erlang-indent-level: 4; indent-tabs-mode: nil; fill-column: 80 -*-
 %% ex: ts=4 sx=4 et
 %%
-%% Copyright 2012 Opscode, Inc. All Rights Reserved.
+%% Copyright Chef Software, Inc. All Rights Reserved.
 %%
 %% This file is provided to you under the Apache License,
 %% Version 2.0 (the "License"); you may not use this file
@@ -38,7 +38,7 @@
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2,
          terminate/2, code_change/3]).
 
--define(SERVER, ?MODULE). 
+-define(SERVER, ?MODULE).
 
 -record(state, {}).
 

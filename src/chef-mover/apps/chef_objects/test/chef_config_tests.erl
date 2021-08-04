@@ -2,7 +2,7 @@
 %% ex: ts=4 sw=4 et
 %% @author Christopher Maier <cm@chef.io>
 %% @author Seth Chisamore <schisamo@chef.io>
-%% Copyright 2012 Opscode, Inc. All Rights Reserved.
+%% Copyright Chef Software, Inc. All Rights Reserved.
 %%
 %% This file is provided to you under the Apache License,
 %% Version 2.0 (the "License"); you may not use this file
@@ -57,8 +57,8 @@ config_option_test_() ->
 					     chef_config:config_option(TestApplication, TestOption, Type))
 			end
 		end}
-       end} || {Description, Value, Type, ErrorState} <- 
-		   [{"Positive integer: " ++ Label, V, pos_integer, E } || 
+       end} || {Description, Value, Type, ErrorState} <-
+		   [{"Positive integer: " ++ Label, V, pos_integer, E } ||
 		       {Label, V, E} <- [{"Succeeds with positive integer", 5, no_error},
 					 {"Fails with 0", 0, error},
 					 {"Fails with negative integer", -5, error},
@@ -68,4 +68,3 @@ config_option_test_() ->
 					 {"Fails with a binary", <<"This is also bad">>, error},
 					 {"Fails when undefined", undefined, always_error}]
 		   ]]}.
-	      

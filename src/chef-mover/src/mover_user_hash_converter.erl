@@ -2,7 +2,7 @@
 %% ex: ts=4 sw=4 et
 %%
 %% @author Marc Paradise <marc@chef.io>
-%% @copyright 2013, Opscode Inc
+%% @copyright Chef Software, Inc.
 %%
 
 -module(mover_user_hash_converter).
@@ -147,5 +147,3 @@ all_unconverted_users_count_sql() ->
 
 all_users_count_sql() ->
     <<"SELECT count(*) FROM users">>.
-
-

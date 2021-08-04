@@ -3,7 +3,7 @@
 %% @author Seth Falcon <seth@chef.io>
 %% @author Christopher Maier <cm@chef.io>
 %% @author Mark Anderson <mark@chef.io>
-%% Copyright 2012 Opscode, Inc. All Rights Reserved.
+%% Copyright Chef Software, Inc. All Rights Reserved.
 %%
 %% This file is provided to you under the Apache License,
 %% Version 2.0 (the "License"); you may not use this file
@@ -241,4 +241,3 @@ is_wrapped_item(Ejson) ->
 -spec(list(#chef_data_bag_item{}, chef_object:select_callback()) -> chef_object:select_return()).
 list(#chef_data_bag_item{org_id = OrgId, data_bag_name = DataBagName}, CallBackFun) ->
     CallBackFun({list_query(), [OrgId, DataBagName], [item_name]}).
-

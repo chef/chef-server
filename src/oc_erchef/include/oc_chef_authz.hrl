@@ -8,7 +8,7 @@
 %%
 %% This module is an Erlang port of the mixlib-authorization Ruby gem.
 %%
-%% Copyright 2011-2012 Opscode, Inc. All Rights Reserved.
+%% Copyright Chef Software, Inc. All Rights Reserved.
 %%
 %% This file is provided to you under the Apache License,
 %% Version 2.0 (the "License"); you may not use this file
@@ -51,4 +51,3 @@
           'path',           % 'path' of container (not used? Orig part of inheritance mech?; safe to delete? Yea!)
           'last_updated_by' % authz guid of last actor to update object
          }).
-

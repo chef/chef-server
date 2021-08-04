@@ -2,7 +2,7 @@
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92-*-
 %% ex: ts=4 sw=4 et
 
-%% Copyright (c) 2013 Opscode, Inc.
+%% Copyright (c) 2013 Chef Software, Inc.
 %% All Rights Reserved
 
 %% TODO: The cookie used by erchef should be part of config
@@ -45,7 +45,7 @@ main(Args) ->
       init_network(),
       [Command, OrgInfo, Context] = validate_args(Args),
       perform(Command, Context, OrgInfo)
-    catch 
+    catch
         error:{badmatch,{error,{conn_failed,{error,econnrefused}}}} ->
             io:format("~n Unable to start new erlang node due to network issue~n Please check if the localhost is resolved to 127.0.0.1 or check if firewall is blocking the connection~n");
         error:{badmatch,{error,{already_started,Pid}}} ->

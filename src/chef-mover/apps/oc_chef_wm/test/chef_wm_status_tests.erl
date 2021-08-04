@@ -1,4 +1,4 @@
-%% Copyright 2012 Opscode, Inc. All Rights Reserved.
+%% Copyright Chef Software, Inc. All Rights Reserved.
 %%
 %% This file is provided to you under the Apache License,
 %% Version 2.0 (the "License"); you may not use this file
@@ -127,5 +127,3 @@ a2b(A) ->
 
 a2s(A) ->
     atom_to_list(A).
-
-

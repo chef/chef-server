@@ -1,8 +1,8 @@
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92-*-
 %% ex: ts=4 sw=4 et
 %% @author Christopher Maier <cm@chef.io>
-%% @copyright 2012 Opscode, Inc.
-%% Copyright 2012 Opscode, Inc. All Rights Reserved.
+%% @copyright Chef Software, Inc.
+%% Copyright Chef Software, Inc. All Rights Reserved.
 %%
 %% This file is provided to you under the Apache License,
 %% Version 2.0 (the "License"); you may not use this file
@@ -271,4 +271,3 @@ record_fields() ->
 
 list(#chef_role{org_id = OrgId}, CallbackFun) ->
     CallbackFun({list_query(), [OrgId], [name]}).
-
