@@ -349,18 +349,18 @@ fi
 
 # check if the system is proxied by checking if HTTPS_PROXY and HTTP_PROXY are unset or empty
 if [[ -z "$HTTPS_PROXY" || -z "$HTTP_PROXY" ]]; then # proxy not set
-  echo "0" > $tmpdir/connectivity/proxied.txt
+  echo "0" > "${tmpdir}/connectivity/proxied.txt"
 else
-  echo "1" > $tmpdir/connectivity/proxied.txt
+  echo "1" > "${tmpdir}/connectivity/proxied.txt"
 fi
 
 # check if a system can reach supermarket
 if curl https://supermarket.chef.io > /dev/null 2>&1; then
-  echo "1" > $tmpdir/connectivity/supermarket_accessible.txt
+  echo "1" > "${tmpdir}/connectivity/supermarket_accessible.txt"
 elif wget https://supermarket.chef.io -O $tmpdir/connectivity/supermarket_accessible.txt > /dev/null 2>&1; then
-  echo "1" > $tmpdir/connectivity/supermarket_accessible.txt
+  echo "1" > "${tmpdir}/connectivity/supermarket_accessible.txt"
 else
-  echo "0" > $tmpdir/connectivity/supermarket_accessible.txt
+  echo "0" > "${tmpdir}/connectivity/supermarket_accessible.txt"
 fi
 
 tar -C "${tmpdir%/*/*}" -czpf "$hostname-$timestamp.tar.gz" "$hostname/$timestamp/"
