@@ -64,7 +64,7 @@ Chef Infra Server 14.8 upgraded PostgreSQL from 9.6 to 13.3. The 14.8 upgrade pr
 
 #### Post-upgrade steps
 
-1. Reindex the Chef Infra server
+1. Reindex the Chef Infra Server
 
     ```bash
     /usr/lib/postgresql/13.3/bin/reindexdb --all
@@ -272,5 +272,4 @@ Chef Infra Server 13 and 14 support the Chef Manage add-on. This add-on is [depr
 #### Use Local Packages
 
 {{% ctl_chef_server_install_features_manual %}}
-
 
