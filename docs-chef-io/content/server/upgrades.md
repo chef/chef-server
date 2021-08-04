@@ -72,7 +72,7 @@ Chef Infra Server 14.8 upgraded PostgreSQL from 9.6 to 13.3. The 14.8 upgrade pr
 
 #### Additional Information
 
-1. Estimates were performed on an 8 core 32 GB memory (t3.2xlarge EC2) machine.
+1. Estimates were performed on an 8 core 32 GB memory (t3.2xlarge) AWS EC2 instance.
 
 2. The down time for standalone scenario upgrade with 158G of unvacuumed data was about 5hr 15min.
 
@@ -272,4 +272,3 @@ Chef Infra Server 13 and 14 support the Chef Manage add-on. This add-on is [depr
 #### Use Local Packages
 
 {{% ctl_chef_server_install_features_manual %}}
-
