@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.7.32 -->
-## [14.7.32](https://github.com/chef/chef-server/tree/14.7.32) (2021-08-03)
+<!-- latest_release 14.8.0 -->
+## [14.8.0](https://github.com/chef/chef-server/tree/14.8.0) (2021-08-04)
 
 #### Merged Pull Requests
-- Improve chef-server-ctl help and docs [#2696](https://github.com/chef/chef-server/pull/2696) ([tas50](https://github.com/tas50))
+- Update PostgreSQL to 13.3 [#2577](https://github.com/chef/chef-server/pull/2577) ([lbakerchef](https://github.com/lbakerchef))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.7.13 -->
 ### Changes since 14.7.13 release
 
 #### Merged Pull Requests
+- Update PostgreSQL to 13.3 [#2577](https://github.com/chef/chef-server/pull/2577) ([lbakerchef](https://github.com/lbakerchef)) <!-- 14.8.0 -->
 - Improve chef-server-ctl help and docs [#2696](https://github.com/chef/chef-server/pull/2696) ([tas50](https://github.com/tas50)) <!-- 14.7.32 -->
 - Update Elasticsearch to 6.8.18 [#2697](https://github.com/chef/chef-server/pull/2697) ([tas50](https://github.com/tas50)) <!-- 14.7.31 -->
 - Add GitHub action for cookstyle/chefspec in ctl cookbook [#2595](https://github.com/chef/chef-server/pull/2595) ([tas50](https://github.com/tas50)) <!-- 14.7.30 -->
