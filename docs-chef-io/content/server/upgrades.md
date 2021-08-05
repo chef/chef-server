@@ -37,6 +37,8 @@ Requires License
 Supported Release
 : Chef Infra Server 13 and later are currently supported Chef Software releases. Earlier releases are no longer supported as of 12/31/2020. For more information about supported Chef Software see the [Supported Versions]({{< relref "/versions#supported-commercial-distributions" >}}) documentation.
 
+## Release Specific Notes
+
 ### Upgrading to 14.x
 
 Chef Infra Server 14 moved from Solr to Elasticsearch as its search index.
@@ -44,25 +46,25 @@ Chef Infra Server 14 moved from Solr to Elasticsearch as its search index.
 
 The Chef Infra Server 14 upgrade does not automatically reindex existing external Elasticsearch installations.
 
-### Upgrading to 14.8.x
+#### Upgrading to 14.8
 
-Chef Infra Server 14.8 upgraded PostgreSQL from 9.6 to 13.3. The 14.8 upgrade process requires downtime for vacuuming, upgrading and reindexing the database. There are extra steps that need to be considered when upgrading from versions less than 14.8 to versions greater than 14.8. Using current recommendations, the entire upgrade operation could take 1 minute per 1000 nodes or longer, depending on your server hardware and the complexity of your Chef data.
+Chef Infra Server 14.8 upgraded PostgreSQL from 9.6 to 13.3. The 14.8 upgrade process requires downtime for vacuuming, upgrading and reindexing the database. There are extra steps that need to be considered when upgrading from versions earlier than 14.8 . The entire upgrade operation is estimated to take 1 minute per 1000 nodes. This process may take longer depending on your server hardware and the size of the node objects in your Chef Infra Server.
 
-#### Pre-upgrade Recommendations
+##### Database Preparation
 
-1. Running vacuum full is recommended if auto vacuuming is not set up, as this will reduce the size of the database by deleting unnecessary data. The vacuum full operation could take around 1 to 2 minutes per GB of data, depending on the nature of the data. Additionally, the vacuum full operation will need an amount of free disk space at least as large as the size of your database.
+1. Running vacuum full on the PostgreSQL database is recommended if auto vacuuming is not set up. This process will reduce the size of the database by deleting unnecessary data and speeds up migration. The vacuum full operation takes around 1 to 2 minutes per GB of data, depending on the complexity of the data. Additionally, the vacuum full operation will need an amount of free disk space at least as large as the size of your database.
 
     ```bash
     /usr/lib/postgresql/9.6/bin/vaccumedb --all --full
     ```
 
-2. Performing `chef-server-ctl backup` or `knife-ec-backup` is recommended before starting the upgrade. The backup takes around 4 to 5 minutes per GB of data.
+2. To allow for a full restoration to a previous release in the event of a failure we recommend backing up the PostgreSQL database before upgrading. Performing `chef-server-ctl backup` or `knife-ec-backup` is will backup all data. The backup takes around 4 to 5 minutes per GB of data.
 
-#### Upgrade Steps
+##### Upgrade Steps
 
-1. Follow the same instructions for upgrading to Chef Infra Server 14.0.
+1. Follow the Chef Infra Server upgrade instructions below.
 
-#### Post-upgrade steps
+##### Post-upgrade Steps
 
 1. Reindex the Chef Infra Server
 
@@ -70,11 +72,11 @@ Chef Infra Server 14.8 upgraded PostgreSQL from 9.6 to 13.3. The 14.8 upgrade pr
     /usr/lib/postgresql/13.3/bin/reindexdb --all
     ```
 
-#### Additional Information
+{{< note >}}
 
-1. Estimates were performed on an 8 core 32 GB memory (t3.2xlarge) AWS EC2 instance.
+Estimates were performed on an 8 core 32 GB memory (t3.2xlarge) AWS EC2 instance.
 
-2. The down time for standalone scenario upgrade with 158G of unvacuumed data was about 5hr 15min.
+{{</note >}}
 
 ### Upgrading to 12.17.15
 
