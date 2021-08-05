@@ -2,7 +2,7 @@
 .kitchen/
 .vagrant/
 bin/*
-files/private-chef-cookbooks/cache/
+files/server-ctl-cookbooks/cache/
 pkg/*
 vendor/
 tests/**/*.so

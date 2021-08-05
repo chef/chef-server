@@ -41,7 +41,7 @@ do_unpack() {
     mkdir -p "$HAB_CACHE_SRC_PATH/$pkg_dirname"
     cp -R "$PLAN_CONTEXT/../"* "$HAB_CACHE_SRC_PATH/$pkg_dirname"
     mkdir -p "$HAB_CACHE_SRC_PATH/$pkg_dirname/static"
-    cp -R "$PLAN_CONTEXT/../../../omnibus/files/private-chef-cookbooks/private-chef/files/default/html" "$HAB_CACHE_SRC_PATH/$pkg_dirname/static"
+    cp -R "$PLAN_CONTEXT/../../../omnibus/files/server-ctl-cookbooks/infra-server/files/default/html" "$HAB_CACHE_SRC_PATH/$pkg_dirname/static"
 }
 
 do_build() {
