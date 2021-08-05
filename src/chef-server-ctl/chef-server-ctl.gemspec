@@ -27,7 +27,7 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency "pry"
   spec.add_runtime_dependency "rb-readline"
 
-  spec.add_runtime_dependency "pg", '~> 1.2', '>= 1.2.3'
+  spec.add_runtime_dependency "pg", '~> 1.1', '>= 1.1.4'
 
   spec.add_runtime_dependency "redis"
   # TODO
