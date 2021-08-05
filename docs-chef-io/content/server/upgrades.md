@@ -104,7 +104,7 @@ If you are running a Chef Infra Server release prior to 12.3.0 please contact Ch
 
 1. Run `vacuumdb` before starting the upgrade:
 
-   bash```
+   ```bash
    sudo su postgres
    /usr/bin/vacuumdb --all --full
    exit
@@ -118,9 +118,9 @@ If you are running a Chef Infra Server release prior to 12.3.0 please contact Ch
 
 2. Confirm that the Chef Infra Server services are operational:
 
-    ```bash
-    chef-server-ctl reconfigure
-    ```
+   ```bash
+   chef-server-ctl reconfigure
+   ```
 
 1. If you are running chef-server version 12.17.15 or greater, **SKIP THIS STEP** and proceed to step X below.  Otherwise, consult the [upgrade matrix](https://docs.chef.io/server/upgrades/) and perform a stepped upgrade.
 
@@ -133,34 +133,34 @@ If you are running a Chef Infra Server release prior to 12.3.0 please contact Ch
 
 4. Stop the server:
 
-    ```bash
-    chef-server-ctl stop || chef-server-ctl kill rabbitmq
-    ```
+   ```bash
+   chef-server-ctl stop || chef-server-ctl kill rabbitmq
+   ```
 
 5. Install the Chef Infra Server package:
 
-    To install with `dpkg`:
+   To install with `dpkg`:
 
-    ```bash
-    dpkg -iEG /path/to/chef-server-core-<version>.deb
-    ```
+   ```bash
+   dpkg -iEG /path/to/chef-server-core-<version>.deb
+   ```
 
-    To install with the RPM Package Manager:
+   To install with the RPM Package Manager:
 
-    ```bash
-    rpm -Uvh --nopostun /path/to/chef-server-core-<version>.rpm
-    ```
+   ```bash
+   rpm -Uvh --nopostun /path/to/chef-server-core-<version>.rpm
+   ```
 
 6. Upgrade the server and accept the Chef Software license by entering `Yes` at the prompt:
 
-    ```bash
-    chef-server-ctl upgrade
-    ```
+   ```bash
+   chef-server-ctl upgrade
+   ```
 
-    To accept the license and upgrade in one command:
+   To accept the license and upgrade in one command:
 
-    ```bash
-    CHEF_LICENSE='accept' chef-server-ctl upgrade
+   ```bash
+   CHEF_LICENSE='accept' chef-server-ctl upgrade
     ```
 
 7. If the upgrade failed, SKIP THIS STEP and continue at step X below. If the upgrade was successful, start Chef Infra Server:
@@ -175,13 +175,13 @@ If you are running a Chef Infra Server release prior to 12.3.0 please contact Ch
 
 10. Clean up the server by removing the old data:
 
-    ```bash
-    chef-server-ctl cleanup
-    ```
+   ```bash
+   chef-server-ctl cleanup
+   ```
 
 11. Reindex the database:
 
-    ```bash
+   ```bash
    /usr/bin/reindexdb --all
    ```
 
@@ -214,7 +214,7 @@ Check the [post upgrade steps](#post-upgrade-steps) if you are upgrading from a 
 
 1. Run `vacuumdb` before starting the upgrade:
 
-   bash```
+   ```bash
    sudo su postgres
    /usr/bin/vacuumdb --all --full
    exit
