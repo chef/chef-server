@@ -74,7 +74,7 @@ Reindex the Chef Infra Server
 
 {{< note >}}
 
-Estimates were performed on an 8 core 32 GB memory (t3.2xlarge) AWS EC2 instance with 2 orgs, 3 users having 565000+ nodes, 13000+ cookbooks, 29000+ databags, 274000+ envs and 281000+ roles. 
+Estimates were performed on an 8-core 32 GB memory (t3.2xlarge) AWS EC2 instance with 2 organizations, 3 users having 565,000+ nodes, 13,000+ cookbooks, 29,000+ databags, 274,000+ environments, and 281,000+ roles. 
 
 {{</note >}}
 
