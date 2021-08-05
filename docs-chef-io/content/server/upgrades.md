@@ -52,10 +52,10 @@ Chef Infra Server 14.8 upgraded PostgreSQL from 9.6 to 13.3. The 14.8 upgrade pr
 
 ##### Database Preparation
 
-1. Running vacuum full on the PostgreSQL database is recommended if auto vacuuming is not set up. This process will reduce the size of the database by deleting unnecessary data and speeds up migration. The vacuum full operation takes around 1 to 2 minutes per GB of data, depending on the complexity of the data. Additionally, the vacuum full operation will need an amount of free disk space at least as large as the size of your database.
+1. Running vacuum full on the PostgreSQL database is recommended if auto vacuuming is not set up. This process will reduce the size of the database by deleting unnecessary data and speeds up the migration. The vacuum full operation takes around 1 to 2 minutes per GB of data, depending on the complexity of the data. Additionally, the vacuum full operation will need an amount of free disk space at least as large as the size of your database.
 
     ```bash
-    /usr/lib/postgresql/9.6/bin/vaccumedb --all --full
+    /opt/opscode/embedded/bin/vacuumdb --all --full
     ```
 
 2. To allow for a full restoration to a previous release in the event of a failure we recommend backing up the PostgreSQL database before upgrading. Performing `chef-server-ctl backup` or `knife-ec-backup` is will backup all data. The backup takes around 4 to 5 minutes per GB of data.
@@ -69,7 +69,7 @@ Follow the Chef Infra Server upgrade instructions below.
 Reindex the Chef Infra Server
 
 ```bash
-/usr/lib/postgresql/13.3/bin/reindexdb --all
+/opt/opscode/embedded/bin/reindexdb --all
 ```
 
 {{< note >}}
