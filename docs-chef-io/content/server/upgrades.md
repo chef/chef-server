@@ -267,7 +267,7 @@ To upgrade to Chef Infra Server on a tiered Chef Infra Server configuration, do 
 
 {{< note >}}
 
-Check [post upgrade steps](#post-upgrade-steps) if you are upgrading from version less than 14.8 to version greater than or equal to 14.8
+Check the [post upgrade steps](#post-upgrade-steps) if you are upgrading from a version before Chef Infra Server 14.8 to a version greater than or equal to 14.8.
 
 {{</note >}}
 
