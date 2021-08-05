@@ -62,15 +62,15 @@ Chef Infra Server 14.8 upgraded PostgreSQL from 9.6 to 13.3. The 14.8 upgrade pr
 
 ##### Upgrade Steps
 
-1. Follow the Chef Infra Server upgrade instructions below.
+Follow the Chef Infra Server upgrade instructions below.
 
 ##### Post-upgrade Steps
 
-1. Reindex the Chef Infra Server
+Reindex the Chef Infra Server
 
-    ```bash
-    /usr/lib/postgresql/13.3/bin/reindexdb --all
-    ```
+```bash
+/usr/lib/postgresql/13.3/bin/reindexdb --all
+```
 
 {{< note >}}
 
