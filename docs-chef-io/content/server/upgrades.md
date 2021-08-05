@@ -74,7 +74,7 @@ Reindex the Chef Infra Server
 
 {{< note >}}
 
-Estimates were performed on an 8 core 32 GB memory (t3.2xlarge) AWS EC2 instance.
+Estimates were performed on an 8 core 32 GB memory (t3.2xlarge) AWS EC2 instance with 2 orgs, 3 users having 565000+ nodes, 13000+ cookbooks, 29000+ databags, 274000+ envs and 281000+ roles. 
 
 {{</note >}}
 
@@ -150,7 +150,7 @@ If you are running a Chef Infra Server release prior to 12.3.0 please contact Ch
     chef-server-ctl start
     ```
 
-8. [Upgrade](#upgrading-add-ons) any Chef Infra Server add-ons.
+8. [Upgrade](#upgrading-manage-add-on) any Chef Infra Server add-ons.
 
 9. After the upgrade process is complete, test and verify that the server works properly.
 
@@ -159,6 +159,12 @@ If you are running a Chef Infra Server release prior to 12.3.0 please contact Ch
     ```bash
     chef-server-ctl cleanup
     ```
+
+{{< note >}}
+
+Check [post upgrade steps](#post-upgrade-steps) if you are upgrading from version less than 14.8 to version greater than or equal to 14.8
+
+{{</note >}}
 
 ### Chef Backend Install
 
@@ -249,7 +255,7 @@ To upgrade to Chef Infra Server on a tiered Chef Infra Server configuration, do 
     chef-server-ctl start
     ```
 
-11. [Upgrade]({{< relref "#upgrading-add-ons" >}}) any Chef Infra Server add-ons.
+11. [Upgrade]({{< relref "#upgrading-manage-add-on" >}}) any Chef Infra Server add-ons.
 
 12. After the upgrade process is complete, test and verify that the server works properly.
 
@@ -258,6 +264,12 @@ To upgrade to Chef Infra Server on a tiered Chef Infra Server configuration, do 
    ```bash
    chef-server-ctl cleanup
    ```
+
+{{< note >}}
+
+Check [post upgrade steps](#post-upgrade-steps) if you are upgrading from version less than 14.8 to version greater than or equal to 14.8
+
+{{</note >}}
 
 ### Upgrading Manage Add-On
 
