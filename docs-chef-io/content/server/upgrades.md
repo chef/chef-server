@@ -58,7 +58,7 @@ Chef Infra Server 14.8 upgraded PostgreSQL from 9.6 to 13.3. The 14.8 upgrade pr
     /opt/opscode/embedded/bin/vacuumdb --all --full
     ```
 
-2. To allow for a full restoration to a previous release in the event of a failure we recommend backing up the PostgreSQL database before upgrading. Performing `chef-server-ctl backup` or `knife-ec-backup` is will backup all data. The backup takes around 4 to 5 minutes per GB of data.
+2. To allow for a full restoration to a previous release in the event of a failure we recommend backing up the PostgreSQL database before upgrading. See [Backup and Restore]({{< relref "server_backup_restore" >}}) for additional information.
 
 ##### Upgrade Steps
 
