@@ -162,7 +162,7 @@ If you are running a Chef Infra Server release prior to 12.3.0 please contact Ch
 
 {{< note >}}
 
-Check [post upgrade steps](#post-upgrade-steps) if you are upgrading from version less than 14.8 to version greater than or equal to 14.8
+Check the [post upgrade steps](#post-upgrade-steps) if you are upgrading from a version before Chef Infra Server 14.8 to a version greater than or equal to 14.8.
 
 {{</note >}}
 
