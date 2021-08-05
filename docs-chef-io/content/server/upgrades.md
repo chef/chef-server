@@ -102,7 +102,19 @@ If you are running a Chef Infra Server release prior to 12.3.0 please contact Ch
 
 #### Standalone Upgrade Steps
 
-1. Back up your Chef Infra Server data before starting the upgrade process using [knife-ec-backup](https://github.com/chef/knife-ec-backup).
+1. Run `vacuumdb` before starting the upgrade:
+
+   bash```
+   sudo su postgres
+   /usr/bin/vacuumdb --all --full
+   exit
+   ```
+
+1. Back up your Chef Infra Server data before starting the upgrade process using [chef-server-ctl-backup](https://docs.chef.io/server/server_backup_restore/). **Make a note of where the backup was placed** (normally under /var/opt/chef-backup).  Please note that chef-server will go offline to perform the backup:
+
+   ```bash
+   sudo chef-server-ctl backup
+   ```
 
 2. Confirm that the Chef Infra Server services are operational:
 
@@ -110,12 +122,19 @@ If you are running a Chef Infra Server release prior to 12.3.0 please contact Ch
     chef-server-ctl reconfigure
     ```
 
+1. If you are running chef-server version 12.17.15 or greater, **SKIP THIS STEP** and proceed to step X below.  Otherwise, consult the [upgrade matrix](https://docs.chef.io/server/upgrades/) and perform a stepped upgrade.
+
+   - If you are running chef-server 12.3.0, first upgrade 12.17.15.
+   - If you are running chef-server 11, first upgrade to 12.3.0, and then to 12.17.15.
+
+   After performing the stepped upgrade to 12.17.15, continue with step X below.
+
 3. Download the desired Chef Infra Server version from the [Chef Infra Server Downloads](https://downloads.chef.io/products/chef-server) page.
 
 4. Stop the server:
 
     ```bash
-    chef-server-ctl stop
+    chef-server-ctl stop || chef-server-ctl kill rabbitmq
     ```
 
 5. Install the Chef Infra Server package:
@@ -123,7 +142,7 @@ If you are running a Chef Infra Server release prior to 12.3.0 please contact Ch
     To install with `dpkg`:
 
     ```bash
-    dpkg -i /path/to/chef-server-core-<version>.deb
+    dpkg -iEG /path/to/chef-server-core-<version>.deb
     ```
 
     To install with the RPM Package Manager:
@@ -144,11 +163,11 @@ If you are running a Chef Infra Server release prior to 12.3.0 please contact Ch
     CHEF_LICENSE='accept' chef-server-ctl upgrade
     ```
 
-7. Start Chef Infra Server:
+7. If the upgrade failed, SKIP THIS STEP and continue at step X below. If the upgrade was successful, start Chef Infra Server:
 
-    ```bash
-    chef-server-ctl start
-    ```
+   ```bash
+   chef-server-ctl start
+   ```
 
 8. [Upgrade](#upgrading-manage-add-on) any Chef Infra Server add-ons.
 
@@ -160,11 +179,240 @@ If you are running a Chef Infra Server release prior to 12.3.0 please contact Ch
     chef-server-ctl cleanup
     ```
 
+11. Reindex the database:
+
+    ```bash
+   /usr/bin/reindexdb --all
+   ```
+
+   You are now finished with the upgrade.  **Do not proceed further.**
+
 {{< note >}}
 
 Check the [post upgrade steps](#post-upgrade-steps) if you are upgrading from a version before Chef Infra Server 14.8 to a version greater than or equal to 14.8.
 
 {{</note >}}
+
+1. If the upgrade failed, and you are left with a corrupted chef-server and/or corrupted database, **DO NOT RISK YOUR BACKUP OF THE DATABASE.**  You should take any and all steps in order to preserve the backup, including copying it to another disk.  Consult with a professional sysadmin for instructions, best practices, etc.
+
+1. Contact customer support.
+
+1. Reinstall the original version of chef-server you were using before attempting the upgrade process (if you had to perform a stepped upgrade, install your original version of chef-server before the stepped upgrade, not any versions you upgraded to in the stepped upgrade process).  Again, **DO NOT RISK YOUR BACKUP OF THE DATABASE.**  For example, consider using a separate disk from your backup for the new installation.
+
+   [Chef Infra Server Downloads](https://downloads.chef.io/products/chef-server)
+
+   [Chef Infra Server Installation](https://docs.chef.io/server/install_server)
+
+1. Consult the [restore documentation](https://docs.chef.io/server/server_backup_restore), and restore the database from the path where it was previously saved:
+
+   ```bash
+   chef-server-ctl restore /var/opt/chef-backup/chef-backup-2021-06-11-18-59-19.tgz
+   ```
+### External PostgreSQL
+
+1. Log into the external PostgreSQL machine.
+
+1. Run `vacuumdb` before starting the upgrade:
+
+   bash```
+   sudo su postgres
+   /usr/bin/vacuumdb --all --full
+   exit
+   ```
+1. Log into the chef-server machine.
+
+1. Consult the documentation on `knife-ec-backup`.   
+   https://blog.chef.io/migrating-chef-server-knife-ec-backup-knife-tidy
+
+   If it is not already installed, install `knife-ec-backup`.  A sample session follows   
+   (note that your steps could differ, depending on the versions of your software,   
+   the topology of your setup, your OS and distrubition, and a range of other factors).   
+   Example:
+   ```
+   $ apt-get update
+   $ apt install ruby
+   $ apt install make
+   $ curl -L https://chef.io/chef/install.sh | sudo bash -s -- -P chefdk
+   $ export PATH=$PATH:/root/.chefdk/gem/ruby/2.6.0/bin
+   $ apt-get -y install gcc postgresql libpq-dev
+   $ /opt/chefdk/embedded/bin/gem install knife-ec-backup -- --with-pg-config=/opt/opscode/embedded/postgresql/9.6/bin/pg_config
+   ```
+1. If it is not already configured, configure `knife`.  A sample session follows (again, note that your steps could differ, depending on a range of factors).   
+   Example:
+   ```
+   $ chef-server-ctl org-create 4thcafe 'Fourth Cafe, Inc.' --association_user janedoe --filename /tmp/4thcafe-validator.pem
+   $ chef generate repo chef-repo
+   $ cd chef-repo/
+   $ mkdir -p .chef
+   $ echo '.chef' >> .gitignore
+   $ cp /tmp/4thcafe-validator.pem .chef
+   $ cp /home/ubuntu/janedoe.pem .chef
+   $ cd .chef
+   $ knife configure
+   WARNING: No knife configuration file found. See https://docs.chef.io/config_rb/ for details.
+   Please enter the chef server URL: [https://1.2.3.4/organizations/myorg] https://1.2.3.4/organizations/4thcafe
+   Please enter an existing username or clientname for the API: [ubuntu] janedoe
+   $ knife ssl fetch
+   ```
+1. Backup the database.   
+   Example:
+   ```
+   $ mkdir /backup
+   $ /opt/chefdk/embedded/bin/knife ec backup /backup
+   ```
+1. If you are running chef-server version 12.17.15 or greater, **SKIP THIS STEP** and proceed to step X below.  Otherwise, consult the documentation on upgrading Chef Infra Server.
+   https://docs.chef.io/server/upgrades/
+
+   If you are running a chef-server release prior to 12.17.15, you cannot upgrade directly to 14.8.X.  You must perform a stepped upgrade first.
+   
+   - If you are running chef-server 12.3.0, you must first upgrade 12.17.15.
+   - If you are running chef-server 11, you must first upgrade to 12.3.0, and then to 12.17.15.
+
+   After performing the stepped upgrade, return here and continue with step X below.  
+
+1. Download the chef-server version 14.8.X upgrade package.
+https://downloads.chef.io/tools/infra-server
+
+1. Stop services.
+   `$ sudo chef-server-ctl stop || sudo chef-server-ctl kill rabbitmq`
+
+1. Install the chef-server 14.8.X package.
+
+   dpkg:  
+   `$ sudo dpkg -iEG /path/to/chef-server-core-<version>.deb`
+
+   rpm:  
+   `$ sudo rpm -U /path/to/chef-server-core-<version>.rpm`
+
+1. Upgrade chef-server.   
+
+   `$ sudo CHEF_LICENSE='accept' chef-server-ctl upgrade`
+
+1. IF THE UPGRADE WAS SUCCESSFUL, start services and cleanup.
+   ```
+   $ sudo chef-server-ctl start
+   $ sudo chef-server-ctl cleanup
+   ```
+   You are now finished with the chef-server upgrade.  Proceed directly to the **Upgrade PostgreSQL** section.   
+
+1. **IF THE UPGRADE FAILED**, and you are left with a corrupted chef-server and/or corrupted database,  
+    it is strongly recommended that you DO NOT UNDER ANY CIRCUMSTANCES RISK YOUR BACKUP OF THE DATABASE.  
+    You should take any and all steps in order to preserve the backup, including copying it to another disk.
+
+1. If the upgrade failed, and you are left with a corrupted chef-server and/or corrupted database, it is strongly recommended that you DO NOT UNDER ANY CIRCUMSTANCES RISK YOUR BACKUP OF THE DATABASE.  You should take any and all steps in order to preserve the backup, including copying it to another disk.  Consult with a professional sysadmin for instructions, best practices, etc.
+
+1. Contact customer support.
+1. Reinstall the original version of chef-server you were using before attempting the upgrade process (if you had to perform a stepped upgrade, install your original version of chef-server before the stepped upgrade, not any versions you upgraded to in the stepped upgrade process).  Again, it is recommended that you DO NOT RISK YOUR BACKUP OF THE DATABASE.  For instance, consider using a separate disk from your backup for the new installation.
+
+   Download link for chef-server:  
+   https://docs.chef.io/server/install_server/
+
+   Installation instructions for chef-server:  
+   https://docs.chef.io/server/install_server/
+
+1. Consult the documentation on knife-ec-restore, and restore the database from the path where it was saved previously.   
+   https://blog.chef.io/migrating-chef-server-knife-ec-backup-knife-tidy
+
+   Example:   
+`$ /opt/chefdk/embedded/bin/knife ec restore /backup/`
+
+1. Do not proceed further until you have an uncorrupted Chef Server upgraded to version X.Y.Z,    
+   and an uncorrupted PostgreSQL database.
+
+**Upgrade PostgreSQL**
+
+1. Log into the external PostgreSQL machine.   
+
+1. Update packages and install PostgreSQL 13.3.   
+   Example (Ubuntu):
+   ```
+   $ sudo apt-get update
+   $ sudo apt-get install postgresql-13
+   ```
+
+1. Check if there are any differences in the config files.  Make sure to update the new config files if required.   
+   ```
+   $ diff /etc/postgresql/<old-pg-version>/main/postgresql.conf /etc/postgresql/13/main/postgresql.conf
+   $ diff /etc/postgresql/<old-pg-version>/main/pg_hba.conf     /etc/postgresql/13/main/pg_hba.conf
+   ```
+1. Stop the PostgreSQL service.   
+   `$ sudo systemctl stop postgresql.service`
+1. Log in as the postgres user.   
+   `$ su postgres`
+1. Check clusters (notice the --check argument, this will not change any data).   
+   ```
+   $ /usr/lib/postgresql/13/bin/pg_upgrade \
+     --old-datadir=/var/lib/postgresql/9.6/main \
+     --new-datadir=/var/lib/postgresql/13/main \
+     --old-bindir=/usr/lib/postgresql/9.6/bin \
+     --new-bindir=/usr/lib/postgresql/13/bin \
+     --old-options '-c config_file=/etc/postgresql/9.6/main/postgresql.conf' \
+     --new-options '-c config_file=/etc/postgresql/13/main/postgresql.conf' \
+     --check
+   ```
+1. Migrate the data (without the --check argument).   
+   ```
+   $ /usr/lib/postgresql/13/bin/pg_upgrade \
+     --old-datadir=/var/lib/postgresql/9.6/main \
+     --new-datadir=/var/lib/postgresql/13/main \
+     --old-bindir=/usr/lib/postgresql/9.6/bin \
+     --new-bindir=/usr/lib/postgresql/13/bin \
+     --old-options '-c config_file=/etc/postgresql/9.6/main/postgresql.conf' \
+     --new-options '-c config_file=/etc/postgresql/13/main/postgresql.conf'
+   ```
+1. Log out of the postgres user.   
+`$ exit`
+1. Swap the ports for the old and new PostgreSQL versions.   
+   ```
+   $ sudo vim /etc/postgresql/13/main/postgresql.conf
+   # change "port = 5433" to "port = 5432"
+   
+   $ sudo vim /etc/postgresql/9.6/main/postgresql.conf
+   # change "port = 5432" to "port = 5433"
+   ```
+1. Start the PostgreSQL service.   
+   `$ sudo systemctl start postgresql.service`
+
+1. Log in as the postgres user and confirm that the new PostgreSQL version is 13.3.   
+   ```
+   $ sudo su postgres
+   $ psql -c "SELECT version();"
+                                                                      version
+   ---------------------------------------------------------------------------------------------------------------------------------------------
+    PostgreSQL 13.3 (Ubuntu 13.3-1.pgdg16.04+1) on x86_64-pc-linux-gnu, compiled by gcc (Ubuntu 5.4.0-6ubuntu1~16.04.12) 5.4.0 20160609, 64-bit
+   (1 row)
+   ```
+1. Run reindexdb.  Example:    
+   ```
+   $ /usr/bin/reindexdb --all
+   reindexdb: reindexing database "bifrost"
+   reindexdb: reindexing database "oc_id"
+   reindexdb: reindexing database "opscode_chef"
+   reindexdb: reindexing database "postgres"
+   reindexdb: reindexing database "template1"
+   ```
+
+1. Log into the chef-server machine.   
+
+1. Check the status of chef-server.  PostgreSQL should be connected.
+   ```
+   $ sudo chef-server-ctl status
+   -------------------
+    Internal Services
+   -------------------
+   run: bookshelf: (pid 15763) 219163s; run: log: (pid 16559) 228464s
+   run: elasticsearch: (pid 15797) 219162s; run: log: (pid 16345) 228507s
+   run: nginx: (pid 15901) 219162s; run: log: (pid 16745) 228452s
+   run: oc_bifrost: (pid 15909) 219161s; run: log: (pid 16237) 228519s
+   run: oc_id: (pid 15915) 219161s; run: log: (pid 16255) 228513s
+   run: opscode-erchef: (pid 15948) 219160s; run: log: (pid 16673) 228458s
+   run: redis_lb: (pid 15952) 219160s; run: log: (pid 16779) 228445s
+   -------------------
+    External Services
+   -------------------
+   run: postgresql: connected OK to 10.0.11.0:5432
+   ```
+
 
 ### Chef Backend Install
 
