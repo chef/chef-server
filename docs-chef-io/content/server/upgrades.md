@@ -52,7 +52,7 @@ Chef Infra Server 14.8 upgraded PostgreSQL from 9.6 to 13.3. The 14.8 upgrade pr
 
 ##### Database Preparation
 
-1. Running vacuum full on the PostgreSQL database is recommended if auto vacuuming is not set up. This process will reduce the size of the database by deleting unnecessary data and speeds up the migration. The vacuum full operation takes around 1 to 2 minutes per GB of data, depending on the complexity of the data. Additionally, the vacuum full operation will need an amount of free disk space at least as large as the size of your database.
+1. We recommend running `VACUUM FULL` on the PostgreSQL database if you don't have automatic vacuuming set up. This process will reduce the size of the database by deleting unnecessary data and speeds up the migration. The `VACUUM FULL` operation takes around 1 to 2 minutes per gigabyte of data depending on the complexity of the data. Additionally, the `VACUUM FULL` operation requires additional free disk space at least as large as the size of your database.
 
     ```bash
     /opt/opscode/embedded/bin/vacuumdb --all --full
