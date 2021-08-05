@@ -1,5 +1,5 @@
   define_upgrade do
-    require 'mixlib/shellout'
+    require 'pg'
     if Partybus.config.bootstrap_server
       must_be_data_master
 
@@ -10,7 +10,7 @@
       sleep 30
 
        # Run reindex for postgresql 13
-      log "Reindexing postgresql..."
+      log "Reindexing postgreSQL..."
       #run_command("/opt/opscode/embedded/bin/reindexdb --all", :user => 'opscode-pgsql')
       running_config = JSON.parse(File.read("/etc/opscode/chef-server-running.json"))
       pc = running_config['private_chef']
