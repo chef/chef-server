@@ -66,7 +66,7 @@ Follow the Chef Infra Server upgrade instructions below.
 
 ##### Post-upgrade Steps
 
-Reindex the Chef Infra Server
+Reindex the Chef Infra Server:
 
 ```bash
 /opt/opscode/embedded/bin/reindexdb --all
