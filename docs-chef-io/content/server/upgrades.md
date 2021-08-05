@@ -76,7 +76,7 @@ Reindex the Chef Infra Server
 
 Estimates were performed on an 8 core 32 GB memory (t3.2xlarge) AWS EC2 instance.
 
-{{<note >}}
+{{</note >}}
 
 ### Upgrading to 12.17.15
 
