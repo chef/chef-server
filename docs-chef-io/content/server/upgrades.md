@@ -48,7 +48,7 @@ The Chef Infra Server 14 upgrade does not automatically reindex existing externa
 
 #### Upgrading to 14.8
 
-Chef Infra Server 14.8 upgraded PostgreSQL from 9.6 to 13.3. The 14.8 upgrade process requires a one time downtime for vacuuming, upgrading and reindexing the database. The entire upgrade operation is estimated to take 1 minute per 1000 nodes. This process may take longer depending on your server hardware and the size of the node objects in your Chef Infra Server.
+Chef Infra Server 14.8 upgraded PostgreSQL from 9.6 to 13.3. The 14.8 upgrade process requires a one time downtime for vacuuming, upgrading, and re-indexing the database. The entire upgrade operation takes approximately 1 minute per 1000 nodes. This process may take longer depending on your server hardware and the size of the node objects in your Chef Infra Server.
 
 ##### Database Preparation
 
