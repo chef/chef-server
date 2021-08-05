@@ -37,18 +37,18 @@ Requires License
 Supported Release
 : Chef Infra Server 13 and later are currently supported Chef Software releases. Earlier releases are no longer supported as of 12/31/2020. For more information about supported Chef Software see the [Supported Versions]({{< relref "/versions#supported-commercial-distributions" >}}) documentation.
 
-## Release Specific Notes
+## Release Specific Steps
 
 ### Upgrading to 14.x
 
-Chef Infra Server 14 moved from Solr to Elasticsearch as its search index.
+Chef Infra Server 14.0 moved from Solr to Elasticsearch as its search index.
 {{% server_upgrade_duration %}}
 
 The Chef Infra Server 14 upgrade does not automatically reindex existing external Elasticsearch installations.
 
 #### Upgrading to 14.8
 
-Chef Infra Server 14.8 upgraded PostgreSQL from 9.6 to 13.3. The 14.8 upgrade process requires downtime for vacuuming, upgrading and reindexing the database. There are extra steps that need to be considered when upgrading from versions earlier than 14.8 . The entire upgrade operation is estimated to take 1 minute per 1000 nodes. This process may take longer depending on your server hardware and the size of the node objects in your Chef Infra Server.
+Chef Infra Server 14.8 upgraded PostgreSQL from 9.6 to 13.3. The 14.8 upgrade process requires a one time downtime for vacuuming, upgrading and reindexing the database. The entire upgrade operation is estimated to take 1 minute per 1000 nodes. This process may take longer depending on your server hardware and the size of the node objects in your Chef Infra Server.
 
 ##### Database Preparation
 
@@ -76,7 +76,7 @@ Chef Infra Server 14.8 upgraded PostgreSQL from 9.6 to 13.3. The 14.8 upgrade pr
 
 Estimates were performed on an 8 core 32 GB memory (t3.2xlarge) AWS EC2 instance.
 
-{{</note >}}
+{{<note >}}
 
 ### Upgrading to 12.17.15
 
@@ -171,8 +171,6 @@ To upgrade your Chef Backend installation, see [High Availability: Upgrade to Ch
 ### Tiered Install
 
 This section describes the upgrade process from a tiered server configuration.
-
-{{% server_upgrade_duration %}}
 
 {{< note >}}
 
