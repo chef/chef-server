@@ -194,7 +194,7 @@ component_runit_service 'oc_id' do
 end
 
 if node['private_chef']['bootstrap']['enable']
-  execute '/opt/opscode/bin/private-chef-ctl start oc_id' do
+  execute '/opt/opscode/bin/chef-server-ctl start oc_id' do
     retries 20
   end
 end
