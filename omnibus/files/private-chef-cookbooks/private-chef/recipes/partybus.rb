@@ -83,7 +83,7 @@ ruby_block 'migration-level file check' do
   not_if { ::File.exist?('/var/opt/opscode/upgrades/migration-level') }
   action :nothing
   if OmnibusHelper.has_been_bootstrapped?
-    subscribes :run, 'private-chef_pg_upgrade[upgrade_if_necessary]', :delayed
+    subscribes :run, 'pg_upgrade[upgrade_if_necessary]', :delayed
   else
     subscribes :run, 'execute[set initial migration level]', :immediately
   end
