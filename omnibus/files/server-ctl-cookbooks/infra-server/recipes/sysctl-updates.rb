@@ -1,5 +1,6 @@
 
 # Author:: Marc Paradise (<marc@chef.io>)
+# Author:: Tim Smith (<tsmith@chef.io>)
 # Copyright:: Chef Software, Inc.
 # License:: Apache License, Version 2.0
 #
@@ -22,21 +23,7 @@
 # the behavior.
 # net.ipv6.bindv6only = 0
 
-execute 'sysctl-reload' do
-  command '/sbin/sysctl -p /etc/sysctl.conf || true'
-  action :nothing
-end
-
-# Ideally, we'd just render a template into sysctl.d - but that's
-# 6.2 and later under centos. This method will work for all supported
-# platforms.
-
-bash 'dual ip4/ip6 portbind' do
-  user 'root'
-  code <<-EOF
-    echo 'net.ipv6.bindv6only = 0' >> /etc/sysctl.conf
-  EOF
-  notifies :run, 'execute[sysctl-reload]', :immediately
-  not_if "egrep '^net\.ipv6\.bindv6only = 0' /etc/sysctl.conf"
+sysctl 'net.ipv6.bindv6only' do
+  value '0'
   only_if { PrivateChef['use_ipv6'] == true }
 end

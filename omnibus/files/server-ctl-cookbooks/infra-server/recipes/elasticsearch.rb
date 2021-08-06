@@ -1,5 +1,17 @@
-# Copyright:: Chef Software, Inc.
-# All Rights Reserved
+# License:: Apache License, Version 2.0
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
 
 MAX_MAP_COUNT = 262_144
 cluster_name = if node['previous_run'] && node['previous_run']['elasticsearch'] && node['previous_run']['elasticsearch']['cluster_name']
@@ -39,11 +51,6 @@ logging_config_file = File.join(elasticsearch_conf_dir, 'logging.yml')
   end
 end
 
-execute 'sysctl-reload' do
-  command '/sbin/sysctl -p /etc/sysctl.conf || true'
-  action :nothing
-end
-
 # Just make sure the file is there, saves a round of error handling
 # when we open it up.
 file '/etc/sysctl.conf' do
@@ -64,7 +71,7 @@ sysctl 'vm.max_map_count' do
     # set by the operator, causing problems for ES on next reboot.
     # TODO: foundation for a shared sysctl resource?
     highest_val = 0
-    File.read('/etc/sysctl.conf').split("\n").each do |line|
+    ::File.read('/etc/sysctl.conf').split("\n").each do |line|
       line.chomp!
       match = /^[[:space:]]*vm\.max_map_count[[:space:]]*=[[:space:]]*([[:digit:]]+)/.match(line)
       if match
@@ -74,7 +81,6 @@ sysctl 'vm.max_map_count' do
     end
     highest_val < MAX_MAP_COUNT
   end
-  notifies :run, 'execute[sysctl-reload]', :immediately
 end
 
 # Remove the old env config to ensre it's not left over after an upgrade.
@@ -82,6 +88,7 @@ directory '/opt/opscode/service/elasticsearch/env' do
   action :delete
   recursive true
 end
+
 template config_file do
   source 'elasticsearch.yml.erb'
   owner OmnibusHelper.new(node).ownership['owner']

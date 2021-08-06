@@ -6,15 +6,6 @@ AllCops:
 Chef/Deprecations/ResourceWithoutUnifiedTrue:
   Enabled: false
 
-# We should move to sysctl where we can
-Chef/Modernize/ExecuteSysctl:
-  Exclude:
-    - '**/metadata.rb'
-    - '**/attributes/*.rb'
-    - '**/Berksfile'
-    - 'recipes/elasticsearch.rb'
-    - 'recipes/sysctl-updates.rb'
-
 # We need to figure out if this is necessary and if so disable this cop inline
 Lint/RescueException:
   Exclude:
