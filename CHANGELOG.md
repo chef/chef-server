@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.8.3 -->
-## [14.8.3](https://github.com/chef/chef-server/tree/14.8.3) (2021-08-06)
+<!-- latest_release 14.8.4 -->
+## [14.8.4](https://github.com/chef/chef-server/tree/14.8.4) (2021-08-06)
 
 #### Merged Pull Requests
-- Elastsearch gather-log updates [#2716](https://github.com/chef/chef-server/pull/2716) ([teknofire](https://github.com/teknofire))
+- Added auto reindexing for pg 13.3 [#2715](https://github.com/chef/chef-server/pull/2715) ([jashaik](https://github.com/jashaik))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.7.13 -->
 ### Changes since 14.7.13 release
 
 #### Merged Pull Requests
+- Added auto reindexing for pg 13.3 [#2715](https://github.com/chef/chef-server/pull/2715) ([jashaik](https://github.com/jashaik)) <!-- 14.8.4 -->
 - Elastsearch gather-log updates [#2716](https://github.com/chef/chef-server/pull/2716) ([teknofire](https://github.com/teknofire)) <!-- 14.8.3 -->
 - Replace Opscode copyrights [#2703](https://github.com/chef/chef-server/pull/2703) ([tas50](https://github.com/tas50)) <!-- 14.8.2 -->
 - Test the system connectivity to the Internet in the gather logs [#2704](https://github.com/chef/chef-server/pull/2704) ([tas50](https://github.com/tas50)) <!-- 14.8.1 -->
