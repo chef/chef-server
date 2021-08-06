@@ -67,10 +67,10 @@ fi
 
 # Gather some information from Elasticsearch, if it's available
 gather_es() {
-    curl -sS -X GET "http://localhost:$1/_cluster/health?pretty" > "$tmpdir/elasticsearch-cluster-health.txt"
-    curl -sS -X GET "http://localhost:$1/_cat/indices?v" > "$tmpdir/elasticsearch-cat-indices.txt"
-    curl -sS -X GET "http://localhost:$1/_cat/shards?h=index,shard,prirep,state,unassigned.reason&pretty" > "$tmpdir/elasticsearch-cat-shards.txt"
-    curl -sS -X GET "http://localhost:$1/_cluster/allocation/explain?pretty" > "$tmpdir/elasticsearch-cluster-shards-explain.txt"
+    curl -sS -X GET "http://localhost:$1/_cluster/health?pretty" > "$tmpdir/elasticsearch_cluster_health.txt"
+    curl -sS -X GET "http://localhost:$1/_cat/indices?v" > "$tmpdir/elasticsearch_cat_indices.txt"
+    curl -sS -X GET "http://localhost:$1/_cat/shards?h=index,shard,prirep,state,unassigned.reason&pretty" > "$tmpdir/elasticsearch_cat_shards.txt"
+    curl -sS -X GET "http://localhost:$1/_cluster/allocation/explain?pretty" > "$tmpdir/elasticsearch_cluster_shards_explain.txt"
 }
 ES_9200="$(curl -s -XGET 'http://localhost:9200/' | grep 'for Search')"
 ES_10144="$(curl -s -XGET 'http://localhost:10144/' | grep 'for Search')"
