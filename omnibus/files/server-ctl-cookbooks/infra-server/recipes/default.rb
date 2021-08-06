@@ -161,14 +161,12 @@ include_recipe 'infra-server::fix_permissions'
 end
 
 include_recipe 'infra-server::cleanup'
-include_recipe 'infra-server::remove_actions'
 
 include_recipe 'infra-server::private-chef-sh'
 include_recipe 'infra-server::oc-chef-pedant'
 include_recipe 'infra-server::log_cleanup'
 include_recipe 'infra-server::partybus'
 include_recipe 'infra-server::ctl_config'
-include_recipe 'infra-server::disable_chef_server_11'
 
 file '/etc/opscode/chef-server-running.json' do
   owner OmnibusHelper.new(node).ownership['owner']

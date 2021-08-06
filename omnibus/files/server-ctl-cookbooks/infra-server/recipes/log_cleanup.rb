@@ -17,23 +17,6 @@
 # limitations under the License.
 #
 
-# BEGIN LEGACY CRONTAB CLEANUP
-#
-# OPC log rotation was previously controlled by multiple full-blown crontabs.
-# A simple `/etc/cron.hourly/` script now controlls the rotation so we'll
-# cleanup all legacy crontabs.
-#
-cron_d 'opc_log_cleanup' do
-  action :delete
-end
-
-cron_d 'opc_logrotate.cron' do
-  action :delete
-end
-# END LEGACY CRONTAB CLEANUP
-
-# package "logrotate"
-
 # not using /etc/logrotate.d on purpose here so that busted system logrotation will not break
 # the privatechef logrotation.
 template '/etc/opscode/logrotate.conf' do
