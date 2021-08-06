@@ -99,7 +99,7 @@ node['private_chef']['addons']['packages'].each do |pkg|
   package pkg do
     provider value_for_platform_family(
       ['debian'] => Chef::Provider::Package::Dpkg,
-      %w(rhel suse) => Chef::Provider::Package::Rpm
+      %w(rhel suse amazon) => Chef::Provider::Package::Rpm
     )
     source lazy { pkg_file }
     notifies :run, "ruby_block[addon_install_notification_#{pkg}]", :immediately
