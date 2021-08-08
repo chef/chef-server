@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.8.5 -->
-## [14.8.5](https://github.com/chef/chef-server/tree/14.8.5) (2021-08-08)
+<!-- latest_release 14.8.6 -->
+## [14.8.6](https://github.com/chef/chef-server/tree/14.8.6) (2021-08-08)
 
 #### Merged Pull Requests
-- Fix a notification for firing partybus [#2718](https://github.com/chef/chef-server/pull/2718) ([tas50](https://github.com/tas50))
+- Fix error (malformed version number string) [#2714](https://github.com/chef/chef-server/pull/2714) ([lbakerchef](https://github.com/lbakerchef))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.7.13 -->
 ### Changes since 14.7.13 release
 
 #### Merged Pull Requests
+- Fix error (malformed version number string) [#2714](https://github.com/chef/chef-server/pull/2714) ([lbakerchef](https://github.com/lbakerchef)) <!-- 14.8.6 -->
 - Fix a notification for firing partybus [#2718](https://github.com/chef/chef-server/pull/2718) ([tas50](https://github.com/tas50)) <!-- 14.8.5 -->
 - Added auto reindexing for pg 13.3 [#2715](https://github.com/chef/chef-server/pull/2715) ([jashaik](https://github.com/jashaik)) <!-- 14.8.4 -->
 - Elastsearch gather-log updates [#2716](https://github.com/chef/chef-server/pull/2716) ([teknofire](https://github.com/teknofire)) <!-- 14.8.3 -->
