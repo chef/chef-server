@@ -6,7 +6,10 @@ define_upgrade do
     start_services(['postgresql'])
     sleep 30
     # Run reindex for postgresql 13
-    log 'Reindexing postgreSQL...'
-    run_command("sudo -H -u  opscode-pgsql bash -c \'/opt/opscode/embedded/bin/reindexdb --all\'")
+    running_config = JSON.parse(File.read("/etc/opscode/chef-server-running.json"))
+    unless running_config['private_chef']['postgresql']['external']
+      log 'Reindexing postgreSQL...'
+      run_command("sudo -H -u  opscode-pgsql bash -c \'/opt/opscode/embedded/bin/reindexdb --all\'")
+    end
   end
 end
