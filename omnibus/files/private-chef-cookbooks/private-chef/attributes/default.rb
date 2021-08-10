@@ -527,6 +527,8 @@ default['private_chef']['nginx']['pivotal_ssl_client_cert'] = false
 default['private_chef']['nginx']['pivotal_ssl_client_key'] = false
 # default['private_chef']['nginx']['ssl_client_ca'] = "/etc/something/foo.ca.pem"
 default['private_chef']['nginx']['ssl_verify_depth'] = 2
+# Whether nginx should be configured to not use the root user
+default['private_chef']['nginx']['nginx_no_root'] = true # todo - must be false before merge
 
 ###
 # PostgreSQL

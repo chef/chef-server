@@ -51,6 +51,19 @@ nginx_tempfile_dir = File.join(nginx_dir, 'tmp')
   end
 end
 
+[
+  nginx_log_dir,
+  nginx_dir,
+  '/opt/opscode/embedded/nginx',
+  # "#{node['private_chef']['nginx']['dir']}",
+  # "#{node['private_chef']['nginx']['log_directory']}",
+].each do |nginx_no_root_perms_fix_path|
+  execute "find #{nginx_no_root_perms_fix_path} -user 'root' -exec chown #{node['private_chef']['user']['username']} {} \\;" do
+    user 'root'
+    only_if { node['private_chef']['nginx']['nginx_no_root'] }
+  end
+end
+
 # Create empty error log files
 %w(access.log error.log current).each do |logfile|
   file File.join(nginx_log_dir, logfile) do
@@ -109,8 +122,8 @@ end
 if node['private_chef']['required_recipe']['enable']
   remote_file ::File.join(nginx_html_dir, 'required_recipe') do
     source "file://#{node['private_chef']['required_recipe']['path']}"
-    owner 'root'
-    group 'root'
+    owner OmnibusHelper.new(node).ownership['owner']
+    group OmnibusHelper.new(node).ownership['group']
     mode '0644'
   end
 end
@@ -122,8 +135,8 @@ if node['private_chef']['nginx']['ssl_dhparam'].nil?
   openssl_dhparam ssl_dhparam do
     key_length node['private_chef']['nginx']['dhparam_key_length']
     generator node['private_chef']['nginx']['dhparam_generator_id']
-    owner 'root'
-    group 'root'
+    owner OmnibusHelper.new(node).ownership['owner']
+    group OmnibusHelper.new(node).ownership['group']
     mode '0600'
   end
 
@@ -134,8 +147,8 @@ end
 remote_directory nginx_html_dir do
   source 'html'
   files_backup false
-  files_owner 'root'
-  files_group 'root'
+  files_owner OmnibusHelper.new(node).ownership['owner']
+  files_group OmnibusHelper.new(node).ownership['group']
   files_mode '0644'
   owner OmnibusHelper.new(node).ownership['owner']
   group OmnibusHelper.new(node).ownership['group']
@@ -169,8 +182,8 @@ lbconf = node['private_chef']['lb'].to_hash.merge(nginx_vars).merge(
 ].each do |script|
   template File.join(nginx_scripts_dir, script) do
     source "nginx/scripts/#{script}.erb"
-    owner 'root'
-    group 'root'
+    owner OmnibusHelper.new(node).ownership['owner']
+    group OmnibusHelper.new(node).ownership['group']
     mode '0644'
     variables lbconf
     # Note that due to JIT compile of lua resources, any
@@ -206,8 +219,8 @@ end
 
   template lb_config do
     source 'nginx/nginx_chef_api_lb.conf.erb'
-    owner 'root'
-    group 'root'
+    owner OmnibusHelper.new(node).ownership['owner']
+    group OmnibusHelper.new(node).ownership['group']
     mode '0644'
     variables(lbconf.merge(
       server_proto: server_proto,
@@ -227,8 +240,8 @@ nginx_config = File.join(nginx_etc_dir, 'nginx.conf')
 
 template nginx_config do
   source 'nginx/nginx.conf.erb'
-  owner 'root'
-  group 'root'
+  owner OmnibusHelper.new(node).ownership['owner']
+  group OmnibusHelper.new(node).ownership['group']
   mode '0644'
   variables(lbconf.merge(chef_lb_configs).merge(temp_dir: nginx_tempfile_dir))
   notifies :restart, 'component_runit_service[nginx]'
@@ -237,8 +250,8 @@ end
 # Write out README.md for addons dir
 cookbook_file File.join(nginx_addon_dir, 'README.md') do
   source 'nginx/nginx-addons.README.md'
-  owner 'root'
-  group 'root'
+  owner OmnibusHelper.new(node).ownership['owner']
+  group OmnibusHelper.new(node).ownership['group']
   mode '0644'
 end
 
@@ -254,8 +267,8 @@ end
 # log rotation
 template '/etc/opscode/logrotate.d/nginx' do
   source 'logrotate.erb'
-  owner 'root'
-  group 'root'
+  owner OmnibusHelper.new(node).ownership['owner']
+  group OmnibusHelper.new(node).ownership['group']
   mode '0644'
   variables(node['private_chef']['nginx'].to_hash.merge(
     'postrotate' => "/opt/opscode/embedded/sbin/nginx -c #{nginx_config} -s reopen",
