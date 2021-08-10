@@ -161,7 +161,7 @@ If you are running a Chef Infra Server release before 12.3.0, please contact Che
 
    ```bash
    CHEF_LICENSE='accept' chef-server-ctl upgrade
-    ```
+   ```
 
 1. If the upgrade failed, see the section below on how to handle an [upgrade failure](#upgrade-failure-troubleshooting).
 
@@ -210,6 +210,7 @@ Check the [post upgrade steps](#post-upgrade-steps) if you are upgrading from a 
    ```
 
 ### External PostgreSQL
+
 
 1. Log into the external PostgreSQL machine.
 
@@ -277,32 +278,38 @@ Check the [post upgrade steps](#post-upgrade-steps) if you are upgrading from a 
 
    After performing the stepped upgrade, return here and continue with the next step below.
 
-1. [Download](https://downloads.chef.io/tools/infra-server) the Chef Infra Server version 14.8.X upgrade package.
+1. [Download](https://downloads.chef.io/tools/infra-server) the desired version of Chef Infra Server.
 
-1. Stop services.
+1. Stop the Chef Infra Server:
 
    ```bash
-   sudo chef-server-ctl stop || sudo chef-server-ctl kill rabbitmq
+   chef-server-ctl stop || chef-server-ctl kill rabbitmq
    ```
 
-1. Install the Chef Infra Server 14.8.X package.
+1. Install the Chef Infra Server package:
 
-   dpkg:
+   To install with `dpkg`:
 
    ```bash
-   sudo dpkg -iEG /path/to/chef-server-core-VERSION.deb
+   dpkg -iEG /path/to/chef-server-core-VERSION.deb
    ```
 
-   RPM:
+   To install with the RPM Package Manager:
 
    ```bash
-   sudo rpm -U /path/to/chef-server-core-VERSION.rpm
+   rpm -Uvh --nopostun --force /path/to/chef-server-core-VERSION.rpm
    ```
 
-1. Upgrade Chef Infra Server.
+1. Upgrade Chef Infra Server and accept the Chef Software license by entering `Yes` at the prompt:
 
    ```bash
-   sudo CHEF_LICENSE='accept' chef-server-ctl upgrade
+   chef-server-ctl upgrade
+   ```
+
+   To accept the license and upgrade in one command:
+
+   ```bash
+   CHEF_LICENSE='accept' chef-server-ctl upgrade
    ```
 
 1. If the upgrade failed, see the section on [upgrade failure troubleshooting](#upgrade-failure-troubleshooting-1).
@@ -320,14 +327,15 @@ Check the [post upgrade steps](#post-upgrade-steps) if you are upgrading from a 
 
 1. Log into the external PostgreSQL machine.
 
-1. Update packages and install PostgreSQL 13.3.
-   Example (Ubuntu):
+1. Update packages and install your selected PostgreSQL version.
+   Example (Ubuntu/PostgreSQL 13.3):
    ```
    sudo apt-get update
    sudo apt-get install postgresql-13
    ```
 
 1. Check if there are any differences in the config files. Make sure to update the new config files if required.
+   Example (PostgreSQL 13.3):
 
    ```
    diff /etc/postgresql/OLD_POSTGRESQL_VERSION/main/postgresql.conf /etc/postgresql/13/main/postgresql.conf
@@ -340,13 +348,14 @@ Check the [post upgrade steps](#post-upgrade-steps) if you are upgrading from a 
    sudo systemctl stop postgresql.service
    ```
 
-1. Log in as the PostgreSQL user.
+1. Log in as the `postgres` user.
 
    ```bash
    su postgres
    ```
 
 1. Check clusters (notice the `--check` argument, this will not change any data).
+   Example (PostgreSQL 13.3):
 
    ```
    /usr/lib/postgresql/13/bin/pg_upgrade \
@@ -360,6 +369,7 @@ Check the [post upgrade steps](#post-upgrade-steps) if you are upgrading from a 
    ```
 
 1. Migrate the data (without the `--check` argument).
+   Example (PostgreSQL 13.3):
 
    ```
    /usr/lib/postgresql/13/bin/pg_upgrade \
@@ -371,13 +381,14 @@ Check the [post upgrade steps](#post-upgrade-steps) if you are upgrading from a 
    --new-options '-c config_file=/etc/postgresql/13/main/postgresql.conf'
    ```
 
-1. Log out of the PostgreSQL user.
+1. Log out of the `postgres` user.
 
    ```bash
    exit
    ```
 
 1. Swap the ports for the old and new PostgreSQL versions.
+   Example (PostgreSQL 13.3):
 
    ```
    $ sudo vim /etc/postgresql/13/main/postgresql.conf
@@ -393,7 +404,8 @@ Check the [post upgrade steps](#post-upgrade-steps) if you are upgrading from a 
    sudo systemctl start postgresql.service
    ```
 
-1. Log in as the postgres user and confirm that the new PostgreSQL version is 13.3.
+1. Log in as the `postgres` user and confirm that the new PostgreSQL version is correct.
+   Example (PostgreSQL 13.3):
 
    ```
    $ sudo su postgres
