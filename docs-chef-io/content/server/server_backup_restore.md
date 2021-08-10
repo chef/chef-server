@@ -16,7 +16,8 @@ aliases = ["/server_backup_restore.html", "/runbook/server_backup_restore/"]
 
 Periodic backups of Chef Infra Server data are an essential part of
 managing and maintaining a healthy configuration and ensuring that
-important data can be restored, if required.
+important data can be restored, if required. The backup takes around
+4 to 5 minutes per GB of data on a t3.2xlarge AWS EC2 instance.
 
 ## chef-server-ctl
 
