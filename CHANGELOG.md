@@ -1,46 +1,44 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.8.7 -->
-## [14.8.7](https://github.com/chef/chef-server/tree/14.8.7) (2021-08-10)
-
-#### Merged Pull Requests
-- Skipping auto reindex for external postgreSQL [#2721](https://github.com/chef/chef-server/pull/2721) ([jashaik](https://github.com/jashaik))
+<!-- latest_release -->
 <!-- latest_release -->
 
-<!-- release_rollup since=14.7.13 -->
-### Changes since 14.7.13 release
-
-#### Merged Pull Requests
-- Skipping auto reindex for external postgreSQL [#2721](https://github.com/chef/chef-server/pull/2721) ([jashaik](https://github.com/jashaik)) <!-- 14.8.7 -->
-- Fix error (malformed version number string) [#2714](https://github.com/chef/chef-server/pull/2714) ([lbakerchef](https://github.com/lbakerchef)) <!-- 14.8.6 -->
-- Fix a notification for firing partybus [#2718](https://github.com/chef/chef-server/pull/2718) ([tas50](https://github.com/tas50)) <!-- 14.8.5 -->
-- Added auto reindexing for pg 13.3 [#2715](https://github.com/chef/chef-server/pull/2715) ([jashaik](https://github.com/jashaik)) <!-- 14.8.4 -->
-- Elastsearch gather-log updates [#2716](https://github.com/chef/chef-server/pull/2716) ([teknofire](https://github.com/teknofire)) <!-- 14.8.3 -->
-- Replace Opscode copyrights [#2703](https://github.com/chef/chef-server/pull/2703) ([tas50](https://github.com/tas50)) <!-- 14.8.2 -->
-- Test the system connectivity to the Internet in the gather logs [#2704](https://github.com/chef/chef-server/pull/2704) ([tas50](https://github.com/tas50)) <!-- 14.8.1 -->
-- Update PostgreSQL to 13.3 [#2577](https://github.com/chef/chef-server/pull/2577) ([lbakerchef](https://github.com/lbakerchef)) <!-- 14.8.0 -->
-- Improve chef-server-ctl help and docs [#2696](https://github.com/chef/chef-server/pull/2696) ([tas50](https://github.com/tas50)) <!-- 14.7.32 -->
-- Update Elasticsearch to 6.8.18 [#2697](https://github.com/chef/chef-server/pull/2697) ([tas50](https://github.com/tas50)) <!-- 14.7.31 -->
-- Add GitHub action for cookstyle/chefspec in ctl cookbook [#2595](https://github.com/chef/chef-server/pull/2595) ([tas50](https://github.com/tas50)) <!-- 14.7.30 -->
-- gather-logs: Remove support for specifying the server type / chef server 11 [#2672](https://github.com/chef/chef-server/pull/2672) ([tas50](https://github.com/tas50)) <!-- 14.7.29 -->
-- More cleanup of the configuration cookbook [#2692](https://github.com/chef/chef-server/pull/2692) ([tas50](https://github.com/tas50)) <!-- 14.7.28 -->
-- Update partybus output private-chef -&gt; Infra Server [#2690](https://github.com/chef/chef-server/pull/2690) ([tas50](https://github.com/tas50)) <!-- 14.7.27 -->
-- Remove the word sanity from logs, tests, and comments [#2691](https://github.com/chef/chef-server/pull/2691) ([tas50](https://github.com/tas50)) <!-- 14.7.26 -->
-- Update docs.chef.io and GitHub links to avoid redirects or 404s [#2673](https://github.com/chef/chef-server/pull/2673) ([tas50](https://github.com/tas50)) <!-- 14.7.25 -->
-- Improve logging when there are no DB migrations to run [#2688](https://github.com/chef/chef-server/pull/2688) ([tas50](https://github.com/tas50)) <!-- 14.7.24 -->
-- More Chef Server -&gt; Chef Infra Server branding updates [#2689](https://github.com/chef/chef-server/pull/2689) ([tas50](https://github.com/tas50)) <!-- 14.7.23 -->
-- Improve migration logging a bit [#2670](https://github.com/chef/chef-server/pull/2670) ([tas50](https://github.com/tas50)) <!-- 14.7.22 -->
-- Add basic server usage information to gather-logs [#2666](https://github.com/chef/chef-server/pull/2666) ([tas50](https://github.com/tas50)) <!-- 14.7.21 -->
-- Branding updates in the chef-server-ctl command [#2685](https://github.com/chef/chef-server/pull/2685) ([tas50](https://github.com/tas50)) <!-- 14.7.20 -->
-- Better describe what chef-server-ctl upgrade does [#2687](https://github.com/chef/chef-server/pull/2687) ([tas50](https://github.com/tas50)) <!-- 14.7.19 -->
-- Fix incorrect spelling of PostgreSQL [#2686](https://github.com/chef/chef-server/pull/2686) ([tas50](https://github.com/tas50)) <!-- 14.7.18 -->
-- Bump omnibus-software from `a4f73e4` to `c172afb` in /omnibus [#2684](https://github.com/chef/chef-server/pull/2684) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.7.17 -->
-- Bump omnibus from `6d109b6` to `9ffcd89` in /omnibus [#2683](https://github.com/chef/chef-server/pull/2683) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.7.16 -->
-- Bump redis from 4.3.1 to 4.4.0 in /src/chef-server-ctl [#2680](https://github.com/chef/chef-server/pull/2680) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.7.15 -->
-- Update pg gem to 1.2.3 [#2611](https://github.com/chef/chef-server/pull/2611) ([jashaik](https://github.com/jashaik)) <!-- 14.7.14 -->
+<!-- release_rollup -->
 <!-- release_rollup -->
 
 <!-- latest_stable_release -->
+## [14.8.7](https://github.com/chef/chef-server/tree/14.8.7) (2021-08-10)
+
+#### Merged Pull Requests
+- Update pg gem to 1.2.3 [#2611](https://github.com/chef/chef-server/pull/2611) ([jashaik](https://github.com/jashaik))
+- Bump redis from 4.3.1 to 4.4.0 in /src/chef-server-ctl [#2680](https://github.com/chef/chef-server/pull/2680) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump omnibus from `6d109b6` to `9ffcd89` in /omnibus [#2683](https://github.com/chef/chef-server/pull/2683) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump omnibus-software from `a4f73e4` to `c172afb` in /omnibus [#2684](https://github.com/chef/chef-server/pull/2684) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Fix incorrect spelling of PostgreSQL [#2686](https://github.com/chef/chef-server/pull/2686) ([tas50](https://github.com/tas50))
+- Better describe what chef-server-ctl upgrade does [#2687](https://github.com/chef/chef-server/pull/2687) ([tas50](https://github.com/tas50))
+- Branding updates in the chef-server-ctl command [#2685](https://github.com/chef/chef-server/pull/2685) ([tas50](https://github.com/tas50))
+- Add basic server usage information to gather-logs [#2666](https://github.com/chef/chef-server/pull/2666) ([tas50](https://github.com/tas50))
+- Improve migration logging a bit [#2670](https://github.com/chef/chef-server/pull/2670) ([tas50](https://github.com/tas50))
+- More Chef Server -&gt; Chef Infra Server branding updates [#2689](https://github.com/chef/chef-server/pull/2689) ([tas50](https://github.com/tas50))
+- Improve logging when there are no DB migrations to run [#2688](https://github.com/chef/chef-server/pull/2688) ([tas50](https://github.com/tas50))
+- Update docs.chef.io and GitHub links to avoid redirects or 404s [#2673](https://github.com/chef/chef-server/pull/2673) ([tas50](https://github.com/tas50))
+- Remove the word sanity from logs, tests, and comments [#2691](https://github.com/chef/chef-server/pull/2691) ([tas50](https://github.com/tas50))
+- Update partybus output private-chef -&gt; Infra Server [#2690](https://github.com/chef/chef-server/pull/2690) ([tas50](https://github.com/tas50))
+- More cleanup of the configuration cookbook [#2692](https://github.com/chef/chef-server/pull/2692) ([tas50](https://github.com/tas50))
+- gather-logs: Remove support for specifying the server type / chef server 11 [#2672](https://github.com/chef/chef-server/pull/2672) ([tas50](https://github.com/tas50))
+- Add GitHub action for cookstyle/chefspec in ctl cookbook [#2595](https://github.com/chef/chef-server/pull/2595) ([tas50](https://github.com/tas50))
+- Update Elasticsearch to 6.8.18 [#2697](https://github.com/chef/chef-server/pull/2697) ([tas50](https://github.com/tas50))
+- Improve chef-server-ctl help and docs [#2696](https://github.com/chef/chef-server/pull/2696) ([tas50](https://github.com/tas50))
+- Update PostgreSQL to 13.3 [#2577](https://github.com/chef/chef-server/pull/2577) ([lbakerchef](https://github.com/lbakerchef))
+- Test the system connectivity to the Internet in the gather logs [#2704](https://github.com/chef/chef-server/pull/2704) ([tas50](https://github.com/tas50))
+- Replace Opscode copyrights [#2703](https://github.com/chef/chef-server/pull/2703) ([tas50](https://github.com/tas50))
+- Elastsearch gather-log updates [#2716](https://github.com/chef/chef-server/pull/2716) ([teknofire](https://github.com/teknofire))
+- Added auto reindexing for pg 13.3 [#2715](https://github.com/chef/chef-server/pull/2715) ([jashaik](https://github.com/jashaik))
+- Fix a notification for firing partybus [#2718](https://github.com/chef/chef-server/pull/2718) ([tas50](https://github.com/tas50))
+- Fix error (malformed version number string) [#2714](https://github.com/chef/chef-server/pull/2714) ([lbakerchef](https://github.com/lbakerchef))
+- Skipping auto reindex for external postgreSQL [#2721](https://github.com/chef/chef-server/pull/2721) ([jashaik](https://github.com/jashaik))
+<!-- latest_stable_release -->
+
 ## [14.7.13](https://github.com/chef/chef-server/tree/14.7.13) (2021-07-28)
 
 #### Merged Pull Requests
@@ -64,7 +62,6 @@
 - Remove old references to Chef Analytics [#2663](https://github.com/chef/chef-server/pull/2663) ([tas50](https://github.com/tas50))
 - gather-logs: Avoid errors in console on Ubuntu [#2671](https://github.com/chef/chef-server/pull/2671) ([tas50](https://github.com/tas50))
 - Antima/dependabot/bundler/src/oc id/rails 6.1.4 code changes [#2678](https://github.com/chef/chef-server/pull/2678) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
-<!-- latest_stable_release -->
 
 ## [14.6.32](https://github.com/chef/chef-server/tree/14.6.32) (2021-07-19)
 
