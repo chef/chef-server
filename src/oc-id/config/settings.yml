@@ -5,6 +5,7 @@ doorkeeper:
   administrators:
     - rainbowdash
 email_from_address: 'Chef Notifications <notifications@chef.io>'
+origin: <%= ENV['CHEF_DOMAIN'] || 'chef.io' %>
 protocol: https
 secret_key_base: CHANGE ME
 zendesk:

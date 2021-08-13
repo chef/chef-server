@@ -16,18 +16,21 @@ class ProfilesController < ApplicationController
   #
   def update
     @user = current_user
-    updated_email = false
+    updated_email = permit_all_params.has_key? :email
 
     # Note that if an email address is provided, don't update it right away.
     # Instead send a confirmation email and let that email link update the
     # email address.
     # update note
     # params are coming as string from user profile form.
-    params[:user].reject! { |k| k == "email" }
+    #params[:user].reject! { |k| k == "email" }
 
     if @user.update_attributes(user_params)
       message = I18n.t('profile.update_successful')
-      message << "\n" + I18n.t('profile.email_change_sent') if updated_email
+      if updated_email
+        EmailVerifyMailer.email_verify(@user, permit_all_params[:email]).deliver_now
+        message << "\n" + I18n.t('profile.email_change_sent')
+      end
       redirect_to profile_path, :notice => message
     else
       render 'show'
@@ -121,5 +124,9 @@ class ProfilesController < ApplicationController
   # When creating a new ActiveRecord model, only the permitted attributes are passed into the model
   def user_params
     params.require(:user).permit(:username,:first_name,:last_name,:middle_name,:public_key,:private_key,:display_name,:password)
+  end
+
+  def permit_all_params
+    params.require(:user).permit(:username, :first_name, :last_name, :middle_name, :public_key, :private_key, :display_name, :password, :email)
   end
 end
