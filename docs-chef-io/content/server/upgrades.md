@@ -98,8 +98,6 @@ If you are running a Chef Infra Server release before 12.3.0, please contact Che
 
 {{% server_upgrade_duration %}}
 
-#### Standalone Upgrade Steps
-
 1. Run `vacuumdb` before starting the upgrade:
 
    ```bash
@@ -209,6 +207,7 @@ Check the [post upgrade steps](#post-upgrade-steps) if you are upgrading from a 
 
 ### External PostgreSQL
 
+**Upgrade Chef Infra Server**
 
 1. Log into the external PostgreSQL machine.
 
