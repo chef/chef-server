@@ -28,7 +28,7 @@ build do
 
   env = with_standard_compiler_flags(with_embedded_path)
 
-  # we would like to do this '--without development' but appbundler is insisting
+  # we would like to do this 'bundle config set --local without development' but appbundler is insisting
   # on installing
   bundle "install", env: env
 

@@ -1,5 +1,6 @@
 install:
-	bundle install --without development --deployment
+	bundle config set --local without development
+	bundle install --deployment
 	psql -c 'create database oc_id_test;' -U postgres
 
 travis: ci
