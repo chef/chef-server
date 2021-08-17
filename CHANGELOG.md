@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.8.8 -->
-## [14.8.8](https://github.com/chef/chef-server/tree/14.8.8) (2021-08-16)
+<!-- latest_release 14.8.9 -->
+## [14.8.9](https://github.com/chef/chef-server/tree/14.8.9) (2021-08-17)
 
 #### Merged Pull Requests
-- Point to master of chef_secrets [#2736](https://github.com/chef/chef-server/pull/2736) ([lbakerchef](https://github.com/lbakerchef))
+- Bump mixlib-install from 3.12.11 to 3.12.16 in /src/chef-server-ctl [#2733](https://github.com/chef/chef-server/pull/2733) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.8.7 -->
 ### Changes since 14.8.7 release
 
 #### Merged Pull Requests
+- Bump mixlib-install from 3.12.11 to 3.12.16 in /src/chef-server-ctl [#2733](https://github.com/chef/chef-server/pull/2733) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.8.9 -->
 - Point to master of chef_secrets [#2736](https://github.com/chef/chef-server/pull/2736) ([lbakerchef](https://github.com/lbakerchef)) <!-- 14.8.8 -->
 <!-- release_rollup -->
 
