@@ -48,7 +48,13 @@ The Chef Infra Server 14 upgrade does not automatically reindex existing externa
 
 #### Upgrading to 14.8
 
-Chef Infra Server 14.8 upgrades PostgreSQL from 9.6 to 13.3. The 14.8 upgrade process requires a one-time downtime to vacuum, upgrade, and re-index the database. The entire upgrade operation takes approximately one minute per 1000 nodes. This process may take longer depending on your server hardware and the size of the node objects on your Chef Infra Server.
+Chef Infra Server 14.8 upgrades PostgreSQL from 9.6 to 13.3. The 14.8 upgrade process requires a one-time downtime to vacuum, upgrade, and re-index the database. The entire upgrade operation takes approximately one minute per 1000 nodes (1000 nodes is approximately 286MB). This process may take longer depending on your server hardware and the size of the node objects on your Chef Infra Server.
+
+{{< note >}}
+
+Set the `postgresql['pg_upgrade_timeout']` attribute in [chef-server.rb]({{< relref "config_rb_server_optional_settings" >}}) to the timeout value for the upgrade. Set this value based on the size of your data, where it take approximately one minute per 1,000 nodes which is approximately 286MB.
+
+{{</note >}}
 
 ##### Database Preparation
 
@@ -63,14 +69,6 @@ Chef Infra Server 14.8 upgrades PostgreSQL from 9.6 to 13.3. The 14.8 upgrade pr
 ##### Upgrade Steps
 
 Follow the Chef Infra Server upgrade instructions below.
-
-##### Post-Upgrade Steps
-
-Reindex the Chef Infra Server:
-
-```bash
-/opt/opscode/embedded/bin/reindexdb --all
-```
 
 {{< note >}}
 
@@ -99,8 +97,6 @@ If you are running a Chef Infra Server release before 12.3.0, please contact Che
 ### Standalone Server
 
 {{% server_upgrade_duration %}}
-
-#### Standalone Upgrade Steps
 
 1. Run `vacuumdb` before starting the upgrade:
 
@@ -211,6 +207,7 @@ Check the [post upgrade steps](#post-upgrade-steps) if you are upgrading from a 
 
 ### External PostgreSQL
 
+**Upgrade Chef Infra Server**
 
 1. Log into the external PostgreSQL machine.
 

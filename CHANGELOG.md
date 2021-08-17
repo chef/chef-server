@@ -1,9 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release -->
+<!-- latest_release 14.8.8 -->
+## [14.8.8](https://github.com/chef/chef-server/tree/14.8.8) (2021-08-16)
+
+#### Merged Pull Requests
+- Point to master of chef_secrets [#2736](https://github.com/chef/chef-server/pull/2736) ([lbakerchef](https://github.com/lbakerchef))
 <!-- latest_release -->
 
-<!-- release_rollup -->
+<!-- release_rollup since=14.8.7 -->
+### Changes since 14.8.7 release
+
+#### Merged Pull Requests
+- Point to master of chef_secrets [#2736](https://github.com/chef/chef-server/pull/2736) ([lbakerchef](https://github.com/lbakerchef)) <!-- 14.8.8 -->
 <!-- release_rollup -->
 
 <!-- latest_stable_release -->
