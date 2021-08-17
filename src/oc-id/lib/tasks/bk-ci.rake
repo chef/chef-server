@@ -10,7 +10,7 @@ begin
   end
 
 rescue LoadError
-  # In production, we `bundle --without development test`, so RSpec is not
+  # In production, we `bundle config set --local without development test`, so RSpec is not
   # included. Whenever you run a rake task or load the app it loads all of the
   # tasks in lib/tasks, so this will fail in those cases. We don't need this
   # task in those cases, so just fail gracefully and print a warning.

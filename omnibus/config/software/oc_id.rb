@@ -47,9 +47,9 @@ build do
          " --with-xml2-config=#{install_dir}/embedded/bin/xml2-config" \
          " --with-xslt-config=#{install_dir}/embedded/bin/xslt-config"
 
+  bundle "config set --local without development test doc", env: env
   bundle "install" \
-         " --path=#{install_dir}/embedded/service/gem" \
-         " --without development test doc", env: env
+         " --path=#{install_dir}/embedded/service/gem", env: env
 
   bundle "exec rake assets:precompile", env: env
   sync project_dir, "#{install_dir}/embedded/service/oc_id/", exclude: ['**/.gitignore', 'log/', 'tmp/']

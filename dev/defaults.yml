@@ -126,8 +126,8 @@ projects:
           - ldap.bind_password
   oc-id:
     type: rails
-    install_options: --without development test doc
     build_steps:
+      - bundle config set --local without development test doc
       # We used to build assets in the pipeline, and needed to build them before loading. Now we've commited those assets to git, and
       #    - bundle exec rake assets:precompile --trace
       - bundle exec --keep-file-descriptors rake db:migrate
