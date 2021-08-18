@@ -14,15 +14,13 @@ if [[ -n $1  ]]; then
     testing=true
 fi
 
-path='opscode'
-ctl_cmd='private-chef-ctl'
 config_name='*chef*.rb'
 
-if [[ ! -e "/opt/$path/bin/$ctl_cmd" ]]; then
+if [[ ! -e "/opt/opscode/bin/chef-server-ctl" ]]; then
     echo "ERROR: Chef Infra Server may not be installed."
     exit 1
 fi
-config_file_path="/etc/$path/$config_name"
+config_file_path="/etc/opscode/$config_name"
 
 hostname=$(hostname)
 timestamp=$(date +%F_%H.%M.%S-%Z)
@@ -30,7 +28,7 @@ tmpdir="$(mktemp -d)/$hostname/$timestamp"
 #RHEL5 has ip and other tools here
 PATH=$PATH:/bin:/sbin
 
-PATH=/opt/$path/embedded/bin:$PATH
+PATH=/opt/opscode/embedded/bin:$PATH
 
 mkdir -p "$tmpdir"
 # make sure we have the full path in /proc created for the gather-logs bundle
@@ -38,12 +36,12 @@ mkdir -p "$tmpdir/proc/sys/crypto/"
 # create the connectivity dir for proxy / supermarket access checks
 mkdir -p "$tmpdir/connectivity/"
 
-for i in /opt/{chef,$path}*/version-manifest.txt \
-              /opt/$path/pc-version.txt \
-              /etc/$path/$config_name \
-              /etc/{chef,$path}*/*-running.json \
-              /var/opt/$path*/etc/*-running.json \
-              /etc/{chef,$path,opscode-manage}*/*.rb \
+for i in /opt/{chef,opscode}*/version-manifest.txt \
+              /opt/opscode/pc-version.txt \
+              /etc/opscode/$config_name \
+              /etc/{chef,opscode}*/*-running.json \
+              /var/opt/opscode*/etc/*-running.json \
+              /etc/{chef,opscode,opscode-manage}*/*.rb \
               /var/log/syslog \
               /var/log/messages; do
     if [[ -e "$i" ]]; then
@@ -81,10 +79,10 @@ elif [[ -n $ES_10144 ]]; then
     gather_es 10144
 fi
 
-$ctl_cmd status > "$tmpdir/$ctl_cmd"_status.txt
+chef-server-ctl status > "$tmpdir/chef-server-ctl"_status.txt
 
 
-STATSPW=$($ctl_cmd show-secret opscode_erchef stats_password)
+STATSPW=$(chef-server-ctl show-secret opscode_erchef stats_password)
 if [ -n "$STATSPW" ]; then
     curl -k -s -X GET "https://statsuser:$STATSPW@localhost/_stats?format=text" status > "$tmpdir/chef_server_stats_endpoint.txt"
 else
@@ -236,27 +234,27 @@ if [[ -z $testing ]]; then
     echo '## Resolved Name + Time' >> "$name_resolution_file"
     echo $tempname >> "$name_resolution_file"
     for interval in `seq 1 5`; do
-        { time /opt/$path/embedded/bin/ruby -e "require 'resolv'; start=Time.now; p Resolv.getaddress(\"$tempname\")" ; } >> "$name_resolution_file" 2>&1
+        { time /opt/opscode/embedded/bin/ruby -e "require 'resolv'; start=Time.now; p Resolv.getaddress(\"$tempname\")" ; } >> "$name_resolution_file" 2>&1
         sleep 2;
     done
 
     echo $backend_fqdn >> "$name_resolution_file"
     for interval in `seq 1 5`; do
-        { time /opt/$path/embedded/bin/ruby -e "require 'resolv'; start=Time.now; p Resolv.getaddress(\"$backend_fqdn\")" ; } >> "$name_resolution_file" 2>&1
+        { time /opt/opscode/embedded/bin/ruby -e "require 'resolv'; start=Time.now; p Resolv.getaddress(\"$backend_fqdn\")" ; } >> "$name_resolution_file" 2>&1
         sleep 2;
     done
 fi
 
 # gather important file permissions
 for fileperms in \
-    /var/opt/$path* \
-        /var/log/$path*; do
+    /var/opt/opscode* \
+        /var/log/opscode*; do
     ls -altuhR "$fileperms" >> "$tmpdir/perms.txt"
 done
 
 # gather the db migration level
 migration_level_file="$tmpdir/migration-level.txt"
-migration_level_file_location="/var/opt/$path/upgrades/migration-level"
+migration_level_file_location="/var/opt/opscode/upgrades/migration-level"
 if [[ -f $migration_level_file_location  ]]; then
     cat $migration_level_file_location >> "$migration_level_file"
 else
