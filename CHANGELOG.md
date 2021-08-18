@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.8.11 -->
-## [14.8.11](https://github.com/chef/chef-server/tree/14.8.11) (2021-08-17)
+<!-- latest_release 14.8.12 -->
+## [14.8.12](https://github.com/chef/chef-server/tree/14.8.12) (2021-08-18)
 
 #### Merged Pull Requests
-- Remove require rubygems in chef-server-ctl [#2743](https://github.com/chef/chef-server/pull/2743) ([tas50](https://github.com/tas50))
+- Avoid deprecation warning when running partybus migrations [#2746](https://github.com/chef/chef-server/pull/2746) ([tas50](https://github.com/tas50))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.8.7 -->
 ### Changes since 14.8.7 release
 
 #### Merged Pull Requests
+- Avoid deprecation warning when running partybus migrations [#2746](https://github.com/chef/chef-server/pull/2746) ([tas50](https://github.com/tas50)) <!-- 14.8.12 -->
 - Remove require rubygems in chef-server-ctl [#2743](https://github.com/chef/chef-server/pull/2743) ([tas50](https://github.com/tas50)) <!-- 14.8.11 -->
 - Fix typo in partybus upgrade output [#2744](https://github.com/chef/chef-server/pull/2744) ([tas50](https://github.com/tas50)) <!-- 14.8.10 -->
 - Bump mixlib-install from 3.12.11 to 3.12.16 in /src/chef-server-ctl [#2733](https://github.com/chef/chef-server/pull/2733) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.8.9 -->
