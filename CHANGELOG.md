@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.8.13 -->
-## [14.8.13](https://github.com/chef/chef-server/tree/14.8.13) (2021-08-18)
+<!-- latest_release 14.8.14 -->
+## [14.8.14](https://github.com/chef/chef-server/tree/14.8.14) (2021-08-18)
 
 #### Merged Pull Requests
-- Bump omnibus-software from `c172afb` to `7eebe98` in /omnibus [#2739](https://github.com/chef/chef-server/pull/2739) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Construct PostgreSQL version object using a regex. [#2720](https://github.com/chef/chef-server/pull/2720) ([lbakerchef](https://github.com/lbakerchef))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.8.7 -->
 ### Changes since 14.8.7 release
 
 #### Merged Pull Requests
+- Construct PostgreSQL version object using a regex. [#2720](https://github.com/chef/chef-server/pull/2720) ([lbakerchef](https://github.com/lbakerchef)) <!-- 14.8.14 -->
 - Bump omnibus-software from `c172afb` to `7eebe98` in /omnibus [#2739](https://github.com/chef/chef-server/pull/2739) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.8.13 -->
 - Avoid deprecation warning when running partybus migrations [#2746](https://github.com/chef/chef-server/pull/2746) ([tas50](https://github.com/tas50)) <!-- 14.8.12 -->
 - Remove require rubygems in chef-server-ctl [#2743](https://github.com/chef/chef-server/pull/2743) ([tas50](https://github.com/tas50)) <!-- 14.8.11 -->
