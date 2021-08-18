@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.8.14 -->
-## [14.8.14](https://github.com/chef/chef-server/tree/14.8.14) (2021-08-18)
+<!-- latest_release 14.8.15 -->
+## [14.8.15](https://github.com/chef/chef-server/tree/14.8.15) (2021-08-18)
 
 #### Merged Pull Requests
-- Construct PostgreSQL version object using a regex. [#2720](https://github.com/chef/chef-server/pull/2720) ([lbakerchef](https://github.com/lbakerchef))
+- Bump chefstyle from 2.0.7 to 2.0.8 in /src/chef-server-ctl [#2730](https://github.com/chef/chef-server/pull/2730) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.8.7 -->
 ### Changes since 14.8.7 release
 
 #### Merged Pull Requests
+- Bump chefstyle from 2.0.7 to 2.0.8 in /src/chef-server-ctl [#2730](https://github.com/chef/chef-server/pull/2730) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.8.15 -->
 - Construct PostgreSQL version object using a regex. [#2720](https://github.com/chef/chef-server/pull/2720) ([lbakerchef](https://github.com/lbakerchef)) <!-- 14.8.14 -->
 - Bump omnibus-software from `c172afb` to `7eebe98` in /omnibus [#2739](https://github.com/chef/chef-server/pull/2739) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.8.13 -->
 - Avoid deprecation warning when running partybus migrations [#2746](https://github.com/chef/chef-server/pull/2746) ([tas50](https://github.com/tas50)) <!-- 14.8.12 -->
