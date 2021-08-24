@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.8.17 -->
-## [14.8.17](https://github.com/chef/chef-server/tree/14.8.17) (2021-08-18)
+<!-- latest_release 14.8.18 -->
+## [14.8.18](https://github.com/chef/chef-server/tree/14.8.18) (2021-08-24)
 
 #### Merged Pull Requests
-- Update gather-logs to use chef-server-ctl [#2717](https://github.com/chef/chef-server/pull/2717) ([tas50](https://github.com/tas50))
+- Bump chef from 17.3.48 to 17.4.25 in /oc-chef-pedant [#2757](https://github.com/chef/chef-server/pull/2757) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.8.7 -->
 ### Changes since 14.8.7 release
 
 #### Merged Pull Requests
+- Bump chef from 17.3.48 to 17.4.25 in /oc-chef-pedant [#2757](https://github.com/chef/chef-server/pull/2757) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.8.18 -->
 - Update gather-logs to use chef-server-ctl [#2717](https://github.com/chef/chef-server/pull/2717) ([tas50](https://github.com/tas50)) <!-- 14.8.17 -->
 - Bump veil from `eb86d6e` to `8bcee8d` in /src/oc_bifrost/oc-bifrost-pedant [#2738](https://github.com/chef/chef-server/pull/2738) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.8.16 -->
 - Bump chefstyle from 2.0.7 to 2.0.8 in /src/chef-server-ctl [#2730](https://github.com/chef/chef-server/pull/2730) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.8.15 -->
