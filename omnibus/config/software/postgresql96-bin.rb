@@ -16,7 +16,7 @@
 
 name "postgresql96-bin"
 
-default_version "9.6.22"
+default_version "9.6.23"
 
 license "PostgreSQL"
 license_file "COPYRIGHT"
@@ -30,7 +30,7 @@ dependency "libossp-uuid"
 dependency "config_guess"
 
 source url: "https://ftp.postgresql.org/pub/source/v#{version}/postgresql-#{version}.tar.bz2"
-version("9.6.22") { source sha256: "3d32cd101025a0556813397c69feff3df3d63736adb8adeaf365c522f39f2930" }
+version("9.6.23") { source sha256: "a849f798401ab8c6dfa653ebbcd853b43f2200b4e3bc1ea3cb5bec9a691947b9" }
 
 relative_path "postgresql-#{version}"
 
