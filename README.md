@@ -1,15 +1,15 @@
 # Chef Server
 
-[![Build Status](https://badge.buildkite.com/ccdefb69f938db51cb23f092e54030aa41608e6472cfe4aa7e.svg)](https://buildkite.com/chef/chef-chef-server-master-omnibus-adhoc)
-[![](https://img.shields.io/badge/Release%20Policy-Cadence%20Release-brightgreen.svg)](https://github.com/chef/chef-server/blob/master/dev-docs/release_cadence.md)
+[![Build Status](https://badge.buildkite.com/ccdefb69f938db51cb23f092e54030aa41608e6472cfe4aa7e.svg)](https://buildkite.com/chef/chef-chef-server-main-omnibus-adhoc)
+[![](https://img.shields.io/badge/Release%20Policy-Cadence%20Release-brightgreen.svg)](https://github.com/chef/chef-server/blob/main/dev-docs/release_cadence.md)
 
-**Umbrella Project**: [Chef Infra](https://github.com/chef/chef-oss-practices/blob/master/projects/chef-infra-server.md)
+**Umbrella Project**: [Chef Infra](https://github.com/chef/chef-oss-practices/blob/main/projects/chef-infra-server.md)
 
-**Project State**: [Active](https://github.com/chef/chef-oss-practices/blob/master/repo-management/repo-states.md#active)
+**Project State**: [Active](https://github.com/chef/chef-oss-practices/blob/main/repo-management/repo-states.md#active)
 
-**Issues [Response Time Maximum](https://github.com/chef/chef-oss-practices/blob/master/repo-management/repo-states.md)**: 14 days
+**Issues [Response Time Maximum](https://github.com/chef/chef-oss-practices/blob/main/repo-management/repo-states.md)**: 14 days
 
-**Pull Request [Response Time Maximum](https://github.com/chef/chef-oss-practices/blob/master/repo-management/repo-states.md)**: 14 days
+**Pull Request [Response Time Maximum](https://github.com/chef/chef-oss-practices/blob/main/repo-management/repo-states.md)**: 14 days
 
 NOTE: we know we have a backlog, and are working through it, but this
 applies for new requests.
@@ -47,7 +47,7 @@ This repository contains the core services that make up the Chef Server.
 ## Working on the Chef Server
 
 The quickest way to get a Chef Server development environment is to
-follow the [instructions](https://github.com/chef/chef-server/blob/master/dev/README.md) in the `dev` directory.
+follow the [instructions](https://github.com/chef/chef-server/blob/main/dev/README.md) in the `dev` directory.
 This environment is based on Vagrant and features hot reloading of code.
 
 ## Building a Chef Server package locally
@@ -122,7 +122,7 @@ The `chef/chef-server` repository, like many other Chef Software repositories, l
 
 ## Contributing
 
-For information on contributing to this project see <https://github.com/chef/chef/blob/master/CONTRIBUTING.md>
+For information on contributing to this project see <https://github.com/chef/chef/blob/main/CONTRIBUTING.md>
 
 ## License & Authors
 

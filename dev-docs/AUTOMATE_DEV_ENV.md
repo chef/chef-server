@@ -6,7 +6,7 @@ consider writing an explanation here.
 ## Setup
 
 To be able to build and run Automate follow the following steps
-1. Set up automate by following the docker setup in the [docs](https://github.com/chef/automate/blob/master/dev-docs/DEV_ENVIRONMENT.md#docker-setup)
+1. Set up automate by following the docker setup in the [docs](https://github.com/chef/automate/blob/main/dev-docs/DEV_ENVIRONMENT.md#docker-setup)
 
 2. Configure Habitat
 

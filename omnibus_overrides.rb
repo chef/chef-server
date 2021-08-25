@@ -3,7 +3,7 @@
 # the various usages are updated in lockstep
 #
 override :erlang, version: "22.2"
-override :'omnibus-ctl', version: "master"
+override :'omnibus-ctl', version: "main"
 override :chef, version: "v16.13.16"
 override :ohai, version: "v16.13.0"
 override :ruby, version: "2.7.4"

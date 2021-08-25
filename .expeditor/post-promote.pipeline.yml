@@ -4,7 +4,7 @@ steps:
     label: "Manifest Upload"
     concurrency: 1
     timeout_in_minutes: 30
-    concurrency_group: chef-server-master/deploy/$CHANNEL
+    concurrency_group: chef-server-main/deploy/$CHANNEL
     expeditor:
       secrets:
         GITHUB_TOKEN:

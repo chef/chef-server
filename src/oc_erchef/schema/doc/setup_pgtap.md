@@ -33,7 +33,7 @@ general-use and (with a little work) could make it into pgTAP itself,
 while others are specific to testing the Chef schema.
 
 ```
-git clone git://github.com/opscode/chef_pgtap.git
+git clone git://github.com/chef/chef_pgtap.git
 cd chef_pgtap
 make install
 ```
