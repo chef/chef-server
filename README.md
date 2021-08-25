@@ -24,7 +24,7 @@ If you need to file an issue against another Chef project, you can find a list o
 
 We use GitHub issues to track bugs and feature requests. If you need help please post to our Mailing List or join the Chef Community Slack.
 
-* Chef Community Slack at http://community-slack.chef.io/.
+* Chef Community Slack at https://community-slack.chef.io/.
 * Chef Mailing List https://discourse.chef.io/
 
 ## Components of the Chef Server
