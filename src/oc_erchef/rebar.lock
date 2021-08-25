@@ -18,7 +18,7 @@
   0},
  {<<"chef_secrets">>,
   {git,"git://github.com/chef/chef_secrets.git",
-       {ref,"8bcee8d67d87a1c0acdf26ca0d1f64654f99dd84"}},
+       {ref,"47ae8d8d868fdc20c2d5bc19c77c65ae5da0a568"}},
   0},
  {<<"darklaunch">>,
   {git,"git://github.com/chef/opscode-darklaunch-erlang.git",
