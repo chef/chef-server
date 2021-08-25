@@ -40,7 +40,7 @@ Pre-release, bump the major or minor version anytime a PR is being merged if the
 1. Apply the label _Expeditor: Bump Version Minor_ or _Expeditor: Bump Version Major_ to your PR to bump the version number of the release candidate, as applicable.
 1. DOUBLE-CHECK the labels to confirm that they are correct. A mistake here is not easy to revert.
 
-After a commit is merged to master, expeditor automatically bumps the patch version, and a build is automatically kicked-off on the Chef / [chef/chef-server:master] omnibus/release pipeline.  After the build and tests in buildkite pass, expeditor should put the build artifact in Artifactory's current channel.  Monitor the build's progress at chef-server-notify slack channel.
+After a commit is merged to main, expeditor automatically bumps the patch version, and a build is automatically kicked-off on the Chef / [chef/chef-server:main] omnibus/release pipeline.  After the build and tests in buildkite pass, expeditor should put the build artifact in Artifactory's current channel.  Monitor the build's progress at chef-server-notify slack channel.
 
 3. Confirm that the omnibus build to be promoted is present in Artifactory's current channel.
 One approach is to enter the following into a bash shell, where _version_ is the version number of the new release:
@@ -53,13 +53,13 @@ Starting download https://packages.chef.io/files/current/chef-server/14.2.23/ubu
 
 #### Integration Testing
 
-Every merge to chef-server master must be built, and the various upgrade paths for the build must be tested with the full Umbrella automated integration test pipeline at https://buildkite.com/chef/chef-umbrella-master-chef-server-full (use https://buildkite.com/chef/chef-umbrella-master-chef-server for testing the 12.17.15 -> YOUR-RELEASE upgrade path).  [NOTE: Every merge to master automatically runs through adhoc, and umbrella is run nightly for all changes made that day].  The integration test run for the tag being shipped must be successful.
+Every merge to chef-server main must be built, and the various upgrade paths for the build must be tested with the full Umbrella automated integration test pipeline at https://buildkite.com/chef/chef-umbrella-main-chef-server-full (use https://buildkite.com/chef/chef-umbrella-main-chef-server for testing the 12.17.15 -> YOUR-RELEASE upgrade path).  [NOTE: Every merge to main automatically runs through adhoc, and umbrella is run nightly for all changes made that day].  The integration test run for the tag being shipped must be successful.
 
 Any Chef Infra Server release 12.17.15 or later should be able to upgrade directly to the latest release of 14. The nightly builds test upgrades to the latest current artifact from 12.17.15 and 13.2.0.  Releases prior to 12.17.15 must perform a stepped upgrade.  See: https://docs.chef.io/server/upgrades/#upgrade-matrix
 
 Using the step-by-step Umbrella testing process detailed below...
 
-1. Test that the 12.17.15 release can successfully upgrade to the new release (for this, use the pipeline at https://buildkite.com/chef/chef-umbrella-master-chef-server).  This is the _12.17.15 -> YOUR-RELEASE_ upgrade path.
+1. Test that the 12.17.15 release can successfully upgrade to the new release (for this, use the pipeline at https://buildkite.com/chef/chef-umbrella-main-chef-server).  This is the _12.17.15 -> YOUR-RELEASE_ upgrade path.
 1. Test that the 13.2.0   release can successfully upgrade to the new release.  This is the _13.2.0 -> YOUR-RELEASE_ upgrade path.
 1. Test that the latest stable release can successfully upgrade to the new release. This is the _LATEST-STABLE -> YOUR-RELEASE_ upgrade path.
 
@@ -68,9 +68,9 @@ https://downloads.chef.io
 
 Umbrella Testing Step-by-Step:
 
-1. Navigate your web browser to https://buildkite.com/chef/chef-umbrella-master-chef-server-full (or for _12.17.15 -> YOUR-RELEASE_, use https://buildkite.com/chef/chef-umbrella-master-chef-server).
+1. Navigate your web browser to https://buildkite.com/chef/chef-umbrella-main-chef-server-full (or for _12.17.15 -> YOUR-RELEASE_, use https://buildkite.com/chef/chef-umbrella-main-chef-server).
 1. Select 'New Build'.
-1. Leave 'Branch' set to 'master'.
+1. Leave 'Branch' set to 'main'.
 1. Select 'Options' to expand the 'Environment Variables' field.
 1. Enter `INSTALL_VERSION=<version number>` into the 'Options | Environment Variables' field, where _version number_ is the stable channel  version number of the release you wish to test upgrading FROM (for example 12.17.15).
 1. Enter `UPGRADE_VERSION=<version number>` into the 'Options | Environment Variables' field, where _version number_ is the current channel version number of the release candidate you wish to test upgrading TO (for example 14.6.32). This release candidate version number should come from the release pipeline build for the release you are doing.
@@ -117,7 +117,7 @@ null_resource.chef_server_config (remote-exec): BEGIN INSTALL CHEF SERVER
 ```
 10. Navigate to `http://<hostname>` via web browser where _hostname_ is the DNS name of the emphemeral machine obtained in the previous step.
 11. Enter the username and password to test the login.  The username and password are stored in the following script:
-    https://github.com/chef/umbrella/blob/master/chef-server/common/files/add_user.sh.
+    https://github.com/chef/umbrella/blob/main/chef-server/common/files/add_user.sh.
 12. Verify that the login is successful.
 13. Navigate to `http://<hostname>/id` via web browser where _hostname_ is the DNS name of the emphemeral machine obtained in the previous step.
 14. Login with the same user/password as the previous login step above.
@@ -154,11 +154,11 @@ make destroy-resource-group
 19. Any failures must be fixed before shipping a release, unless they are "known failures" or expected. A document at an unknown state of updatedness tracking known failures can be found at:
 https://docs.google.com/spreadsheets/d/10LZszYuAIlrk1acy0GRhrZMd0YohLTQWmcNIdY6XuZU/edit#gid=0
 Use chef.io account credentials to access it.
-Note that no changes other than CHANGELOG/RELEASE_NOTES changes should land on master between testing and releasing since we typically tag HEAD of master. If something large does land on master, the release tag you create should point specifically at the build that you tested. The git SHA of the build you are testing can be found in /opt/opscode/version-manifest.json.
+Note that no changes other than CHANGELOG/RELEASE_NOTES changes should land on main between testing and releasing since we typically tag HEAD of main. If something large does land on main, the release tag you create should point specifically at the build that you tested. The git SHA of the build you are testing can be found in /opt/opscode/version-manifest.json.
 
-20. Make sure the Habitat builds for master are passing. These are kicked-off automatically on every merge.
-Chef / [chef/chef-server:master] habitat/build / master
-https://buildkite.com/chef/chef-chef-server-master-habitat-build
+20. Make sure the Habitat builds for main are passing. These are kicked-off automatically on every merge.
+Chef / [chef/chef-server:main] habitat/build / main
+https://buildkite.com/chef/chef-chef-server-main-habitat-build
 
 #### Special Testing
 
@@ -180,11 +180,11 @@ http://packages.chef.io/manifests/current/chef-server/latest.json
 
 In practice it will look like:
 
-        /expeditor promote chef/chef-server:master VERSION
+        /expeditor promote chef/chef-server:main VERSION
 
 Example:
 ```
-/expeditor promote chef/chef-server:master 14.2.2
+/expeditor promote chef/chef-server:main 14.2.2
 ```
 
   Please do this in the `#chef-server` channel.  Once this is
@@ -205,7 +205,7 @@ https://discourse.chef.io/c/chef-release/9
 1. Create issues in the chef-server repo and in the automate repo to update the version of Chef Infra Server in Automate. Make sure to link the issues to each other.
 1. Bump the version of Automate [placeholder - instructions forthcoming].
 
-   https://github.com/chef/chef-server/blob/master/dev-docs/AUTOMATE_DEV_ENV.md
+   https://github.com/chef/chef-server/blob/main/dev-docs/AUTOMATE_DEV_ENV.md
    https://github.com/chef/automate/pull/5269
 
 Chef Infra Server is now released.
@@ -217,11 +217,11 @@ RELEASE CHECKLIST
 - omnibus build in current channel          DONE
 - umbrella pipeline full
     12.17.15 -> 14.6.32                     PASS [failures but no release blockers]
-    https://buildkite.com/chef/chef-umbrella-master-chef-server-full/builds/44#78500beb-e0e1-4ef8-a4aa-07aefdb7a7c2
+    https://buildkite.com/chef/chef-umbrella-main-chef-server-full/builds/44#78500beb-e0e1-4ef8-a4aa-07aefdb7a7c2
     13.2     -> 14.6.32                     PASS [failures but no release blockers]
-    https://buildkite.com/chef/chef-umbrella-master-chef-server-full/builds/45#6049ca7a-9e06-4407-9cff-7c835fdae65e
+    https://buildkite.com/chef/chef-umbrella-main-chef-server-full/builds/45#6049ca7a-9e06-4407-9cff-7c835fdae65e
     14.5.29 ->14.6.32                       PASS [failures but no release blockers]
-    https://buildkite.com/chef/chef-umbrella-master-chef-server-full/builds/47#0ae8a00f-7b52-4a22-a3bf-8f4b78d94ff7
+    https://buildkite.com/chef/chef-umbrella-main-chef-server-full/builds/47#0ae8a00f-7b52-4a22-a3bf-8f4b78d94ff7
 - update known failure sheet                DONE
 - login to chef manage
     AWS

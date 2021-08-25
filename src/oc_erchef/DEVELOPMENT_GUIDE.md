@@ -2,7 +2,7 @@
 
 This document is aimed to give you some hints and best practices around
 developing in `oc_erchef`. Please contact a maintainer or lieutenant
-[here](https://github.com/chef/chef-server/blob/master/MAINTAINERS.md)
+[here](https://github.com/chef/chef-server/blob/main/MAINTAINERS.md)
 if you find anything out of date.
 
 ## Handling Dates in oc_chef_wm

@@ -53,7 +53,7 @@ module DVM
       if !project_dir_exists_on_host?(name)
         # Some things to consider:
         # do we want to match the revision/branch from rebar?
-        # do we want to auto-create a new branch from it if we did the clone ourselves or detect master or
+        # do we want to auto-create a new branch from it if we did the clone ourselves or detect main or
         if opts[:skip_checkout]
           raise DVMArgumentError "The project directory for #{name} can't be found, and you told me not to check it out."
         end

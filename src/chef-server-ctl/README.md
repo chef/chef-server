@@ -14,7 +14,7 @@ bundle install --binstubs
 ./bin/rake test:csc
 ```
 ###### To run unit tests in the dev-vm
-Stand up a vagrant based dev-vm (https://github.com/chef/chef-server/blob/master/dev/README.md) once in the vm
+Stand up a vagrant based dev-vm (https://github.com/chef/chef-server/blob/main/dev/README.md) once in the vm
 
 ```
 sudo bash

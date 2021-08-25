@@ -36,7 +36,7 @@ dependency "haproxy"
 dependency "elasticsearch" # used by search
 
 # moved earlier because it is external to this repo and pinned, so should change infrequently
-dependency "chef" # for embedded chef-client -z runs (built from master - build last)
+dependency "chef" # for embedded chef-client -z runs (built from main - build last)
 
 dependency "private-chef-ctl" # additional project-specific private-chef-ctl subcommands
 
