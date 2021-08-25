@@ -28,13 +28,6 @@ release_branches:
 # Habitat + Docker exporting
 
 
-# At the given time, trigger the following scheduled workloads
-# https://expeditor.chef.io/docs/getting-started/subscriptions/#scheduling-workloads
-schedules:
-  - name: nightly_build
-    description: "Run a nightly build in the omnibus/adhoc pipeline"
-    cronline: "0 6 * * *"
-
 pipelines:
   - verify
   - habitat/build
