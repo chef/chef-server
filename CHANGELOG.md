@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.8.19 -->
-## [14.8.19](https://github.com/chef/chef-server/tree/14.8.19) (2021-08-25)
+<!-- latest_release 14.9.0 -->
+## [14.9.0](https://github.com/chef/chef-server/tree/14.9.0) (2021-08-25)
 
 #### Merged Pull Requests
-- Update branch references to point at main &amp; pin redis release [#2762](https://github.com/chef/chef-server/pull/2762) ([tas50](https://github.com/tas50))
+- Update to PostgreSQL 9.6.23 and 13.4 [#2764](https://github.com/chef/chef-server/pull/2764) ([tas50](https://github.com/tas50))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.8.7 -->
 ### Changes since 14.8.7 release
 
 #### Merged Pull Requests
+- Update to PostgreSQL 9.6.23 and 13.4 [#2764](https://github.com/chef/chef-server/pull/2764) ([tas50](https://github.com/tas50)) <!-- 14.9.0 -->
 - Update branch references to point at main &amp; pin redis release [#2762](https://github.com/chef/chef-server/pull/2762) ([tas50](https://github.com/tas50)) <!-- 14.8.19 -->
 - Bump chef from 17.3.48 to 17.4.25 in /oc-chef-pedant [#2757](https://github.com/chef/chef-server/pull/2757) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.8.18 -->
 - Update gather-logs to use chef-server-ctl [#2717](https://github.com/chef/chef-server/pull/2717) ([tas50](https://github.com/tas50)) <!-- 14.8.17 -->
