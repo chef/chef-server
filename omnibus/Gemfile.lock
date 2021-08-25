@@ -1,6 +1,6 @@
 GIT
   remote: https://github.com/chef/omnibus-software.git
-  revision: 8d882d4c57812a73ad5c1b25f6f9c1fb9a6c1c1b
+  revision: 4e342167f98cb69378294a3ff4c6faf8da137e32
   branch: main
   specs:
     omnibus-software (4.0.0)
@@ -245,7 +245,7 @@ GEM
       plist (~> 3.1)
       train-core
       wmi-lite (~> 1.0)
-    parallel (1.20.2)
+    parallel (1.20.1)
     parslet (1.8.2)
     pastel (0.8.0)
       tty-color (~> 0.5)
