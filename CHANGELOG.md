@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.9.1 -->
-## [14.9.1](https://github.com/chef/chef-server/tree/14.9.1) (2021-08-25)
+<!-- latest_release 14.9.2 -->
+## [14.9.2](https://github.com/chef/chef-server/tree/14.9.2) (2021-08-26)
 
 #### Merged Pull Requests
-- Pin to chef_secrets 0.3.9 [#2765](https://github.com/chef/chef-server/pull/2765) ([lbakerchef](https://github.com/lbakerchef))
+- Bump veil from 0.3.5 to 0.3.9 in /src/oc-id [#2770](https://github.com/chef/chef-server/pull/2770) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.8.7 -->
 ### Changes since 14.8.7 release
 
 #### Merged Pull Requests
+- Bump veil from 0.3.5 to 0.3.9 in /src/oc-id [#2770](https://github.com/chef/chef-server/pull/2770) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.9.2 -->
 - Pin to chef_secrets 0.3.9 [#2765](https://github.com/chef/chef-server/pull/2765) ([lbakerchef](https://github.com/lbakerchef)) <!-- 14.9.1 -->
 - Update to PostgreSQL 9.6.23 and 13.4 [#2764](https://github.com/chef/chef-server/pull/2764) ([tas50](https://github.com/tas50)) <!-- 14.9.0 -->
 - Update branch references to point at main &amp; pin redis release [#2762](https://github.com/chef/chef-server/pull/2762) ([tas50](https://github.com/tas50)) <!-- 14.8.19 -->
