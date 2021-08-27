@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.9.4 -->
-## [14.9.4](https://github.com/chef/chef-server/tree/14.9.4) (2021-08-27)
+<!-- latest_release 14.9.5 -->
+## [14.9.5](https://github.com/chef/chef-server/tree/14.9.5) (2021-08-27)
 
 #### Merged Pull Requests
-- Bump chefstyle from 2.0.8 to 2.0.9 in /src/chef-server-ctl [#2771](https://github.com/chef/chef-server/pull/2771) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Add `allow_email_update_only_from_manage` to hab plan to resolve automate user issue [#2775](https://github.com/chef/chef-server/pull/2775) ([vinay-satish](https://github.com/vinay-satish))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.8.7 -->
 ### Changes since 14.8.7 release
 
 #### Merged Pull Requests
+- Add `allow_email_update_only_from_manage` to hab plan to resolve automate user issue [#2775](https://github.com/chef/chef-server/pull/2775) ([vinay-satish](https://github.com/vinay-satish)) <!-- 14.9.5 -->
 - Bump chefstyle from 2.0.8 to 2.0.9 in /src/chef-server-ctl [#2771](https://github.com/chef/chef-server/pull/2771) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.9.4 -->
 - Bump veil from 0.3.5 to 0.3.9 in /src/chef-server-ctl [#2768](https://github.com/chef/chef-server/pull/2768) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.9.3 -->
 - Bump veil from 0.3.5 to 0.3.9 in /src/oc-id [#2770](https://github.com/chef/chef-server/pull/2770) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.9.2 -->
