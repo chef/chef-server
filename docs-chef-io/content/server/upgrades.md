@@ -351,7 +351,9 @@ Check the [post upgrade steps](#post-upgrade-steps) if you are upgrading from a 
    su postgres
    ```
 1. Ensure that you are in a directory where you can successfully run the `pg_upgrade` command.
+
    Example:
+   
    ```bash
    cd /tmp
    ```
