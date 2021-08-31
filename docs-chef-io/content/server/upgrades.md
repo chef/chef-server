@@ -61,7 +61,19 @@ Set the `postgresql['pg_upgrade_timeout']` attribute in [chef-server.rb]({{< rel
 1. Run `VACUUM FULL` on the PostgreSQL database if you don't have automatic vacuuming set up. This process will reduce the size of the database by deleting unnecessary data and speeds up the migration. The `VACUUM FULL` operation takes around 1 to 2 minutes per gigabyte of data depending on the complexity of the data, and requires free disk space at least as large as the size of your database.
 
     ```bash
-    /opt/opscode/embedded/bin/vacuumdb --all --full
+       sudo su - opscode-pgsql
+       /opt/opscode/embedded/bin/vacuumdb --all --full
+    ```
+
+You should then see output like
+
+    ```bash
+       vacuumdb: vacuuming database "bifrost"
+       vacuumdb: vacuuming database "oc_id"
+       vacuumdb: vacuuming database "opscode-pgsql"
+       vacuumdb: vacuuming database "opscode_chef"
+       vacuumdb: vacuuming database "postgres"
+       vacuumdb: vacuuming database "template1"
     ```
 
 1. Back up the PostgreSQL database before upgrading so you can restore the full database to a previous release in the event of a failure. See [Backup and Restore]({{< relref "server_backup_restore" >}}) for additional information.
@@ -101,9 +113,20 @@ If you are running a Chef Infra Server release before 12.3.0, please contact Che
 1. Run `vacuumdb` before starting the upgrade:
 
    ```bash
-   sudo su postgres
-   /usr/bin/vacuumdb --all --full
+   sudo su - opscode-pgsql
+   /opt/opscode/embedded/bin/vacuumdb --all --full
    exit
+   ```
+
+You should see output like
+
+   ```bash
+   vacuumdb: vacuuming database "bifrost"
+   vacuumdb: vacuuming database "oc_id"
+   vacuumdb: vacuuming database "opscode-pgsql"
+   vacuumdb: vacuuming database "opscode_chef"
+   vacuumdb: vacuuming database "postgres"
+   vacuumdb: vacuuming database "template1"
    ```
 
 1. Back up your Chef Infra Server data before starting the upgrade process using [chef-server-ctl-backup]({{< relref "server_backup_restore#backup" >}}). **Make a note of where the backup was placed** (normally under `/var/opt/chef-backup`). Please note that Chef Infra Server will go offline to perform the backup:
@@ -180,8 +203,21 @@ If you are running a Chef Infra Server release before 12.3.0, please contact Che
 1. Reindex the database:
 
    ```bash
-   /usr/bin/reindexdb --all
+   sudo su - opscode-pgsql
+   /opt/opscode/embedded/bin/reindexdb --all
    ```
+
+You should see output like
+
+   ```bash
+   reindexdb: reindexing database "bifrost"
+   reindexdb: reindexing database "oc_id"
+   reindexdb: reindexing database "opscode-pgsql"
+   reindexdb: reindexing database "opscode_chef"
+   reindexdb: reindexing database "postgres"
+   reindexdb: reindexing database "template1"
+   ```
+
 
    You are now finished with the upgrade.
 
@@ -413,7 +449,7 @@ Check the [post upgrade steps](#post-upgrade-steps) if you are upgrading from a 
    Example (PostgreSQL 13.3):
 
    ```bash
-   $ sudo su postgres
+   $ sudo su - postgres
    $ psql -c "SELECT version();"
                                                                       version
    ---------------------------------------------------------------------------------------------------------------------------------------------
