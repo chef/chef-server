@@ -16,18 +16,19 @@ class ProfilesController < ApplicationController
   #
   def update
     @user = current_user
-    updated_email = false
+    updated_email = permit_all_params.has_key? :email
 
     # Note that if an email address is provided, don't update it right away.
     # Instead send a confirmation email and let that email link update the
     # email address.
     # update note
-    # params are coming as string from user profile form.
-    params[:user].reject! { |k| k == "email" }
 
     if @user.update_attributes(user_params)
       message = I18n.t('profile.update_successful')
-      message << "\n" + I18n.t('profile.email_change_sent') if updated_email
+      if updated_email
+        EmailVerifyMailer.email_verify(@user, permit_all_params[:email]).deliver_now
+        message << "\n" + I18n.t('profile.email_change_sent')
+      end
       redirect_to profile_path, :notice => message
     else
       render 'show'
@@ -68,15 +69,16 @@ class ProfilesController < ApplicationController
   # to the signin page.
   #
   def change_email
-    @user = User.find(URI.escape(params[:username])) if params[:username].present?
-    return goto_forbidden('errors.emails.invalid_username', name: params[:username]) if @user.nil?
+    profile_params =   decode_user_params
+    @user = User.find(URI.encode_www_form_component(profile_params[:username])) if profile_params[:username].present?
+    return goto_forbidden('errors.emails.invalid_username', name: profile_params[:username]) if @user.nil?
     return goto_forbidden('errors.emails.invalid_signature') unless valid_signature?
 
-    @user.update_attributes('email' => params[:email])
+    @user.update_attributes('email' => profile_params[:email])
     return goto_forbidden('errors.emails.problem') unless @user.errors.empty?
 
     target_path = signed_in? ? profile_path : signin_path
-    redirect_to target_path, :notice => I18n.t('profile.email_changed', name: params[:username])
+    redirect_to target_path, :notice => I18n.t('profile.email_changed', name: profile_params[:username])
   end
 
   #
@@ -103,7 +105,7 @@ class ProfilesController < ApplicationController
 
 
   def valid_signature?
-    return false unless [:signature, :email, :expires].all? { |p| params[p].present? }
+    return false unless [:signature, :user, :expires].all? { |p| params[p].present? }
 
     # Validate the signature against the user's current primary email address using
     # the new email address as a "payload" to verify that the email change request
@@ -113,13 +115,24 @@ class ProfilesController < ApplicationController
       @user.email,
       params[:expires],
       Settings.secret_key_base,
-      params[:email],
+      decode_user_params[:email],
     ).valid_for?(params[:signature])
   end
   
+  def decode_user_params
+    unsafe_input_encoded = params[:user]
+    JSON.parse(Base64.urlsafe_decode64(unsafe_input_encoded),
+                        symbolize_names: true,
+                        create_additions: false
+                      )
+  end
 
   # When creating a new ActiveRecord model, only the permitted attributes are passed into the model
   def user_params
-    params.require(:user).permit(:username,:first_name,:last_name,:middle_name,:public_key,:private_key,:display_name,:password)
+    params.require(:user).permit(:username, :first_name, :last_name, :middle_name, :public_key, :private_key, :display_name, :password)
+  end
+
+  def permit_all_params
+    params.require(:user).permit(:username, :first_name, :last_name, :middle_name, :public_key, :private_key, :display_name, :password, :email)
   end
 end
