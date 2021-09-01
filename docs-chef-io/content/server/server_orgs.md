@@ -6,10 +6,11 @@ aliases = ["/server_orgs.html", "/auth_authorization.html"]
 product = ["client", "server"]
 
 [menu]
-  [menu.legacy]
+  [menu.server]
     title = "Organizations & Groups"
     identifier = "server/overview/server_orgs.md Organizations & Groups"
     parent = "server/overview"
+    weight = 65
 +++
 
 {{% server_rbac %}}
