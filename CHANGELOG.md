@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.9.5 -->
-## [14.9.5](https://github.com/chef/chef-server/tree/14.9.5) (2021-08-27)
+<!-- latest_release 14.9.6 -->
+## [14.9.6](https://github.com/chef/chef-server/tree/14.9.6) (2021-09-01)
 
 #### Merged Pull Requests
-- Add `allow_email_update_only_from_manage` to hab plan to resolve automate user issue [#2775](https://github.com/chef/chef-server/pull/2775) ([vinay-satish](https://github.com/vinay-satish))
+- Move server_orgs page to server menu. [#2788](https://github.com/chef/chef-server/pull/2788) ([IanMadd](https://github.com/IanMadd))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.8.7 -->
 ### Changes since 14.8.7 release
 
 #### Merged Pull Requests
+- Move server_orgs page to server menu. [#2788](https://github.com/chef/chef-server/pull/2788) ([IanMadd](https://github.com/IanMadd)) <!-- 14.9.6 -->
 - Add `allow_email_update_only_from_manage` to hab plan to resolve automate user issue [#2775](https://github.com/chef/chef-server/pull/2775) ([vinay-satish](https://github.com/vinay-satish)) <!-- 14.9.5 -->
 - Bump chefstyle from 2.0.8 to 2.0.9 in /src/chef-server-ctl [#2771](https://github.com/chef/chef-server/pull/2771) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.9.4 -->
 - Bump veil from 0.3.5 to 0.3.9 in /src/chef-server-ctl [#2768](https://github.com/chef/chef-server/pull/2768) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.9.3 -->
