@@ -14,7 +14,7 @@ aliases = ["/upgrade_server.html", "/upgrade_server/", "/upgrades/"]
     weight = 60
 +++
 
-Each new release of Chef Infra Server improves reliability and updates 3rd party components to ensure the security of the server. It is important to keep Chef Infra Server up to date in order to ensure the secure and reliable operation of Chef Infra in your organization.
+Each new release of Chef Infra Server improves reliability and updates 3rd party components to ensure the security of the server. It is important to keep Chef Infra Server up to date to ensure the secure and reliable operation of Chef Infra in your organization.
 
 {{< warning >}}
 Before upgrading a production server make sure to upgrade a test server to confirm the process.
@@ -32,10 +32,10 @@ If running a Chef Infra Server 12.17.15 or later you can upgrade directly to the
 | 11 | 12.3.0 | No | No |
 
 Requires License
-: Chef Infra Server 13 and later are governed by the [Chef EULA]({{< relref "chef_license" >}}). You will be required to accept these terms when using Chef Infra Server for the first time by entering `Yes` when prompted.
+: Chef Infra Server 13 and later are governed by the [Chef EULA]({{< relref "chef_license" >}}). You are required to accept these terms when using Chef Infra Server for the first time by entering `Yes` when prompted.
 
 Supported Release
-: Chef Infra Server 13 and later are currently supported Chef Software releases. Earlier releases are no longer supported as of 12/31/2020. For more information about supported Chef Software see the [Supported Versions]({{< relref "/versions#supported-commercial-distributions" >}}) documentation.
+: Chef Infra Server 14 and later are supported Chef Software releases. Earlier releases are no longer supported as of 6/30/2021. For more information about supported Chef Software see the [Supported Versions]({{< relref "/versions#supported-commercial-distributions" >}}) documentation.
 
 ## Release-Specific Steps
 
@@ -48,11 +48,11 @@ The Chef Infra Server 14 upgrade does not automatically reindex existing externa
 
 #### Upgrading to 14.8
 
-Chef Infra Server 14.8 upgrades PostgreSQL from 9.6 to 13.3. The 14.8 upgrade process requires a one-time downtime to vacuum, upgrade, and re-index the database. The entire upgrade operation takes approximately one minute per 1000 nodes (1000 nodes is approximately 286MB). This process may take longer depending on your server hardware and the size of the node objects on your Chef Infra Server.
+Chef Infra Server 14.8 upgrades PostgreSQL from 9.6 to 13.3. The 14.8 upgrade process requires a one-time downtime to vacuum, upgrade, and re-index the database. The entire upgrade operation takes about one minute for each 1000 nodes (1000 nodes is approximately 286MB). This process may take longer depending on your server hardware and the size of the node objects on your Chef Infra Server.
 
 {{< note >}}
 
-Set the `postgresql['pg_upgrade_timeout']` attribute in [chef-server.rb]({{< relref "config_rb_server_optional_settings" >}}) to the timeout value for the upgrade. Set this value based on the size of your data, where it take approximately one minute per 1,000 nodes which is approximately 286MB.
+Set the `postgresql['pg_upgrade_timeout']` attribute in [chef-server.rb]({{< relref "config_rb_server_optional_settings" >}}) to the timeout value for the upgrade. Set this value based on the size of your data, where it take about one minute per 1,000 nodes which is approximately 286MB.
 
 {{</note >}}
 
@@ -65,7 +65,7 @@ Set the `postgresql['pg_upgrade_timeout']` attribute in [chef-server.rb]({{< rel
        /opt/opscode/embedded/bin/vacuumdb --all --full
     ```
 
-You should then see output like
+   You should then see output like:
 
     ```bash
        vacuumdb: vacuuming database "bifrost"
@@ -76,7 +76,7 @@ You should then see output like
        vacuumdb: vacuuming database "template1"
     ```
 
-1. Back up the PostgreSQL database before upgrading so you can restore the full database to a previous release in the event of a failure. See [Backup and Restore]({{< relref "server_backup_restore" >}}) for additional information.
+1. Back up the PostgreSQL database before upgrading so you can restore the full database to a previous release in the event of a failure. See [Backup and Restore]({{< relref "server_backup_restore" >}}) for more information.
 
 ##### Upgrade Steps
 
@@ -118,7 +118,7 @@ If you are running a Chef Infra Server release before 12.3.0, please contact Che
    exit
    ```
 
-You should see output like
+   You should see output like:
 
    ```bash
    vacuumdb: vacuuming database "bifrost"
@@ -129,7 +129,7 @@ You should see output like
    vacuumdb: vacuuming database "template1"
    ```
 
-1. Back up your Chef Infra Server data before starting the upgrade process using [chef-server-ctl-backup]({{< relref "server_backup_restore#backup" >}}). **Make a note of where the backup was placed** (normally under `/var/opt/chef-backup`). Please note that Chef Infra Server will go offline to perform the backup:
+1. Back up your Chef Infra Server data before starting the upgrade process using [chef-server-ctl-backup]({{< relref "server_backup_restore#backup" >}}). **Make a note of where the backup is located** (The default is `/var/opt/chef-backup`). Please note that Chef Infra Server will go offline to perform the backup:
 
    ```bash
    sudo chef-server-ctl backup
@@ -207,7 +207,7 @@ You should see output like
    /opt/opscode/embedded/bin/reindexdb --all
    ```
 
-You should see output like
+   You should see output like:
 
    ```bash
    reindexdb: reindexing database "bifrost"
@@ -218,8 +218,7 @@ You should see output like
    reindexdb: reindexing database "template1"
    ```
 
-
-   You are now finished with the upgrade.
+You are now finished with the upgrade.
 
 {{< note >}}
 
@@ -235,7 +234,7 @@ Check the [post upgrade steps](#post-upgrade-steps) if you are upgrading from a 
 
 1. Reinstall the original version of Chef Infra Server you were using before attempting the upgrade process (if you had to perform a stepped upgrade, [install your original version of Chef Infra Server]({{< relref "install_server" >}}) before the stepped upgrade, not any versions you upgraded to in the stepped upgrade process). Again, **DO NOT RISK YOUR BACKUP OF THE DATABASE.** For example, consider using a separate disk from your backup for the new installation.
 
-1. Consult the [restore documentation]({{< relref "server_backup_restore" >}}) and restore the database from the path where it was saved:
+1. Consult the [restore documentation]({{< relref "server_backup_restore" >}}) and restore the database from the path to where it was saved:
 
    ```bash
    chef-server-ctl restore /path/to/tar/archive.tar.gz
@@ -243,7 +242,7 @@ Check the [post upgrade steps](#post-upgrade-steps) if you are upgrading from a 
 
 ### External PostgreSQL
 
-**Upgrade Chef Infra Server**
+#### Upgrade Chef Infra Server
 
 1. Log into the external PostgreSQL machine.
 
@@ -259,7 +258,7 @@ Check the [post upgrade steps](#post-upgrade-steps) if you are upgrading from a 
 
 1. Consult the documentation on [`knife-ec-backup`](https://blog.chef.io/migrating-chef-server-knife-ec-backup-knife-tidy).
 
-   If it is not already installed, install `knife-ec-backup`. A sample session follows
+   Install `knife-ec-backup`, if it not already installed. A sample session follows
    (note that your steps could differ, depending on the versions of your software,
    the topology of your setup, your OS and distribution, and a range of other factors).
 
@@ -356,12 +355,13 @@ Check the [post upgrade steps](#post-upgrade-steps) if you are upgrading from a 
 
    You are now finished with the Chef Infra Server upgrade. Proceed directly to the **Upgrade PostgreSQL** section.
 
-**Upgrade PostgreSQL**
+#### Upgrade PostgreSQL
 
 1. Log into the external PostgreSQL machine.
 
 1. Update packages and install your selected PostgreSQL version.
    Example (Ubuntu/PostgreSQL 13.3):
+
    ```bash
    sudo apt-get update
    sudo apt-get install postgresql-13
@@ -386,14 +386,14 @@ Check the [post upgrade steps](#post-upgrade-steps) if you are upgrading from a 
    ```bash
    su postgres
    ```
-1. Ensure that you are in a directory where you can successfully run the `pg_upgrade` command.
+
+1. Ensure that you are in a directory where you can run the `pg_upgrade` command.
 
    Example:
-   
+
    ```bash
    cd /tmp
    ```
-
 
 1. Check clusters (notice the `--check` argument, this will not change any data).
    Example (PostgreSQL 13.3):
@@ -523,8 +523,8 @@ This section describes the upgrade process from a tiered server configuration.
 
 {{< note >}}
 
-These instructions are intended for users of the Chef Infra Server `tier` topology.
-For the latest information on setting up a highly-available server cluster, see [High Availability: Backend Cluster]({{< relref "install_server_ha" >}}).
+These instructions are for the Chef Infra Server `tier` topology.
+For the latest information on setting up a highly available server cluster, see [High Availability: Backend Cluster]({{< relref "install_server_ha" >}}).
 
 {{< /note >}}
 
@@ -600,7 +600,7 @@ To upgrade to Chef Infra Server on a tiered Chef Infra Server configuration, do 
 
 11. [Upgrade]({{< relref "#upgrading-manage-add-on" >}}) any Chef Infra Server add-ons.
 
-12. After the upgrade process is complete, test and verify that the server works properly.
+12. After the upgrade process is complete, test and verify that the server works.
 
 13. Clean up the server by removing the old data:
 
