@@ -835,7 +835,7 @@ describe "ACL API", :acl do
 
   context "/<type>/<name>/_acl endpoint" do
 
-    # TODO: Sanity check: users don't seem to have any ACLs, or at least, nothing is
+    # TODO: Basic check: users don't seem to have any ACLs, or at least, nothing is
     # accessible from external API as far as I can tell:
     # - [jkeiser] Users have ACLs, but they are at /users/NAME/_acl
     %w(cookbook_artifacts clients groups containers data nodes roles environments cookbooks policies policy_groups).each do |type|

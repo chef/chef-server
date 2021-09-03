@@ -2,7 +2,7 @@
 %% ex: ts=4 sw=4 et
 %% @author Tyler Cloke <tyler@chef.io>
 %% @author Mark Anderson <mark@chef.io>
-%% Copyright 2014 Opscode, Inc. All Rights Reserved.
+%% Copyright 2014 Chef Software, Inc. All Rights Reserved.
 
 -module(oc_chef_organization).
 
@@ -182,7 +182,7 @@ type_name(#oc_chef_organization{}) ->
 %% TODO: This was copy-pasta'd from chef_regex, reunite someday (see also oc_chef_container)
 %%
 %% The name regex should limit to some short length. Nginx default is 8k. (large_client_header_buffers)
-%% but we probably for sanity's sake want something less. 255 seems reasonable, but we probably should dig deeper.
+%% but we probably for want something less. 255 seems reasonable, but we probably should dig deeper.
 %% For reference, I've succesfully created orgs of 900+ character lengths in hosted, but failed with 1000.
 %% Probably have to be able to handle api.opscode.us/<ORGNAME>/environments/default in 1k?)
 %%

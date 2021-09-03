@@ -28,7 +28,6 @@ add_command_under_category "ha-status", "high-availability", "Show the status of
   exit 1
 end
 
-
 def err_CONFIG_DRBD_HA_REMOVED(command)
   <<EOM
 DRBD_HA_001: HA Command #{command} no longer supported.

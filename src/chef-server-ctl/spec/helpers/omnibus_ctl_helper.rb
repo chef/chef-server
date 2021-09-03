@@ -11,7 +11,7 @@ class OmnibusCtlHelper
   end
 
   def run_test_omnibus_command(command, args)
-    #$0 = "./bin/omnibus-ctl"
+    # $0 = "./bin/omnibus-ctl"
     # we must mock out ARGV.
     # The first three arguments to ARGV in omnibus-ctl are
     # irrelevant to the command, but get passed in anyway.

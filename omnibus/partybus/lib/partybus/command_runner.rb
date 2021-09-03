@@ -7,7 +7,7 @@ class Partybus::CommandRunner
     returns = options[:returns] || [0]
 
     Dir.chdir(cwd) do
-      Bundler.clean_system(env, command)
+      Bundler.unbundled_system(env, command)
     end
 
     exit_code = $?.exitstatus

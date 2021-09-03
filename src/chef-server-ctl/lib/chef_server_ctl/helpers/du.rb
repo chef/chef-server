@@ -1,4 +1,4 @@
-require 'mixlib/shellout'
+require "mixlib/shellout" unless defined?(Mixlib::ShellOut)
 module Du
   # Calculate the disk space used by the given path. Requires that
   # `du` is in our PATH.
@@ -14,9 +14,9 @@ module Du
     else
       puts "du -sk #{path} failed with exit status: #{command.exitstatus}"
       puts "du stderr: #{command.stderr}"
-      raise 'DuFailedException', command.stderr
+      raise "DuFailedException", command.stderr
     end
   rescue Errno::ENOENT
-    raise 'DuFailedException', command.stderr
+    raise "DuFailedException", command.stderr
   end
 end

@@ -16,11 +16,10 @@
 #
 
 provides :oc_id_application
-resource_name :oc_id_application
 
-property :write_to_disk, kind_of: [TrueClass, FalseClass], default: false
+property :write_to_disk, [true, false], default: false
 
-property :redirect_uri, kind_of: String, required: true
+property :redirect_uri, String, required: true
 
 action :create do
   converge_by "create oc-id application '#{new_resource.name}'" do
@@ -49,7 +48,7 @@ action_class do
                       env_helper = 'veil-env-helper --use-file -s chef-server.webui_key -s oc_id.sql_password -s oc_id.secret_key_base'
                       rails_script = <<~EOF
                               app = Doorkeeper::Application.find_or_create_by(:name => "#{new_resource.name}");
-                              app.update_attributes(:redirect_uri => "#{new_resource.redirect_uri}");
+                              app.update(:redirect_uri => "#{new_resource.redirect_uri}");
                               puts app.to_json
                             EOF
                       # in order to account for rails logging, we take only the last line of output

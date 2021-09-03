@@ -1,6 +1,6 @@
 %syntax-version=1.0.0-b2
 %project=oss_chef
-%uri=https://github.com/opscode/chef-server-schema
+%uri=https://github.com/chef/chef-server-schema
 
 osc_users 2013-09-04T13:54:01Z Christopher Maier <cm@opscode.com> # Open Source users table
 nodes 2013-09-04T14:07:22Z Christopher Maier <cm@opscode.com> # Nodes table

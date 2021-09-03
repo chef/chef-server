@@ -5,10 +5,10 @@ name: Brakeman Scan
 
 on:
   push:
-    branches: [ master, chef-server-13 ]
+    branches: [ main ]
   pull_request:
     # The branches below must be a subset of the branches above
-    branches: [ master ]
+    branches: [ main ]
   schedule:
     - cron: '22 13 * * 3'
 

@@ -156,7 +156,7 @@ end
 # credentials the chef-client reconfigure run will re-enable/link the services,
 # restart the Chef Server and remove the sentinel file that enables the
 # pre-hook.
-add_command_under_category "require-credential-rotation", "Secrets Management", "Disable the Chef Server and require credential rotation", 2 do
+add_command_under_category "require-credential-rotation", "Secrets Management", "Disable the Chef Infra Server and require credential rotation", 2 do
   @agree_to_disable = false
   @ui = HighLine.new
 

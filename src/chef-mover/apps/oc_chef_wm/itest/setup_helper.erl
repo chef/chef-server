@@ -1,7 +1,7 @@
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92 -*-
 %% ex: ts=4 sw=4 et
 %% @author Stephen Delano <stephen@chef.io>
-%% Copyright 2013 Opscode, Inc. All Rights Reserved.
+%% Copyright Chef Software, Inc. All Rights Reserved.
 
 -module(setup_helper).
 
@@ -57,7 +57,7 @@ start_server(Config) ->
     application:set_env(oc_chef_authz, couchdb_port, 6984),
     application:set_env(chef_db, couchdb_host, "localhost"),
     application:set_env(chef_db, couchdb_port, 6984),
-    
+
     application:set_env(lager, error_logger_redirect, false),
 
     application:set_env(stats_hero, udp_socket_pool_size, 200),

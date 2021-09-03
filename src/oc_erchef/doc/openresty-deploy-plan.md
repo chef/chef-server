@@ -14,7 +14,7 @@ First, we'll "bake-test" an openresty load balancer to look for exceptional reso
 
 The OpenResty / Lua work has been combined into one pull request:
 
-* https://github.com/opscode/opscode-platform-cookbooks/pull/112
+* https://github.com/chef/opscode-platform-cookbooks/pull/112
 
 This will need to be merged before deploy. In order to simplify a potential rollback, prepend the first line of the merge commit with the following:
 

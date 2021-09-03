@@ -9,7 +9,7 @@
 -- have in place.
 --
 -- See
--- https://github.com/opscode/chef-sql-schema/commit/be4f85a1429e2b02aadea425e6e77fdcfe3d1c71
+-- https://github.com/chef/chef-sql-schema/commit/be4f85a1429e2b02aadea425e6e77fdcfe3d1c71
 -- for more details.
 CREATE OR REPLACE FUNCTION chef_pgtap.is_wide_uuid(p_table_name NAME, p_column_name NAME)
 RETURNS BOOLEAN

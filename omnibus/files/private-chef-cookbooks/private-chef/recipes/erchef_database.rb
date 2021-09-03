@@ -16,12 +16,12 @@
 postgres = node['private_chef']['postgresql']
 erchef = node['private_chef']['opscode-erchef']
 
-private_chef_pg_user erchef['sql_user'] do
+pg_user erchef['sql_user'] do
   password PrivateChef.credentials.get('opscode_erchef', 'sql_password')
   superuser false
 end
 
-private_chef_pg_user erchef['sql_ro_user'] do
+pg_user erchef['sql_ro_user'] do
   password PrivateChef.credentials.get('opscode_erchef', 'sql_ro_password')
   superuser false
 end
@@ -65,14 +65,14 @@ private_chef_pg_sqitch '/opt/opscode/embedded/service/opscode-erchef/schema' do
   action :nothing
 end
 
-private_chef_pg_user_table_access erchef['sql_user'] do
+pg_user_table_access erchef['sql_user'] do
   database 'opscode_chef'
   schema 'public'
   access_profile :write
   only_if { is_data_master? }
 end
 
-private_chef_pg_user_table_access erchef['sql_ro_user'] do
+pg_user_table_access erchef['sql_ro_user'] do
   database 'opscode_chef'
   schema 'public'
   access_profile :read

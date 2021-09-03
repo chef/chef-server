@@ -1723,6 +1723,11 @@ This configuration file has the following settings for `postgresql`:
 :   The size (in megabytes) of allowed in-memory sorting. Default value:
     `8MB`.
 
+`postgresql['pg_upgrade_timeout']`
+
+:   The timeout value (in seconds) for PostgreSQL upgrade. Default value:
+    `7200`.
+
 ### redis_lb
 
 {{< reusable_text_versioned file="server_services_redis" >}}

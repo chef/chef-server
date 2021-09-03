@@ -50,7 +50,7 @@ deploy_dev_cache:
 # file) from the pkg directory.  This is used to keep the pkg
 # directory small, as it is rsynced into our development Vagrant box
 # (see
-# https://github.com/chef/delivery/blob/master/cookbooks/delivery-dev/recipes/delivery.rb)
+# https://github.com/chef/delivery/blob/main/cookbooks/delivery-dev/recipes/delivery.rb)
 #
 # "tail -n+2" starts the listing at the second line (i.e., we don't
 # send the most recent file through to the "rm")

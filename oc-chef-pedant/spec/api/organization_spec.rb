@@ -2,7 +2,7 @@
 #
 # Author:: Ho-Sheng Hsiao (<hosh@chef.io>)
 # Author:: Tyler Cloke (<tyler@chef.io>)
-# Copyright:: Copyright (c) 2013 Opscode, Inc.
+# Copyright:: Copyright (c) 2013 Chef Software, Inc.
 
 require 'pedant/rspec/common'
 require 'json'

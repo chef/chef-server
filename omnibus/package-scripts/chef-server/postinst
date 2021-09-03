@@ -35,8 +35,8 @@ if [ -e /etc/opscode/chef-server-running.json ]; then
   echo
   echo -e "\033[1;31mchef-server-ctl upgrade\033[0m"
   echo
-  echo "After the upgrade command completes, your Chef services will"
-  echo "remain in a down state. To bring them back up run:"
+  echo "After the upgrade command completes, your Chef Infra Server"
+  echo "services will remain in a down state. To bring them back up run:"
   echo
   echo -e "\033[1;31mchef-server-ctl start\033[0m"
   echo

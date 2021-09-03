@@ -6,7 +6,7 @@
 %% @author Ho-Sheng Hsiao <hosh@chef.io>
 %% @doc chef_s3 - Manage S3 activities for erchef
 %%
-%% Copyright 2012-2013 Opscode, Inc. All Rights Reserved.
+%% Copyright Chef Software, Inc. All Rights Reserved.
 %%
 %% This file is provided to you under the Apache License,
 %% Version 2.0 (the "License"); you may not use this file
@@ -175,4 +175,3 @@ s3_external_url(VHostUrl) ->
         BadUrl ->
             {invalid_s3_url, BadUrl}
     end.
-

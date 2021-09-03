@@ -1,6 +1,6 @@
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92 -*-
 %% ex: ts=4 sw=4 et
-%% Copyright 2013 Opscode, Inc. All Rights Reserved.
+%% Copyright Chef Software, Inc. All Rights Reserved.
 %%
 %% This file is provided to you under the Apache License,
 %% Version 2.0 (the "License"); you may not use this file
@@ -238,12 +238,12 @@ verify_email_updates_test_() ->
                OrigEmail = <<"user@example.com">>,
                NewEmail = <<"user@example.com">>,
                RequestOrigin = "web",
-               EmailUpdateConfig = false, 
+               EmailUpdateConfig = false,
                ApiVersion = 0,
                meck:expect(oc_chef_wm_named_user, verify_update_request, fun(_, _, _, _, _) ->
                                                               {ok, oc_chef_wm_key_base, update_object_embedded_key_data_v0}
                                                       end),
-               oc_chef_wm_named_user:verify_update_request(OrigEmail, NewEmail, 
+               oc_chef_wm_named_user:verify_update_request(OrigEmail, NewEmail,
                        RequestOrigin, EmailUpdateConfig, ApiVersion),
                ?assert(meck:validate(oc_chef_wm_named_user))
        end},
@@ -252,12 +252,12 @@ verify_email_updates_test_() ->
                OrigEmail = <<"user@example.com">>,
                NewEmail = <<"user2@example.com">>,
                RequestOrigin = "web",
-               EmailUpdateConfig = false, 
+               EmailUpdateConfig = false,
                ApiVersion = 0,
                meck:expect(oc_chef_wm_named_user, verify_update_request, fun(_, _, _, _, _) ->
                                                               {ok, oc_chef_wm_key_base, update_object_embedded_key_data_v0}
                                                       end),
-               oc_chef_wm_named_user:verify_update_request(OrigEmail, NewEmail, 
+               oc_chef_wm_named_user:verify_update_request(OrigEmail, NewEmail,
                        RequestOrigin, EmailUpdateConfig, ApiVersion),
                ?assert(meck:validate(oc_chef_wm_named_user))
        end},
@@ -266,12 +266,12 @@ verify_email_updates_test_() ->
                OrigEmail = <<"user@example.com">>,
                NewEmail = <<"user@example.com">>,
                RequestOrigin = "knife",
-               EmailUpdateConfig = false, 
+               EmailUpdateConfig = false,
                ApiVersion = 0,
                meck:expect(oc_chef_wm_named_user, verify_update_request, fun(_, _, _, _, _) ->
                                                               {ok, oc_chef_wm_key_base, update_object_embedded_key_data_v0}
                                                       end),
-               oc_chef_wm_named_user:verify_update_request(OrigEmail, NewEmail, 
+               oc_chef_wm_named_user:verify_update_request(OrigEmail, NewEmail,
                        RequestOrigin, EmailUpdateConfig, ApiVersion),
                ?assert(meck:validate(oc_chef_wm_named_user))
        end},
@@ -280,12 +280,12 @@ verify_email_updates_test_() ->
                OrigEmail = <<"user@example.com">>,
                NewEmail = <<"user2@example.com">>,
                RequestOrigin = "knife",
-               EmailUpdateConfig = false, 
+               EmailUpdateConfig = false,
                ApiVersion = 0,
                meck:expect(oc_chef_wm_named_user, verify_update_request, fun(_, _, _, _, _) ->
                                                               {ok, oc_chef_wm_key_base, update_object_embedded_key_data_v0}
                                                       end),
-               oc_chef_wm_named_user:verify_update_request(OrigEmail, NewEmail, 
+               oc_chef_wm_named_user:verify_update_request(OrigEmail, NewEmail,
                        RequestOrigin, EmailUpdateConfig, ApiVersion),
                ?assert(meck:validate(oc_chef_wm_named_user))
        end},
@@ -294,12 +294,12 @@ verify_email_updates_test_() ->
                OrigEmail = <<"user@example.com">>,
                NewEmail = <<"user@example.com">>,
                RequestOrigin = "web",
-               EmailUpdateConfig = true, 
+               EmailUpdateConfig = true,
                ApiVersion = 0,
                meck:expect(oc_chef_wm_named_user, verify_update_request, fun(_, _, _, _, _) ->
                                                               {ok, oc_chef_wm_key_base, update_object_embedded_key_data_v0}
                                                       end),
-               oc_chef_wm_named_user:verify_update_request(OrigEmail, NewEmail, 
+               oc_chef_wm_named_user:verify_update_request(OrigEmail, NewEmail,
                        RequestOrigin, EmailUpdateConfig, ApiVersion),
                ?assert(meck:validate(oc_chef_wm_named_user))
        end},
@@ -308,12 +308,12 @@ verify_email_updates_test_() ->
                OrigEmail = <<"user@example.com">>,
                NewEmail = <<"user2@example.com">>,
                RequestOrigin = "web",
-               EmailUpdateConfig = true, 
+               EmailUpdateConfig = true,
                ApiVersion = 0,
                meck:expect(oc_chef_wm_named_user, verify_update_request, fun(_, _, _, _, _) ->
                                                               {ok, oc_chef_wm_key_base, update_object_embedded_key_data_v0}
                                                       end),
-               oc_chef_wm_named_user:verify_update_request(OrigEmail, NewEmail, 
+               oc_chef_wm_named_user:verify_update_request(OrigEmail, NewEmail,
                        RequestOrigin, EmailUpdateConfig, ApiVersion),
                ?assert(meck:validate(oc_chef_wm_named_user))
        end},
@@ -322,12 +322,12 @@ verify_email_updates_test_() ->
                OrigEmail = <<"user@example.com">>,
                NewEmail = <<"user@example.com">>,
                RequestOrigin = "knife",
-               EmailUpdateConfig = true, 
+               EmailUpdateConfig = true,
                ApiVersion = 0,
                meck:expect(oc_chef_wm_named_user, verify_update_request, fun(_, _, _, _, _) ->
                                                               halt
                                                       end),
-               oc_chef_wm_named_user:verify_update_request(OrigEmail, NewEmail, 
+               oc_chef_wm_named_user:verify_update_request(OrigEmail, NewEmail,
                        RequestOrigin, EmailUpdateConfig, ApiVersion),
                ?assert(meck:validate(oc_chef_wm_named_user))
        end},
@@ -336,12 +336,12 @@ verify_email_updates_test_() ->
                OrigEmail = <<"user@example.com">>,
                NewEmail = <<"user2@example.com">>,
                RequestOrigin = "knife",
-               EmailUpdateConfig = true, 
+               EmailUpdateConfig = true,
                ApiVersion = 0,
                meck:expect(oc_chef_wm_named_user, verify_update_request, fun(_, _, _, _, _) ->
                                                               halt
                                                       end),
-               oc_chef_wm_named_user:verify_update_request(OrigEmail, NewEmail, 
+               oc_chef_wm_named_user:verify_update_request(OrigEmail, NewEmail,
                        RequestOrigin, EmailUpdateConfig, ApiVersion),
                ?assert(meck:validate(oc_chef_wm_named_user))
        end},
@@ -351,12 +351,12 @@ verify_email_updates_test_() ->
                OrigEmail = <<"user@example.com">>,
                NewEmail = <<"user@example.com">>,
                RequestOrigin = "web",
-               EmailUpdateConfig = false, 
+               EmailUpdateConfig = false,
                ApiVersion = 1,
                meck:expect(oc_chef_wm_named_user, verify_update_request, fun(_, _, _, _, _) ->
                                                               {ok, oc_chef_wm_base, update_from_json}
                                                       end),
-               oc_chef_wm_named_user:verify_update_request(OrigEmail, NewEmail, 
+               oc_chef_wm_named_user:verify_update_request(OrigEmail, NewEmail,
                        RequestOrigin, EmailUpdateConfig, ApiVersion),
                ?assert(meck:validate(oc_chef_wm_named_user))
        end},
@@ -365,12 +365,12 @@ verify_email_updates_test_() ->
                OrigEmail = <<"user@example.com">>,
                NewEmail = <<"user2@example.com">>,
                RequestOrigin = "web",
-               EmailUpdateConfig = false, 
+               EmailUpdateConfig = false,
                ApiVersion = 1,
                meck:expect(oc_chef_wm_named_user, verify_update_request, fun(_, _, _, _, _) ->
                                                               {ok, oc_chef_wm_base, update_from_json}
                                                       end),
-               oc_chef_wm_named_user:verify_update_request(OrigEmail, NewEmail, 
+               oc_chef_wm_named_user:verify_update_request(OrigEmail, NewEmail,
                        RequestOrigin, EmailUpdateConfig, ApiVersion),
                ?assert(meck:validate(oc_chef_wm_named_user))
        end},
@@ -379,12 +379,12 @@ verify_email_updates_test_() ->
                OrigEmail = <<"user@example.com">>,
                NewEmail = <<"user@example.com">>,
                RequestOrigin = "knife",
-               EmailUpdateConfig = false, 
+               EmailUpdateConfig = false,
                ApiVersion = 1,
                meck:expect(oc_chef_wm_named_user, verify_update_request, fun(_, _, _, _, _) ->
                                                               {ok, oc_chef_wm_base, update_from_json}
                                                       end),
-               oc_chef_wm_named_user:verify_update_request(OrigEmail, NewEmail, 
+               oc_chef_wm_named_user:verify_update_request(OrigEmail, NewEmail,
                        RequestOrigin, EmailUpdateConfig, ApiVersion),
                ?assert(meck:validate(oc_chef_wm_named_user))
        end},
@@ -393,12 +393,12 @@ verify_email_updates_test_() ->
                OrigEmail = <<"user@example.com">>,
                NewEmail = <<"user2@example.com">>,
                RequestOrigin = "knife",
-               EmailUpdateConfig = false, 
+               EmailUpdateConfig = false,
                ApiVersion = 1,
                meck:expect(oc_chef_wm_named_user, verify_update_request, fun(_, _, _, _, _) ->
                                                               {ok, oc_chef_wm_base, update_from_json}
                                                       end),
-               oc_chef_wm_named_user:verify_update_request(OrigEmail, NewEmail, 
+               oc_chef_wm_named_user:verify_update_request(OrigEmail, NewEmail,
                        RequestOrigin, EmailUpdateConfig, ApiVersion),
                ?assert(meck:validate(oc_chef_wm_named_user))
        end},
@@ -407,12 +407,12 @@ verify_email_updates_test_() ->
                OrigEmail = <<"user@example.com">>,
                NewEmail = <<"user@example.com">>,
                RequestOrigin = "web",
-               EmailUpdateConfig = true, 
+               EmailUpdateConfig = true,
                ApiVersion = 1,
                meck:expect(oc_chef_wm_named_user, verify_update_request, fun(_, _, _, _, _) ->
                                                               {ok, oc_chef_wm_base, update_from_json}
                                                       end),
-               oc_chef_wm_named_user:verify_update_request(OrigEmail, NewEmail, 
+               oc_chef_wm_named_user:verify_update_request(OrigEmail, NewEmail,
                        RequestOrigin, EmailUpdateConfig, ApiVersion),
                ?assert(meck:validate(oc_chef_wm_named_user))
        end},
@@ -421,12 +421,12 @@ verify_email_updates_test_() ->
                OrigEmail = <<"user@example.com">>,
                NewEmail = <<"user2@example.com">>,
                RequestOrigin = "web",
-               EmailUpdateConfig = true, 
+               EmailUpdateConfig = true,
                ApiVersion = 1,
                meck:expect(oc_chef_wm_named_user, verify_update_request, fun(_, _, _, _, _) ->
                                                               {ok, oc_chef_wm_base, update_from_json}
                                                       end),
-               oc_chef_wm_named_user:verify_update_request(OrigEmail, NewEmail, 
+               oc_chef_wm_named_user:verify_update_request(OrigEmail, NewEmail,
                        RequestOrigin, EmailUpdateConfig, ApiVersion),
                ?assert(meck:validate(oc_chef_wm_named_user))
        end},
@@ -435,12 +435,12 @@ verify_email_updates_test_() ->
                OrigEmail = <<"user@example.com">>,
                NewEmail = <<"user@example.com">>,
                RequestOrigin = "knife",
-               EmailUpdateConfig = true, 
+               EmailUpdateConfig = true,
                ApiVersion = 1,
                meck:expect(oc_chef_wm_named_user, verify_update_request, fun(_, _, _, _, _) ->
                                                               halt
                                                       end),
-               oc_chef_wm_named_user:verify_update_request(OrigEmail, NewEmail, 
+               oc_chef_wm_named_user:verify_update_request(OrigEmail, NewEmail,
                        RequestOrigin, EmailUpdateConfig, ApiVersion),
                ?assert(meck:validate(oc_chef_wm_named_user))
        end},
@@ -449,12 +449,12 @@ verify_email_updates_test_() ->
                OrigEmail = <<"user@example.com">>,
                NewEmail = <<"user2@example.com">>,
                RequestOrigin = "knife",
-               EmailUpdateConfig = true, 
+               EmailUpdateConfig = true,
                ApiVersion = 1,
                meck:expect(oc_chef_wm_named_user, verify_update_request, fun(_, _, _, _, _) ->
                                                               halt
                                                       end),
-               oc_chef_wm_named_user:verify_update_request(OrigEmail, NewEmail, 
+               oc_chef_wm_named_user:verify_update_request(OrigEmail, NewEmail,
                        RequestOrigin, EmailUpdateConfig, ApiVersion),
                ?assert(meck:validate(oc_chef_wm_named_user))
        end}

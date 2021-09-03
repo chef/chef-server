@@ -1,6 +1,6 @@
 %syntax-version=1.0.0
 %project=enterprise_chef
-%uri=https://github.com/opscode/enterprise-chef-server-schema
+%uri=https://github.com/chef/enterprise-chef-server-schema
 
 drop_osc_users [oss_chef:osc_users] 2013-09-05T19:22:00Z Christopher Maier <cm@opscode.com> # Remove osc_users table
 users [drop_osc_users] 2013-09-04T13:54:01Z Christopher Maier <cm@opscode.com> # users table

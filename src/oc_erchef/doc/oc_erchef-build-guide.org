@@ -107,8 +107,8 @@ your build:
 2. Edit =config/software/oc_erchef.rb=. Change the version value to be
    the name of your oc_erchef feature branch. You might also need to
    update other components (e.g. oc-chef-pedant).
-3. If your changes require app config changes, edit the [[https://github.com/opscode/opscode-omnibus/blob/master/files/private-chef-cookbooks/private-chef/attributes/default.rb#L166][defaults]] and
-   [[https://github.com/opscode/opscode-omnibus/blob/master/files/private-chef-cookbooks/private-chef/templates/default/oc_erchef.config.erb][template]].
+3. If your changes require app config changes, edit the [[https://github.com/chef/opscode-omnibus/blob/master/files/private-chef-cookbooks/private-chef/attributes/default.rb#L166][defaults]] and
+   [[https://github.com/chef/opscode-omnibus/blob/master/files/private-chef-cookbooks/private-chef/templates/default/oc_erchef.config.erb][template]].
 4. Push your feature branch of opscode-omnibus
 
 * Trigger Build
@@ -120,7 +120,3 @@ prefix with origin. Example: =sf/a-feature=.
 The trigger should succeed quickly. You can click on a trigger job
 and in the left panel select "Downstream build view" to monitor
 progress.
-
-
-
-

@@ -14,9 +14,9 @@
 # limitations under the License.
 #
 
-name "postgresql96"
+name "postgresql96-bin"
 
-default_version "9.6.22"
+default_version "9.6.23"
 
 license "PostgreSQL"
 license_file "COPYRIGHT"
@@ -30,7 +30,7 @@ dependency "libossp-uuid"
 dependency "config_guess"
 
 source url: "https://ftp.postgresql.org/pub/source/v#{version}/postgresql-#{version}.tar.bz2"
-version("9.6.22") { source sha256: "3d32cd101025a0556813397c69feff3df3d63736adb8adeaf365c522f39f2930" }
+version("9.6.23") { source sha256: "a849f798401ab8c6dfa653ebbcd853b43f2200b4e3bc1ea3cb5bec9a691947b9" }
 
 relative_path "postgresql-#{version}"
 
@@ -49,15 +49,9 @@ build do
           " --with-libraries=#{install_dir}/embedded/lib", env: env
 
   make "world -j #{workers}", env: env
-  make "install-world -j #{workers}", env: env
 
-  block do
-    Dir.glob("#{install_dir}/embedded/postgresql/#{short_version}/bin/*").sort.each do |bin|
-      link bin, "#{install_dir}/embedded/bin/#{File.basename(bin)}"
-    end
-
-    delete "#{install_dir}/embedded/postgresql/#{short_version}/share/doc"
-    delete "#{install_dir}/embedded/postgresql/#{short_version}/share/man"
-
-  end
+  make "-C src/interfaces/libpq install", env: env  # libpq.so
+  make "-C src/backend install-bin", env: env       # postgres binary
+  make "-C src/timezone/tznames  install", env: env # share/timezonesets
+  make "-C src/bin install", env: env               # pg_*, psql binaries
 end

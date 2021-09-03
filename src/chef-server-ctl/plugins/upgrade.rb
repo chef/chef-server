@@ -1,12 +1,12 @@
-#Copyright:: Copyright (c) 2012-2014 Chef Software, Inc.
+# Copyright:: Copyright (c) 2012-2014 Chef Software, Inc.
 #
 # All Rights Reserved
 #
 
-require 'optparse'
-require 'ostruct'
+require "optparse"
+require "ostruct"
 
-add_command_under_category "upgrade", "general", "Upgrade your private chef installation.", 2 do
+add_command_under_category "upgrade", "general", "Upgrade your Chef Infra Server installation after updating packages.", 2 do
 
   # Since this is evaled, need to have methods first so they can be picked up
 
@@ -40,11 +40,11 @@ add_command_under_category "upgrade", "general", "Upgrade your private chef inst
 
       # This option matches the knife -s option
       opts.on("-s", "--chef11-server-url [url]", String, "The url of the Chef 11 server.  Defaults to #{@options.chef11_server_url}") do |url|
-         @options.chef11_server_url = url
+        @options.chef11_server_url = url
       end
 
       opts.on("-x", "--chef12-server-url [url]", String, "The url of the Chef 12 server.  Defaults to #{@options.chef12_server_url}") do |url|
-         @options.chef12_server_url = url
+        @options.chef12_server_url = url
       end
 
       # This option matches the knife -u option
@@ -93,7 +93,7 @@ add_command_under_category "upgrade", "general", "Upgrade your private chef inst
     log "Would you like to upgrade? [yN]"
 
     answer = STDIN.gets.chomp
-    return answer == 'Y' || answer == 'y'
+    answer == "Y" || answer == "y"
   end
 
   def partybus_upgrade
@@ -123,13 +123,12 @@ add_command_under_category "upgrade", "general", "Upgrade your private chef inst
     bundle = File.join(base_path, "embedded", "bin", "bundle")
     status = run_command("#{bundle} exec ./bin/partybus upgrade")
     if status.success?
-      puts "Chef Server Upgraded!"
+      puts "Chef Infra Server Upgraded!"
       exit 0
     else
       exit 1
     end
   end
-
 
   ### Start script ###
 

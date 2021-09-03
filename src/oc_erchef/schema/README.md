@@ -100,4 +100,4 @@ make
 
 The targets of the [Makefile](Makefile) actually call out to
 corresponding targets in the
-[Open Source Makefile](https://github.com/opscode/chef-server-schema/blob/master/Makefile).
+[Open Source Makefile](https://github.com/chef/chef-server-schema/blob/master/Makefile).

@@ -1,5 +1,5 @@
 
-require 'omnibus_ctl_helper'
+require "omnibus_ctl_helper"
 
 module Omnibus
   class Ctl
@@ -12,11 +12,10 @@ module Omnibus
   end
 end
 
-
 describe "chef-server-ctl maintenance" do
 
-  let(:command)   { "maintenance" }
-  let(:running_config) { { 'private_chef' => { 'redis_lb' => { 'vip' => '127.0.0.1', 'port' => '16379' } } } }
+  let(:command) { "maintenance" }
+  let(:running_config) { { "private_chef" => { "redis_lb" => { "vip" => "127.0.0.1", "port" => "16379" } } } }
   let(:veil_creds) do
     double("ChefSecretsFile", save: true)
   end

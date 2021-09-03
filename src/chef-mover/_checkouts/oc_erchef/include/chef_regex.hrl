@@ -2,7 +2,7 @@
 %% ex: ts=4 sw=4 et
 %% @author James Casey <james@chef.io>
 %%
-%% Copyright 2012 Opscode, Inc. All Rights Reserved.
+%% Copyright Chef Software, Inc. All Rights Reserved.
 %%
 %% This file is provided to you under the Apache License,
 %% Version 2.0 (the "License"); you may not use this file
@@ -39,4 +39,3 @@
 -type re_msg() :: <<_:64,_:_*8>>.
 
 -type regex_pattern() :: [1..255,...].
-

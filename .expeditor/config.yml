@@ -22,7 +22,7 @@ github:
   major_bump_labels:
     - "Expeditor: Bump Version Major"
   release_branch:
-    - master:
+    - main:
         version_constraint: 14*
 
 # At the given time, trigger the following scheduled workloads
@@ -52,11 +52,11 @@ pipelines:
 #
 # TODO: add action to update changelog with modified omnibus components
 subscriptions:
-  # Subscription to workload action of pull request merge to master branch on
+  # Subscription to workload action of pull request merge to main branch on
   # omnibus-software project will allow us to trigger an uncached omnibus build
   # for chef-server when the omnibus-software has modified software config files.
   # chef/omnibus-software
-  - workload: pull_request_merged:chef/omnibus-software:master:*
+  - workload: pull_request_merged:chef/omnibus-software:main:*
     actions:
       - trigger_pipeline:omnibus/adhoc:
           only_if_modified:
@@ -77,7 +77,7 @@ subscriptions:
       - bash:.expeditor/announce-release.sh:
           post_commit: true
       - built_in:notify_chefio_slack_channels
-  - workload: schedule_triggered:chef/chef-server:master:nightly_build:*
+  - workload: schedule_triggered:chef/chef-server:main:nightly_build:*
     actions:
       - trigger_pipeline:omnibus/adhoc
   # Run these actions when the freshly built Habitat packages have been uploaded to Depot

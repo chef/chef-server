@@ -1,7 +1,7 @@
 %% @author Ho-Sheng Hsiao <hosh@chef.io>
 %% @doc group operations
 %%
-%% Copyright 2013 Opscode, Inc. All Rights Reserved.
+%% Copyright Chef Software, Inc. All Rights Reserved.
 %%
 %% This file is provided to you under the Apache License,
 %% Version 2.0 (the "License"); you may not use this file
@@ -97,4 +97,3 @@ handle_error_test_() ->
             end
         }
     ].
-

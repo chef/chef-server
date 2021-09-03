@@ -29,14 +29,14 @@ dependency "runit"
 dependency "openssl-fips-config" if fips_mode?
 
 # the backend
-dependency "postgresql96"
+dependency "postgresql96-bin" # for upgrading 9.6 -> 13.3
+dependency "postgresql13"
 dependency "redis" # dynamic routing controls
 dependency "haproxy"
-dependency "pg-gem" # used by private-chef-ctl reconfigure
 dependency "elasticsearch" # used by search
 
 # moved earlier because it is external to this repo and pinned, so should change infrequently
-dependency "chef" # for embedded chef-client -z runs (built from master - build last)
+dependency "chef" # for embedded chef-client -z runs (built from main - build last)
 
 dependency "private-chef-ctl" # additional project-specific private-chef-ctl subcommands
 

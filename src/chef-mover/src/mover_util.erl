@@ -1,7 +1,7 @@
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92 -*-
 %% ex: ts=4 sw=4 et
 %% @author Marc A. Paradise <marc@chef.io>
-%% @copyright (C) 2013, Opscode Inc.
+%% @copyright (C) Chef Software, Inc..
 %%
 %% @doc
 %% Some simple org migration utilities.

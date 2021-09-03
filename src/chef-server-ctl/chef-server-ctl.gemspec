@@ -1,5 +1,5 @@
 
-lib = File.expand_path("../lib", __FILE__)
+lib = File.expand_path("lib", __dir__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require "chef_server_ctl/version"
 
@@ -27,8 +27,7 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency "pry"
   spec.add_runtime_dependency "rb-readline"
 
-  # investigate what it would take to upgrade this...
-  spec.add_runtime_dependency "pg", "~> 0.17", ">= 0.17.1"
+  spec.add_runtime_dependency "pg", "~> 1.2", ">= 1.2.3"
 
   spec.add_runtime_dependency "redis"
   # TODO

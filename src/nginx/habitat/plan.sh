@@ -22,7 +22,7 @@ pkg_binds_optional=(
   [oc_id]="port"
 )
 pkg_description="NGINX configuration and content for Chef Server"
-pkg_upstream_url="https://docs.chef.io/server_components.html"
+pkg_upstream_url="https://docs.chef.io/server/"
 pkg_svc_run="openresty -c ${pkg_svc_config_path}/nginx.conf -p ${pkg_svc_var_path}"
 
 pkg_version() {

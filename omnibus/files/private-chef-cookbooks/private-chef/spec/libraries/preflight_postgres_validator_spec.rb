@@ -77,7 +77,7 @@ describe PostgresqlPreflightValidator do
 
     let(:connection) { double('connection') }
     let(:version_reply) { [{ 'server_version' => version }] }
-    let(:error_message) { /PostgreSQL version 9\.2 or greater/ }
+    let(:error_message) { /PostgreSQL version 9\.6 or greater/ }
 
     before do
       allow(connection).to receive(:exec).with('SHOW server_version;')
@@ -102,8 +102,8 @@ describe PostgresqlPreflightValidator do
       end
     end
 
-    context 'when external version is > 9.x' do
-      let(:version) { '10.0' }
+    context 'when external version is > 13.x' do
+      let(:version) { '14.0' }
 
       it 'fails with a CSPG014 error' do
         expect(postgres_validator).to receive(:fail_with).with(error_message)
@@ -111,8 +111,17 @@ describe PostgresqlPreflightValidator do
       end
     end
 
-    context 'when external version is == 9.2' do
-      let(:version) { '9.2' }
+    context 'when external version is == 9.6' do
+      let(:version) { '9.6' }
+
+      it 'does not fail with a CSPG014 error' do
+        expect(postgres_validator).to_not receive(:fail_with)
+        postgres_validator.backend_verify_postgres_version(connection)
+      end
+    end
+
+    context 'when external version is == 13.3' do
+      let(:version) { '13.3' }
 
       it 'does not fail with a CSPG014 error' do
         expect(postgres_validator).to_not receive(:fail_with)
@@ -125,6 +134,15 @@ describe PostgresqlPreflightValidator do
 
       it 'does not fail with a CSPG014 error' do
         expect(postgres_validator).to_not receive(:fail_with)
+        postgres_validator.backend_verify_postgres_version(connection)
+      end
+    end
+
+    context 'when 9.2 > external version > 13.3' do
+      let(:version) { '12' }
+
+      it 'adds a warning to the ChefServer::Warnings' do
+        expect(ChefServer::Warnings).to receive(:warn)
         postgres_validator.backend_verify_postgres_version(connection)
       end
     end

@@ -2,8 +2,8 @@ source 'https://rubygems.org'
 
 # Install omnibus software
 group :omnibus do
-  gem "omnibus", github: ENV.fetch("OMNIBUS_GITHUB_REPO", "chef/omnibus"), branch: ENV.fetch("OMNIBUS_GITHUB_BRANCH", "master")
-  gem "omnibus-software", github: ENV.fetch("OMNIBUS_SOFTWARE_GITHUB_REPO", "chef/omnibus-software"), branch: ENV.fetch("OMNIBUS_SOFTWARE_GITHUB_BRANCH", "master")
+  gem "omnibus", github: ENV.fetch("OMNIBUS_GITHUB_REPO", "chef/omnibus"), branch: ENV.fetch("OMNIBUS_GITHUB_BRANCH", "main")
+  gem "omnibus-software", github: ENV.fetch("OMNIBUS_SOFTWARE_GITHUB_REPO", "chef/omnibus-software"), branch: ENV.fetch("OMNIBUS_SOFTWARE_GITHUB_BRANCH", "main")
   gem 'artifactory'
 end
 
@@ -11,5 +11,4 @@ group :test do
   gem 'test-kitchen' # for Test Kitchen testing of the omnibus builds
   gem 'berkshelf' # depsolving the Test Kitchen suite
   gem 'rake'
-  gem 'chefspec' # for cookbook chefspec tests
 end

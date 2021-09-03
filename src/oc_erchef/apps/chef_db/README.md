@@ -28,7 +28,7 @@ Once your repository is set up, you can start working on the code.
 
 Source:
 
-    https://github.com/opscode/chef_db
+    https://github.com/chef/chef_db
 
 Tickets/Issues:
 
@@ -40,7 +40,7 @@ Documentation:
 
 # LICENSE:
 
-Copyright 2011-2012 Opscode, Inc. All Rights Reserved.
+Copyright Chef Software, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License.  You may obtain a copy of the License at
 

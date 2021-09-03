@@ -1,24 +1,24 @@
 # Chef Infra Server Project - Integration Test Pipeline
 
 The [Buildkite Integration Test
-Pipeline](https://buildkite.com/chef/chef-chef-server-master-integration-test)
+Pipeline](https://buildkite.com/chef/chef-chef-server-main-integration-test)
 provides a convenient way to run the Terraform test scenarios against
 a useful subset of our testing matrix.
 
 For a broader suite of tests, the [Buildkite Integration Full Test
-Pipeline](https://buildkite.com/chef/chef-chef-server-master-integration-test-full)
+Pipeline](https://buildkite.com/chef/chef-chef-server-main-integration-test-full)
 provides a convenient way to run the Terraform test scenarios against
 the full matrix of supported distributions and configurations.
 
 ## Running the Pipeline
 
-The simplest way to run the [Integration Test Pipeline](https://buildkite.com/chef/chef-chef-server-master-integration-test) is to rely on the defaults and just click `New Build`, optionally provide a `Message` explaining *why* you are running the pipeline, and click `Create Build`.
+The simplest way to run the [Integration Test Pipeline](https://buildkite.com/chef/chef-chef-server-main-integration-test) is to rely on the defaults and just click `New Build`, optionally provide a `Message` explaining *why* you are running the pipeline, and click `Create Build`.
 
-***NOTE:*** **Make sure to leave `Branch` set to `master` since the pipeline is defined in the `master` branch even if you are wanting to test an artifact created from your own developer branch.**
+***NOTE:*** **Make sure to leave `Branch` set to `main` since the pipeline is defined in the `main` branch even if you want to test an artifact created from your own developer branch.**
 
 By default, the pipeline will be testing the latest `chef-server` artifact from the **current** channel while using the latest `chef-server` artifact from the **stable** channel as the initial install version for any scenario that is performing upgrade testing.
 
-If you are wanting to test your own developer branch you must first run the [Buildkite Omnibus Adhoc Pipeline](https://buildkite.com/chef/chef-chef-server-master-omnibus-adhoc) against your developer branch and identify the `unstable` artifact version (e.g. `13.1.58+20200303212531`) found in the `Create Build Record` step.  Once you have the `unstable` artifact version you would feed it into the [Buildkite Integration Test Pipeline](https://buildkite.com/chef/chef-chef-server-master-integration-test) using the `UPGRADE_VERSION` environment variable.
+If you want to test your own developer branch you must first run the [Buildkite Omnibus Adhoc Pipeline](https://buildkite.com/chef/chef-chef-server-main-omnibus-adhoc) against your developer branch and identify the `unstable` artifact version (e.g. `13.1.58+20200303212531`) found in the `Create Build Record` step.  Once you have the `unstable` artifact version you would feed it into the [Buildkite Integration Test Pipeline](https://buildkite.com/chef/chef-chef-server-main-integration-test) using the `UPGRADE_VERSION` environment variable.
 
 See the [Overriding Defaults](Overriding-Defaults) section for more information on how you can tune the pipeline to suit your needs.
 

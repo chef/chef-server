@@ -26,7 +26,7 @@ module Partybus
     attr_accessor :secrets
 
     def initialize
-      if File.exists?(RUNNING_CONFIG_FILE)
+      if File.exist?(RUNNING_CONFIG_FILE)
         @running_server = JSON.parse(IO.read(RUNNING_CONFIG_FILE))
         @postgres = @running_server['private_chef']['postgresql']
       else
@@ -60,7 +60,7 @@ EOF
   module Logger
 
     def log(message)
-      puts "[private-chef-upgrade] - #{message}"
+      puts "[Infra Server Upgrade] - #{message}"
     end
 
   end

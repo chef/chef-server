@@ -9,63 +9,18 @@ POSTGRESQL_UNIX_USER=${POSTGRESQL_UNIX_USER:=opscode-pgsql}
 modified_within_last_x_minutes=180
 tail_lines=10000
 
-type='CS'
-if [[ -n $1 ]];
-then
-    type=$1
-fi
-
 #Lets have a way to avoid things that take a while, like DNS
-if [[ -n $2  ]];
-then
+if [[ -n $1  ]]; then
     testing=true
 fi
 
-if [[ $type == 'CS' ]];
-then
-    path='opscode'
-    ctl_cmd='private-chef-ctl'
-    config_name='*chef*.rb'
+config_name='*chef*.rb'
 
-    if [[ ! -e "/opt/$path/bin/$ctl_cmd" ]];
-    then
-        echo "ERROR: Chef Infra Server may not be installed."
-        exit 1
-    fi
-elif [[ $type == 'OSC' ]];
-then
-    path='chef-server'
-    ctl_cmd='chef-server-ctl'
-    config_name='chef-server.rb'
-
-    if [[ ! -e "/opt/$path/bin/$ctl_cmd" ]];
-    then
-        echo "ERROR: Open Source Chef Server 11 may not be installed."
-        exit 1
-    fi
-
-    echo "Gathering logs from Open Source Chef server 11."
-elif [[ $type == 'Analytics' ]];
-then
-    path='opscode-analytics'
-    ctl_cmd='opscode-analytics-ctl'
-    config_name='opscode-analytics.rb'
-
-    if [[ ! -e "/opt/$path/bin/$ctl_cmd" ]];
-    then
-        echo "ERROR: Analytics server may not be installed."
-        exit 1
-    fi
-
-    echo "Gathering logs from Analytics server."
-else
-    echo "Usage: gather-logs [ CS | OSC | Analytics ]"
-    echo "CS - Enterprise or Chef Server (default)"
-    echo "OSC - Open Source Chef Server 11"
-    echo "Analytics - Opscode Analytics server"
+if [[ ! -e "/opt/opscode/bin/chef-server-ctl" ]]; then
+    echo "ERROR: Chef Infra Server may not be installed."
     exit 1
 fi
-config_file_path="/etc/$path/$config_name"
+config_file_path="/etc/opscode/$config_name"
 
 hostname=$(hostname)
 timestamp=$(date +%F_%H.%M.%S-%Z)
@@ -73,16 +28,20 @@ tmpdir="$(mktemp -d)/$hostname/$timestamp"
 #RHEL5 has ip and other tools here
 PATH=$PATH:/bin:/sbin
 
-PATH=/opt/$path/embedded/bin:$PATH
+PATH=/opt/opscode/embedded/bin:$PATH
 
 mkdir -p "$tmpdir"
+# make sure we have the full path in /proc created for the gather-logs bundle
+mkdir -p "$tmpdir/proc/sys/crypto/"
+# create the connectivity dir for proxy / supermarket access checks
+mkdir -p "$tmpdir/connectivity/"
 
-for i in /opt/{chef,$path}*/version-manifest.txt \
-              /opt/$path/pc-version.txt \
-              /etc/$path/$config_name \
-              /etc/{chef,$path}*/*-running.json \
-              /var/opt/$path*/etc/*-running.json \
-              /etc/{chef,$path,opscode-manage}*/*.rb \
+for i in /opt/{chef,opscode}*/version-manifest.txt \
+              /opt/opscode/pc-version.txt \
+              /etc/opscode/$config_name \
+              /etc/{chef,opscode}*/*-running.json \
+              /var/opt/opscode*/etc/*-running.json \
+              /etc/{chef,opscode,opscode-manage}*/*.rb \
               /var/log/syslog \
               /var/log/messages; do
     if [[ -e "$i" ]]; then
@@ -99,83 +58,64 @@ for i in `find -L /var/log/${path}* -type f -mmin -"$modified_within_last_x_minu
 done
 
 # Add signing proxy log and elastic info from RDS if system is configured using https://github.com/chef-customers/aws_native_chef_server
-if [[ -f "/var/log/aws-signing-proxy/proxy.log" ]];
-then
+if [[ -f "/var/log/aws-signing-proxy/proxy.log" ]]; then
     mkdir -p "$tmpdir/var/log/aws-signing-proxy"
     tail -"$tail_lines" "/var/log/aws-signing-proxy/proxy.log" > "$tmpdir/var/log/aws-signing-proxy/proxy.log"
 fi
 
 # Gather some information from Elasticsearch, if it's available
 gather_es() {
-    curl -s -X GET "http://localhost:$1/_cluster/health?pretty" > "$tmpdir/elasticsearch-cluster-health.txt"
-    curl -s -X GET "http://localhost:$1/_cat/indices?v" > "$tmpdir/elasticsearch-cat-indices.txt"
-    curl -s -X GET "http://localhost:$1/_cat/shards?h=index,shard,prirep,state,unassigned.reason&pretty" > "$tmpdir/elasticsearch-cat-shards.txt"
-    curl -s -X GET "http://localhost:$1/_cluster/allocation/explain?pretty" > "$tmpdir/elasticsearch-cluster-shards-explain.txt"
+    curl -sS -X GET "http://localhost:$1/_cluster/health?pretty" > "$tmpdir/elasticsearch_cluster_health.txt"
+    curl -sS -X GET "http://localhost:$1/_cluster/state?pretty" > "$tmpdir/elasticsearch_cluster_state.txt"
+    curl -sS -X GET "http://localhost:$1/_cat/indices?v" > "$tmpdir/elasticsearch_cat_indices.txt"
+    curl -sS -X GET "http://localhost:$1/_cat/shards?h=index,shard,prirep,state,unassigned.reason&pretty" > "$tmpdir/elasticsearch_cat_shards.txt"
+    curl -sS -X GET "http://localhost:$1/_cluster/allocation/explain?pretty" > "$tmpdir/elasticsearch_cluster_shards_explain.txt"
 }
 ES_9200="$(curl -s -XGET 'http://localhost:9200/' | grep 'for Search')"
 ES_10144="$(curl -s -XGET 'http://localhost:10144/' | grep 'for Search')"
-if [[ -n $ES_9200 ]];
-then
+if [[ -n $ES_9200 ]]; then
     gather_es 9200
-elif [[ -n $ES_10144 ]];
-then
+elif [[ -n $ES_10144 ]]; then
     gather_es 10144
 fi
 
-$ctl_cmd status > "$tmpdir/$ctl_cmd"_status.txt
+chef-server-ctl status > "$tmpdir/chef-server-ctl"_status.txt
 
-if [[ $type == 'CS' ]];
-then
-    STATSPW=$($ctl_cmd show-secret opscode_erchef stats_password)
-    if [ -n "$STATSPW" ];
-    then
-        curl -k -s -X GET "https://statsuser:$STATSPW@localhost/_stats?format=text" status > "$tmpdir/chef_server_stats_endpoint.txt"
-    else
-        curl -k -s -X GET "https://localhost/_stats?format=text" status > "$tmpdir/chef_server_stats_endpoint.txt"
-    fi
+
+STATSPW=$(chef-server-ctl show-secret opscode_erchef stats_password)
+if [ -n "$STATSPW" ]; then
+    curl -k -s -X GET "https://statsuser:$STATSPW@localhost/_stats?format=text" status > "$tmpdir/chef_server_stats_endpoint.txt"
+else
+    curl -k -s -X GET "https://localhost/_stats?format=text" status > "$tmpdir/chef_server_stats_endpoint.txt"
 fi
 
-# Try to determine with /tmp/.s.PGSQL.5432 if postgresql is running before gathering psql logs
-# There are two cases in which this could fail:
-# 1) We've configure postgresql to listen on a different local socket. Most users don't do this, but it is possible.
-# 2) Postgresql isn't running.
-# Since the general goal of this script is to collect whatever we can for support but not present confusing errors to
-# the user, we went for a test that covered (2) easily. If we can do something smart that would account for (1) that
-# would be cool, but my sense is that this is OK for now.
+# postgres server may be external - we'll go ahead and try to gather what we can in any case, and just capture errors to the output
+# without showing them to the user
+echo "SELECT CURRENT_TIMESTAMP; SELECT * FROM pg_stat_activity;" | chef-server-ctl psql oc_erchef --as-admin --options -tA > "$tmpdir/pg_stat_activity.txt" 2>&1
+echo "SELECT * FROM sqitch.tags;" |  chef-server-ctl psql oc_erchef --as-admin --options -tA  > "$tmpdir/opscode_chef_sqitch_tags.txt" 2>&1
+echo "SELECT * FROM sqitch.tags;" |  chef-server-ctl psql bifrost --as-admin --options -tA > "$tmpdir/bifrost_sqitch_tags.txt" 2>&1
+
+# gather usage information
+mkdir -p "$tmpdir/infra_server_usage"
+echo "SELECT count(DISTINCT org_id) FROM nodes;" |  chef-server-ctl psql oc_erchef --as-admin --options -tA > "$tmpdir/infra_server_usage/consumed_orgs.txt" 2>&1
+echo "SELECT count(DISTINCT environment) FROM nodes WHERE NOT name='_default';" |  chef-server-ctl psql oc_erchef --as-admin --options -tA > "$tmpdir/infra_server_usage/consumed_environments.txt" 2>&1
+echo "SELECT count(DISTINCT policy_group) FROM nodes;" |  chef-server-ctl psql oc_erchef --as-admin --options -tA > "$tmpdir/infra_server_usage/consumed_policy_group.txt" 2>&1
+echo "SELECT count(DISTINCT policy_name) FROM nodes;" |  chef-server-ctl psql oc_erchef --as-admin --options -tA > "$tmpdir/infra_server_usage/consumed_policy_name.txt" 2>&1
+echo "SELECT count(*) FROM nodes;" |  chef-server-ctl psql oc_erchef --as-admin --options -tA > "$tmpdir/infra_server_usage/consumed_nodes.txt" 2>&1
+echo 'SELECT row_to_json(users) FROM (SELECT username, admin FROM "users") AS users;' |  chef-server-ctl psql oc_erchef --as-admin --options -tA > "$tmpdir/infra_server_usage/total_users.json" 2>&1
 
 if [[ -S "/tmp/.s.PGSQL.5432" ]]; then
-    if [[ $type == 'Analytics' ]];
-    then
-        echo "SELECT CURRENT_TIMESTAMP; SELECT * FROM pg_stat_activity;" | su -l chef-pgsql -c 'psql actions' > "$tmpdir/pg_stat_activity.txt"
-        echo "SELECT * FROM schema_migrations;" | su -l chef-pgsql -c 'psql actions' > "$tmpdir/actions_schema_migrations.txt"
-        su -m chef-pgsql -c 'ulimit -a'> "$tmpdir/ulimit_a_chef-pgsql.txt"
-    fi
-fi
-
-
-if [[ $type == 'CS' ]];
-then
-    # postgres server may be external - we'll go ahead and try to gather what we can in any case, and just capture errors to the output
-    # without showing them to the user
-    echo "SELECT CURRENT_TIMESTAMP; SELECT * FROM pg_stat_activity;" | chef-server-ctl psql oc_erchef --as-admin --options -tA > "$tmpdir/pg_stat_activity.txt" 2>&1
-    echo "SELECT * FROM sqitch.tags;" |  chef-server-ctl psql oc_erchef --as-admin --options -tA  > "$tmpdir/opscode_chef_sqitch_tags.txt" 2>&1
-    echo "SELECT * FROM sqitch.tags;" |  chef-server-ctl psql bifrost --as-admin --options -tA > "$tmpdir/bifrost_sqitch_tags.txt" 2>&1
-    if [[ -S "/tmp/.s.PGSQL.5432" ]]; then
-        su -m $POSTGRESQL_UNIX_USER -c 'ulimit -a' > "$tmpdir/ulimit_a_opscode-pgsql.txt"
-    fi
+    su -m $POSTGRESQL_UNIX_USER -c 'ulimit -a' > "$tmpdir/ulimit_a_opscode-pgsql.txt"
 fi
 
 # Retrieve Platform and Platform Version
-if [[ -f "/etc/lsb-release" ]] && grep -q DISTRIB_ID /etc/lsb-release;
-then
+if [[ -f "/etc/lsb-release" ]] && grep -q DISTRIB_ID /etc/lsb-release; then
     cp "/etc/lsb-release" "$tmpdir/platform_version.txt"
     known_platform="ubuntu"
-elif [[ -f "/etc/redhat-release" ]];
-then
+elif [[ -f "/etc/redhat-release" ]]; then
     cp "/etc/redhat-release" "$tmpdir/platform_version.txt"
     known_platform="rhel"
-elif [[ -f "/etc/os-release" ]] && grep -q "Amazon Linux 2" /etc/os-release;
-then
+elif [[ -f "/etc/os-release" ]] && grep -q "Amazon Linux 2" /etc/os-release; then
     known_platform="amazon"
     cat "/etc/os-release" >> "$tmpdir/platform_version.txt"
     cat "/etc/system-release-cpe" >> "$tmpdir/platform_version.txt"
@@ -183,40 +123,54 @@ else
     echo "Platform and version are unknown." > "$tmpdir/platform_version.txt"
 fi
 
+# version / os information we want regardless of platform
+cp "/proc/version" "$tmpdir/proc/version"
+cp "/etc/os-release" "$tmpdir/etc/os-release"
+cp "/etc/system-release" "$tmpdir/etc/system-release" 2>/dev/null
+uname -a > "$tmpdir/uname_a.txt"
+
+# gather the configured umask
 umask > "$tmpdir/umask.txt"
 
+# gather the system uptime
 uptime > "$tmpdir/uptime.txt"
 
-mkdir -p "$tmpdir/proc/sys/crypto/"
+# gather FIPS mode enabled or not
+cp "/proc/sys/crypto/fips_enabled" "$tmpdir/proc/sys/crypto/fips_enabled" 2>/dev/null
 
+# gather information on CPU count and installed memory
 cp "/proc/cpuinfo" "$tmpdir/proc/cpuinfo"
-
 cp "/proc/meminfo" "$tmpdir/proc/meminfo"
 
-cp "/proc/version" "$tmpdir/proc/version"
-
-cp "/proc/sys/crypto/fips_enabled" "$tmpdir/proc/sys/crypto/fips_enabled"
-
-free -m > "$tmpdir/free_m.txt"
-
+# gather running processes
 ps fauxww > "$tmpdir/ps_fauxww.txt"
 
+# gather free memory
+free -m > "$tmpdir/free_m.txt"
+
+# gather disk usage information
 df -h > "$tmpdir/df_h.txt"
-
 df -i > "$tmpdir/df_i.txt"
-
 df -k > "$tmpdir/df_k.txt"
 
+# gather hostname and dns information
+cp "/etc/resolv.conf" "$tmpdir/etc/resolv.conf"
+cp "/etc/hosts" "$tmpdir/etc/hosts"
+hostname > "$tmpdir/hostname.txt"
+hostname --fqdn > "$tmpdir/hostname_--fqdn.txt"
+dig `hostname --fqdn` > "$tmpdir/dig-fqdn.txt"
+ping -c 2 `hostname --fqdn` > ping_-c_2_fqdn.txt
+ping -c 2 `hostname` > ping_-c_2_hostname.txt
+
+# gather everything ohai knows
 /opt/opscode/bin/ohai > "$tmpdir/ohai.txt"
 
-if [[ -e /opt/opscode-manage/bin/opscode-manage-ctl ]];
-then
+if [[ -e /opt/opscode-manage/bin/opscode-manage-ctl ]]; then
     /opt/opscode-manage/bin/opscode-manage-ctl status > "$tmpdir/opscode-manage-ctl_status.txt"
     found_manage=true
 fi
 
-if [[ -e /opt/opscode-reporting/bin/opscode-reporting-ctl ]];
-then
+if [[ -e /opt/opscode-reporting/bin/opscode-reporting-ctl ]]; then
     /opt/opscode-reporting/bin/opscode-reporting-ctl status > "$tmpdir/opscode-reporting-ctl_status.txt"
     found_reporting=true
 fi
@@ -237,9 +191,9 @@ function add_footer (){
     echo ""    >> "$1"
 }
 
-if [[ -z $testing ]];
-then
-
+if [[ -z $testing ]]; then
+    # in the future we should remove this file since the data is now
+    # gathered one file at a time to match Automate output
     name_resolution_file="$tmpdir/name-resolution.txt"
 
     if which dig > /dev/null 2>&1; then
@@ -266,79 +220,58 @@ then
 
 fi
 
-if [[ $type == 'CS' ]];
-then
-    fqdn="api_fqdn"
-elif [[ $type == 'Analytics' ]];
-then
-    fqdn="analytics_fqdn"
-fi
+fqdn="api_fqdn"
 backend_vip="backend_vip"
 tempname=`grep -E $fqdn $config_file_path | cut -d \" -f2`
 backend_fqdn=`grep -E $backend_vip $config_file_path | cut -d \" -f2`
 
 #Didnt find a hostname above, so fallback
-if [[ -z $tempname ]];
-then
+if [[ -z $tempname ]]; then
     tempname=$hostname
 fi
 
-if [[ -z $testing ]];
-then
-
+if [[ -z $testing ]]; then
     echo '## Resolved Name + Time' >> "$name_resolution_file"
     echo $tempname >> "$name_resolution_file"
     for interval in `seq 1 5`; do
-        { time /opt/$path/embedded/bin/ruby -e "require 'resolv'; start=Time.now; p Resolv.getaddress(\"$tempname\")" ; } >> "$name_resolution_file" 2>&1
+        { time /opt/opscode/embedded/bin/ruby -e "require 'resolv'; start=Time.now; p Resolv.getaddress(\"$tempname\")" ; } >> "$name_resolution_file" 2>&1
         sleep 2;
     done
 
     echo $backend_fqdn >> "$name_resolution_file"
     for interval in `seq 1 5`; do
-        { time /opt/$path/embedded/bin/ruby -e "require 'resolv'; start=Time.now; p Resolv.getaddress(\"$backend_fqdn\")" ; } >> "$name_resolution_file" 2>&1
+        { time /opt/opscode/embedded/bin/ruby -e "require 'resolv'; start=Time.now; p Resolv.getaddress(\"$backend_fqdn\")" ; } >> "$name_resolution_file" 2>&1
         sleep 2;
     done
-
 fi
 
+# gather important file permissions
 for fileperms in \
-    /var/opt/$path* \
-        /var/log/$path*; do
+    /var/opt/opscode* \
+        /var/log/opscode*; do
     ls -altuhR "$fileperms" >> "$tmpdir/perms.txt"
 done
 
-if [[ $type == 'CS' || $type == 'OSC' ]]; then
-    migration_level_file="$tmpdir/migration-level.txt"
-    migration_level_file_location="/var/opt/$path/upgrades/migration-level"
-    if [[ -f $migration_level_file_location  ]]; then
-        cat $migration_level_file_location >> "$migration_level_file"
-    else
-        echo "!!! Migration level file not found  !!!">> "$migration_level_file";
-    fi
+# gather the db migration level
+migration_level_file="$tmpdir/migration-level.txt"
+migration_level_file_location="/var/opt/opscode/upgrades/migration-level"
+if [[ -f $migration_level_file_location  ]]; then
+    cat $migration_level_file_location >> "$migration_level_file"
+else
+    echo "!!! Migration level file not found  !!!">> "$migration_level_file";
 fi
 
 #What packages do we have installed on our supported platforms?
 installed_packages_file="$tmpdir/installed-packages.txt"
 installed_packages_grep="grep -i -E (chef|opscode)"
-if [[ $known_platform == 'rhel' ]];
-then
-
+if [[ $known_platform == 'rhel' ]]; then
     rpm -qa | $installed_packages_grep >> "$installed_packages_file"
-
-elif [[ $known_platform == 'amazon' ]];
-then
-
+elif [[ $known_platform == 'amazon' ]]; then
     rpm -qa | $installed_packages_grep >> "$installed_packages_file"
-
-elif [[ $known_platform == 'ubuntu' ]];
-then
-
+elif [[ $known_platform == 'ubuntu' ]]; then
     dpkg -l | $installed_packages_grep >> "$installed_packages_file"
-
 else
-
     echo "!!! Unknown platform !!!" >> "$installed_packages_file"
-
 fi
 
 ##
@@ -350,8 +283,7 @@ fi
 ## grep sql_ro_password /etc/opscode-reporting/opscode-reporting-running.json | sed -e 's/^.*"\(.*\)",$/\1opscode_reporting_ro/' | tr -d '\n' | md5sum | cut -d ' ' -f1 >> "$service_passwords_file"
 ##
 ##
-if [[ $type == 'CS' && $found_reporting ]];
-then
+if [[ $found_reporting ]]; then
     service_passwords_file="$tmpdir/service-passwords.txt"
     db_check="echo select passwd from pg_shadow where usename=\'first\'\; | su - $POSTGRESQL_UNIX_USER -c 'psql -U opscode-pgsql postgres -t -A' | sed 's/md5//'"
     opscode_reporting_password=`echo $db_check | sed s@first@opscode_reporting@`
@@ -384,6 +316,22 @@ then
     echo `eval $opscode_reporting_etc_ro` >> "$service_passwords_file"
     add_footer "$service_passwords_file"
 
+fi
+
+# check if the system is proxied by checking if HTTPS_PROXY and HTTP_PROXY are unset or empty
+if [[ -z "$HTTPS_PROXY" || -z "$HTTP_PROXY" ]]; then # proxy not set
+    echo "0" > "${tmpdir}/connectivity/proxied.txt"
+else
+    echo "1" > "${tmpdir}/connectivity/proxied.txt"
+fi
+
+# check if a system can reach supermarket
+if curl https://supermarket.chef.io > /dev/null 2>&1; then
+    echo "1" > "${tmpdir}/connectivity/supermarket_accessible.txt"
+elif wget https://supermarket.chef.io -O $tmpdir/connectivity/supermarket_accessible.txt > /dev/null 2>&1; then
+    echo "1" > "${tmpdir}/connectivity/supermarket_accessible.txt"
+else
+    echo "0" > "${tmpdir}/connectivity/supermarket_accessible.txt"
 fi
 
 tar -C "${tmpdir%/*/*}" -czpf "$hostname-$timestamp.tar.gz" "$hostname/$timestamp/"

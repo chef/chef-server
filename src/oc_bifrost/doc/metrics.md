@@ -160,5 +160,5 @@ When the request is finished, several more metrics are generated.
   - `bifrost.application.byRequestType.$REQUEST_LABEL.$REQUEST_VERB.upstreamRequests.rdbms.bifrost_db.my_fun2`
   - `bifrost.application.byRequestType.$REQUEST_LABEL.$REQUEST_VERB.upstreamRequests.rdbms.bifrost_db.my_fun3`
 
-[estatsd]:https://github.com/opscode/estatsd
-[stats_hero]:https://github.com/opscode/stats_hero
+[estatsd]:https://github.com/chef/estatsd
+[stats_hero]:https://github.com/chef/stats_hero

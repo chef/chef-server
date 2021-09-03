@@ -1,4 +1,4 @@
--- Copyright 2011-2012 Opscode, Inc. All Rights Reserved.
+-- Copyright Chef Software, Inc. All Rights Reserved.
 --
 -- Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License.  You may obtain a copy of the License at
 --
@@ -37,7 +37,7 @@ SET default_tablespace = '';
 SET default_with_oids = false;
 
 --
--- Name: checksums; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+-- Name: checksums; Type: TABLE; Schema: public; Owner: -; Tablespace:
 --
 
 CREATE TABLE checksums (
@@ -47,7 +47,7 @@ CREATE TABLE checksums (
 
 
 --
--- Name: clients; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+-- Name: clients; Type: TABLE; Schema: public; Owner: -; Tablespace:
 --
 
 CREATE TABLE clients (
@@ -66,7 +66,7 @@ CREATE TABLE clients (
 
 
 --
--- Name: cookbook_version_checksums; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+-- Name: cookbook_version_checksums; Type: TABLE; Schema: public; Owner: -; Tablespace:
 --
 
 CREATE TABLE cookbook_version_checksums (
@@ -77,7 +77,7 @@ CREATE TABLE cookbook_version_checksums (
 
 
 --
--- Name: cookbook_versions; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+-- Name: cookbook_versions; Type: TABLE; Schema: public; Owner: -; Tablespace:
 --
 
 CREATE TABLE cookbook_versions (
@@ -104,7 +104,7 @@ ALTER TABLE ONLY cookbook_versions ALTER COLUMN serialized_object SET STORAGE EX
 CREATE INDEX cookbook_version_checksums_by_id ON cookbook_version_checksums(cookbook_version_id);
 
 --
--- Name: cookbooks; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+-- Name: cookbooks; Type: TABLE; Schema: public; Owner: -; Tablespace:
 --
 
 CREATE TABLE cookbooks (
@@ -151,7 +151,7 @@ ALTER SEQUENCE cookbooks_id_seq OWNED BY cookbooks.id;
 
 
 --
--- Name: data_bag_items; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+-- Name: data_bag_items; Type: TABLE; Schema: public; Owner: -; Tablespace:
 --
 
 CREATE TABLE data_bag_items (
@@ -168,7 +168,7 @@ ALTER TABLE ONLY data_bag_items ALTER COLUMN serialized_object SET STORAGE EXTER
 
 
 --
--- Name: data_bags; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+-- Name: data_bags; Type: TABLE; Schema: public; Owner: -; Tablespace:
 --
 
 CREATE TABLE data_bags (
@@ -183,7 +183,7 @@ CREATE TABLE data_bags (
 
 
 --
--- Name: environments; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+-- Name: environments; Type: TABLE; Schema: public; Owner: -; Tablespace:
 --
 
 CREATE TABLE environments (
@@ -208,7 +208,7 @@ CREATE VIEW joined_cookbook_version AS
 
 
 --
--- Name: nodes; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+-- Name: nodes; Type: TABLE; Schema: public; Owner: -; Tablespace:
 --
 
 CREATE TABLE nodes (
@@ -226,7 +226,7 @@ ALTER TABLE ONLY nodes ALTER COLUMN serialized_object SET STORAGE EXTERNAL;
 
 
 --
--- Name: roles; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+-- Name: roles; Type: TABLE; Schema: public; Owner: -; Tablespace:
 --
 
 CREATE TABLE roles (
@@ -243,7 +243,7 @@ ALTER TABLE ONLY roles ALTER COLUMN serialized_object SET STORAGE EXTERNAL;
 
 
 --
--- Name: sandboxed_checksums; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+-- Name: sandboxed_checksums; Type: TABLE; Schema: public; Owner: -; Tablespace:
 --
 
 CREATE TABLE sandboxed_checksums (
@@ -255,7 +255,7 @@ CREATE TABLE sandboxed_checksums (
 
 
 --
--- Name: schema_info; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+-- Name: schema_info; Type: TABLE; Schema: public; Owner: -; Tablespace:
 --
 
 CREATE TABLE schema_info (
@@ -264,7 +264,7 @@ CREATE TABLE schema_info (
 
 
 --
--- Name: osc_users; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+-- Name: osc_users; Type: TABLE; Schema: public; Owner: -; Tablespace:
 --
 
 CREATE TABLE osc_users (
@@ -293,7 +293,7 @@ ALTER TABLE cookbooks ALTER COLUMN id SET DEFAULT nextval('cookbooks_id_seq'::re
 
 
 --
--- Name: checksums_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+-- Name: checksums_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace:
 --
 
 ALTER TABLE ONLY checksums
@@ -301,7 +301,7 @@ ALTER TABLE ONLY checksums
 
 
 --
--- Name: clients_authz_id_key; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+-- Name: clients_authz_id_key; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace:
 --
 
 ALTER TABLE ONLY clients
@@ -309,7 +309,7 @@ ALTER TABLE ONLY clients
 
 
 --
--- Name: clients_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+-- Name: clients_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace:
 --
 
 ALTER TABLE ONLY clients
@@ -317,7 +317,7 @@ ALTER TABLE ONLY clients
 
 
 --
--- Name: cookbook_versions_cookbook_id_major_minor_patch_key; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+-- Name: cookbook_versions_cookbook_id_major_minor_patch_key; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace:
 --
 
 ALTER TABLE ONLY cookbook_versions
@@ -325,7 +325,7 @@ ALTER TABLE ONLY cookbook_versions
 
 
 --
--- Name: cookbook_versions_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+-- Name: cookbook_versions_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace:
 --
 
 ALTER TABLE ONLY cookbook_versions
@@ -333,7 +333,7 @@ ALTER TABLE ONLY cookbook_versions
 
 
 --
--- Name: cookbooks_authz_id_key; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+-- Name: cookbooks_authz_id_key; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace:
 --
 
 ALTER TABLE ONLY cookbooks
@@ -341,7 +341,7 @@ ALTER TABLE ONLY cookbooks
 
 
 --
--- Name: cookbooks_org_id_name_key; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+-- Name: cookbooks_org_id_name_key; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace:
 --
 
 ALTER TABLE ONLY cookbooks
@@ -349,7 +349,7 @@ ALTER TABLE ONLY cookbooks
 
 
 --
--- Name: cookbooks_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+-- Name: cookbooks_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace:
 --
 
 ALTER TABLE ONLY cookbooks
@@ -357,7 +357,7 @@ ALTER TABLE ONLY cookbooks
 
 
 --
--- Name: data_bag_items_org_id_data_bag_name_item_name_key; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+-- Name: data_bag_items_org_id_data_bag_name_item_name_key; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace:
 --
 
 ALTER TABLE ONLY data_bag_items
@@ -365,7 +365,7 @@ ALTER TABLE ONLY data_bag_items
 
 
 --
--- Name: data_bag_items_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+-- Name: data_bag_items_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace:
 --
 
 ALTER TABLE ONLY data_bag_items
@@ -373,7 +373,7 @@ ALTER TABLE ONLY data_bag_items
 
 
 --
--- Name: data_bags_authz_id_key; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+-- Name: data_bags_authz_id_key; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace:
 --
 
 ALTER TABLE ONLY data_bags
@@ -381,7 +381,7 @@ ALTER TABLE ONLY data_bags
 
 
 --
--- Name: data_bags_org_id_name_key; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+-- Name: data_bags_org_id_name_key; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace:
 --
 
 ALTER TABLE ONLY data_bags
@@ -389,7 +389,7 @@ ALTER TABLE ONLY data_bags
 
 
 --
--- Name: data_bags_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+-- Name: data_bags_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace:
 --
 
 ALTER TABLE ONLY data_bags
@@ -397,7 +397,7 @@ ALTER TABLE ONLY data_bags
 
 
 --
--- Name: environments_authz_id_key; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+-- Name: environments_authz_id_key; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace:
 --
 
 ALTER TABLE ONLY environments
@@ -405,7 +405,7 @@ ALTER TABLE ONLY environments
 
 
 --
--- Name: environments_org_id_name_key; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+-- Name: environments_org_id_name_key; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace:
 --
 
 ALTER TABLE ONLY environments
@@ -413,7 +413,7 @@ ALTER TABLE ONLY environments
 
 
 --
--- Name: environments_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+-- Name: environments_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace:
 --
 
 ALTER TABLE ONLY environments
@@ -421,7 +421,7 @@ ALTER TABLE ONLY environments
 
 
 --
--- Name: nodes_authz_id_key; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+-- Name: nodes_authz_id_key; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace:
 --
 
 ALTER TABLE ONLY nodes
@@ -429,7 +429,7 @@ ALTER TABLE ONLY nodes
 
 
 --
--- Name: nodes_org_id_name_key; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+-- Name: nodes_org_id_name_key; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace:
 --
 
 ALTER TABLE ONLY nodes
@@ -437,7 +437,7 @@ ALTER TABLE ONLY nodes
 
 
 --
--- Name: nodes_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+-- Name: nodes_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace:
 --
 
 ALTER TABLE ONLY nodes
@@ -445,7 +445,7 @@ ALTER TABLE ONLY nodes
 
 
 --
--- Name: org_id_name_unique; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+-- Name: org_id_name_unique; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace:
 --
 
 ALTER TABLE ONLY clients
@@ -453,7 +453,7 @@ ALTER TABLE ONLY clients
 
 
 --
--- Name: roles_authz_id_key; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+-- Name: roles_authz_id_key; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace:
 --
 
 ALTER TABLE ONLY roles
@@ -461,7 +461,7 @@ ALTER TABLE ONLY roles
 
 
 --
--- Name: roles_org_id_name_key; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+-- Name: roles_org_id_name_key; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace:
 --
 
 ALTER TABLE ONLY roles
@@ -469,7 +469,7 @@ ALTER TABLE ONLY roles
 
 
 --
--- Name: roles_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+-- Name: roles_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace:
 --
 
 ALTER TABLE ONLY roles
@@ -477,7 +477,7 @@ ALTER TABLE ONLY roles
 
 
 --
--- Name: sandboxed_checksums_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+-- Name: sandboxed_checksums_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace:
 --
 
 ALTER TABLE ONLY sandboxed_checksums
@@ -485,7 +485,7 @@ ALTER TABLE ONLY sandboxed_checksums
 
 
 --
--- Name: osc_users_authz_id_key; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+-- Name: osc_users_authz_id_key; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace:
 --
 
 ALTER TABLE ONLY osc_users
@@ -493,7 +493,7 @@ ALTER TABLE ONLY osc_users
 
 
 --
--- Name: osc_users_email_key; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+-- Name: osc_users_email_key; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace:
 --
 
 ALTER TABLE ONLY osc_users
@@ -501,7 +501,7 @@ ALTER TABLE ONLY osc_users
 
 
 --
--- Name: osc_users_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+-- Name: osc_users_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace:
 --
 
 ALTER TABLE ONLY osc_users
@@ -509,7 +509,7 @@ ALTER TABLE ONLY osc_users
 
 
 --
--- Name: osc_users_username_key; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+-- Name: osc_users_username_key; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace:
 --
 
 ALTER TABLE ONLY osc_users
@@ -517,14 +517,14 @@ ALTER TABLE ONLY osc_users
 
 
 --
--- Name: cookbooks_org_id_index; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+-- Name: cookbooks_org_id_index; Type: INDEX; Schema: public; Owner: -; Tablespace:
 --
 
 CREATE INDEX cookbooks_org_id_index ON cookbooks USING btree (org_id);
 
 
 --
--- Name: nodes_org_id_environment_index; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+-- Name: nodes_org_id_environment_index; Type: INDEX; Schema: public; Owner: -; Tablespace:
 --
 
 CREATE INDEX nodes_org_id_environment_index ON nodes USING btree (org_id, environment);
@@ -565,4 +565,3 @@ ALTER TABLE ONLY data_bag_items
 --
 -- PostgreSQL database dump complete
 --
-

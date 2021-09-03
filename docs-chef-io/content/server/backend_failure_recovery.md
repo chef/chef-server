@@ -133,7 +133,7 @@ data, you may want to reinstate its leadership.
     rm /var/opt/chef-backend/leaderl/data/no-start-pgsql
     ```
 
-2.  Then restart PostgresSQL:
+2.  Then restart PostgreSQL:
 
     ```none
     chef-backend-ctl restart postgresql
@@ -160,7 +160,7 @@ cause a loss of availability if the first failure is not resolved.
 
 ### PostgreSQL
 
-The leader/follower state of PostgresSQL is managed by Leaderl. Leaderl
+The leader/follower state of PostgreSQL is managed by Leaderl. Leaderl
 performs health checks on PostgreSQL and fails over to a follower if the
 health check fails.
 

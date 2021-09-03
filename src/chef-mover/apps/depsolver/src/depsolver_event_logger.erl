@@ -1,7 +1,7 @@
 %% -*- erlang-indent-level: 4; indent-tabs-mode: nil; fill-column: 80 -*-
 %% ex: ts=4 sx=4 et
 %%
-%% Copyright 2013 Opscode, Inc. All Rights Reserved.
+%% Copyright Chef Software, Inc. All Rights Reserved.
 %%
 %% This file is provided to you under the Apache License,
 %% Version 2.0 (the "License"); you may not use this file
@@ -27,7 +27,7 @@
 %% Config = [{root_dir, "/tmp/depsolver"}, {max_files, 200}].
 %% depsolver_event_logger:add_handler(Config).
 %% '''
-%% 
+%%
 %% The above will enable the solution event logging. You will find
 %% directories `ok', `error', `timeout', and `unreachable' under the
 %% specified `root_dir'. Each directory will contain no more than
@@ -63,14 +63,14 @@
 %% gen_event callbacks
 -export([
          code_change/3,
-         handle_call/2, 
+         handle_call/2,
          handle_event/2,
          handle_info/2,
          init/1,
          terminate/2
         ]).
 
--define(SERVER, ?MODULE). 
+-define(SERVER, ?MODULE).
 
 -define(DIRS, ["ok", "timeout", "unreachable", "error"]).
 -define(DEFAULT_MAX_FILES, 200).
@@ -175,7 +175,7 @@ get_count({error, resolution_timeout}, #state{timeout_count = Count}) ->
 get_count(_, #state{error_count = Count}) ->
     Count.
 
-result_label({ok, _}) ->    
+result_label({ok, _}) ->
     "ok";
 result_label({error, {unreachable_package, _}}) ->
     "unreachable";

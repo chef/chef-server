@@ -179,7 +179,7 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_create do
           context "with metadata.providing" do
             after(:each) { delete_cookbook admin_user, cookbook_name, cookbook_version }
 
-            # http://docs.chef.io/config_rb_metadata.html#provides
+            # https://docs.chef.io/config_rb_metadata/#provides
             should_create_with_metadata 'providing', 'cats::sleep'
             should_create_with_metadata 'providing', 'here(:kitty, :time_to_eat)'
             should_create_with_metadata 'providing', 'service[snuggle]'

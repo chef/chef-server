@@ -14,6 +14,8 @@
 # limitations under the License.
 #
 
+provides :pg_user
+
 property :username,
   kind_of: String,
   name_property: true
@@ -69,7 +71,7 @@ action_class do
       pg_shadow_info = connection.exec('select passwd from pg_shadow where usename = $1', [ new_resource.username ])
       if pg_shadow_info.ntuples > 0
         pg_shadow_info = pg_shadow_info[0]
-        if new_resource.password && pg_shadow_info['passwd'] != ::PGconn.encrypt_password(new_resource.password, new_resource.username)
+        if new_resource.password && pg_shadow_info['passwd'] != ::PG::Connection.encrypt_password(new_resource.password, new_resource.username)
           changes << '  Update password'
           sql << " ENCRYPTED PASSWORD '#{connection.escape(new_resource.password)}'"
         end

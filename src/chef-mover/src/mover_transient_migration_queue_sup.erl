@@ -2,7 +2,7 @@
 %% ex: ts=4 sw=4 et
 %%
 %% @author Marc Paradise <marc@chef.io>
-%% @copyright 2013, Opscode Inc
+%% @copyright Chef Software, Inc.
 %%
 
 -module(mover_transient_migration_queue_sup).
@@ -23,4 +23,3 @@ init([]) ->
             {mover_transient_migration_queue, start_link, []},
                  permanent, brutal_kill, worker, [mover_transient_migration_queue]},
     {ok, {{one_for_one, 10, 10}, [Spec]}}.
-

@@ -1,5 +1,5 @@
 ## System setup
-# Hey neat - our packages have chef from master now
+# Hey neat - our packages have chef from main now
 # which means we can:
 package node['install_packages']
 

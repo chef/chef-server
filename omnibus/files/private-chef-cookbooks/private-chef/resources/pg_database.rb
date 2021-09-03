@@ -13,21 +13,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-property :database,
-  kind_of: String,
-  name_property: true
+property :database, String, name_property: true
 
-property :owner,
-  kind_of: String,
-  required: false
+property :owner, String, required: false
 
-property :template,
-  kind_of: String,
-  default: 'template0'
+property :template, String, default: 'template0'
 
-property :encoding,
-  kind_of: String,
-  default: 'UTF-8'
+property :encoding, String, default: 'UTF-8'
 
 # NOTE: Uses the value of node['private_chef']['postgresql']['username'] as
 # the user to run the database-creation psql command

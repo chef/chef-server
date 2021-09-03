@@ -1,5 +1,5 @@
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92-*-
-%% Copyright 2012 Opscode, Inc. All Rights Reserved.
+%% Copyright Chef Software, Inc. All Rights Reserved.
 %%
 %% This file is provided to you under the Apache License,
 %% Version 2.0 (the "License"); you may not use this file
@@ -32,7 +32,3 @@ is_enabled(_, _) ->
 is_enabled(Feature, Darklaunch) ->
     ?CHEF_DB_DARKLAUNCH:is_enabled(Feature, Darklaunch).
 -endif.
-
-
-
-

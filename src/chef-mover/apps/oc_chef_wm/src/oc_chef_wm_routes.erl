@@ -74,7 +74,7 @@ route(Type, Req, Args) ->
 %% Internal route function that generates routes with orgname
 org_route(organization_search, Req, Args) ->
     %% Using pattern matching with lists:keyfind instead of just proplists:get_value just
-    %% for extra sanity check
+    %% for extra check
     Org = org_name(Req),
     {search_index, Index} = lists:keyfind(search_index, 1, Args),
 

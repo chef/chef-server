@@ -46,7 +46,7 @@ Needing passing verify + adhoc builds:
 - oc-chef-pedant/Gemfile.lock
 - src/chef-server-ctl/Gemfile.lock
 
-You can rebase the PR's branch onto master by putting:
+You can rebase the PR's branch onto main by putting:
 `@dependabot rebase`
 in the comment section.
 
@@ -54,8 +54,8 @@ in the comment section.
 
 ### Overview
 
-For personal sanity, remove all .bundle and vendor directories before
-starting and after you complete the updates. 
+To avoid frustration, remove all .bundle and vendor directories before
+starting and after you complete the updates.
 
 The following Gemfile.locks need to be updated to do a complete
 sweep. We strongly recommend using bundler 1.17.x until bundler 2.1 is
@@ -66,7 +66,7 @@ out and stable.
 - src/oc-id/Gemfile.lock
   DO NOT update this file unless Rails is upgraded.
   Due to the Rails version, we've locked a lot of dependencies. Make
-  sure we can build and run oc-id before merging to master.
+  sure we can build and run oc-id before merging to main.
   You'll need the libsqlite3-dev library if doing this on Ubuntu.
 - src/oc\_erchef/apps/chef_objects/priv/depselector\_rb/Gemfile.lock
 - src/chef-server-ctl/Gemfile.lock
@@ -135,6 +135,34 @@ directory.
 11) If other gems need updating, go back to step 6, otherwise you are
 done.
 
+### Steps to Update the PG Gem in chef-server
+
+1) `cd` to the directory containing the .gemspec in chef-server-ctl for PG gem update.
+
+2) Rename or otherwise backup and delete the Gemfile.lock.
+
+3) Edit the .gemspec file to update the PG gem(s).
+
+4) chef-server-ctl depends on PG gem and chef_fixie which also depends on the PG gem.
+
+5) Make sure to update chef_fixie gem in the rubygem.org with same PG gem version otherwise chef-server-ctl fails with dependency conflict error.
+
+5) After publishing the `chef_fixie`, The chef-server gemspec changes can be tested in dev vm
+
+6) `ssh` into a dev vm.  Do `sudo -i` or otherwise login as root.
+
+6) `cd` to the directory containing the edited .gemspec
+file, using /host as the root directory, e.g. /host/src/chef-server-ctl.
+
+7) generate .gem file
+```
+/opt/opscode/embedded/bin/gem build *.gemspec
+```
+8) install .gem file
+```
+/opt/opscode/embedded/bin/gem install *.gem
+```
+
 ## Updating Chef Client
 
 - Ensure that the versions in the following locations are consistent.
@@ -176,7 +204,7 @@ done.
   - cd chef-server/dev
   - vagrant up
   - vagrant ssh
-  - In another window/tab on the host machine 
+  - In another window/tab on the host machine
     - make changes to the rebar.config if needed
       and run sync to sync the changes with the dev-vm.
     - Make sure to stop the sync after it is complete.

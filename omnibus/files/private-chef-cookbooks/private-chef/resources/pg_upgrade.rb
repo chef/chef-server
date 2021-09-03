@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 
-# That's right folks, there are no attributes.
+# That's right folks, there are no properties.
 
 # NOTE: Uses the value of certain node attributes in the course of execution.
 #
@@ -60,6 +60,8 @@
 # creation and updating are separate steps (and we could conceivably
 # fail between them), we're going to drop off a sentinel file that we
 # can check to see if we've been migrated.
+
+provides :pg_upgrade
 
 action :upgrade do
   if upgrade_required?
@@ -209,9 +211,12 @@ action_class do
         # Might not be initialized yet if a prior Chef run failed between
         # creating the directory and initializing a cluster in it
 
-        # the version file contains is a single line with the version
+        # the version file contains a single line with the version
         # (e.g. "9.2\n")
-        IO.read(version_file_for(data_dir)).strip
+        pg_version = IO.read(version_file_for(data_dir)).strip
+
+        # read the version from data_dir and match with the pg_version
+        data_dir.split('/').select { |x| x.match?(pg_version) }.first
       end
     end
   end
@@ -237,6 +242,8 @@ action_class do
 
         # The new data directory may have just been created; that's why
         # this needs to be evaluated lazily
+
+        # cannot use version_from_data_dir because from PostgreSQL 10 and later, the version is always a single number
         new_version = version_from_data_dir(new_data_dir)
 
         old_bins = binary_path_for(old_version)

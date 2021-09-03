@@ -1,6 +1,33 @@
 AllCops:
   TargetRubyVersion: 2.7
+  TargetChefVersion: 16.13
 
 # We need to turn this on, but it's going to require testing
 Chef/Deprecations/ResourceWithoutUnifiedTrue:
   Enabled: false
+
+# We should move to sysctl where we can
+Chef/Modernize/ExecuteSysctl:
+  Exclude:
+    - '**/metadata.rb'
+    - '**/attributes/*.rb'
+    - '**/Berksfile'
+    - 'recipes/elasticsearch.rb'
+    - 'recipes/sysctl-updates.rb'
+
+# We need to figure out if this is necessary and if so disable this cop inline
+Lint/RescueException:
+  Exclude:
+    - 'recipes/partybus.rb'
+
+# If these aren't actually being used let's disable them to speed up / reduce memory usage
+Lint/UselessAssignment:
+  Exclude:
+    - 'libraries/preflight_postgres_validator.rb'
+    - 'recipes/redis_lb.rb'
+    - 'resources/elasticsearch_index.rb'
+
+# Potentially worth cleaning up
+Style/ClassVars:
+  Exclude:
+    - 'libraries/warnings.rb'

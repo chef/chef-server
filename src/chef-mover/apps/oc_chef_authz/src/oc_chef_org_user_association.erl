@@ -1,7 +1,7 @@
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92 -*-
 %% ex: ts=4 sw=4 et
 %% @author Tyler Cloke <tyler@chef.io>
-%% Copyright 2014 Opscode, Inc. All Rights Reserved.
+%% Copyright 2014 Chef Software, Inc. All Rights Reserved.
 
 -module(oc_chef_org_user_association).
 
@@ -159,4 +159,3 @@ type_name(#oc_chef_org_user_association{}) ->
 
 delete(#oc_chef_org_user_association{org_id = OrgId, user_id = UserId}, CallbackFun) ->
     CallbackFun({delete_query(), [OrgId, UserId]}).
-

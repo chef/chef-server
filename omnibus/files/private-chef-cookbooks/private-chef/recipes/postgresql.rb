@@ -62,7 +62,7 @@ directory postgresql_dir do
 end
 
 # Upgrade the cluster if you gotta
-private_chef_pg_upgrade 'upgrade_if_necessary'
+pg_upgrade 'upgrade_if_necessary'
 
 component_runit_service 'postgresql' do
   control ['t']
@@ -120,7 +120,7 @@ if is_data_master?
   end
 
   # Update the postgresql superuser  with a password for tcp-based access.
-  private_chef_pg_user node['private_chef']['postgresql']['db_superuser'] do
+  pg_user node['private_chef']['postgresql']['db_superuser'] do
     password PrivateChef.credentials.get('postgresql', 'db_superuser_password')
     # This initial password set must be done over local socket:
     local_connection true

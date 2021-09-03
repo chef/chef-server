@@ -1,6 +1,6 @@
-require 'pg'
+require "pg"
 
-CREATE_SQL =<<SQL
+CREATE_SQL = <<SQL
 BEGIN;
 CREATE UNLOGGED TABLE IF NOT EXISTS cleanup_tracking_auth_actors(
     authz_id  CHAR(32)
@@ -10,13 +10,13 @@ CREATE OR REPLACE RULE cleanup_auth_actor_creation_tracking AS ON INSERT TO auth
 COMMIT;
 SQL
 
-CREATE_SQL2 =<<SQL
+CREATE_SQL2 = <<SQL
 CREATE UNLOGGED TABLE IF NOT EXISTS cleanup_known_auth_actors(
     authz_id  CHAR(32)
 );
 SQL
 
-DELETE_SQL =<<SQL
+DELETE_SQL = <<SQL
 BEGIN;
 DROP RULE IF EXISTS cleanup_auth_actor_creation_tracking ON auth_actor;
 DROP TABLE IF EXISTS cleanup_tracking_auth_actors;
@@ -119,7 +119,6 @@ def run_cleanup(bifrost_db, batch_size, wait_time)
       exit(0)
     end
 
-
     install_known_actor_table(known_actor_list, bifrost_db)
     run_bifrost_scan(batch_size, bifrost_db)
   ensure
@@ -131,7 +130,7 @@ def known_actor_list
   @known_actor_list ||= timed "Fetching initial opscode_chef clients and user list" do
     clients_and_users = erchef_db.exec("SELECT authz_id FROM clients UNION select authz_id FROM users")
     clients_and_users.map do |real_actor|
-      real_actor['authz_id']
+      real_actor["authz_id"]
     end
   end
 end
@@ -171,7 +170,7 @@ end
 
 def fetch_auth_actor_count(db)
   timed "Fetching count from bifrost auth_actor" do
-    db.exec("SELECT count(*) FROM auth_actor").first['count'].to_i
+    db.exec("SELECT count(*) FROM auth_actor").first["count"].to_i
   end
 end
 
@@ -192,7 +191,7 @@ def run_bifrost_scan(batch_size, db)
   loop do
     deletion_count = timed "Processing batch of #{batch_size} unknown auth_actors. " do
       count = db.exec(CLEANUP_SQL, [batch_size]).cmd_tuples
-      printf "Deleted #{count} actor#{count == 1 ? '' : 's'} (total = #{total_deleted + count})"
+      printf "Deleted #{count} actor#{count == 1 ? "" : "s"} (total = #{total_deleted + count})"
       count
     end
 

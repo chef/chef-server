@@ -3,7 +3,7 @@
 # ex: ts=4 sw=4 et
 #
 # Author:: Douglas Triggs (<doug@chef.io>)
-# Copyright:: Copyright (c) 2012 Opscode, Inc.
+# Copyright:: Copyright (c) Chef Software, Inc.
 #
 
 describe "Principals API Endpoint", :principals do
