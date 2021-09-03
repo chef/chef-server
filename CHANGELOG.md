@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.9.8 -->
-## [14.9.8](https://github.com/chef/chef-server/tree/14.9.8) (2021-09-03)
+<!-- latest_release 14.9.9 -->
+## [14.9.9](https://github.com/chef/chef-server/tree/14.9.9) (2021-09-03)
 
 #### Merged Pull Requests
-- First round of chefstyle on chef-server-ctl [#2698](https://github.com/chef/chef-server/pull/2698) ([tas50](https://github.com/tas50))
+- Bump chef from 17.4.25 to 17.4.38 in /oc-chef-pedant [#2778](https://github.com/chef/chef-server/pull/2778) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.8.7 -->
 ### Changes since 14.8.7 release
 
 #### Merged Pull Requests
+- Bump chef from 17.4.25 to 17.4.38 in /oc-chef-pedant [#2778](https://github.com/chef/chef-server/pull/2778) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.9.9 -->
 - First round of chefstyle on chef-server-ctl [#2698](https://github.com/chef/chef-server/pull/2698) ([tas50](https://github.com/tas50)) <!-- 14.9.8 -->
 - Cleanup markdown and fix some lints. [#2790](https://github.com/chef/chef-server/pull/2790) ([kagarmoe](https://github.com/kagarmoe)) <!-- 14.9.7 -->
 - Move server_orgs page to server menu. [#2788](https://github.com/chef/chef-server/pull/2788) ([IanMadd](https://github.com/IanMadd)) <!-- 14.9.6 -->
