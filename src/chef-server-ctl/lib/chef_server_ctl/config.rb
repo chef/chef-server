@@ -1,4 +1,4 @@
-require 'chef_server_ctl/log'
+require "chef_server_ctl/log"
 
 # ChefServerCtl::Config is a global configuration class for
 # ChefServerCtl subcommands.
@@ -31,10 +31,10 @@ Patents:       https://www.chef.io/patents
 
     def self.init(ctl)
       @@ctl = ctl
-      Log.debug("Using KNIFE_CONFIG_FILE=#{self.knife_config_file}")
-      Log.debug("Using KNIFE_BIN=#{self.knife_bin}")
-      Log.debug("Using ERCHEF_REINDEX_SCRIPT=#{self.erchef_reindex_script}")
-      Log.debug("Using HABITAT_MODE=#{self.habitat_mode}")
+      Log.debug("Using KNIFE_CONFIG_FILE=#{knife_config_file}")
+      Log.debug("Using KNIFE_BIN=#{knife_bin}")
+      Log.debug("Using ERCHEF_REINDEX_SCRIPT=#{erchef_reindex_script}")
+      Log.debug("Using HABITAT_MODE=#{habitat_mode}")
       # We don't always get run with a full chef-server-running.json
       # so any setting that fallsback to running_config or
       # credentials we can't print here. :(
@@ -45,27 +45,19 @@ Patents:       https://www.chef.io/patents
     # knife_config should be the path to a configuration file that
     # allows the `knife` executable to run with pivotal permissions.
     def self.knife_config_file
-      if ENV['CSC_KNIFE_CONFIG_FILE']
-        ENV['CSC_KNIFE_CONFIG_FILE']
-      else
-        DEFAULT_KNIFE_CONFIG_FILE
-      end
+      ENV["CSC_KNIFE_CONFIG_FILE"] || DEFAULT_KNIFE_CONFIG_FILE
     end
 
     # knife_bin is the command used to execute knife.
     def self.knife_bin
-      if ENV['CSC_KNIFE_BIN']
-        ENV['CSC_KNIFE_BIN']
-      else
-        DEFAULT_KNIFE_BIN
-      end
+      ENV["CSC_KNIFE_BIN"] || DEFAULT_KNIFE_BIN
     end
 
     # fips_enabled indicates whether the chef-server is running in
     # fips mode.
     def self.fips_enabled
-      if ENV['CSC_FIPS_ENABLED']
-        ENV['CSC_FIPS_ENABLED'] == "true"
+      if ENV["CSC_FIPS_ENABLED"]
+        ENV["CSC_FIPS_ENABLED"] == "true"
       else
         @@ctl.running_config["private_chef"]["fips_enabled"]
       end
@@ -74,9 +66,9 @@ Patents:       https://www.chef.io/patents
     # The lb_url should be an HTTP address that supports the Chef
     # Server API.
     def self.lb_url
-      if ENV['CSC_LB_URL']
-        ENV['CSC_LB_URL']
-      elsif self.fips_enabled
+      if ENV["CSC_LB_URL"]
+        ENV["CSC_LB_URL"]
+      elsif fips_enabled
         DEFAULT_FIPS_LB_URL
       else
         DEFAULT_LB_URL
@@ -86,22 +78,18 @@ Patents:       https://www.chef.io/patents
     # The bifrost_superuser_id is a shared secret of the bifrost
     # service that allows us to make requests without access controls.
     def self.bifrost_superuser_id
-      @@bifrost_superuser_id ||= if ENV['CSC_BIFROST_SUPERUSER_ID']
-                                   ENV['CSC_BIFROST_SUPERUSER_ID']
-                                 else
-                                   @@ctl.credentials.get('oc_bifrost', 'superuser_id')
-                                 end
+      @@bifrost_superuser_id ||= ENV["CSC_BIFROST_SUPERUSER_ID"] || @@ctl.credentials.get("oc_bifrost", "superuser_id")
     end
 
     # bifrost_url is an HTTP url for the Bifrost authentication
     # service.
     def self.bifrost_url
-      @@bifrost_url ||= if ENV['CSC_BIFROST_URL']
-                          ENV['CSC_BIFROST_URL']
+      @@bifrost_url ||= if ENV["CSC_BIFROST_URL"]
+                          ENV["CSC_BIFROST_URL"]
                         else
-                          bifrost_config = @@ctl.running_service_config('oc_bifrost')
-                          vip = bifrost_config['vip']
-                          port = bifrost_config['port']
+                          bifrost_config = @@ctl.running_service_config("oc_bifrost")
+                          vip = bifrost_config["vip"]
+                          port = bifrost_config["port"]
                           "http://#{vip}:#{port}"
                         end
     end
@@ -113,13 +101,13 @@ Patents:       https://www.chef.io/patents
     # We connect to bifrost as the superuser since we need to create
     # tables in cleanup-bfirost
     def self.bifrost_sql_connuri
-      @@bifrost_connuri ||= if ENV['CSC_BIFROST_DB_URI']
-                              ENV['CSC_BIFROST_DB_URI']
+      @@bifrost_connuri ||= if ENV["CSC_BIFROST_DB_URI"]
+                              ENV["CSC_BIFROST_DB_URI"]
                             else
-                              pg_config = @@ctl.running_service_config('postgresql')
-                              user = pg_config['db_connection_superuser'] || pg_config['db_superuser']
-                              password = @@ctl.credentials.get('postgresql', 'db_superuser_password')
-                              make_connection_string('bifrost', user, password)
+                              pg_config = @@ctl.running_service_config("postgresql")
+                              user = pg_config["db_connection_superuser"] || pg_config["db_superuser"]
+                              password = @@ctl.credentials.get("postgresql", "db_superuser_password")
+                              make_connection_string("bifrost", user, password)
                             end
     end
 
@@ -127,13 +115,13 @@ Patents:       https://www.chef.io/patents
     # format. This string is suitable for passing directly to
     # ::PGConn.open.
     def self.erchef_sql_connuri
-      @@erchef_connuri ||= if ENV['CSC_ERCHEF_DB_URI']
-                             ENV['CSC_ERCHEF_DB_URI']
+      @@erchef_connuri ||= if ENV["CSC_ERCHEF_DB_URI"]
+                             ENV["CSC_ERCHEF_DB_URI"]
                            else
-                             erchef_config = @@ctl.running_service_config('opscode-erchef')
-                             user = erchef_config['sql_connection_user'] || erchef_config['sql_user']
-                             password = @@ctl.credentials.get('opscode_erchef', 'sql_password')
-                             make_connection_string('opscode_chef', user, password)
+                             erchef_config = @@ctl.running_service_config("opscode-erchef")
+                             user = erchef_config["sql_connection_user"] || erchef_config["sql_user"]
+                             password = @@ctl.credentials.get("opscode_erchef", "sql_password")
+                             make_connection_string("opscode_chef", user, password)
                            end
     end
 
@@ -141,28 +129,24 @@ Patents:       https://www.chef.io/patents
     # reindex RPC calls. This is an RPC script that is part of the
     # erchef application.
     def self.erchef_reindex_script
-      if ENV['CSC_ERCHEF_REINDEX_SCRIPT']
-        ENV['CSC_ERCHEF_REINDEX_SCRIPT']
-      else
-        DEFAULT_ERCHEF_REINDEX_SCRIPT
-      end
+      ENV["CSC_ERCHEF_REINDEX_SCRIPT"] || DEFAULT_ERCHEF_REINDEX_SCRIPT
     end
 
     # habitat_mode is a boolean that is true if running in habitat
     # mode.
     def self.habitat_mode
-      ENV['CSC_HABITAT_MODE'] == "true"
+      ENV["CSC_HABITAT_MODE"] == "true"
     end
 
     def self.make_connection_string(db_name, db_user, db_password)
-      pg_config = @@ctl.running_service_config('postgresql')
-      host = pg_config['vip']
-      port = pg_config['port']
+      pg_config = @@ctl.running_service_config("postgresql")
+      host = pg_config["vip"]
+      port = pg_config["port"]
       "postgresql:///#{db_name}?user=#{db_user}&password=#{db_password}&host=#{host}&port=#{port}"
     end
 
     def self.ssl_params
-      return Hash.new unless habitat_mode
+      return {} unless habitat_mode
 
       # net/http doesn't allow CN customization so we can't mutually verify
       params = { verify_ssl: OpenSSL::SSL::VERIFY_NONE }

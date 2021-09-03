@@ -14,9 +14,9 @@
 # limitations under the License.
 #
 
-require 'restclient'
-require 'json'
-require 'pg'
+require "restclient"
+require "json"
+require "pg"
 
 PLACEHOLDER_GLOBAL_ORG_ID = "00000000000000000000000000000000"
 
@@ -62,7 +62,7 @@ add_command_under_category "remove-server-admin-permissions", "server-admins", "
 
   username = cmd_args[0]
 
-  if username.downcase == 'pivotal'
+  if username.downcase == "pivotal"
     msg = "You cannot remove the base superuser pivotal from server-admins."
     STDERR.puts msg
     raise SystemExit.new(1, msg)
@@ -84,16 +84,16 @@ add_command_under_category "remove-server-admin-permissions", "server-admins", "
   }.merge(::ChefServerCtl::Config.ssl_params)
   results = JSON.parse(RestClient::Request.execute(req_params))
 
-  users = db.exec_params("SELECT * from USERS WHERE authz_id IN #{create_sql_collection_string(results['actors'])}")
+  users = db.exec_params("SELECT * from USERS WHERE authz_id IN #{create_sql_collection_string(results["actors"])}")
   user_found = false
   users.each do |user|
-    if username == user['username']
+    if username == user["username"]
       user_found = true
       break
     end
   end
 
-  if !user_found
+  unless user_found
     msg = "User #{username} is not a member of server-admins so it cannot be removed."
     STDERR.puts msg
     raise SystemExit.new(1, msg)
@@ -131,7 +131,7 @@ add_command_under_category "list-server-admins", "server-admins", "List users th
   results = JSON.parse(RestClient::Request.execute(req_params))
 
   # get the user's authz id
-  users = db.exec_params("SELECT * from USERS WHERE authz_id IN #{create_sql_collection_string(results['actors'])}")
+  users = db.exec_params("SELECT * from USERS WHERE authz_id IN #{create_sql_collection_string(results["actors"])}")
   users.each do |user|
     puts user["username"]
   end
@@ -162,7 +162,7 @@ def get_server_admins_authz_id(db)
     raise SystemExit.new(1, msg)
   end
 
-  server_admins_erchef_group.first['authz_id']
+  server_admins_erchef_group.first["authz_id"]
 end
 
 def get_user_authz_id(db, username)
@@ -174,5 +174,5 @@ def get_user_authz_id(db, username)
     raise SystemExit.new(1, msg)
   end
 
-  user.first['authz_id']
+  user.first["authz_id"]
 end

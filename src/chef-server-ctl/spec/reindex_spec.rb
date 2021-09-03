@@ -27,7 +27,7 @@ describe "chef-server-ctl reindex" do
   let(:args) { [] }
   let(:config) do
     {
-      'private_chef' => {}
+      "private_chef" => {},
     }
   end
 
@@ -50,7 +50,7 @@ describe "chef-server-ctl reindex" do
   end
 
   context "with the -w flag" do
-    let(:args) { %w( -w --all-orgs ) }
+    let(:args) { %w{ -w --all-orgs } }
     it "does nothing but logs a message" do
       expect($stderr).to receive(:puts).with(/no longer supported/)
       reindex

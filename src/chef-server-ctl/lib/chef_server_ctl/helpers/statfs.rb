@@ -1,4 +1,4 @@
-require 'ffi'
+require "ffi" unless defined?(FFI)
 
 class Statfs
   #
@@ -9,10 +9,10 @@ class Statfs
   extend FFI::Library
   ffi_lib FFI::Library::LIBC
 
-  attach_function(:statvfs, %i(string pointer), :int)
+  attach_function(:statvfs, %i{string pointer}, :int)
   attach_function(:strerror, [:int], :string)
 
-  FSBLKCNT_T = if RbConfig::CONFIG['host_os'] =~ /darwin|osx|mach/i
+  FSBLKCNT_T = if RbConfig::CONFIG["host_os"] =~ /darwin|osx|mach/i
                  :uint
                else
                  :ulong
@@ -37,7 +37,7 @@ class Statfs
     # Linux has this at the end of the struct and if we don't include
     # it we end up getting a memory corruption error when th object
     # gets GCd.
-    if RbConfig::CONFIG['host_os'] =~ /linux/i
+    if RbConfig::CONFIG["host_os"] =~ /linux/i
       spec << :f_spare
       spec << [:int, 6]
     end
@@ -71,7 +71,7 @@ class Statfs
   def stat(path)
     statvfs = Statvfs.new
     if statvfs(path, statvfs.to_ptr) != 0
-      raise 'StatvfsFailedException', command.stderr
+      raise "StatvfsFailedException", command.stderr
     end
 
     statvfs

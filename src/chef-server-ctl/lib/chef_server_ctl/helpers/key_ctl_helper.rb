@@ -96,7 +96,6 @@ EOS
         exit_failure("Error: An unexpected error has occured (the server returned a #{err.response.code}).\nError: Please contact a system admin if the problem persists.")
       end
 
-
       def get_required_arg!(options, args, usage, field_symbol, field_name, field_number)
         field_value = nil
         if args.nil? || args[field_number - 1].nil?
@@ -109,16 +108,16 @@ EOS
 
       def build_key_object(name, key, expiration_date)
         {
-          'name' => name,
-          'public_key' => key,
-          'expiration_date' => expiration_date
+          "name" => name,
+          "public_key" => key,
+          "expiration_date" => expiration_date,
         }
       end
 
       def output_simple_key_results(results)
         results.each do |result|
-          puts "\nname: #{result['name']}"
-          puts "expired: #{result['expired']}"
+          puts "\nname: #{result["name"]}"
+          puts "expired: #{result["expired"]}"
         end
       end
 

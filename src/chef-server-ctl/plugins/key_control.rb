@@ -189,7 +189,7 @@ add_command_under_category "list-client-keys", "key-rotation", "List keys for a 
   Chef::Config[:chef_server_url] = "#{Chef::Config[:chef_server_root]}/organizations/#{@options.orgname}"
   begin
     if @options.verbose
-      @helper.output_full_key_results(Chef::Key.list_by_client(@options.clientname, inflate=true))
+      @helper.output_full_key_results(Chef::Key.list_by_client(@options.clientname, inflate = true))
     else
       @helper.output_simple_key_results(Chef::Key.list_by_client(@options.clientname))
     end
@@ -228,11 +228,11 @@ add_command_under_category "list-user-keys", "key-rotation", "List keys for a us
   @helper.get_required_arg!(@options, cmd_args, @usage, :username, "USERNAME", 1)
 
   begin
-  if @options.verbose
-    @helper.output_full_key_results(Chef::Key.list_by_user(@options.username, inflate=true))
-  else
-    @helper.output_simple_key_results(Chef::Key.list_by_user(@options.username))
-  end
+    if @options.verbose
+      @helper.output_full_key_results(Chef::Key.list_by_user(@options.username, inflate = true))
+    else
+      @helper.output_simple_key_results(Chef::Key.list_by_user(@options.username))
+    end
   rescue Net::HTTPServerException => e
     if e.response.code == "404"
       @helper.exit_failure("Error: Could not find user #{@options.username}.")
@@ -284,6 +284,6 @@ add_command_under_category "delete-client-key", "key-rotation", "Delete a key", 
       @helper.exit_failure("Error: Could not find key #{@options.key_name} for user #{@options.username}.")
     else
       @helper.exit_http_fail(e)
-      end
+    end
   end
 end
