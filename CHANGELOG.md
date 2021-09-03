@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.9.12 -->
-## [14.9.12](https://github.com/chef/chef-server/tree/14.9.12) (2021-09-03)
+<!-- latest_release 14.9.13 -->
+## [14.9.13](https://github.com/chef/chef-server/tree/14.9.13) (2021-09-03)
 
 #### Merged Pull Requests
-- Bump omnibus-software from `b774203` to `cd34c3b` in /omnibus [#2792](https://github.com/chef/chef-server/pull/2792) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Update another Chef Server -&gt; Chef Infra Server [#2791](https://github.com/chef/chef-server/pull/2791) ([tas50](https://github.com/tas50))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.8.7 -->
 ### Changes since 14.8.7 release
 
 #### Merged Pull Requests
+- Update another Chef Server -&gt; Chef Infra Server [#2791](https://github.com/chef/chef-server/pull/2791) ([tas50](https://github.com/tas50)) <!-- 14.9.13 -->
 - Bump omnibus-software from `b774203` to `cd34c3b` in /omnibus [#2792](https://github.com/chef/chef-server/pull/2792) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.9.12 -->
 - Bump activesupport from 6.1.4 to 6.1.4.1 in /oc-chef-pedant [#2750](https://github.com/chef/chef-server/pull/2750) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.9.11 -->
 - Bump activesupport from 6.1.4 to 6.1.4.1 in /src/oc_bifrost/oc-bifrost-pedant [#2751](https://github.com/chef/chef-server/pull/2751) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.9.10 -->
