@@ -90,7 +90,7 @@ Chef Infra Server versions earlier than 14.5 configured with `nginx['enable_non_
 
 :   The URL to visit for more information about how to update the number
     of nodes licensed for an organization. Default value:
-    `'http://www.chef.io/contact/on-premises-simple'`.
+    `'https://www.chef.io/pricing'`.
 
 `notification_email`
 

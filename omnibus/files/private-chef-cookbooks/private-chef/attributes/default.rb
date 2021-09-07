@@ -44,7 +44,7 @@ default['private_chef']['notification_email'] = 'pc-default@chef.io'
 default['private_chef']['from_email'] = '"Opscode" <donotreply@chef.io>'
 default['private_chef']['role'] = 'standalone'
 default['private_chef']['license']['nodes'] = 25
-default['private_chef']['license']['upgrade_url'] = 'http://www.chef.io/contact/on-premises-simple'
+default['private_chef']['license']['upgrade_url'] = 'https://www.chef.io/pricing'
 
 default['private_chef']['default_orgname'] = nil
 

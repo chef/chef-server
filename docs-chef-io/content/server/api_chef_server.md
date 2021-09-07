@@ -363,7 +363,7 @@ The response is similar to:
   "limit_exceeded": false,
   "node_license": 25,
   "node_count": 12,
-  "upgrade_url": "http://www.chef.io/contact/on-premises-simple"
+  "upgrade_url": "https://www.chef.io/pricing"
 }
 ```
 
@@ -394,7 +394,7 @@ number of nodes that are under license:
 </tr>
 <tr class="even">
 <td><code>license['upgrade_url']</code></td>
-<td>The URL to visit for more information about how to update the number of nodes licensed for an organization. Default value: <code>"http://www.chef.io/contact/on-premises-simple"</code>.</td>
+<td>The URL to visit for more information about how to update the number of nodes licensed for an organization. Default value: <code>"https://www.chef.io/pricing"</code>.</td>
 </tr>
 </tbody>
 </table>
