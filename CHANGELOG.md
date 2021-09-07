@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.9.15 -->
-## [14.9.15](https://github.com/chef/chef-server/tree/14.9.15) (2021-09-07)
+<!-- latest_release 14.9.16 -->
+## [14.9.16](https://github.com/chef/chef-server/tree/14.9.16) (2021-09-07)
 
 #### Merged Pull Requests
-- updated config default value of allow_email_update_only_from_manage [#2793](https://github.com/chef/chef-server/pull/2793) ([jashaik](https://github.com/jashaik))
+- Update URLs for our pricing page [#2795](https://github.com/chef/chef-server/pull/2795) ([tas50](https://github.com/tas50))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.8.7 -->
 ### Changes since 14.8.7 release
 
 #### Merged Pull Requests
+- Update URLs for our pricing page [#2795](https://github.com/chef/chef-server/pull/2795) ([tas50](https://github.com/tas50)) <!-- 14.9.16 -->
 - updated config default value of allow_email_update_only_from_manage [#2793](https://github.com/chef/chef-server/pull/2793) ([jashaik](https://github.com/jashaik)) <!-- 14.9.15 -->
 - Bump omnibus-software from `cd34c3b` to `13ad157` in /omnibus [#2794](https://github.com/chef/chef-server/pull/2794) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.9.14 -->
 - Update another Chef Server -&gt; Chef Infra Server [#2791](https://github.com/chef/chef-server/pull/2791) ([tas50](https://github.com/tas50)) <!-- 14.9.13 -->
