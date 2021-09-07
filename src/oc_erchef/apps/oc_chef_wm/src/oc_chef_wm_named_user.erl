@@ -199,7 +199,7 @@ from_json(Req, #base_state{server_api_version = ApiVersion, resource_state =
         _ -> string:lowercase(OrigEmail0)
     end,
     NewEmail = ej:get({<<"email">>}, UserData),
-    EmailUpdateConfig = envy:get(oc_chef_wm, allow_email_update_only_from_manage, boolean),
+    EmailUpdateConfig = envy:get(oc_chef_wm, allow_email_update_only_from_manage, false, boolean),
     %% check if the request originated from the webui or client (client /knife)
     RequestOrigin = wrq:get_req_header("x-ops-request-source", Req),
     % in v1+ keys may only be updated via the keys endpoint.
