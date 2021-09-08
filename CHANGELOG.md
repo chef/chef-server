@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.9.18 -->
-## [14.9.18](https://github.com/chef/chef-server/tree/14.9.18) (2021-09-08)
+<!-- latest_release 14.9.19 -->
+## [14.9.19](https://github.com/chef/chef-server/tree/14.9.19) (2021-09-08)
 
 #### Merged Pull Requests
-- updating the chef-zero version [#2798](https://github.com/chef/chef-server/pull/2798) ([vinay-satish](https://github.com/vinay-satish))
+- Changing the uri in the sqitch.plan causes sqitch to deploy some of the older changes that do not exist and fail an upgrade in automate. Reverting this change currently until we figure that out. [#2799](https://github.com/chef/chef-server/pull/2799) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.8.7 -->
 ### Changes since 14.8.7 release
 
 #### Merged Pull Requests
+- Changing the uri in the sqitch.plan causes sqitch to deploy some of the older changes that do not exist and fail an upgrade in automate. Reverting this change currently until we figure that out. [#2799](https://github.com/chef/chef-server/pull/2799) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.9.19 -->
 - updating the chef-zero version [#2798](https://github.com/chef/chef-server/pull/2798) ([vinay-satish](https://github.com/vinay-satish)) <!-- 14.9.18 -->
 - Changing the uri in the sqitch.plan causes sqitch to deploy some of the older changes that do not exist and fail an upgrade in automate. Reverting this change currently until we figure that out. [#2796](https://github.com/chef/chef-server/pull/2796) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.9.17 -->
 - Update URLs for our pricing page [#2795](https://github.com/chef/chef-server/pull/2795) ([tas50](https://github.com/tas50)) <!-- 14.9.16 -->
