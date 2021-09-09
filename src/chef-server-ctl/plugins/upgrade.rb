@@ -5,8 +5,9 @@
 
 require "optparse"
 require "ostruct"
+require "chef-utils"
 
-add_command_under_category "upgrade", "general", "Upgrade your Chef Infra Server installation after updating packages.", 2 do
+add_command_under_category "upgrade", "general", "Upgrade your #{ChefUtils::Dist::Server::PRODUCT} installation after updating packages.", 2 do
 
   # Since this is evaled, need to have methods first so they can be picked up
 
@@ -22,19 +23,19 @@ add_command_under_category "upgrade", "general", "Upgrade your Chef Infra Server
     @options.chef11_admin_client_key = "/etc/chef-server/admin.pem"
 
     opt_parser = OptionParser.new do |opts|
-      opts.banner = "Usage: chef-server-ctl upgrade [options]"
-      opts.banner = opts.banner << "\n Options only apply to open source Chef 11 server to Chef 12 server upgrades."
-      opts.banner = opts.banner << "\n If upgrading from Enterprise Chef 11 server to Chef 12 server no options are needed."
+      opts.banner = "Usage: #{ChefUtils::Dist::Server::SERVER_CTL} upgrade [options]"
+      opts.banner = opts.banner << "\n Options only apply to open source #{ChefUtils::Dist::Server::PRODUCT} 11 to #{ChefUtils::Dist::Server::PRODUCT} 12 upgrades."
+      opts.banner = opts.banner << "\n If upgrading from Enterprise #{ChefUtils::Dist::Server::PRODUCT} 11 to #{ChefUtils::Dist::Server::PRODUCT} 12 no options are needed."
 
       opts.on("-y", "--yes", "Skip confirmation") do |y|
         @options.skip_confirmation = y
       end
 
-      opts.on("-o", "--org-name [name]", String, "The name of the Chef 12 organization to be created. It must begin with a lower case letter or digit; can only have lower case letters, digits, hyphens, and underscores and must be between 1 and 255 characters long (Will ask interactively if not passed).") do |n|
+      opts.on("-o", "--org-name [name]", String, "The name of the #{ChefUtils::Dist::Infra::Org} 12 organization to be created. It must begin with a lower case letter or digit; can only have lower case letters, digits, hyphens, and underscores and must be between 1 and 255 characters long (Will ask interactively if not passed).") do |n|
         @options.org_name = n
       end
 
-      opts.on("-f", "--full-org-name [name]", String, "The full name of the Chef 12 organization to be created. It must begin with a non-white space character and must be between 1 and 1023 characters long (Will ask interactively if not passed).") do |n|
+      opts.on("-f", "--full-org-name [name]", String, "The full name of the #{ChefUtils::Dist::Infra::Org} 12 organization to be created. It must begin with a non-white space character and must be between 1 and 1023 characters long (Will ask interactively if not passed).") do |n|
         @options.full_org_name = n
       end
 
@@ -123,7 +124,7 @@ add_command_under_category "upgrade", "general", "Upgrade your Chef Infra Server
     bundle = File.join(base_path, "embedded", "bin", "bundle")
     status = run_command("#{bundle} exec ./bin/partybus upgrade")
     if status.success?
-      puts "Chef Infra Server Upgraded!"
+      puts "#{ChefUtils::Dist::Server::PRODUCT} Upgraded!"
       exit 0
     else
       exit 1
