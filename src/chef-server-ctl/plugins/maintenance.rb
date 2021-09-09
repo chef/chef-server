@@ -51,7 +51,7 @@ def validate_ip(ip)
   end
 end
 
-add_command_under_category "maintenance", "general", "Control the maintenance mode on the Chef Infra Server", 2 do
+add_command_under_category "maintenance", "general", "Control the maintenance mode on the #{ChefUtils::Dist::Server::PRODUCT}", 2 do
   args = ARGV[1..-1] # Chop off first 1 args, keep the rest... that is, everything after 'chef-server-ctl maintenance'
   options = {}
 
