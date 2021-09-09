@@ -2,11 +2,10 @@
 #
 # All Rights Reserved
 #
-
-add_command_under_category "gather-logs", "general", "Create a tarball of recent logs and system information for Chef Support", 2 do
+add_command_under_category "gather-logs", "general", "Create a tarball of recent logs and system information for #{ChefUtils::Dist::Server::PRODUCT} Support", 2 do
   if Process.uid != 0
-    STDERR.puts "private-chef-ctl gather-logs should be run as root."
+    STDERR.puts "private-#{ChefUtils::Dist::Infra::SHORT} gather-logs should be run as root."
     exit 1
   end
-  run_command("/opt/opscode/bin/gather-logs")
+  run_command("/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/bin/gather-logs")
 end
