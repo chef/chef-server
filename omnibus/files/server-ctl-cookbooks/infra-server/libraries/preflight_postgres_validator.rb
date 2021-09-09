@@ -23,7 +23,7 @@ class PostgresqlPreflightValidator < PreflightValidator
   REQUIRED_VERSION  = Gem::Version.new(9.6)
 
   # supported PG version
-  SUPPORTED_VERSION = Gem::Version.new(13.3)
+  SUPPORTED_VERSION = Gem::Version.new(13.4)
 
   def run!
     warn_about_removed_attribute('checkpoint_segments')
