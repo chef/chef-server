@@ -1,6 +1,6 @@
 
 
-add_command_under_category "filtered-dump", "Debug Tools", "Generate a filtered dump of indexable Chef Objects for all organizations. Top-level data is captured; only object name is captured from object json" do
+add_command_under_category "filtered-dump", "Debug Tools", "Generate a filtered dump of indexable #{ChefUtils::Dist::Server::PRODUCT} Objects for all organizations. Top-level data is captured; only object name is captured from object json" do
   require "json"
   require "zlib"
   require "stringio"
