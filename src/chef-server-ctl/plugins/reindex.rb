@@ -21,6 +21,7 @@ require "redis"
 require "chef_server_ctl/helpers/du"
 require "chef_server_ctl/helpers/statfs"
 
+
 def all_orgs
   Chef::Config.from_file(::ChefServerCtl::Config.knife_config_file)
   Chef::Org.list.keys.sort
@@ -45,12 +46,12 @@ def redis
 end
 
 def disable_api
-  puts "- Disabling the Chef API."
+  puts "- Disabling the #{ChefUtils::Dist::Server::PRODUCT} API."
   redis.hset("dl_default", "503_mode", true)
 end
 
 def enable_api
-  puts "- Re-enabling the Chef API"
+  puts "- Re-enabling the #{ChefUtils::Dist::Server::PRODUCT} API"
   redis.hdel("dl_default", "503_mode")
 end
 
