@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.9.21 -->
-## [14.9.21](https://github.com/chef/chef-server/tree/14.9.21) (2021-09-08)
+<!-- latest_release 14.9.22 -->
+## [14.9.22](https://github.com/chef/chef-server/tree/14.9.22) (2021-09-09)
 
 #### Merged Pull Requests
-- Bump omnibus-software from `13ad157` to `e0d92a6` in /omnibus [#2801](https://github.com/chef/chef-server/pull/2801) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- The default PostgreSQL version is 13.4 [#2802](https://github.com/chef/chef-server/pull/2802) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.8.7 -->
 ### Changes since 14.8.7 release
 
 #### Merged Pull Requests
+- The default PostgreSQL version is 13.4 [#2802](https://github.com/chef/chef-server/pull/2802) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.9.22 -->
 - Bump omnibus-software from `13ad157` to `e0d92a6` in /omnibus [#2801](https://github.com/chef/chef-server/pull/2801) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.9.21 -->
 - Pint to the original version redis was pointed at: 5.0.7 [#2800](https://github.com/chef/chef-server/pull/2800) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.9.20 -->
 - Changing the uri in the sqitch.plan causes sqitch to deploy some of the older changes that do not exist and fail an upgrade in automate. Reverting this change currently until we figure that out. [#2799](https://github.com/chef/chef-server/pull/2799) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.9.19 -->
