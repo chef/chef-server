@@ -14,7 +14,7 @@ add_command_under_category "password", "organization-and-user-management", "Set 
   # changed arg to turn on ldap to --enable-external-auth since that makes more sense to new users, but left in
   # --disable for older users.
   unless ARGV.length == 2 || (ARGV.length == 3 && (ARGV[2] == "--disable" || ARGV[2] == "--enable-external-auth"))
-    STDERR.puts "Usage: private-chef-ctl password <username> [--enable-external-auth]"
+    STDERR.puts "Usage: private-#{ChefUtils::Dist::Infra::SHORT}-ctl password <username> [--enable-external-auth]"
     exit 1
   end
 
@@ -31,7 +31,7 @@ add_command_under_category "password", "organization-and-user-management", "Set 
       exit 1
     end
     if password == "" && ldap_authentication_enabled?
-      example_cmd = "'chef-server-ctl password #{username} --enable-external-auth'"
+      example_cmd = "'#{ChefUtils::Dist::Server::SERVER_CTL} password #{username} --enable-external-auth'"
       STDERR.puts "You entered a blank password. If you were trying to enable ldap try #{example_cmd}?"
       exit 1
     end
