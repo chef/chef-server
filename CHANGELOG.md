@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.9.22 -->
-## [14.9.22](https://github.com/chef/chef-server/tree/14.9.22) (2021-09-09)
+<!-- latest_release 14.9.23 -->
+## [14.9.23](https://github.com/chef/chef-server/tree/14.9.23) (2021-09-09)
 
 #### Merged Pull Requests
-- The default PostgreSQL version is 13.4 [#2802](https://github.com/chef/chef-server/pull/2802) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Setting the pg to 13.3 in omnibus and default attribute [#2807](https://github.com/chef/chef-server/pull/2807) ([vinay-satish](https://github.com/vinay-satish))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.8.7 -->
 ### Changes since 14.8.7 release
 
 #### Merged Pull Requests
+- Setting the pg to 13.3 in omnibus and default attribute [#2807](https://github.com/chef/chef-server/pull/2807) ([vinay-satish](https://github.com/vinay-satish)) <!-- 14.9.23 -->
 - The default PostgreSQL version is 13.4 [#2802](https://github.com/chef/chef-server/pull/2802) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.9.22 -->
 - Bump omnibus-software from `13ad157` to `e0d92a6` in /omnibus [#2801](https://github.com/chef/chef-server/pull/2801) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.9.21 -->
 - Pint to the original version redis was pointed at: 5.0.7 [#2800](https://github.com/chef/chef-server/pull/2800) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.9.20 -->
