@@ -118,6 +118,11 @@ action_class do
       # directories); i.e., this is just another garden-variety chef run
       Chef::Log.debug 'Database cluster is unchanged; nothing to upgrade'
       false
+    elsif (/[0-9]+/.match old_data_dir).to_s == (/[0-9]+/.match new_data_dir).to_s
+      # Compare major version numbers of old_data_dir and new_data_dir,
+      # don't upgrade if equal.
+      Chef::Log.debug 'PostgreSQL major version numbers are same; upgrade unnecessary'
+      false
     elsif Dir.exist?(new_data_dir) &&
           cluster_initialized?(new_data_dir) &&
           ::File.exist?(sentinel_file)
@@ -227,9 +232,9 @@ action_class do
   # @note The path used in this method are taken from how we currently
   #   use Postgres software definitions.
   #
-  # @param version [String] indicates the major release of Postgres,
-  #   e.g. "9.1", "9.2".  Note that this does NOT include patch-levels,
-  #   like "9.1.9" or "9.2.4"
+  # @param version [String] indicates the release of Postgres,
+  #   e.g. "9.1", "9.2".  Note that since PostgreSQL 10 this
+  #   no longer includes patch-levels, like "9.1.9" or "9.2.4"
   # @return [String] the absolute path to the binaries.
   def binary_path_for(version)
     "/opt/opscode/embedded/postgresql/#{version}/bin"
