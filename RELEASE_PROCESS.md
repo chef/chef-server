@@ -160,6 +160,21 @@ Note that no changes other than CHANGELOG/RELEASE_NOTES changes should land on m
 Chef / [chef/chef-server:main] habitat/build / main
 https://buildkite.com/chef/chef-chef-server-main-habitat-build
 
+21. Test the supermarket by adding the below configuration in '/etc/opscode/chef-server.rb' and run chef-server-ctl reconfigure
+```
+oc_id['applications'] ||= {}
+oc_id['applications']['supermarket'] = {
+  'redirect_uri' => 'https://supermarket.mycompany.com/auth/chef_oauth2/callback',
+}
+```
+The result of chef-server-ctl reconfigure should successfull for confirming supermarket is working with the latest chef-server version.
+```
+chef-server-ctl reconfigure
+```
+22. Test the chef-server version with Automate if there are any schema changes.
+Follow the below document for testing the chef-server version in Automate environment.
+https://github.com/chef/automate/blob/main/dev-docs/DEV_ENVIRONMENT.md
+
 #### Special Testing
 
 Do any special testing related to the particular release you are doing, as applicable.
