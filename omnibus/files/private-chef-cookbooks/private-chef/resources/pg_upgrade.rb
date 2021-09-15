@@ -121,6 +121,7 @@ action_class do
     elsif (/^[0-9]+/.match old_data_dir).to_s == (/^[0-9]+/.match new_data_dir).to_s
       # Compare major version numbers of old_data_dir and new_data_dir,
       # don't upgrade if equal.
+      Chef::Log.debug 'PostgreSQL major version numbers are same; upgrade unnecessary'
       false
     elsif Dir.exist?(new_data_dir) &&
           cluster_initialized?(new_data_dir) &&
