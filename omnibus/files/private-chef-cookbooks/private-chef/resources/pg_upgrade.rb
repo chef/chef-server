@@ -227,9 +227,9 @@ action_class do
   # @note The path used in this method are taken from how we currently
   #   use Postgres software definitions.
   #
-  # @param version [String] indicates the major release of Postgres,
-  #   e.g. "9.1", "9.2".  Note that this does NOT include patch-levels,
-  #   like "9.1.9" or "9.2.4"
+  # @param version [String] indicates the release of Postgres,
+  #   e.g. "9.1", "9.2".  Note that since PostgreSQL 10 this
+  #   no longer includes patch-levels, like "9.1.9" or "9.2.4"
   # @return [String] the absolute path to the binaries.
   def binary_path_for(version)
     "/opt/opscode/embedded/postgresql/#{version}/bin"
