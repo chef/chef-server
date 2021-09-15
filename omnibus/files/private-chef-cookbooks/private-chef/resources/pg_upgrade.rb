@@ -119,7 +119,8 @@ action_class do
       Chef::Log.debug 'Database cluster is unchanged; nothing to upgrade'
       false
     elsif (/^[0-9]+/.match old_data_dir).to_s == (/^[0-9]+/.match new_data_dir).to_s
-      # Compare major version numbers of old_data_dir and new_data_dir
+      # Compare major version numbers of old_data_dir and new_data_dir,
+      # don't upgrade if equal.
       false
     elsif Dir.exist?(new_data_dir) &&
           cluster_initialized?(new_data_dir) &&
