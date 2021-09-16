@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.9.24 -->
-## [14.9.24](https://github.com/chef/chef-server/tree/14.9.24) (2021-09-14)
+<!-- latest_release 14.9.25 -->
+## [14.9.25](https://github.com/chef/chef-server/tree/14.9.25) (2021-09-16)
 
 #### Merged Pull Requests
-- Release tag should be verified in automate environment as part of rel… [#2797](https://github.com/chef/chef-server/pull/2797) ([jashaik](https://github.com/jashaik))
+- EOL 13 docs [#2809](https://github.com/chef/chef-server/pull/2809) ([kagarmoe](https://github.com/kagarmoe))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.9.23 -->
 ### Changes since 14.9.23 release
 
 #### Merged Pull Requests
+- EOL 13 docs [#2809](https://github.com/chef/chef-server/pull/2809) ([kagarmoe](https://github.com/kagarmoe)) <!-- 14.9.25 -->
 - Release tag should be verified in automate environment as part of rel… [#2797](https://github.com/chef/chef-server/pull/2797) ([jashaik](https://github.com/jashaik)) <!-- 14.9.24 -->
 <!-- release_rollup -->
 
