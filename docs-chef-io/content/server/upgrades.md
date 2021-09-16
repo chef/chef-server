@@ -35,7 +35,7 @@ Requires License
 : Chef Infra Server 13 and later are governed by the [Chef EULA]({{< relref "chef_license" >}}). You are required to accept these terms when using Chef Infra Server for the first time by entering `Yes` when prompted.
 
 Supported Release
-: Chef Infra Server 14 and later are supported Chef Software releases. Earlier releases are no longer supported as of 6/30/2021. For more information about supported Chef Software see the [Supported Versions]({{< relref "/versions#supported-commercial-distributions" >}}) documentation.
+: Chef Infra Server 14 and later are supported Chef Software releases. Earlier releases are not supported. For more information about supported Chef Software see the [Supported Versions]({{< relref "/versions#supported-commercial-distributions" >}}) documentation.
 
 ## Release-Specific Steps
 
@@ -618,7 +618,7 @@ Check the [post upgrade steps](#post-upgrade-steps) if you are upgrading from a 
 
 Chef Manage is a management console for data bags, attributes, run-lists, roles, environments, and cookbooks from a web user interface.
 
-Chef Infra Server 13 and 14 support the Chef Manage add-on. This add-on is [deprecated]({{< relref "versions#deprecated-products-and-versions" >}}) and will reach [EOL]({{< relref "versions#end-of-life-eol-products" >}}) on December 31, 2021. After upgrading Chef Infra Server, reinstall the add-on and then reconfigure Chef Infra Server and the add-on.
+Chef Infra Server 14 supports the Chef Manage add-on. This add-on is [deprecated]({{< relref "versions#deprecated-products-and-versions" >}}) and will reach [EOL]({{< relref "versions#end-of-life-eol-products" >}}) on December 31, 2022. After upgrading Chef Infra Server, reinstall the add-on and then reconfigure Chef Infra Server and the add-on.
 
 #### Use Downloads.chef.io
 
