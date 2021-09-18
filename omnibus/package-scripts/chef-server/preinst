@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Perform necessary chef-server setup steps after package is installed.
+# Perform necessary chef-server setup steps before package is installed.
 #
 
 PROGNAME=$(basename $0)
@@ -37,5 +37,13 @@ warn_about_search_reindex() {
     fi
 }
 
+save_pg_dir()
+{
+    # save the postgresql directory because it will be deleted by package upgrade
+    sudo mkdir --verbose /tmp/opt-opscode-embedded-postgresql
+    sudo cp --recursive --no-clobber --verbose /opt/opscode/embedded/postgresql/* /tmp/opt-opscode-embedded-postgresql
+}
+
 warn_about_search_reindex
+save_pg_dir
 exit 0

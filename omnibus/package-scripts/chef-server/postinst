@@ -11,6 +11,10 @@ function error_exit
 	exit 1
 }
 
+# restore postgresql directory from previous save
+# --force ?
+sudo cp --recursive --no-clobber --verbose /tmp/opt-opscode-embedded-postgresql/* /opt/opscode/embedded/postgresql
+
 ln -sf /opt/opscode/bin/private-chef-ctl /usr/bin || error_exit "Cannot link private-chef-ctl in /usr/bin"
 ln -sf /opt/opscode/bin/chef-server-ctl /usr/bin || error_exit "Cannot link chef-server-ctl in /usr/bin"
 
