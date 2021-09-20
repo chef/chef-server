@@ -6,6 +6,7 @@
 describe "Headers", :headers do
   let (:request_url) { api_url("users") }
   let (:requestor) { platform.admin_user }
+  let (:config) { JSON.parse(IO.read("/etc/opscode/chef-server-running.json"))['private_chef'] }
 
 
   context "Request Headers" do
@@ -43,9 +44,18 @@ describe "Headers", :headers do
     end
   end # context "Request Headers"
 
-    context "Verify nginx default error responses", :nginx_default_error do
+  context "Verify nginx default error responses", :nginx_default_error do
     it "openresty tag should not be present in the nginx default error responses" do
       get(request_url.sub!('https', 'http'), superuser).to_s.should_not loosely_match(/.*openresty.*/)
     end
   end # context "Verify nginx default error response"
+
+
+  context "Responses Headers", :response_headers do
+    it "x_ops_api_info should be configured" do
+      response_header = get(request_url, requestor).headers
+      response_header[:x_ops_api_info].nil?.should eql !config['opscode-erchef']['include_x_ops_api_info']
+    end
+  end # context "Responses Headers"
+
 end # describe "Headers"
