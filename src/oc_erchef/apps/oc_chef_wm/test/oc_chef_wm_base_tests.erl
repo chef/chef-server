@@ -460,6 +460,32 @@ verify_email_updates_test_() ->
        end}
      ]}.
 
+verify_add_x_ops_api_info_test_(Include_version_in_status) ->
+    {
+        setup,
+        fun() ->
+            application:set_env(oc_chef_wm, include_version_in_status, Include_version_in_status),
+            meck:expect(wrq, get_req_header, fun(_Header, _Req) -> "username" end)
+        end,
+        fun(_) ->
+           meck:unload()
+        end,
+        [
+            fun() ->
+                Req1 = make_req_data(),
+                State = make_base_state(),
+                Req2 = oc_chef_wm_base:add_x_ops_api_info(Req1, State),
+                HeaderPresent =
+                    case wrq:get_req_header("add_x_ops_api_info", Req2) of
+                        undefined -> false;
+                        "" -> false;
+                        _ -> true
+                    end,
+                ?assertEqual(Include_version_in_status, HeaderPresent)
+            end
+        ]
+    }.
+
 make_req_data() ->
     #wm_reqdata{}.
 

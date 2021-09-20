@@ -347,6 +347,7 @@ default['private_chef']['opscode-erchef']['keygen_timeout'] = 1000
 default['private_chef']['opscode-erchef']['keygen_key_size'] = 2048
 default['private_chef']['opscode-erchef']['strict_search_result_acls'] = false
 default['private_chef']['opscode-erchef']['ssl_session_caching']['enabled'] = false
+default['private_chef']['opscode-erchef']['include_x_ops_api_info'] = false
 
 # The amount of milliseconds before we timeout and assume an endpoint is down for
 # the /_status endpoint.
