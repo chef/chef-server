@@ -103,9 +103,22 @@ delete_resource(Req, #base_state{chef_db_context = DbContext,
             {true, wrq:set_resp_body(JSON, Req), State}
     end.
 
-to_json(Req, #base_state{resource_state = #named_policy_named_rev_state{
+to_json(Req, #base_state{chef_db_context = DbContext,
+                            resource_state = #named_policy_named_rev_state{
                             policy_revision_record = PolicyRevRecord}} = State) ->
     CompressedObject = PolicyRevRecord#oc_chef_policy_revision.serialized_object,
-    JSON = chef_db_compression:decompress(CompressedObject),
-    {JSON, Req, State}.
+    JSON1 = chef_json:decode(chef_db_compression:decompress(CompressedObject)),
+    RevisionID = wrq:path_info(revision_id, Req),
+    JSON2 = 
+        case chef_db:list_policy_groups_for_policy_revision(DbContext, RevisionID) of
+            {error, Why} ->
+                Report = {list_policy_groups_for_policy_revision, {Why}},
+                lager:error("~p", [Report]),
+                error(Report);
+
+            PolicyGroupNames ->
+                PolicyGroupNameList = [PG || {PG} <- PolicyGroupNames],
+                ej:set({<<"policy_group_list">>}, JSON1, PolicyGroupNameList)
+        end,
+    {chef_json:encode(JSON2), Req, State}.
 

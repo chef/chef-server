@@ -101,6 +101,7 @@
          %% policy_groups
          find_all_policy_revisions_by_group_and_name/1,
          find_all_policy_revisions_associated_to_group/2,
+         list_policy_groups_for_policy_revision/1,
 
          %% policies
          list_all_policy_revisions_by_orgid/1,
@@ -1594,6 +1595,17 @@ find_all_policy_revisions_associated_to_group(OrgId, GroupName) ->
             {ok, []};
         {ok, Rows } ->
             Processed = policy_rev_by_group_rows_to_tuple(Rows, []),
+            {ok, Processed};
+        {error, Reason} ->
+            {error, Reason}
+    end.
+
+list_policy_groups_for_policy_revision(RevisionID) ->
+    case sqerl:select(list_policy_groups_for_policy_revision, [RevisionID]) of
+        {ok, none} ->
+            {ok, []};
+        {ok, Rows } ->
+            Processed = [{proplists:get_value(<<"policy_group_name">>, R)} || R <- Rows],
             {ok, Processed};
         {error, Reason} ->
             {error, Reason}
