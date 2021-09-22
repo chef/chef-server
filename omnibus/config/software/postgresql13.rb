@@ -16,7 +16,7 @@
 
 name "postgresql13"
 
-default_version "13.3"
+default_version "13.4"
 
 license "PostgreSQL"
 license_file "COPYRIGHT"
@@ -31,6 +31,7 @@ dependency "config_guess"
 
 source url: "https://ftp.postgresql.org/pub/source/v#{version}/postgresql-#{version}.tar.bz2"
 version("13.3") { source sha256: "3cd9454fa8c7a6255b6743b767700925ead1b9ab0d7a0f9dcb1151010f8eb4a1" }
+version("13.4") { source sha256: "ea93e10390245f1ce461a54eb5f99a48d8cabd3a08ce4d652ec2169a357bc0cd" }
 
 relative_path "postgresql-#{version}"
 
