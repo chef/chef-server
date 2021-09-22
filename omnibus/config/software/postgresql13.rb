@@ -14,24 +14,24 @@
 # limitations under the License.
 #
 
-name "postgresql13"
+name 'postgresql13'
 
-default_version "13.4"
+default_version '13.4'
 
-license "PostgreSQL"
-license_file "COPYRIGHT"
+license 'PostgreSQL'
+license_file 'COPYRIGHT'
 skip_transitive_dependency_licensing true
 
-dependency "zlib"
-dependency "openssl"
-dependency "libedit"
-dependency "ncurses"
-dependency "libossp-uuid"
-dependency "config_guess"
+dependency 'zlib'
+dependency 'openssl'
+dependency 'libedit'
+dependency 'ncurses'
+dependency 'libossp-uuid'
+dependency 'config_guess'
 
 source url: "https://ftp.postgresql.org/pub/source/v#{version}/postgresql-#{version}.tar.bz2"
-version("13.3") { source sha256: "3cd9454fa8c7a6255b6743b767700925ead1b9ab0d7a0f9dcb1151010f8eb4a1" }
-version("13.4") { source sha256: "ea93e10390245f1ce461a54eb5f99a48d8cabd3a08ce4d652ec2169a357bc0cd" }
+version('13.3') { source sha256: '3cd9454fa8c7a6255b6743b767700925ead1b9ab0d7a0f9dcb1151010f8eb4a1' }
+version('13.4') { source sha256: 'ea93e10390245f1ce461a54eb5f99a48d8cabd3a08ce4d652ec2169a357bc0cd' }
 
 relative_path "postgresql-#{version}"
 
@@ -39,7 +39,7 @@ build do
   env = with_standard_compiler_flags(with_embedded_path)
   short_version = version.gsub(/^([0-9]+).([0-9]+).[0-9]+$/, '\1.\2')
 
-  update_config_guess(target: "config")
+  update_config_guess(target: 'config')
 
   command "./configure" \
           " --prefix=#{install_dir}/embedded/postgresql/#{short_version}" \
