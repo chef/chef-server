@@ -118,11 +118,6 @@ action_class do
       # directories); i.e., this is just another garden-variety chef run
       Chef::Log.debug 'Database cluster is unchanged; nothing to upgrade'
       false
-    elsif (/[0-9]+/.match old_data_dir).to_s == (/[0-9]+/.match new_data_dir).to_s
-      # Compare major version numbers of old_data_dir and new_data_dir,
-      # don't upgrade if equal.
-      Chef::Log.debug 'PostgreSQL major version numbers are same; upgrade unnecessary'
-      false
     elsif Dir.exist?(new_data_dir) &&
           cluster_initialized?(new_data_dir) &&
           ::File.exist?(sentinel_file)
@@ -264,7 +259,7 @@ action_class do
           --new-options=" -c config_file=#{::File.join(new_data_dir, 'postgresql.conf')}"
         && date > #{sentinel_file}
       EOM
-      }
+      } unless (/[0-9]+/.match old_data_dir).to_s == (/[0-9]+/.match new_data_dir).to_s
       user node['private_chef']['postgresql']['username']
       cwd new_data_dir # TODO: Should this be some other directory, instead?
       creates sentinel_file
