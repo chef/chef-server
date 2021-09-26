@@ -37,7 +37,7 @@ relative_path "postgresql-#{version}"
 
 build do
   env = with_standard_compiler_flags(with_embedded_path)
-  short_version = version.gsub(/^([0-9]+).([0-9]+).[0-9]+$/, '\1.\2')
+  short_version = version.gsub(/^([0-9]+).[0-9]+$/, '\1')
 
   update_config_guess(target: "config")
 
