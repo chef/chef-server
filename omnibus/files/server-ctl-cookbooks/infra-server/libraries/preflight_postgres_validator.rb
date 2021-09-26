@@ -14,16 +14,17 @@
 # limitations under the License.
 
 require_relative './warnings'
+require_relative './pgversion'
 
 class PostgresqlPreflightValidator < PreflightValidator
   # This check used to verify that the external PG version matches the version
   # we ship. When we bumped the version we ship to 9.6, we haven't yet
   # introduced any changes that _require_ 9.6. So, these constants reflect the
   # actually required PG version.
-  REQUIRED_VERSION  = Gem::Version.new(9.6)
+  REQUIRED_VERSION  = PgVersion.new('9.6')
 
   # supported PG version
-  SUPPORTED_VERSION = Gem::Version.new(13.3)
+  SUPPORTED_VERSION = PgVersion.new('13')
 
   def run!
     warn_about_removed_attribute('checkpoint_segments')
@@ -186,17 +187,17 @@ class PostgresqlPreflightValidator < PreflightValidator
   def backend_verify_postgres_version(connection)
     # Make sure the server is a supported version.
     r = connection.exec('SHOW server_version;')
-    v = Gem::Version.new /^([0-9\.]+)/.match(r[0]['server_version'])[0]
+    v = PgVersion.new /^([0-9\.]+)/.match(r[0]['server_version'])[0]
 
     # Note that we're looking for the same major, and using our minor as the minimum version
-    # This provides compatibility with external databases that use < 9.6 before we make use
-    # of any features available in > 9.2.
+    # This provides compatibility with external databases that use < 13 before we make use
+    # of any features available in > 9.6.
 
-    if v == REQUIRED_VERSION || v == SUPPORTED_VERSION
+    if v.major == REQUIRED_VERSION || v.major == SUPPORTED_VERSION
       :ok
-    elsif v < REQUIRED_VERSION || v > SUPPORTED_VERSION
+    elsif v.major < REQUIRED_VERSION || v.major > SUPPORTED_VERSION
       fail_with err_CSPG014_bad_postgres_version(v)
-    elsif v < SUPPORTED_VERSION
+    elsif v.major < SUPPORTED_VERSION
       ChefServer::Warnings.warn err_unsupported_postgres_version(v)
     end
   end
