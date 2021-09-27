@@ -35,7 +35,7 @@ module Omnibus
       if ENV.has_key?(CREDENTIAL_ENV)
         @credentials = Veil::CredentialCollection::ChefSecretsEnv.new(var_name: CREDENTIAL_ENV)
       else
-        secrets_file = ENV["SECRETS_FILE"] || "/etc/opscode/private-#{ChefUtils::Dist::Infra::SHORT}-secrets.json"
+        secrets_file = ENV["SECRETS_FILE"] || "/etc/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/private-#{ChefUtils::Dist::Infra::SHORT}-secrets.json"
         @credentials ||= Veil::CredentialCollection::ChefSecretsFile.from_file(secrets_file)
       end
     end
