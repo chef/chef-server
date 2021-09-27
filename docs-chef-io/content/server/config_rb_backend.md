@@ -362,7 +362,7 @@ See [Elasticsearch's configuration documentation](https://www.elastic.co/guide/e
 
 `leaderl.etcd_pool.ibrowse_options`
 : Internal options to affect how requests to etcd are made (see
-  <https://github.com/cmullaparthi/ibrowse/blob/master/doc/ibrowse.html>).
+  <https://github.com/cmullaparthi/ibrowse/blob/main/doc/ibrowse.html>).
 
 `leaderl.epmd_monitor.check_interval`
 : How often to check that leaderl is registered with the Erlang Port Mapping Daemon (epmd) in milliseconds.
@@ -410,7 +410,7 @@ See [Elasticsearch's configuration documentation](https://www.elastic.co/guide/e
 
 ### Chef HA Backend Leader Connection Pool Settings
 
-See <https://github.com/seth/pooler/blob/master/README.org> for details.
+See <https://github.com/seth/pooler/blob/main/README.org> for details.
 These are internal settings that affect the responsiveness, uptime and
 reliability of the backend cluster. They should not be modified unless
 you are advised to do so by Support.
