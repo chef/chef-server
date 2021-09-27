@@ -1,4 +1,5 @@
 require "chef_server_ctl/log"
+require "chef-utils/dist"
 
 # ChefServerCtl::Config is a global configuration class for
 # ChefServerCtl subcommands.
@@ -17,11 +18,11 @@ require "chef_server_ctl/log"
 # out during reconfiugration.
 module ChefServerCtl
   module Config
-    DEFAULT_KNIFE_CONFIG_FILE = "/etc/opscode/pivotal.rb".freeze
-    DEFAULT_KNIFE_BIN = "/opt/opscode/embedded/bin/knife".freeze
+    DEFAULT_KNIFE_CONFIG_FILE = "/etc/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/pivotal.rb".freeze
+    DEFAULT_KNIFE_BIN = "/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/embedded/bin/knife".freeze
     DEFAULT_LB_URL = "https://127.0.0.1".freeze
     DEFAULT_FIPS_LB_URL = "https://127.0.0.1".freeze
-    DEFAULT_ERCHEF_REINDEX_SCRIPT = "/opt/opscode/embedded/service/opscode-erchef/bin/reindex-opc-organization".freeze
+    DEFAULT_ERCHEF_REINDEX_SCRIPT = "/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/embedded/service/opscode-erchef/bin/reindex-opc-organization".freeze
     DOC_PATENT_MSG = <<-DOC.freeze
 
 Documentation: https://docs.chef.io/server/

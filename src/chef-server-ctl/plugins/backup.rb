@@ -62,7 +62,7 @@ add_command_under_category "restore", "general", "Restore the #{ChefUtils::Dist:
       options.restore_dir = File.expand_path(staging_directory)
     end
 
-    opts.on("-c", "--cleanse", "Agree to cleansing all existing state during a restore.  THIS WILL COMPLETELY REMOVING EXISTING #{ChefUtils::Dist::Server::PRODUCT.upcase} DATA") do
+    opts.on("-c", "--cleanse", "Agree to cleansing all existing state during a restore.  THIS WILL COMPLETELY REMOVE EXISTING #{ChefUtils::Dist::Server::PRODUCT.upcase} DATA") do
       options.agree_to_cleanse = "yes"
     end
 

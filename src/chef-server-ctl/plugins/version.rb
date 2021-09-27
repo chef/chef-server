@@ -27,9 +27,9 @@ add_command_under_category "version", "general", "Display current version of #{C
 
   if File.exist?("/hab/svc/chef-server-ctl/PID")
     ident_file = File.read("../IDENT")
-    version = "chef-server #{ident_file.split("/")[2]}"
+    version = "#{ChefUtils::Dist::Server::SERVER} #{ident_file.split("/")[2]}"
   else
-    version = JSON.parse(File.read("/opt/opscode/version-manifest.json"))["build_version"]
+    version = JSON.parse(File.read("/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/version-manifest.json"))["build_version"]
   end
 
   puts version

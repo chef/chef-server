@@ -225,7 +225,7 @@ def restore_secrets_file(backup_file)
 end
 
 def secrets_file_path
-  "/etc/opscode/private-#{ChefUtils::Dist::Infra::SHORT}-secrets.json"
+  "/etc/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/private-#{ChefUtils::Dist::Infra::SHORT}-secrets.json"
 end
 
 def remove_backup_file(backup_file)
