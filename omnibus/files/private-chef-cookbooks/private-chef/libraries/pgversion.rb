@@ -41,11 +41,8 @@
 # http://www.databasesoup.com/2016/05/changing-postgresql-version-numbering.html
 
 class PgVersion < Gem::Version
-
-  @@major = {}
-
   def major
-    @@major[self] ||=
+    @major ||=
       begin
         segments = self.segments
         if segments[0].to_i >= 10
@@ -59,7 +56,7 @@ class PgVersion < Gem::Version
   # We override here to also accept the server_version_num value, and coerce the
   # value into a proper dotted version string.
   def self.new(input)
-    if self === input
+    if input.is_a?(self)
       super
     elsif input.to_i >= 100000
       new input.to_s.match(/([0-9]+)([0-9]{4})$/).captures.map(&:to_i).join('.')
@@ -75,9 +72,16 @@ class PgVersion < Gem::Version
   def to_i
     segments = self.segments
     if segments[0].to_i >= 10
-      sprintf('%d%04d', segments[0].to_i, segments[1].to_i).to_i
-    elsif segments[0].to_i == 9 || ( segments[0].to_i == 8 && segments[1].to_i >= 2 )
-      sprintf('%d%02d%02d', segments[0].to_i, segments[1].to_i, segments[2].to_i).to_i
+      format('%<major>d%<minor>04d',
+             major: segments[0].to_i,
+             minor: segments[1].to_i
+            ).to_i
+    elsif segments[0].to_i == 9 || (segments[0].to_i == 8 && segments[1].to_i >= 2)
+      format('%<major1>d%<major2>02d%<minor>02d',
+             major1: segments[0].to_i,
+             major2: segments[1].to_i,
+             minor: segments[2].to_i
+            ).to_i
     else
       nil.to_i
     end
