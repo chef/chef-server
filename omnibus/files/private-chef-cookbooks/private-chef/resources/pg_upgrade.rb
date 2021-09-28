@@ -211,12 +211,9 @@ action_class do
         # Might not be initialized yet if a prior Chef run failed between
         # creating the directory and initializing a cluster in it
 
-        # the version file contains a single line with the version
-        # (e.g. "9.2\n")
-        pg_version = IO.read(version_file_for(data_dir)).strip
-
-        # read the version from data_dir and match with the pg_version
-        data_dir.split('/').select { |x| x.match?(pg_version) }.first
+        # the version file contains a single line with the major version
+        # (e.g. "9.6\n", "13\n")
+        IO.read(version_file_for(data_dir)).strip
       end
     end
   end
@@ -228,8 +225,8 @@ action_class do
   #   use Postgres software definitions.
   #
   # @param version [String] indicates the major release of Postgres,
-  #   e.g. "9.1", "9.2".  Note that this does NOT include patch-levels,
-  #   like "9.1.9" or "9.2.4"
+  #   e.g. "9.6", "13".  Note that this does NOT include minor release
+  #   levels, like "9.6.22" or "13.4"
   # @return [String] the absolute path to the binaries.
   def binary_path_for(version)
     "/opt/opscode/embedded/postgresql/#{version}/bin"
@@ -243,7 +240,6 @@ action_class do
         # The new data directory may have just been created; that's why
         # this needs to be evaluated lazily
 
-        # cannot use version_from_data_dir because from PostgreSQL 10 and later, the version is always a single number
         new_version = version_from_data_dir(new_data_dir)
 
         old_bins = binary_path_for(old_version)
