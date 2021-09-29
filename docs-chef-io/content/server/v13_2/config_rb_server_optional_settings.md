@@ -2216,7 +2216,7 @@ regardless of the node's run list. This feature is targeted at expert
 level practitioners who are delivering isolated configuration changes to
 the target systems, such as self-contained agent software. Further
 explanation of the feature can be found in
-[Chef Infra Client Development Docs](https://github.com/chef/chef/blob/master/docs/dev/design_documents/server_enforced_recipes.md).
+[Chef Infra Client Development Docs](https://github.com/chef/chef/blob/main/docs/dev/design_documents/server_enforced_recipes.md).
 
 This configuration file has the following settings for
 `required_recipe`:
