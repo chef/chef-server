@@ -237,6 +237,7 @@ action_class do
 
   def update_to_latest_version
     execute 'upgrade_postgres_cluster' do
+#if (/[0-9]+/.match old_data_dir).to_s != (/[0-9]+/.match new_data_dir).to_s
       command lazy {
         old_version = version_from_data_dir(old_data_dir)
 
@@ -259,7 +260,8 @@ action_class do
           --new-options=" -c config_file=#{::File.join(new_data_dir, 'postgresql.conf')}"
         && date > #{sentinel_file}
       EOM
-      } unless (/[0-9]+/.match old_data_dir).to_s == (/[0-9]+/.match new_data_dir).to_s
+      }
+#end
       user node['private_chef']['postgresql']['username']
       cwd new_data_dir # TODO: Should this be some other directory, instead?
       creates sentinel_file
