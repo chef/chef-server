@@ -16,7 +16,7 @@
 
 name 'postgresql13'
 
-default_version '13.4'
+default_version '13.3'
 
 license 'PostgreSQL'
 license_file 'COPYRIGHT'
