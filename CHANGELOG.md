@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.10.1 -->
-## [14.10.1](https://github.com/chef/chef-server/tree/14.10.1) (2021-10-02)
+<!-- latest_release 14.10.2 -->
+## [14.10.2](https://github.com/chef/chef-server/tree/14.10.2) (2021-10-02)
 
 #### Merged Pull Requests
-- Bump chef from 17.4.38 to 17.6.18 in /oc-chef-pedant [#2845](https://github.com/chef/chef-server/pull/2845) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump chef from 17.3.48 to 17.6.18 in /src/oc-id [#2846](https://github.com/chef/chef-server/pull/2846) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.9.23 -->
 ### Changes since 14.9.23 release
 
 #### Merged Pull Requests
+- Bump chef from 17.3.48 to 17.6.18 in /src/oc-id [#2846](https://github.com/chef/chef-server/pull/2846) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.10.2 -->
 - Bump chef from 17.4.38 to 17.6.18 in /oc-chef-pedant [#2845](https://github.com/chef/chef-server/pull/2845) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.10.1 -->
 - Bump omnibus from `7ce6173` to `37897ad` in /omnibus [#2833](https://github.com/chef/chef-server/pull/2833) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.10.0 -->
 - Bump nokogiri from 1.11.7 to 1.12.5 in /src/oc-id [#2829](https://github.com/chef/chef-server/pull/2829) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.9.31 -->
