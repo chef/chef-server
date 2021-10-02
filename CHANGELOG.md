@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.9.28 -->
-## [14.9.28](https://github.com/chef/chef-server/tree/14.9.28) (2021-09-24)
+<!-- latest_release 14.9.29 -->
+## [14.9.29](https://github.com/chef/chef-server/tree/14.9.29) (2021-10-02)
 
 #### Merged Pull Requests
-- Bump rspec-rails from 5.0.1 to 5.0.2 in /src/oc-id [#2735](https://github.com/chef/chef-server/pull/2735) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump chefstyle from 2.0.9 to 2.1.0 in /src/chef-server-ctl [#2834](https://github.com/chef/chef-server/pull/2834) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.9.23 -->
 ### Changes since 14.9.23 release
 
 #### Merged Pull Requests
+- Bump chefstyle from 2.0.9 to 2.1.0 in /src/chef-server-ctl [#2834](https://github.com/chef/chef-server/pull/2834) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.9.29 -->
 - Bump rspec-rails from 5.0.1 to 5.0.2 in /src/oc-id [#2735](https://github.com/chef/chef-server/pull/2735) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.9.28 -->
 - Bump omnibus-software from `e0d92a6` to `d880e20` in /omnibus [#2816](https://github.com/chef/chef-server/pull/2816) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.9.27 -->
 - Fix branch name in docs makefile [#2810](https://github.com/chef/chef-server/pull/2810) ([IanMadd](https://github.com/IanMadd)) <!-- 14.9.26 -->
