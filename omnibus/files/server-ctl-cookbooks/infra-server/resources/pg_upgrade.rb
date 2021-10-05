@@ -48,7 +48,7 @@
 # run must have succeeded for us to see any old values.)  If the new
 # value for the data directory is the same as the old one, then we
 # don't need to do anything, since we are keeping our data directories
-# segregated by postgres version.
+# segregated by postgres major version.
 #
 # If the new value is different, however, two things may be happening:
 # one, the user may have gone and moved their existing data directory
@@ -66,11 +66,11 @@
 provides :pg_upgrade
 
 action :upgrade do
-  if rename_required?
+  if rename_parent_required?
     # Only rename the parent of the data directory
-    converge_by('Renaming database cluster data directory') do
+    converge_by('Renaming database cluster parent directory') do
       shutdown_postgres
-      rename_existing_cluster
+      rename_existing_cluster_parent
     end
   elsif move_required?
     # Move the data directory into a new parent directory
@@ -113,12 +113,17 @@ action_class do
     node['private_chef']['postgresql']['data_dir']
   end
 
-  def new_data_version
-    node['private_chef']['postgresql']['version']
+  def parent_dir(dir)
+    return nil if dir.nil?
+    ::File.expand_path("#{dir}/..")
   end
 
-  def parent_dir(dir)
-    ::File.dirname(dir)
+  def mountpoint?(dir)
+    stat1 = ::File.new(dir).lstat
+    stat2 = ::File.new(::File.expand_path("#{dir}/..")).lstat
+    stat1.dev != stat2.dev || stat1.ino == stat2.ino
+  rescue Errno::ENOENT
+    false
   end
 
   # If this file exists, assume that the upgrade has succeeded
@@ -129,55 +134,43 @@ action_class do
   # @return [Boolean] Whether or not a cluster rename is needed, and the
   # why-run message to describe what we're doing (or why we're not doing
   # anything)
-  def rename_required?
-    # Check if we can get away with only renaming the data directory's
-    # parent directory, so we don't have to concern ourselves with actual
-    # data copying/migration
+  def rename_parent_required?
+    # Check if we can simply rename the data directory's parent
+    # directory, so we don't have to concern ourselves with actual
+    # data copying or migration
+    Chef::Log.debug 'Checking if the database cluster parent directory needs to be renamed'
 
     # Get the parents and grandparents of the data directories
     old_data_parent = parent_dir(old_data_dir)
-    old_data_grandparent = parent_dir(old_data_parent)
     new_data_parent = parent_dir(new_data_dir)
+    old_data_grandparent = parent_dir(old_data_parent)
     new_data_grandparent = parent_dir(new_data_parent)
 
-    Chef::Log.debug 'Checking if the database cluster data directory needs to be renamed'
     if old_data_dir.nil?
       # This will only happen if we've never successfully completed a
-      # Private Chef installation on this machine before.  In that case,
-      # there is (by definition) nothing to upgrade
-      Chef::Log.debug 'No prior database cluster detected; nothing to do'
+      # Private Chef installation on this machine before, or if the existing
+      # database cluster is already in the correct location
+      Chef::Log.debug 'No old database cluster detected; nothing to rename'
       false
-    elsif old_data_dir == new_data_dir
-      # If the directories are the same, then we're not changing anything
-      # (since we keep data directories in version-scoped
-      # directories); i.e., this is just another garden-variety chef run
-      Chef::Log.debug 'Database cluster is unchanged; nothing to do'
+    elsif ::File.exist?(new_data_parent)
+      # If the new parent directory already exists, we cannot rename the
+      # old parent directory to an existing path
+      Chef::Log.debug 'New parent directory already exists; nothing to rename'
       false
-    elsif Dir.exist?(new_data_dir)
-      # If the new data directory already exists, we shouldn't consider
-      # overwriting the data directory. Maybe it was just initialized,
-      # and needs to finish the pg_upgrade process
-      Chef::Log.debug 'Database cluster exists from previous installation; nothing to do'
-      false
-    elsif version_from_data_dir(old_data_dir) != new_data_version
-      # If the major version from the old PG_VERSION file doesn't match
-      # our target major version, we cannot simply move the directories
-      # around, so we avoid doing anything here
-      Chef::Log.debug 'Major versions differ, may need upgrading instead; nothing to do'
+    elsif mountpoint?(old_data_parent)
+      # If the old parent directory is a mountpoint, we cannot rename the
+      # old parent directory
+      Chef::Log.debug 'Old parent directory is a mountpoint; nothing to rename'
       false
     elsif old_data_grandparent != new_data_grandparent
-      # We're only going to rename the parent directory, so we can't
-      # have different grandparent directories
-      Chef::Log.debug 'Cannot rename since named target is in different parent directory; nothing to do'
-      false
-    elsif File.exist?(new_data_parent)
-      # We're only going to rename the parent directory, so we can't
-      # have a target parent that already exists
-      Chef::Log.debug 'Cannot rename since named target is already present; nothing to do'
+      # If the parent directory will be renamed, the old and new parent
+      # directories cannot have different filesystem paths. This should
+      # never happen, but check anyways
+      Chef::Log.debug 'Old and new parent directories exist at different filesystem paths; nothing to rename'
       false
     else
       # Hmm, looks like we need to rename directories after all
-      Chef::Log.debug 'Database cluster data directory rename is required'
+      Chef::Log.debug 'Database cluster parent directory rename is required'
       true
     end
   end
@@ -186,35 +179,29 @@ action_class do
   # why-run message to describe what we're doing (or why we're not doing
   # anything)
   def move_required?
-    # Since we can't simply rename the directory, for reasons...
-    # We instead will do a filesystem move of the directory into a new
+    # Since we cannot simply rename the directory, for reasons...
+    # We instead attempt a filesystem move of the data directory into a new
     # parent. If we're doing this, there's probably something weird going
     # on, but if this doesn't fix things, we can still pg_upgrade.
-
     Chef::Log.debug 'Checking if the database cluster data directory needs to move'
+
     if old_data_dir.nil?
       # This will only happen if we've never successfully completed a
-      # Private Chef installation on this machine before.  In that case,
-      # there is (by definition) nothing to upgrade
-      Chef::Log.debug 'No prior database cluster detected; nothing to do'
-      false
-    elsif old_data_dir == new_data_dir
-      # If the directories are the same, then we're not changing anything
-      # (since we keep data directories in version-scoped
-      # directories); i.e., this is just another garden-variety chef run
-      Chef::Log.debug 'Database cluster is unchanged; nothing to do'
+      # Private Chef installation on this machine before, or if the existing
+      # database cluster is already in the correct location
+      Chef::Log.debug 'No old database cluster detected; nothing to move'
       false
     elsif Dir.exist?(new_data_dir)
       # If the new data directory already exists, we shouldn't consider
       # overwriting the data directory. Maybe it was just initialized,
       # and needs to finish the pg_upgrade process
-      Chef::Log.debug 'Database cluster exists from previous installation; nothing to do'
+      Chef::Log.debug 'Database cluster data directory already exists from previous installation; nothing to move'
       false
-    elsif version_from_data_dir(old_data_dir) != new_data_version
+    elsif version_from_data_dir(old_data_dir) != node['private_chef']['postgresql']['version']
       # If the major version from the old PG_VERSION file doesn't match
       # our target major version, we cannot simply move the directories
       # around, so we avoid doing anything here
-      Chef::Log.debug 'Major versions differ, may need upgrading instead; nothing to do'
+      Chef::Log.debug 'Database cluster major versions differ, may need upgrading instead; nothing to move'
       false
     else
       # Hmm, looks like we need to move directories after all
@@ -227,21 +214,15 @@ action_class do
   # why-run message to describe what we're doing (or why we're not doing
   # anything)
   def upgrade_required?
-    # We couldn't rename or move the data directory, so we probably really
-    # need to do a pg_upgrade to get the data migrated.
-
+    # The data directory could not be renamed or moved, so check if
+    # pg_upgrade should migrate the database cluster
     Chef::Log.debug 'Checking if the database cluster needs to be upgraded'
+
     if old_data_dir.nil?
       # This will only happen if we've never successfully completed a
-      # Private Chef installation on this machine before.  In that case,
-      # there is (by definition) nothing to upgrade
-      Chef::Log.debug 'No prior database cluster detected; nothing to upgrade'
-      false
-    elsif old_data_dir == new_data_dir
-      # If the directories are the same, then we're not changing anything
-      # (since we keep data directories in version-scoped
-      # directories); i.e., this is just another garden-variety chef run
-      Chef::Log.debug 'Database cluster is unchanged; nothing to upgrade'
+      # Private Chef installation on this machine before, or if the existing
+      # database cluster is already in the correct location
+      Chef::Log.debug 'No old database cluster detected; nothing to upgrade'
       false
     elsif Dir.exist?(new_data_dir) &&
           cluster_initialized?(new_data_dir) &&
@@ -289,7 +270,9 @@ action_class do
 
   def dir_or_existing_parent(dir)
     return dir if ::File.exist?(dir)
-    dir_or_existing_parent(::File.dirname(dir))
+    return dir if ::File.expand_path(dir) == '/'
+
+    dir_or_existing_parent(::File.expand_path("#{dir}/.."))
   end
 
   # If a pre-existing postgres service exists it will need to be shut
@@ -356,7 +339,7 @@ action_class do
     "/opt/opscode/embedded/postgresql/#{version}/bin"
   end
 
-  def rename_existing_cluster
+  def rename_existing_cluster_parent
     # Get the parents of the data directories
     old_data_dir_parent = parent_dir(old_data_dir)
     new_data_dir_parent = parent_dir(new_data_dir)
@@ -366,23 +349,26 @@ action_class do
   end
 
   def move_existing_cluster
+    # Hold for logging
+    old_dir = old_data_dir
+
     # Get the parents of the data directories
     old_data_dir_parent = parent_dir(old_data_dir)
     new_data_dir_parent = parent_dir(new_data_dir)
     new_owner = node['private_chef']['postgresql']['username']
 
-    # Create the destination directory, if needed
+    # Create the destination parent, if needed
     unless ::File.exist?(new_data_dir_parent)
       ::Dir.mkdir(new_data_dir_parent, 0750)
       ::FileUtils.chown(new_owner, new_owner, new_data_dir_parent)
-      Chef::Log.debug("Created new data destination directory #{new_data_dir_parent}")
+      Chef::Log.debug("Created new data destination parent directory #{new_data_dir_parent}")
     end
 
-    # Moven the old data directory into the new destination parent
-    ::FileUtils.mv(old_data_dir, new_data_dir_parent)
-    Chef::Log.debug("Moved #{old_data_dir} into destination #{new_data_dir_parent}")
+    # Move the old data directory into the new destination parent
+    ::FileUtils.mv(old_dir, new_data_dir_parent)
+    Chef::Log.debug("Moved #{old_dir} into destination #{new_data_dir_parent}")
 
-    # Remove the old parent
+    # Remove the old parent directory
     if ::Dir.empty?(old_data_dir_parent)
       ::Dir.rmdir(old_data_dir_parent)
       Chef::Log.debug("Removed old directory #{old_data_dir_parent}")
