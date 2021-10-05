@@ -648,6 +648,7 @@ default['private_chef']['oc_chef_authz']['http_max_age'] = '{70, sec}'
 default['private_chef']['oc_chef_authz']['http_max_connection_duration'] = '{70, sec}'
 default['private_chef']['oc_chef_authz']['http_retry_on_conn_closed'] = true
 default['private_chef']['oc_chef_authz']['ibrowse_options'] = '[{connect_timeout, 5000}]'
+default['private_chef']['oc_chef_authz']['max_connection_request_limit'] = 100
 
 ####
 # Bookshelf
