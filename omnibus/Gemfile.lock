@@ -1,6 +1,6 @@
 GIT
   remote: https://github.com/chef/omnibus-software.git
-  revision: 09666687aa62234cf8c917cdc079307aca070228
+  revision: 24f508c7f2e3a20debdf5d19ced27757fed7f7fb
   branch: main
   specs:
     omnibus-software (4.0.0)
@@ -39,7 +39,7 @@ GEM
       aws-partitions (~> 1, >= 1.239.0)
       aws-sigv4 (~> 1.1)
       jmespath (~> 1.0)
-    aws-sdk-kms (1.48.0)
+    aws-sdk-kms (1.49.0)
       aws-sdk-core (~> 3, >= 3.120.0)
       aws-sigv4 (~> 1.1)
     aws-sdk-s3 (1.103.0)
