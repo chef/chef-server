@@ -114,7 +114,7 @@ action_class do
   end
 
   def parent_dir(dir)
-    return nil if dir.nil?
+    return if dir.nil?
     ::File.expand_path("#{dir}/..")
   end
 
