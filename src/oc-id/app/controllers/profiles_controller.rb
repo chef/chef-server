@@ -19,9 +19,8 @@ class ProfilesController < ApplicationController
     updated_email = permit_all_params.has_key? :email
 
     # Note that if an email address is provided, don't update it right away.
-    # Instead send a confirmation email and let that email link update the
+    # Instead send a verification email and let that email link update the
     # email address.
-    # update note
 
     if @user.update_attributes(user_params)
       message = I18n.t('profile.update_successful')
