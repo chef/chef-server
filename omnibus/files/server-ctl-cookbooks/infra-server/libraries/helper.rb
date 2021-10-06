@@ -419,7 +419,7 @@ class OmnibusHelper
     case node['platform_family']
     when 'debian'
       'deb'
-    when 'rhel', 'suse'
+    when 'rhel', 'suse', 'amazon'
       'rpm'
     else
       # TODO: probably don't actually want to fail out?
