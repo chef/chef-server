@@ -109,7 +109,7 @@ to_json(Req, #base_state{chef_db_context = DbContext,
     CompressedObject = PolicyRevRecord#oc_chef_policy_revision.serialized_object,
     JSON1 = chef_json:decode(chef_db_compression:decompress(CompressedObject)),
     RevisionID = wrq:path_info(revision_id, Req),
-    JSON2 = 
+    JSON2 =
         case chef_db:list_policy_groups_for_policy_revision(DbContext, RevisionID) of
             {error, Why} ->
                 Report = {list_policy_groups_for_policy_revision, {Why}},

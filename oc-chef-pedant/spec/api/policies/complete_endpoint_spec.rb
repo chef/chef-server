@@ -688,6 +688,25 @@ describe "Policies API endpoint", :policies do
 
     context "when the policy_name exists and :revision_id exists" do
 
+      let(:other_response) do
+        <<-PAYLOAD
+        {
+          "revision_id": "909c26701e291510eacdc6c06d626b9fa5350d25",
+          "name": "example-policy",
+          "run_list": [
+            "recipe[policyfile_demo::default]"
+          ],
+          "cookbook_locks": {
+            "policyfile_demo": {
+              "identifier": "f04cc40faf628253fe7d9566d66a1733fb1afbe9",
+              "version": "1.2.3"
+            }
+          },
+          "policy_group_list": []
+        }
+        PAYLOAD
+      end
+
       before do
         expect(post(named_policy_revisions_url, requestor, payload: payload).code).to eq(201)
       end
@@ -702,7 +721,7 @@ describe "Policies API endpoint", :policies do
       it "GET /policies/:policy_name/revisions/:revision_id returns 200, with the policy as the body" do
         response = get(named_revision_url, requestor)
         expect(response.code).to eq(200)
-        expect(parse(response.body)).to eq(parse(payload))
+        expect(parse(response.body)).to eq(parse(other_response))
       end
 
       it "DELETE /policies/:policy_name/revisions/:revision_id returns 200, with the policy as the body" do
@@ -759,6 +778,73 @@ describe "Policies API endpoint", :policies do
 
       context "PUT" do
 
+        let(:minimum_payload_response) do
+          <<-PAYLOAD
+            {
+              "revision_id": "909c26701e291510eacdc6c06d626b9fa5350d25",
+              "name": "some_policy_name",
+              "run_list": [
+                "recipe[policyfile_demo::default]"
+              ],
+              "cookbook_locks": {
+                "policyfile_demo": {
+                  "identifier": "f04cc40faf628253fe7d9566d66a1733fb1afbe9",
+                  "version": "1.2.3"
+                }
+              },
+              "policy_group_list": ["some_policy_group"]
+            }
+          PAYLOAD
+        end
+
+        let(:canonical_payload_response) do
+          <<-PAYLOAD
+            {
+              "revision_id": "cf0885f3f2f5edaa44bf8d5e5de4c4d0efa51411",
+              "name": "some_policy_name",
+              "run_list": [
+                "recipe[policyfile_demo::default]"
+              ],
+              "named_run_lists": {
+                "update_jenkins": [
+                  "recipe[policyfile_demo::other_recipe]"
+                ]
+              },
+              "cookbook_locks": {
+                "policyfile_demo": {
+                  "version": "0.1.0",
+                  "identifier": "f04cc40faf628253fe7d9566d66a1733fb1afbe9",
+                  "dotted_decimal_identifier": "67638399371010690.23642238397896298.25512023620585",
+                  "source": "cookbooks/policyfile_demo",
+                  "cache_key": null,
+                  "scm_info": {
+                    "scm": "git",
+                    "remote": "git@github.com:danielsdeleo/policyfile-jenkins-demo.git",
+                    "revision": "edd40c30c4e0ebb3658abde4620597597d2e9c17",
+                    "working_tree_clean": false,
+                    "published": false,
+                    "synchronized_remote_branches": [
+
+                    ]
+                  },
+                  "source_options": {
+                    "path": "cookbooks/policyfile_demo"
+                  }
+                }
+              },
+              "solution_dependencies": {
+                "Policyfile": [
+                  [ "policyfile_demo", ">= 0.0.0" ]
+                ],
+                "dependencies": {
+                  "policyfile_demo (0.1.0)": []
+                }
+              },
+              "policy_group_list": ["some_policy_group"]
+            }
+          PAYLOAD
+        end
+
         let(:request_method) { :PUT }
 
         after(:each) do
@@ -771,6 +857,8 @@ describe "Policies API endpoint", :policies do
 
           it "PUT /policy_groups/:group_name/policies/:policy_name returns 201" do
             expect(response.code).to eq(201)
+            response = get(api_url("/policies/some_policy_name/revisions/cf0885f3f2f5edaa44bf8d5e5de4c4d0efa51411"), requestor)
+            expect(parse(response.body)).to eq(parse(canonical_payload_response))
           end
 
 
@@ -782,6 +870,8 @@ describe "Policies API endpoint", :policies do
 
           it "PUT /policy_groups/:group_name/policies/:policy_name returns 201" do
             expect(response.code).to eq(201)
+            response = get(api_url("/policies/some_policy_name/revisions/909c26701e291510eacdc6c06d626b9fa5350d25"), requestor)
+            expect(parse(response.body)).to eq(parse(minimum_payload_response))
           end
 
         end
@@ -1232,6 +1322,71 @@ describe "Policies API endpoint", :policies do
           expect(retrieved_doc.code).to eq(200)
           expect(parse(retrieved_doc.body)).to eq(parse(updated_canonical_policy_payload))
         end
+
+      end
+
+      context "PUT (add to another policy group)" do
+
+        let(:other_named_policy_url) { api_url("/policy_groups/other_policy_group/policies/some_policy_name") }
+        
+        let(:canonical_payload_response) do
+          <<-PAYLOAD
+            {
+              "revision_id": "cf0885f3f2f5edaa44bf8d5e5de4c4d0efa51411",
+              "name": "some_policy_name",
+              "run_list": [
+                "recipe[policyfile_demo::default]"
+              ],
+              "named_run_lists": {
+                "update_jenkins": [
+                  "recipe[policyfile_demo::other_recipe]"
+                ]
+              },
+              "cookbook_locks": {
+                "policyfile_demo": {
+                  "version": "0.1.0",
+                  "identifier": "f04cc40faf628253fe7d9566d66a1733fb1afbe9",
+                  "dotted_decimal_identifier": "67638399371010690.23642238397896298.25512023620585",
+                  "source": "cookbooks/policyfile_demo",
+                  "cache_key": null,
+                  "scm_info": {
+                    "scm": "git",
+                    "remote": "git@github.com:danielsdeleo/policyfile-jenkins-demo.git",
+                    "revision": "edd40c30c4e0ebb3658abde4620597597d2e9c17",
+                    "working_tree_clean": false,
+                    "published": false,
+                    "synchronized_remote_branches": [
+
+                    ]
+                  },
+                  "source_options": {
+                    "path": "cookbooks/policyfile_demo"
+                  }
+                }
+              },
+              "solution_dependencies": {
+                "Policyfile": [
+                  [ "policyfile_demo", ">= 0.0.0" ]
+                ],
+                "dependencies": {
+                  "policyfile_demo (0.1.0)": []
+                }
+              },
+              "policy_group_list": [
+                "some_policy_group",
+                "other_policy_group"
+              ]
+            }
+          PAYLOAD
+        end
+
+        it "PUT /policy_groups/:group/policies/:name returns 201" do
+          response = put(other_named_policy_url, requestor, payload: canonical_policy_payload)
+          expect(response.code).to eq(201)
+          response = get(api_url("/policies/some_policy_name/revisions/cf0885f3f2f5edaa44bf8d5e5de4c4d0efa51411"), requestor)
+          expect(parse(response.body)).to eq(parse(canonical_payload_response))
+        end
+
       end
 
       context "DELETE" do
@@ -1255,7 +1410,6 @@ describe "Policies API endpoint", :policies do
           subsequent_get = get(static_named_policy_url, requestor)
           expect(subsequent_get.code).to eq(404)
         end
-
 
       end
 
