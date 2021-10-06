@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.10.5 -->
-## [14.10.5](https://github.com/chef/chef-server/tree/14.10.5) (2021-10-06)
+<!-- latest_release 14.10.6 -->
+## [14.10.6](https://github.com/chef/chef-server/tree/14.10.6) (2021-10-06)
 
 #### Merged Pull Requests
-- Rename the private-chef cookbook to infra-server [#2709](https://github.com/chef/chef-server/pull/2709) ([tas50](https://github.com/tas50))
+- Use chef-server-ctl not private-chef-ctl in upgrade/reconfigure [#2712](https://github.com/chef/chef-server/pull/2712) ([tas50](https://github.com/tas50))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.9.23 -->
 ### Changes since 14.9.23 release
 
 #### Merged Pull Requests
+- Use chef-server-ctl not private-chef-ctl in upgrade/reconfigure [#2712](https://github.com/chef/chef-server/pull/2712) ([tas50](https://github.com/tas50)) <!-- 14.10.6 -->
 - Rename the private-chef cookbook to infra-server [#2709](https://github.com/chef/chef-server/pull/2709) ([tas50](https://github.com/tas50)) <!-- 14.10.5 -->
 - Bump test-kitchen from 3.0.0 to 3.1.0 in /omnibus [#2849](https://github.com/chef/chef-server/pull/2849) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.10.4 -->
 - Bump rails from 6.1.4 to 6.1.4.1 in /src/oc-id [#2752](https://github.com/chef/chef-server/pull/2752) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.10.3 -->
