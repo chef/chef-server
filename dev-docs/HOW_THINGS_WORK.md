@@ -317,3 +317,8 @@ This is pipeline is automatically triggered every night to make sure that the ma
 This pipeline is for end to end testing and creates different builds integrating with other projects of chef.
 These builds are packaged to replicate the different environment in which chef-server will be used by the customers.
 This pipeline is run on a nightly basis using the latest build from the current omnibus pipeline.
+
+## Chef-zero
+Chef Zero is an in-memory Chef server that is majorly used for Chef Client testing. Chef Zero is tested against pedant tests in the verify build pipeline. Any changes that we make to the Chef Infra server must be reflected in the Chef Zero also or else the verify build will fail.
+
+As it is an in-memory service, Chef Zero does not have all the files which Chef Infra server contains. In some of the pedant tests we use `chef-server-running.json` file to test with the configuration. Currently, such tests cannot be tested for Chef Zero as this file is missing in the Chef Zero environment. Such tests must be checked if they can be skipped.
