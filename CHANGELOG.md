@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.10.7 -->
-## [14.10.7](https://github.com/chef/chef-server/tree/14.10.7) (2021-10-06)
+<!-- latest_release 14.10.8 -->
+## [14.10.8](https://github.com/chef/chef-server/tree/14.10.8) (2021-10-06)
 
 #### Merged Pull Requests
-- Fix add-ons not installing on Amazon Linux [#2713](https://github.com/chef/chef-server/pull/2713) ([tas50](https://github.com/tas50))
+- Bump omnibus-software from `0966668` to `a2a70e2` in /omnibus [#2856](https://github.com/chef/chef-server/pull/2856) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.9.23 -->
 ### Changes since 14.9.23 release
 
 #### Merged Pull Requests
+- Bump omnibus-software from `0966668` to `a2a70e2` in /omnibus [#2856](https://github.com/chef/chef-server/pull/2856) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.10.8 -->
 - Fix add-ons not installing on Amazon Linux [#2713](https://github.com/chef/chef-server/pull/2713) ([tas50](https://github.com/tas50)) <!-- 14.10.7 -->
 - Use chef-server-ctl not private-chef-ctl in upgrade/reconfigure [#2712](https://github.com/chef/chef-server/pull/2712) ([tas50](https://github.com/tas50)) <!-- 14.10.6 -->
 - Rename the private-chef cookbook to infra-server [#2709](https://github.com/chef/chef-server/pull/2709) ([tas50](https://github.com/tas50)) <!-- 14.10.5 -->
