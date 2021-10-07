@@ -6,8 +6,7 @@ this email. If you are indeed trying to update your account, follow
 this link to confirm your new email address.
 
 <%= email_profile_url(
-  username: @user.username,
-  email: @email,
+  user: Base64.urlsafe_encode64({username: @user.username,  email: @email}.to_json),
   expires: @expires,
   signature: @signature).html_safe %>
 
