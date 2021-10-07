@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.10.10 -->
-## [14.10.10](https://github.com/chef/chef-server/tree/14.10.10) (2021-10-07)
+<!-- latest_release 14.10.11 -->
+## [14.10.11](https://github.com/chef/chef-server/tree/14.10.11) (2021-10-07)
 
 #### Merged Pull Requests
-- Simplify a few things in the infra-server setup cookbook [#2859](https://github.com/chef/chef-server/pull/2859) ([tas50](https://github.com/tas50))
+- Update chef in chef-server-ctl to 16.16 [#2862](https://github.com/chef/chef-server/pull/2862) ([tas50](https://github.com/tas50))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.9.23 -->
 ### Changes since 14.9.23 release
 
 #### Merged Pull Requests
+- Update chef in chef-server-ctl to 16.16 [#2862](https://github.com/chef/chef-server/pull/2862) ([tas50](https://github.com/tas50)) <!-- 14.10.11 -->
 - Simplify a few things in the infra-server setup cookbook [#2859](https://github.com/chef/chef-server/pull/2859) ([tas50](https://github.com/tas50)) <!-- 14.10.10 -->
 - [OC-ID]: User email verification functionality added [#2783](https://github.com/chef/chef-server/pull/2783) ([antima-gupta](https://github.com/antima-gupta)) <!-- 14.10.9 -->
 - Bump omnibus-software from `0966668` to `a2a70e2` in /omnibus [#2856](https://github.com/chef/chef-server/pull/2856) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.10.8 -->
