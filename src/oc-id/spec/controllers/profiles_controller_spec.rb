@@ -124,6 +124,21 @@ describe ProfilesController do
          expect(response).to render_template('show')
          expect(flash[:alert]).to match /invalid signature/
        end
+
+       it 'requires new email to match the new email specified for verification' do
+         get :change_email, params: { user:  Base64.urlsafe_encode64({ username: username, email: "malicious_change@user.com" }.to_json), expires: expires, signature: signature }
+         expect(response).to render_template('show')
+         expect(flash[:alert]).to match /invalid signature/
+       end
+       
+       describe 'invalid signature - when new email specified for verification is same as previous email' do
+         let(:old_email) { logged_in_user.email }
+         it 'should reject the link if email specified for verification is match with previous email' do
+           get :change_email, params: { user:  Base64.urlsafe_encode64({ username: username, email: old_email }.to_json), expires: expires, signature: signature }
+           expect(response).to render_template('show')
+           expect(flash[:alert]).to match /invalid signature/
+         end
+       end
      end
 
      describe 'expired link' do
