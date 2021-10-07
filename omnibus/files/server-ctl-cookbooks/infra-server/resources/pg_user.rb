@@ -16,20 +16,16 @@
 
 provides :pg_user
 
-property :username,
-  kind_of: String,
+property :username, String,
   name_property: true
 
-property :password,
-  kind_of: String,
+property :password, String,
   required: true
 
-property :superuser,
-  kind_of: [TrueClass, FalseClass],
+property :superuser, [true, false],
   default: false
 
-property :local_connection,
-  kind_of: [TrueClass, FalseClass],
+property :local_connection, [true, false],
   default: false
 
 # NOTE: Uses the value of node['private_chef']['postgresql']['username'] as

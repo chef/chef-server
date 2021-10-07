@@ -19,9 +19,9 @@ provides :elasticsearch_index
 
 property :index_name, String, name_property: true
 
-property :server_url, kind_of: String
+property :server_url, String
 
-property :index_definition, kind_of: Hash
+property :index_definition, Hash
 
 action :create do
   unless retry_index_exists?(4)
