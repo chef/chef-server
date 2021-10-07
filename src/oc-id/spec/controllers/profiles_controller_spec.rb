@@ -125,7 +125,7 @@ describe ProfilesController do
          expect(flash[:alert]).to match /invalid signature/
        end
 
-       it 'requires new email to match the new email specified for verification' do
+       it 'requires new email in the response from verification to match the new email specified in the profile page' do
          get :change_email, params: { user:  Base64.urlsafe_encode64({ username: username, email: "malicious_change@user.com" }.to_json), expires: expires, signature: signature }
          expect(response).to render_template('show')
          expect(flash[:alert]).to match /invalid signature/
