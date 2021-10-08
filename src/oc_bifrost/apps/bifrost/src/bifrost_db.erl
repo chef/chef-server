@@ -158,6 +158,7 @@ bulk_permission(ActorId, Targets, Perm, TargetType) ->
 -spec has_permission(auth_type(), auth_id(), auth_id(), permission() | any) ->
                             boolean() | {error, _}.
 has_permission(TargetType, TargetId, RequestorId, Permission) ->
+    Result =
     case select(actor_has_permission_on, [RequestorId, TargetId, TargetType,
                                           Permission],
                 first_as_scalar, [permission]) of
@@ -171,7 +172,10 @@ has_permission(TargetType, TargetId, RequestorId, Permission) ->
             {error, {invalid_actor, RequestorId}};
         {error, Error} ->
             {error, Error}
-    end.
+    end,
+    io:format("Devlog - bifrost_db - has_permission: ~p - Result ~p~n",
+        [{TargetType, TargetId, RequestorId, Permission}, Result]),
+    Result.
 
 membership_query(actor) -> group_actor_members;
 membership_query(group) -> group_group_members.

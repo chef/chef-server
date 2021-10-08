@@ -242,6 +242,7 @@ default['private_chef']['opscode-erchef']['sql_ro_user'] = 'opscode_chef_ro'
 default['private_chef']['opscode-erchef']['sql_connection_user'] = nil
 default['private_chef']['opscode-erchef']['enable_request_logging'] = true
 default['private_chef']['opscode-erchef']['allow_email_update_only_from_manage'] = false
+default['private_chef']['opscode-erchef']['enable_ibrowse_traces'] = false
 
 #
 # Reindex configurables

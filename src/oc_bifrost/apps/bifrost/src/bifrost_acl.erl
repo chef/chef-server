@@ -15,6 +15,7 @@
 -spec check_access(request_id(), auth_type(), auth_id(), requestor_id(), permission()) ->
                           boolean() | {error, _}.
 check_access(ReqId, TargetType, TargetId, ActorId, Permission) ->
+    Result = 
     case ActorId of
         superuser ->
             %% Super user has all access but
@@ -28,7 +29,10 @@ check_access(ReqId, TargetType, TargetId, ActorId, Permission) ->
         Id ->
             ?SH_TIME(ReqId, bifrost_db, has_permission, (TargetType, TargetId, Id,
                                                           Permission))
-    end.
+    end,
+    io:format("Devlog - bifrost_acl - chef_access: ~p - result - ~p~n",
+        [{ReqId, TargetType, TargetId, ActorId, Permission}, Result]),
+    Result.
 
 %% @doc Update ACL (for given permission type) on target for all actors and groups
 -spec update_acl(request_id(), auth_type(), auth_id(), permission(), list(), list()) ->
