@@ -3,4 +3,6 @@ source "https://rubygems.org"
 gemspec
 
 gem "chef", "= 16.16.13"
+gem "chef_fixie", git: "https://github.com/chef/fixie.git", branch: "zei/update_sequel_to_5.9"
+gem "knife-ec-backup", git: "https://github.com/chef/knife-ec-backup", branch: "lbaker/bigdecimal", ref: "28f8d9d3a1f1c23fe7410a6a94280b881f522a65"
 gem "toml" # for habitat-land
