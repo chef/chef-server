@@ -242,7 +242,7 @@ default['private_chef']['opscode-erchef']['sql_ro_user'] = 'opscode_chef_ro'
 default['private_chef']['opscode-erchef']['sql_connection_user'] = nil
 default['private_chef']['opscode-erchef']['enable_request_logging'] = true
 default['private_chef']['opscode-erchef']['allow_email_update_only_from_manage'] = false
-default['private_chef']['opscode-erchef']['enable_ibrowse_traces'] = false
+default['private_chef']['opscode-erchef']['enable_ibrowse_traces'] = true
 
 #
 # Reindex configurables
@@ -645,7 +645,7 @@ default['private_chef']['oc_chef_authz']['http_max_age'] = '{70, sec}'
 default['private_chef']['oc_chef_authz']['http_max_connection_duration'] = '{70, sec}'
 default['private_chef']['oc_chef_authz']['http_retry_on_conn_closed'] = true
 default['private_chef']['oc_chef_authz']['ibrowse_options'] = '[{connect_timeout, 5000}]'
-default['private_chef']['oc_chef_authz']['max_connection_request_limit'] = 2
+default['private_chef']['oc_chef_authz']['max_connection_request_limit'] = 100
 
 ####
 # Bookshelf
