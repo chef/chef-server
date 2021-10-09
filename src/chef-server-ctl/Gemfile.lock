@@ -35,7 +35,7 @@ PATH
       chef_fixie
       ffi-yajl (>= 1.2.0)
       highline (~> 1.6, >= 1.6.9)
-      knife-ec-backup
+      knife-ec-backup (2.4.17)
       knife-opc
       license-acceptance
       mixlib-install
