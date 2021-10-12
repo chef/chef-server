@@ -24,6 +24,7 @@
   %% we could instead make all (or most) applications included,
   %% and just manage startup ourselves.
   {included_applications, [
+                           etop,
                            pooler,
                            chef_db,
                            chef_objects,
