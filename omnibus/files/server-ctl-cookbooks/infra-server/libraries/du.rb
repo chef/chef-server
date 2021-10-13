@@ -10,7 +10,11 @@ module Du
     # TODO(ssd) 2017-08-18: Do we need to worry about sparse files
     # here? If so, can we expect the --apparent-size flag to exist on
     # all of our platforms.
-    command = shell_out("du -sk #{path}")
+
+    # Changed from: command = shell_out("du -sk #{path}")
+    # because of NoMethodError undefined method `shell_out' for Du:Module
+    command = Mixlib::ShellOut.new("du -sk #{path}")
+    command.run_command
     if command.status.success?
       command.stdout.split("\t").first.to_i
     else
