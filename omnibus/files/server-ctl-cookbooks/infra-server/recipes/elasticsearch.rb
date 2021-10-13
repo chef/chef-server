@@ -19,7 +19,7 @@ elasticsearch_scripts_dir      = elasticsearch['scripts_directory']     # /var/o
 elasticsearch_temp_dir         = elasticsearch['temp_directory']        # /var/log/opscode/elasticsearch/tmp
 elasticsearch_log_dir          = elasticsearch['log_directory']         # /var/log/opscode/elasticsearch
 
-config_file = File.join(elasticsearch_conf_dir, 'elasticsearch.yml')
+config_file = File.join(elasticsearch_conf_dir, 'opensearch.yml')
 logging_config_file = File.join(elasticsearch_conf_dir, 'logging.yml')
 
 # set up the basic es directory structure
@@ -78,7 +78,7 @@ sysctl 'vm.max_map_count' do
 end
 
 # Remove the old env config to ensre it's not left over after an upgrade.
-directory '/opt/opscode/service/elasticsearch/env' do
+directory '/opt/opscode/service/opensearch/env' do
   action :delete
   recursive true
 end
@@ -89,7 +89,7 @@ template config_file do
   mode '0644'
   variables(lazy { elasticsearch.to_hash })
   force_unlink true
-  notifies :restart, 'component_runit_service[elasticsearch]', :delayed
+  notifies :restart, 'component_runit_service[opensearch]', :delayed
 end
 
 template logging_config_file do
@@ -99,7 +99,7 @@ template logging_config_file do
   mode '0644'
   variables(elasticsearch.to_hash)
   force_unlink true
-  notifies :restart, 'component_runit_service[elasticsearch]', :delayed
+  notifies :restart, 'component_runit_service[opensearch]', :delayed
 end
 
 # If the user has configured a solr4 heap-size, we'll still honor it
@@ -131,7 +131,7 @@ template jvm_config_file do
             new_size: elasticsearch['new_size'],
             enable_gc_log: elasticsearch['enable_gc_log'],
             tmp_dir: elasticsearch['temp_directory'])
-  notifies :restart, 'component_runit_service[elasticsearch]'
+  notifies :restart, 'component_runit_service[opensearch]'
 end
 
 log4j_file = File.join(elasticsearch_conf_dir, 'log4j2.properties')
@@ -153,14 +153,14 @@ end
 #
 # TODO - what happens on upgrade? Will the config disappear until reconfigure?
 #
-link '/opt/opscode/embedded/elasticsearch/config' do
+link '/opt/opscode/embedded/opensearch/config' do
   to elasticsearch_conf_dir
 end
 
 # While Restoring the chef server backup, enable is always successful
 # but start is not which is the root cause of restore issue.
 # So added retries for making sure the elasticsearch runit service is running
-component_runit_service 'elasticsearch' do
+component_runit_service 'opensearch' do
   action [:enable, :start]
   retries 10
   retry_delay 1

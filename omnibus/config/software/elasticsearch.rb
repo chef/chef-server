@@ -15,7 +15,7 @@
 #
 
 name "elasticsearch"
-default_version "6.8.18"
+default_version "1.1.0"
 
 dependency "server-open-jre"
 
@@ -23,7 +23,12 @@ license "Apache-2.0"
 license_file "LICENSE.txt"
 skip_transitive_dependency_licensing true
 
-relative_path "elasticsearch-#{version}"
+relative_path "opensearch-#{version}"
+
+version "1.1.0" do
+  source url: "https://artifacts.opensearch.org/releases/bundle/opensearch/#{version}/opensearch-#{version}-linux-x64.tar.gz",
+         sha512: "b5ea595be5f05a3311459492c4a9c78c3606222a82e7fcf81433c635aaed6078a16275d199e6ef45b0c2a23babe8a37e84c8c09e71cf27d4f9c84cdec29f55c9"
+end
 
 version "6.8.18" do
   source url: "https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-oss-#{version}.tar.gz",
@@ -35,7 +40,7 @@ version "7.9.3" do
          sha512: "bb02a5dc1caef97638a959ebba05dd649083c856334f30c670b851067292d7230e561d8759b15a80be73537d7a7efd9cef427d253cbb2efdbd6b168c6f9baa13"
 end
 
-target_path = "#{install_dir}/embedded/elasticsearch"
+target_path = "#{install_dir}/embedded/opensearch"
 
 build do
   mkdir  "#{target_path}"
