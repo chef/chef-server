@@ -7,7 +7,6 @@
   {mod, {bifrost_app, []}},
   {env, []},
   {included_applications, [
-                           etop,
                            pooler,
                            sqerl
                           ]},
