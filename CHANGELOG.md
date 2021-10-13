@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.10.14 -->
-## [14.10.14](https://github.com/chef/chef-server/tree/14.10.14) (2021-10-13)
+<!-- latest_release 14.10.15 -->
+## [14.10.15](https://github.com/chef/chef-server/tree/14.10.15) (2021-10-13)
 
 #### Merged Pull Requests
-- Bump omnibus from `37897ad` to `90306c9` in /omnibus [#2871](https://github.com/chef/chef-server/pull/2871) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Fix error: undefined method &#39;shell_out&#39; for Du:Module [#2873](https://github.com/chef/chef-server/pull/2873) ([lbakerchef](https://github.com/lbakerchef))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.9.23 -->
 ### Changes since 14.9.23 release
 
 #### Merged Pull Requests
+- Fix error: undefined method &#39;shell_out&#39; for Du:Module [#2873](https://github.com/chef/chef-server/pull/2873) ([lbakerchef](https://github.com/lbakerchef)) <!-- 14.10.15 -->
 - Bump omnibus from `37897ad` to `90306c9` in /omnibus [#2871](https://github.com/chef/chef-server/pull/2871) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.10.14 -->
 - Set default version of PostgreSQL to 13.4 [#2804](https://github.com/chef/chef-server/pull/2804) ([jashaik](https://github.com/jashaik)) <!-- 14.10.13 -->
 - Produce Ubuntu 16.04 packages again [#2864](https://github.com/chef/chef-server/pull/2864) ([tas50](https://github.com/tas50)) <!-- 14.10.12 -->
