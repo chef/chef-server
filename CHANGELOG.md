@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.10.12 -->
-## [14.10.12](https://github.com/chef/chef-server/tree/14.10.12) (2021-10-13)
+<!-- latest_release 14.10.13 -->
+## [14.10.13](https://github.com/chef/chef-server/tree/14.10.13) (2021-10-13)
 
 #### Merged Pull Requests
-- Produce Ubuntu 16.04 packages again [#2864](https://github.com/chef/chef-server/pull/2864) ([tas50](https://github.com/tas50))
+- Set default version of PostgreSQL to 13.4 [#2804](https://github.com/chef/chef-server/pull/2804) ([jashaik](https://github.com/jashaik))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.9.23 -->
 ### Changes since 14.9.23 release
 
 #### Merged Pull Requests
+- Set default version of PostgreSQL to 13.4 [#2804](https://github.com/chef/chef-server/pull/2804) ([jashaik](https://github.com/jashaik)) <!-- 14.10.13 -->
 - Produce Ubuntu 16.04 packages again [#2864](https://github.com/chef/chef-server/pull/2864) ([tas50](https://github.com/tas50)) <!-- 14.10.12 -->
 - Update chef in chef-server-ctl to 16.16 [#2862](https://github.com/chef/chef-server/pull/2862) ([tas50](https://github.com/tas50)) <!-- 14.10.11 -->
 - Simplify a few things in the infra-server setup cookbook [#2859](https://github.com/chef/chef-server/pull/2859) ([tas50](https://github.com/tas50)) <!-- 14.10.10 -->
