@@ -104,7 +104,7 @@ add_command_under_category "remove-server-admin-permissions", "server-admins", "
   req_params[:url] = "#{::ChefServerCtl::Config.bifrost_url}/groups/#{server_admins_authz_id}/actors/#{user_authz_id}"
   RestClient::Request.execute(req_params)
 
-  puts "User #{username} was removed from server-admins. This user can no longer list, read, create, and delete users for this #{ChefUtils::Dist::Server::PRODUCT} except for where they have default permissions (such as within an org)."
+  puts "User #{username} was removed from the server-admins group. This user can no longer list, read, create, and delete users for this #{ChefUtils::Dist::Server::PRODUCT} except for where they have default permissions (such as within an org)."
 
 end
 
