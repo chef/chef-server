@@ -23,8 +23,9 @@ class PostgresqlPreflightValidator < PreflightValidator
   # actually required PG version.
   REQUIRED_VERSION  = PgVersion.new('9.6')
 
-  # supported PG version
-  SUPPORTED_VERSION = PgVersion.new('13')
+  # supported PG versions: 13, 14
+  MIN_SUPPORTED_VERSION = PgVersion.new('13')
+  SUPPORTED_VERSION     = PgVersion.new('14')
 
   def run!
     warn_about_removed_attribute('checkpoint_segments')
@@ -197,7 +198,7 @@ class PostgresqlPreflightValidator < PreflightValidator
       :ok
     elsif v.major < REQUIRED_VERSION || v.major > SUPPORTED_VERSION
       fail_with err_CSPG014_bad_postgres_version(v)
-    elsif v.major < SUPPORTED_VERSION
+    elsif v.major < MIN_SUPPORTED_VERSION
       ChefServer::Warnings.warn err_unsupported_postgres_version(v)
     end
   end

@@ -536,7 +536,7 @@ default['private_chef']['nginx']['nginx_no_root'] = false
 ###
 # For now, we're hardcoding the version directory suffix here.
 # Since postgresql 10, only use major version numbers.
-default['private_chef']['postgresql']['version'] = '13'
+default['private_chef']['postgresql']['version'] = '14'
 # In the future, we're probably going to want to do something more elegant so we
 # don't accidentally overwrite this directory if we upgrade PG to 9.3: keeping these
 # directories straight is important because in the distant future (the year 2000)
