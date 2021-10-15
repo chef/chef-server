@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 
-name "postgresql13"
+name "postgresql13-bin"
 
 default_version "13.4"
 
@@ -50,13 +50,9 @@ build do
           " --with-libraries=#{install_dir}/embedded/lib", env: env
 
   make "world -j #{workers}", env: env
-  make "install-world -j #{workers}", env: env
 
-  block do
-    Dir.glob("#{install_dir}/embedded/postgresql/#{short_version}/bin/*").sort.each do |bin|
-      link bin, "#{install_dir}/embedded/bin/#{File.basename(bin)}"
-    end
-
-    delete "#{install_dir}/embedded/postgresql/#{short_version}/share/doc"
-  end
+  make "-C src/interfaces/libpq install", env: env  # libpq.so
+  make "-C src/backend install-bin", env: env       # postgres binary
+  make "-C src/timezone/tznames  install", env: env # share/timezonesets
+  make "-C src/bin install", env: env               # pg_*, psql binaries
 end

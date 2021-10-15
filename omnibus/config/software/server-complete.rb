@@ -30,7 +30,7 @@ dependency "openssl-fips-config" if fips_mode?
 
 # the backend
 dependency "postgresql96-bin" # for upgrading 9.6 -> 13
-dependency "postgresql13"
+dependency "postgresql13-bin" # for upgrading 13  -> 14
 dependency "postgresql14"
 dependency "redis" # dynamic routing controls
 dependency "haproxy"
