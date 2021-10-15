@@ -27,7 +27,7 @@ license_file "LICENSE"
 # and makeds more sense than adding the thing that is stopping
 # it from building on s390 (libxml2).
 dependency "nokogiri"
-dependency "postgresql13" # for libpq
+dependency "postgresql14" # for libpq
 dependency "ruby"
 
 relative_path "oc-id"

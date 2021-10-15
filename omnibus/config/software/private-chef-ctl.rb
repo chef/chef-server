@@ -21,7 +21,7 @@ source path: "#{project.files_path}/../../src/chef-server-ctl"
 license :project_license
 skip_transitive_dependency_licensing true
 
-dependency "postgresql13" # for libpq
+dependency "postgresql14" # for libpq
 dependency "omnibus-ctl"
 
 build do
