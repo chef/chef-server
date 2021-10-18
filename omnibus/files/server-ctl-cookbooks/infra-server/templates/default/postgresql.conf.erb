@@ -92,7 +92,8 @@ tcp_keepalives_count = <%= node['private_chef']['postgresql']['keepalives_count'
 # - Authentication -
 
 #authentication_timeout = 1min      # 1s-600s
-#password_encryption = md5      # md5 or scram-sha-256
+# PG 14
+password_encryption = md5      # md5 or scram-sha-256
 #db_user_namespace = off
 
 # GSSAPI using Kerberos
