@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.10.19 -->
-## [14.10.19](https://github.com/chef/chef-server/tree/14.10.19) (2021-10-18)
+<!-- latest_release 14.10.20 -->
+## [14.10.20](https://github.com/chef/chef-server/tree/14.10.20) (2021-10-18)
 
 #### Merged Pull Requests
-- Adding a configurable to display x-ops-api-info [#2815](https://github.com/chef/chef-server/pull/2815) ([vinay-satish](https://github.com/vinay-satish))
+- adds configurable option to run nginx master process as non-root user [#2570](https://github.com/chef/chef-server/pull/2570) ([collinmcneese](https://github.com/collinmcneese))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.9.23 -->
 ### Changes since 14.9.23 release
 
 #### Merged Pull Requests
+- adds configurable option to run nginx master process as non-root user [#2570](https://github.com/chef/chef-server/pull/2570) ([collinmcneese](https://github.com/collinmcneese)) <!-- 14.10.20 -->
 - Adding a configurable to display x-ops-api-info [#2815](https://github.com/chef/chef-server/pull/2815) ([vinay-satish](https://github.com/vinay-satish)) <!-- 14.10.19 -->
 - Policy Groups List in the policy revision API [#2818](https://github.com/chef/chef-server/pull/2818) ([vinay-satish](https://github.com/vinay-satish)) <!-- 14.10.18 -->
 - reverted the chef version to 16.13.16 due to mtls scenario failure [#2877](https://github.com/chef/chef-server/pull/2877) ([jashaik](https://github.com/jashaik)) <!-- 14.10.17 -->
