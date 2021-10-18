@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.10.17 -->
-## [14.10.17](https://github.com/chef/chef-server/tree/14.10.17) (2021-10-18)
+<!-- latest_release 14.10.18 -->
+## [14.10.18](https://github.com/chef/chef-server/tree/14.10.18) (2021-10-18)
 
 #### Merged Pull Requests
-- reverted the chef version to 16.13.16 due to mtls scenario failure [#2877](https://github.com/chef/chef-server/pull/2877) ([jashaik](https://github.com/jashaik))
+- Policy Groups List in the policy revision API [#2818](https://github.com/chef/chef-server/pull/2818) ([vinay-satish](https://github.com/vinay-satish))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.9.23 -->
 ### Changes since 14.9.23 release
 
 #### Merged Pull Requests
+- Policy Groups List in the policy revision API [#2818](https://github.com/chef/chef-server/pull/2818) ([vinay-satish](https://github.com/vinay-satish)) <!-- 14.10.18 -->
 - reverted the chef version to 16.13.16 due to mtls scenario failure [#2877](https://github.com/chef/chef-server/pull/2877) ([jashaik](https://github.com/jashaik)) <!-- 14.10.17 -->
 - Remove erchef from main page [#2874](https://github.com/chef/chef-server/pull/2874) ([kagarmoe](https://github.com/kagarmoe)) <!-- 14.10.16 -->
 - Fix error: undefined method &#39;shell_out&#39; for Du:Module [#2873](https://github.com/chef/chef-server/pull/2873) ([lbakerchef](https://github.com/lbakerchef)) <!-- 14.10.15 -->
