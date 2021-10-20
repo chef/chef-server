@@ -327,6 +327,11 @@ is_authorized_on_resource(RequestorId, ResourceType, ResourceId, ActorType, Acto
         ok -> true;
         %% This api returns not found for any missing permission
         {error, not_found} -> false;
+        {error,req_timedout} -> 
+            io:format("Devlog - oc_chef_authz - is_authorized_on_resource - req_timedout - ~p~n",
+                [{Url, RequestorId}]),
+            % For now returning server_error,TBD
+            {error, server_error};
         %% Otherwise, we expect server_error; not forbidden
         {error, server_error} -> {error, server_error}
     end.
