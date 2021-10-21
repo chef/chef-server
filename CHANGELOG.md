@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.10.22 -->
-## [14.10.22](https://github.com/chef/chef-server/tree/14.10.22) (2021-10-21)
+<!-- latest_release 14.10.23 -->
+## [14.10.23](https://github.com/chef/chef-server/tree/14.10.23) (2021-10-21)
 
 #### Merged Pull Requests
-- Updating the sequel of knife-ec-backup and chef_fixie from 4.49 to 5.49 [#2868](https://github.com/chef/chef-server/pull/2868) ([vinay-satish](https://github.com/vinay-satish))
+- Fix PostgreSQL major version detection and use for binaries &amp; data paths [#2830](https://github.com/chef/chef-server/pull/2830) ([lbakerchef](https://github.com/lbakerchef))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.9.23 -->
 ### Changes since 14.9.23 release
 
 #### Merged Pull Requests
+- Fix PostgreSQL major version detection and use for binaries &amp; data paths [#2830](https://github.com/chef/chef-server/pull/2830) ([lbakerchef](https://github.com/lbakerchef)) <!-- 14.10.23 -->
 - Updating the sequel of knife-ec-backup and chef_fixie from 4.49 to 5.49 [#2868](https://github.com/chef/chef-server/pull/2868) ([vinay-satish](https://github.com/vinay-satish)) <!-- 14.10.22 -->
 - Replace wordmarks in chef-server-ctl (#1949, first pass) [#2808](https://github.com/chef/chef-server/pull/2808) ([jgitlin-p21](https://github.com/jgitlin-p21)) <!-- 14.10.21 -->
 - adds configurable option to run nginx master process as non-root user [#2570](https://github.com/chef/chef-server/pull/2570) ([collinmcneese](https://github.com/collinmcneese)) <!-- 14.10.20 -->
