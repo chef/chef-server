@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.10.21 -->
-## [14.10.21](https://github.com/chef/chef-server/tree/14.10.21) (2021-10-18)
+<!-- latest_release 14.10.22 -->
+## [14.10.22](https://github.com/chef/chef-server/tree/14.10.22) (2021-10-21)
 
 #### Merged Pull Requests
-- Replace wordmarks in chef-server-ctl (#1949, first pass) [#2808](https://github.com/chef/chef-server/pull/2808) ([jgitlin-p21](https://github.com/jgitlin-p21))
+- Updating the sequel of knife-ec-backup and chef_fixie from 4.49 to 5.49 [#2868](https://github.com/chef/chef-server/pull/2868) ([vinay-satish](https://github.com/vinay-satish))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.9.23 -->
 ### Changes since 14.9.23 release
 
 #### Merged Pull Requests
+- Updating the sequel of knife-ec-backup and chef_fixie from 4.49 to 5.49 [#2868](https://github.com/chef/chef-server/pull/2868) ([vinay-satish](https://github.com/vinay-satish)) <!-- 14.10.22 -->
 - Replace wordmarks in chef-server-ctl (#1949, first pass) [#2808](https://github.com/chef/chef-server/pull/2808) ([jgitlin-p21](https://github.com/jgitlin-p21)) <!-- 14.10.21 -->
 - adds configurable option to run nginx master process as non-root user [#2570](https://github.com/chef/chef-server/pull/2570) ([collinmcneese](https://github.com/collinmcneese)) <!-- 14.10.20 -->
 - Adding a configurable to display x-ops-api-info [#2815](https://github.com/chef/chef-server/pull/2815) ([vinay-satish](https://github.com/vinay-satish)) <!-- 14.10.19 -->
