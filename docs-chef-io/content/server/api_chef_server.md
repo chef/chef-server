@@ -6870,6 +6870,364 @@ The response groups policies by name and revision and is similar to:
 </tbody>
 </table>
 
+### /policies/NAME
+
+The `/policies/NAME` endpoint has the following methods: `DELETE` and `GET`.
+
+#### DELETE
+
+The `DELETE` method is used to delete the given policy `NAME` from the Chef Infra Server.
+
+This method has no parameters.
+
+**Request**
+
+```none
+DELETE /organizations/NAME/policies/NAME
+```
+
+**Response**
+
+The response has the list of all the revision ids associated with the given policy `NAME` and is similar to:
+
+```javascript
+{
+   "revisions":{
+      "909c26701e291510eacdc6c06d626b9fa5350d24":{
+         
+      },
+      "909c26701e291510eacdc6c06d626b9fa5350d25":{
+         
+      }
+   }
+}
+```
+
+**Response Codes**
+
+<table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 80%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Response Code</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>200</code></td>
+<td>OK. The request was successful.</td>
+</tr>
+<tr class="even">
+<td><code>401</code></td>
+<td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name, and that the correct key was used to sign the request.</td>
+</tr>
+<tr class="odd">
+<td><code>403</code></td>
+<td>Forbidden. The user who made the request is not authorized to perform the action.</td>
+</tr>
+<tr class="even">
+<td><code>404</code></td>
+<td>Not found. The requested object does not exist.</td>
+</tr>
+</tbody>
+</table>
+
+#### GET
+
+The `GET` method is used to get a list of all revisions of the given policy `NAME` from the Chef Infra Server.
+
+This method has no parameters.
+
+**Request**
+
+```none
+GET /organizations/NAME/policies/NAME
+```
+
+**Response**
+
+The response is similar to:
+
+```javascript
+{
+   "revisions":{
+      "909c26701e291510eacdc6c06d626b9fa5350d24":{
+         
+      },
+      "909c26701e291510eacdc6c06d626b9fa5350d25":{
+         
+      }
+   }
+}
+```
+
+**Response Codes**
+
+<table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 80%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Response Code</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>200</code></td>
+<td>OK. The request was successful.</td>
+</tr>
+<tr class="even">
+<td><code>401</code></td>
+<td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name, and that the correct key was used to sign the request.</td>
+</tr>
+<tr class="odd">
+<td><code>403</code></td>
+<td>Forbidden. The user who made the request is not authorized to perform the action.</td>
+</tr>
+<tr class="even">
+<td><code>404</code></td>
+<td>Not found. The requested object does not exist.</td>
+</tr>
+</tbody>
+</table>
+
+### /policies/NAME/revisions
+
+The `/policies/NAME/revisions` endpoint has the following methods: `POST`.
+
+#### POST
+
+The `POST` method is used to create a policy with the given revision id. The created policy will not be associated with any policy group.
+
+This method has no parameters.
+
+**Request**
+
+```none
+POST /organizations/NAME/policies/NAME/revisions
+```
+
+with a request body similar to:
+
+```javascript
+{
+        "revision_id": "909c26701e291510eacdc6c06d626b9fa5350d25",
+        "name": "example-policy",
+        "run_list": [
+          "recipe[policyfile_demo::default]"
+        ],
+        "cookbook_locks": {
+          "policyfile_demo": {
+            "identifier": "f04cc40faf628253fe7d9566d66a1733fb1afbe9",
+            "version": "1.2.3"
+          }
+        }
+      }
+```
+
+**Response**
+
+The response has the details of the policy created and is similar to:
+
+```javascript
+{
+        "revision_id": "909c26701e291510eacdc6c06d626b9fa5350d25",
+        "name": "example-policy",
+        "run_list": [
+          "recipe[policyfile_demo::default]"
+        ],
+        "cookbook_locks": {
+          "policyfile_demo": {
+            "identifier": "f04cc40faf628253fe7d9566d66a1733fb1afbe9",
+            "version": "1.2.3"
+          }
+        }
+      }
+```
+
+**Response Codes**
+
+<table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 80%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Response Code</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>201</code></td>
+<td>OK. The request was successful.</td>
+</tr>
+<tr class="even">
+<td><code>400</code></td>
+<td>Bad request. The contents of the request are not formatted correctly.</td>
+</tr>
+<tr class="odd">
+<td><code>401</code></td>
+<td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name, and that the correct key was used to sign the request.</td>
+</tr>
+<tr class="even">
+<td><code>403</code></td>
+<td>Forbidden. The user who made the request is not authorized to perform the action.</td>
+</tr>
+<tr class="odd">
+<td><code>409</code></td>
+<td>Conflict. The object already exists.</td>
+</tr>
+<tr class="even">
+<td><code>413</code></td>
+<td>Request entity too large. A request may not be larger than 1000000 bytes.</td>
+</tr>
+</tbody>
+</table>
+
+### /policies/NAME/revisions/REVISION_ID
+
+The `/policies/NAME/revisions/REVISION_ID` endpoint has the following methods: `DELETE` and `GET`.
+
+#### DELETE
+
+The `DELETE` method is used to delete the policy revision of a policy. If the policy has only one revision, then the whole policy is deleted.
+
+This method has no parameters.
+
+**Request**
+
+```none
+DELETE /organizations/NAME/policies/NAME/revisions/REVISION_ID
+```
+
+**Response**
+
+The response has the details of the policy revision that is deleted and is similar to:
+
+```javascript
+{
+        "revision_id": "909c26701e291510eacdc6c06d626b9fa5350d25",
+        "name": "example-policy",
+        "run_list": [
+          "recipe[policyfile_demo::default]"
+        ],
+        "cookbook_locks": {
+          "policyfile_demo": {
+            "identifier": "f04cc40faf628253fe7d9566d66a1733fb1afbe9",
+            "version": "1.2.3"
+          }
+        }
+      }
+```
+
+**Response Codes**
+
+<table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 80%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Response Code</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>200</code></td>
+<td>OK. The request was successful.</td>
+</tr>
+<tr class="even">
+<td><code>401</code></td>
+<td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name, and that the correct key was used to sign the request.</td>
+</tr>
+<tr class="odd">
+<td><code>403</code></td>
+<td>Forbidden. The user who made the request is not authorized to perform the action.</td>
+</tr>
+<tr class="even">
+<td><code>404</code></td>
+<td>Not found. The requested object does not exist.</td>
+</tr>
+</tbody>
+</table>
+
+#### GET
+
+The `GET` method is used to get the details of the given policy `NAME` and `REVISION_ID` along with the list of the policy group to which the given policy revision belongs to.
+
+This method has no parameters.
+
+**Request**
+
+```none
+GET /organizations/NAME/policies/NAME/revisions/REVISION_ID
+```
+
+**Response**
+
+The response is similar to:
+
+```javascript
+{
+        "revision_id": "909c26701e291510eacdc6c06d626b9fa5350d25",
+        "name": "example-policy",
+        "run_list": [
+          "recipe[policyfile_demo::default]"
+        ],
+        "cookbook_locks": {
+          "policyfile_demo": {
+            "identifier": "f04cc40faf628253fe7d9566d66a1733fb1afbe9",
+            "version": "1.2.3"
+          }
+        },
+        "policy_group_list": ["some_policy_group"]
+      }
+```
+
+**Response Codes**
+
+<table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 80%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Response Code</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>200</code></td>
+<td>OK. The request was successful.</td>
+</tr>
+<tr class="even">
+<td><code>401</code></td>
+<td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name, and that the correct key was used to sign the request.</td>
+</tr>
+<tr class="odd">
+<td><code>403</code></td>
+<td>Forbidden. The user who made the request is not authorized to perform the action.</td>
+</tr>
+<tr class="even">
+<td><code>404</code></td>
+<td>Not found. The requested object does not exist.</td>
+</tr>
+</tbody>
+</table>
+
 ### /policy_groups
 
 The `/policy_groups` endpoint has the following methods: `GET`.
@@ -6886,6 +7244,410 @@ that group:
     mapped to organizational requirements such as "dev", "test",
     "staging", and "production", but can also be mapped to more detailed
     requirements as needed
+
+This method has no parameters.
+
+**Request**
+
+```none
+GET /organizations/NAME/policy_groups
+```
+
+**Response**
+
+The response has the list of all the policy group belonging to the given organization and is similar to:
+
+```javascript
+{
+   "other_policy_group":{
+      "uri":"https://api.chef-server.dev/organizations/pedant_testorg_api_17692/policy_groups/other_policy_group",
+      "policies":{
+         "some_policy_name":{
+            "revision_id":"cf0885f3f2f5edaa44bf8d5e5de4c4d0efa51411"
+         }
+      }
+   },
+   "some_policy_group":{
+      "uri":"https://api.chef-server.dev/organizations/pedant_testorg_api_17692/policy_groups/some_policy_group",
+      "policies":{
+         "some_policy_name":{
+            "revision_id":"cf0885f3f2f5edaa44bf8d5e5de4c4d0efa51411"
+         }
+      }
+   }
+}
+```
+
+**Response Codes**
+
+<table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 80%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Response Code</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>200</code></td>
+<td>OK. The request was successful.</td>
+</tr>
+<tr class="even">
+<td><code>403</code></td>
+<td>Forbidden. The user who made the request is not authorized to perform the action.</td>
+</tr>
+</tbody>
+</table>
+
+### /policy_groups/POLICY_GROUP_NAME
+
+The `/policy_groups/POLICY_GROUP_NAME` endpoint has the following methods: `DELETE` and `GET`.
+
+#### DELETE
+
+The `DELETE` method is used to delete the given policy group `POLICY_GROUP_NAME` from the Chef Infra Server 
+
+This method has no parameters.
+
+**Request**
+
+```none
+DELETE /organizations/NAME/policy_groups/POLICY_GROUP_NAME
+```
+
+**Response**
+
+The response is similar to:
+
+```javascript
+{
+   "policies":{
+      "some_policy_name":{
+         "revision_id":"909c26701e291510eacdc6c06d626b9fa5350d24"
+      }
+   },
+   "uri":"https://api.chef-server.dev/organizations/pedant_testorg_api_11593/policy_groups/some_policy_group"
+}
+```
+
+**Response Codes**
+
+<table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 80%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Response Code</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>200</code></td>
+<td>OK. The request was successful.</td>
+</tr>
+<tr class="even">
+<td><code>401</code></td>
+<td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name, and that the correct key was used to sign the request.</td>
+</tr>
+<tr class="odd">
+<td><code>403</code></td>
+<td>Forbidden. The user who made the request is not authorized to perform the action.</td>
+</tr>
+<tr class="even">
+<td><code>404</code></td>
+<td>Not found. The requested object does not exist.</td>
+</tr>
+</tbody>
+</table>
+
+#### GET
+
+The `GET` method is used to get the details of the given `POLICY_GROUP_NAME`
+
+This method has no parameters.
+
+**Request**
+
+```none
+GET /organizations/NAME/policy_groups/POLICY_GROUP_NAME
+```
+
+**Response**
+
+The response is similar to:
+
+```javascript
+{
+   "policies":{
+      "some_policy_name":{
+         "revision_id":"909c26701e291510eacdc6c06d626b9fa5350d24"
+      }
+   },
+   "uri":"https://api.chef-server.dev/organizations/pedant_testorg_api_11593/policy_groups/some_policy_group"
+}
+```
+
+**Response Codes**
+
+<table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 80%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Response Code</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>200</code></td>
+<td>OK. The request was successful.</td>
+</tr>
+<tr class="even">
+<td><code>401</code></td>
+<td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name, and that the correct key was used to sign the request.</td>
+</tr>
+<tr class="odd">
+<td><code>403</code></td>
+<td>Forbidden. The user who made the request is not authorized to perform the action.</td>
+</tr>
+<tr class="even">
+<td><code>404</code></td>
+<td>Not found. The requested object does not exist.</td>
+</tr>
+</tbody>
+</table>
+
+### /policy_groups/POLICY_GROUP_NAME/policies/NAME
+
+The `/policy_groups/POLICY_GROUP_NAME/policies/NAME` endpoint has the following methods: `DELETE`, `GET` and `PUT`.
+
+#### DELETE
+
+The `DELETE` method is used to remove the given policy NAME from the given policy group `POLICY_GROUP_NAME`.
+
+This method has no parameters.
+
+**Request**
+
+```none
+DELETE /organizations/NAME/policy_groups/POLICY_GROUP_NAME/policies/NAME
+```
+
+**Response**
+
+The response is similar to:
+
+```javascript
+{
+   "revision_id":"909c26701e291510eacdc6c06d626b9fa5350d24",
+   "name":"some_policy_name",
+   "run_list":[
+      "recipe[policyfile_demo::default]"
+   ],
+   "cookbook_locks":{
+      "policyfile_demo":{
+         "identifier":"f04cc40faf628253fe7d9566d66a1733fb1afbe9",
+         "version":"1.2.3"
+      }
+   }
+}
+```
+
+**Response Codes**
+
+<table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 80%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Response Code</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>200</code></td>
+<td>OK. The request was successful.</td>
+</tr>
+<tr class="even">
+<td><code>401</code></td>
+<td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name, and that the correct key was used to sign the request.</td>
+</tr>
+<tr class="odd">
+<td><code>403</code></td>
+<td>Forbidden. The user who made the request is not authorized to perform the action.</td>
+</tr>
+<tr class="even">
+<td><code>404</code></td>
+<td>Not found. The requested object does not exist.</td>
+</tr>
+</tbody>
+</table>
+
+#### GET
+
+The `GET` method is used to get the details of policy `NAME` whose revision id is associated with the given policy group `POLICY_GROUP_NAME`.
+
+This method has no parameters.
+
+**Request**
+
+```none
+GET /organizations/NAME/policy_groups/POLICY_GROUP_NAME/policies/NAME
+```
+
+**Response**
+
+The response is similar to:
+
+```javascript
+{
+   "revision_id":"909c26701e291510eacdc6c06d626b9fa5350d24",
+   "name":"some_policy_name",
+   "run_list":[
+      "recipe[policyfile_demo::default]"
+   ],
+   "cookbook_locks":{
+      "policyfile_demo":{
+         "identifier":"f04cc40faf628253fe7d9566d66a1733fb1afbe9",
+         "version":"1.2.3"
+      }
+   }
+}
+```
+
+**Response Codes**
+
+<table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 80%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Response Code</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>200</code></td>
+<td>OK. The request was successful.</td>
+</tr>
+<tr class="even">
+<td><code>401</code></td>
+<td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name, and that the correct key was used to sign the request.</td>
+</tr>
+<tr class="odd">
+<td><code>403</code></td>
+<td>Forbidden. The user who made the request is not authorized to perform the action.</td>
+</tr>
+<tr class="even">
+<td><code>404</code></td>
+<td>Not found. The requested object does not exist.</td>
+</tr>
+</tbody>
+</table>
+
+#### PUT
+
+The `PUT` method is used to creates a policy of given policy `NAME` if does not exits and associates it with the given policy group `POLICY_GROUP_NAME`. 
+If the given policy `NAME` already exists but the revision is new, creates a policy with new revision and updates the association with the new policy revision.
+
+This method has no parameters.
+
+**Request**
+
+```none
+PUT /organizations/NAME/policy_groups/POLICY_GROUP_NAME/policies/NAME
+```
+
+with a request body similar to:
+
+```javascript
+{
+   "revision_id":"909c26701e291510eacdc6c06d626b9fa5350d24",
+   "name":"some_policy_name",
+   "run_list":[
+      "recipe[policyfile_demo::default]"
+   ],
+   "cookbook_locks":{
+      "policyfile_demo":{
+         "identifier":"f04cc40faf628253fe7d9566d66a1733fb1afbe9",
+         "version":"1.2.3"
+      }
+   }
+}
+```
+
+**Response**
+
+The response has the details of the policy created and is similar to:
+
+```javascript
+{
+   "revision_id":"909c26701e291510eacdc6c06d626b9fa5350d24",
+   "name":"some_policy_name",
+   "run_list":[
+      "recipe[policyfile_demo::default]"
+   ],
+   "cookbook_locks":{
+      "policyfile_demo":{
+         "identifier":"f04cc40faf628253fe7d9566d66a1733fb1afbe9",
+         "version":"1.2.3"
+      }
+   }
+}
+```
+
+**Response Codes**
+
+<table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 80%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Response Code</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>200</code></td>
+<td>OK. The request was successful.</td>
+</tr>
+<tr class="even">
+<td><code>401</code></td>
+<td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name, and that the correct key was used to sign the request.</td>
+</tr>
+<tr class="odd">
+<td><code>403</code></td>
+<td>Forbidden. The user who made the request is not authorized to perform the action.</td>
+</tr>
+<tr class="even">
+<td><code>404</code></td>
+<td>Not found. The requested object does not exist.</td>
+</tr>
+<tr class="odd">
+<td><code>413</code></td>
+<td>Request entity too large. A request may not be larger than 1000000 bytes.</td>
+</tr>
+</tbody>
+</table>
 
 ### /principals/NAME
 
