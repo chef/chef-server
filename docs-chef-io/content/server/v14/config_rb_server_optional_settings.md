@@ -836,7 +836,7 @@ Chef Infra Server versions earlier than 14.5 configured with `nginx['enable_non_
     ports greater than `1024` or that the local system is otherwise allowed to bind to privileged ports
     with the user `user['username']`.
 
-    **New in Chef Infra Server 14.6**
+    **New in Chef Infra Server 14.10*
 
 ### oc_bifrost
 
