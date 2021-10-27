@@ -59,7 +59,7 @@ group :doc do
 end
 
 group :test do
-  gem 'capybara', '~> 3.33'
+  gem 'capybara', '~> 3.36'
   gem 'factory_girl_rails', '~> 4.4.0'
   gem 'selenium-webdriver', '~> 3.142.7'
   gem 'timecop'
