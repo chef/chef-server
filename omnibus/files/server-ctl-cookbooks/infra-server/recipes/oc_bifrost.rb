@@ -15,26 +15,6 @@
 # limitations under the License.
 #
 
-# BEGIN AUTHZ CLEANUP
-#
-# Remove all traces of the legacy opscode-authz service that oc_bifrost
-# replaces.
-#
-
-execute '/opt/opscode/bin/private-chef-ctl stop opscode-authz' do
-  retries 20
-end
-
-runit_service 'opscode-authz' do
-  action :disable
-end
-
-directory '/opt/opscode/sv/opscode-authz' do
-  action :delete
-  recursive true
-end
-# END AUTHZ CLEANUP
-
 oc_bifrost_dir = node['private_chef']['oc_bifrost']['dir']
 oc_bifrost_bin_dir = File.join(oc_bifrost_dir, 'bin')
 oc_bifrost_log_dir = node['private_chef']['oc_bifrost']['log_directory']

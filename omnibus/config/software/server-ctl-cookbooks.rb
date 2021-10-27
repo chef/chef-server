@@ -52,8 +52,6 @@ build do
     File.open("#{install_dir}/embedded/cookbooks/post_upgrade_cleanup.json", "w") do |f|
       f.write FFI_Yajl::Encoder.encode(
         run_list: [
-          'recipe[infra-server::post_11_upgrade_cleanup]',
-          'recipe[infra-server::post_12_upgrade_cleanup]',
           'recipe[infra-server::solr4_gclog_cleanup]',
           'recipe[infra-server::postgres_upgrade_cleanup]',
           'recipe[infra-server::post_14_upgrade_cleanup]'
