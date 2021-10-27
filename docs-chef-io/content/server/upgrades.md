@@ -242,6 +242,8 @@ Check the [post upgrade steps](#post-upgrade-steps) if you are upgrading from a 
 
 ### External PostgreSQL
 
+The following External PostgreSQL upgrade steps are provided as a courtesy only.  It is the responsibility of the user to upgrade and maintain any External PostgreSQL configurations.
+
 #### Upgrade Chef Infra Server
 
 1. Log into the external PostgreSQL machine.
