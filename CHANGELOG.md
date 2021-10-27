@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.10.28 -->
-## [14.10.28](https://github.com/chef/chef-server/tree/14.10.28) (2021-10-27)
+<!-- latest_release 14.10.29 -->
+## [14.10.29](https://github.com/chef/chef-server/tree/14.10.29) (2021-10-27)
 
 #### Merged Pull Requests
-- Bump capybara from 3.35.3 to 3.36.0 in /src/oc-id [#2905](https://github.com/chef/chef-server/pull/2905) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Remove cleanup logic for older releases of Chef Infra Server [#2711](https://github.com/chef/chef-server/pull/2711) ([tas50](https://github.com/tas50))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.10.23 -->
 ### Changes since 14.10.23 release
 
 #### Merged Pull Requests
+- Remove cleanup logic for older releases of Chef Infra Server [#2711](https://github.com/chef/chef-server/pull/2711) ([tas50](https://github.com/tas50)) <!-- 14.10.29 -->
 - Bump capybara from 3.35.3 to 3.36.0 in /src/oc-id [#2905](https://github.com/chef/chef-server/pull/2905) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.10.28 -->
 - Bump test-kitchen from 3.1.0 to 3.1.1 in /omnibus [#2910](https://github.com/chef/chef-server/pull/2910) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.10.27 -->
 - Bump chefstyle from 2.1.0 to 2.1.1 in /src/chef-server-ctl [#2904](https://github.com/chef/chef-server/pull/2904) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.10.26 -->
