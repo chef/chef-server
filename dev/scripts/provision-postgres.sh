@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 #### IMPORTANT:
 #
@@ -54,18 +54,17 @@
 #### Set default values (if not overridden by environment variables)
 #
 
-CS_IP=${CS_IP:-$1} # Allow old use of $1 variable
-if [ -z "${CS_IP}"        ]; then CS_IP='192.168.33.100'   ; fi
-if [ -z "${PG_MAJOR}"     ]; then PG_MAJOR=13              ; fi
-if [ -z "${PG_MINOR}"     ]; then PG_MINOR='latest'        ; fi
-if [ -z "${PG_HBA_AUTH}"  ]; then PG_HBA_AUTH='md5'        ; fi
-if [ -z "${DB_SUPERUSER}" ]; then DB_SUPERUSER='bofh'      ; fi
-if [ -z "${DB_SUPERPASS}" ]; then DB_SUPERPASS='i1uvd3v0ps'; fi
+test -n "${CS_IP}"        || CS_IP=${1:-'192.168.33.100'} # Allow old $1 parameter
+test -n "${PG_MAJOR}"     || PG_MAJOR=13
+test -n "${PG_MINOR}"     || PG_MINOR='latest'
+test -n "${PG_HBA_AUTH}"  || PG_HBA_AUTH='md5'
+test -n "${DB_SUPERUSER}" || DB_SUPERUSER='bofh'
+test -n "${DB_SUPERPASS}" || DB_SUPERPASS='i1uvd3v0ps'
 
 # Grab DISTRIB_CODENAME value from /etc/lsb-release
-if [ -f /etc/lsb-release ]; then . /etc/lsb-release ; fi
+test -f /etc/lsb-release && . /etc/lsb-release
 # Otherwise, set a default value
-if [ -z "${DISTRIB_CODENAME}" ]; then DISTRIB_CODENAME='bionic' ; fi
+test -n "${DISTRIB_CODENAME}" || DISTRIB_CODENAME='bionic'
 
 #
 #### Set up repositories
