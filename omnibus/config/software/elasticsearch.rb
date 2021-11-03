@@ -27,7 +27,7 @@ relative_path "opensearch-#{version}"
 
 version "1.1.0" do
   source url: "https://artifacts.opensearch.org/releases/bundle/opensearch/#{version}/opensearch-#{version}-linux-x64.tar.gz",
-         sha512: "b5ea595be5f05a3311459492c4a9c78c3606222a82e7fcf81433c635aaed6078a16275d199e6ef45b0c2a23babe8a37e84c8c09e71cf27d4f9c84cdec29f55c9"
+         sha512: "4c2626ee56b4cdc4c8110931c369a8b9bd2c7268f5c0baa4022276e9198cf25eb7103ea3aa427a931508a4047a2a0e25fda20a2a5b1a0f6686c187b62134037a"
 end
 
 version "6.8.18" do
