@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.10.32 -->
-## [14.10.32](https://github.com/chef/chef-server/tree/14.10.32) (2021-11-04)
+<!-- latest_release 14.10.33 -->
+## [14.10.33](https://github.com/chef/chef-server/tree/14.10.33) (2021-11-04)
 
 #### Merged Pull Requests
-- Update release process [#2903](https://github.com/chef/chef-server/pull/2903) ([lbakerchef](https://github.com/lbakerchef))
+- Bump chef from 17.6.18 to 17.7.29 in /src/oc-id [#2918](https://github.com/chef/chef-server/pull/2918) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.10.23 -->
 ### Changes since 14.10.23 release
 
 #### Merged Pull Requests
+- Bump chef from 17.6.18 to 17.7.29 in /src/oc-id [#2918](https://github.com/chef/chef-server/pull/2918) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.10.33 -->
 - Update release process [#2903](https://github.com/chef/chef-server/pull/2903) ([lbakerchef](https://github.com/lbakerchef)) <!-- 14.10.32 -->
 - Clarify support for External PostgreSQL configurations [#2912](https://github.com/chef/chef-server/pull/2912) ([lbakerchef](https://github.com/lbakerchef)) <!-- 14.10.31 -->
 - Bump chef from 17.6.18 to 17.7.22 in /oc-chef-pedant [#2908](https://github.com/chef/chef-server/pull/2908) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.10.30 -->
