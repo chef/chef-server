@@ -64,7 +64,7 @@ Using the step-by-step Umbrella testing process detailed below...
 1. Test that the latest stable release can successfully upgrade to the new release. This is the _LATEST-STABLE -> YOUR-RELEASE_ upgrade path.
 
 Past stable releases:
-https://downloads.chef.io
+https://downloads.chef.io/tools/infra-server
 
 Umbrella Testing Step-by-Step:
 
@@ -204,7 +204,7 @@ Example:
 
   Please do this in the `#chef-server` channel.  Once this is
   done, the release is available to the public via the APT and YUM
-  repositories and downloads.chef.io.
+  repositories and https://downloads.chef.io/tools/infra-server.
 
 ### Announce the release post-promote to the following channels:
 
@@ -214,6 +214,15 @@ Example:
 
 Copying/pasting a discourse link to the post-promote channels should suffice.  You can find the link here.  Note that this is NOT the link to copy/paste, this is a link where you can find the link to copy/paste:
 https://discourse.chef.io/c/chef-release/9
+
+### Verifying Release Success
+
+1. Confirm the existence of the notification in the #chef-server-notify channel.
+1. Confirm that the release appears at https://downloads.chef.io/tools/infra-server.  This usually takes a while.
+1. Confirm that the release notes from Pending Release Notes are automatically posted on discourse.  Sample post:
+https://discourse.chef.io/t/chef-infra-server-14-10-23-released/20438
+1. Confirm that the data for the Pending Release Notes at https://github.com/chef/chef-server/wiki/Pending-Release-Notes is automatically deleted by expeditor, and only the titles remain.  Notify releng at https://github.com/chef/release-engineering/issues if this does not automatically happen on promote.
+1. Confirm that the release notes appear at https://docs.chef.io/release_notes_server/ .  This should happen automatically via expeditor, but if it does not you need to perform the steps manually and create an issue with releng at https://github.com/chef/release-engineering/issues.
 
 ### Automate
 
