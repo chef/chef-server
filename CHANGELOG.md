@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.10.31 -->
-## [14.10.31](https://github.com/chef/chef-server/tree/14.10.31) (2021-10-29)
+<!-- latest_release 14.10.32 -->
+## [14.10.32](https://github.com/chef/chef-server/tree/14.10.32) (2021-11-04)
 
 #### Merged Pull Requests
-- Clarify support for External PostgreSQL configurations [#2912](https://github.com/chef/chef-server/pull/2912) ([lbakerchef](https://github.com/lbakerchef))
+- Update release process [#2903](https://github.com/chef/chef-server/pull/2903) ([lbakerchef](https://github.com/lbakerchef))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.10.23 -->
 ### Changes since 14.10.23 release
 
 #### Merged Pull Requests
+- Update release process [#2903](https://github.com/chef/chef-server/pull/2903) ([lbakerchef](https://github.com/lbakerchef)) <!-- 14.10.32 -->
 - Clarify support for External PostgreSQL configurations [#2912](https://github.com/chef/chef-server/pull/2912) ([lbakerchef](https://github.com/lbakerchef)) <!-- 14.10.31 -->
 - Bump chef from 17.6.18 to 17.7.22 in /oc-chef-pedant [#2908](https://github.com/chef/chef-server/pull/2908) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.10.30 -->
 - Remove cleanup logic for older releases of Chef Infra Server [#2711](https://github.com/chef/chef-server/pull/2711) ([tas50](https://github.com/tas50)) <!-- 14.10.29 -->
