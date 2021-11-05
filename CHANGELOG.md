@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.10.35 -->
-## [14.10.35](https://github.com/chef/chef-server/tree/14.10.35) (2021-11-04)
+<!-- latest_release 14.10.36 -->
+## [14.10.36](https://github.com/chef/chef-server/tree/14.10.36) (2021-11-05)
 
 #### Merged Pull Requests
-- Bump newrelic_rpm from 7.2.0 to 8.1.0 in /src/oc-id [#2915](https://github.com/chef/chef-server/pull/2915) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump chefstyle from 2.1.1 to 2.1.2 in /src/chef-server-ctl [#2914](https://github.com/chef/chef-server/pull/2914) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.10.23 -->
 ### Changes since 14.10.23 release
 
 #### Merged Pull Requests
+- Bump chefstyle from 2.1.1 to 2.1.2 in /src/chef-server-ctl [#2914](https://github.com/chef/chef-server/pull/2914) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.10.36 -->
 - Bump newrelic_rpm from 7.2.0 to 8.1.0 in /src/oc-id [#2915](https://github.com/chef/chef-server/pull/2915) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.10.35 -->
 - Bump chef from 17.7.22 to 17.7.29 in /oc-chef-pedant [#2916](https://github.com/chef/chef-server/pull/2916) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.10.34 -->
 - Bump chef from 17.6.18 to 17.7.29 in /src/oc-id [#2918](https://github.com/chef/chef-server/pull/2918) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.10.33 -->
