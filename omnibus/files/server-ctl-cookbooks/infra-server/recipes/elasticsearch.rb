@@ -2,14 +2,14 @@
 # All Rights Reserved
 
 MAX_MAP_COUNT = 262_144
-cluster_name = if node['previous_run'] && node['previous_run']['elasticsearch'] && node['previous_run']['elasticsearch']['cluster_name']
-                 node['previous_run']['elasticsearch']['cluster_name']
+cluster_name = if node['previous_run'] && node['previous_run']['opensearch'] && node['previous_run']['opensearch']['cluster_name']
+                 node['previous_run']['opensearch']['cluster_name']
                else
                  "ChefInfraServer-#{SecureRandom.hex(4)}"
                end
 
-node.override['private_chef']['elasticsearch']['cluster_name'] = cluster_name
-elasticsearch = node['private_chef']['elasticsearch']
+node.override['private_chef']['opensearch']['cluster_name'] = cluster_name
+elasticsearch = node['private_chef']['opensearch']
 
 elasticsearch_dir              = elasticsearch['dir']                   # /var/opt/opscode/elasticsearch
 elasticsearch_conf_dir         = File.join(elasticsearch_dir, 'config') # /var/opt/opscode/elasticsearch/config

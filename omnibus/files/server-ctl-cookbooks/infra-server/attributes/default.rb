@@ -153,29 +153,29 @@ default['private_chef']['opscode-solr4']['heap_size'] = nil
 var_base = '/var/opt/opscode'
 log_base = '/var/log/opscode'
 
-elasticsearch = default['private_chef']['elasticsearch']
+opensearch = default['private_chef']['opensearch']
 
 # These attributes cannot be overridden in chef-server.rb
 # elasticsearch['tunable_blacklist'] = %w{dir data_dir try_start}
 # elasticsearch['try_start'] = true
-elasticsearch['enable'] = true
+opensearch['enable'] = true
 # elasticsearch['external'] = nil
 # elasticsearch['external_url'] = nil
-elasticsearch['dir'] = "#{var_base}/opensearch"
-elasticsearch['data_dir'] = "#{var_base}/opensearch/data"
-elasticsearch['plugins_directory'] = "#{var_base}/opensearch/plugins"
-elasticsearch['scripts_directory'] = "#{var_base}/opensearch/scripts"
-elasticsearch['temp_directory'] = "#{var_base}/opensearch/tmp"
-elasticsearch['log_directory'] = "#{log_base}/opensearch"
-elasticsearch['log_rotation']['file_maxbytes'] = 104857600
-elasticsearch['log_rotation']['num_to_keep'] = 10
-elasticsearch['vip'] = '127.0.0.1'
-elasticsearch['listen'] = '127.0.0.1'
-elasticsearch['port'] = 9200
-elasticsearch['enable_gc_log'] = false
-elasticsearch['initial_cluster_join_timeout'] = 90
-elasticsearch['shard_count'] = 5
-elasticsearch['replica_count'] = 1
+opensearch['dir'] = "#{var_base}/opensearch"
+opensearch['data_dir'] = "#{var_base}/opensearch/data"
+opensearch['plugins_directory'] = "#{var_base}/opensearch/plugins"
+opensearch['scripts_directory'] = "#{var_base}/opensearch/scripts"
+opensearch['temp_directory'] = "#{var_base}/opensearch/tmp"
+opensearch['log_directory'] = "#{log_base}/opensearch"
+opensearch['log_rotation']['file_maxbytes'] = 104857600
+opensearch['log_rotation']['num_to_keep'] = 10
+opensearch['vip'] = '127.0.0.1'
+opensearch['listen'] = '127.0.0.1'
+opensearch['port'] = 9200
+opensearch['enable_gc_log'] = false
+opensearch['initial_cluster_join_timeout'] = 90
+opensearch['shard_count'] = 5
+opensearch['replica_count'] = 1
 # elasticsearch['es_version'] = '6.8.14'
 
 # each item in this list will be placed as-is into java_opts config file.
@@ -193,7 +193,7 @@ elasticsearch['replica_count'] = 1
 # elasticsearch.heap_size = $value
 # elasticsearch.new_size = $value
 # Note that in both cases, $value is a number that represents megabytes
-elasticsearch['jvm_opts'] = []
+opensearch['jvm_opts'] = []
 
 #
 # NOTE: if new_size or heap_size is also specificed directly in java_opts,
@@ -214,8 +214,8 @@ elasticsearch['jvm_opts'] = []
 # should be set.
 #
 #
-elasticsearch['heap_size'] = Elasticsearch.heap_size_default(node)
-elasticsearch['new_size'] = Elasticsearch.new_size_default(node)
+opensearch['heap_size'] = Elasticsearch.heap_size_default(node)
+opensearch['new_size'] = Elasticsearch.new_size_default(node)
 
 ####
 # Erlang Chef Server API

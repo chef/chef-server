@@ -29,7 +29,7 @@ class IndexingPreflightValidator < PreflightValidator
     @cs_solr_attr = PrivateChef['opscode_solr4']
     @cs_erchef_attr = PrivateChef['opscode_erchef']
 
-    @node_elasticsearch_attr = node['private_chef']['elasticsearch']
+    @node_elasticsearch_attr = node['private_chef']['opensearch']
     @node_erchef_attr = node['private_chef']['opscode-erchef']
   end
 

@@ -40,6 +40,6 @@ class Elasticsearch
   # Defaults to the larger of 1/16th of heap_size,
   # or 32MB.
   def self.new_size_default(node)
-    [node['private_chef']['elasticsearch']['heap_size'] / 16, 32].max
+    [node['private_chef']['opensearch']['heap_size'] / 16, 32].max
   end
 end
