@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.10.39 -->
-## [14.10.39](https://github.com/chef/chef-server/tree/14.10.39) (2021-11-05)
+<!-- latest_release 14.10.40 -->
+## [14.10.40](https://github.com/chef/chef-server/tree/14.10.40) (2021-11-05)
 
 #### Merged Pull Requests
-- Bump jwt from 2.2.3 to 2.3.0 in /src/oc-id [#2851](https://github.com/chef/chef-server/pull/2851) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump spring from 2.1.1 to 3.0.0 in /src/oc-id [#2805](https://github.com/chef/chef-server/pull/2805) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.10.23 -->
 ### Changes since 14.10.23 release
 
 #### Merged Pull Requests
+- Bump spring from 2.1.1 to 3.0.0 in /src/oc-id [#2805](https://github.com/chef/chef-server/pull/2805) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.10.40 -->
 - Bump jwt from 2.2.3 to 2.3.0 in /src/oc-id [#2851](https://github.com/chef/chef-server/pull/2851) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.10.39 -->
 - Bump doorkeeper from 4.4.3 to 5.5.4 in /src/oc-id [#2857](https://github.com/chef/chef-server/pull/2857) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.10.38 -->
 - Bump selenium-webdriver from 3.142.7 to 4.0.3 in /src/oc-id [#2901](https://github.com/chef/chef-server/pull/2901) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.10.37 -->
