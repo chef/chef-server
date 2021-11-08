@@ -1,0 +1,17 @@
+#!/bin/sh
+exec 2>&1
+
+ulimit -n 65536
+
+export ES_HOME=<%= node['private_chef']['opensearch']['dir'] %>            #/var/opt/opscode/elasticsearch
+export ES_DATA=<%= node['private_chef']['opensearch']['dir'] %>/data       #/var/opt/opscode/elasticsearch/data
+
+export JAVA_HOME=/opt/opscode/embedded/open-jre/
+export ES_PATH_CONF=<%= node['private_chef']['opensearch']['dir'] %>/config
+export PATH=<%= node['private_chef']['install_path'] %>/embedded/bin:$JAVA_HOME/bin:$ES_HOME:$PATH #/opt/opscode/embedded/bin
+
+export TMPDIR=<%= node['private_chef']['opensearch']['temp_directory'] %>
+export ES_TMPDIR=<%= node['private_chef']['opensearch']['temp_directory'] %>
+
+cd $ES_HOME
+exec chpst -P -u <%= node['private_chef']['user']['username'] %> -U <%= node['private_chef']['user']['username'] %> <%= node['private_chef']['install_path'] %>/embedded/opensearch/bin/opensearch
