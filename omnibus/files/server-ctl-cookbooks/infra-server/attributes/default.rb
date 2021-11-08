@@ -177,7 +177,8 @@ opensearch['initial_cluster_join_timeout'] = 90
 opensearch['shard_count'] = 5
 opensearch['replica_count'] = 1
 # elasticsearch['es_version'] = '6.8.14'
-
+#TODO: Remove before review
+default['private_chef']['elasticsearch']['enable'] = true
 # each item in this list will be placed as-is into java_opts config file.
 # entries are set in chef-server.rb as
 # elasticsearch.jvm_opts = [
