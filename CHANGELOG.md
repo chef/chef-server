@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.10.41 -->
-## [14.10.41](https://github.com/chef/chef-server/tree/14.10.41) (2021-11-06)
+<!-- latest_release 14.10.42 -->
+## [14.10.42](https://github.com/chef/chef-server/tree/14.10.42) (2021-11-09)
 
 #### Merged Pull Requests
-- Bump omnibus-software from `0f8338a` to `485b535` in /omnibus [#2931](https://github.com/chef/chef-server/pull/2931) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Clarify dependabot testing process [#2935](https://github.com/chef/chef-server/pull/2935) ([lbakerchef](https://github.com/lbakerchef))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.10.23 -->
 ### Changes since 14.10.23 release
 
 #### Merged Pull Requests
+- Clarify dependabot testing process [#2935](https://github.com/chef/chef-server/pull/2935) ([lbakerchef](https://github.com/lbakerchef)) <!-- 14.10.42 -->
 - Bump omnibus-software from `0f8338a` to `485b535` in /omnibus [#2931](https://github.com/chef/chef-server/pull/2931) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.10.41 -->
 - Bump spring from 2.1.1 to 3.0.0 in /src/oc-id [#2805](https://github.com/chef/chef-server/pull/2805) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.10.40 -->
 - Bump jwt from 2.2.3 to 2.3.0 in /src/oc-id [#2851](https://github.com/chef/chef-server/pull/2851) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.10.39 -->
