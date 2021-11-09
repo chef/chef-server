@@ -32,16 +32,16 @@ Dependabot creates PRs for updating Ruby gems.  Verify pipeline builds
 are kicked-off automatically, but it is necessary to verify that they
 pass.  Any needed adhoc builds must be kicked-off by hand.
 
-Some Dependabot PRs will only need passing verify builds.  Others will
-need both passing verify and adhoc builds.  Look at the title of the PR,
+Some Dependabot PRs will only need passing verify tests.  Others will
+need passing verify tests, adhoc builds, and umbrella tests.  Look at the title of the PR,
 then consult the lists below to determine what you need to do with the PR.
 
-Needing passing verify builds only:
+Needing passing verify tests only:
 - src/oc-id/Gemfile.lock
 - src/oc\_erchef/apps/chef_objects/priv/depselector\_rb/Gemfile.lock
 - src/oc_bifrost/oc-bifrost-pedant/Gemfile.lock
 
-Needing passing verify + adhoc builds:
+Needing passing verify + adhoc + umbrella:
 - omnibus/Gemfile.lock
 - oc-chef-pedant/Gemfile.lock
 - src/chef-server-ctl/Gemfile.lock
