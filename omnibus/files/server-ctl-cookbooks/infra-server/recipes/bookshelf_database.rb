@@ -57,5 +57,5 @@ pg_sqitch '/opt/opscode/embedded/service/bookshelf/schema' do
   password PrivateChef.credentials.get('postgresql', 'db_superuser_password')
   database 'bookshelf'
   sslmode postgres_attrs['sslmode']
-  action :nothing
+  action :deploy
 end

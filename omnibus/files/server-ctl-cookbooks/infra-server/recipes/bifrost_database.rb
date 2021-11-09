@@ -62,5 +62,5 @@ pg_sqitch '/opt/opscode/embedded/service/oc_bifrost/db' do
   password PrivateChef.credentials.get('postgresql', 'db_superuser_password')
   database 'bifrost'
   sslmode postgres_attrs['sslmode']
-  action :nothing
+  action :deploy
 end
