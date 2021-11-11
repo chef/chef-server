@@ -62,7 +62,7 @@ class OmnibusHelper
     if node['private_chef']['opscode-erchef']['search_provider'] == 'elasticsearch'
       begin
         client = Chef::HTTP.new(solr_url)
-        response = client.get('')
+        response = client.get('', auth_header)
       rescue => e
         # Perform a blind rescue because Net:HTTP throws a variety of exceptions - some of which are platform specific.
         if current_request == max_requests
@@ -269,9 +269,9 @@ class OmnibusHelper
 
   def solr_url
     if external_elasticsearch?
-      node['private_chef']['elasticsearch']['external_url'] || node['private_chef']['opscode-solr4']['external_url']
+      node['private_chef']['opensearch']['external_url'] || node['private_chef']['opscode-solr4']['external_url']
     else
-      "http://#{vip_for_uri('elasticsearch')}:#{node['private_chef']['elasticsearch']['port']}"
+      "http://#{vip_for_uri('opensearch')}:#{node['private_chef']['opensearch']['port']}"
     end
   end
 
@@ -461,5 +461,10 @@ class OmnibusHelper
     # see: https://www.postgresql.org/docs/9.6/libpq-ssl.html
     # allowable choices come from the PGSSLMODE environment var for libpq.
     { 'disable' => false, 'require' => 'required' }
+  end
+
+  def auth_header 
+    auth = Base64.strict_encode64("admin:admin")
+    {Authorization: "Basic #{auth}"}
   end
 end

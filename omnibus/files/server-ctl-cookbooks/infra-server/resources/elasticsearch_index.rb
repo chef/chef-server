@@ -26,7 +26,7 @@ property :index_definition, Hash
 action :create do
   unless retry_index_exists?(4)
     converge_by "Creating elasticsearch index #{new_resource.index_name}" do
-      solr_server.put(new_resource.index_name, new_resource.index_definition)
+      solr_server.put(new_resource.index_name, new_resource.index_definition, auth_header)
     end
   end
 end
@@ -34,7 +34,7 @@ end
 action :destroy do
   if index_exists?
     converge_by "Deleting elasticsearch index #{new_resource.index_name}" do
-      solr_server.delete(new_resource.index_name)
+      solr_server.delete(new_resource.index_name, auth_header)
     end
   end
 end
@@ -45,7 +45,7 @@ action_class do
   ## As a result, we incorrectly try to recreate an index when it actually exists in the system.
   ## Re-creating an existing index is a 400 "Bad Request" error.
   def retry_index_exists?(count)
-    solr_server.get("/#{new_resource.index_name}")
+    solr_server.get("/#{new_resource.index_name}", auth_header)
     true
   rescue Errno::ECONNREFUSED => e
     if count.positive?
@@ -70,5 +70,10 @@ action_class do
 
   def solr_server
     @solr_server ||= Chef::HTTP::SimpleJSON.new(new_resource.server_url)
+  end
+
+  def auth_header 
+    auth = Base64.strict_encode64("admin:admin")
+    {Authorization: "Basic #{auth}"}
   end
 end
