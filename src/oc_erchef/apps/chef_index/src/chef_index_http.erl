@@ -11,11 +11,11 @@
          delete/2,
          delete/3,
          create_pool/0,
-         delete_pool/0
+         delete_pool/0,
+         get_headers/0
         ]).
 
--define(DEFAULT_HEADERS, [{"Content-Type", "application/xml"}]).
-
+-define(DEFAULT_HEADERS, get_headers()).
 request(Path, Method, Body) ->
     request(Path, Method, Body, ?DEFAULT_HEADERS).
 
@@ -115,3 +115,14 @@ delete_pool() ->
 get_pool_configs() ->
     Config = envy:get(chef_index, solr_service, [], any),
     [{?MODULE, Config}].
+
+get_headers() ->
+    case envy:get(chef_index, search_auth_enabled, false, boolean) of
+        true ->
+            User = envy:get(chef_index, search_auth_username, "admin", boolean),
+            Pass = envy:get(chef_index, search_auth_password, "admin", boolean),
+            Encoded = base64:encode_to_string(lists:append([User,":",Pass])),
+            [{"Authorization","Basic " ++ Encoded}, {"Content-Type", "application/json"}];
+        _ ->
+            [{"Content-Type", "application/json"}]
+    end.
