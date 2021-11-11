@@ -972,6 +972,11 @@ This configuration file has the following settings for `oc_chef_authz`:
 :   The amount of time (in milliseconds) to wait for a connection to be
     established. Default value: `'[{connect_timeout, 5000}]'`.
 
+`oc_chef_authz['max_connection_request_limit']`
+
+:   The max number of requests allowed per connections. 
+    Default value: `100`.
+
 ### oc-chef-pedant
 
 This configuration file has the following settings for `oc-chef-pedant`:
