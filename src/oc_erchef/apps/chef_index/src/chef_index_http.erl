@@ -119,8 +119,8 @@ get_pool_configs() ->
 get_headers() ->
     case envy:get(chef_index, search_auth_enabled, false, boolean) of
         true ->
-            User = envy:get(chef_index, search_auth_username, "admin", boolean),
-            Pass = envy:get(chef_index, search_auth_password, "admin", boolean),
+            User = envy:get(chef_index, search_auth_username, "admin", string),
+            Pass = envy:get(chef_index, search_auth_password, "admin", string),
             Encoded = base64:encode_to_string(lists:append([User,":",Pass])),
             [{"Authorization","Basic " ++ Encoded}, {"Content-Type", "application/json"}];
         _ ->
