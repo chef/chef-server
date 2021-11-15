@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.10.45 -->
-## [14.10.45](https://github.com/chef/chef-server/tree/14.10.45) (2021-11-15)
+<!-- latest_release 14.10.46 -->
+## [14.10.46](https://github.com/chef/chef-server/tree/14.10.46) (2021-11-15)
 
 #### Merged Pull Requests
-- Reverting doorkeeper changes [#2946](https://github.com/chef/chef-server/pull/2946) ([vinay-satish](https://github.com/vinay-satish))
+- fixing bootstrap for external postgresql [#2919](https://github.com/chef/chef-server/pull/2919) ([vinay-satish](https://github.com/vinay-satish))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.10.23 -->
 ### Changes since 14.10.23 release
 
 #### Merged Pull Requests
+- fixing bootstrap for external postgresql [#2919](https://github.com/chef/chef-server/pull/2919) ([vinay-satish](https://github.com/vinay-satish)) <!-- 14.10.46 -->
 - Reverting doorkeeper changes [#2946](https://github.com/chef/chef-server/pull/2946) ([vinay-satish](https://github.com/vinay-satish)) <!-- 14.10.45 -->
 - Enable authentication for ElasticSearch/OpenSearch [#2855](https://github.com/chef/chef-server/pull/2855) ([jashaik](https://github.com/jashaik)) <!-- 14.10.44 -->
 - Added max_connection_request_limit in oc_chef_authz pool config [#2929](https://github.com/chef/chef-server/pull/2929) ([jashaik](https://github.com/jashaik)) <!-- 14.10.43 -->
