@@ -1,6 +1,6 @@
 GIT
   remote: https://github.com/chef/omnibus-software.git
-  revision: 485b5352c210a7fb1b3d84f9b65fa3e89a433906
+  revision: 32876cd385807cd29b7b33cee219ad028dcc6f5f
   branch: main
   specs:
     omnibus-software (4.0.0)
@@ -33,8 +33,8 @@ GEM
     artifactory (3.0.15)
     awesome_print (1.9.2)
     aws-eventstream (1.2.0)
-    aws-partitions (1.525.0)
-    aws-sdk-core (3.122.0)
+    aws-partitions (1.530.0)
+    aws-sdk-core (3.122.1)
       aws-eventstream (~> 1, >= 1.0.2)
       aws-partitions (~> 1, >= 1.525.0)
       aws-sigv4 (~> 1.1)
@@ -232,8 +232,8 @@ GEM
     octokit (4.21.0)
       faraday (>= 0.9)
       sawyer (~> 0.8.0, >= 0.5.3)
-    ohai (16.13.0)
-      chef-config (>= 12.8, < 17)
+    ohai (16.17.0)
+      chef-config (>= 14.12, < 17)
       chef-utils (>= 16.0, < 17)
       ffi (~> 1.9)
       ffi-yajl (~> 2.2)
@@ -241,7 +241,7 @@ GEM
       mixlib-cli (>= 1.7.0)
       mixlib-config (>= 2.0, < 4.0)
       mixlib-log (>= 2.0.1, < 4.0)
-      mixlib-shellout (>= 2.0, < 4.0)
+      mixlib-shellout (~> 3.2, >= 3.2.5)
       plist (~> 3.1)
       train-core
       wmi-lite (~> 1.0)
