@@ -111,9 +111,9 @@ class OmnibusHelper
           },
         },
         'number_of_shards':
-          node['private_chef']['elasticsearch']['shard_count'],
+          node['private_chef']['opensearch']['shard_count'],
         'number_of_replicas':
-          node['private_chef']['elasticsearch']['replica_count'],
+          node['private_chef']['opensearch']['replica_count'],
       },
       'mappings': {
         '_source': {

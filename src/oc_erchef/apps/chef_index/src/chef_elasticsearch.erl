@@ -133,7 +133,7 @@ query_body(#chef_solr_query{
 
 fields_tag() ->
     case envy:get(chef_index, solr_elasticsearch_major_version, 2, non_neg_integer) of
-        X when X >= 5; X=:=1 -> <<"stored_fields">>;
+        X when X >= 5; X==1 -> <<"stored_fields">>;
         2 -> <<"fields">>
     end.
 
@@ -141,7 +141,7 @@ query_string_query_ejson(QueryString) ->
     QueryEjson = [{<<"query">>, list_to_binary(QueryString)}],
     QueryEjson1 =
     case envy:get(chef_index, solr_elasticsearch_major_version, 2, non_neg_integer) of
-        X when X =:= 7; X=:=1 -> QueryEjson;
+        X when X == 7; X==1 -> QueryEjson;
         _ -> [{<<"lowercase_expanded_terms">>, false}| QueryEjson]
     end,
     {<<"query_string">>,{QueryEjson1}}.
@@ -177,7 +177,7 @@ delete_search_db_by_type(OrgId, Type)
                             },
     prometheus_counter:inc(chef_elasticsearch_delete_search_db_by_type_count),
     case envy:get(chef_index, solr_elasticsearch_major_version, 2, non_neg_integer) of
-        X when X >= 5; X=:=1 ->
+        X when X >= 5; X == 1 ->
             chef_index_http:post("/chef/_delete_by_query", delete_query_body(QueryString), ?JSON_HEADER),
             commit(),
             ok;
@@ -197,7 +197,7 @@ delete_search_db(OrgId) ->
                             },
     prometheus_counter:inc(chef_elasticsearch_delete_search_db_count),
     case envy:get(chef_index, solr_elasticsearch_major_version, 2, non_neg_integer) of
-        X when X >= 5; X=:=1 ->
+        X when X >= 5; X == 1 ->
             %% TODO(ssd) 2020-05-15: Why don't we check the return value here?
             chef_index_http:post("/chef/_delete_by_query", delete_query_body(QueryString), ?JSON_HEADER),
             commit(),
@@ -275,7 +275,7 @@ delete_ids([]) ->
     ok;
 delete_ids([Id | Ids]) ->
     URI = case envy:get(chef_index, solr_elasticsearch_major_version, 2, non_neg_integer) of
-            X when X=:=7; X=:=1 -> "/chef/_doc/";
+            X when X == 7; X == 1 -> "/chef/_doc/";
             _ -> "/chef/object/"
         end,
     ok = chef_index_http:delete(URI ++ Id, [], ?JSON_HEADER),

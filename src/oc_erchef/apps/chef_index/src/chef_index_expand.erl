@@ -131,7 +131,7 @@ make_doc_for_del(solr, Id) ->
      <<"</id></delete>">>];
 make_doc_for_del(elasticsearch, Id) ->
     QueryStr = case envy:get(chef_index, solr_elasticsearch_major_version, 2, non_neg_integer) of
-                    7 ->
+                    X when X==7; X==1 ->
                         <<"{\"delete\":{\"_index\":\"chef\",\"_id\":\"">>;
                     _ ->
                         <<"{\"delete\":{\"_index\":\"chef\",\"_type\":\"object\",\"_id\":\"">>
@@ -144,7 +144,7 @@ make_doc_for_add(Command = #chef_idx_expand_doc{id = Id, type=Type, search_provi
                   {<<"_id">>, Id}],
     IndexEjson1 =
     case envy:get(chef_index, solr_elasticsearch_major_version, 2, non_neg_integer) of
-        7 ->
+        X when X==7; X==1 ->
             IndexEjson;
         _ ->
             [{<<"_type">>, <<"object">>}| IndexEjson]
