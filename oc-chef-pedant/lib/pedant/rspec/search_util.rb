@@ -735,10 +735,11 @@ module Pedant
         # some things to Solr, we want to give it a little
         # time to clear the queue.  In a test scenario, this
         # should be enough of a wait.
+        auth = Base64.strict_encode64("admin:admin")
         sleep Pedant::Config.direct_solr_query_sleep_time
         url = "#{Pedant::Config.search_server}#{Pedant::Config.search_commit_url}"
         body = ''
-        headers = {}
+        headers = {Authorization: "Basic #{auth}"}
         RestClient.send :post, url, body, headers
       end
 

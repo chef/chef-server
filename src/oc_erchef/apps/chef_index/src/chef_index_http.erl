@@ -29,6 +29,7 @@ request(Path, Method, Body, Headers) ->
     TimeTakenInMicro = erlang:convert_time_unit(TimeTaken, native, microsecond),
     TimeTakenInMillis = TimeTakenInMicro/1000.0,
     prometheus_histogram:observe(chef_index_http_req_duration_ms, [Method], TimeTakenInMillis),
+    io:format("chef_index_http: request - ~p~n",[Response]),
     case Response of
         {ok, "200", _Head, _RespBody} ->
             prometheus_counter:inc(chef_index_http_req_success_total, [Method]);

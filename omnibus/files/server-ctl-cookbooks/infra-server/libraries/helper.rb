@@ -91,7 +91,7 @@ class OmnibusHelper
 
   def es_index_definition
     es_version = elastic_search_major_version
-    if elastic_search_major_version == 7
+    if elastic_search_major_version == 7;elastic_search_major_version == 1;
       es_7_index
     elsif elastic_search_major_version == 6
       es_6_index
