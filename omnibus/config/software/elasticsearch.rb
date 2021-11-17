@@ -42,7 +42,7 @@ end
 
 target_path = "#{install_dir}/embedded/opensearch"
 
-build dox/
+build do
   mkdir  "#{target_path}"
   delete "#{project_dir}/lib/sigar/*solaris*"
   delete "#{project_dir}/lib/sigar/*sparc*"
