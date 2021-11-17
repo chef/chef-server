@@ -92,27 +92,27 @@ template config_file do
   notifies :restart, 'component_runit_service[opensearch]', :delayed
 end
 
-key1 = File.join(elasticsearch_conf_dir, 'esnode.pem')
-key2 = File.join(elasticsearch_conf_dir, 'esnode-key.pem')
-key3 = File.join(elasticsearch_conf_dir, 'root-ca.pem')
-template key1 do
-  source 'esnode.pem'
-  owner OmnibusHelper.new(node).ownership['owner']
-  group OmnibusHelper.new(node).ownership['group']
-  mode '0644'
-end
-template key2 do
-  source 'esnode-key.pem'
-  owner OmnibusHelper.new(node).ownership['owner']
-  group OmnibusHelper.new(node).ownership['group']
-  mode '0644'
-end
-template key3 do
-  source 'root-ca.pem'
-  owner OmnibusHelper.new(node).ownership['owner']
-  group OmnibusHelper.new(node).ownership['group']
-  mode '0644'
-end
+# key1 = File.join(elasticsearch_conf_dir, 'esnode.pem')
+# key2 = File.join(elasticsearch_conf_dir, 'esnode-key.pem')
+# key3 = File.join(elasticsearch_conf_dir, 'root-ca.pem')
+# template key1 do
+#   source 'esnode.pem'
+#   owner OmnibusHelper.new(node).ownership['owner']
+#   group OmnibusHelper.new(node).ownership['group']
+#   mode '0644'
+# end
+# template key2 do
+#   source 'esnode-key.pem'
+#   owner OmnibusHelper.new(node).ownership['owner']
+#   group OmnibusHelper.new(node).ownership['group']
+#   mode '0644'
+# end
+# template key3 do
+#   source 'root-ca.pem'
+#   owner OmnibusHelper.new(node).ownership['owner']
+#   group OmnibusHelper.new(node).ownership['group']
+#   mode '0644'
+# end
 
 template logging_config_file do
   source 'elasticsearch_logging.yml.erb'
