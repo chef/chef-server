@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.10.47 -->
-## [14.10.47](https://github.com/chef/chef-server/tree/14.10.47) (2021-11-17)
+<!-- latest_release 14.10.48 -->
+## [14.10.48](https://github.com/chef/chef-server/tree/14.10.48) (2021-11-19)
 
 #### Merged Pull Requests
-- Fetch trusted certs on reconfigure if mtls is enabled [#2938](https://github.com/chef/chef-server/pull/2938) ([lbakerchef](https://github.com/lbakerchef))
+- Bump chefstyle from 2.1.2 to 2.1.3 in /src/chef-server-ctl [#2947](https://github.com/chef/chef-server/pull/2947) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.10.23 -->
 ### Changes since 14.10.23 release
 
 #### Merged Pull Requests
+- Bump chefstyle from 2.1.2 to 2.1.3 in /src/chef-server-ctl [#2947](https://github.com/chef/chef-server/pull/2947) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.10.48 -->
 - Fetch trusted certs on reconfigure if mtls is enabled [#2938](https://github.com/chef/chef-server/pull/2938) ([lbakerchef](https://github.com/lbakerchef)) <!-- 14.10.47 -->
 - fixing bootstrap for external postgresql [#2919](https://github.com/chef/chef-server/pull/2919) ([vinay-satish](https://github.com/vinay-satish)) <!-- 14.10.46 -->
 - Reverting doorkeeper changes [#2946](https://github.com/chef/chef-server/pull/2946) ([vinay-satish](https://github.com/vinay-satish)) <!-- 14.10.45 -->
