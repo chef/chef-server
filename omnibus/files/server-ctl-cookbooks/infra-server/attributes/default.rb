@@ -217,6 +217,21 @@ elasticsearch['jvm_opts'] = []
 elasticsearch['heap_size'] = Elasticsearch.heap_size_default(node)
 elasticsearch['new_size'] = Elasticsearch.new_size_default(node)
 
+
+
+opensearch = default['private_chef']['opensearch']
+
+opensearch['enable'] = true
+opensearch['dir'] = "#{var_base}/opensearch"
+opensearch['data_dir'] = "#{var_base}/opensearch/data"
+opensearch['plugins_directory'] = "#{var_base}/opensearch/plugins"
+opensearch['scripts_directory'] = "#{var_base}/opensearch/scripts"
+opensearch['temp_directory'] = "#{var_base}/opensearch/tmp"
+opensearch['log_directory'] = "#{log_base}/opensearch"
+
+
+
+
 ####
 # Erlang Chef Server API
 ####
@@ -314,7 +329,7 @@ default['private_chef']['opscode-erchef']['ibrowse_max_sessions'] = 256
 default['private_chef']['opscode-erchef']['ibrowse_max_pipeline_size'] = 1
 default['private_chef']['opscode-erchef']['enable_ibrowse_traces'] = false
 # general search settings used to set up chef_index
-default['private_chef']['opscode-erchef']['search_provider'] = 'elasticsearch'
+default['private_chef']['opscode-erchef']['search_provider'] = 'opensearch'
 default['private_chef']['opscode-erchef']['search_queue_mode'] = 'batch'
 default['private_chef']['opscode-erchef']['search_batch_max_size'] = '5000000'
 default['private_chef']['opscode-erchef']['search_batch_max_wait'] = '10'
