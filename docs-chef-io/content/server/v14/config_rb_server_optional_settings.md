@@ -1312,6 +1312,11 @@ This configuration file has the following settings for `opscode-erchef`:
 
 :   Default value: `256`.
 
+`opscode_erchef['enable_ibrowse_traces']`
+
+:   Use to configure ibrowse logging for the `opscode_erchef` service.
+    Default value: `false`.
+
 `opscode_erchef["include_version_in_status"]`
 
 :   Set to `true` to include `server_version` as part of the `/_status` endpoint.

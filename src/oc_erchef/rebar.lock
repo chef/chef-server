@@ -68,7 +68,7 @@
  {<<"goldrush">>,{pkg,<<"goldrush">>,<<"0.1.9">>},1},
  {<<"ibrowse">>,
   {git,"git://github.com/chef/ibrowse.git",
-       {ref,"1df08a6aca30614f69126451957af6a3d0aeb7b2"}},
+       {ref,"d541f7190894734e2b69f4763c3664fb4d6bb9db"}},
   0},
  {<<"jiffy">>,
   {git,"git://github.com/davisp/jiffy.git",
