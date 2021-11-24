@@ -1,6 +1,6 @@
 %syntax-version=1.0.0-b2
 %project=bifrost
-%uri=https://github.com/opscode/oc_bifrost
+%uri=https://github.com/chef/oc_bifrost
 
 base 2013-06-24T11:10:23Z Christopher Maier <cm@opscode.com> # The initial base install of the bifrost schema
 forbid_group_cycles [base] 2013-06-24T13:04:05Z Christopher Maier <cm@opscode.com> # Add forbid_group_cycles function and accompanying trigger
