@@ -55,6 +55,32 @@ class OmnibusHelper
     normalize_host(node['private_chef'][service]['vip'])
   end
 
+  def create_opensearch_user
+    if node['private_chef']['opscode-erchef']['search_provider'] == 'elasticsearch'
+      begin
+        client = Chef::HTTP.new(solr_url)
+        opensearch_user = node['private_chef']['opscode-erchef']['opensearch_user']
+        body = {
+          password => PrivateChef.credentials.get('opscode_erchef', 'opensearch_password'),
+          backend_roles => ["admin"],
+          description => "Chef Server erchef user"
+        }
+        response = client.put("_plugins/_security/api/internalusers/#{opensearch_user}", body, auth_header)
+      rescue => e
+        # Perform a blind rescue because Net:HTTP throws a variety of exceptions - some of which are platform specific.
+        if current_request == max_requests
+          raise "Failed to connect to opensearch service at #{solr_url}: #{e}"
+        else
+          # Chef HTTP logs the details in the debug log.
+          Chef::Log.error "Failed to connect to opensearch service #{current_request}/#{max_requests}. Retrying."
+          current_request += 1
+          sleep(current_request * 2) # Exponential back-off.
+          retry
+        end
+      end
+    end
+  end
+
   def elastic_search_major_version
     max_requests = 5
     current_request = 1

@@ -358,7 +358,7 @@ module PrivateChef
         { group: 'opscode_erchef', name: 'sql_password', length: 60 },
         { group: 'opscode_erchef', name: 'sql_ro_password', length: 60 },
         { group: 'opscode_erchef', name: 'stats_password', lendth: 100 },
-        { group: 'opscode_erchef', name: 'search_auth_password', length: 60 },
+        { group: 'opscode_erchef', name: 'opensearch_password', length: 60 },
         { group: 'oc_bifrost', name: 'superuser_id', length: 32, frozen: true },
         { group: 'oc_bifrost', name: 'sql_password', length: 100 },
         { group: 'oc_bifrost', name: 'sql_ro_password', length: 100 },
