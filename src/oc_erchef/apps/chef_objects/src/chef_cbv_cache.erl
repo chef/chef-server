@@ -58,19 +58,38 @@
          terminate/2
         ]).
 
-
-
+-spec start_link() -> {ok, pid()} | ignore | {error, term()}.
 start_link() ->
     Enabled = envy:get(chef_objects, cbv_cache_enabled, false, boolean),
     TTL = envy:get(chef_objects, cbv_cache_item_ttl, ?DEFAULT_TTL, integer),
     gen_server:start_link({local, ?SERVER}, ?MODULE, [Enabled, TTL], []).
 
+%% @doc this function retrieves a stored value from the cache.
+%% If the value is missing, it will return undefined.
+%% If another caller has claimed intent to populate the key, this will return
+%% 'retry' indicating that the caller should try again after a brief delay.
+%% If it returns 'busy' the process is not available to service the request, and
+%% the caller should fail without retrying.
+-spec get(any()) -> retry | busy | undefined | term().
 get(Key) ->
     send_if_available({get, Key}).
 
+%% @doc claim intent to populate Key into the cache.
+%% When the claim is accepted, returns 'ok'.
+%% When another process has already claimed intent, this returns 'retry' indicating
+%% that the caller should retry the original 'get' request after a brief delay.
+%% If it returns 'busy' the process is not available to service the request, and
+%% the caller should fail without retrying.
+-spec claim(any()) -> ok | retry | busy.
 claim(Key) ->
     send_if_available({claim, Key}).
 
+%% @doc store a value in the cache.  Caller must have first claimed intent to populate
+%% this key by invoking claim/1.
+%% If the caller has not first invoked claim/1, this will return {error, noclaim}.
+%% If another process has invoked claim/1, this will return {error, already_claimed}.
+%% returns 'ok' when the value is stored successfully
+-spec put(any(), term()) -> {error, already_claimed} | {error, noclaim} | ok.
 put(Key, Value) ->
     % We do not protect this with the breaker - this function is only to be called
     % after a successful 'claim', and we want to allow caller to put the claim
@@ -78,12 +97,16 @@ put(Key, Value) ->
     % do the work, then put the result.
     gen_server:call(?SERVER, {put, Key, Value}).
 
+%% Internal function that checks in with the process message queue for chef_cbv_cache intermittently
+%% and tracks whether its mailbox has grown to large. If that happens, response with 'busy' instead
+%% of sending the request through.
 send_if_available(Msg) ->
     case breaker_tripped() of
         true -> busy;
         false -> gen_server:call(?SERVER, Msg)
     end.
 
+%% @doc intended for testing.
 stop() ->
     gen_server:call(?SERVER, stop).
 
@@ -157,7 +180,7 @@ insert_into_cache(Tid, Key, Value, TTL) ->
             % We can't avoid the initial cluster and corresponding CPU spike
             % when we have nothing cached, but staggering the expirations after that
             % will reduce CPU/VM utilization spikes that can impact the overall system.
-            erlang:send_after(TTL + rand:uniform(TTL), self(), {exphttps://github.com/chef/chef-server/pull/2955ire, Key});
+            erlang:send_after(TTL + rand:uniform(TTL), self(), {expire, Key});
         false ->
             % Value already exists.  Given the enforced ordering to prevent more than
             % one caller from trying to put the same key, this should rarely occur
