@@ -34,7 +34,7 @@
 % the process.
 -define(QUEUE_LEN_REFRESH_INTERVAL, 100).
 % Threshold for determining when to stop allowing requests to pass through to chef_cbv_cache
-%  Don't forget to change it in chef_cbv_cache_test if you chagne it here.
+% Don't forget to change it in chef_cbv_cache_test if you change it here.
 -define(MAX_QUEUE_LEN, 10).
 
 -record(state, { tid = undefined, ttl = ?DEFAULT_TTL, enabled = false, claims = undefined }).
@@ -93,7 +93,7 @@ init([Enabled, TTL]) ->
     process_flag(trap_exit, true),
     spawn_breaker(),
     {ok, #state{enabled = Enabled,
-                ttl = round(TTL/2), % Splay is TTL/2 + (0-100% of TTL) for max of TTL.
+                ttl = round(TTL/2), % Splay is TTL/2 + (0-50% of TTL) for max of TTL.
                 claims = dict:new(),
                 tid = ets:new(chef_cbv_cache, [set, private, {read_concurrency, true}])
                }}.
@@ -114,6 +114,8 @@ handle_call({get, Key}, _From, #state{tid = Tid, claims = Claims} = State) ->
             case is_process_alive(Pid) of
                 true -> {reply, retry, State};
                 false ->
+                    % If the original claiming process has died, it can't complete its
+                    % claim.
                     case ets:lookup(Tid, Key) of
                         [{_, Value}] -> {reply, Value, State};
                         [] -> {reply, undefined, State#state{claims = Claims1}}
@@ -141,7 +143,7 @@ handle_call({put, Key, Value}, { From, _Tag }, #state{tid = Tid, ttl = TTL, clai
             insert_into_cache(Tid, Key, Value, TTL),
             {reply, ok, State#state{claims = Claims1}};
         { _OtherPid, _Claims1 } ->
-            % Mis-usage: Someon else claimed it and is still active/working on it,
+            % Mis-usage: Someone else claimed it and is still active/working on it,
             % but we have been invoked anyway. `put` should only be invoked when the caller
             % has first invoked `claim`.
             {reply, {error, already_claimed}, State }
@@ -155,7 +157,7 @@ insert_into_cache(Tid, Key, Value, TTL) ->
             % We can't avoid the initial cluster and corresponding CPU spike
             % when we have nothing cached, but staggering the expirations after that
             % will reduce CPU/VM utilization spikes that can impact the overall system.
-            erlang:send_after(TTL + rand:uniform(TTL), self(), {expire, Key});
+            erlang:send_after(TTL + rand:uniform(TTL), self(), {exphttps://github.com/chef/chef-server/pull/2955ire, Key});
         false ->
             % Value already exists.  Given the enforced ordering to prevent more than
             % one caller from trying to put the same key, this should rarely occur

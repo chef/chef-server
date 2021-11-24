@@ -287,7 +287,8 @@ assemble_response(Req, #base_state{server_api_version = ApiVersion} = State, Coo
             case make_json_list(CookbookVersions, chef_wm_util:base_uri(Req), ApiVersion) of
                 {error, busy} ->
                   % Force backoff until the cache catches up with demand. Occurs when caching is enabled
-                  % and the cache message queue is overloaded.
+                  % and the cache message queue is overloaded. Also occurs when we give up on waiting for
+                  % another process that has claimed a given cache key to complete its work.
                   wm_halt(503, Req, State, <<"cookbook versions cache unavailable. Try again shortly.">>, cbv_cache_timeout);
                 JsonList ->
                  {true, wrq:append_to_response_body(chef_json:encode(JsonList), Req), State}
