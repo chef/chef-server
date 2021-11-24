@@ -353,6 +353,16 @@ default['private_chef']['opscode-erchef']['strict_search_result_acls'] = false
 default['private_chef']['opscode-erchef']['ssl_session_caching']['enabled'] = false
 default['private_chef']['opscode-erchef']['include_x_ops_api_info'] = false
 
+# Enable cookbook versions caching by setting this to true. If you are frequently seeing
+# very long response times from `cookbook_versions` when under load, this is worth enabling.
+default['private_chef']['opscode-erchef']['cbv_cache_enabled'] = false
+# When CBV caching is enabled, this indicates the minimum time in milliseconds that given
+# CBV list will be expired. Be careful if increasing this number - requests for a given
+# set of cookbook_versions will be stale if the resolved cookbook versions
+# are updated before the cache entry times out.
+# Not an issue if you are incrementing cookbook version with every change.
+default['private_chef']['opscode-erchef']['cbv_cache_item_ttl'] = 30000
+
 # The amount of milliseconds before we timeout and assume an endpoint is down for
 # the /_status endpoint.
 
