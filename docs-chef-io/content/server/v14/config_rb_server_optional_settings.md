@@ -1456,6 +1456,23 @@ This configuration file has the following settings for `opscode-erchef`:
 
 :   The virtual IP address. Default value: `127.0.0.1`.
 
+`opscode_erchef['cbv_cache_enabled']`
+
+:   Enable cookbook versions caching by setting this to `true`. If you are frequently seeing
+    very long response times from `cookbook_versions` when under load, this is worth enabling.
+    Default value: `false`.
+
+`opscode_erchef['cbv_cache_item_ttl']`
+
+:   The minimum time in milliseconds that given cookbook versions list will be expired
+    when cbv_cache_enabled is enabled.
+    Default value: `30000`.
+{{< note >}}
+
+Be careful if increasing this number - requests for a given set of cookbook_versions will be stale if the resolved cookbook versions are updated before the cache entry times out.Not an issue if you are incrementing cookbook version with every change.
+
+{{< /note >}}
+
 ### Elasticsearch
 
 This configuration file has the following settings for `elasticsearch`:
