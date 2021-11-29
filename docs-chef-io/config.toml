@@ -1,4 +1,4 @@
 [params.chef-server]
 versions = ["13_2", "14"]
-gh_path = "https://github.com/chef/chef-server/blob/master/docs-chef-io/content/"
+gh_path = "https://github.com/chef/chef-server/blob/main/docs-chef-io/content/"
 vendor_content_path = "_vendor/github.com/chef/chef-server/docs-chef-io/content/"
