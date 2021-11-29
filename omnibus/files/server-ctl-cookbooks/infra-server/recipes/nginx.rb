@@ -254,8 +254,8 @@ end
 # log rotation
 template '/etc/opscode/logrotate.d/nginx' do
   source 'logrotate.erb'
-  owner OmnibusHelper.new(node).ownership['owner']
-  group OmnibusHelper.new(node).ownership['group']
+  owner 'root'
+  group 'root'
   mode '0644'
   variables(node['private_chef']['nginx'].to_hash.merge(
     'postrotate' => "/opt/opscode/embedded/sbin/nginx -c #{nginx_config} -s reopen",
