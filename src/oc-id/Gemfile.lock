@@ -293,7 +293,7 @@ GEM
       tty-prompt (~> 0.17)
       tty-table (~> 0.10)
     ipaddress (0.8.3)
-    jbuilder (2.11.2)
+    jbuilder (2.11.3)
       activesupport (>= 5.0.0)
     jmespath (1.4.0)
     jquery-rails (4.4.0)
@@ -615,7 +615,7 @@ DEPENDENCIES
   doorkeeper (~> 4.0)
   factory_girl_rails (~> 4.4.0)
   foundation-rails!
-  jbuilder (~> 2.7)
+  jbuilder (~> 2.11)
   jquery-rails
   jwt
   mailcatcher
