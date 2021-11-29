@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.11.1 -->
-## [14.11.1](https://github.com/chef/chef-server/tree/14.11.1) (2021-11-23)
+<!-- latest_release 14.11.2 -->
+## [14.11.2](https://github.com/chef/chef-server/tree/14.11.2) (2021-11-29)
 
 #### Merged Pull Requests
-- Added enable_ibrowse_traces flag for ibrowse debugs [#2930](https://github.com/chef/chef-server/pull/2930) ([jashaik](https://github.com/jashaik))
+- Bump sprockets-rails from `118ce60` to `4e0f168` in /src/oc-id [#2971](https://github.com/chef/chef-server/pull/2971) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.10.23 -->
 ### Changes since 14.10.23 release
 
 #### Merged Pull Requests
+- Bump sprockets-rails from `118ce60` to `4e0f168` in /src/oc-id [#2971](https://github.com/chef/chef-server/pull/2971) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.11.2 -->
 - Added enable_ibrowse_traces flag for ibrowse debugs [#2930](https://github.com/chef/chef-server/pull/2930) ([jashaik](https://github.com/jashaik)) <!-- 14.11.1 -->
 - Bump test-kitchen from 3.1.1 to 3.2.0 in /omnibus [#2954](https://github.com/chef/chef-server/pull/2954) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.11.0 -->
 - Bump omnibus from `b1f410b` to `2c309fa` in /omnibus [#2940](https://github.com/chef/chef-server/pull/2940) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.10.50 -->
