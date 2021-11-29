@@ -9,9 +9,9 @@ GIT
 
 GIT
   remote: https://github.com/rails/sprockets-rails.git
-  revision: 118ce60b1ffeb7a85640661b014cd2ee3c4e3e56
+  revision: 4e0f1686ce108ea3a52fb0dfb24bb6272ea2df3f
   specs:
-    sprockets-rails (3.2.2)
+    sprockets-rails (3.4.1)
       actionpack (>= 5.2)
       activesupport (>= 5.2)
       sprockets (>= 3.0.0)
@@ -266,7 +266,7 @@ GEM
       tilt
     hashie (4.1.0)
     httpclient (2.8.3)
-    i18n (1.8.10)
+    i18n (1.8.11)
       concurrent-ruby (~> 1.0)
     iniparse (1.5.0)
     inspec-core (4.49.0)
@@ -599,7 +599,7 @@ GEM
     wmi-lite (1.0.5)
     xpath (3.2.0)
       nokogiri (~> 1.8)
-    zeitwerk (2.4.2)
+    zeitwerk (2.5.1)
 
 PLATFORMS
   ruby
