@@ -972,6 +972,11 @@ This configuration file has the following settings for `oc_chef_authz`:
 :   The amount of time (in milliseconds) to wait for a connection to be
     established. Default value: `'[{connect_timeout, 5000}]'`.
 
+`oc_chef_authz['max_connection_request_limit']`
+
+:   The max number of requests allowed per connections. 
+    Default value: `100`.
+
 ### oc-chef-pedant
 
 This configuration file has the following settings for `oc-chef-pedant`:
@@ -1306,6 +1311,11 @@ This configuration file has the following settings for `opscode-erchef`:
 `opscode_erchef['ibrowse_max_sessions']`
 
 :   Default value: `256`.
+
+`opscode_erchef['enable_ibrowse_traces']`
+
+:   Use to configure ibrowse logging for the `opscode_erchef` service.
+    Default value: `false`.
 
 `opscode_erchef["include_version_in_status"]`
 

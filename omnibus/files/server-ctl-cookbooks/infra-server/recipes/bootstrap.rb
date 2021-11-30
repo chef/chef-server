@@ -26,6 +26,12 @@ end
 
 # These should always be running by this point, but let's be certain.
 %w(postgresql oc_bifrost).each do |service|
+  # external postgres cannot be managed through chef-server-ctl.
+  # But when we migrate the server manually (manual bootstrap), we touch the file `/var/opt/opscode/bootstrapped`
+  # and create the file `/var/opt/opscode/upgrades/migration-level`
+  # with the major and minor version of the migration file to be run.
+  # ex : {"major":1,"minor":34}
+  # After we do the needed migration, `OmnibusHelper.has_been_bootstrapped` will return `true`.
   execute "/opt/opscode/bin/chef-server-ctl start #{service}" do
     not_if { OmnibusHelper.has_been_bootstrapped? }
   end

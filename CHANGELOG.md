@@ -1,16 +1,35 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.10.40 -->
-## [14.10.40](https://github.com/chef/chef-server/tree/14.10.40) (2021-11-05)
+<!-- latest_release 14.11.8 -->
+## [14.11.8](https://github.com/chef/chef-server/tree/14.11.8) (2021-11-30)
 
 #### Merged Pull Requests
-- Bump spring from 2.1.1 to 3.0.0 in /src/oc-id [#2805](https://github.com/chef/chef-server/pull/2805) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump omnibus-software from `7501e20` to `8560231` in /omnibus [#2973](https://github.com/chef/chef-server/pull/2973) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.10.23 -->
 ### Changes since 14.10.23 release
 
 #### Merged Pull Requests
+- Bump omnibus-software from `7501e20` to `8560231` in /omnibus [#2973](https://github.com/chef/chef-server/pull/2973) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.11.8 -->
+- Bump test-kitchen from 3.2.0 to 3.2.1 in /omnibus [#2975](https://github.com/chef/chef-server/pull/2975) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.11.7 -->
+- Bump config from 2.2.3 to 3.1.0 in /src/oc-id [#2630](https://github.com/chef/chef-server/pull/2630) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.11.6 -->
+- Bump jbuilder from 2.11.2 to 2.11.3 in /src/oc-id [#2945](https://github.com/chef/chef-server/pull/2945) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.11.5 -->
+- Bump selenium-webdriver from 4.0.3 to 4.1.0 in /src/oc-id [#2962](https://github.com/chef/chef-server/pull/2962) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.11.4 -->
+- Bump spring from 3.0.0 to 3.1.1 in /src/oc-id [#2968](https://github.com/chef/chef-server/pull/2968) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.11.3 -->
+- Bump sprockets-rails from `118ce60` to `4e0f168` in /src/oc-id [#2971](https://github.com/chef/chef-server/pull/2971) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.11.2 -->
+- Added enable_ibrowse_traces flag for ibrowse debugs [#2930](https://github.com/chef/chef-server/pull/2930) ([jashaik](https://github.com/jashaik)) <!-- 14.11.1 -->
+- Bump test-kitchen from 3.1.1 to 3.2.0 in /omnibus [#2954](https://github.com/chef/chef-server/pull/2954) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.11.0 -->
+- Bump omnibus from `b1f410b` to `2c309fa` in /omnibus [#2940](https://github.com/chef/chef-server/pull/2940) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.10.50 -->
+- Bump omnibus-software from `485b535` to `7501e20` in /omnibus [#2952](https://github.com/chef/chef-server/pull/2952) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.10.49 -->
+- Bump chefstyle from 2.1.2 to 2.1.3 in /src/chef-server-ctl [#2947](https://github.com/chef/chef-server/pull/2947) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.10.48 -->
+- Fetch trusted certs on reconfigure if mtls is enabled [#2938](https://github.com/chef/chef-server/pull/2938) ([lbakerchef](https://github.com/lbakerchef)) <!-- 14.10.47 -->
+- fixing bootstrap for external postgresql [#2919](https://github.com/chef/chef-server/pull/2919) ([vinay-satish](https://github.com/vinay-satish)) <!-- 14.10.46 -->
+- Reverting doorkeeper changes [#2946](https://github.com/chef/chef-server/pull/2946) ([vinay-satish](https://github.com/vinay-satish)) <!-- 14.10.45 -->
+- Enable authentication for ElasticSearch/OpenSearch [#2855](https://github.com/chef/chef-server/pull/2855) ([jashaik](https://github.com/jashaik)) <!-- 14.10.44 -->
+- Added max_connection_request_limit in oc_chef_authz pool config [#2929](https://github.com/chef/chef-server/pull/2929) ([jashaik](https://github.com/jashaik)) <!-- 14.10.43 -->
+- Clarify dependabot testing process [#2935](https://github.com/chef/chef-server/pull/2935) ([lbakerchef](https://github.com/lbakerchef)) <!-- 14.10.42 -->
+- Bump omnibus-software from `0f8338a` to `485b535` in /omnibus [#2931](https://github.com/chef/chef-server/pull/2931) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.10.41 -->
 - Bump spring from 2.1.1 to 3.0.0 in /src/oc-id [#2805](https://github.com/chef/chef-server/pull/2805) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.10.40 -->
 - Bump jwt from 2.2.3 to 2.3.0 in /src/oc-id [#2851](https://github.com/chef/chef-server/pull/2851) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.10.39 -->
 - Bump doorkeeper from 4.4.3 to 5.5.4 in /src/oc-id [#2857](https://github.com/chef/chef-server/pull/2857) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.10.38 -->

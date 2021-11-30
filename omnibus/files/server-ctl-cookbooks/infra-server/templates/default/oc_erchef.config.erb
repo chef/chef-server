@@ -168,7 +168,8 @@
             {max_age, <%= node['private_chef']['oc_chef_authz']['http_max_age'] %>},
             {max_connection_duration, <%= node['private_chef']['oc_chef_authz']['http_max_connection_duration'] %>},
             {retry_on_conn_closed, <%= node['private_chef']['oc_chef_authz']['http_retry_on_conn_closed']=%>},
-            {ibrowse_options, <%= node['private_chef']['oc_chef_authz']['ibrowse_options'] %>}
+            {ibrowse_options, <%= node['private_chef']['oc_chef_authz']['ibrowse_options'] %>},
+            {max_connection_request_limit, <%= node['private_chef']['oc_chef_authz']['max_connection_request_limit'] %>}
         ]},
         {cleanup_batch_size, <%= node['private_chef']['opscode-erchef']['cleanup_batch_size'] %>}
     ]},
@@ -187,6 +188,9 @@
         {reindex_sleep_max_ms, <%= @reindex_sleep_max_ms -%>},
         {reindex_item_retries, <%= @reindex_item_retries -%>},
         {solr_elasticsearch_major_version, <%= @solr_elasticsearch_major_version %>},
+        {search_auth_enabled, <%= node['private_chef']['opscode-erchef']['search_auth_enabled'] %>},
+        {search_auth_username, <%= node['private_chef']['opscode-erchef']['search_auth_username'] %>},
+        {search_auth_password, <%= node['private_chef']['opscode-erchef']['search_auth_password'] %>},
         {solr_service, [
             {root_url, "<%= @helper.solr_url() %>"},
             {timeout, <%= @solr_timeout %>},
@@ -283,7 +287,8 @@
 
     {ibrowse, [
         {default_max_sessions, <%= @ibrowse_max_sessions %>},
-        {default_max_pipeline_size, <%= @ibrowse_max_pipeline_size %>}
+        {default_max_pipeline_size, <%= @ibrowse_max_pipeline_size %>},
+        {enable_ibrowse_traces, <%= @enable_ibrowse_traces %>}
     ]},
 
     {pooler, [

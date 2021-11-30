@@ -1,6 +1,6 @@
 GIT
   remote: https://github.com/chef/omnibus-software.git
-  revision: 0f8338aa01b03ea494923fe397da27018963da7a
+  revision: 85602312dd75745571728606c3ef77faabddf1d9
   branch: main
   specs:
     omnibus-software (4.0.0)
@@ -8,10 +8,10 @@ GIT
 
 GIT
   remote: https://github.com/chef/omnibus.git
-  revision: b1f410bf6b039027650d3d753f7d337a6ca4c1d8
+  revision: 2c309fa8df525e57f3c234fe23e47fb5133f0370
   branch: main
   specs:
-    omnibus (8.2.4)
+    omnibus (8.2.6)
       aws-sdk-s3 (~> 1)
       chef-cleanroom (~> 1.0)
       chef-utils (>= 15.4)
@@ -20,7 +20,7 @@ GIT
       license_scout (~> 1.0)
       mixlib-shellout (>= 2.0, < 4.0)
       mixlib-versioning
-      ohai (>= 15, < 17)
+      ohai (>= 15, < 18)
       pedump
       ruby-progressbar (~> 1.7)
       thor (>= 0.18, < 2.0)
@@ -33,17 +33,17 @@ GEM
     artifactory (3.0.15)
     awesome_print (1.9.2)
     aws-eventstream (1.2.0)
-    aws-partitions (1.517.0)
-    aws-sdk-core (3.121.3)
+    aws-partitions (1.536.0)
+    aws-sdk-core (3.123.0)
       aws-eventstream (~> 1, >= 1.0.2)
-      aws-partitions (~> 1, >= 1.239.0)
+      aws-partitions (~> 1, >= 1.525.0)
       aws-sigv4 (~> 1.1)
       jmespath (~> 1.0)
-    aws-sdk-kms (1.50.0)
-      aws-sdk-core (~> 3, >= 3.121.2)
+    aws-sdk-kms (1.51.0)
+      aws-sdk-core (~> 3, >= 3.122.0)
       aws-sigv4 (~> 1.1)
-    aws-sdk-s3 (1.104.0)
-      aws-sdk-core (~> 3, >= 3.121.2)
+    aws-sdk-s3 (1.108.0)
+      aws-sdk-core (~> 3, >= 3.122.0)
       aws-sdk-kms (~> 1)
       aws-sigv4 (~> 1.4)
     aws-sigv4 (1.4.0)
@@ -184,7 +184,7 @@ GEM
     iostruct (0.0.4)
     ipaddress (0.8.3)
     jmespath (1.4.0)
-    json (2.6.0)
+    json (2.6.1)
     libyajl2 (2.1.0)
     license-acceptance (2.1.13)
       pastel (~> 0.7)
@@ -232,8 +232,8 @@ GEM
     octokit (4.21.0)
       faraday (>= 0.9)
       sawyer (~> 0.8.0, >= 0.5.3)
-    ohai (16.13.0)
-      chef-config (>= 12.8, < 17)
+    ohai (16.17.0)
+      chef-config (>= 14.12, < 17)
       chef-utils (>= 16.0, < 17)
       ffi (~> 1.9)
       ffi-yajl (~> 2.2)
@@ -241,7 +241,7 @@ GEM
       mixlib-cli (>= 1.7.0)
       mixlib-config (>= 2.0, < 4.0)
       mixlib-log (>= 2.0.1, < 4.0)
-      mixlib-shellout (>= 2.0, < 4.0)
+      mixlib-shellout (~> 3.2, >= 3.2.5)
       plist (~> 3.1)
       train-core
       wmi-lite (~> 1.0)
@@ -299,7 +299,7 @@ GEM
       unicode_utils (~> 1.4)
     strings-ansi (0.2.0)
     syslog-logger (1.6.8)
-    test-kitchen (3.1.1)
+    test-kitchen (3.2.1)
       bcrypt_pbkdf (~> 1.0)
       chef-utils (>= 16.4.35)
       ed25519 (~> 1.2)
@@ -314,7 +314,7 @@ GEM
       winrm-elevated (~> 1.0)
       winrm-fs (~> 1.1)
     thor (1.1.0)
-    toml-rb (2.0.1)
+    toml-rb (2.1.0)
       citrus (~> 3.0, > 3.0)
     tomlrb (1.3.0)
     train-core (3.8.1)

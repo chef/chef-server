@@ -9,9 +9,9 @@ GIT
 
 GIT
   remote: https://github.com/rails/sprockets-rails.git
-  revision: 118ce60b1ffeb7a85640661b014cd2ee3c4e3e56
+  revision: 4e0f1686ce108ea3a52fb0dfb24bb6272ea2df3f
   specs:
-    sprockets-rails (3.2.2)
+    sprockets-rails (3.4.1)
       actionpack (>= 5.2)
       activesupport (>= 5.2)
       sprockets (>= 3.0.0)
@@ -179,7 +179,7 @@ GEM
       execjs
     coffee-script-source (1.12.2)
     concurrent-ruby (1.1.9)
-    config (2.2.3)
+    config (3.1.0)
       deep_merge (~> 1.2, >= 1.2.1)
       dry-validation (~> 1.0, >= 1.0.0)
     corefoundation (0.3.4)
@@ -189,25 +189,24 @@ GEM
     debug_inspector (1.1.0)
     deep_merge (1.2.1)
     diff-lcs (1.3)
-    doorkeeper (5.5.4)
-      railties (>= 5)
-    dry-configurable (0.12.1)
+    doorkeeper (4.4.3)
+      railties (>= 4.2)
+    dry-configurable (0.13.0)
       concurrent-ruby (~> 1.0)
-      dry-core (~> 0.5, >= 0.5.0)
-    dry-container (0.8.0)
+      dry-core (~> 0.6)
+    dry-container (0.9.0)
       concurrent-ruby (~> 1.0)
-      dry-configurable (~> 0.1, >= 0.1.3)
+      dry-configurable (~> 0.13, >= 0.13.0)
     dry-core (0.7.1)
       concurrent-ruby (~> 1.0)
-    dry-equalizer (0.3.0)
     dry-inflector (0.2.1)
     dry-initializer (3.0.4)
     dry-logic (1.2.0)
       concurrent-ruby (~> 1.0)
       dry-core (~> 0.5, >= 0.5)
-    dry-schema (1.7.0)
+    dry-schema (1.8.0)
       concurrent-ruby (~> 1.0)
-      dry-configurable (~> 0.8, >= 0.8.3)
+      dry-configurable (~> 0.13, >= 0.13.0)
       dry-core (~> 0.5, >= 0.5)
       dry-initializer (~> 3.0)
       dry-logic (~> 1.0)
@@ -218,13 +217,12 @@ GEM
       dry-core (~> 0.5, >= 0.5)
       dry-inflector (~> 0.1, >= 0.1.2)
       dry-logic (~> 1.0, >= 1.0.2)
-    dry-validation (1.6.0)
+    dry-validation (1.7.0)
       concurrent-ruby (~> 1.0)
       dry-container (~> 0.7, >= 0.7.1)
-      dry-core (~> 0.4)
-      dry-equalizer (~> 0.2)
+      dry-core (~> 0.5, >= 0.5)
       dry-initializer (~> 3.0)
-      dry-schema (~> 1.5, >= 1.5.2)
+      dry-schema (~> 1.8, >= 1.8.0)
     erubi (1.10.0)
     erubis (2.7.0)
     eventmachine (1.2.7)
@@ -293,7 +291,7 @@ GEM
       tty-prompt (~> 0.17)
       tty-table (~> 0.10)
     ipaddress (0.8.3)
-    jbuilder (2.11.2)
+    jbuilder (2.11.3)
       activesupport (>= 5.0.0)
     jmespath (1.4.0)
     jquery-rails (4.4.0)
@@ -480,7 +478,7 @@ GEM
       tilt
     sdoc (2.2.0)
       rdoc (>= 5.0)
-    selenium-webdriver (4.0.3)
+    selenium-webdriver (4.1.0)
       childprocess (>= 0.5, < 5.0)
       rexml (~> 3.2, >= 3.2.5)
       rubyzip (>= 1.2.2)
@@ -495,7 +493,7 @@ GEM
     skinny (0.2.2)
       eventmachine (~> 1.0)
       thin
-    spring (3.0.0)
+    spring (3.1.1)
     spring-commands-rspec (1.0.4)
       spring (>= 0.9.1)
     sprockets (4.0.2)
@@ -611,11 +609,11 @@ DEPENDENCIES
   capybara (~> 3.36)
   chef (~> 17)
   coffee-rails (~> 5.0)
-  config (~> 2.2, >= 2.2.1)
-  doorkeeper (~> 5.5)
+  config (~> 3.1)
+  doorkeeper (~> 4.0)
   factory_girl_rails (~> 4.4.0)
   foundation-rails!
-  jbuilder (~> 2.7)
+  jbuilder (~> 2.11)
   jquery-rails
   jwt
   mailcatcher
@@ -632,7 +630,7 @@ DEPENDENCIES
   rspec-rails (~> 5.0)
   sass-rails (>= 4.0.3)
   sdoc
-  selenium-webdriver (~> 4.0.3)
+  selenium-webdriver (~> 4.1.0)
   sentry-raven
   spring
   spring-commands-rspec
