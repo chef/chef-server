@@ -6,7 +6,7 @@ override :erlang, version: "22.2"
 override :'omnibus-ctl', version: "main"
 override :chef, version: "v16.13.16"
 override :ohai, version: "v16.13.0"
-override :ruby, version: "2.7.4"
+override :ruby, version: "2.7.5"
 override :perl, version: "5.18.1"
 override :redis, version: "5.0.7"
 
