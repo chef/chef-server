@@ -53,12 +53,8 @@ content_types_provided(Req, State) ->
 
 to_json(Req, #base_state{otp_info = {_, ServerVersion}} = State) ->
     ServerVersionBinary = list_to_binary(ServerVersion),
-    case check_health(ServerVersionBinary) of
-        {fail, Body} ->
-            {{halt, 500}, wrq:set_resp_body(Body, Req), State};
-        {pong, Body} ->
-            {Body, Req, State}
-    end.
+    {_Status, Body} = check_health(ServerVersionBinary),
+    {Body, Req, State}.
 
 %% private functions
 
