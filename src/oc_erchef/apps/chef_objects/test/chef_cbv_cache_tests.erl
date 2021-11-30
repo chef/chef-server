@@ -26,32 +26,41 @@
 start_cbv_cache(Enabled, TTL) ->
     application:set_env(chef_objects, cbv_cache_enabled, Enabled),
     application:set_env(chef_objects, cbv_cache_item_ttl, TTL),
-    {ok, CachePid} = chef_cbv_cache:start_link(),
-    CachePid.
+    case Enabled of
+        true ->
+            {ok, _} = chef_cbv_cache:start_link();
+        false ->
+            % The gen_server is only started by supervisor when it is enabled.
+            ok
+    end.
 
 cleanup_cache(_) ->
-    chef_cbv_cache:stop(),
+    case chef_cbv_cache:enabled() of
+        true -> gen_server:stop(chef_cbv_cache);
+        false -> ok
+    end,
     application:set_env(chef_objects, cbv_cache_enabled, false),
     application:set_env(chef_objects, cbv_cache_item_ttl, 30000),
     ok.
 
-chef_cbv_cache_expires_key_after_ttl_test_() ->
-  {setup,
-   fun() ->
-       start_cbv_cache(true, 250)
-   end,
-   fun cleanup_cache/1,
-   fun() ->
-       chef_cbv_cache:claim(expiring_key),
-       chef_cbv_cache:put(expiring_key, "a value"),
-       % Make sure it's really there
-       ?assertEqual("a value", chef_cbv_cache:get(expiring_key)),
 
-       % wait for our specified key TTL to pass
-       timer:sleep(250),
-       ?assertEqual(undefined, chef_cbv_cache:get(expiring_key))
-   end
-  }.
+chef_cbv_cache_disabled_responses_test_() ->
+    {setup,
+     fun() -> start_cbv_cache(false, 30000) end,
+     fun cleanup_cache/1,
+     [
+      {"get returns undefined even after we put the key",
+       fun() ->
+               chef_cbv_cache:claim(value),
+               chef_cbv_cache:put(value, "test"),
+               ?assertEqual(undefined, chef_cbv_cache:get(value))
+       end},
+      {"put returns undefined",
+       fun() -> ?assertEqual(undefined, chef_cbv_cache:put(value, "test")) end },
+      {"claim returns undefined",
+       fun() -> ?assertEqual(undefined, chef_cbv_cache:claim(value)) end }
+     ]
+    }.
 
 claim_replies_retry_when_another_pid_has_claimed_first_test_() ->
   {setup,
@@ -61,7 +70,7 @@ claim_replies_retry_when_another_pid_has_claimed_first_test_() ->
    fun cleanup_cache/1,
    fun() ->
        spawn(fun() -> chef_cbv_cache:claim(other_key) end),
-       timer:sleep(100), % Give the claim tiem to go through
+       timer:sleep(100), % Give the claim time to go through
        ?assertEqual(retry, chef_cbv_cache:claim(other_key))
    end
   }.

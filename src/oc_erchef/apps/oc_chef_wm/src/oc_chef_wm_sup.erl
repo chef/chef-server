@@ -54,15 +54,23 @@ init([]) ->
                 {chef_keygen_cache, start_link, []},
                 permanent, 5000, worker, [chef_keygen_cache]},
 
-    CBVCache = {chef_cbv_cache, {chef_cbv_cache, start_link, []},
-                permanent, 5000, worker, [chef_cvb_cache]},
-
     Index = {chef_index_sup,
              {chef_index_sup, start_link, []},
              permanent, 5000, supervisor, [chef_index_sup]},
 
-    {ok, { {one_for_one, 10, 10}, [KeyRing, Index, KeyGenWorkerSup,
-                                   KeyCache, Web, CBVCache]}}.
+    Services = [KeyRing, Index, KeyGenWorkerSup, KeyCache, Web],
+
+
+    Services1 = case chef_cbv_cache:enabled() of
+                    true ->
+                        [{chef_cbv_cache, {chef_cbv_cache, start_link, []},
+                         permanent, 5000, worker, [chef_cvb_cache]}| Services];
+                    false ->
+                        Services
+                end,
+
+
+    {ok, { {one_for_one, 10, 10}, Services1} }.
 
 load_ibrowse_config() ->
     %% FIXME: location of the ibrowse.config should be itself configurable. Also need to
