@@ -1,16 +1,19 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.11.8 -->
-## [14.11.8](https://github.com/chef/chef-server/tree/14.11.8) (2021-11-30)
+<!-- latest_release 14.11.11 -->
+## [14.11.11](https://github.com/chef/chef-server/tree/14.11.11) (2021-11-30)
 
 #### Merged Pull Requests
-- Bump omnibus-software from `7501e20` to `8560231` in /omnibus [#2973](https://github.com/chef/chef-server/pull/2973) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Update Ruby to 2.7.5 [#2976](https://github.com/chef/chef-server/pull/2976) ([tas50](https://github.com/tas50))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.10.23 -->
 ### Changes since 14.10.23 release
 
 #### Merged Pull Requests
+- Update Ruby to 2.7.5 [#2976](https://github.com/chef/chef-server/pull/2976) ([tas50](https://github.com/tas50)) <!-- 14.11.11 -->
+- Update OpenResty to 1.19.9.1 [#2978](https://github.com/chef/chef-server/pull/2978) ([tas50](https://github.com/tas50)) <!-- 14.11.10 -->
+- Fix formatting of nginx config [#2896](https://github.com/chef/chef-server/pull/2896) ([tas50](https://github.com/tas50)) <!-- 14.11.9 -->
 - Bump omnibus-software from `7501e20` to `8560231` in /omnibus [#2973](https://github.com/chef/chef-server/pull/2973) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.11.8 -->
 - Bump test-kitchen from 3.2.0 to 3.2.1 in /omnibus [#2975](https://github.com/chef/chef-server/pull/2975) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.11.7 -->
 - Bump config from 2.2.3 to 3.1.0 in /src/oc-id [#2630](https://github.com/chef/chef-server/pull/2630) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.11.6 -->
