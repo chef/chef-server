@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.11.11 -->
-## [14.11.11](https://github.com/chef/chef-server/tree/14.11.11) (2021-11-30)
+<!-- latest_release 14.11.12 -->
+## [14.11.12](https://github.com/chef/chef-server/tree/14.11.12) (2021-12-01)
 
 #### Merged Pull Requests
-- Update Ruby to 2.7.5 [#2976](https://github.com/chef/chef-server/pull/2976) ([tas50](https://github.com/tas50))
+- Update embedded Chef to 16.17 [#2977](https://github.com/chef/chef-server/pull/2977) ([tas50](https://github.com/tas50))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.10.23 -->
 ### Changes since 14.10.23 release
 
 #### Merged Pull Requests
+- Update embedded Chef to 16.17 [#2977](https://github.com/chef/chef-server/pull/2977) ([tas50](https://github.com/tas50)) <!-- 14.11.12 -->
 - Update Ruby to 2.7.5 [#2976](https://github.com/chef/chef-server/pull/2976) ([tas50](https://github.com/tas50)) <!-- 14.11.11 -->
 - Update OpenResty to 1.19.9.1 [#2978](https://github.com/chef/chef-server/pull/2978) ([tas50](https://github.com/tas50)) <!-- 14.11.10 -->
 - Fix formatting of nginx config [#2896](https://github.com/chef/chef-server/pull/2896) ([tas50](https://github.com/tas50)) <!-- 14.11.9 -->
