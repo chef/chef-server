@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.11.13 -->
-## [14.11.13](https://github.com/chef/chef-server/tree/14.11.13) (2021-12-01)
+<!-- latest_release 14.11.14 -->
+## [14.11.14](https://github.com/chef/chef-server/tree/14.11.14) (2021-12-02)
 
 #### Merged Pull Requests
-- Remove logic for configuring ES to support RHEL &lt; 7  [#2710](https://github.com/chef/chef-server/pull/2710) ([tas50](https://github.com/tas50))
+- fixes /etc/opscode/logrotate.d/nginx file to be owned by root [#2972](https://github.com/chef/chef-server/pull/2972) ([collinmcneese](https://github.com/collinmcneese))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.10.23 -->
 ### Changes since 14.10.23 release
 
 #### Merged Pull Requests
+- fixes /etc/opscode/logrotate.d/nginx file to be owned by root [#2972](https://github.com/chef/chef-server/pull/2972) ([collinmcneese](https://github.com/collinmcneese)) <!-- 14.11.14 -->
 - Remove logic for configuring ES to support RHEL &lt; 7  [#2710](https://github.com/chef/chef-server/pull/2710) ([tas50](https://github.com/tas50)) <!-- 14.11.13 -->
 - Update embedded Chef to 16.17 [#2977](https://github.com/chef/chef-server/pull/2977) ([tas50](https://github.com/tas50)) <!-- 14.11.12 -->
 - Update Ruby to 2.7.5 [#2976](https://github.com/chef/chef-server/pull/2976) ([tas50](https://github.com/tas50)) <!-- 14.11.11 -->
