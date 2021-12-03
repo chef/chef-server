@@ -974,7 +974,7 @@ This configuration file has the following settings for `oc_chef_authz`:
 
 `oc_chef_authz['max_connection_request_limit']`
 
-:   The max number of requests allowed per connections.
+:   The maximum number of requests allowed per connection.
     Default value: `100`.
 
 ### oc-chef-pedant
@@ -1458,22 +1458,22 @@ This configuration file has the following settings for `opscode-erchef`:
 
 `opscode_erchef['cbv_cache_enabled']`
 
-:   Enable cookbook version response caching by setting this to `true`. If you are frequently seeing
+:   Enable cookbook version response caching by setting this to `true`. If you frequently see
     very long response times from `cookbook_versions` when under load, this is worth enabling.
-    Enabling this does open a window for a client to receive stale results. When a cookbook is updated
-    in place (without incrementing the version), and the old response has not been expired from cache,
-    the old response will be given to the client.  Subsequent client runs will receive the updated response.
-    Default value: `false`.
+    Enabling this makes it possible for a client to receive stale results. When a cookbook is updated
+    in place (without incrementing the version), and the old response has not expired from the cache,
+    the Infra Server will give the old response to the client. Subsequent client runs will receive the
+    updated response. Default value: `false`.
 
 `opscode_erchef['cbv_cache_item_ttl']`
 
-:   The minimum time in milliseconds that any given cookbook version response will be expired from the cache when
-    when cbv_cache_enabled is enabled.
+:   The minimum time in milliseconds that Chef Infra Server will keep any given cookbook version response in the cache when
+    when `cbv_cache_enabled` is enabled.
     Default value: `30000`.
 {{< note >}}
 
-Be careful if increasing this number - requests for a given set of cookbook_versions will be stale if the resolved cookbook versions are updated before the cache entry times out. This will
-not occur if cookbook version is incremented with every cookbook update, which is the recommended approach to updating cookbooks.
+Be careful if increasing this number - requests for a given set of cookbook versions will be stale if the resolved cookbook versions are updated before the cache entry times out. This will
+not occur if you increment the version of a cookbook with every cookbook update, which is the recommended approach to updating cookbooks.
 
 {{< /note >}}
 
