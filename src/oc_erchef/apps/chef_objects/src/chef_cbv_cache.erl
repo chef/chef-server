@@ -68,6 +68,30 @@ start_link() ->
 %% If it returns 'busy' the process is not available to service the request, and
 %% the caller should fail without retrying.
 %% Returns undefined if the cache is disabled.
+%%
+%% Future Improvements:
+%%  We can eke a little more out of this by allowing clients to directly
+%%  fetch from the ets table (within the get/1 API), without needing to post a message
+%%  to chef_cbv_cache.
+%%
+%%  Currently funnelling everything through the gen_server queue ensures an order of
+%%  operations, where only one caller ultimately calculates the results.
+%%  Allowing reads directly from ETS would introduce a race condition, where:
+%%  Caller A ->  does  get and finds no result, claims the key
+%%  Caller B -> in parallel puts a claimed result into the cache
+%%  Caller A -> assembles the result that B had just assembled and puts it to cache
+%%  Under high load, there could be multiple 'caller a' behaviors in this scenario.
+%%
+%%  We can prevent this by having `claim` check for an existing entry in the cache in addition to
+%%  an existing claim. If an entry is found, it will return `retry` just as if a claim were present;
+%%  in the scenario above 'Caller A' would get `retry` in response to `claim` and would
+%%  retry normally, getting the cached result in the next attempt.
+%%
+%%  Testing under heavy load has shown that the current solution performs very well as-is,
+%%  with load-shedding working as intended when the queue reaches capacity.
+%%  These changes only make sense if we hit new usage patterns that overwhelm the
+%%  cbv_cache message queue on a regular basis.
+%%
 -spec get(any()) -> retry | busy | undefined | term().
 get(Key) ->
     send_if_available({get, Key}).
