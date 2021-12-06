@@ -224,7 +224,10 @@
         {s3_parallel_ops_timeout, <%= node['private_chef']['opscode-erchef']['s3_parallel_ops_timeout'] %>},
         {s3_parallel_ops_fanout, <%= node['private_chef']['opscode-erchef']['s3_parallel_ops_fanout'] %>},
         {depsolver_timeout, <%= @depsolver_timeout %>},
-        {depsolver_pooler_timeout, <%= @depsolver_pooler_timeout %>}
+        {depsolver_pooler_timeout, <%= @depsolver_pooler_timeout %>},
+        {cbv_cache_enabled, <%= node['private_chef']['opscode-erchef']['cbv_cache_enabled'] %>},
+        {cbv_cache_item_ttl, <%= node['private_chef']['opscode-erchef']['cbv_cache_item_ttl'] %>}
+
     ]},
 
     <% if node['private_chef']['data_collector']['root_url'] %>
