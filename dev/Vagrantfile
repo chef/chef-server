@@ -56,7 +56,7 @@ end
 
 Vagrant.configure("2") do |config|
   attributes = load_settings
-
+  config.omnibus.chef_version = :latest
   config.vm.network 'public_network' if USE_AZURE
   # Use the official Ubuntu 18.04 box
   # Vagrant will auto resolve the url to download from Atlas
