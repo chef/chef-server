@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.11.16 -->
-## [14.11.16](https://github.com/chef/chef-server/tree/14.11.16) (2021-12-07)
+<!-- latest_release 14.11.17 -->
+## [14.11.17](https://github.com/chef/chef-server/tree/14.11.17) (2021-12-08)
 
 #### Merged Pull Requests
-- Fix external postgresql error on dev vm `vagrant up` [#2987](https://github.com/chef/chef-server/pull/2987) ([lbakerchef](https://github.com/lbakerchef))
+- Fix and extend dev/scripts/provision-postgres.sh [#2932](https://github.com/chef/chef-server/pull/2932) ([lbakerchef](https://github.com/lbakerchef))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.11.15 -->
 ### Changes since 14.11.15 release
 
 #### Merged Pull Requests
+- Fix and extend dev/scripts/provision-postgres.sh [#2932](https://github.com/chef/chef-server/pull/2932) ([lbakerchef](https://github.com/lbakerchef)) <!-- 14.11.17 -->
 - Fix external postgresql error on dev vm `vagrant up` [#2987](https://github.com/chef/chef-server/pull/2987) ([lbakerchef](https://github.com/lbakerchef)) <!-- 14.11.16 -->
 <!-- release_rollup -->
 
