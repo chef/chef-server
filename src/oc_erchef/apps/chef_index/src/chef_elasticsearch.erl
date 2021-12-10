@@ -109,6 +109,7 @@ query_body(#chef_solr_query{
               filter_query = undefined,
               start = Start,
               rows = Rows}) ->
+io:format("~n~nchef_elasticsearch:~nquery_string = ~w~nfilter_query = ~w~n~n", [Query, undefined]),
     jiffy:encode({[{fields_tag(), <<"_id">>},
                    {<<"from">>, Start},
                    {<<"size">>, Rows},
@@ -119,6 +120,7 @@ query_body(#chef_solr_query{
               filter_query = FilterQuery,
               start = Start,
               rows = Rows}) ->
+io:format("~n~nchef_elasticsearch:~nquery_string = ~w~nfilter_query = ~w~n~n", [Query, FilterQuery]),
     chef_index_query:assert_org_id_filter(FilterQuery),
     jiffy:encode({[{ fields_tag(), <<"_id">>},
         {<<"from">>, Start},
