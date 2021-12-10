@@ -16,7 +16,6 @@ gem 'unicorn-rails', '~> 2.2', '>= 2.2.1'
 gem 'nokogiri', '1.13.1'
 gem 'pg', '>= 0.18', '< 2.0' # active_record 4.2.8 pins this but doesn't manifest this in the gemspec for some reason
 gem 'mixlib-authentication', '>= 2.1', '< 4'
-gem 'sentry-raven'
 gem 'responders', '~> 3.0', '>= 3.0.1'
 gem 'doorkeeper', '~> 4.0'
 gem "sprockets-rails", ">= 3.4.2"
