@@ -70,3 +70,9 @@
   9-:-Djava.locale.providers=COMPAT
 
 <% end %>
+
+## RCE 0-day exploit found in log4j, a popular Java logging package
+#https://www.randori.com/blog/cve-2021-44228/
+#https://github.com/elastic/elasticsearch/issues/81618
+
+-Dlog4j2.formatMsgNoLookups=true
