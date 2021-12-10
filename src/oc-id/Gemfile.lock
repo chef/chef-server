@@ -9,7 +9,7 @@ GIT
 
 GIT
   remote: https://github.com/rails/sprockets-rails.git
-  revision: 4e0f1686ce108ea3a52fb0dfb24bb6272ea2df3f
+  revision: 26d6583cc2aced0d58e4d81da3d9aded2039ec6b
   specs:
     sprockets-rails (3.4.1)
       actionpack (>= 5.2)
@@ -312,7 +312,7 @@ GEM
     logging (2.3.0)
       little-plugger (~> 1.1)
       multi_json (~> 1.14)
-    loofah (2.12.0)
+    loofah (2.13.0)
       crass (~> 1.0.2)
       nokogiri (>= 1.5.9)
     mail (2.7.1)
