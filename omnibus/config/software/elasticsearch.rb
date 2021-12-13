@@ -33,6 +33,7 @@ end
 version "7.9.3" do
   source url: "https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-#{version}-linux-x86_64.tar.gz",
          sha512: "bb02a5dc1caef97638a959ebba05dd649083c856334f30c670b851067292d7230e561d8759b15a80be73537d7a7efd9cef427d253cbb2efdbd6b168c6f9baa13"
+end
 
 target_path = "#{install_dir}/embedded/elasticsearch"
 
