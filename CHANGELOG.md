@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.11.19 -->
-## [14.11.19](https://github.com/chef/chef-server/tree/14.11.19) (2021-12-13)
+<!-- latest_release 14.11.20 -->
+## [14.11.20](https://github.com/chef/chef-server/tree/14.11.20) (2021-12-13)
 
 #### Merged Pull Requests
-- Bump omnibus-software from `8560231` to `d2525ab` in /omnibus [#3003](https://github.com/chef/chef-server/pull/3003) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Update Elasticsearch to 6.8.21 [#3000](https://github.com/chef/chef-server/pull/3000) ([lbakerchef](https://github.com/lbakerchef))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.11.15 -->
 ### Changes since 14.11.15 release
 
 #### Merged Pull Requests
+- Update Elasticsearch to 6.8.21 [#3000](https://github.com/chef/chef-server/pull/3000) ([lbakerchef](https://github.com/lbakerchef)) <!-- 14.11.20 -->
 - Bump omnibus-software from `8560231` to `d2525ab` in /omnibus [#3003](https://github.com/chef/chef-server/pull/3003) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.11.19 -->
 - Switch main back to master for wiki in publish-release-notes [#2989](https://github.com/chef/chef-server/pull/2989) ([IanMadd](https://github.com/IanMadd)) <!-- 14.11.18 -->
 - Fix and extend dev/scripts/provision-postgres.sh [#2932](https://github.com/chef/chef-server/pull/2932) ([lbakerchef](https://github.com/lbakerchef)) <!-- 14.11.17 -->
