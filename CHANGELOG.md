@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.11.18 -->
-## [14.11.18](https://github.com/chef/chef-server/tree/14.11.18) (2021-12-09)
+<!-- latest_release 14.11.19 -->
+## [14.11.19](https://github.com/chef/chef-server/tree/14.11.19) (2021-12-13)
 
 #### Merged Pull Requests
-- Switch main back to master for wiki in publish-release-notes [#2989](https://github.com/chef/chef-server/pull/2989) ([IanMadd](https://github.com/IanMadd))
+- Bump omnibus-software from `8560231` to `d2525ab` in /omnibus [#3003](https://github.com/chef/chef-server/pull/3003) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.11.15 -->
 ### Changes since 14.11.15 release
 
 #### Merged Pull Requests
+- Bump omnibus-software from `8560231` to `d2525ab` in /omnibus [#3003](https://github.com/chef/chef-server/pull/3003) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.11.19 -->
 - Switch main back to master for wiki in publish-release-notes [#2989](https://github.com/chef/chef-server/pull/2989) ([IanMadd](https://github.com/IanMadd)) <!-- 14.11.18 -->
 - Fix and extend dev/scripts/provision-postgres.sh [#2932](https://github.com/chef/chef-server/pull/2932) ([lbakerchef](https://github.com/lbakerchef)) <!-- 14.11.17 -->
 - Fix external postgresql error on dev vm `vagrant up` [#2987](https://github.com/chef/chef-server/pull/2987) ([lbakerchef](https://github.com/lbakerchef)) <!-- 14.11.16 -->
