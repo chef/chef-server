@@ -160,24 +160,13 @@ Note that no changes other than CHANGELOG/RELEASE_NOTES changes should land on m
 Chef / [chef/chef-server:main] habitat/build / main
 https://buildkite.com/chef/chef-chef-server-main-habitat-build
 
-21. Test the supermarket by adding the below configuration in '/etc/opscode/chef-server.rb' and run chef-server-ctl reconfigure
-```
-oc_id['applications'] ||= {}
-oc_id['applications']['supermarket'] = {
-  'redirect_uri' => 'https://supermarket.mycompany.com/auth/chef_oauth2/callback',
-}
-```
-The result of chef-server-ctl reconfigure should successfull for confirming supermarket is working with the latest chef-server version.
-```
-chef-server-ctl reconfigure
-```
-22. Test the chef-server version with Automate if there are any schema changes.
+21. Test the chef-server version with Automate if there are any schema changes.
 Follow the below document for testing the chef-server version in Automate environment.
 https://github.com/chef/automate/blob/main/dev-docs/DEV_ENVIRONMENT.md
 
 #### Special Testing
 
-Do any special testing related to the particular release you are doing, as applicable.
+Do any special testing specific to the particular release you are doing, as applicable.
 
 ### Other
 
@@ -240,24 +229,25 @@ RELEASE CHECKLIST
 - updated release notes                     DONE
 - omnibus build in current channel          DONE
 - umbrella pipeline full
-    12.17.15 -> 14.6.32                     PASS [failures but no release blockers]
-    https://buildkite.com/chef/chef-umbrella-main-chef-server-full/builds/44#78500beb-e0e1-4ef8-a4aa-07aefdb7a7c2
-    13.2     -> 14.6.32                     PASS [failures but no release blockers]
-    https://buildkite.com/chef/chef-umbrella-main-chef-server-full/builds/45#6049ca7a-9e06-4407-9cff-7c835fdae65e
-    14.5.29 ->14.6.32                       PASS [failures but no release blockers]
-    https://buildkite.com/chef/chef-umbrella-main-chef-server-full/builds/47#0ae8a00f-7b52-4a22-a3bf-8f4b78d94ff7
-- update known failure sheet                DONE
+    12.17.15 -> 14.11.21                    FAILURES [EXTERNAL ELASTICSEARCH]
+https://buildkite.com/chef/chef-umbrella-main-chef-server/builds/955#02f24277-5696-44a6-89d6-e9ae10c27568
+    13.2     -> 14.11.21                    FAILURES
+https://buildkite.com/chef/chef-umbrella-main-chef-server-full/builds/98#d250c5f4-882c-481b-915c-70c14a37b6a9
+    14.11.15 -> 14.11.21                    FAILURES
+https://buildkite.com/chef/chef-umbrella-main-chef-server-full/builds/97#20ad56a9-2161-4d0c-bcce-3490d4d060ec
+- update known failure sheet                PENDING
 - login to chef manage
     AWS
-        ipv4                                PASS
-        ipv6                                PASS
+        ipv4                                EMAIL NOT GREYED-OUT
+        ipv6                                EMAIL NOT GREYED-OUT
     AZURE
-        ipv4                                PENDING [credentials issue]
-        ipv6                                PENDING [credentials issue]
-- special testing                           PASS
-- check that hab builds are successful      PASS
-- verify that manifest contains correct     FAIL
+        ipv4                                TERRAFORM ERROR
+        ipv6                                TERRAFORM ERROR
+- check that hab builds are successful      PASSED
+- automate                                  PENDING
+- special testing                           PENDING
+- verify that manifest contains correct     PASSED
   release number
-- build and release the release             DONE
-- Create automate issues                    DONE
+- build and release the release             PENDING
+- Create automate issues                    PENDING
 ```
