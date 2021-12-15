@@ -18,7 +18,7 @@ PATH
 GEM
   remote: https://rubygems.org/
   specs:
-    activesupport (6.1.4.1)
+    activesupport (6.1.4.3)
       concurrent-ruby (~> 1.0, >= 1.0.2)
       i18n (>= 1.6, < 2)
       minitest (>= 5.1)
@@ -140,7 +140,7 @@ GEM
     http-cookie (1.0.4)
       domain_name (~> 0.5)
     httpclient (2.8.3)
-    i18n (1.8.10)
+    i18n (1.8.11)
       concurrent-ruby (~> 1.0)
     iniparse (1.5.0)
     inspec-core (4.49.0)
@@ -183,7 +183,7 @@ GEM
     mime-types (3.3.1)
       mime-types-data (~> 3.2015)
     mime-types-data (3.2021.0225)
-    minitest (5.14.4)
+    minitest (5.15.0)
     mixlib-archive (1.1.7)
       mixlib-log
     mixlib-authentication (3.0.10)
@@ -332,7 +332,7 @@ GEM
       winrm (~> 2.0)
     wisper (2.0.1)
     wmi-lite (1.0.5)
-    zeitwerk (2.4.2)
+    zeitwerk (2.5.1)
 
 PLATFORMS
   ruby
