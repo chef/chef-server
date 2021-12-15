@@ -128,6 +128,7 @@ to_json(Req, #base_state{chef_db_context = DbContext,
                          requestor_id = RequestorId} = State) ->
     BatchSize = batch_size(),
     Query = SearchState#search_state.solr_query,
+io:format("~n~nchef_wm_search:~nReq = ~w~nSearchState = ~w~nQuery = ~w~n~n", [Req, SearchState, Query]),
     case solr_query(Query, ReqId) of
         {ok, Start0, SolrNumFound, Ids} ->
             Start1 = handle_undefined_start(Start0, Req),
