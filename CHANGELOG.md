@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.11.22 -->
-## [14.11.22](https://github.com/chef/chef-server/tree/14.11.22) (2021-12-15)
+<!-- latest_release 14.11.23 -->
+## [14.11.23](https://github.com/chef/chef-server/tree/14.11.23) (2021-12-19)
 
 #### Merged Pull Requests
-- Bump rails from 6.1.4.1 to 6.1.4.3 in /src/oc-id [#3014](https://github.com/chef/chef-server/pull/3014) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Remove the Chef Backend deprecation warning from tiered [#3020](https://github.com/chef/chef-server/pull/3020) ([tas50](https://github.com/tas50))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.11.21 -->
 ### Changes since 14.11.21 release
 
 #### Merged Pull Requests
+- Remove the Chef Backend deprecation warning from tiered [#3020](https://github.com/chef/chef-server/pull/3020) ([tas50](https://github.com/tas50)) <!-- 14.11.23 -->
 - Bump rails from 6.1.4.1 to 6.1.4.3 in /src/oc-id [#3014](https://github.com/chef/chef-server/pull/3014) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.11.22 -->
 <!-- release_rollup -->
 
