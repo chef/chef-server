@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.11.26 -->
-## [14.11.26](https://github.com/chef/chef-server/tree/14.11.26) (2021-12-20)
+<!-- latest_release 14.11.27 -->
+## [14.11.27](https://github.com/chef/chef-server/tree/14.11.27) (2021-12-20)
 
 #### Merged Pull Requests
-- Bump newrelic_rpm from 8.1.0 to 8.2.0 in /src/oc-id [#2974](https://github.com/chef/chef-server/pull/2974) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump chef from 17.7.29 to 17.8.25 in /oc-chef-pedant [#2982](https://github.com/chef/chef-server/pull/2982) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.11.21 -->
 ### Changes since 14.11.21 release
 
 #### Merged Pull Requests
+- Bump chef from 17.7.29 to 17.8.25 in /oc-chef-pedant [#2982](https://github.com/chef/chef-server/pull/2982) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.11.27 -->
 - Bump newrelic_rpm from 8.1.0 to 8.2.0 in /src/oc-id [#2974](https://github.com/chef/chef-server/pull/2974) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.11.26 -->
 - Bump omnibus from `2c309fa` to `2bf77bb` in /omnibus [#2996](https://github.com/chef/chef-server/pull/2996) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.11.25 -->
 - Bump test-kitchen from 3.2.1 to 3.2.2 in /omnibus [#2983](https://github.com/chef/chef-server/pull/2983) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.11.24 -->
