@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.11.29 -->
-## [14.11.29](https://github.com/chef/chef-server/tree/14.11.29) (2021-12-20)
+<!-- latest_release 14.11.30 -->
+## [14.11.30](https://github.com/chef/chef-server/tree/14.11.30) (2021-12-21)
 
 #### Merged Pull Requests
-- Update Elasticsearch to 6.8.22 [#3023](https://github.com/chef/chef-server/pull/3023) ([tas50](https://github.com/tas50))
+- Updating habitat build channel to stable2021q2 [#2961](https://github.com/chef/chef-server/pull/2961) ([vinay-satish](https://github.com/vinay-satish))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.11.21 -->
 ### Changes since 14.11.21 release
 
 #### Merged Pull Requests
+- Updating habitat build channel to stable2021q2 [#2961](https://github.com/chef/chef-server/pull/2961) ([vinay-satish](https://github.com/vinay-satish)) <!-- 14.11.30 -->
 - Update Elasticsearch to 6.8.22 [#3023](https://github.com/chef/chef-server/pull/3023) ([tas50](https://github.com/tas50)) <!-- 14.11.29 -->
 - Bump chef from 17.7.29 to 17.8.25 in /src/oc-id [#2984](https://github.com/chef/chef-server/pull/2984) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.11.28 -->
 - Bump chef from 17.7.29 to 17.8.25 in /oc-chef-pedant [#2982](https://github.com/chef/chef-server/pull/2982) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.11.27 -->
