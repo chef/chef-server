@@ -1,29 +1,27 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.11.31 -->
-## [14.11.31](https://github.com/chef/chef-server/tree/14.11.31) (2021-12-21)
-
-#### Merged Pull Requests
-- point to stable2021-q2 [#3026](https://github.com/chef/chef-server/pull/3026) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+<!-- latest_release -->
 <!-- latest_release -->
 
-<!-- release_rollup since=14.11.21 -->
-### Changes since 14.11.21 release
-
-#### Merged Pull Requests
-- point to stable2021-q2 [#3026](https://github.com/chef/chef-server/pull/3026) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.11.31 -->
-- Updating habitat build channel to stable2021q2 [#2961](https://github.com/chef/chef-server/pull/2961) ([vinay-satish](https://github.com/vinay-satish)) <!-- 14.11.30 -->
-- Update Elasticsearch to 6.8.22 [#3023](https://github.com/chef/chef-server/pull/3023) ([tas50](https://github.com/tas50)) <!-- 14.11.29 -->
-- Bump chef from 17.7.29 to 17.8.25 in /src/oc-id [#2984](https://github.com/chef/chef-server/pull/2984) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.11.28 -->
-- Bump chef from 17.7.29 to 17.8.25 in /oc-chef-pedant [#2982](https://github.com/chef/chef-server/pull/2982) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.11.27 -->
-- Bump newrelic_rpm from 8.1.0 to 8.2.0 in /src/oc-id [#2974](https://github.com/chef/chef-server/pull/2974) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.11.26 -->
-- Bump omnibus from `2c309fa` to `2bf77bb` in /omnibus [#2996](https://github.com/chef/chef-server/pull/2996) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.11.25 -->
-- Bump test-kitchen from 3.2.1 to 3.2.2 in /omnibus [#2983](https://github.com/chef/chef-server/pull/2983) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.11.24 -->
-- Remove the Chef Backend deprecation warning from tiered [#3020](https://github.com/chef/chef-server/pull/3020) ([tas50](https://github.com/tas50)) <!-- 14.11.23 -->
-- Bump rails from 6.1.4.1 to 6.1.4.3 in /src/oc-id [#3014](https://github.com/chef/chef-server/pull/3014) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.11.22 -->
+<!-- release_rollup -->
 <!-- release_rollup -->
 
 <!-- latest_stable_release -->
+## [14.11.31](https://github.com/chef/chef-server/tree/14.11.31) (2021-12-21)
+
+#### Merged Pull Requests
+- Bump rails from 6.1.4.1 to 6.1.4.3 in /src/oc-id [#3014](https://github.com/chef/chef-server/pull/3014) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Remove the Chef Backend deprecation warning from tiered [#3020](https://github.com/chef/chef-server/pull/3020) ([tas50](https://github.com/tas50))
+- Bump test-kitchen from 3.2.1 to 3.2.2 in /omnibus [#2983](https://github.com/chef/chef-server/pull/2983) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump omnibus from `2c309fa` to `2bf77bb` in /omnibus [#2996](https://github.com/chef/chef-server/pull/2996) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump newrelic_rpm from 8.1.0 to 8.2.0 in /src/oc-id [#2974](https://github.com/chef/chef-server/pull/2974) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump chef from 17.7.29 to 17.8.25 in /oc-chef-pedant [#2982](https://github.com/chef/chef-server/pull/2982) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump chef from 17.7.29 to 17.8.25 in /src/oc-id [#2984](https://github.com/chef/chef-server/pull/2984) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Update Elasticsearch to 6.8.22 [#3023](https://github.com/chef/chef-server/pull/3023) ([tas50](https://github.com/tas50))
+- Updating habitat build channel to stable2021q2 [#2961](https://github.com/chef/chef-server/pull/2961) ([vinay-satish](https://github.com/vinay-satish))
+- point to stable2021-q2 [#3026](https://github.com/chef/chef-server/pull/3026) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+<!-- latest_stable_release -->
+
 ## [14.11.21](https://github.com/chef/chef-server/tree/14.11.21) (2021-12-14)
 
 #### Merged Pull Requests
@@ -33,7 +31,6 @@
 - Bump omnibus-software from `8560231` to `d2525ab` in /omnibus [#3003](https://github.com/chef/chef-server/pull/3003) ([dependabot[bot]](https://github.com/dependabot[bot]))
 - Update Elasticsearch to 6.8.21 [#3000](https://github.com/chef/chef-server/pull/3000) ([lbakerchef](https://github.com/lbakerchef))
 - Update Elasticsearch to 6.8.21 [#3004](https://github.com/chef/chef-server/pull/3004) ([lbakerchef](https://github.com/lbakerchef))
-<!-- latest_stable_release -->
 
 ## [14.11.15](https://github.com/chef/chef-server/tree/14.11.15) (2021-12-07)
 
