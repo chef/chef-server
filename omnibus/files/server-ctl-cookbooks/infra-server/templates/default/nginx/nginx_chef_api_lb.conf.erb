@@ -37,10 +37,11 @@
     proxy_send_timeout      300;
     proxy_read_timeout      300;
 
-    <% if !node['packages']['chef-manage'] %>
+    <% unless node['packages']['chef-manage'] %>
     add_header X-Frame-Options DENY;
     add_header X-Content-Type-Options nosniff;
     add_header X-XSS-Protection 1;
+    add_header Permissions-Policy "camera 'none'; payment 'none'; microphone 'none'; gyroscope 'none'; magnetometer 'none'; midi 'none'; geolocation 'none'";
       <% if @server_proto == 'https' %>
     add_header Strict-Transport-Security "max-age=<%= @helper.get_max_age_for_hsts %>; includeSubDomains";
       <% end %>
