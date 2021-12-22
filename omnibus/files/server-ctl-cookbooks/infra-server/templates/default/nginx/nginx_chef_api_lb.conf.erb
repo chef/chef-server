@@ -42,6 +42,7 @@
     add_header X-Content-Type-Options nosniff;
     add_header X-XSS-Protection 1;
     add_header Permissions-Policy "camera 'none'; payment 'none'; microphone 'none'; gyroscope 'none'; magnetometer 'none'; midi 'none'; geolocation 'none'";
+    add_header Referrer-Policy 'origin';
       <% if @server_proto == 'https' %>
     add_header Strict-Transport-Security "max-age=<%= @helper.get_max_age_for_hsts %>; includeSubDomains";
       <% end %>
