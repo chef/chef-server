@@ -39,8 +39,8 @@
 
     <% unless node['packages']['chef-manage'] %>
     add_header X-Frame-Options DENY;
+    add_header Content-Security-Policy "default-src 'self';";
     add_header X-Content-Type-Options nosniff;
-    add_header X-XSS-Protection 1;
     add_header Permissions-Policy "camera=(); payment=(); microphone=(); gyroscope=(); magnetometer=(); midi=(); geolocation=()";
     add_header Referrer-Policy 'origin';
       <% if @server_proto == 'https' %>
@@ -60,6 +60,7 @@
       add_header X-Frame-Options DENY;
       add_header X-Content-Type-Options nosniff;
       add_header Permissions-Policy "camera=(); payment=(); microphone=(); gyroscope=(); magnetometer=(); midi=(); geolocation=()";
+      add_header Referrer-Policy 'origin';
     }
 
     location "/css/" {
@@ -67,6 +68,7 @@
       add_header X-Frame-Options DENY;
       add_header X-Content-Type-Options nosniff;
       add_header Permissions-Policy "camera=(); payment=(); microphone=(); gyroscope=(); magnetometer=(); midi=(); geolocation=()";
+      add_header Referrer-Policy 'origin';
     }
 
     location "/images/" {
@@ -74,6 +76,7 @@
       add_header X-Frame-Options DENY;
       add_header X-Content-Type-Options nosniff;
       add_header Permissions-Policy "camera=(); payment=(); microphone=(); gyroscope=(); magnetometer=(); midi=(); geolocation=()";
+      add_header Referrer-Policy 'origin';
     }
 
     location /version {
@@ -81,6 +84,7 @@
       add_header X-Frame-Options DENY;
       add_header X-Content-Type-Options nosniff;
       add_header Permissions-Policy "camera=(); payment=(); microphone=(); gyroscope=(); magnetometer=(); midi=(); geolocation=()";
+      add_header Referrer-Policy 'origin';
       types { }
       default_type text/plain;
       alias /opt/opscode/version-manifest.txt;
