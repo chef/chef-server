@@ -42,7 +42,7 @@
     add_header Content-Security-Policy "default-src 'self';";
     add_header X-Content-Type-Options nosniff;
     add_header Permissions-Policy "camera=(); payment=(); microphone=(); gyroscope=(); magnetometer=(); midi=(); geolocation=()";
-    add_header Referrer-Policy 'origin';
+    add_header Referrer-Policy 'strict-origin';
       <% if @server_proto == 'https' %>
     add_header Strict-Transport-Security "max-age=<%= @helper.get_max_age_for_hsts %>; includeSubDomains";
       <% end %>
@@ -60,7 +60,7 @@
       add_header X-Frame-Options DENY;
       add_header X-Content-Type-Options nosniff;
       add_header Permissions-Policy "camera=(); payment=(); microphone=(); gyroscope=(); magnetometer=(); midi=(); geolocation=()";
-      add_header Referrer-Policy 'origin';
+      add_header Referrer-Policy 'strict-origin';
     }
 
     location "/css/" {
@@ -68,7 +68,7 @@
       add_header X-Frame-Options DENY;
       add_header X-Content-Type-Options nosniff;
       add_header Permissions-Policy "camera=(); payment=(); microphone=(); gyroscope=(); magnetometer=(); midi=(); geolocation=()";
-      add_header Referrer-Policy 'origin';
+      add_header Referrer-Policy 'strict-origin';
     }
 
     location "/images/" {
@@ -76,7 +76,7 @@
       add_header X-Frame-Options DENY;
       add_header X-Content-Type-Options nosniff;
       add_header Permissions-Policy "camera=(); payment=(); microphone=(); gyroscope=(); magnetometer=(); midi=(); geolocation=()";
-      add_header Referrer-Policy 'origin';
+      add_header Referrer-Policy 'strict-origin';
     }
 
     location /version {
@@ -84,7 +84,7 @@
       add_header X-Frame-Options DENY;
       add_header X-Content-Type-Options nosniff;
       add_header Permissions-Policy "camera=(); payment=(); microphone=(); gyroscope=(); magnetometer=(); midi=(); geolocation=()";
-      add_header Referrer-Policy 'origin';
+      add_header Referrer-Policy 'strict-origin';
       types { }
       default_type text/plain;
       alias /opt/opscode/version-manifest.txt;
