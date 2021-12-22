@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.11.32 -->
-## [14.11.32](https://github.com/chef/chef-server/tree/14.11.32) (2021-12-21)
+<!-- latest_release 14.11.33 -->
+## [14.11.33](https://github.com/chef/chef-server/tree/14.11.33) (2021-12-22)
 
 #### Merged Pull Requests
-- Disable omnibus build caching in buildkite [#3030](https://github.com/chef/chef-server/pull/3030) ([tas50](https://github.com/tas50))
+- Bump omnibus-software from `d2525ab` to `4707275` in /omnibus [#3032](https://github.com/chef/chef-server/pull/3032) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.11.31 -->
 ### Changes since 14.11.31 release
 
 #### Merged Pull Requests
+- Bump omnibus-software from `d2525ab` to `4707275` in /omnibus [#3032](https://github.com/chef/chef-server/pull/3032) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.11.33 -->
 - Disable omnibus build caching in buildkite [#3030](https://github.com/chef/chef-server/pull/3030) ([tas50](https://github.com/tas50)) <!-- 14.11.32 -->
 <!-- release_rollup -->
 
