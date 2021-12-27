@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.11.35 -->
-## [14.11.35](https://github.com/chef/chef-server/tree/14.11.35) (2021-12-27)
+<!-- latest_release 14.11.36 -->
+## [14.11.36](https://github.com/chef/chef-server/tree/14.11.36) (2021-12-27)
 
 #### Merged Pull Requests
-- Add the definitions for solr4 external as they are called from scenarios with external databases. [#3034](https://github.com/chef/chef-server/pull/3034) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- moving back to opscode from chef in the uri of sqitch.plan [#3043](https://github.com/chef/chef-server/pull/3043) ([vinay-satish](https://github.com/vinay-satish))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.11.31 -->
 ### Changes since 14.11.31 release
 
 #### Merged Pull Requests
+- moving back to opscode from chef in the uri of sqitch.plan [#3043](https://github.com/chef/chef-server/pull/3043) ([vinay-satish](https://github.com/vinay-satish)) <!-- 14.11.36 -->
 - Add the definitions for solr4 external as they are called from scenarios with external databases. [#3034](https://github.com/chef/chef-server/pull/3034) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.11.35 -->
 - Improve security of the default site with more HTTP headers [#3031](https://github.com/chef/chef-server/pull/3031) ([tas50](https://github.com/tas50)) <!-- 14.11.34 -->
 - Bump omnibus-software from `d2525ab` to `4707275` in /omnibus [#3032](https://github.com/chef/chef-server/pull/3032) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.11.33 -->
