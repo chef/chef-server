@@ -37,10 +37,12 @@
     proxy_send_timeout      300;
     proxy_read_timeout      300;
 
-    <% if !node['packages']['chef-manage'] %>
+    <% unless node['packages']['chef-manage'] %>
     add_header X-Frame-Options DENY;
+    add_header Content-Security-Policy "default-src 'self';";
     add_header X-Content-Type-Options nosniff;
-    add_header X-XSS-Protection 1;
+    add_header Permissions-Policy "camera=(); payment=(); microphone=(); gyroscope=(); magnetometer=(); midi=(); geolocation=()";
+    add_header Referrer-Policy 'strict-origin';
       <% if @server_proto == 'https' %>
     add_header Strict-Transport-Security "max-age=<%= @helper.get_max_age_for_hsts %>; includeSubDomains";
       <% end %>
@@ -56,21 +58,45 @@
     location ~ "^/[0-9]{3,3}\.(json|html)|favicon.ico|index.html$" {
       add_header Content-Security-Policy "default-src 'self';";
       add_header X-Frame-Options DENY;
+      add_header X-Content-Type-Options nosniff;
+      add_header Permissions-Policy "camera=(); payment=(); microphone=(); gyroscope=(); magnetometer=(); midi=(); geolocation=()";
+      add_header Referrer-Policy 'strict-origin';
+      <% if @server_proto == 'https' %>
+      add_header Strict-Transport-Security "max-age=<%= @helper.get_max_age_for_hsts %>; includeSubDomains";
+      <% end %>
     }
 
     location "/css/" {
       add_header Content-Security-Policy "default-src 'self';";
       add_header X-Frame-Options DENY;
+      add_header X-Content-Type-Options nosniff;
+      add_header Permissions-Policy "camera=(); payment=(); microphone=(); gyroscope=(); magnetometer=(); midi=(); geolocation=()";
+      add_header Referrer-Policy 'strict-origin';
+      <% if @server_proto == 'https' %>
+      add_header Strict-Transport-Security "max-age=<%= @helper.get_max_age_for_hsts %>; includeSubDomains";
+      <% end %>
     }
 
     location "/images/" {
       add_header Content-Security-Policy "default-src 'self';";
       add_header X-Frame-Options DENY;
+      add_header X-Content-Type-Options nosniff;
+      add_header Permissions-Policy "camera=(); payment=(); microphone=(); gyroscope=(); magnetometer=(); midi=(); geolocation=()";
+      add_header Referrer-Policy 'strict-origin';
+      <% if @server_proto == 'https' %>
+      add_header Strict-Transport-Security "max-age=<%= @helper.get_max_age_for_hsts %>; includeSubDomains";
+      <% end %>
     }
 
     location /version {
       add_header Content-Security-Policy "default-src 'self';";
       add_header X-Frame-Options DENY;
+      add_header X-Content-Type-Options nosniff;
+      add_header Permissions-Policy "camera=(); payment=(); microphone=(); gyroscope=(); magnetometer=(); midi=(); geolocation=()";
+      add_header Referrer-Policy 'strict-origin';
+      <% if @server_proto == 'https' %>
+      add_header Strict-Transport-Security "max-age=<%= @helper.get_max_age_for_hsts %>; includeSubDomains";
+      <% end %>
       types { }
       default_type text/plain;
       alias /opt/opscode/version-manifest.txt;
