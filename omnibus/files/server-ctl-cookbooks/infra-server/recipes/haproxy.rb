@@ -77,7 +77,11 @@ template File.join(haproxy_dir, 'haproxy.cfg') do
   notifies :restart, 'component_runit_service[haproxy]'
 end
 
-component_runit_service 'haproxy'
+component_runit_service 'haproxy' do
+  action [:enable, :start]
+  retries 10
+  retry_delay 1
+end
 
 # On startup, all backend servers will be marked as UP.
 #
