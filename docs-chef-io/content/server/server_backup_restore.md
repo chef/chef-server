@@ -82,26 +82,39 @@ To make backups for future use in disaster scenarios:
 
 ### Restore
 
-To restore a Chef Backend-based Chef Infra Server cluster:
+To restore a Chef Backend-based Chef Infra Server cluster, first we need to do restore on the backend and then on the front end:
 
-1.  Restore the node and an IP address that can be used to reach the
-    node on the first machine that you want to use in your new Chef
-    Backend cluster. The argument to the `--publish_address` option
-    should be the IP address for reaching the node you are restoring.
+#### Backend Restore
+
+1.  Restoring backend will create a new cluster. Select one of the node as the leader
+    and restore the backup on that node first. Provide the IP address of the node
+    on which you are restoring as the argument to the `--publish_address` option.
 
     ```bash
     chef-backend-ctl restore --publish_address X.Y.Z.W /path/to/backup.tar.gz
     ```
 
-2.  Join additional nodes to your Chef Backend cluster. (If you are only
-    testing and verifying your restore process you can test against a
-    single Chef Backend node and a single Chef Infra Server node.)
+2.  The file `/etc/chef-backend/chef-backend-secrets.json` will be generated 
+    after restor command creates a new cluster. Make a copy of this file 
+    on to the follower nodes (in the example, copied to `/tmp/chef-backend-secrets.json` ).
+
+3.  Join follower nodes to your new Chef Backend cluster, by passing the IP address of the 
+    restored leader node as the argument. Provide the IP address of the follower node which you are
+    joining to the cluster as the argument to the `--publish_address` option. Also provide
+    the copied `chef-backend-secrets.json` as the argument for the -s option.
 
     ```bash
-    chef-backend-ctl join-cluster IP_OF_FIRST_NODE --publish_address IP_OF_THIS_NODE
+    chef-backend-ctl join-cluster --accept-license --yes --quiet IP_OF_LEADER_NODE --publish_address IP_OF_CURRENT_FOLLOWER_NODE -s /tmp/chef-backend-secrets.json
+    ```
+4.  Generate the configs from the new cluster for the front end.
+    ```bash
+    chef-backend-ctl gen-server-config chefserver.internal > /tmp/chef-server.rb
     ```
 
-3.  Restore Chef Infra Server from your backed up Infra Server configuration
+
+#### Frontend Restore
+
+1.  Restore Chef Infra Server from your backed up Infra Server configuration
     (See step 2 in the backup instructions above). Alternatively, you
     can generate new configuration for this node and reconfigure it
     using the steps found in [the installation
@@ -111,7 +124,48 @@ To restore a Chef Backend-based Chef Infra Server cluster:
     chef-server-ctl restore /path/to/chef-server-backup.tar.gz
     ```
 
-4.  Run the `reindex` command to re-populate your search index
+    {{< note >}}
+
+    For the Chef Infra Server version earlier than 14.11.36, the `chef-server-ctl restore` will not work. It is best to upgrade to the version 14.11.36 or later.
+    For a quick fix you can edit `/opt/opscode/embedded/lib/ruby/gems/2.7.0/gems/chef-server-ctl-1.1.0/bin/chef-server-ctl` and add the following methods
+    ```bash
+        # External Solr/ElasticSearch Commands
+    def external_status_opscode_solr4(_detail_level)
+      solr = external_services['opscode-solr4']['external_url']
+      begin
+        Chef::HTTP.new(solr).get(solr_status_url)
+        puts "run: opscode-solr4: connected OK to #{solr}"
+      rescue StandardError => e
+        puts "down: opscode-solr4: failed to connect to #{solr}: #{e.message.split("\n")[0]}"
+      end
+    end
+
+    def external_cleanse_opscode_solr4(perform_delete)
+      log <<-EOM
+Cleansing data in a remote Sol4 instance is not currently supported.
+EOM
+    end
+
+    def solr_status_url
+      case running_service_config('opscode-erchef')['search_provider']
+      when "elasticsearch"
+        "/chef"
+      else
+        "/admin/ping?wt=json"
+      end
+    end
+    ```
+
+    {{< /note >}}
+
+2. Copy the backend generated config `/tmp/chef-server.rb`, to the front end node and replace it onto `/etc/opscode/chef-server.rb`.
+   Run reconfigure to apply the changes.
+
+   ```bash
+    chef-server-ctl reconfigure
+   ```
+
+3.  Run the `reindex` command to re-populate your search index
 
     ```bash
     chef-server-ctl reindex --all
