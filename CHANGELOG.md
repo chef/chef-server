@@ -1,9 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release -->
+<!-- latest_release 14.11.37 -->
+## [14.11.37](https://github.com/chef/chef-server/tree/14.11.37) (2021-12-29)
+
+#### Merged Pull Requests
+- Update FrequentTasks.md [#3025](https://github.com/chef/chef-server/pull/3025) ([lbakerchef](https://github.com/lbakerchef))
 <!-- latest_release -->
 
-<!-- release_rollup -->
+<!-- release_rollup since=14.11.36 -->
+### Changes since 14.11.36 release
+
+#### Merged Pull Requests
+- Update FrequentTasks.md [#3025](https://github.com/chef/chef-server/pull/3025) ([lbakerchef](https://github.com/lbakerchef)) <!-- 14.11.37 -->
 <!-- release_rollup -->
 
 <!-- latest_stable_release -->
