@@ -148,7 +148,7 @@ If you are running a Chef Infra Server release before 12.3.0, please contact Che
 
    After performing the stepped upgrade to 12.17.15, continue with the next step.
 
-1. Download the desired Chef Infra Server version from the [Chef Infra Server Downloads](https://downloads.chef.io/products/chef-server).
+1. Download the desired Chef Infra Server version from the [Chef Infra Server Downloads](https://www.chef.io/downloads/tools/infra-server).
 
 1. Stop the Chef Infra Server:
 
@@ -312,7 +312,7 @@ The following External PostgreSQL upgrade steps are provided as a courtesy only.
 
    After performing the stepped upgrade, return here and continue with the next step below.
 
-1. [Download](https://downloads.chef.io/tools/infra-server) the desired version of Chef Infra Server.
+1. [Download](https://www.chef.io/downloads/tools/infra-server) the desired version of Chef Infra Server.
 
 1. Stop the Chef Infra Server:
 
@@ -542,7 +542,7 @@ To upgrade to Chef Infra Server on a tiered Chef Infra Server configuration, do 
     chef-server-ctl reconfigure
     ```
 
-3. Download the desired Chef Infra Server version from the [Chef Infra Server Downloads](https://downloads.chef.io/products/chef-server) page, then copy it to each server.
+3. Download the desired Chef Infra Server version from the [Chef Infra Server Downloads](https://www.chef.io/downloads/tools/infra-server) page, then copy it to each server.
 
 4. Stop all front end servers:
 
@@ -622,7 +622,7 @@ Chef Manage is a management console for data bags, attributes, run-lists, roles,
 
 Chef Infra Server 14 supports the Chef Manage add-on. This add-on is [deprecated]({{< relref "versions#deprecated-products-and-versions" >}}) and will reach [EOL]({{< relref "versions#end-of-life-eol-products" >}}) on December 31, 2022. After upgrading Chef Infra Server, reinstall the add-on and then reconfigure Chef Infra Server and the add-on.
 
-#### Use Downloads.chef.io
+#### Use Chef Downloads
 
 {{% ctl_chef_server_install_features_download %}}
 
