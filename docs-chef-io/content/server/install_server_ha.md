@@ -120,8 +120,8 @@ These instructions assume you are using the minimum versions:
 -   Chef Server : 12.5.0
 -   Chef Backend : 0.8.0
 
-Download [Chef Infra Server](https://downloads.chef.io/chef-server/) and
-[Chef Backend (chef-backend)](https://downloads.chef.io/chef-backend/)
+Download [Chef Infra Server](https://www.chef.io/downloads/tools/infra-server) and
+[Chef Backend (chef-backend)](https://www.chef.io/downloads/tools/backend)
 if you do not have them already.
 
 Before creating the backend HA cluster and building at least one Chef
@@ -149,7 +149,7 @@ different from any other back-end node.
 1.  Install the Chef Backend package on the first backend node **as root**.
 
     -   Download [Chef Backend
-        (chef-backend)](https://downloads.chef.io/chef-backend/)
+        (chef-backend)](https://www.chef.io/downloads/tools/backend)
     -   In Red Hat/CentOS: `yum install PATH_TO_RPM`
     -   In Debian/Ubuntu: `dpkg -i PATH_TO_DEB`
 
@@ -200,7 +200,7 @@ join nodes in parallel the cluster may fail to become available):
 1.  Install the Chef Backend package on the node.
 
     -   Download [Chef Backend
-        (chef-backend)](https://downloads.chef.io/chef-backend/)
+        (chef-backend)](https://www.chef.io/downloads/tools/backend)
     -   In Red Hat/CentOS: `yum install PATH_TO_RPM`
     -   In Debian/Ubuntu: `dpkg -i PATH_TO_DEB`
 
