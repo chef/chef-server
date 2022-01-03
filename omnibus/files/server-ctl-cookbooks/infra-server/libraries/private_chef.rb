@@ -40,6 +40,7 @@ module PrivateChef
 
   addons Mash.new
   elasticsearch Mash.new
+  opensearch Mash.new
   opscode_erchef Mash.new
   opscode_erchef['log_rotation'] ||= Mash.new
   oc_chef_authz Mash.new
@@ -208,6 +209,7 @@ module PrivateChef
         # configuration keys.
         'opscode_solr4',
         'elasticsearch',
+        'opensearch',
         'opscode_erchef',
         'oc_chef_authz',
         'folsom_graphite',
@@ -358,6 +360,7 @@ module PrivateChef
         { group: 'opscode_erchef', name: 'sql_password', length: 60 },
         { group: 'opscode_erchef', name: 'sql_ro_password', length: 60 },
         { group: 'opscode_erchef', name: 'stats_password', lendth: 100 },
+        { group: 'opscode_erchef', name: 'opensearch_password', length: 60 },
         { group: 'oc_bifrost', name: 'superuser_id', length: 32, frozen: true },
         { group: 'oc_bifrost', name: 'sql_password', length: 100 },
         { group: 'oc_bifrost', name: 'sql_ro_password', length: 100 },

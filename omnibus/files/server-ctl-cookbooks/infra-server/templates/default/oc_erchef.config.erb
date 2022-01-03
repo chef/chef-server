@@ -189,10 +189,10 @@
         {reindex_item_retries, <%= @reindex_item_retries -%>},
         {solr_elasticsearch_major_version, <%= @solr_elasticsearch_major_version %>},
         {search_auth_enabled, <%= node['private_chef']['opscode-erchef']['search_auth_enabled'] %>},
-        {search_auth_username, <%= node['private_chef']['opscode-erchef']['search_auth_username'] %>},
-        {search_auth_password, <%= node['private_chef']['opscode-erchef']['search_auth_password'] %>},
+        {search_auth_username, "<%= node['private_chef']['opscode-erchef']['search_auth_username'] %>"},
+        {search_auth_password, "<%= node['private_chef']['opscode-erchef']['search_auth_password'] %>"},
         {solr_service, [
-            {root_url, "<%= @helper.solr_url() %>"},
+            {root_url, "<%= @helper.search_engine_url() %>"},
             {timeout, <%= @solr_timeout %>},
             {init_count, <%= @solr_http_init_count %>},
             {max_count, <%= @solr_http_max_count %>},

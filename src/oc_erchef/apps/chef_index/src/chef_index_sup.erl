@@ -44,9 +44,9 @@ start_link() ->
 init([]) ->
     error_logger:info_msg("Starting chef_index_sup.~n", []),
     error_logger:info_msg("Creating HTTP pool for Search Index.~n"),
-    Provider = envy:get(chef_index, search_provider, solr, envy:one_of([solr, elasticsearch])),
+    Provider = envy:get(chef_index, search_provider, solr, envy:one_of([solr, elasticsearch, opensearch])),
     case Provider of
-        elasticsearch ->
+        Pro when Pro == elasticsearch; Pro == opensearch ->
             chef_elasticsearch:declare_metrics();
         _ -> ok
     end,

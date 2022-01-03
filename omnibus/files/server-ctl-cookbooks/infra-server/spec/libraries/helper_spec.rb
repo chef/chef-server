@@ -78,7 +78,7 @@ describe OmnibusHelper do
     end
   end
 
-  describe '#elastic_search_major_version' do
+  describe '#search_engine_major_version' do
     let(:external) { true }
     let(:external_url) { 'http://myserver:2000' }
     let(:provider) { 'elasticsearch' }
@@ -123,7 +123,7 @@ describe OmnibusHelper do
 
       it 'should return a default version 0' do
         helper = described_class.new(node)
-        expect(helper.elastic_search_major_version).to eq(0)
+        expect(helper.search_engine_major_version).to eq(0)
       end
     end
 
@@ -136,7 +136,7 @@ describe OmnibusHelper do
         expect(client).to receive(:get).with('').and_return(response)
 
         allow(helper).to receive(:sleep).and_return(0)
-        expect(helper.elastic_search_major_version).to eq(2)
+        expect(helper.search_engine_major_version).to eq(2)
       end
     end
 
@@ -166,7 +166,7 @@ describe OmnibusHelper do
         expect(Chef::HTTP).to receive(:new).with(external_url).exactly(5).times.and_return(client)
         expect(client).to receive(:get).with('').exactly(5).times.and_raise('Bad connection')
         allow(helper).to receive(:sleep).and_return(0)
-        expect { helper.elastic_search_major_version }.to raise_error(/Failed to connect/)
+        expect { helper.search_engine_major_version }.to raise_error(/Failed to connect/)
       end
     end
 
@@ -175,7 +175,7 @@ describe OmnibusHelper do
         helper = described_class.new(node)
         expect(Chef::HTTP).to receive(:new).with(external_url).and_return(client)
         expect(client).to receive(:get).with('').and_return(response)
-        expect(helper.elastic_search_major_version).to eq(2)
+        expect(helper.search_engine_major_version).to eq(2)
       end
     end
 
@@ -186,7 +186,7 @@ describe OmnibusHelper do
         helper = described_class.new(node)
         expect(Chef::HTTP).to receive(:new).with(external_url).and_return(client)
         expect(client).to receive(:get).with('').and_return(response)
-        expect(helper.elastic_search_major_version).to eq(5)
+        expect(helper.search_engine_major_version).to eq(5)
       end
     end
 
@@ -197,7 +197,7 @@ describe OmnibusHelper do
         helper = described_class.new(node)
         expect(Chef::HTTP).to receive(:new).with(external_url).and_return(client)
         expect(client).to receive(:get).with('').and_return(response)
-        expect(helper.elastic_search_major_version).to eq(6)
+        expect(helper.search_engine_major_version).to eq(6)
       end
     end
 
@@ -208,7 +208,7 @@ describe OmnibusHelper do
         helper = described_class.new(node)
         expect(Chef::HTTP).to receive(:new).with(external_url).and_return(client)
         expect(client).to receive(:get).with('').and_return(response)
-        expect(helper.elastic_search_major_version).to eq(7)
+        expect(helper.search_engine_major_version).to eq(7)
       end
     end
 
@@ -219,7 +219,7 @@ describe OmnibusHelper do
         helper = described_class.new(node)
         expect(Chef::HTTP).to receive(:new).with(external_url).and_return(client)
         expect(client).to receive(:get).with('').and_return(response)
-        expect { helper.elastic_search_major_version }.to raise_error(/Unsupported Elasticsearch version/)
+        expect { helper.search_engine_major_version }.to raise_error(/Unsupported Elasticsearch version/)
       end
     end
 
@@ -240,7 +240,7 @@ describe OmnibusHelper do
         helper = described_class.new(node)
         expect(Chef::HTTP).to receive(:new).with(external_url).and_return(client)
         expect(client).to receive(:get).with('').and_return(response)
-        expect { helper.elastic_search_major_version }.to raise_error(/Unable to parse elasticsearch response/)
+        expect { helper.search_engine_major_version }.to raise_error(/Unable to parse elasticsearch response/)
       end
     end
 
@@ -249,7 +249,7 @@ describe OmnibusHelper do
 
       it 'should return 0' do
         helper = described_class.new(node)
-        expect(helper.elastic_search_major_version).to eq(0)
+        expect(helper.search_engine_major_version).to eq(0)
       end
     end
 
@@ -260,7 +260,7 @@ describe OmnibusHelper do
 
       it 'should return a default version 0' do
         helper = described_class.new(node)
-        expect(helper.elastic_search_major_version).to eq(0)
+        expect(helper.search_engine_major_version).to eq(0)
       end
     end
   end

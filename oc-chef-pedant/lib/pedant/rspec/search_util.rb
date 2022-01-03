@@ -708,9 +708,11 @@ module Pedant
         # Chef Object type (in addition to filtering based on org).  We
         # don't have an easy way to access the org's guid in the tests, so
         # I'm not using that. In any event, the following query works.
+        auth = Base64.strict_encode64("admin:admin")
         url = "#{Pedant::Config.search_server}#{Pedant::Config.search_url_fmt}" % {:type => CGI.escape(type), :query => CGI.escape(query)}
         headers = {
-          "Accept" => "application/json"
+          "Accept" => "application/json",
+          "Authorization" => "Basic #{auth}"
         }
         sleep Pedant::Config.direct_solr_query_sleep_time
         r = RestClient.send :get, url, headers
@@ -736,9 +738,10 @@ module Pedant
         # time to clear the queue.  In a test scenario, this
         # should be enough of a wait.
         sleep Pedant::Config.direct_solr_query_sleep_time
+        auth = Base64.strict_encode64("admin:admin")
         url = "#{Pedant::Config.search_server}#{Pedant::Config.search_commit_url}"
         body = ''
-        headers = {}
+        headers = {Authorization: "Basic #{auth}"}
         RestClient.send :post, url, body, headers
       end
 
