@@ -253,6 +253,7 @@ default['private_chef']['opscode-erchef']['bulk_fetch_batch_size'] = '5'
 default['private_chef']['opscode-erchef']['udp_socket_pool_size'] = nil
 default['private_chef']['opscode-erchef']['sql_user'] = 'opscode_chef'
 default['private_chef']['opscode-erchef']['sql_ro_user'] = 'opscode_chef_ro'
+default['private_chef']['opscode-erchef']['opensearch_user'] = 'opscode_chef'
 # See default['private_chef']['postgresql']['db_connection_superuser'] for information
 default['private_chef']['opscode-erchef']['sql_connection_user'] = nil
 default['private_chef']['opscode-erchef']['enable_request_logging'] = true
