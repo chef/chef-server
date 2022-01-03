@@ -20,4 +20,6 @@ when 'solr'
   Chef::Log.warn('External Solr Support does not include configuring the Solr schema.')
 when 'elasticsearch'
   include_recipe 'infra-server::elasticsearch_index'
+when 'opensearch'
+  include_recipe 'infra-server::opensearch_index'
 end
