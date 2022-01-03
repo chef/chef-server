@@ -63,20 +63,23 @@ if [[ -f "/var/log/aws-signing-proxy/proxy.log" ]]; then
     tail -"$tail_lines" "/var/log/aws-signing-proxy/proxy.log" > "$tmpdir/var/log/aws-signing-proxy/proxy.log"
 fi
 
-# Gather some information from Elasticsearch, if it's available
-gather_es() {
-    curl -sS -X GET "http://localhost:$1/_cluster/health?pretty" > "$tmpdir/elasticsearch_cluster_health.txt"
-    curl -sS -X GET "http://localhost:$1/_cluster/state?pretty" > "$tmpdir/elasticsearch_cluster_state.txt"
-    curl -sS -X GET "http://localhost:$1/_cat/indices?v" > "$tmpdir/elasticsearch_cat_indices.txt"
-    curl -sS -X GET "http://localhost:$1/_cat/shards?h=index,shard,prirep,state,unassigned.reason&pretty" > "$tmpdir/elasticsearch_cat_shards.txt"
-    curl -sS -X GET "http://localhost:$1/_cluster/allocation/explain?pretty" > "$tmpdir/elasticsearch_cluster_shards_explain.txt"
+# Gather some information from OpenSearch, if it's available
+SEARCHUSR=$(chef-server-ctl show-config | grep 'search_auth_username' |awk '{printf substr($2, 2, length($2)-3)}')
+[[ -n $SEARCHUSR ]] && OPENSEARCHUSR=$SEARCHUSR || OPENSEARCHUSR="opensearch_user"
+OPENSEARCHPW=$(chef-server-ctl show-secret opscode_erchef search_auth_password)
+gather_opensearch() {
+    curl -sS -X GET "http://localhost:$1/_cluster/health?pretty" -u "$OPENSEARCHUSR:$OPENSEARCHPW" > "$tmpdir/opensearch_cluster_health.txt"
+    curl -sS -X GET "http://localhost:$1/_cluster/state?pretty" -u "$OPENSEARCHUSR:$OPENSEARCHPW" > "$tmpdir/opensearch_cluster_state.txt"
+    curl -sS -X GET "http://localhost:$1/_cat/indices?v" -u "$OPENSEARCHUSR:$OPENSEARCHPW" > "$tmpdir/opensearch_cat_indices.txt"
+    curl -sS -X GET "http://localhost:$1/_cat/shards?h=index,shard,prirep,state,unassigned.reason&pretty" -u "$OPENSEARCHUSR:$OPENSEARCHPW" > "$tmpdir/opensearch_cat_shards.txt"
+    curl -sS -X GET "http://localhost:$1/_cluster/allocation/explain?pretty" -u "$OPENSEARCHUSR:$OPENSEARCHPW" > "$tmpdir/opensearch_cluster_shards_explain.txt"
 }
-ES_9200="$(curl -s -XGET 'http://localhost:9200/' | grep 'for Search')"
-ES_10144="$(curl -s -XGET 'http://localhost:10144/' | grep 'for Search')"
+ES_9200="$(curl -s -XGET 'http://localhost:9200/' -u "$OPENSEARCHUSR:$OPENSEARCHPW" | grep 'opensearch')"
+ES_10144="$(curl -s -XGET 'http://localhost:10144/' -u "$OPENSEARCHUSR:$OPENSEARCHPW" | grep 'opensearch')"
 if [[ -n $ES_9200 ]]; then
-    gather_es 9200
+    gather_opensearch 9200
 elif [[ -n $ES_10144 ]]; then
-    gather_es 10144
+    gather_opensearch 10144
 fi
 
 chef-server-ctl status > "$tmpdir/chef-server-ctl"_status.txt

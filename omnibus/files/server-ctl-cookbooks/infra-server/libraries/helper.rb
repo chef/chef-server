@@ -27,6 +27,16 @@ class OmnibusHelper
     cmd.stdout
   end
 
+  def hash_password(password)
+    cmd = Mixlib::ShellOut.new("export JAVA_HOME=\"/opt/opscode/embedded/open-jre/\"; /opt/opscode/embedded/opensearch/plugins/opensearch-security/tools/hash.sh -p '#{password}'")
+    cmd.run_command
+    unless cmd.status.success?
+      raise 'Failed to generate apr1 password hash'
+    end
+
+    cmd.stdout.strip
+  end
+
   def self.is_ip?(addr)
     IPAddr.new addr
     true
@@ -93,10 +103,14 @@ class OmnibusHelper
     end
   end
 
+  def search_auth_password
+    node['private_chef']['opscode-erchef']['search_auth_password'] || PrivateChef.credentials.get('opscode_erchef', 'search_auth_password')
+  end
+
   def search_engine_auth_header
     if search_provider == 'opensearch'
       username = node['private_chef']['opscode-erchef']['search_auth_username']
-      password = node['private_chef']['opscode-erchef']['search_auth_password']
+      password = node['private_chef']['opscode-erchef']['search_auth_password'] || PrivateChef.credentials.get('opscode_erchef', 'search_auth_password')
       auth = Base64.strict_encode64("#{username}:#{password}")
       { Authorization: "Basic #{auth}" }
     else
