@@ -148,7 +148,11 @@ include_recipe 'infra-server::fix_permissions'
       action :disable
     end
   elsif node['private_chef'][service]['enable']
-    include_recipe "infra-server::#{service}"
+    if service == 'elasticsearch' && node['private_chef']['opscode-erchef']['search_provider'] == 'opensearch' && node['private_chef']['opensearch']['external']
+      include_recipe 'infra-server::opensearch-external'
+    else
+      include_recipe "infra-server::#{service}"
+    end
   else
     # bootstrap isn't a service, nothing to disable.
     next if service == 'bootstrap'

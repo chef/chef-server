@@ -41,7 +41,7 @@
           max_size :: non_neg_integer() | undefined,
           item_queue = [] :: [{{pid(), term()}, erlang:timestamp(), iolist()}],
           max_wait :: non_neg_integer() | undefined,
-          search_provider = solr :: solr | elasticsearch,
+          search_provider = solr :: solr | elasticsearch | opensearch,
           total_docs_queued = 0 :: integer(),
           total_docs_success = 0 :: integer(),
           avg_queue_latency = 0.0 :: float(),
@@ -80,7 +80,8 @@ wrap_solr(Docs) ->
 -spec wrap(iolist(), #chef_idx_batch_state{}) -> iolist().
 wrap(Docs, #chef_idx_batch_state{search_provider = solr}) ->
     wrap_solr(Docs);
-wrap(Docs, #chef_idx_batch_state{search_provider = elasticsearch}) ->
+wrap(Docs, #chef_idx_batch_state{search_provider = SearchPro})
+            when SearchPro == elasticsearch; SearchPro == opensearch ->
     Docs.
 
 -spec wrapper_size(#chef_idx_batch_state{}) -> non_neg_integer().
@@ -109,7 +110,7 @@ init([]) ->
             {stop, list_to_binary([<<"chef_index batch_max_size is set to ">>, integer_to_binary(MaxSize),
                                    <<". Please set to non-negative value, or set search_queue_mode to something besides batch.">>])};
         false ->
-            SearchProvider = envy:get(chef_index, search_provider, solr, envy:one_of([solr, elasticsearch])),
+            SearchProvider = envy:get(chef_index, search_provider, solr, envy:one_of([solr, elasticsearch, opensearch])),
             MaxWait = envy:get(chef_index, search_batch_max_wait, 10, non_neg_integer),
             WrapperSize = wrapper_size(#chef_idx_batch_state{search_provider=SearchProvider}),
             CurrentSize = 0,

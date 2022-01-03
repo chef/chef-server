@@ -18,7 +18,7 @@
 -record(chef_solr_query, {
           query_string :: string() | undefined,
           filter_query :: string() | undefined,
-          search_provider = solr :: 'solr' | 'elasticsearch',
+          search_provider = solr :: 'solr' | 'elasticsearch' | 'opensearch',
           start :: integer() | undefined,
           rows :: integer()  | undefined,
           sort :: string()   | undefined,

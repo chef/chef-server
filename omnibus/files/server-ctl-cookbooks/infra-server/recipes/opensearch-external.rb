@@ -14,8 +14,5 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-helper = OmnibusHelper.new(node)
-elasticsearch_index 'chef' do
-  server_url lazy { helper.search_engine_url }
-  index_definition lazy { helper.search_engine_index_definition }
-end
+
+include_recipe 'infra-server::opensearch_index'

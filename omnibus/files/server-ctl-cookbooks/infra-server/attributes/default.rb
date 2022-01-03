@@ -218,6 +218,20 @@ elasticsearch['heap_size'] = Elasticsearch.heap_size_default(node)
 elasticsearch['new_size'] = Elasticsearch.new_size_default(node)
 
 ####
+# Opensearch
+####
+opensearch = default['private_chef']['opensearch']
+
+opensearch['external'] = nil
+opensearch['external_url'] = nil
+opensearch['shard_count'] = 5
+opensearch['replica_count'] = 1
+# Tobe added in the internal opensearch changes
+# opensearch['vip'] = '54.183.208.113'
+# opensearch['port'] = 9200
+# opensearch['username'] = 'admin'
+
+####
 # Erlang Chef Server API
 ####
 default['private_chef']['opscode-erchef']['enable'] = true
@@ -318,9 +332,8 @@ default['private_chef']['opscode-erchef']['search_provider'] = 'elasticsearch'
 default['private_chef']['opscode-erchef']['search_queue_mode'] = 'batch'
 default['private_chef']['opscode-erchef']['search_batch_max_size'] = '5000000'
 default['private_chef']['opscode-erchef']['search_batch_max_wait'] = '10'
-default['private_chef']['opscode-erchef']['search_auth_enabled'] = false
-default['private_chef']['opscode-erchef']['search_auth_username'] = 'admin'
-default['private_chef']['opscode-erchef']['search_auth_password'] = 'admin'
+# default['private_chef']['opscode-erchef']['search_auth_username'] = "admin"
+# default['private_chef']['opscode-erchef']['search_auth_password'] = "admin"
 # solr_service configuration for erchef. These are used to configure an opscoderl_httpc pool
 # of HTTP connecton workers.
 default['private_chef']['opscode-erchef']['solr_timeout'] = 30000

@@ -59,7 +59,10 @@ template pedant_config do
   variables({
     api_url: node['private_chef']['oc-chef-pedant']['chef_server'] || OmnibusHelper.new(node).nginx_ssl_url,
     base_resource_url: node['private_chef']['opscode-erchef']['base_resource_url'],
-    solr_url: OmnibusHelper.new(node).solr_url,
+    search_engine_url: OmnibusHelper.new(node).search_engine_url,
+    search_provider: node['private_chef']['opscode-erchef']['search_provider'],
+    search_auth_username: node['private_chef']['opscode-erchef']['search_auth_username'],
+    search_auth_password: node['private_chef']['opscode-erchef']['search_auth_password'],
     opscode_account_internal_url: node['private_chef']['lb_internal']['vip'],
     opscode_account_internal_port: node['private_chef']['lb_internal']['account_port'],
     erchef_internal_vip: node['private_chef']['opscode-erchef']['vip'],

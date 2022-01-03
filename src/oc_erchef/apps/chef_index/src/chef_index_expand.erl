@@ -86,7 +86,7 @@ update_payload(ToAdd, ToDel, solr) ->
      ToDel,
      add_block(ToAdd),
      ?UPDATE_E];
-update_payload(ToAdd, ToDel, elasticsearch) ->
+update_payload(ToAdd, ToDel, Provider) when Provider == elasticsearch; Provider == opensearch ->
     [ToAdd, ToDel].
 
 add_block([]) ->
@@ -129,30 +129,35 @@ make_doc_for_del(solr, Id) ->
     [<<"<delete><id>">>,
      Id,
      <<"</id></delete>">>];
-make_doc_for_del(elasticsearch, Id) ->
-    QueryStr = case envy:get(chef_index, solr_elasticsearch_major_version, 2, non_neg_integer) of
-                    7 ->
+make_doc_for_del(Provider, Id) ->
+    QueryStr = case {Provider, envy:get(chef_index, solr_elasticsearch_major_version, 2, non_neg_integer)} of
+                    {opensearch, 1} ->
+                        <<"{\"delete\":{\"_index\":\"chef\",\"_id\":\"">>;
+                    {_, 7} ->
                         <<"{\"delete\":{\"_index\":\"chef\",\"_id\":\"">>;
                     _ ->
                         <<"{\"delete\":{\"_index\":\"chef\",\"_type\":\"object\",\"_id\":\"">>
                end,
     [QueryStr, Id, <<"\" }}\n">>].
 
-make_doc_for_add(Command = #chef_idx_expand_doc{id = Id, type=Type, search_provider=elasticsearch}) ->
+make_doc_for_add(Command = #chef_idx_expand_doc{id = Id, type=Type, search_provider=Provider})
+        when Provider == elasticsearch; Provider == opensearch ->
     MetaFieldsPL = meta_fields(Command),
     IndexEjson = [{<<"_index">>, <<"chef">>},
                   {<<"_id">>, Id}],
     IndexEjson1 =
-    case envy:get(chef_index, solr_elasticsearch_major_version, 2, non_neg_integer) of
-        7 ->
+    case {Provider, envy:get(chef_index, solr_elasticsearch_major_version, 2, non_neg_integer)} of
+        {opensearch, 1} ->
+            IndexEjson;
+        {_, 7} ->
             IndexEjson;
         _ ->
             [{<<"_type">>, <<"object">>}| IndexEjson]
     end,
     [jiffy:encode({[{<<"index">>, {IndexEjson1}}]}),
      <<"\n">>,
-     jiffy:encode({[{<<"content">>, iolist_to_binary(make_content(elasticsearch, Command, MetaFieldsPL))} |
-                    maybe_data_bag_field(elasticsearch, Type, MetaFieldsPL) ]}),
+     jiffy:encode({[{<<"content">>, iolist_to_binary(make_content(Provider, Command, MetaFieldsPL))} |
+                    maybe_data_bag_field(Provider, Type, MetaFieldsPL) ]}),
      <<"\n">>];
 make_doc_for_add(Command = #chef_idx_expand_doc{type=Type, search_provider=Provider}) ->
     MetaFieldsPL = meta_fields(Command),

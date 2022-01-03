@@ -144,10 +144,14 @@ class PreflightChecks
       PostgresqlPreflightValidator.new(node).run!
     end
     AuthPreflightValidator.new(node).run!
-    IndexingPreflightValidator.new(node).run!
     SslPreflightValidator.new(node).run!
     BookshelfPreflightValidator.new(node).run!
     RequiredRecipePreflightValidator.new(node).run!
+    if PrivateChef['opscode_erchef']['search_provider'] == 'opensearch'
+      OpensearchPreflightValidator.new(node).run!
+    else
+      IndexingPreflightValidator.new(node).run!
+    end
   rescue PreflightValidationFailed => e
     # use of exit! prevents exit handlers from running, ensuring the last thing
     # the customer sees is the descriptive error we've provided.

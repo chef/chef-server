@@ -369,6 +369,53 @@ es_api_test_() ->
      end]
     }.
 
+op_api_test_() ->
+    MinItem = {[{<<"key1">>, <<"value1">>},
+                {<<"key2">>, <<"value-2">>}]},
+    JsonContentType = [{"Authorization","Basic YWRtaW46YWRtaW4="},{"Content-Type", "application/json"}],
+    {foreach,
+     fun() ->
+             application:set_env(chef_index, search_provider, opensearch),
+             chef_index_expand:declare_metrics(),
+             chef_opensearch:declare_metrics()
+     end,
+     fun(_) ->
+             meck:unload()
+     end,
+     [fun(_) ->
+              [{"send_item",
+                fun() ->
+                        application:set_env(chef_index, solr_elasticsearch_major_version, 1),
+                        chef_index_test_utils:set_provider(opensearch),
+                        Expect = os_send_item_json_expect(),
+                        meck:expect(chef_index_http, post,
+                                    fun("/_bulk", Doc, Headers) ->
+                                            ?assertEqual(JsonContentType, Headers),
+                                            ?assertEqual(Expect, Doc),
+                                            ok
+                                    end),
+                        AddDoc = chef_index_expand:doc_for_index(role, <<"a2">>, <<"db2">>, MinItem),
+                        ?assertEqual(ok, chef_index_expand:send_item(AddDoc))
+                end},
+               {"send_delete",
+                fun() ->
+                        application:set_env(chef_index, solr_elasticsearch_major_version, 1),
+                        chef_index_test_utils:set_provider(opensearch),
+                        Expect = os_send_delete_json_expect(),
+                        meck:expect(chef_index_http, post,
+                                    fun("/_bulk", Doc, Headers) ->
+                                            ?assertEqual(JsonContentType, Headers),
+                                            ?assertEqual(Expect, Doc),
+                                            ok
+                                    end),
+                        DelDoc = chef_index_expand:doc_for_delete(role, <<"a2">>, <<"db2">>),
+                        ?assertEqual(ok, chef_index_expand:send_delete(DelDoc))
+                end
+               }
+              ]
+     end]
+    }.
+
 send_delete_xml_expect() ->
     <<"<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
       "<update>"
@@ -394,12 +441,6 @@ send_item_xml_expect() ->
       "</add>"
       "</update>">>.
 
-es_send_delete_json_expect() ->
-    <<"{\"delete\":{\"_index\":\"chef\",\"_type\":\"object\",\"_id\":\"a5\" }}\n">>.
-
-es_send_delete_json_expect(es7) ->
-    <<"{\"delete\":{\"_index\":\"chef\",\"_id\":\"a2\" }}\n">>.
-
 es_send_item_json_expect() ->
     <<"{\"index\":{\"_type\":\"object\",\"_index\":\"chef\",\"_id\":\"a1\"}}\n"
       "{\"content\":\"X_CHEF_database_CHEF_X__=__chef_db1 X_CHEF_id_CHEF_X__=__a1 X_CHEF_type_CHEF_X__=__role key1__=__value1 key2__=__value-2 \","
@@ -409,3 +450,19 @@ es_send_item_json_expect(es7) ->
     <<"{\"index\":{\"_index\":\"chef\",\"_id\":\"a2\"}}\n"
       "{\"content\":\"X_CHEF_database_CHEF_X__=__chef_db2 X_CHEF_id_CHEF_X__=__a2 X_CHEF_type_CHEF_X__=__role key1__=__value1 key2__=__value-2 \","
       "\"X_CHEF_id_CHEF_X\":\"a2\",\"X_CHEF_database_CHEF_X\":\"chef_db2\",\"X_CHEF_type_CHEF_X\":\"role\"}\n">>.
+
+os_send_item_json_expect() ->
+    <<"{\"index\":{\"_index\":\"chef\",\"_id\":\"a2\"}}\n"
+      "{\"content\":\"X_CHEF_database_CHEF_X__=__chef_db2 X_CHEF_id_CHEF_X__=__a2 X_CHEF_type_CHEF_X__=__role key1__=__value1 key2__=__value-2 \","
+      "\"X_CHEF_id_CHEF_X\":\"a2\",\"X_CHEF_database_CHEF_X\":\"chef_db2\",\"X_CHEF_type_CHEF_X\":\"role\"}\n">>.
+
+
+
+es_send_delete_json_expect() ->
+    <<"{\"delete\":{\"_index\":\"chef\",\"_type\":\"object\",\"_id\":\"a5\" }}\n">>.
+
+es_send_delete_json_expect(es7) ->
+    <<"{\"delete\":{\"_index\":\"chef\",\"_id\":\"a2\" }}\n">>.
+
+os_send_delete_json_expect() ->
+    <<"{\"delete\":{\"_index\":\"chef\",\"_id\":\"a2\" }}\n">>.

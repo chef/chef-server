@@ -55,21 +55,70 @@ class OmnibusHelper
     normalize_host(node['private_chef'][service]['vip'])
   end
 
-  def elastic_search_major_version
+  def search_provider
+    search_provider = node['private_chef']['opscode-erchef']['search_provider']
+    if search_provider == 'solr'
+      'opscode-solr4'
+    else
+      search_provider
+    end
+  end
+
+  def external_search_engine?
+    if node['private_chef'][search_provider].key?('external')
+      node['private_chef'][search_provider]['external']
+    elsif search_provider == 'elasticsearch' && node['private_chef']['opscode-solr4'].key?('external')
+      # Ideally the external elasticsearch url should be in the node['private_chef']['elasticsearch']['external']
+      # variable but, there was a support to give the external elasticsearch url in the
+      # node['private_chef']['opscode-solr4']['external_url'] variable. We still need to support this.
+      node['private_chef']['opscode-solr4']['external']
+    else
+      false
+    end
+  end
+
+  def search_engine_url
+    if external_search_engine?
+      if search_provider == 'elasticsearch'
+        # Ideally the external elasticsearch url should be in the node['private_chef']['elasticsearch']['external']
+        # variable but, there was a support to give the external elasticsearch url in the
+        # node['private_chef']['opscode-solr4']['external_url'] variable. We still need to support this.
+        node['private_chef']['elasticsearch']['external_url'] || node['private_chef']['opscode-solr4']['external_url']
+      else
+        node['private_chef'][search_provider]['external_url']
+      end
+    elsif search_provider != 'opscode-solr4'
+      # internal solr is not supported
+      "http://#{vip_for_uri(search_provider)}:#{node['private_chef'][search_provider]['port']}"
+    end
+  end
+
+  def search_engine_auth_header
+    if search_provider == 'opensearch'
+      username = node['private_chef']['opscode-erchef']['search_auth_username']
+      password = node['private_chef']['opscode-erchef']['search_auth_password']
+      auth = Base64.strict_encode64("#{username}:#{password}")
+      { Authorization: "Basic #{auth}" }
+    else
+      {}
+    end
+  end
+
+  def search_engine_major_version
     max_requests = 5
     current_request = 1
 
-    if node['private_chef']['opscode-erchef']['search_provider'] == 'elasticsearch'
+    if search_provider != 'opscode-solr4'
       begin
-        client = Chef::HTTP.new(solr_url)
-        response = client.get('')
+        client = Chef::HTTP.new(search_engine_url)
+        response = client.get('', search_engine_auth_header)
       rescue => e
         # Perform a blind rescue because Net:HTTP throws a variety of exceptions - some of which are platform specific.
         if current_request == max_requests
-          raise "Failed to connect to elasticsearch service at #{solr_url}: #{e}"
+          raise "Failed to connect to #{search_provider} service at #{search_engine_url}: #{e}"
         else
           # Chef HTTP logs the details in the debug log.
-          Chef::Log.error "Failed to connect to elasticsearch service #{current_request}/#{max_requests}. Retrying."
+          Chef::Log.error "Failed to connect to #{search_provider} service #{current_request}/#{max_requests}. Retrying."
           current_request += 1
           sleep(current_request * 2) # Exponential back-off.
           retry
@@ -79,25 +128,82 @@ class OmnibusHelper
         version = JSON.parse(response)['version']['number'].split('.').first.to_i
       rescue StandardError => e
         # Decorate any JSON parsing exception or numeric exceptions when accessing and parsing the version field.
-        raise "Unable to parse elasticsearch response #{e}"
+        raise "Unable to parse #{search_provider} response #{e}"
       end
-      raise "Unsupported Elasticsearch version of #{version}. There is currently support for the major versions of 2, 5, 6 and 7." unless [2, 5, 6, 7].include?(version)
+      if (search_provider == 'elasticsearch') && ![2, 5, 6, 7].include?(version)
+        raise "Unsupported Elasticsearch version of #{version}. There is currently support for the major versions of 2, 5, 6 and 7."
+      end
+      if (search_provider == 'opensearch') && ![1].include?(version)
+        raise "Unsupported Opensearch version of #{version}. There is currently support for the major versions of 1."
+      end
       version
     else
-      # Elasticsearch is disabled - this configuration setting should never be used in erlang.
+      # opscode-solr4 is enabled - this configuration setting should never be used in erlang.
       0
     end
   end
 
-  def es_index_definition
-    es_version = elastic_search_major_version
-    if elastic_search_major_version == 7
-      es_7_index
-    elsif elastic_search_major_version == 6
-      es_6_index
-    elsif [2, 5].include?(es_version)
-      es_5_or_2_index
+  def search_engine_index_definition
+    if (search_provider == 'opensearch') && (search_engine_major_version == 1)
+      os_1_index
+    elsif search_provider == 'elasticsearch'
+      if search_engine_major_version == 7
+        es_7_index
+      elsif search_engine_major_version == 6
+        es_6_index
+      elsif [2, 5].include?(search_engine_major_version)
+        es_5_or_2_index
+      end
     end
+  end
+
+  def os_1_index
+    {
+      'settings': {
+        'analysis': {
+          'analyzer': {
+            'default': {
+              'type': 'whitespace',
+            },
+          },
+        },
+        'number_of_shards':
+          node['private_chef']['opensearch']['shard_count'],
+        'number_of_replicas':
+          node['private_chef']['opensearch']['replica_count'],
+      },
+      'mappings': {
+        '_source': {
+          'enabled': false,
+        },
+        'properties': {
+          'X_CHEF_database_CHEF_X': {
+            'type': 'keyword',
+            'index': true,
+            'norms': false,
+          },
+          'X_CHEF_type_CHEF_X': {
+            'type': 'keyword',
+            'index': true,
+            'norms': false,
+          },
+          'X_CHEF_id_CHEF_X': {
+            'type': 'keyword',
+            'index': true,
+            'norms': false,
+          },
+          'data_bag': {
+            'type': 'keyword',
+            'index': true,
+            'norms': false,
+          },
+          'content': {
+            'type': 'text',
+            'index': true,
+          },
+        },
+      },
+    }
   end
 
   def es_7_index
@@ -257,27 +363,10 @@ class OmnibusHelper
     }
   end
 
-  def external_elasticsearch?
-    if node['private_chef']['elasticsearch'].key?('external')
-      node['private_chef']['elasticsearch']['external']
-    elsif node['private_chef']['opscode-solr4'].key?('external')
-      node['private_chef']['opscode-solr4']['external']
-    else
-      false
-    end
-  end
-
-  def solr_url
-    if external_elasticsearch?
-      node['private_chef']['elasticsearch']['external_url'] || node['private_chef']['opscode-solr4']['external_url']
-    else
-      "http://#{vip_for_uri('elasticsearch')}:#{node['private_chef']['elasticsearch']['port']}"
-    end
-  end
-
   # Returns scheme://host:port without any path
+  # this method is not used anywhere, should we remove this?
   def solr_root
-    url = URI.parse(solr_url)
+    url = URI.parse(search_engine_url)
     host = url.scheme + '://' + url.host
     if url.port
       host += ':' + url.port.to_s

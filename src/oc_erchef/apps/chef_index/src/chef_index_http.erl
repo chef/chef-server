@@ -117,11 +117,12 @@ get_pool_configs() ->
     [{?MODULE, Config}].
 
 get_headers() ->
-    case envy:get(chef_index, search_auth_enabled, false, boolean) of
-        true ->
-            User = envy:get(chef_index, search_auth_username, "admin", boolean),
-            Pass = envy:get(chef_index, search_auth_password, "admin", boolean),
-            Encoded = base64:encode_to_string(lists:append([User,":",Pass])),
+    SearchProvider = envy:get(chef_index, search_provider, solr, envy:one_of([solr, elasticsearch, opensearch])),
+    case SearchProvider of
+        opensearch ->
+            User = envy:get(chef_index, search_auth_username, "admin", string),
+            Pass = envy:get(chef_index, search_auth_password, "admin", string),
+            Encoded = base64:encode_to_string(lists:append([User, ":" ,Pass])),
             [{"Authorization","Basic " ++ Encoded}, {"Content-Type", "application/json"}];
         _ ->
             [{"Content-Type", "application/json"}]
