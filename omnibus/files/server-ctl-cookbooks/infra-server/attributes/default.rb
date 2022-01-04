@@ -220,6 +220,10 @@ elasticsearch['new_size'] = Elasticsearch.new_size_default(node)
 ####
 # Opensearch
 ####
+
+var_base = '/var/opt/opscode'
+log_base = '/var/log/opscode'
+
 opensearch = default['private_chef']['opensearch']
 
 opensearch['enable'] = true
@@ -229,6 +233,29 @@ opensearch['port'] = 9200
 #opensearch['username'] = 'admin'
 opensearch['shard_count'] = 5
 opensearch['replica_count'] = 1
+opensearch['jvm_opts'] = []
+opensearch['heap_size'] = Elasticsearch.heap_size_default(node)
+opensearch['new_size'] = Elasticsearch.new_size_default(node)
+
+
+
+opensearch['external_url'] = nil
+opensearch['username'] = 'admin'
+
+opensearch['enable'] = true
+opensearch['dir'] = "#{var_base}/elasticsearch"
+opensearch['data_dir'] = "#{var_base}/elasticsearch/data"
+opensearch['plugins_directory'] = "#{var_base}/elasticsearch/plugins"
+opensearch['scripts_directory'] = "#{var_base}/elasticsearch/scripts"
+opensearch['temp_directory'] = "#{var_base}/elasticsearch/tmp"
+opensearch['log_directory'] = "#{log_base}/elasticsearch"
+opensearch['log_rotation']['file_maxbytes'] = 104857600
+opensearch['log_rotation']['num_to_keep'] = 10
+opensearch['vip'] = '127.0.0.1'
+opensearch['listen'] = '127.0.0.1'
+opensearch['port'] = 9200
+opensearch['enable_gc_log'] = false
+opensearch['initial_cluster_join_timeout'] = 90
 
 
 

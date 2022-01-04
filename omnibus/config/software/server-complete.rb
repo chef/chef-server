@@ -34,6 +34,7 @@ dependency "postgresql13"
 dependency "redis" # dynamic routing controls
 dependency "haproxy"
 dependency "elasticsearch" # used by search
+dependency "opensearch" # used by search
 
 # moved earlier because it is external to this repo and pinned, so should change infrequently
 dependency "chef" # for embedded chef-client -z runs (built from main - build last)

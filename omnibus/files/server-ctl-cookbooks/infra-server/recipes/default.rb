@@ -114,12 +114,13 @@ include_recipe 'infra-server::sysctl-updates'
 if node['private_chef']['use_chef_backend']
   # Ensure internal elasticsearch is not enabled
   # if we are in the chef_backend configuration
-  node.override['private-chef']['elasticsearch']['enable'] = false
+  node.override['private-chef']['elasticsearch']['enable'] = false # need to switch to opensearch
   include_recipe 'infra-server::haproxy'
 end
 
 include_recipe 'infra-server::fix_permissions'
 
+# need switch elasticsearch with opensearch
 # Configure Services
 %w(
   postgresql

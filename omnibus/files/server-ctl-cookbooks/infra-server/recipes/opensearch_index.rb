@@ -15,6 +15,14 @@
 # limitations under the License.
 #
 
+# instead of the init in the resource/opensearch_index.rb,
+# can you do the following?
+# ruby_block 'create erchef user' do
+#   block do
+#     create_opensearch_user
+#   end
+# end
+
 helper = OmnibusHelper.new(node)
 opensearch_index 'chef' do
   server_url lazy { helper.search_engine_url }
