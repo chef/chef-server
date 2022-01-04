@@ -16,12 +16,12 @@ PATH
       rest-client (>= 1.8, < 2.2)
       rspec (~> 2.11.0)
       rspec-rerun (= 0.3.1)
-      rspec_junit_formatter (>= 0.1.1, < 0.5.0)
+      rspec_junit_formatter (>= 0.1.1, < 0.6.0)
 
 GEM
   remote: https://rubygems.org/
   specs:
-    activesupport (6.1.4.1)
+    activesupport (6.1.4.4)
       concurrent-ruby (~> 1.0, >= 1.0.2)
       i18n (>= 1.6, < 2)
       minitest (>= 5.1)
@@ -35,12 +35,12 @@ GEM
     http-accept (1.7.0)
     http-cookie (1.0.4)
       domain_name (~> 0.5)
-    i18n (1.8.10)
+    i18n (1.8.11)
       concurrent-ruby (~> 1.0)
-    mime-types (3.3.1)
+    mime-types (3.4.1)
       mime-types-data (~> 3.2015)
-    mime-types-data (3.2021.0225)
-    minitest (5.14.4)
+    mime-types-data (3.2021.1115)
+    minitest (5.15.0)
     mixlib-config (3.0.9)
       tomlrb
     net-http-spy (0.2.1)
@@ -61,15 +61,15 @@ GEM
     rspec-mocks (2.11.3)
     rspec-rerun (0.3.1)
       rspec
-    rspec_junit_formatter (0.4.1)
+    rspec_junit_formatter (0.5.0)
       rspec-core (>= 2, < 4, != 2.12.0)
     tomlrb (2.0.1)
     tzinfo (2.0.4)
       concurrent-ruby (~> 1.0)
     unf (0.1.4)
       unf_ext
-    unf_ext (0.0.7.7)
-    zeitwerk (2.4.2)
+    unf_ext (0.0.8)
+    zeitwerk (2.5.3)
 
 PLATFORMS
   ruby
