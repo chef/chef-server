@@ -27,13 +27,8 @@ property :opensearch_user, String
 
 property :search_engine_url, String
 
-action :init do
-  converge_by "Creating new user for erchef" do
-    create_opensearch_user
-  end
-end
-
 action :create do
+  create_opensearch_user
   unless retry_index_exists?(4)
     converge_by "Creating opensearch index #{new_resource.index_name}" do
       search_engine_server.put(new_resource.index_name, new_resource.index_definition, search_engine_auth_header)
@@ -107,8 +102,7 @@ action_class do
   end
 
   def search_engine_auth_header
-    password = PrivateChef.credentials.get('opscode_erchef', 'opensearch_password')
-    auth = Base64.strict_encode64("#{new_resource.opensearch_user}:#{password}")
+    auth = Base64.strict_encode64("admin:admin")
     {Authorization: "Basic #{auth}"}
   end
 end

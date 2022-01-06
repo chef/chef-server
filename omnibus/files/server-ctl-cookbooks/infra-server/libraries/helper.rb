@@ -68,6 +68,11 @@ class OmnibusHelper
     end
   end
 
+  def opensearch_password
+    auth = Base64.strict_encode64("admin:admin")
+    {Authorization: "Basic #{auth}"}
+  end
+
   def search_engine_major_version
     max_requests = 5
     current_request = 1
@@ -90,6 +95,7 @@ class OmnibusHelper
       end
       begin
         version = JSON.parse(response)['version']['number'].split('.').first.to_i
+
       rescue StandardError => e
         # Decorate any JSON parsing exception or numeric exceptions when accessing and parsing the version field.
         raise "Unable to parse #{search_provider} response #{e}"
