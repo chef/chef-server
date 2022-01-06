@@ -71,7 +71,7 @@ claim_replies_retry_when_another_pid_has_claimed_first_test_() ->
    fun() ->
        spawn(fun() -> chef_cbv_cache:claim(other_key) end),
        timer:sleep(100), % Give the claim time to go through
-       ?assertEqual(retry, chef_cbv_cache:claim(other_key))
+       ?assertEqual({error, retry}, chef_cbv_cache:claim(other_key))
    end
   }.
 
@@ -180,7 +180,7 @@ get_returns_retry_when_another_proc_has_invoked_claim_test_() ->
                          timer:sleep(200)
              end),
        timer:sleep(100),
-       ?assertEqual(retry, chef_cbv_cache:get(reserved_key))
+       ?assertEqual({error, retry}, chef_cbv_cache:get(reserved_key))
    end
   }.
 get_returns_undefined_when_another_proc_has_invoked_claim_and_died_test_() ->

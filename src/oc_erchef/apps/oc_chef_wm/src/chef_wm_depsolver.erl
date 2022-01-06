@@ -307,7 +307,7 @@ make_json_list(_CookbookVersions, _URI, _ApiVersion, Hash, ?CACHE_MAX_RETRIES) -
     {error, busy};
 make_json_list(CookbookVersions, URI, ApiVersion, Hash, NumAttempts) ->
     case chef_cbv_cache:get(Hash) of
-        retry ->
+        {error, retry} ->
             % Someone else is calculating this, pause to let them finish and try again
             timer:sleep(?CACHE_RETRY_INTERVAL),
             make_json_list(CookbookVersions, URI, ApiVersion, Hash, NumAttempts + 1);
@@ -327,12 +327,12 @@ make_json_list(CookbookVersions, URI, ApiVersion, Hash, NumAttempts) ->
                      },
                     chef_cbv_cache:put(Hash, Result),
                     Result;
-                retry ->
+                {error, retry} ->
                     % Someone snuck in and claimed it at around the same time as us. They got
                     % there first, so we'll wait and retry the get.
                     timer:sleep(?CACHE_RETRY_INTERVAL),
                     make_json_list(CookbookVersions, URI, ApiVersion, Hash, NumAttempts + 1);
-                busy ->
+                {error, busy} ->
                     % cache service is overloaded, we're done here.
                     {error, busy}
             end;

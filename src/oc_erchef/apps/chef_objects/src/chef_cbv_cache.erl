@@ -64,9 +64,10 @@ start_link() ->
 %% @doc this function retrieves a stored value from the cache.
 %% If the value is missing, or the cache is disabled, it will return undefined.
 %% If another caller has claimed intent to populate the key, this will return
-%% 'retry' indicating that the caller should try again after a brief delay.
-%% If it returns 'busy' the process is not available to service the request, and
+%% '{error, retry}' indicating that the caller should try again after a brief delay.
+%% If it returns '{error, busy}' the process is not available to service the request, and
 %% the caller should fail without retrying.
+%%
 %% Returns undefined if the cache is disabled.
 %%
 %% Future Improvements:
@@ -83,8 +84,8 @@ start_link() ->
 %%  Under high load, there could be multiple 'caller a' behaviors in this scenario.
 %%
 %%  We can prevent this by having `claim` check for an existing entry in the cache in addition to
-%%  an existing claim. If an entry is found, it will return `retry` just as if a claim were present;
-%%  in the scenario above 'Caller A' would get `retry` in response to `claim` and would
+%%  an existing claim. If an entry is found, it will return `{error, retry}` just as if a claim were present;
+%%  in the scenario above 'Caller A' would get `{error, retry}` in response to `claim` and would
 %%  retry normally, getting the cached result in the next attempt.
 %%
 %%  Testing under heavy load has shown that the current solution performs very well as-is,
@@ -92,7 +93,7 @@ start_link() ->
 %%  These changes only make sense if we hit new usage patterns that overwhelm the
 %%  cbv_cache message queue on a regular basis.
 %%
--spec get(any()) -> retry | busy | undefined | term().
+-spec get(any()) -> {error, retry|busy} | undefined | term().
 get(Key) ->
     send_if_available({get, Key}).
 
@@ -100,10 +101,10 @@ get(Key) ->
 %% When the claim is accepted, returns 'ok'.
 %% When another process has already claimed intent, this returns 'retry' indicating
 %% that the caller should retry the original 'get' request after a brief delay.
-%% If it returns 'busy' the process is not available to service the request, and
+%% If it returns '{error, busy}' the process is not available to service the request, and
 %% the caller should fail without retrying.
 %% Returns undefined if the cache is disabled.
--spec claim(any()) -> ok | retry | busy | undefined.
+-spec claim(any()) -> ok | {error, retry|busy} | undefined.
 claim(Key) ->
     send_if_available({claim, Key}).
 
@@ -113,7 +114,7 @@ claim(Key) ->
 %% This call is not protected with the breaker - this function is only to be called
 %% after a successful 'claim', and we want to prioritize putting the claim even if
 %% it puts us past the queue limit, since that is likely to free other processes from
-%% polling against a 'retry'.
+%% polling against a '{error, retry}'.
 %% If the caller has not first invoked claim/1, this will return {error, noclaim}.
 %% If another process has invoked claim/1, this will return {error, already_claimed}.
 %% returns 'ok' when the value is stored successfully
@@ -130,13 +131,13 @@ enabled() ->
     envy:get(chef_objects, cbv_cache_enabled, false, boolean).
 
 %% Internal function that checks in with the process message queue for chef_cbv_cache intermittently
-%% and tracks whether its mailbox has grown to large. If that happens, response with 'busy' instead
+%% and tracks whether its mailbox has grown to large. If that happens, response with '{error, busy}' instead
 %% of sending the request through.
 send_if_available(Msg) ->
     case enabled() of
         true ->
             case breaker_tripped() of
-                true -> busy;
+                true -> {error, busy};
                 false -> gen_server:call(?SERVER, Msg)
             end;
         false ->
@@ -164,7 +165,7 @@ handle_call({get, Key}, _From, #state{tid = Tid, claims = Claims} = State) ->
             end;
         {Pid, Claims1} ->
             case is_process_alive(Pid) of
-                true -> {reply, retry, State};
+                true -> {reply, {error, retry}, State};
                 false ->
                     % If the original claiming process has died, it can't complete its
                     % claim.
@@ -182,7 +183,7 @@ handle_call({claim, Key}, {From, _Tag}, #state{claims = Claims} = State) ->
             % This caller has already claimed it, that's fine..
             {reply, ok, State};
         {_OtherPid, _Claims1} -> % Someone has already claimed it, so caller should retry the GET
-            {reply, retry, State}
+            {reply, {error, retry}, State}
     end;
 handle_call({put, Key, Value}, { From, _Tag }, #state{tid = Tid, ttl = TTL, claims = Claims} = State) ->
     case dict:take(Key, Claims) of
