@@ -103,7 +103,7 @@ put_does_not_return_busy_when_cache_queue_limit_exceeded_test_() ->
        timer:sleep(100), % QUEUE_LEN_REFRESH_INTERVAL
 
        % verify that rquests that use the breaker are failing
-       ?assertEqual(busy, chef_cbv_cache:get(my_key)),
+       ?assertEqual({error, busy}, chef_cbv_cache:get(my_key)),
 
        % Let it start processing the junk
        erlang:resume_process(Pid),
@@ -135,8 +135,8 @@ get_and_claim_return_busy_when_cache_queue_limit_exceeded_test_() ->
        timer:sleep(100), % QUEUE_LEN_REFRESH_INTERVAL
 
        % Any calls should be stopped before a message is sent to chef_cbv_cache
-       ?assertEqual(busy, chef_cbv_cache:get(anything)),
-       ?assertEqual(busy, chef_cbv_cache:claim(anything)),
+       ?assertEqual({error, busy}, chef_cbv_cache:get(anything)),
+       ?assertEqual({error, busy}, chef_cbv_cache:claim(anything)),
        erlang:resume_process(Pid)
    end
   }.

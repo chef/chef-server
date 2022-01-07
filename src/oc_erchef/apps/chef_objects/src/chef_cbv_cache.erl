@@ -131,7 +131,7 @@ enabled() ->
     envy:get(chef_objects, cbv_cache_enabled, false, boolean).
 
 %% Internal function that checks in with the process message queue for chef_cbv_cache intermittently
-%% and tracks whether its mailbox has grown to large. If that happens, response with '{error, busy}' instead
+%% and tracks whether its mailbox has grown too large. If that happens, response with '{error, busy}' instead
 %% of sending the request through.
 send_if_available(Msg) ->
     case enabled() of
