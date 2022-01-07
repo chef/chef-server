@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.11.41 -->
-## [14.11.41](https://github.com/chef/chef-server/tree/14.11.41) (2022-01-07)
+<!-- latest_release 14.11.42 -->
+## [14.11.42](https://github.com/chef/chef-server/tree/14.11.42) (2022-01-07)
 
 #### Merged Pull Requests
-- Update rspec_junit_formatter requirement from &gt;= 0.1.1, &lt; 0.5.0 to &gt;= 0.1.1, &lt; 0.6.0 in /src/oc_bifrost/oc-bifrost-pedant [#3056](https://github.com/chef/chef-server/pull/3056) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump chef from 17.8.25 to 17.9.18 in /oc-chef-pedant [#3037](https://github.com/chef/chef-server/pull/3037) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.11.36 -->
 ### Changes since 14.11.36 release
 
 #### Merged Pull Requests
+- Bump chef from 17.8.25 to 17.9.18 in /oc-chef-pedant [#3037](https://github.com/chef/chef-server/pull/3037) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.11.42 -->
 - Update rspec_junit_formatter requirement from &gt;= 0.1.1, &lt; 0.5.0 to &gt;= 0.1.1, &lt; 0.6.0 in /src/oc_bifrost/oc-bifrost-pedant [#3056](https://github.com/chef/chef-server/pull/3056) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.11.41 -->
 - Bump sdoc from 2.2.0 to 2.3.0 in /src/oc-id [#3058](https://github.com/chef/chef-server/pull/3058) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.11.40 -->
 - Bump chef_backup from 0.1.1 to 0.2.0 in /src/chef-server-ctl [#3021](https://github.com/chef/chef-server/pull/3021) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.11.39 -->
