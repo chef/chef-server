@@ -1,6 +1,6 @@
 127.0.0.1 localhost
 <% @fqdns.each do |fqdn| %>
-192.168.33.100  <%=fqdn.split(".")[0]%> <%=fqdn%>
+192.168.56.100  <%=fqdn.split(".")[0]%> <%=fqdn%>
 <% end %>
 
 <% @global_fqdns.each do |entry| %>

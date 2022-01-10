@@ -15,7 +15,7 @@
 #
 #CS_IP=
 #     Chef Infra Server IP address
-#     default: '192.168.33.100'
+#     default: '192.168.56.100'
 #
 #PG_MAJOR=
 #     PostgreSQL major version
@@ -54,7 +54,7 @@
 #### Set default values (if not overridden by environment variables)
 #
 
-test -n "${CS_IP}"        || CS_IP=${1:-'192.168.33.100'} # Allow old $1 parameter
+test -n "${CS_IP}"        || CS_IP=${1:-'192.168.56.100'} # Allow old $1 parameter
 test -n "${PG_MAJOR}"     || PG_MAJOR=13
 test -n "${PG_MINOR}"     || PG_MINOR='latest'
 test -n "${PG_HBA_AUTH}"  || PG_HBA_AUTH='md5'

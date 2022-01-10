@@ -60,11 +60,11 @@ fi
 echo "postgresql['db_superuser'] = \"bofh\"" > /tmp/external-postgres-1.rb
 echo "postgresql['db_superuser_password'] = \"i1uvd3v0ps\"" >> /tmp/external-postgres-1.rb
 echo "postgresql['external'] = true" >> /tmp/external-postgres-1.rb
-echo "postgresql['vip'] = \"192.168.33.150\"" >> /tmp/external-postgres-1.rb
+echo "postgresql['vip'] = \"192.168.56.150\"" >> /tmp/external-postgres-1.rb
 
 # External Server Config 2)
 
 echo "postgresql['db_superuser'] = \"bofh\"" > /tmp/external-postgres-2.rb
 echo "postgresql['db_superuser_password'] = \"i1uvd3v0ps\"" >> /tmp/external-postgres-2.rb
 echo "postgresql['external'] = true" >> /tmp/external-postgres-2.rb
-echo "postgresql['vip'] = \"192.168.33.155\"" >> /tmp/external-postgres-2.rb
+echo "postgresql['vip'] = \"192.168.56.155\"" >> /tmp/external-postgres-2.rb
