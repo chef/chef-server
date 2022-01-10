@@ -223,10 +223,10 @@ elasticsearch['new_size'] = Elasticsearch.new_size_default(node)
 opensearch = default['private_chef']['opensearch']
 
 opensearch['enable'] = true
-opensearch['external_url'] = nil
-opensearch['vip'] = '127.0.0.1'
+opensearch['external_url'] = 'http://54.183.208.113:9200'
+opensearch['vip'] = '54.183.208.113'
 opensearch['port'] = 9200
-opensearch['username'] = 'admin'
+#opensearch['username'] = 'admin'
 opensearch['shard_count'] = 5
 opensearch['replica_count'] = 1
 
@@ -330,7 +330,7 @@ default['private_chef']['opscode-erchef']['ibrowse_max_sessions'] = 256
 default['private_chef']['opscode-erchef']['ibrowse_max_pipeline_size'] = 1
 default['private_chef']['opscode-erchef']['enable_ibrowse_traces'] = false
 # general search settings used to set up chef_index
-default['private_chef']['opscode-erchef']['search_provider'] = 'elasticsearch' #by default elasticsearch, only for external set opensearch for now
+default['private_chef']['opscode-erchef']['search_provider'] = 'opensearch' #by default elasticsearch, only for external set opensearch for now
 default['private_chef']['opscode-erchef']['search_queue_mode'] = 'batch'
 default['private_chef']['opscode-erchef']['search_batch_max_size'] = '5000000'
 default['private_chef']['opscode-erchef']['search_batch_max_wait'] = '10'

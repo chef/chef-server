@@ -68,10 +68,10 @@ class OmnibusHelper
     end
   end
 
-  def opensearch_password
-    auth = Base64.strict_encode64("admin:admin")
-    {Authorization: "Basic #{auth}"}
-  end
+  # def opensearch_password
+  #   auth = Base64.strict_encode64("admin:admin")
+  #   {Authorization: "Basic #{auth}"}
+  # end
 
   def search_engine_major_version
     max_requests = 5

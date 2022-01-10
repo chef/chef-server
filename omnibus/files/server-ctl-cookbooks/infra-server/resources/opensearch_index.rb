@@ -28,7 +28,7 @@ property :opensearch_user, String
 property :search_engine_url, String
 
 action :create do
-  create_opensearch_user
+  #create_opensearch_user
   unless retry_index_exists?(4)
     converge_by "Creating opensearch index #{new_resource.index_name}" do
       search_engine_server.put(new_resource.index_name, new_resource.index_definition, search_engine_auth_header)
@@ -45,29 +45,29 @@ action :destroy do
 end
 
 action_class do
-  def create_opensearch_user
-    max_requests = 5
-    current_request = 1
-    begin
-      body = {
-        password => PrivateChef.credentials.get('opscode_erchef', 'opensearch_password'),
-        backend_roles => ["admin"],
-        description => "Chef Server erchef user"
-      }
-      search_engine_server.put("_plugins/_security/api/internalusers/#{new_resource.opensearch_user}", body, search_engine_auth_header)
-    rescue => e
-      # Perform a blind rescue because Net:HTTP throws a variety of exceptions - some of which are platform specific.
-      if current_request == max_requests
-        raise "Failed to connect to opensearch service at #{new_resource.search_engine_url}: #{e}"
-      else
-        # Chef HTTP logs the details in the debug log.
-        Chef::Log.error "Failed to connect to opensearch service #{current_request}/#{max_requests}. Retrying."
-        current_request += 1
-        sleep(current_request * 2) # Exponential back-off.
-        retry
-      end
-    end
-  end
+  # def create_opensearch_user
+  #   max_requests = 5
+  #   current_request = 1
+  #   begin
+  #     body = {
+  #       password => PrivateChef.credentials.get('opscode_erchef', 'opensearch_password'),
+  #       backend_roles => ["admin"],
+  #       description => "Chef Server erchef user"
+  #     }
+  #     search_engine_server.put("_plugins/_security/api/internalusers/#{new_resource.opensearch_user}", body, search_engine_auth_header)
+  #   rescue => e
+  #     # Perform a blind rescue because Net:HTTP throws a variety of exceptions - some of which are platform specific.
+  #     if current_request == max_requests
+  #       raise "Failed to connect to opensearch service at #{new_resource.search_engine_url}: #{e}"
+  #     else
+  #       # Chef HTTP logs the details in the debug log.
+  #       Chef::Log.error "Failed to connect to opensearch service #{current_request}/#{max_requests}. Retrying."
+  #       current_request += 1
+  #       sleep(current_request * 2) # Exponential back-off.
+  #       retry
+  #     end
+  #   end
+  # end
 
   ## We check if the Elasticsearch index exists before creating it.
   ## But Elasticsearch returns 404 for a short duration during startup before it stabilizes and can return a 200.
