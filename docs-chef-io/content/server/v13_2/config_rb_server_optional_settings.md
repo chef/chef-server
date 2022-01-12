@@ -45,10 +45,6 @@ This configuration file has the following general settings:
 :   The `ORG_NAME` part of the `/organizations` endpoint in Chef Infra
     Server.
 
-`flavor`
-
-:   Default value: `'cs'`.
-
 `fips`
 
 :   Set to `true` to run the server in FIPS compliance mode. Set to
