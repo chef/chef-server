@@ -95,7 +95,7 @@ Chef Infra Server versions earlier than 14.5 that are configured with `nginx['en
 `notification_email`
 
 :   The email addressed to which email notifications are sent. Default
-    value: `'pc-default@opscode.com'`.
+    value: `'pc-default@chef.io'`.
 
 `role`
 
