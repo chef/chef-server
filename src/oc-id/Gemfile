@@ -51,7 +51,7 @@ group :development do
   gem 'binding_of_caller'
   gem 'spring' # App preloading
   gem 'spring-commands-rspec'
-  gem 'thor', '~> 1.0', '>= 1.0.1'
+  gem 'thor', '~> 1.2'
 end
 
 group :doc do
