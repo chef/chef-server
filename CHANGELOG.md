@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.12.1 -->
-## [14.12.1](https://github.com/chef/chef-server/tree/14.12.1) (2022-01-13)
+<!-- latest_release 14.12.2 -->
+## [14.12.2](https://github.com/chef/chef-server/tree/14.12.2) (2022-01-13)
 
 #### Merged Pull Requests
-- Update Redis to 5.0.14 [#3080](https://github.com/chef/chef-server/pull/3080) ([tas50](https://github.com/tas50))
+- Update Elasticsearch to 6.8.23 [#3083](https://github.com/chef/chef-server/pull/3083) ([tas50](https://github.com/tas50))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.11.36 -->
 ### Changes since 14.11.36 release
 
 #### Merged Pull Requests
+- Update Elasticsearch to 6.8.23 [#3083](https://github.com/chef/chef-server/pull/3083) ([tas50](https://github.com/tas50)) <!-- 14.12.2 -->
 - Update Redis to 5.0.14 [#3080](https://github.com/chef/chef-server/pull/3080) ([tas50](https://github.com/tas50)) <!-- 14.12.1 -->
 - Update PostgreSQL from 13.4 to 13.5 [#3071](https://github.com/chef/chef-server/pull/3071) ([tas50](https://github.com/tas50)) <!-- 14.12.0 -->
 - Update address ranges in use for vbox compat [#3072](https://github.com/chef/chef-server/pull/3072) ([marcparadise](https://github.com/marcparadise)) <!-- 14.11.43 -->
