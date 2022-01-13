@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.12.4 -->
-## [14.12.4](https://github.com/chef/chef-server/tree/14.12.4) (2022-01-13)
+<!-- latest_release 14.12.5 -->
+## [14.12.5](https://github.com/chef/chef-server/tree/14.12.5) (2022-01-13)
 
 #### Merged Pull Requests
-- Bump newrelic_rpm from 8.2.0 to 8.3.0 in /src/oc-id [#3086](https://github.com/chef/chef-server/pull/3086) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump chef from 17.9.18 to 17.9.26 in /oc-chef-pedant [#3062](https://github.com/chef/chef-server/pull/3062) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.11.36 -->
 ### Changes since 14.11.36 release
 
 #### Merged Pull Requests
+- Bump chef from 17.9.18 to 17.9.26 in /oc-chef-pedant [#3062](https://github.com/chef/chef-server/pull/3062) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.12.5 -->
 - Bump newrelic_rpm from 8.2.0 to 8.3.0 in /src/oc-id [#3086](https://github.com/chef/chef-server/pull/3086) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.12.4 -->
 - Bump config from 3.1.0 to 3.1.1 in /src/oc-id [#3051](https://github.com/chef/chef-server/pull/3051) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.12.3 -->
 - Update Elasticsearch to 6.8.23 [#3083](https://github.com/chef/chef-server/pull/3083) ([tas50](https://github.com/tas50)) <!-- 14.12.2 -->
