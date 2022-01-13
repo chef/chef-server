@@ -3,7 +3,7 @@ source 'https://rubygems.org'
 # Install omnibus software
 group :omnibus do
   gem "omnibus", github: ENV.fetch("OMNIBUS_GITHUB_REPO", "chef/omnibus"), branch: ENV.fetch("OMNIBUS_GITHUB_BRANCH", "main")
-  gem "omnibus-software", github: ENV.fetch("OMNIBUS_SOFTWARE_GITHUB_REPO", "chef/omnibus-software"), :ref=> 258c243d8f9e5b81f357f48588c975306d71c4ed  #branch: ENV.fetch("OMNIBUS_SOFTWARE_GITHUB_BRANCH", "main")
+  gem "omnibus-software", github: ENV.fetch("OMNIBUS_SOFTWARE_GITHUB_REPO", "chef/omnibus-software"), :ref => '258c243d8f9e5b81f357f48588c975306d71c4ed'  #branch: ENV.fetch("OMNIBUS_SOFTWARE_GITHUB_BRANCH", "main")
   gem 'artifactory'
 end
 
