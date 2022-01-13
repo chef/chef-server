@@ -1,7 +1,7 @@
 GIT
   remote: https://github.com/chef/omnibus-software.git
-  revision: 4707275bb5cac7643938972738e83723e8fd5621
-  branch: main
+  revision: 3b35c9d8e885808fc3e2db36381473c62778d036
+  branch: lbaker/sqitch-license
   specs:
     omnibus-software (4.0.0)
       omnibus (>= 8.0.0)
