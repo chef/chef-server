@@ -1,4 +1,4 @@
-add_command_under_category "oc-id-show-app", "Secrets Management", "Show configuration for oc-id applications", 2 do
+add_command_under_category "oc-id-show-app", "Secrets Management", "Show configuration for oc-id applications.", 2 do
   require "mixlib/shellout"
   require "json"
 

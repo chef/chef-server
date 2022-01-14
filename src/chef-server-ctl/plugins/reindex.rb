@@ -89,7 +89,7 @@ rescue => exception
   puts "Skipping the disk space verification due to #{exception.message}"
 end
 
-add_command_under_category "reindex", "general", "Reindex all server data for a given organization", 2 do
+add_command_under_category "reindex", "general", "Reindex all server data for a given organization.", 2 do
   reindex_args = ARGV[1..-1] # Chop off first 1 args, keep the rest... that is, everything after "private-chef-ctl reindex"
   options = {}
 
