@@ -9,7 +9,7 @@ require "chef-utils/dist"
 # Because the shared secrets are known on all nodes in the cluster the user can
 # choose between copying the secrets file to each node in the cluster and
 # reconfiguring or by running this command on all nodes.
-add_command_under_category "rotate-credentials", "Secrets Management", "Rotate #{ChefUtils::Dist::Server::PRODUCT} credentials for a given service", 2 do
+add_command_under_category "rotate-credentials", "Secrets Management", "Rotate #{ChefUtils::Dist::Server::PRODUCT} credentials for a given service.", 2 do
   ensure_configured!
 
   OptionParser.new do |opts|
@@ -65,7 +65,7 @@ end
 # the shared secrets are known on all nodes in the cluster the user can choose
 # between copying the secrets file to each node in the cluster and reconfiguring
 # or by running this command on all nodes.
-add_command_under_category "rotate-all-credentials", "Secrets Management", "Rotate all #{ChefUtils::Dist::Server::PRODUCT} service credentials", 2 do
+add_command_under_category "rotate-all-credentials", "Secrets Management", "Rotate all #{ChefUtils::Dist::Server::PRODUCT} service credentials.", 2 do
   ensure_configured!
 
   # Rotate and save the credentials
@@ -104,7 +104,7 @@ end
 # new service credentials for all services. It will then do a chef run to apply
 # the new credentials. As the shared secret and salt is securely and randomly
 # generated the user must copy the secrets file to all nodes in the cluster.
-add_command_under_category "rotate-shared-secrets", "Secrets Management", "Rotate the #{ChefUtils::Dist::Server::PRODUCT} shared secrets and all service credentials", 2 do
+add_command_under_category "rotate-shared-secrets", "Secrets Management", "Rotate the #{ChefUtils::Dist::Server::PRODUCT} shared secrets and all service credentials.", 2 do
   ensure_configured!
 
   backup_file = backup_secrets_file
@@ -140,7 +140,7 @@ add_command_under_category "rotate-shared-secrets", "Secrets Management", "Rotat
   end
 end
 
-add_command_under_category "show-service-credentials", "Secrets Management", "Show the service credentials", 2 do
+add_command_under_category "show-service-credentials", "Secrets Management", "Show the service credentials.", 2 do
   ensure_configured!
 
   pp(credentials.legacy_credentials_hash)
@@ -157,7 +157,7 @@ end
 # credentials the chef-client reconfigure run will re-enable/link the services,
 # restart the Chef Server and remove the sentinel file that enables the
 # pre-hook.
-add_command_under_category "require-credential-rotation", "Secrets Management", "Disable the #{ChefUtils::Dist::Server::PRODUCT} and require credential rotation", 2 do
+add_command_under_category "require-credential-rotation", "Secrets Management", "Disable the #{ChefUtils::Dist::Server::PRODUCT} and require credential rotation.", 2 do
   @agree_to_disable = false
   @ui = HighLine.new
 

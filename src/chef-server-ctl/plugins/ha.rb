@@ -9,7 +9,7 @@ add_command_under_category "master-recover", "high-availability", "Set this serv
   exit 1
 end
 
-add_command_under_category "backup-recover", "high-availability", "Set this server to HA backup state, ignoring VRRP", 1 do
+add_command_under_category "backup-recover", "high-availability", "Set this server to HA backup state, ignoring VRRP.", 1 do
   puts err_CONFIG_DRBD_HA_REMOVED("backup-recover")
   exit 1
 end

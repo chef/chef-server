@@ -25,7 +25,7 @@ require "chef/key"
 # TODO Check if this is still true in gem-world
 require "chef_server_ctl/helpers/key_ctl_helper"
 
-add_command_under_category "add-client-key", "key-rotation", "Create a new client key", 2 do
+add_command_under_category "add-client-key", "key-rotation", "Create a new client key.", 2 do
   cmd_args = ARGV[1..-1]
   @helper = ::ChefServerCtl::Helpers::KeyCtlHelper.new
   @options = OpenStruct.new
@@ -95,7 +95,7 @@ add_command_under_category "add-client-key", "key-rotation", "Create a new clien
   end
 end
 
-add_command_under_category "add-user-key", "key-rotation", "Create a new user key", 2 do
+add_command_under_category "add-user-key", "key-rotation", "Create a new user key.", 2 do
   cmd_args = ARGV[1..-1]
   @helper = ::ChefServerCtl::Helpers::KeyCtlHelper.new
   @options = OpenStruct.new
@@ -161,7 +161,7 @@ add_command_under_category "add-user-key", "key-rotation", "Create a new user ke
   end
 end
 
-add_command_under_category "list-client-keys", "key-rotation", "List keys for a client", 2 do
+add_command_under_category "list-client-keys", "key-rotation", "List keys for a client.", 2 do
   cmd_args = ARGV[1..-1]
   @helper = ::ChefServerCtl::Helpers::KeyCtlHelper.new
   @options = OpenStruct.new
@@ -202,7 +202,7 @@ add_command_under_category "list-client-keys", "key-rotation", "List keys for a 
   end
 end
 
-add_command_under_category "list-user-keys", "key-rotation", "List keys for a user", 2 do
+add_command_under_category "list-user-keys", "key-rotation", "List keys for a user.", 2 do
   cmd_args = ARGV[1..-1]
   @helper = ::ChefServerCtl::Helpers::KeyCtlHelper.new
 
@@ -242,7 +242,7 @@ add_command_under_category "list-user-keys", "key-rotation", "List keys for a us
   end
 end
 
-add_command_under_category "delete-user-key", "key-rotation", "Delete a key", 2 do
+add_command_under_category "delete-user-key", "key-rotation", "Delete a key.", 2 do
   cmd_args = ARGV[1..-1]
   @helper = ::ChefServerCtl::Helpers::KeyCtlHelper.new
   @options = OpenStruct.new
@@ -264,7 +264,7 @@ add_command_under_category "delete-user-key", "key-rotation", "Delete a key", 2 
   end
 end
 
-add_command_under_category "delete-client-key", "key-rotation", "Delete a key", 2 do
+add_command_under_category "delete-client-key", "key-rotation", "Delete a key.", 2 do
   cmd_args = ARGV[1..-1]
   @helper = ::ChefServerCtl::Helpers::KeyCtlHelper.new
   @options = OpenStruct.new
