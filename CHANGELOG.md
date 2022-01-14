@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.12.7 -->
-## [14.12.7](https://github.com/chef/chef-server/tree/14.12.7) (2022-01-13)
+<!-- latest_release 14.12.8 -->
+## [14.12.8](https://github.com/chef/chef-server/tree/14.12.8) (2022-01-14)
 
 #### Merged Pull Requests
-- Bump rspec_junit_formatter from 0.4.1 to 0.5.1 in /oc-chef-pedant [#3055](https://github.com/chef/chef-server/pull/3055) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump nokogiri from 1.12.5 to 1.13.1 in /src/oc-id [#3084](https://github.com/chef/chef-server/pull/3084) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.11.36 -->
 ### Changes since 14.11.36 release
 
 #### Merged Pull Requests
+- Bump nokogiri from 1.12.5 to 1.13.1 in /src/oc-id [#3084](https://github.com/chef/chef-server/pull/3084) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.12.8 -->
 - Bump rspec_junit_formatter from 0.4.1 to 0.5.1 in /oc-chef-pedant [#3055](https://github.com/chef/chef-server/pull/3055) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.12.7 -->
 - Bump chef from 17.8.25 to 17.9.26 in /src/oc-id [#3057](https://github.com/chef/chef-server/pull/3057) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.12.6 -->
 - Bump chef from 17.9.18 to 17.9.26 in /oc-chef-pedant [#3062](https://github.com/chef/chef-server/pull/3062) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.12.5 -->
