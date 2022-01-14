@@ -37,13 +37,16 @@ Infra Server to use SSL certificates:
     nginx['ssl_protocols'] = 'TLSv1.2'
     ```
 
-    {{< note >}}
+    <div class="admonition-note">
+    <p class="admonition-note-title">Note</p>
+    <div class="admonition-note-text">
 
     See <https://www.openssl.org/docs/man1.0.2/man1/ciphers.html> for more
     information about the values used with the `nginx['ssl_ciphers']` and
     `nginx['ssl_protocols']` settings.
 
-    {{< /note >}}
+    </div>
+    </div>
 
     For example, after copying the SSL certificate files to the Chef Infra
     Server, update the `nginx['ssl_certificate']` and
