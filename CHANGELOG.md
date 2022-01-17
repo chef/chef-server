@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.12.10 -->
-## [14.12.10](https://github.com/chef/chef-server/tree/14.12.10) (2022-01-14)
+<!-- latest_release 14.12.11 -->
+## [14.12.11](https://github.com/chef/chef-server/tree/14.12.11) (2022-01-17)
 
 #### Merged Pull Requests
-- Bump omnibus-software from `4707275` to `774125f` in /omnibus [#3088](https://github.com/chef/chef-server/pull/3088) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Minor updates to the static website [#3090](https://github.com/chef/chef-server/pull/3090) ([tas50](https://github.com/tas50))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.11.36 -->
 ### Changes since 14.11.36 release
 
 #### Merged Pull Requests
+- Minor updates to the static website [#3090](https://github.com/chef/chef-server/pull/3090) ([tas50](https://github.com/tas50)) <!-- 14.12.11 -->
 - Bump omnibus-software from `4707275` to `774125f` in /omnibus [#3088](https://github.com/chef/chef-server/pull/3088) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.12.10 -->
 - Bump thor from 1.1.0 to 1.2.1 in /src/oc-id [#3052](https://github.com/chef/chef-server/pull/3052) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.12.9 -->
 - Bump nokogiri from 1.12.5 to 1.13.1 in /src/oc-id [#3084](https://github.com/chef/chef-server/pull/3084) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.12.8 -->
