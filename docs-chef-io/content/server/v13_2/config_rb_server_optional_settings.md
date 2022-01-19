@@ -717,7 +717,7 @@ Chef Infra Server versions earlier than 14.5 configured with `nginx['enable_non_
 :   The list of supported cipher suites that are used to establish a
     secure connection. To favor AES256 with ECDHE forward security, drop
     the `RC4-SHA:RC4-MD5:RC4:RSA` prefix. See [this
-    link](https://www.openssl.org/docs/man1.0.2/man1/ciphers.html) for more
+    link](https://www.openssl.org/docs/man1.1.1/man1/ciphers.html) for more
     information. For example:
 
     ```ruby
