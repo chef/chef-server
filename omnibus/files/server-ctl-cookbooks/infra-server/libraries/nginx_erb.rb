@@ -103,9 +103,9 @@ class NginxErb
     case proto
     when 'http'
       fname = "access-port-#{node['private_chef']['nginx']['non_ssl_port'] || 80}.log"
-      "/var/log/opscode/nginx/#{fname}"
+      "/var/log/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/nginx/#{fname}"
     when 'https'
-      '/var/log/opscode/nginx/access.log'
+      "/var/log/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/nginx/access.log"
     end
   end
 

@@ -1,4 +1,4 @@
 #!/bin/sh
 exec 2>&1
 cd <%= node['private_chef']['haproxy']['dir'] %>
-exec chpst -P -u <%= node['private_chef']['user']['username'] %> -U <%= node['private_chef']['user']['username'] %> /opt/opscode/embedded/sbin/haproxy -f haproxy.cfg
+exec chpst -P -u <%= node['private_chef']['user']['username'] %> -U <%= node['private_chef']['user']['username'] %> /opt/<%= ChefUtils::Dist::Org::LEGACY_CONF_DIR %>/embedded/sbin/haproxy -f haproxy.cfg

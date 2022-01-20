@@ -24,22 +24,22 @@ require 'openssl'
 # ensure that they're always here.
 %w(private-chef-ctl chef-server-ctl).each do |bin|
   link "/usr/bin/#{bin}" do
-    to "/opt/opscode/bin/#{bin}"
+    to "/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/bin/#{bin}"
   end
 end
 
 # Ensure that all our Omnibus-ed binaries are the ones that get used;
 # much better than having to specify this on each resource!
-ENV['PATH'] = "/opt/opscode/bin:/opt/opscode/embedded/bin:#{ENV['PATH']}"
+ENV['PATH'] = "/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/bin:/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/embedded/bin:#{ENV['PATH']}"
 
-directory '/etc/opscode' do
+directory "/etc/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}" do
   owner 'root'
   group 'root'
   mode '0755'
   action :nothing
 end.run_action(:create)
 
-directory '/etc/opscode/logrotate.d' do
+directory "/etc/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/logrotate.d" do
   owner 'root'
   group 'root'
   mode '0755'
@@ -79,7 +79,7 @@ darklaunch_values = node['private_chef']['dark_launch']
                     .merge(node['private_chef']['lb']['xdl_defaults'])
                     .to_hash
 
-file '/etc/opscode/dark_launch_features.json' do
+file "/etc/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/dark_launch_features.json" do
   owner OmnibusHelper.new(node).ownership['owner']
   group 'root'
   mode '0644'
@@ -93,7 +93,7 @@ directory '/etc/chef' do
   action :create
 end
 
-directory '/var/opt/opscode' do
+directory "/var/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}" do
   owner 'root'
   group 'root'
   mode '0755'
@@ -101,7 +101,7 @@ directory '/var/opt/opscode' do
   action :create
 end
 
-directory '/var/log/opscode' do
+directory "/var/log/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}" do
   owner OmnibusHelper.new(node).ownership['owner']
   group OmnibusHelper.new(node).ownership['group']
   mode '0755'
@@ -168,7 +168,7 @@ include_recipe 'infra-server::log_cleanup'
 include_recipe 'infra-server::partybus'
 include_recipe 'infra-server::ctl_config'
 
-file '/etc/opscode/chef-server-running.json' do
+file "/etc/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/chef-server-running.json" do
   owner OmnibusHelper.new(node).ownership['owner']
   group 'root'
   mode '0600'

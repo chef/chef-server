@@ -5,7 +5,7 @@
 
     set_by_lua $data_collector_token 'return os.getenv("DATA_COLLECTOR_TOKEN")';
 
-    access_log <%= @helper.access_log(@server_proto) %> opscode;
+    access_log <%= @helper.access_log(@server_proto) %> <%= ChefUtils::Dist::Org::LEGACY_CONF_DIR %>;
 
     <% if @server_proto == "https" %>
       ssl_certificate <%= @ssl_certificate %>;
@@ -99,7 +99,7 @@
       <% end %>
       types { }
       default_type text/plain;
-      alias /opt/opscode/version-manifest.txt;
+      alias /opt/<%= ChefUtils::Dist::Org::LEGACY_CONF_DIR %>/version-manifest.txt;
     }
 
     location ~ "^/organizations/([^/]+)/validate" {

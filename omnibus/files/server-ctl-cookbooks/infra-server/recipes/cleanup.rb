@@ -20,7 +20,7 @@ component_runit_service 'opscode-solr4' do
   action :disable
 end
 
-directory '/opt/opscode/sv/opscode-solr4' do
+directory "/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/sv/opscode-solr4" do
   recursive true
   action :delete
 end
@@ -29,7 +29,7 @@ component_runit_service 'rabbitmq' do
   action :disable
 end
 
-directory '/opt/opscode/sv/rabbitmq' do
+directory "/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/sv/rabbitmq" do
   recursive true
   action :delete
 end

@@ -1,7 +1,7 @@
 <%= @log_directory %>/*.log {
   rotate <%= @log_rotation['num_to_keep'] %>
   size <%= @log_rotation['file_maxbytes'] %>
-  create 644 <%= @owner || 'opscode' %> <%= @group || 'opscode' %>
+  create 644 <%= @owner || ChefUtils::Dist::Org::LEGACY_CONF_DIR %> <%= @group || ChefUtils::Dist::Org::LEGACY_CONF_DIR %>
 <% if @postrotate -%>
   delaycompress
   sharedscripts

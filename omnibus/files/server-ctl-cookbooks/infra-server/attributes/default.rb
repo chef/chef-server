@@ -15,6 +15,9 @@
 # limitations under the License.
 #
 
+var_base = "/var/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}"
+log_base = "/var/log/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}"
+
 ###
 # Set a project-name for the enterprise-chef-common cookbook
 ###
@@ -38,7 +41,7 @@ opscode-chef-mover
 ###
 default['private_chef']['api_version'] = '12.0.0'
 default['private_chef']['flavor'] = 'cs'
-default['private_chef']['install_path'] = '/opt/opscode'
+default['private_chef']['install_path'] = "/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}"
 
 default['private_chef']['notification_email'] = 'pc-default@chef.io'
 default['private_chef']['from_email'] = '"Opscode" <donotreply@chef.io>'
@@ -78,11 +81,11 @@ default['private_chef']['addons']['ubuntu_distribution'] =
 # The Chef User that services run as
 ####
 # The username for the chef services user
-default['private_chef']['user']['username'] = 'opscode'
+default['private_chef']['user']['username'] = ChefUtils::Dist::Org::LEGACY_CONF_DIR
 # The shell for the chef services user
 default['private_chef']['user']['shell'] = '/usr/sbin/nologin'
 # The home directory for the chef services user
-default['private_chef']['user']['home'] = '/opt/opscode/embedded'
+default['private_chef']['user']['home'] = "/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/embedded"
 
 ####
 # Service data_dir, etc_dir, log_directory perms
@@ -92,22 +95,22 @@ default['private_chef']['service_dir_perms'] = '0750'
 ####
 # CouchDB (legacy required for upgrades to work)
 ####
-default['private_chef']['couchdb']['data_dir'] = '/var/opt/opscode/couchdb/db'
+default['private_chef']['couchdb']['data_dir'] = "/var/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/couchdb/db"
 default['private_chef']['couchdb']['vip'] = '127.0.0.1'
 default['private_chef']['couchdb']['port'] = 5984
 
 ####
 # Legacy attributes required for cleanup
 ####
-default['private_chef']['opscode-solr']['data_dir'] = '/var/opt/opscode/opscode-solr/data'
-default['private_chef']['rabbitmq']['dir'] = '/var/opt/opscode/rabbitmq'
-default['private_chef']['rabbitmq']['data_dir'] = '/var/opt/opscode/rabbitmq/db'
-default['private_chef']['rabbitmq']['log_directory'] = '/var/log/opscode/rabbitmq'
-default['private_chef']['opscode-solr4']['dir'] = '/var/opt/opscode/opscode-solr4'
-default['private_chef']['opscode-solr4']['data_dir'] = '/var/opt/opscode/opscode-solr4/data'
-default['private_chef']['opscode-solr4']['log_directory'] = '/var/log/opscode/opscode-solr4'
-default['private_chef']['opscode-expander']['dir'] = '/var/opt/opscode/opscode-expander'
-default['private_chef']['opscode-expander']['log_directory'] = '/var/log/opscode/opscode-expander'
+default['private_chef']['opscode-solr']['data_dir'] = "#{var_base}/opscode-solr/data"
+default['private_chef']['rabbitmq']['dir'] = "#{var_base}/rabbitmq"
+default['private_chef']['rabbitmq']['data_dir'] = "#{var_base}/rabbitmq/db"
+default['private_chef']['rabbitmq']['log_directory'] = "#{var_base}/rabbitmq"
+default['private_chef']['opscode-solr4']['dir'] = "#{var_base}/opscode-solr4"
+default['private_chef']['opscode-solr4']['data_dir'] = "#{var_base}/opscode-solr4/data"
+default['private_chef']['opscode-solr4']['log_directory'] = "#{var_base}/opscode-solr4"
+default['private_chef']['opscode-expander']['dir'] = "#{var_base}/opscode-expander"
+default['private_chef']['opscode-expander']['log_directory'] = "#{var_base}/opscode-expander"
 
 ####
 # Server API Version - is not used in server configuration, but rather in the configuration
@@ -125,8 +128,8 @@ default['private_chef']['server-api-version'] = 0
 # the current chef-backend leader.
 ####
 default['private_chef']['haproxy']['enable'] = true
-default['private_chef']['haproxy']['dir'] = '/var/opt/opscode/haproxy'
-default['private_chef']['haproxy']['log_directory'] = '/var/log/opscode/haproxy'
+default['private_chef']['haproxy']['dir'] = "#{var_base}/haproxy"
+default['private_chef']['haproxy']['log_directory'] = "#{var_base}/haproxy"
 default['private_chef']['haproxy']['log_rotation']['file_maxbytes'] = 104857600
 default['private_chef']['haproxy']['log_rotation']['num_to_keep'] = 10
 default['private_chef']['haproxy']['listen'] = '0.0.0.0'
@@ -150,9 +153,6 @@ default['private_chef']['opscode-solr4']['heap_size'] = nil
 ####
 # Elasticsearch
 ####
-var_base = '/var/opt/opscode'
-log_base = '/var/log/opscode'
-
 elasticsearch = default['private_chef']['elasticsearch']
 
 # These attributes cannot be overridden in chef-server.rb
@@ -221,11 +221,11 @@ elasticsearch['new_size'] = Elasticsearch.new_size_default(node)
 # Erlang Chef Server API
 ####
 default['private_chef']['opscode-erchef']['enable'] = true
-default['private_chef']['opscode-erchef']['dir'] = '/var/opt/opscode/opscode-erchef'
+default['private_chef']['opscode-erchef']['dir'] = "#{var_base}/opscode-erchef"
 # sets a ulimit on the data memory segment via `chpst`'s `-d` option. Setting
 # to `nil` disables the limit.
 default['private_chef']['opscode-erchef']['memory_maxbytes'] = nil
-default['private_chef']['opscode-erchef']['log_directory'] = '/var/log/opscode/opscode-erchef'
+default['private_chef']['opscode-erchef']['log_directory'] = "#{log_base}/opscode-erchef"
 default['private_chef']['opscode-erchef']['log_rotation']['file_maxbytes'] = 104857600
 default['private_chef']['opscode-erchef']['log_rotation']['num_to_keep'] = 10
 default['private_chef']['opscode-erchef']['log_rotation']['max_messages_per_second'] = 1000
@@ -372,12 +372,12 @@ default['private_chef']['opscode-erchef']['include_version_in_status'] = false
 # Stats endpoint
 default['private_chef']['opscode-erchef']['stats_auth_enable'] = true
 default['private_chef']['opscode-erchef']['stats_user'] = 'statsuser'
-default['private_chef']['opscode-erchef']['stats_password_file'] = '/var/opt/opscode/nginx/stats_htpasswd'
+default['private_chef']['opscode-erchef']['stats_password_file'] = "#{var_base}/nginx/stats_htpasswd"
 
 ###
 # Legacy path (required for cookbok migration)
 ###
-default['private_chef']['opscode-chef']['checksum_path'] = '/var/opt/opscode/opscode-chef/checksum'
+default['private_chef']['opscode-chef']['checksum_path'] = "#{var_base}/opscode-chef/checksum"
 
 ####
 # Chef Server WebUI (legacy required for manage install to work)
@@ -387,8 +387,8 @@ default['private_chef']['opscode-webui']['enable'] = false
 ####
 # Chef Pedant
 ####
-default['private_chef']['oc-chef-pedant']['dir'] = '/var/opt/opscode/oc-chef-pedant'
-default['private_chef']['oc-chef-pedant']['log_directory'] = '/var/log/opscode/oc-chef-pedant'
+default['private_chef']['oc-chef-pedant']['dir'] = "#{var_base}/oc-chef-pedant"
+default['private_chef']['oc-chef-pedant']['log_directory'] = "#{log_base}/oc-chef-pedant"
 default['private_chef']['oc-chef-pedant']['log_http_requests'] = true
 default['private_chef']['oc-chef-pedant']['log_rotation']['file_maxbytes'] = 104857600
 default['private_chef']['oc-chef-pedant']['log_rotation']['num_to_keep'] = 10
@@ -402,9 +402,9 @@ default['private_chef']['oc-chef-pedant']['chef_server'] = nil
 # redis_lb
 ###
 default['private_chef']['redis_lb']['enable'] = true
-default['private_chef']['redis_lb']['dir'] = '/var/opt/opscode/redis_lb'
-default['private_chef']['redis_lb']['data_dir'] = '/var/opt/opscode/redis_lb/data'
-default['private_chef']['redis_lb']['log_directory'] = '/var/log/opscode/redis_lb'
+default['private_chef']['redis_lb']['dir'] = "#{var_base}/redis_lb"
+default['private_chef']['redis_lb']['data_dir'] = "#{var_base}/redis_lb/data"
+default['private_chef']['redis_lb']['log_directory'] = "#{log_base}/redis_lb"
 default['private_chef']['redis_lb']['log_rotation']['file_maxbytes'] = 1000000
 default['private_chef']['redis_lb']['log_rotation']['num_to_keep'] = 10
 default['private_chef']['redis_lb']['port'] = '16379'
@@ -467,8 +467,8 @@ default['private_chef']['lb']['xmaint_allowed_ips_list'] = [ '127.0.0.1' ]
 # Nginx
 ####
 default['private_chef']['nginx']['enable'] = true
-default['private_chef']['nginx']['dir'] = '/var/opt/opscode/nginx'
-default['private_chef']['nginx']['log_directory'] = '/var/log/opscode/nginx'
+default['private_chef']['nginx']['dir'] = "#{var_base}/nginx"
+default['private_chef']['nginx']['log_directory'] = "#{log_base}/nginx"
 default['private_chef']['nginx']['log_rotation']['file_maxbytes'] = 104857600
 default['private_chef']['nginx']['log_rotation']['num_to_keep'] = 10
 default['private_chef']['nginx']['log_x_forwarded_for'] = false
@@ -558,9 +558,9 @@ default['private_chef']['postgresql']['version'] = '13'
 # whether we need to run pg_upgrade.
 default['private_chef']['postgresql']['enable'] = true
 default['private_chef']['postgresql']['external'] = false
-default['private_chef']['postgresql']['dir'] = "/var/opt/opscode/postgresql/#{node['private_chef']['postgresql']['version']}"
-default['private_chef']['postgresql']['data_dir'] = "/var/opt/opscode/postgresql/#{node['private_chef']['postgresql']['version']}/data"
-default['private_chef']['postgresql']['log_directory'] = "/var/log/opscode/postgresql/#{node['private_chef']['postgresql']['version']}"
+default['private_chef']['postgresql']['dir'] = "#{var_base}/postgresql/#{node['private_chef']['postgresql']['version']}"
+default['private_chef']['postgresql']['data_dir'] = "#{var_base}/postgresql/#{node['private_chef']['postgresql']['version']}/data"
+default['private_chef']['postgresql']['log_directory'] = "#{log_base}/postgresql/#{node['private_chef']['postgresql']['version']}"
 default['private_chef']['postgresql']['log_min_duration_statement'] = -1
 default['private_chef']['postgresql']['log_rotation']['file_maxbytes'] = 104857600
 default['private_chef']['postgresql']['log_rotation']['num_to_keep'] = 10
@@ -571,8 +571,8 @@ default['private_chef']['postgresql']['db_superuser'] = 'opscode-pgsql'
 # This will default to the db_superuser value if left nil.
 default['private_chef']['postgresql']['db_connection_superuser'] = nil
 default['private_chef']['postgresql']['shell'] = '/bin/sh'
-default['private_chef']['postgresql']['home'] = '/var/opt/opscode/postgresql'
-default['private_chef']['postgresql']['user_path'] = '/opt/opscode/embedded/bin:/opt/opscode/bin:$PATH'
+default['private_chef']['postgresql']['home'] = "#{var_base}/postgresql"
+default['private_chef']['postgresql']['user_path'] = "/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/embedded/bin:/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/bin:$PATH"
 default['private_chef']['postgresql']['vip'] = '127.0.0.1'
 default['private_chef']['postgresql']['port'] = 5432
 # We want to listen on all the loopback addresses, because we can't control which one localhost resolves to.
@@ -624,8 +624,8 @@ default['private_chef']['postgresql']['pg_upgrade_timeout'] = 7200
 # Bifrost
 ###
 default['private_chef']['oc_bifrost']['enable'] = true
-default['private_chef']['oc_bifrost']['dir'] = '/var/opt/opscode/oc_bifrost'
-default['private_chef']['oc_bifrost']['log_directory'] = '/var/log/opscode/oc_bifrost'
+default['private_chef']['oc_bifrost']['dir'] = "#{var_base}/oc_bifrost"
+default['private_chef']['oc_bifrost']['log_directory'] = "#{log_base}/oc_bifrost"
 default['private_chef']['oc_bifrost']['log_rotation']['file_maxbytes'] = 104857600
 default['private_chef']['oc_bifrost']['log_rotation']['num_to_keep'] = 10
 default['private_chef']['oc_bifrost']['log_rotation']['max_messages_per_second'] = 1000
@@ -668,9 +668,9 @@ default['private_chef']['oc_chef_authz']['max_connection_request_limit'] = 100
 # Bookshelf
 ####
 default['private_chef']['bookshelf']['enable'] = true
-default['private_chef']['bookshelf']['dir'] = '/var/opt/opscode/bookshelf'
-default['private_chef']['bookshelf']['data_dir'] = '/var/opt/opscode/bookshelf/data'
-default['private_chef']['bookshelf']['log_directory'] = '/var/log/opscode/bookshelf'
+default['private_chef']['bookshelf']['dir'] = "#{var_base}/bookshelf"
+default['private_chef']['bookshelf']['data_dir'] = "#{var_base}/bookshelf/data"
+default['private_chef']['bookshelf']['log_directory'] = "#{log_base}/bookshelf"
 default['private_chef']['bookshelf']['log_rotation']['file_maxbytes'] = 104857600
 default['private_chef']['bookshelf']['log_rotation']['num_to_keep'] = 10
 default['private_chef']['bookshelf']['vip'] = node['private_chef']['lb']['api_fqdn']
@@ -708,8 +708,8 @@ default['private_chef']['bookshelf']['enable_request_logging'] = false
 ###
 
 default['private_chef']['oc_id']['enable'] = true
-default['private_chef']['oc_id']['dir'] = '/var/opt/opscode/oc_id'
-default['private_chef']['oc_id']['log_directory'] = '/var/log/opscode/oc_id'
+default['private_chef']['oc_id']['dir'] = "#{var_base}/oc_id"
+default['private_chef']['oc_id']['log_directory'] = "#{log_base}/oc_id"
 default['private_chef']['oc_id']['log_rotation']['file_maxbytes'] = 104857600
 default['private_chef']['oc_id']['log_rotation']['num_to_keep'] = 10
 default['private_chef']['oc_id']['vip'] = '127.0.0.1'
@@ -757,9 +757,9 @@ default['private_chef']['dark_launch']['reporting'] = true
 # Chef Mover
 ###
 default['private_chef']['opscode-chef-mover']['enable'] = true
-default['private_chef']['opscode-chef-mover']['dir'] = '/var/opt/opscode/opscode-chef-mover'
-default['private_chef']['opscode-chef-mover']['data_dir'] = '/var/opt/opscode/opscode-chef-mover/data'
-default['private_chef']['opscode-chef-mover']['log_directory'] = '/var/log/opscode/opscode-chef-mover'
+default['private_chef']['opscode-chef-mover']['dir'] = "#{var_base}/opscode-chef-mover"
+default['private_chef']['opscode-chef-mover']['data_dir'] = "#{var_base}/opscode-chef-mover/data"
+default['private_chef']['opscode-chef-mover']['log_directory'] = "#{log_base}/opscode-chef-mover"
 default['private_chef']['opscode-chef-mover']['log_rotation']['file_maxbytes'] = 1073741824
 default['private_chef']['opscode-chef-mover']['log_rotation']['num_to_keep'] = 10
 default['private_chef']['opscode-chef-mover']['bulk_fetch_batch_size'] = '5'
@@ -788,8 +788,8 @@ default['private_chef']['bootstrap']['enable'] = true
 # Estatsd
 ###
 default['private_chef']['estatsd']['enable'] = true
-default['private_chef']['estatsd']['dir'] = '/var/opt/opscode/estatsd'
-default['private_chef']['estatsd']['log_directory'] = '/var/log/opscode/estatsd'
+default['private_chef']['estatsd']['dir'] = "#{var_base}/estatsd"
+default['private_chef']['estatsd']['log_directory'] = "#{log_base}/estatsd"
 default['private_chef']['estatsd']['vip'] = '127.0.0.1'
 default['private_chef']['estatsd']['port'] = 9466
 default['private_chef']['estatsd']['protocol'] = 'estatsd'
@@ -840,7 +840,7 @@ default['private_chef']['ldap'] = nil
 ##
 # Upgrades/Partybus
 ##
-default['private_chef']['upgrades']['dir'] = '/var/opt/opscode/upgrades'
+default['private_chef']['upgrades']['dir'] = "#{var_base}/upgrades"
 
 ##
 # Folsom Graphite

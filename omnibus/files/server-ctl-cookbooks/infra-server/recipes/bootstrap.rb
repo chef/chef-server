@@ -32,7 +32,7 @@ end
   # with the major and minor version of the migration file to be run.
   # ex : {"major":1,"minor":34}
   # After we do the needed migration, `OmnibusHelper.has_been_bootstrapped` will return `true`.
-  execute "/opt/opscode/bin/chef-server-ctl start #{service}" do
+  execute "/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/bin/chef-server-ctl start #{service}" do
     not_if { OmnibusHelper.has_been_bootstrapped? }
   end
 end

@@ -54,7 +54,7 @@ class BookshelfPreflightValidator < PreflightValidator
 
           bookshelf['storage_type'] = 'filesystem'
 
-          in /etc/opscode/chef-server.rb or leave it unset.
+          in /etc/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/chef-server.rb or leave it unset.
         EOM
       elsif previous_value.to_s == current_value # case (5)
         true
@@ -69,7 +69,7 @@ class BookshelfPreflightValidator < PreflightValidator
 
           bookshelf['storage_type'] = '#{previous_value}'
 
-          in /etc/opscode/chef-server.rb
+          in /etc/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/chef-server.rb
         EOM
 
       end
