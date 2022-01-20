@@ -18,7 +18,7 @@
 
 upgrades_dir = node['private_chef']['upgrades']['dir']
 upgrades_etc_dir = File.join(upgrades_dir, 'etc')
-upgrades_service_dir = '/opt/opscode/embedded/service/partybus'
+upgrades_service_dir = "/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/embedded/service/partybus"
 [
   upgrades_dir,
   upgrades_etc_dir,
@@ -50,29 +50,29 @@ template partybus_config do
             bootstrap_server: is_bootstrap_server?)
 end
 
-link '/opt/opscode/embedded/service/partybus/config.rb' do
+link "/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/embedded/service/partybus/config.rb" do
   to partybus_config
 end
 
 execute 'set initial migration level' do
   action :nothing
-  command 'cd /opt/opscode/embedded/service/partybus && ./bin/partybus init'
+  command "cd /opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/embedded/service/partybus && ./bin/partybus init"
   subscribes :run, "file[#{OmnibusHelper.bootstrap_sentinel_file}]", :delayed
 end
 
 ruby_block 'migration-level file check' do
   block do
     begin
-      ::JSON.parse(::File.read('/var/opt/opscode/upgrades/migration-level'))
+      ::JSON.parse(::File.read("/var/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/upgrades/migration-level"))
     rescue Exception => e
       message = <<~EOF
         ERROR:
-        The /var/opt/opscode/upgrades/migration-level file is missing or corrupt! Please read https://docs.chef.io/server/install_server_pre/ and correct this file before proceeding
+        The /var/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/upgrades/migration-level file is missing or corrupt! Please read https://docs.chef.io/server/install_server_pre/ and correct this file before proceeding
 
         * If this is a new installation:
-          run: "cd /opt/opscode/embedded/service/partybus ; /opt/opscode/embedded/bin/bundle exec bin/partybus init"
+          run: "cd /opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/embedded/service/partybus ; /opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/embedded/bin/bundle exec bin/partybus init"
         * If you have upgraded a previous installation:
-          copy the /var/opt/opscode/upgrades/migration-level file from a not-yet-upgraded FrontEnd node
+          copy the /var/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/upgrades/migration-level file from a not-yet-upgraded FrontEnd node
 
         Error message #{e}
       EOF
@@ -80,7 +80,7 @@ ruby_block 'migration-level file check' do
       raise message
     end
   end
-  not_if { ::File.exist?('/var/opt/opscode/upgrades/migration-level') }
+  not_if { ::File.exist?("/var/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/upgrades/migration-level") }
   action :nothing
   if OmnibusHelper.has_been_bootstrapped?
     subscribes :run, 'pg_upgrade[upgrade_if_necessary]', :delayed

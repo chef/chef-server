@@ -28,7 +28,7 @@ execute 'remove_old_postgres_data_directory' do
   # old $PG_DATA directory
 end
 
-directory '/var/log/opscode/postgresql/9.6' do
+directory "/var/log/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/postgresql/9.6" do
   recursive true
   action :delete
 end

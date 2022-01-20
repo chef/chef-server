@@ -88,7 +88,7 @@ runit_service 'redis_lb' do
 end
 
 # log rotation
-template '/etc/opscode/logrotate.d/redis_lb' do
+template "/etc/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/logrotate.d/redis_lb" do
   source 'logrotate.erb'
   owner 'root'
   group 'root'

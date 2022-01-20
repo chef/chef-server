@@ -42,7 +42,7 @@ class SslPreflightValidator < PreflightValidator
   end
 
   def openssl_exe
-    '/opt/opscode/embedded/bin/openssl'
+    "/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/embedded/bin/openssl"
   end
 
   def openssl_version

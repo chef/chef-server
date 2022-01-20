@@ -45,13 +45,13 @@ property :groups, Array, default: []
 property :is_service, [true, false], default: true
 
 # Directory where runit service folders are dropped off.
-property :service_root, String, default: '/opt/opscode/sv'
+property :service_root, String, default: "/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/sv"
 
 # Directory where *links* to the runit service folders are dropped off
-property :service_link_root, String, default: '/opt/opscode/service'
+property :service_link_root, String, default: "/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/service"
 
 # Directory where links to the sv binary are dropped off
-property :service_init_link_root, String, default: '/opt/opscode/init'
+property :service_init_link_root, String, default: "/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/init"
 
 action :clean do
   remove_service if new_resource.is_service

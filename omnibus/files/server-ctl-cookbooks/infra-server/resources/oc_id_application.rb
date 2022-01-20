@@ -26,13 +26,13 @@ action :create do
     attributes = create!
 
     if new_resource.write_to_disk
-      directory '/etc/opscode/oc-id-applications' do
+      directory "/etc/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/oc-id-applications" do
         owner 'root'
         group 'root'
         mode '0755'
       end
 
-      file "/etc/opscode/oc-id-applications/#{new_resource.name}.json" do
+      file "/etc/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/oc-id-applications/#{new_resource.name}.json" do
         content Chef::JSONCompat.to_json_pretty(attributes)
         owner 'root'
         group 'root'
@@ -61,7 +61,7 @@ action_class do
                       #          (right here) ------^
                       # ```
                       json = shell_out!("#{env_helper} -- bin/rails runner -e production '#{rails_script}'",
-                        cwd: '/opt/opscode/embedded/service/oc_id').stdout.lines.last.chomp
+                        cwd: "/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/embedded/service/oc_id").stdout.lines.last.chomp
 
                       Chef::JSONCompat.from_json(json).delete_if { |key| %w( id created_at updated_at).include? key }
                     end

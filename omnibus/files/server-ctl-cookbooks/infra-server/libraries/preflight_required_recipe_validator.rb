@@ -39,7 +39,7 @@ class RequiredRecipePreflightValidator < PreflightValidator
       fail_with <<~EOF
         Server enforced required recipe is enabled but the recipe file does not exist or
         is misconfigured. Please set the `required_recipe["path"] = /path/to/recipe` in
-        `/etc/opscode/chef-server.rb` and run:
+        `#{CHEF_SERVER_CONFIG_FILE}` and run:
 
             chef-server-ctl reconfigure
       EOF

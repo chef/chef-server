@@ -37,8 +37,8 @@ action :deploy do
                --top-dir #{new_resource.name}
                deploy #{target} --verify
       EOM
-      environment 'PERL5LIB' => '/opt/opscode/embedded/lib', # force us to use omnibus perl
-                  'LD_LIBRARY_PATH' => '/opt/opscode/embedded/lib', # force us to use omnibus libraries
+      environment 'PERL5LIB' => "/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/embedded/lib", # force us to use omnibus perl
+                  'LD_LIBRARY_PATH' => "/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/embedded/lib", # force us to use omnibus libraries
                   'PGPASSWORD' => new_resource.password,
                   'PGSSLMODE' => new_resource.sslmode
 

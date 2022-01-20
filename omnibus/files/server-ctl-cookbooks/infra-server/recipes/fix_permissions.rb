@@ -13,7 +13,7 @@
 # limitations under the License.
 #
 
-LIB_PATH = '/opt/opscode/embedded/lib'.freeze
+LIB_PATH = "/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/embedded/lib".freeze
 # The GEM_PATH should work since we allow only one version of ruby to be installed.
 GEM_PATH = "#{LIB_PATH}/ruby/gems/*/gems".freeze
 

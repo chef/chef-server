@@ -1,13 +1,14 @@
 require_relative '../../libraries/private_chef'
 require 'chef/log'
+require 'chef-utils'
 
 def expect_existing_secrets
   allow(File).to receive(:exists?).and_call_original
-  allow(File).to receive(:exists?).with('/etc/opscode/private-chef-secrets.json').and_return(true)
-  allow(File).to receive(:size).with('/etc/opscode/private-chef-secrets.json').and_return(1)
-  allow(File).to receive(:exists?).with('/etc/opscode/pivotal.pem').and_return(false)
+  allow(File).to receive(:exists?).with("/etc/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/private-chef-secrets.json").and_return(true)
+  allow(File).to receive(:size).with("/etc/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/private-chef-secrets.json").and_return(1)
+  allow(File).to receive(:exists?).with("/etc/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/pivotal.pem").and_return(false)
   allow(IO).to receive(:read).and_call_original
-  allow(IO).to receive(:read).with('/etc/opscode/private-chef-secrets.json').and_return(secrets)
+  allow(IO).to receive(:read).with("/etc/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/private-chef-secrets.json").and_return(secrets)
 end
 
 def config_for(hostname)
@@ -37,7 +38,7 @@ describe PrivateChef do
     allow(PrivateChef).to receive(:node).and_return(node)
     allow(PrivateChef).to receive(:exit!).and_raise(SystemExit)
     allow_any_instance_of(Veil::CredentialCollection::ChefSecretsFile).to receive(:save).and_return(true)
-    allow(File).to receive(:exists?).with('/etc/opscode/private-chef-secrets.json').and_return(false)
+    allow(File).to receive(:exists?).with("/etc/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/private-chef-secrets.json").and_return(false)
   end
 
   # Example content of /etc/opscode/private-chef-secrets.json
@@ -183,7 +184,7 @@ EOF
     end
 
     before do
-      allow(File).to receive(:exists?).with('/etc/opscode/private-chef-secrets.json').and_return false
+      allow(File).to receive(:exists?).with("/etc/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/private-chef-secrets.json").and_return false
     end
 
     it 'exits with a clear error warning that HA is unsupported' do
@@ -219,7 +220,7 @@ EOF
     end
 
     before do
-      allow(File).to receive(:exists?).with('/etc/opscode/private-chef-secrets.json').and_return false
+      allow(File).to receive(:exists?).with("/etc/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/private-chef-secrets.json").and_return false
     end
 
     it 'generates secrets on the bootstrap node' do
@@ -315,7 +316,7 @@ EOF
 
       it "exits with a clear error message if it can't find a server block for the current block for the current machine" do
         expect(Chef::Log).to receive(:fatal).with <<~EOF
-          No server configuration found for "backend-passive.chef.io" in /etc/opscode/chef-server.rb.
+          No server configuration found for "backend-passive.chef.io" in /etc/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/#{ChefUtils::Dist::Server::SERVER}.rb.
           Server configuration exists for the following hostnames:
 
             backend.chef.io
@@ -329,8 +330,8 @@ EOF
 
   context 'Key File Migration' do
     let(:secrets_mock) { double(Object) }
-    let(:superuser_key_path) { '/etc/opscode/pivotal.pem' }
-    let(:webui_key_path) { '/etc/opscode/webui_priv.pem' }
+    let(:superuser_key_path) { "/etc/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/pivotal.pem" }
+    let(:webui_key_path) { "/etc/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/webui_priv.pem" }
 
     describe '#migrate_keys' do
       it 'should attempt to migrate known keys' do

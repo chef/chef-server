@@ -334,7 +334,7 @@ module PrivateChef
 
     # TODO: 2017-02-28 mp:  configurable location:
     def secrets_json
-      '/etc/opscode/private-chef-secrets.json'
+      "/etc/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/private-chef-secrets.json"
     end
 
     def credentials
@@ -556,7 +556,7 @@ module PrivateChef
     def assert_server_config(node_name)
       unless PrivateChef['servers'].key?(node_name)
         Chef::Log.fatal <<~EOF
-          No server configuration found for "#{node_name}" in /etc/opscode/chef-server.rb.
+          No server configuration found for "#{node_name}" in "#{ChefUtils::Dist::Server::CONF_DIR}/#{ChefUtils::Dist::Server::SERVER}.rb".
           Server configuration exists for the following hostnames:
 
             #{PrivateChef['servers'].keys.sort.join("\n  ")}
@@ -633,8 +633,8 @@ module PrivateChef
 
     # If known private keys are on disk, add them to Veil and commit them.
     def migrate_keys
-      did_something = add_key_from_file_if_present('chef-server', 'superuser_key', '/etc/opscode/pivotal.pem')
-      did_something |= add_key_from_file_if_present('chef-server', 'webui_key', '/etc/opscode/webui_priv.pem')
+      did_something = add_key_from_file_if_present('chef-server', 'superuser_key', "/etc/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/pivotal.pem")
+      did_something |= add_key_from_file_if_present('chef-server', 'webui_key', "/etc/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/webui_priv.pem")
       # Ensure these are committed to disk before continuing -
       # the secrets recipe will delete the old files.
       credentials.save if did_something

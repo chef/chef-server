@@ -77,7 +77,7 @@ class BootstrapPreflightValidator < PreflightValidator
   end
 
   def pivotal_pem_exists?
-    ::File.exist?('/etc/opscode/pivotal.pem')
+    ::File.exist?("/etc/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/pivotal.pem")
   end
 
   def secrets_contains_pivotal?
@@ -110,7 +110,7 @@ class BootstrapPreflightValidator < PreflightValidator
     <<~EOM
       BOOT001: Your configuration indicates that you are starting this node
                as part of a cluster, but the required file
-               /etc/opscode/pivotal.pem is missing.
+               /etc/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/pivotal.pem is missing.
 
                Pending: remediation walkthrough.
     EOM
@@ -119,7 +119,7 @@ class BootstrapPreflightValidator < PreflightValidator
   def err_BOOT002_pivotal_key_exists
     <<~EOM
       BOOT002: Your configuration indicates that you are running an initial reconfigure
-               to bring your Chef Infra Server online, but the file /etc/opscode/pivotal.pem
+               to bring your Chef Infra Server online, but the file /etc/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/pivotal.pem
                already exists.
 
                Pending: remediation walkthrough.
@@ -157,7 +157,7 @@ class BootstrapPreflightValidator < PreflightValidator
 
   def err_BOOT008_pivotal_public_key_mismatch
     <<~EOM
-      BOOT008: The pivotal key in /etc/opscode/private-chef-secrets.json exists, but its public key
+      BOOT008: The pivotal key in /etc/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/private-chef-secrets.json exists, but its public key
                does not match the key for the pivotal user in chef-server.
 
                Critical maintenance operations cannot be performed.
@@ -183,7 +183,7 @@ class BootstrapPreflightValidator < PreflightValidator
 
                Please ensure that you have copied the files 'pivotal.pem' and
                'private-chef-secrets.json' from the node to be reconfigured
-               into '/etc/opscode/' on this node before attempting to run
+               into '/etc/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/' on this node before attempting to run
                reconfigure again.
     EOM
   end
@@ -195,7 +195,7 @@ class BootstrapPreflightValidator < PreflightValidator
 
                If this is the first node you're attempting to reconfigure,
                please remove the file 'private-chef-secrets.json'
-               from '/etc/opscode' before attempting to run reconfigure again.
+               from '/etc/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}' before attempting to run reconfigure again.
     EOM
   end
 end
