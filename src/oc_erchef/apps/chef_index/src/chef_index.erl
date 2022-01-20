@@ -48,9 +48,10 @@ histogram_buckets() ->
                     {ok, non_neg_integer(), non_neg_integer(), [binary()]} |
                     {error, {solr_400, string()}} |
                     {error, {solr_500, string()}}.
-search(Query = #chef_solr_query{search_provider=SearchPro}) 
-                        when SearchPro == elasticsearch; SearchPro == opensearch->
+search(Query = #chef_solr_query{search_provider=elasticsearch}) ->
     chef_elasticsearch:search(Query);
+search(Query = #chef_solr_query{search_provider=opensearch}) ->
+    chef_opensearch:search(Query);
 search(Query = #chef_solr_query{search_provider=solr}) ->
     chef_solr:search(Query).
 
@@ -58,28 +59,27 @@ search(Query = #chef_solr_query{search_provider=solr}) ->
 update(Body) ->
     update(search_provider(), Body).
 
-update(SearchPro, Body) when SearchPro == elasticsearch; 
-                             SearchPro == opensearch ->
+update(elasticsearch, Body) ->
     chef_elasticsearch:update(Body);
+update(opensearch, Body) ->
+    chef_opensearch:update(Body);
 update(solr, Body) ->
     chef_solr:update(Body).
 
 -spec delete_search_db(OrgId :: binary()) -> ok.
 delete_search_db(OrgId) ->
     case search_provider() of
-        SearchPro when SearchPro == elasticsearch; SearchPro == opensearch -> 
-            chef_elasticsearch:delete_search_db(OrgId);
-        solr -> 
-            chef_solr:delete_search_db(OrgId)
+        elasticsearch -> chef_elasticsearch:delete_search_db(OrgId);
+        opensearch -> chef_opensearch:delete_search_db(OrgId);
+        solr -> chef_solr:delete_search_db(OrgId)
     end.
 
 -spec delete_search_db_by_type(OrgId :: binary(), Type :: atom()) -> ok.
 delete_search_db_by_type(OrgId, Type) ->
     case search_provider() of
-        SearchPro when SearchPro == elasticsearch; SearchPro == opensearch ->
-            chef_elasticsearch:delete_search_db_by_type(OrgId, Type);
-        solr -> 
-            chef_solr:delete_search_db_by_type(OrgId, Type)
+        elasticsearch -> chef_elasticsearch:delete_search_db_by_type(OrgId, Type);
+        opensearch -> chef_opensearch:delete_search_db_by_type(OrgId, Type);
+        solr -> chef_solr:delete_search_db_by_type(OrgId, Type)
     end.
 
 -spec query_from_params(binary()|string(),
@@ -96,9 +96,10 @@ add_org_guid_to_query(Query, OrgGuid) ->
 transform_data(Data) ->
     transform_data(search_provider(), Data).
 
-transform_data(SearchPro, Data) when 
-        SearchPro == elasticsearch; SearchPro == opensearch ->
+transform_data(elasticsearch, Data) ->
     chef_elasticsearch:transform_data(Data);
+transform_data(opensearch, Data) ->
+    chef_opensearch:transform_data(Data);
 transform_data(solr, Data) ->
     chef_solr:transform_data(Data).
 
