@@ -1,6 +1,6 @@
 #!/bin/sh
 
-PATH=/opt/opscode/embedded/sbin:$PATH
+PATH=/opt/<%= ChefUtils::Dist::Org::LEGACY_CONF_DIR %>/embedded/sbin:$PATH
 
 command -v logrotate >/dev/null 2>&1 || exit 0
-nice -n 19 ionice -c3 logrotate -s /var/log/opscode/logrotate.status /etc/opscode/logrotate.conf
+nice -n 19 ionice -c3 logrotate -s /var/log/<%= ChefUtils::Dist::Org::LEGACY_CONF_DIR %>/logrotate.status /etc/<%= ChefUtils::Dist::Org::LEGACY_CONF_DIR %>/logrotate.conf

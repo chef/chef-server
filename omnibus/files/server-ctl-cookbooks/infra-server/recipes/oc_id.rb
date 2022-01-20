@@ -78,7 +78,7 @@ oc_id_log_dir = node['private_chef']['oc_id']['log_directory']
 end
 
 %w(log tmp).each do |dir|
-  full_dir = "/opt/opscode/embedded/service/oc_id/#{dir}"
+  full_dir = "/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/embedded/service/oc_id/#{dir}"
   directory full_dir do
     action :delete
     recursive true
@@ -86,11 +86,11 @@ end
   end
 end
 
-link '/opt/opscode/embedded/service/oc_id/log' do
+link "/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/embedded/service/oc_id/log" do
   to oc_id_log_dir
 end
 
-link '/opt/opscode/embedded/service/oc_id/tmp' do
+link "/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/embedded/service/oc_id/tmp" do
   to oc_id_tmp_dir
 end
 
@@ -108,7 +108,7 @@ end
 #
 ## Symlink settings file into the rails service directory
 #
-settings_file = '/opt/opscode/embedded/service/oc_id/config/settings/production.yml'
+settings_file = "/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/embedded/service/oc_id/config/settings/production.yml"
 file settings_file do
   action :delete
   not_if { File.symlink?(settings_file) }
@@ -126,7 +126,7 @@ template "#{oc_id_config_dir}/secret_token.rb" do
   notifies :restart, 'component_runit_service[oc_id]'
 end
 
-secrets_file = '/opt/opscode/embedded/service/oc_id/config/initializers/secret_token.rb'
+secrets_file = "/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/embedded/service/oc_id/config/initializers/secret_token.rb"
 file secrets_file do
   action :delete
   not_if { File.symlink?(secrets_file) }
@@ -144,7 +144,7 @@ template "#{oc_id_config_dir}/database.yml" do
   notifies :restart, 'component_runit_service[oc_id]'
 end
 
-database_file = '/opt/opscode/embedded/service/oc_id/config/database.yml'
+database_file = "/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/embedded/service/oc_id/config/database.yml"
 file database_file do
   action :delete
   not_if { File.symlink?(database_file) }
@@ -171,7 +171,7 @@ end
 veil_helper_args = '--use-file -s chef-server.webui_key -s oc_id.sql_password -s oc_id.secret_key_base'
 execute 'oc_id_schema' do
   command "veil-env-helper #{veil_helper_args} -- bundle exec --keep-file-descriptors rake db:migrate"
-  cwd '/opt/opscode/embedded/service/oc_id'
+  cwd "/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/embedded/service/oc_id"
 
   # There are other recipes that depend on having a VERSION environment
   # variable. If that environment variable is set when we run `rake db:migrate`,
@@ -183,8 +183,8 @@ execute 'oc_id_schema' do
   #
   # Also set the RAILS_ENV as is needed.
   environment('RAILS_ENV' => 'production',
-              'VERSION' => `ls -1 /opt/opscode/embedded/service/oc_id/db/migrate | tail -n 1 | sed -e "s/_.*//g"`.chomp,
-              'PATH' => '/opt/opscode/embedded/bin')
+              'VERSION' => `ls -1 /opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/embedded/service/oc_id/db/migrate | tail -n 1 | sed -e "s/_.*//g"`.chomp,
+              'PATH' => "/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/embedded/bin")
   sensitive true
   only_if { is_data_master? }
 end
@@ -194,7 +194,7 @@ component_runit_service 'oc_id' do
 end
 
 if node['private_chef']['bootstrap']['enable']
-  execute '/opt/opscode/bin/chef-server-ctl start oc_id' do
+  execute "/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/bin/chef-server-ctl start oc_id" do
     retries 20
   end
 end

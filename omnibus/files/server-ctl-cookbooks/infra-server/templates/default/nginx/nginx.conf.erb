@@ -2,7 +2,7 @@
 user <%= node['private_chef']['user']['username'] %> <%= node['private_chef']['user']['username']%>;
 <% end %>
 worker_processes <%= @worker_processes %>;
-error_log /var/log/opscode/nginx/error.log<%= node['private_chef']['lb']['debug'] ? " debug" : "" %>;
+error_log /var/log/<%= ChefUtils::Dist::Org::LEGACY_CONF_DIR %>/nginx/error.log<%= node['private_chef']['lb']['debug'] ? " debug" : "" %>;
 # Enviroment variables that we wish to access while running must be declared here,
 # otherwise they will not be available.
 env REDIS_PASSWORD;
@@ -17,9 +17,9 @@ http {
   server_tokens off;
 
 <% if node['private_chef']['nginx']['log_x_forwarded_for'] -%>
-  log_format opscode ' $http_x_forwarded_for- $remote_user [$<%= @helper.time_format %>]  '
+  log_format <%= ChefUtils::Dist::Org::LEGACY_CONF_DIR %> ' $http_x_forwarded_for- $remote_user [$<%= @helper.time_format %>]  '
 <% else -%>
-  log_format opscode '$remote_addr - $remote_user [$<%= @helper.time_format %>]  '
+  log_format <%= ChefUtils::Dist::Org::LEGACY_CONF_DIR %> '$remote_addr - $remote_user [$<%= @helper.time_format %>]  '
 <% end -%>
                     '"$request" $status "$request_time" $body_bytes_sent '
                     '"$http_referer" "$http_user_agent" "$upstream_addr" "$upstream_status" "$upstream_response_time" "$http_x_chef_version" "$http_x_ops_sign" "$http_x_ops_userid" "$http_x_ops_timestamp" "$http_x_ops_content_hash" $request_length "$http_x_remote_request_id"';
@@ -44,7 +44,7 @@ http {
   gzip_proxied <%= @gzip_proxied %>;
   gzip_types <%= @gzip_types.join(' ') %>;
 
-  include /opt/opscode/embedded/conf/mime.types;
+  include /opt/<%= ChefUtils::Dist::Org::LEGACY_CONF_DIR %>/embedded/conf/mime.types;
 
   lua_package_path "<%=@script_path %>/?.lua;$prefix/?.lua;;";
   lua_shared_dict maint_data 1m;
@@ -150,7 +150,7 @@ http {
             <%= @helper.listen_port('http') %>
             server_name <%= @helper.server_name %>;
             more_clear_headers Server;
-            access_log /var/log/opscode/nginx/rewrite-port-80.log;
+            access_log /var/log/<%= ChefUtils::Dist::Org::LEGACY_CONF_DIR %>/nginx/rewrite-port-80.log;
             return 301 https://$host$request_uri;
             location @errorrespfilter {
               return 301 https://$host$request_uri;
@@ -185,8 +185,8 @@ http {
     proxy_send_timeout      90;
     proxy_read_timeout      90;
 
-    access_log /var/log/opscode/nginx/internal-chef.access.log opscode;
-    error_log  /var/log/opscode/nginx/internal-chef.error.log<%= node['private_chef']['lb']['debug'] ? " debug" : "" %>;
+    access_log /var/log/<%= ChefUtils::Dist::Org::LEGACY_CONF_DIR %>/nginx/internal-chef.access.log <%= ChefUtils::Dist::Org::LEGACY_CONF_DIR %>;
+    error_log  /var/log/<%= ChefUtils::Dist::Org::LEGACY_CONF_DIR %>/nginx/internal-chef.error.log<%= node['private_chef']['lb']['debug'] ? " debug" : "" %>;
 
     # Include internal routes for addons
     include <%= node['private_chef']['nginx']['dir'] %>/etc/addon.d/*_internal.conf;

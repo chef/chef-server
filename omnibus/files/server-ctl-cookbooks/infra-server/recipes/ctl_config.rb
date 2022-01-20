@@ -29,7 +29,7 @@ else
 end
 vip = "#{vip_root}:#{port}"
 
-template '/etc/opscode/pivotal.rb' do
+template "/etc/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/pivotal.rb" do
   source 'pivotal.rb.erb'
   owner 'root'
   group 'root'

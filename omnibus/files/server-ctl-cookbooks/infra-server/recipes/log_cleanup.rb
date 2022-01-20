@@ -19,7 +19,7 @@
 
 # not using /etc/logrotate.d on purpose here so that busted system logrotation will not break
 # the privatechef logrotation.
-template '/etc/opscode/logrotate.conf' do
+template "/etc/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/logrotate.conf" do
   source 'logrotate-opscode.conf'
   mode   '0644'
   owner  'root'
