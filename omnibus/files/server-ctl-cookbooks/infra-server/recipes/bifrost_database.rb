@@ -37,7 +37,7 @@ pg_database 'bifrost' do
   owner bifrost_attrs['sql_user']
   # This is used to trigger creation of the schema during install.
   # For upgrades, create a partybus migration to perform any schema changes.
-  notifies :deploy, 'pg_sqitch[/opt/opscode/embedded/service/oc_bifrost/db]', :immediately
+  notifies :deploy, "pg_sqitch[/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/embedded/service/oc_bifrost/db]", :immediately
 end
 
 pg_user_table_access bifrost_attrs['sql_user'] do
@@ -55,7 +55,7 @@ end
 # Note that these migrations are only deployed during an initial install via the
 # :deploy notification above.  Upgrades to existing installations must be managed
 # via partybus migrations.
-pg_sqitch '/opt/opscode/embedded/service/oc_bifrost/db' do
+pg_sqitch "/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/embedded/service/oc_bifrost/db" do
   hostname postgres_attrs['vip']
   port     postgres_attrs['port']
   username postgres_attrs['db_connection_superuser'] || postgres_attrs['db_superuser']

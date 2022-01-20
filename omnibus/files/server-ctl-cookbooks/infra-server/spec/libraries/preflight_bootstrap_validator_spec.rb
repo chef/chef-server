@@ -32,8 +32,8 @@ describe BootstrapPreflightValidator do
       allow(PrivateChef).to receive(:credentials).and_return(credentials)
       allow(credentials).to receive(:length).and_return(secret_count)
       allow(credentials).to receive(:exist?).with('chef-server', anything).and_return(superuser_key_exists)
-      allow(File).to receive(:exist?).with('/etc/opscode/private-chef-secrets.json').and_return(false)
-      allow(File).to receive(:exist?).with('/etc/opscode/pivotal.pem').and_return(false)
+      allow(File).to receive(:exist?).with("/etc/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/private-chef-secrets.json").and_return(false)
+      allow(File).to receive(:exist?).with("/etc/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/pivotal.pem").and_return(false)
     end
 
     context 'when a previous run exists' do

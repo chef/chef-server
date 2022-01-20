@@ -16,7 +16,7 @@
 # limitations under the License.
 #
 
-cookbook_migration = '/opt/opscode/embedded/bin/cookbook_migration.sh'
+cookbook_migration = "/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/embedded/bin/cookbook_migration.sh"
 
 data_path = node['private_chef']['bookshelf']['data_dir']
 
@@ -54,7 +54,7 @@ execute 'cookbook migration' do
   not_if { ::File.exist?("#{data_path}/_%_BOOKSHELF_DISK_FORMAT") }
 end
 
-link '/opt/opscode/embedded/service/bookshelf/log' do
+link "/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/embedded/service/bookshelf/log" do
   to bookshelf_log_dir
 end
 
@@ -72,7 +72,7 @@ template bookshelf_config do
   notifies :restart, 'component_runit_service[bookshelf]' if is_data_master?
 end
 
-link '/opt/opscode/embedded/service/bookshelf/sys.config' do
+link "/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/embedded/service/bookshelf/sys.config" do
   to bookshelf_config
 end
 
@@ -86,7 +86,7 @@ template vmargs_config do
   notifies :restart, 'component_runit_service[bookshelf]' if is_data_master?
 end
 
-link '/opt/opscode/embedded/service/bookshelf/vm.args' do
+link "/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/embedded/service/bookshelf/vm.args" do
   to vmargs_config
 end
 

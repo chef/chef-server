@@ -16,9 +16,9 @@
 # limitations under the License.
 #
 
-if File.exist?('/etc/opscode/chef-server.rb')
+if File.exist?("/etc/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/#{ChefUtils::Dist::Server::SERVER}.rb")
   PrivateChef[:node] = node
-  PrivateChef.from_file('/etc/opscode/chef-server.rb')
+  PrivateChef.from_file("/etc/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/#{ChefUtils::Dist::Server::SERVER}.rb")
 end
 config = PrivateChef.generate_config(node['fqdn'])
 

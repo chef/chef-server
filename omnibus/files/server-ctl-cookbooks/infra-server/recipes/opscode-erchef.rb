@@ -33,7 +33,7 @@ opscode_erchef_sasl_log_dir = File.join(opscode_erchef_log_dir, 'sasl')
   end
 end
 
-link '/opt/opscode/embedded/service/opscode-erchef/log' do
+link "/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/embedded/service/opscode-erchef/log" do
   to opscode_erchef_log_dir
 end
 
@@ -77,7 +77,7 @@ execute 'remove_erchef_siz_files' do
   action :nothing
 end
 
-link '/opt/opscode/embedded/service/opscode-erchef/sys.config' do
+link "/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/embedded/service/opscode-erchef/sys.config" do
   to erchef_config
 end
 
@@ -91,7 +91,7 @@ template vmargs_config do
   notifies :restart, 'component_runit_service[opscode-erchef]'
 end
 
-link '/opt/opscode/embedded/service/opscode-erchef/vm.args' do
+link "/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/embedded/service/opscode-erchef/vm.args" do
   to vmargs_config
 end
 

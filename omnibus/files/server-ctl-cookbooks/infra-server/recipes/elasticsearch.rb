@@ -78,7 +78,7 @@ sysctl 'vm.max_map_count' do
 end
 
 # Remove the old env config to ensre it's not left over after an upgrade.
-directory '/opt/opscode/service/elasticsearch/env' do
+directory "/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/service/elasticsearch/env" do
   action :delete
   recursive true
 end
@@ -153,7 +153,7 @@ end
 #
 # TODO - what happens on upgrade? Will the config disappear until reconfigure?
 #
-link '/opt/opscode/embedded/elasticsearch/config' do
+link "/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/embedded/elasticsearch/config" do
   to elasticsearch_conf_dir
 end
 
