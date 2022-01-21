@@ -222,7 +222,7 @@ elasticsearch['new_size'] = Elasticsearch.new_size_default(node)
 ####
 opensearch = default['private_chef']['opensearch']
 
-opensearch['enable'] = true
+opensearch['enable'] = false
 opensearch['external_url'] = 'http://54.183.208.113:9200'
 opensearch['vip'] = '54.183.208.113'
 opensearch['port'] = 9200
@@ -253,7 +253,6 @@ default['private_chef']['opscode-erchef']['bulk_fetch_batch_size'] = '5'
 default['private_chef']['opscode-erchef']['udp_socket_pool_size'] = nil
 default['private_chef']['opscode-erchef']['sql_user'] = 'opscode_chef'
 default['private_chef']['opscode-erchef']['sql_ro_user'] = 'opscode_chef_ro'
-default['private_chef']['opscode-erchef']['opensearch_user'] = 'opscode_chef'
 # See default['private_chef']['postgresql']['db_connection_superuser'] for information
 default['private_chef']['opscode-erchef']['sql_connection_user'] = nil
 default['private_chef']['opscode-erchef']['enable_request_logging'] = true
@@ -330,11 +329,11 @@ default['private_chef']['opscode-erchef']['ibrowse_max_sessions'] = 256
 default['private_chef']['opscode-erchef']['ibrowse_max_pipeline_size'] = 1
 default['private_chef']['opscode-erchef']['enable_ibrowse_traces'] = false
 # general search settings used to set up chef_index
-default['private_chef']['opscode-erchef']['search_provider'] = 'opensearch' #by default elasticsearch, only for external set opensearch for now
+default['private_chef']['opscode-erchef']['search_provider'] = 'elasticsearch' #by default elasticsearch, only for external set opensearch for now
 default['private_chef']['opscode-erchef']['search_queue_mode'] = 'batch'
 default['private_chef']['opscode-erchef']['search_batch_max_size'] = '5000000'
 default['private_chef']['opscode-erchef']['search_batch_max_wait'] = '10'
-default['private_chef']['opscode-erchef']['search_auth_enabled'] = true
+default['private_chef']['opscode-erchef']['search_auth_enabled'] = false
 default['private_chef']['opscode-erchef']['search_auth_username'] = "admin"
 default['private_chef']['opscode-erchef']['search_auth_password'] = "admin"
 # solr_service configuration for erchef. These are used to configure an opscoderl_httpc pool
