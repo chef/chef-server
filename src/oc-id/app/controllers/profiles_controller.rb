@@ -16,7 +16,7 @@ class ProfilesController < ApplicationController
   #
   def update
     @user = current_user
-    updated_email = permit_all_params.has_key? :email
+    updated_email = (permit_all_params.has_key? :email) && (permit_all_params[:email] != @user.email)
 
     # Note that if an email address is provided, don't update it right away.
     # Instead send a verification email and let that email link update the
