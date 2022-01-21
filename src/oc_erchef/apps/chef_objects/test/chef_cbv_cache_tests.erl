@@ -71,7 +71,7 @@ claim_replies_retry_when_another_pid_has_claimed_first_test_() ->
    fun() ->
        spawn(fun() -> chef_cbv_cache:claim(other_key) end),
        timer:sleep(100), % Give the claim time to go through
-       ?assertEqual(retry, chef_cbv_cache:claim(other_key))
+       ?assertEqual({error, retry}, chef_cbv_cache:claim(other_key))
    end
   }.
 
@@ -103,7 +103,7 @@ put_does_not_return_busy_when_cache_queue_limit_exceeded_test_() ->
        timer:sleep(100), % QUEUE_LEN_REFRESH_INTERVAL
 
        % verify that rquests that use the breaker are failing
-       ?assertEqual(busy, chef_cbv_cache:get(my_key)),
+       ?assertEqual({error, busy}, chef_cbv_cache:get(my_key)),
 
        % Let it start processing the junk
        erlang:resume_process(Pid),
@@ -135,8 +135,8 @@ get_and_claim_return_busy_when_cache_queue_limit_exceeded_test_() ->
        timer:sleep(100), % QUEUE_LEN_REFRESH_INTERVAL
 
        % Any calls should be stopped before a message is sent to chef_cbv_cache
-       ?assertEqual(busy, chef_cbv_cache:get(anything)),
-       ?assertEqual(busy, chef_cbv_cache:claim(anything)),
+       ?assertEqual({error, busy}, chef_cbv_cache:get(anything)),
+       ?assertEqual({error, busy}, chef_cbv_cache:claim(anything)),
        erlang:resume_process(Pid)
    end
   }.
@@ -180,7 +180,7 @@ get_returns_retry_when_another_proc_has_invoked_claim_test_() ->
                          timer:sleep(200)
              end),
        timer:sleep(100),
-       ?assertEqual(retry, chef_cbv_cache:get(reserved_key))
+       ?assertEqual({error, retry}, chef_cbv_cache:get(reserved_key))
    end
   }.
 get_returns_undefined_when_another_proc_has_invoked_claim_and_died_test_() ->
