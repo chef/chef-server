@@ -34,7 +34,7 @@ category: Alert
 */
 
 @import '../settings';
-@import 'foundation/components/alert-boxes';
+@import '../foundation-rails/components/alert-boxes';
 
 .alert-box.info {
   a {
