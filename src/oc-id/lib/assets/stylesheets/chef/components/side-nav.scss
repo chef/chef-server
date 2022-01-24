@@ -56,7 +56,7 @@ $side-nav-link-color:           $chef-grey !default;
 $side-nav-padding:              rem-calc(0) !default;
 $side-nav-font-size:            rem-calc(13) !default;
 
-@import 'foundation/components/side-nav';
+@import '../foundation-rails/components/side-nav';
 
 // Structure
 

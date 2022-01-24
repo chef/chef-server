@@ -28,4 +28,4 @@ $panel-bg:              scale-color($chef-white, $lightness: -5%);
 $panel-border-style:    none;
 $panel-padding:         $column-gutter / 2;
 
-@import 'foundation/components/panels';
+@import '../foundation-rails/components/panels';
