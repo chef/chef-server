@@ -1,10 +1,10 @@
 #!/bin/sh
 exec 2>&1
-exec /opt/<%= ChefUtils::Dist::Org::LEGACY_CONF_DIR %>/embedded/bin/veil-env-helper -o DATA_COLLECTOR_TOKEN=data_collector.token -s REDIS_PASSWORD=redis_lb.password -- \
+exec /opt/<%= ChefUtils::Dist::Org::LEGACY_CONF_DIR %>/embedded/bin/veil-env-helper -f /etc/<%= ChefUtils::Dist::Org::LEGACY_CONF_DIR %>/private-chef-secrets.json -o DATA_COLLECTOR_TOKEN=data_collector.token -s REDIS_PASSWORD=redis_lb.password -- \
   chpst \
   <% if node['private_chef']['nginx']['nginx_no_root'] %>
   -U <%= node['private_chef']['user']['username'] %> \
   -u <%= node['private_chef']['user']['username'] %> \
   <% end %>
-  -P env TZ=UTC <%= "OPENSSL_CONF=/opt/<%= ChefUtils::Dist::Org::LEGACY_CONF_DIR %>/embedded/ssl/openssl.fips.cnf" if node['private_chef']['fips_enabled'] %> \
+  -P env TZ=UTC <%= "OPENSSL_CONF=/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/embedded/ssl/openssl.fips.cnf" if node['private_chef']['fips_enabled'] %> \
   /opt/<%= ChefUtils::Dist::Org::LEGACY_CONF_DIR %>/embedded/sbin/nginx -c <%= File.join(node['private_chef']['nginx']['dir'], "etc", "nginx.conf") %>

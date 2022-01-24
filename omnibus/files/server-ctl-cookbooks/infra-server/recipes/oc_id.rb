@@ -168,7 +168,7 @@ execute "chown -R #{OmnibusHelper.new(node).ownership['owner']}:#{OmnibusHelper.
   end
 end
 
-veil_helper_args = '--use-file -s chef-server.webui_key -s oc_id.sql_password -s oc_id.secret_key_base'
+veil_helper_args = "--use-file -f /etc/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/private-chef-secrets.json -s chef-server.webui_key -s oc_id.sql_password -s oc_id.secret_key_base"
 execute 'oc_id_schema' do
   command "veil-env-helper #{veil_helper_args} -- bundle exec --keep-file-descriptors rake db:migrate"
   cwd "/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/embedded/service/oc_id"
@@ -185,7 +185,7 @@ execute 'oc_id_schema' do
   environment('RAILS_ENV' => 'production',
               'VERSION' => `ls -1 /opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/embedded/service/oc_id/db/migrate | tail -n 1 | sed -e "s/_.*//g"`.chomp,
               'PATH' => "/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/embedded/bin")
-  sensitive true
+  # sensitive true
   only_if { is_data_master? }
 end
 
