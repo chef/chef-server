@@ -1470,6 +1470,7 @@ This configuration file has the following settings for `opscode-erchef`:
 :   The minimum time in milliseconds that Chef Infra Server will keep any given cookbook version response in the cache when
     when `cbv_cache_enabled` is enabled.
     Default value: `30000`.
+    
 {{< note >}}
 
 Be careful if increasing this number - requests for a given set of cookbook versions will be stale if the resolved cookbook versions are updated before the cache entry times out. This will

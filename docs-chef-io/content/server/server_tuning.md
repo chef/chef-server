@@ -51,9 +51,7 @@ The following settings are often used to for performance tuning of the
 Chef Infra Server in larger installations.
 
 {{< note >}}
-
 {{% notes_config_rb_server_must_reconfigure %}}
-
 {{< /note >}}
 
 ### bookshelf
