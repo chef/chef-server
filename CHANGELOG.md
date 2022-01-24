@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.12.13 -->
-## [14.12.13](https://github.com/chef/chef-server/tree/14.12.13) (2022-01-24)
+<!-- latest_release 14.12.14 -->
+## [14.12.14](https://github.com/chef/chef-server/tree/14.12.14) (2022-01-24)
 
 #### Merged Pull Requests
-- The version should still be 14.12 [#3112](https://github.com/chef/chef-server/pull/3112) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Remove documentation for flavor [#3081](https://github.com/chef/chef-server/pull/3081) ([tas50](https://github.com/tas50))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.11.36 -->
 ### Changes since 14.11.36 release
 
 #### Merged Pull Requests
+- Remove documentation for flavor [#3081](https://github.com/chef/chef-server/pull/3081) ([tas50](https://github.com/tas50)) <!-- 14.12.14 -->
 - The version should still be 14.12 [#3112](https://github.com/chef/chef-server/pull/3112) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.12.13 -->
 - Removed foundation-rails gem [#3015](https://github.com/chef/chef-server/pull/3015) ([antima-gupta](https://github.com/antima-gupta)) <!-- 14.13.0 -->
 - Cookbook version caching updates  [#3079](https://github.com/chef/chef-server/pull/3079) ([marcparadise](https://github.com/marcparadise)) <!-- 14.12.12 -->
