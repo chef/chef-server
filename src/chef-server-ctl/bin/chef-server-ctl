@@ -35,7 +35,7 @@ module Omnibus
       if ENV.has_key?(CREDENTIAL_ENV)
         @credentials = Veil::CredentialCollection::ChefSecretsEnv.new(var_name: CREDENTIAL_ENV)
       else
-        secrets_file = ENV["SECRETS_FILE"] || "/etc/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/private-#{ChefUtils::Dist::Infra::SHORT}-secrets.json"
+        secrets_file = ENV["SECRETS_FILE"] || "/etc/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/private-chef-secrets.json"
         @credentials ||= Veil::CredentialCollection::ChefSecretsFile.from_file(secrets_file)
       end
     end
@@ -333,7 +333,7 @@ end
 # This replaces the default bin/omnibus-ctl command
 require "pathname"
 file_path = Pathname.new(__FILE__)
-cmd_name = "opscode" # what does this do? was ARGV[0]
+cmd_name = ChefUtils::Dist::Org::LEGACY_CONF_DIR # what does this do? was ARGV[0]
 plugin_path = file_path.dirname.parent.join("plugins")
 arguments = ARGV[0..-1] # Get the rest of the command line arguments
 

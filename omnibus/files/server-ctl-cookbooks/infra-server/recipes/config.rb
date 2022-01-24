@@ -39,7 +39,7 @@ if File.exist?(server_running_json)
   node.consume_attributes('previous_run' => old_config['private_chef'])
 end
 
-chef_server_path = "/etc/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/chef-server.rb"
+chef_server_path = "/etc/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/#{ChefUtils::Dist::Server::SERVER}.rb"
 chef_server_json_path = "/etc/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/chef-server.json"
 private_chef_path = "/etc/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/private-chef.rb"
 

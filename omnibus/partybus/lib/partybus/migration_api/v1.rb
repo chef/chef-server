@@ -74,7 +74,7 @@ module Partybus
             --db-host #{Partybus.config.postgres['vip']}
             --db-port #{Partybus.config.postgres['port']}
             --db-user #{options[:username]}
-            --top-dir /opt/opscode/embedded/service/#{options[:path]}
+            --top-dir /opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/embedded/service/#{options[:path]}
             deploy #{target} --verify
         EOM
         run_command(command, env: {"PGPASSWORD" => options[:password]})
