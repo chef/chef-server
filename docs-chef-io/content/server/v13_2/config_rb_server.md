@@ -23,9 +23,7 @@ The following settings are often used for performance tuning of the Chef
 Infra Server in larger installations.
 
 {{< note >}}
-
 {{< reusable_text_versioned file="notes_config_rb_server_must_reconfigure">}}
-
 {{< /note >}}
 
 {{< note >}}
