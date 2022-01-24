@@ -4,4 +4,5 @@ rewrite ^/id$ /id/ permanent;
 location ~ "^/id/.*$" {
     proxy_redirect http://oc_id /;
     proxy_pass http://oc_id;
+    add_header Content-Security-Policy "default-src 'self' 'unsafe-inline' https: data:; base-uri 'self';";
 }
