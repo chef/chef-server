@@ -45,10 +45,6 @@ This configuration file has the following general settings:
 :   The `ORG_NAME` part of the `/organizations` endpoint in Chef Infra
     Server.
 
-`flavor`
-
-:   Default value: `'cs'`.
-
 `fips`
 
 :   Set to `true` to run the server in FIPS compliance mode. Set to
@@ -94,12 +90,12 @@ Chef Infra Server versions earlier than 14.5 that are configured with `nginx['en
 
 :   The URL to visit for more information about how to update the number
     of nodes licensed for an organization. Default value:
-    `https://www.chef.io/pricing'`.
+    `'https://www.chef.io/pricing'`.
 
 `notification_email`
 
 :   The email addressed to which email notifications are sent. Default
-    value: `'pc-default@opscode.com'`.
+    value: `'pc-default@chef.io'`.
 
 `role`
 
