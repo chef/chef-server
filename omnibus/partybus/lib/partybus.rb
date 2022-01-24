@@ -10,8 +10,8 @@ module Partybus
 
   class Config
 
-    SECRETS_FILE = "/etc/opscode/private-chef-secrets.json"
-    RUNNING_CONFIG_FILE = "/etc/opscode/chef-server-running.json"
+    SECRETS_FILE = "/etc/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/private-chef-secrets.json"
+    RUNNING_CONFIG_FILE = "/etc/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/chef-server-running.json"
 
     attr_accessor :database_service_name
     attr_accessor :partybus_migration_directory

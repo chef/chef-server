@@ -233,7 +233,7 @@ class PostgresqlPreflightValidator < PreflightValidator
   def err_CSPG002_missing_superuser_id
     <<~EOM
       CSPG002: You have not set a database superuser name under
-               "postgresql['db_superuser']" in chef-server.rb.  This is required
+               "postgresql['db_superuser']" in #{ChefUtils::Dist::Server::SERVER}.rb.  This is required
                for external database support - please set it now and
                then re-run 'chef-server-ctl reconfigure'.
 
@@ -258,7 +258,7 @@ class PostgresqlPreflightValidator < PreflightValidator
     <<~EOM
       CSPG004: Because postgresql['external'] is set to true, you must also set
                postgresql['vip'] to the host or IP of an external postgres database
-               in chef-server.rb.
+               in #{ChefUtils::Dist::Server::SERVER}.rb.
 
                See https://docs.chef.io/server/#postgresql-settings
                for more information.
@@ -282,7 +282,7 @@ class PostgresqlPreflightValidator < PreflightValidator
 CSPG011: I could not authenticate to #{cs_pg_attr['vip']} as
          #{cs_pg_attr['db_connection_superuser'] || cs_pg_attr['db_superuser']} using the password provided.
          Please make sure that the the password you provided in
-         chef-server.rb under "postgresql['db_superuser_password'] is correct
+         #{ChefUtils::Dist::Server::SERVER}.rb under "postgresql['db_superuser_password'] is correct
          for this user.
 
          See https://docs.chef.io/errors/#cspg011-cannot-authenticate
