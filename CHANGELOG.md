@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.12.12 -->
-## [14.12.12](https://github.com/chef/chef-server/tree/14.12.12) (2022-01-21)
+<!-- latest_release 14.13.0 -->
+## [14.13.0](https://github.com/chef/chef-server/tree/14.13.0) (2022-01-24)
 
 #### Merged Pull Requests
-- Cookbook version caching updates  [#3079](https://github.com/chef/chef-server/pull/3079) ([marcparadise](https://github.com/marcparadise))
+- Removed foundation-rails gem [#3015](https://github.com/chef/chef-server/pull/3015) ([antima-gupta](https://github.com/antima-gupta))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.11.36 -->
 ### Changes since 14.11.36 release
 
 #### Merged Pull Requests
+- Removed foundation-rails gem [#3015](https://github.com/chef/chef-server/pull/3015) ([antima-gupta](https://github.com/antima-gupta)) <!-- 14.13.0 -->
 - Cookbook version caching updates  [#3079](https://github.com/chef/chef-server/pull/3079) ([marcparadise](https://github.com/marcparadise)) <!-- 14.12.12 -->
 - Minor updates to the static website [#3090](https://github.com/chef/chef-server/pull/3090) ([tas50](https://github.com/tas50)) <!-- 14.12.11 -->
 - Bump omnibus-software from `4707275` to `774125f` in /omnibus [#3088](https://github.com/chef/chef-server/pull/3088) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.12.10 -->
