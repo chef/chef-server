@@ -414,13 +414,13 @@ module PrivateChef
       if pass_in_secrets != pass_in_config
         warning = <<~WARN
           #{config_key_desc} in secrets store does not match the value
-          configured in chef-server.rb -- overriding secrets store password with
+          configured in #{ChefUtils::Dist::Server::SERVER}.rb -- overriding secrets store password with
           configuration file password.
         WARN
         if command_name
           warning << <<~WARN2
             If this is unexpected, consider removing the secret from
-            chef-server.rb and setting the correct value with:
+            #{ChefUtils::Dist::Server::SERVER}.rb and setting the correct value with:
 
                 chef-server-ctl #{command_name}
           WARN2
@@ -429,8 +429,8 @@ module PrivateChef
         unless PrivateChef['insecure_addon_compat']
           warning = <<~WARN
             #{config_key_desc} has been saved to the secrets store
-            but is also still in chef-server.rb. Please remove this from
-            chef-server.rb.
+            but is also still in #{ChefUtils::Dist::Server::SERVER}.rb. Please remove this from
+            #{ChefUtils::Dist::Server::SERVER}.rb.
           WARN
         end
       end

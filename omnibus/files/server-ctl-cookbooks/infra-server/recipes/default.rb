@@ -18,6 +18,7 @@
 
 require 'uuidtools'
 require 'openssl'
+require 'English' # for $CHILD_STATUS, etc variables 
 
 # Because these symlinks get removed during the postrm
 # of the chef-server and private-chef packages, we should
