@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.12.15 -->
-## [14.12.15](https://github.com/chef/chef-server/tree/14.12.15) (2022-01-24)
+<!-- latest_release 14.12.16 -->
+## [14.12.16](https://github.com/chef/chef-server/tree/14.12.16) (2022-01-25)
 
 #### Merged Pull Requests
-- change find command to ignore /var/log/lastlog [#3103](https://github.com/chef/chef-server/pull/3103) ([y-me-y](https://github.com/y-me-y))
+- Remove newrelic_rpm gem from oc-id [#2993](https://github.com/chef/chef-server/pull/2993) ([tas50](https://github.com/tas50))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.11.36 -->
 ### Changes since 14.11.36 release
 
 #### Merged Pull Requests
+- Remove newrelic_rpm gem from oc-id [#2993](https://github.com/chef/chef-server/pull/2993) ([tas50](https://github.com/tas50)) <!-- 14.12.16 -->
 - change find command to ignore /var/log/lastlog [#3103](https://github.com/chef/chef-server/pull/3103) ([y-me-y](https://github.com/y-me-y)) <!-- 14.12.15 -->
 - Remove documentation for flavor [#3081](https://github.com/chef/chef-server/pull/3081) ([tas50](https://github.com/tas50)) <!-- 14.12.14 -->
 - The version should still be 14.12 [#3112](https://github.com/chef/chef-server/pull/3112) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.12.13 -->
