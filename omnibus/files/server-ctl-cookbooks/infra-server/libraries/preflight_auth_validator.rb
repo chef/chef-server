@@ -50,7 +50,7 @@ class AuthPreflightValidator < PreflightValidator
     <<~EOM
       AUTH001: Your configuration indicates that you are attempting to
                enable both LDAP and SAML authentication. Only one of these
-               authentication types can be enabled across Chef Infra Server and
+               authentication types can be enabled across #{ChefUtils::Dist::Server::PRODUCT} and
                Chef Manage simultaneously.
     EOM
   end
