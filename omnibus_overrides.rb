@@ -13,4 +13,5 @@ override :redis, version: "5.0.14"
 override :cpanminus, version: "1.7004" # 1.9019 breaks installs currently
 override :logrotate, version: "3.9.2" # 3.18.0 patches fail
 
+# update `src/openresty-noroot/habitat/plan.sh` when updating this version.
 override :openresty, version: "1.19.9.1"
