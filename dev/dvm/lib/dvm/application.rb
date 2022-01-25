@@ -13,14 +13,17 @@ module DVM
     "rails" => DVM::RailsProject
   }
   class Application < Thor
+    def self.exit_on_failure?
+      true
+    end
+
     def initialize(args, local_options,config)
       super
 
       @projects = {}
-      # Note use of hard-coded paths here.  Since I want this installed
-      # as a gem, and to accept modifications at any time to the config files,
-      # and this is intended for use ina  controlled environment - this seems
-      # like the best answer.
+      # /vagrant maps to chef-server/dev on the host. defaults.yml is expected to
+      # always be present; and config.yml may be present to provide overrides and additions to the
+      # defaults.
       @config = YAML.load_file("/vagrant/defaults.yml")
       if File.file? "/vagrant/config.yml"
         overrides = YAML.load_file("/vagrant/config.yml")
@@ -31,8 +34,6 @@ module DVM
         @projects[name] = PROJECT_CLASSES[type].new(name, @config)
       end
     end
-
-
 
     desc "ls [project]", "list available projects, or available dependencies within project"
     def ls(project = nil)
@@ -73,14 +74,6 @@ module DVM
       else
         project.load_dep(dep, options)
       end
-    end
-
-
-    desc "etop <project>", "run etop to monitor the running project"
-    def etop(project_name)
-      ensure_project(project_name)
-      @projects[project_name].etop
-
     end
 
     desc "unload <project> [dep]", "unload a project or a project's named dependency"
@@ -145,44 +138,10 @@ module DVM
       exec "sudo -u opscode-pgsql /opt/opscode/embedded/bin/psql #{database}"
     end
 
-
     desc "stop <project>", "Stop a running service that has been loaded locally"
     def stop(project_name)
       ensure_project(project_name)
       @projects[project_name].stop
-    end
-
-
-    desc "quickstart [<configname>]", "Execute a quickstart configuration.  Use with no arguments to see what's available"
-    def qs(configname = nil)
-      quickstart(configname)
-    end
-    desc "quickstart [<configname>]", "Execute a quickstart configuration.  Use with no arguments to see what's available"
-    def quickstart(configname = nil)
-      if configname.nil?
-        say "The following quickstart configurations are available:"
-        @config["quickstart"].each do |name, qs|
-          say "  #{name} : #{qs["description"]}"
-        end
-      else
-        # TODO support different quickstart configurations by name (bookshelf, oc-id, etc)
-        qs = @config["quickstart"][configname]
-        raise DVMArgumentError, "No such quickstart configuration found: #{configname}" if qs.nil?
-        puts qs["description"] if qs.has_key? "description"
-        if qs.has_key? "load"
-          qs["load"].each do |project_info|
-            name, args = project_info.split(" ", 2)
-            puts "Loading: #{name}"
-            load(name, args)
-          end
-        end
-        if qs.has_key? "start"
-          qs["start"].each do |project_info|
-            args = project_info.split(" ")
-            DVM::Application.start(["start"] + args)
-          end
-        end
-      end
     end
 
     desc "populate", "Create users and orgs as defined in defaults & config yml"

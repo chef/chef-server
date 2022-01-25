@@ -3,14 +3,14 @@ require "highline/import"
 
 module DVM
   class Project
-    attr_reader :name, :project, :config, :service, :project_dir, :path, :external, :omnibus_project
+    attr_reader :name, :project, :config, :service, :project_dir, :path, :external, :install_path_key
     include DVM::Tools
 
     # TODO check required fields in config
     def initialize(project_name, config)
       @project = config['projects'][project_name]
       @external = @project['external'] || false
-      @omnibus_project = @project['omnibus-project'] || "opscode"
+      @install_path_key = @project['install-path-key'] || "opscode"
       @name = project.has_key?('name') ? project['name'] : project_name
 
       if external
@@ -88,7 +88,6 @@ module DVM
     def loaded?
       false
     end
-
     def load_dep(name, ignored_for_now)
       raise DVM::DVMArgumentError, "Load the project before loading deps." unless loaded?
       dep = ensure_dep(name)
@@ -128,13 +127,10 @@ module DVM
       end
       top
     end
-    # so far these only apply to erlang projects. Maybe we should method_missing this stuff...
-    def etop
-      raise DVM::DVMArgumentError, "This application does not support etop."
-    end
 
     def update(args)
       raise DVM::DVMArgumentError, "This project does not support dynamic updates."
+
     end
 
     def console

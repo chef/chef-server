@@ -6,26 +6,12 @@ module DVM
     def initialize(project_name, config)
       super
       @rebar_config_path = "#{project_dir}/rebar.config"
-      reldir = case service['rel-type']
-               when 'relx'
-                 "_rel"
-               when 'reltool'
-                 "rel"
-               when 'rebar3'
-                 "_build/dev/rel"
-               end
-
+      reldir = "_build/dev/rel"
       @relname = service['rel-name'].nil? ? name : service['rel-name']
       @relpath = "#{@project_dir}/#{reldir}/#{relname}"
-      @service_dir = "/var/opt/#{omnibus_project}/embedded/service/#{service['name']}"
+      @service_dir = "/var/opt/#{install_path_key}/embedded/service/#{service['name']}"
       @libpath =  File.join(@relpath, "lib")
       @node = service['node']
-    end
-    def init_reltool
-
-    end
-    def init_rebar3
-
     end
 
     def parse_deps
@@ -35,7 +21,7 @@ module DVM
       result = run_command("#{path} #{@rebar_config_path}")
       target_lib_dir = service['rel-type'] == 'rebar3' ? "_build/dev/lib" : "deps"
       eval(result.stdout).each do |name, data|
-        @deps[name] = ErlangDep.new(name, File.join(project_dir, target_lib_dir) , data, self)
+        @deps[name] = ErlangDep.new(name, File.join(project_dir, "../../external-deps") , data, self)
       end
     end
 
@@ -87,7 +73,7 @@ EOM
       end
       files.reject! do |fname|
         fullpath = File.join(libpath, fname)
-       # special cases, not symlinks:
+        # special cases, not symlinks:
         (fname == "patches" or fname == "." or fname == "..") or
           # all else must be both a symlink and resolve to valid location
           (File.symlink?(fullpath) and (File.file?(fullpath) or File.directory?(fullpath)))
@@ -101,7 +87,7 @@ EOM
     def link
       say("Setting up symlinks")
       # Yay project inconsistencies
-      base_sv_path = "/var/opt/#{omnibus_project}/#{service["name"]}"
+      base_sv_path = "/var/opt/#{install_path_key}/#{service["name"]}"
       purge_links
       if File.exists?("#{base_sv_path}/sys.config")
         FileUtils.ln_s("#{base_sv_path}/sys.config", "#{relpath}/sys.config")
@@ -117,25 +103,8 @@ EOM
     end
 
     def do_load(options)
-      # TODO this can also be wrapped and handled in the base...
-      puts "Checking #{path}"
-      if !project_dir_exists_on_host?(path)
-        git = project['git']
-        if git
-          if git['uri']
-            clone(name, git['uri'])
-            if git['branch']
-              checkout(name, git['branch'])
-            end
-          end
-        else
-          # UGH _ note we're still stuck on not having /do-not-use - because if we clone to external-deps it will not get nuked!
-          raise DVMArgumentError, "Project not available. Clone or link it into chef-server/external-deps directory onto your host machine, or update the project git settings."
-        end
-      end
-
-      raise DVMArgumentError, "Project already loaded. Use --force to proceed." if loaded? and not options[:force]
-      run_command("chef-server-ctl stop  #{service['name']}", "Stopping #{service['name']}")
+      say("Loading #{name}")
+      run_command("chef-server-ctl stop  #{service['name']}", "Stopping #{service['name']} under chef-server-ctl")
       do_build unless options[:no_build]
       disable_service
       link
@@ -159,8 +128,8 @@ EOM
       # TODO sv s should be starting it (it thinks it is) but is not.  Take a look at why
       # this extra step is needed
       run_command("chef-server-ctl start #{svname}", "Starting packaged #{name}")
-
     end
+
     def unload
       purge_links
       enable_service
@@ -174,7 +143,8 @@ EOM
       purge_links
       # TODO currently we only load projects that are maintained by Chef and live in chef-server/src.
       # If this changes, we'll need to support specification of alternative build commands.
-      # TODO2: add build.env since only erchef needs use_system_gecode...
+      # TODO2: add build.env since only erchef needs use_system_gecode.
+      # USE_SYSTEM_GECODE in this case refers to the gecode libs that are installed with the chef-server package.
       make_target = project['make-target'] ? project['make-target'] : 'dvm'
       run_command("make -j 4 #{make_target}", "Building...", cwd: project_dir, env: { "USE_SYSTEM_GECODE" => "1"})
     end
@@ -199,6 +169,7 @@ EOM
       msg = "Important: automatic code loading will be disabled until 'dvm cover #{name} stop' is invoked\n"
       msg << "Enabling coverage for #{modulename}"
       msg = "Enabling coverage for #{modulename}"
+      puts "project dir: #{@project_dir}"
       runargs = ["\\\"#{@project_dir}\\\""]
       runargs << modulename
       runargs << options[:with_deps]
@@ -223,14 +194,10 @@ EOM
       elsif args == "resume"
         erl_rpc("user_default", "sync_action", ["go"], "Resuming sync")
       else
-        # TODO for those that don't have sync, support using user_defaults:um(mod) for explicit reloading.
         raise DVMArgumentError, "Supported update options are 'pause' and 'resume'"
       end
     end
 
-    def etop
-      exec "#{erl_command_base("dvmetop")} -s etop -s erlang halt -output text -sort reductions -lines 25 -node #{service['node']}"
-    end
 
     def erl_rpc(mod, fun, args, message = nil)
       if message.nil?

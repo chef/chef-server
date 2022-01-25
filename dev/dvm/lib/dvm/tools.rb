@@ -6,9 +6,9 @@ module DVM
       cmd = Mixlib::ShellOut.new(command, opts)
       cmd.run_command
       unless no_raise || cmd.status.exitstatus > 0
-        #{command} failed"
-        puts "*** stdout: #{cmd.stdout}"
-        puts "*** stderr: #{cmd.stderr}"
+        # #{command} failed"
+        # puts "*** stdout: #{cmd.stdout}"
+        # puts "*** stderr: #{cmd.stderr}"
       end
 
       cmd.error! unless no_raise
@@ -69,9 +69,9 @@ module DVM
       File.join(host_raw_dir, path)
     end
 
-    def clone(name, uri)
+    def clone(name, uri, dir)
       run_command("git clone '#{uri}' '#{name}'", "Cloning #{name} to host. For future reference, you may also symlink it into chef-server/external-deps from another location on the host.",
-                  cwd: host_external_deps_dir)
+                  cwd: dir)
     end
 
     def project_dir_exists_on_host?(name)
@@ -79,9 +79,8 @@ module DVM
       File.directory?(host_project_dir(name))
     end
 
-    def checkout(name, ref)
-      cwd = host_project_dir(name)
-      result = run_command("git checkout #{ref}", "Checking out #{ref} to match what is currently running", cwd: cwd, no_raise: true)
+    def checkout(name, ref, dir)
+      result = run_command("git checkout #{ref}", "Checking out #{ref} to match what is currently running", cwd: dir, no_raise: true)
       if result.error?
         raise DVM::DVMArgumentError, <<-EOM
 Could not check out #{ref} in #{cwd}.

@@ -5,51 +5,39 @@ vm:
   # postgres box, and if you want to automatically configure chef-server
   # to use it as an externally managed postgres instance.
   postgresql:
-    # enable a separate postgres vm but do not use it unless
-    # use-external is set.
+    # enable a separate postgres vm and configure it as the external postgres provider for
+    # chef-server
     start: false
-    # When this is set true, and start is true,
-    # the chef-server node will be configured to use
-    # this vm as an external postgresql server from the start.
-    use-external: true
     # When this is set true, and start is true, and use-external is true,
     # the chef-server node will be configured to use
     # this vm as an external azure postgresql server from the start.
     use-azure: false
   # Override this in config.yml if you want to bring up a separate reporting
-  # postgres box, and if you want to automatically configure chef-server
+  # postgres box automatically configure chef-server
   # to use it as an externally managed reporting postgres instance.
   reporting_postgresql:
-    # enable a separate postgres vm but do not use it unless
-    # use-external is set.
+    # enable a separate reporting postgres vm and use it as an external postgres provider
+    # for chef-server reporting module
     start: false
-    # When this is set true, and start is true,
-    # chef reporting will be configured to use
-    # this vm as an external postgresql server from the start.
-    use-external: true
   # Override this in config.yml if you want to bring up a separate chef-backend
   # box, and if you want to automatically configure chef-server to use it in a
   # 1 FE / 1 BE topology.
   chef-backend:
-    # enable a separate backend vm but do not use it unless
-    # use-external is set.
     start: false
+  # Override this in config.yml to configure an ldap server and configure chef-server
+  # to perform user authentication with it.
   ldap:
-    # enable a separate ldap vm but do not use it unless
-    # use-external is set.
     start: false
-  # Brings up elasticsearch 5 - not connected to chef-server right now.
+
+  # Brings up elasticsearch 5 and configures chef-server to use it as - not connected to chef-server right now.
   # This is experimental.
   #elasticsearch:
     #start: true
     # The major version family to use - either "2" or "5".
     #version: "5"
+
   # Override this in config.yml if you want to install chef server plugins with
   # specific packages.
-  #external_solr:
-    # enable a separate external vm
-    #start: true
-  # These will map directly to entries in the generated chef-server.rb
   plugins:
     chef-manage: false
     reporting: false
@@ -58,9 +46,7 @@ vm:
   # All settings below apply only to the chef-server vm
   cpus: 4
   memory: 4096
-  # nodejs is included here so that we can run asset compile phase of
-  # oc-id on load.
-  packages: [ ntp, curl, wget, htop, uuid-dev, tmux, vim, iotop, zlib1g-dev, liblzma-dev ]
+  packages: [ ntp, curl, wget, htop, uuid-dev, tmux, vim, iotop, zlib1g-dev, liblzma-dev, jq, ripgrep, tree ]
   omnibus-autoload: [] # see config.yml for details and to add components
   # Override this in config.yml to set a custom path for your dotfiles
   # that's external to this repository.
@@ -69,12 +55,6 @@ vm:
   # Note that we can't exclude .git from top-level projects, and by extension from anything,
   # otherwise rebar commands begin to fail.
   sync:
-  # In local tests, it is about a 1.1 seconds per sync,
-  # with up to about 15 seconds for a large sync (400mb single file)
-  # CPU usage on the host is minimal, but for large syncs does increase
-  # significantly on the guest.
-     interval: 5
-     show-syncing-message: true
      exclude-files:
        - pkg/
        - deps/
@@ -101,7 +81,6 @@ vm:
        - .concrete/
        - relx # we don't want to pull in a mac relx to our linux vm
        - rspec.failures
-       - VERSION
        - partybus/config.rb
        - oc-reporting-pedant/Gemfile.lock # friggin ugh
        - config/database.yml # [oc-id] we'll need to use the one from omnibus
@@ -118,6 +97,7 @@ vm:
   # distro as the chef server, with 2GB/2core, using CUSTOM_VM_ADDRESS
   start-custom: false
   #
+  # Configure oc_id with pre-determined admin and authorized applications for that user
   # oc_id:
   #   administrators:
   #     - admin
@@ -130,7 +110,6 @@ projects:
     type: erlang
     database: opscode_chef # Used for dvm psql oc_erchef
     service:
-      rel-type: rebar3
       name: opscode-erchef
       cookie: erchef
       node: erchef@127.0.0.1
@@ -169,7 +148,6 @@ projects:
     type: erlang
     database: bifrost
     service:
-      rel-type: rebar3
       name:  oc_bifrost
       cookie: oc_bifrost
       node: oc_bifrost@127.0.0.1
@@ -182,9 +160,8 @@ projects:
     type:  erlang
     external: true
     database: opscode_reporting
-    omnibus-project: opscode-reporting
+    install-path-key: opscode-reporting
     service:
-      rel-type: rebar3
       name: opscode-reporting
       cookie: oc_reporting
       node: oc_reporting@127.0.0.1
@@ -228,24 +205,22 @@ projects:
     name: opscode-omnibus
     type: omnibus
     components:
-      # dest paths are relative to /opt/opscode/embedded for these components
-      # source apths are relative to opscode-omnibus/files
-      private-chef-cookbooks:
-        source_path: private-chef-cookbooks/private-chef
-        dest_path: /opt/opscode/embedded/cookbooks/private-chef
+      # Note that these don't all technically belong under project 'omnibus' now, but it works...
+      server-ctl-cookbooks:
+        source_path: server-ctl-cookbooks/infra-server
+        dest_path: /opt/opscode/embedded/cookbooks/infra-server
         reconfigure_on_load: true
       ctl-commands:
-        source_path: private-chef-ctl-commands
-        dest_path: /opt/opscode/embedded/service/omnibus-ctl
+        # TODO: Note that this will override chef-server-ctl plugin commands, but won't load the top-level command
+        # itself at this time.
+        source_path: ../../src/chef-server-ctl/plugins
+        # TODO - the gem version will eventually change, we need a good way to keep it in sync with our ruby version
+        dest_path: /opt/opscode/embedded/lib/ruby/gems/2.7.0/gems/chef-server-ctl-1.1.0/plugins
         reconfigure_on_load: false
       upgrades:
         source_path: private-chef-upgrades
         dest_path: /opt/opscode/embedded/upgrades
         reconfigure_on_load: false
-      ha-drbd-cookbook:
-        source_path: private-chef-cookbooks/chef-ha-drbd
-        dest_path: /opt/opscode/embedded/cookbooks/chef-ha-drbd
-        reconfigure_on_load: true
       partybus:
         source_path: ../partybus
         dest_path: /opt/opscode/embedded/service/partybus
@@ -266,12 +241,8 @@ projects:
 
   #
   # External Components
-  # We'll eventually allow external projects to supply their own
-  # 'dvm.yml' that we can include for project definitions, but for now...
 
-  #
-  # omnibus-ctl
-  #
+  # THe base OmnibusCtl class, from the omnibus-ctl gem
   omnibus-ctl:
     type: ruby
     system: true
@@ -280,7 +251,7 @@ projects:
   #
   # Reporting
   #
-  omnibus-reporting:
+  reporting:
     embedded_in: "oc_reporting"
     type: omnibus
     external: true
@@ -301,27 +272,3 @@ projects:
     gem-path: /opt/opscode-reporting/embedded/service/gems
     run: ./oc-reporting-pedant -c /etc/opscode-reporting/pedant_config.rb
 
-quickstart:
-  chef-server:
-    description: "Load up all the things used for most chef server dev: pedant, cookbooks, commands, erchef.  Starts oc_erchef without a console."
-    load:
-      - omnibus private-chef-cookbooks
-      - omnibus ctl-commands
-      - oc-chef-pedant
-      - oc_erchef
-    start:
-      - oc_erchef
-
-  oc_erchef:
-    description: "Load up erchef and start it in console mode."
-    load:
-      - oc_erchef
-    start:
-      - oc_erchef
-
-  oc_bifrost:
-    description: "Load oc_bifrost and oc-bifrost-pedant from /host. Start oc_bifrost into a console."
-    load:
-      - oc_bifrost
-    start:
-      - oc_bifrost
