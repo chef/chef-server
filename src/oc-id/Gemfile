@@ -18,7 +18,6 @@ gem 'pg', '>= 0.18', '< 2.0' # active_record 4.2.8 pins this but doesn't manifes
 gem 'mixlib-authentication', '>= 2.1', '< 4'
 gem 'sentry-raven'
 gem 'responders', '~> 3.0', '>= 3.0.1'
-gem 'newrelic_rpm'
 gem 'doorkeeper', '~> 4.0'
 gem "sprockets-rails", git: 'https://github.com/rails/sprockets-rails.git'
 gem 'therubyracer', '~> 0.12.3'
