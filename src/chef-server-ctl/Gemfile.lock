@@ -103,7 +103,8 @@ GEM
       rack (~> 2.0, >= 2.0.6)
       uuidtools (~> 2.1)
       webrick
-    chef_backup (0.2.0)
+    chef_backup (0.3.0)
+      chef-utils (>= 16.5.54)
       mixlib-shellout (>= 2.0, < 4.0)
       pastel
       tty-prompt (~> 0.21)
