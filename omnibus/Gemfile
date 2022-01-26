@@ -2,7 +2,7 @@ source 'https://rubygems.org'
 
 # Install omnibus software
 group :omnibus do
-  gem 'omnibus', git: 'https://github.com/chef/omnibus'
+  gem 'omnibus', git: 'https://github.com/chef/omnibus', branch: "lcg/health-check-server-fixing"
   gem 'omnibus-software', git: 'https://github.com/chef/omnibus-software'
   gem 'artifactory'
 end
