@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.12.17 -->
-## [14.12.17](https://github.com/chef/chef-server/tree/14.12.17) (2022-01-25)
+<!-- latest_release 14.12.18 -->
+## [14.12.18](https://github.com/chef/chef-server/tree/14.12.18) (2022-01-26)
 
 #### Merged Pull Requests
-- Source sprockets-rails from rubygems in oc-id [#3053](https://github.com/chef/chef-server/pull/3053) ([tas50](https://github.com/tas50))
+- Bump rspec-rails from 5.0.2 to 5.1.0 in /src/oc-id [#3118](https://github.com/chef/chef-server/pull/3118) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.11.36 -->
 ### Changes since 14.11.36 release
 
 #### Merged Pull Requests
+- Bump rspec-rails from 5.0.2 to 5.1.0 in /src/oc-id [#3118](https://github.com/chef/chef-server/pull/3118) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.12.18 -->
 - Source sprockets-rails from rubygems in oc-id [#3053](https://github.com/chef/chef-server/pull/3053) ([tas50](https://github.com/tas50)) <!-- 14.12.17 -->
 - Remove newrelic_rpm gem from oc-id [#2993](https://github.com/chef/chef-server/pull/2993) ([tas50](https://github.com/tas50)) <!-- 14.12.16 -->
 - change find command to ignore /var/log/lastlog [#3103](https://github.com/chef/chef-server/pull/3103) ([y-me-y](https://github.com/y-me-y)) <!-- 14.12.15 -->
