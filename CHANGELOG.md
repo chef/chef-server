@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.12.21 -->
-## [14.12.21](https://github.com/chef/chef-server/tree/14.12.21) (2022-01-27)
+<!-- latest_release 14.12.22 -->
+## [14.12.22](https://github.com/chef/chef-server/tree/14.12.22) (2022-01-27)
 
 #### Merged Pull Requests
-- Update knife-ec-backup to 3.0.0. [#3121](https://github.com/chef/chef-server/pull/3121) ([lbakerchef](https://github.com/lbakerchef))
+- Update release process documentation [#3122](https://github.com/chef/chef-server/pull/3122) ([lbakerchef](https://github.com/lbakerchef))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.11.36 -->
 ### Changes since 14.11.36 release
 
 #### Merged Pull Requests
+- Update release process documentation [#3122](https://github.com/chef/chef-server/pull/3122) ([lbakerchef](https://github.com/lbakerchef)) <!-- 14.12.22 -->
 - Update knife-ec-backup to 3.0.0. [#3121](https://github.com/chef/chef-server/pull/3121) ([lbakerchef](https://github.com/lbakerchef)) <!-- 14.12.21 -->
 - OCID: Triggered email update only if email is getting change . [#3105](https://github.com/chef/chef-server/pull/3105) ([antima-gupta](https://github.com/antima-gupta)) <!-- 14.12.20 -->
 - Bump chef_backup from 0.2.0 to 0.3.0 in /src/chef-server-ctl [#3119](https://github.com/chef/chef-server/pull/3119) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.12.19 -->
