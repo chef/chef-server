@@ -16,7 +16,7 @@ habitat:
     - origin: chef
       channel: unstable
     - origin: core
-      channel: stable2021-q2
+      channel: stable
 
 allowed_licenses:
   - Apache-1.0
