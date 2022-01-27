@@ -1,15 +1,15 @@
 ---
 env:
-  HAB_BLDR_CHANNEL: "stable"
-  HAB_STUDIO_SECRET_HAB_FALLBACK_CHANNEL: "stable"
-  HAB_FALLBACK_CHANNEL: "stable"
+  HAB_BLDR_CHANNEL: "stable2021-q2"
+  HAB_STUDIO_SECRET_HAB_FALLBACK_CHANNEL: "stable2021-q2"
+  HAB_FALLBACK_CHANNEL: "stable2021-q2"
 
 origin: chef
 smart_build: false
 studio_secrets:
   HAB_BLDR_CHANNEL:
-    value: "stable"
+    value: "stable2021-q2"
   HAB_STUDIO_SECRET_HAB_FALLBACK_CHANNEL:
-    value: "stable"
+    value: "stable2021-q2"
   HAB_FALLBACK_CHANNEL:
-    value: "stable"
+    value: "stable2021-q2"
