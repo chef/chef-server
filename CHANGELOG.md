@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.12.23 -->
-## [14.12.23](https://github.com/chef/chef-server/tree/14.12.23) (2022-01-27)
+<!-- latest_release 14.12.24 -->
+## [14.12.24](https://github.com/chef/chef-server/tree/14.12.24) (2022-01-27)
 
 #### Merged Pull Requests
-- Fix typos [#3124](https://github.com/chef/chef-server/pull/3124) ([lbakerchef](https://github.com/lbakerchef))
+- Update habitat channel to stable2021-q2 [#3126](https://github.com/chef/chef-server/pull/3126) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.11.36 -->
 ### Changes since 14.11.36 release
 
 #### Merged Pull Requests
+- Update habitat channel to stable2021-q2 [#3126](https://github.com/chef/chef-server/pull/3126) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.12.24 -->
 - Fix typos [#3124](https://github.com/chef/chef-server/pull/3124) ([lbakerchef](https://github.com/lbakerchef)) <!-- 14.12.23 -->
 - Update release process documentation [#3122](https://github.com/chef/chef-server/pull/3122) ([lbakerchef](https://github.com/lbakerchef)) <!-- 14.12.22 -->
 - Update knife-ec-backup to 3.0.0. [#3121](https://github.com/chef/chef-server/pull/3121) ([lbakerchef](https://github.com/lbakerchef)) <!-- 14.12.21 -->
