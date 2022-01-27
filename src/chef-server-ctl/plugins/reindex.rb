@@ -21,6 +21,7 @@ require "redis"
 require "chef_server_ctl/helpers/du"
 require "chef_server_ctl/helpers/statfs"
 
+
 def all_orgs
   Chef::Config.from_file(::ChefServerCtl::Config.knife_config_file)
   Chef::Org.list.keys.sort
@@ -45,12 +46,12 @@ def redis
 end
 
 def disable_api
-  puts "- Disabling the Chef API."
+  puts "- Disabling the #{ChefUtils::Dist::Server::PRODUCT} API."
   redis.hset("dl_default", "503_mode", true)
 end
 
 def enable_api
-  puts "- Re-enabling the Chef API"
+  puts "- Re-enabling the #{ChefUtils::Dist::Server::PRODUCT} API"
   redis.hdel("dl_default", "503_mode")
 end
 
@@ -88,7 +89,7 @@ rescue => exception
   puts "Skipping the disk space verification due to #{exception.message}"
 end
 
-add_command_under_category "reindex", "general", "Reindex all server data for a given organization", 2 do
+add_command_under_category "reindex", "general", "Reindex all server data for a given organization.", 2 do
   reindex_args = ARGV[1..-1] # Chop off first 1 args, keep the rest... that is, everything after "private-chef-ctl reindex"
   options = {}
 

@@ -43,7 +43,7 @@ add_command_under_category "cleanup-bifrost", "cleanup", "Cleanup orphaned bifro
   options = {}
 
   OptionParser.new do |opts|
-    opts.banner = "chef-server-ctl cleanup-bifrost [options]"
+    opts.banner = "#{ChefUtils::Dist::Server::SERVER_CTL} cleanup-bifrost [options]"
     opts.on("-b SIZE", "--batch-size SIZE", "How many authz actors to delete at a time") do |b|
       options[:batch_size] = b.to_i
     end
@@ -140,7 +140,7 @@ def safety_check(db)
                           WHERE tablename='cleanup_tracking_auth_actors'")
   if res.ntuples > 0
     puts "ERROR: cleanup_tracking_auth_actors already exists.  cleanup-bifrost may be running."
-    puts "ERROR: If you are sure cleanup-bifrost is not running, you can clean up the tracking tables with: chef-server-ctl cleanup-bifrost --force-cleanup"
+    puts "ERROR: If you are sure cleanup-bifrost is not running, you can clean up the tracking tables with: #{ChefUtils::Dist::Server::SERVER_CTL} cleanup-bifrost --force-cleanup"
     exit(1)
   end
 end
@@ -178,7 +178,7 @@ def print_and_return_estimate(known_actor_list, db)
   tcount = fetch_auth_actor_count(db)
   estimated_del_count = [0, tcount - known_actor_list.length].max
   puts "\n----------------------------------------"
-  puts " Total chef users+clients: #{known_actor_list.length}"
+  puts " Total #{ChefUtils::Dist::Infra::SHORT} users+clients: #{known_actor_list.length}"
   puts "Total bifrost auth_actors: #{tcount}"
   puts "Deletion Candidates (est): #{estimated_del_count}"
   puts "----------------------------------------\n"

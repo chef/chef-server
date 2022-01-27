@@ -11,9 +11,7 @@ The following sections describe the various settings that are available
 in the chef-server.rb file.
 
 {{< note >}}
-
 {{< reusable_text_versioned file="notes_config_rb_server_must_reconfigure" >}}
-
 {{< /note >}}
 
 ### General
@@ -90,12 +88,12 @@ Chef Infra Server versions earlier than 14.5 configured with `nginx['enable_non_
 
 :   The URL to visit for more information about how to update the number
     of nodes licensed for an organization. Default value:
-    `'http://www.chef.io/contact/on-premises-simple'`.
+    `'https://www.chef.io/pricing'`.
 
 `notification_email`
 
 :   The email addressed to which email notifications are sent. Default
-    value: `'pc-default@opscode.com'`.
+    value: `'pc-default@chef.io'`.
 
 `role`
 
@@ -113,9 +111,7 @@ Chef Infra Server versions earlier than 14.5 configured with `nginx['enable_non_
 {{< reusable_text_versioned file="server_services_bookshelf" >}}
 
 {{< note >}}
-
 {{< reusable_text_versioned file="notes_server_aws_cookbook_storage" >}}
-
 {{< /note >}}
 
 This configuration file has the following settings for `bookshelf`:
@@ -692,7 +688,7 @@ Chef Infra Server versions earlier than 14.5 configured with `nginx['enable_non_
 :   The list of supported cipher suites that are used to establish a
     secure connection. To favor AES256 with ECDHE forward security, drop
     the `RC4-SHA:RC4-MD5:RC4:RSA` prefix. See [this
-    link](https://www.openssl.org/docs/man1.0.2/man1/ciphers.html) for more
+    link](https://www.openssl.org/docs/man1.1.1/man1/ciphers.html) for more
     information. For example:
 
     ```ruby
@@ -828,6 +824,16 @@ Chef Infra Server versions earlier than 14.5 configured with `nginx['enable_non_
     Possible values: greater than or equal to `31536000` and less than or equal to `63072000`.
     Default value: `31536000` (1 year).
 
+`nginx['nginx_no_root']`
+
+:   Boolean, default `false`.  Specifies that `nginx` processes, including the `master` process, should not
+    run as the `root` user on a system and will instead run as `user['username']` (defaults to `opscode`).
+    **REQUIRES** that `nginx['ssl_port']` and `nginx['non_ssl_port']` options are configured to non-privileged
+    ports greater than `1024` or that the local system is otherwise allowed to bind to privileged ports
+    with the user `user['username']`.
+
+    **New in Chef Infra Server 14.10*
+
 ### oc_bifrost
 
 {{< reusable_text_versioned file="server_services_bifrost" >}}
@@ -961,6 +967,11 @@ This configuration file has the following settings for `oc_chef_authz`:
 
 :   The amount of time (in milliseconds) to wait for a connection to be
     established. Default value: `'[{connect_timeout, 5000}]'`.
+
+`oc_chef_authz['max_connection_request_limit']`
+
+:   The maximum number of requests allowed per connection.
+    Default value: `100`.
 
 ### oc-chef-pedant
 
@@ -1297,6 +1308,11 @@ This configuration file has the following settings for `opscode-erchef`:
 
 :   Default value: `256`.
 
+`opscode_erchef['enable_ibrowse_traces']`
+
+:   Use to configure ibrowse logging for the `opscode_erchef` service.
+    Default value: `false`.
+
 `opscode_erchef["include_version_in_status"]`
 
 :   Set to `true` to include `server_version` as part of the `/_status` endpoint.
@@ -1435,6 +1451,26 @@ This configuration file has the following settings for `opscode-erchef`:
 `opscode_erchef['vip']`
 
 :   The virtual IP address. Default value: `127.0.0.1`.
+
+`opscode_erchef['cbv_cache_enabled']`
+
+:   Enable cookbook version response caching by setting this to `true`. If you frequently see
+    very long response times from `cookbook_versions` when under load, this is worth enabling.
+    Enabling this makes it possible for a client to receive stale results. When a cookbook is updated
+    in place (without incrementing the version), and the old response has not expired from the cache,
+    the Infra Server will give the old response to the client. Subsequent client runs will receive the
+    updated response. Default value: `false`.
+
+`opscode_erchef['cbv_cache_item_ttl']`
+
+:   The minimum time in milliseconds that Chef Infra Server will keep any given cookbook version response in the cache when
+    when `cbv_cache_enabled` is enabled.
+    Default value: `30000`.
+    
+{{< note >}}
+Be careful if increasing this number - requests for a given set of cookbook versions will be stale if the resolved cookbook versions are updated before the cache entry times out. This will
+not occur if you increment the version of a cookbook with every cookbook update, which is the recommended approach to updating cookbooks.
+{{< /note >}}
 
 ### Elasticsearch
 
@@ -1907,7 +1943,7 @@ regardless of the node's run list. This feature is targeted at expert
 level practitioners who are delivering isolated configuration changes to
 the target systems, such as self-contained agent software. Further
 explanation of the feature can be found in
-[Chef Infra Client Development Docs](https://github.com/chef/chef/blob/master/docs/dev/design_documents/server_enforced_recipes.md).
+[Chef Infra Client Development Docs](https://github.com/chef/chef/blob/main/docs/dev/design_documents/server_enforced_recipes.md).
 
 This configuration file has the following settings for
 `required_recipe`:

@@ -1,7 +1,6 @@
-# -*- coding: utf-8 -*-
 #
 # Author:: Douglas Triggs (<doug@chef.io>)
-# Copyright:: Copyright (c) 2014 Chef, Inc.
+# Copyright:: Copyright (c) Chef Software, Inc.
 
 require 'pedant/rspec/node_util'
 
@@ -19,7 +18,7 @@ describe 'license', :license do
       "limit_exceeded" => (node_count > MAX_NODE_COUNT ) ? true : false,
       "node_license" => MAX_NODE_COUNT,
       "node_count" => node_count,
-      "upgrade_url" => /^http\:\/\.*/
+      "upgrade_url" => /^https\:\/\.*/
     }}
 
   context "GET /license" do

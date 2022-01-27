@@ -57,7 +57,7 @@ vm:
       # and tcp-based access.
       #chef-server-config:
       #  postgresql['external']: true
-      #  postgresql['vip']:  "\"192.168.33.1\""
+      #  postgresql['vip']:  "\"192.168.56.1\""
       #  postgresql['port']: 5432
       #  postgresql['db_superuser']: "\"bob\""
       #  postgresql['db_superuser_password']: "\"i like bob\""

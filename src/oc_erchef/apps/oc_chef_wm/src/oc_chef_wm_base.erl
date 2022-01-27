@@ -938,7 +938,7 @@ api_info_header_value(#base_state{}=State) ->
 -spec add_api_info_header(#wm_reqdata{}, #base_state{}, atom()) ->
                                  #wm_reqdata{}.
 add_api_info_header(Req, #base_state{server_api_version = APIVersion} = State, undefined) ->
-    Req0 = wrq:set_resp_header("X-Ops-API-Info", api_info_header_value(State), Req),
+    Req0 = add_x_ops_api_info(Req, State),
     HeaderBody = build_api_info_header_body(APIVersion, APIVersion),
     wrq:set_resp_header("X-Ops-Server-API-Version", HeaderBody, Req0);
 add_api_info_header(Req, #base_state{server_api_version = RequestedVersion} = State, not_acceptable) ->
@@ -951,9 +951,16 @@ add_api_info_header(Req, #base_state{server_api_version = RequestedVersion} = St
                               _ ->
                                   RequestedVersion
                           end,
-    Req0 = wrq:set_resp_header("X-Ops-API-Info", api_info_header_value(State), Req),
+    Req0 = add_x_ops_api_info(Req, State),
     HeaderBody = build_api_info_header_body(RequestedAPIVersion, ActualAPIVersion),
     wrq:set_resp_header("X-Ops-Server-API-Version", HeaderBody, Req0).
+-spec add_x_ops_api_info(#wm_reqdata{}, #base_state{}) ->
+                                #wm_reqdata{}.
+add_x_ops_api_info(Req, State) ->
+    case envy:get(oc_chef_wm, include_x_ops_api_info, false, boolean) of
+        true -> wrq:set_resp_header("X-Ops-API-Info", api_info_header_value(State), Req);
+        _ -> Req
+    end.
 -spec build_api_info_header_body(integer(), integer()) ->
                                  list().
 build_api_info_header_body(RequestedAPIVersion, ActualAPIVersion) ->

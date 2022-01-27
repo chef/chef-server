@@ -30,14 +30,14 @@ Requirements:
 
 First, add the following configuration to your `/etc/hosts` file:
 
-    192.168.33.100 api.chef-server.dev manage.chef-server.dev
-    192.168.33.150 database.chef-server.dev
-    192.168.33.151 backend.chef-server.dev
-    192.168.33.152 ldap.chef-server.dev
-    192.168.33.153 custom.chef-server.dev
-    192.168.33.155 reportingdb.chef-server.dev
-    192.168.33.156 elasticsearch.chef-server.dev
-    192.168.33.157 solr.chef-server.dev
+    192.168.56.100 api.chef-server.dev manage.chef-server.dev
+    192.168.56.150 database.chef-server.dev
+    192.168.56.151 backend.chef-server.dev
+    192.168.56.152 ldap.chef-server.dev
+    192.168.56.153 custom.chef-server.dev
+    192.168.56.155 reportingdb.chef-server.dev
+    192.168.56.156 elasticsearch.chef-server.dev
+    192.168.56.157 solr.chef-server.dev
 
 Next, bring up the VMs!
 
@@ -126,7 +126,7 @@ Ruby project dependency loading support coming soon.
 ### Installing Chef Server Plugins
 
 If you wish to install Chef Server plugins with pre-downloaded or pre-built
-binaries, set the corresponding attribute in your `config.yml` to true. 
+binaries, set the corresponding attribute in your `config.yml` to true.
 The corresponding package needs to be either in `~/Downloads`, `../omnibus/pkg`,
 or you can set an environment variable with the path to the package.
 
@@ -330,7 +330,7 @@ vm:
     start: true
     use-external: true
 ```
-# Using elasticsearch 
+# Using elasticsearch
 
 To create a separate elasticsearch vm create a `config.yml` file with the following contents:
 ```
@@ -339,7 +339,7 @@ To create a separate elasticsearch vm create a `config.yml` file with the follow
     # The major version family to use - either "2" or "5".
     version: "5"
 ```
-# Using external solr 
+# Using external solr
 
 To create a separate solr vm create a `config.yml` file with the following contents:
 ```

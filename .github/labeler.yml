@@ -1,0 +1,8 @@
+documentation:
+  - 'README.md'
+  - 'CODE_OF_CONDUCT.md'
+  - 'CONTRIBUTING.md'
+  - 'CODE_REVIEW_CHECKLIST.md'
+  - 'RELEASE_PROCESS.md'
+  - 'docs-chef-io/**/*'
+

@@ -8,12 +8,12 @@ updates:
     timezone: America/Los_Angeles
   open-pull-requests-limit: 10
 - package-ecosystem: bundler
-  directory: "/omnibus/files/private-chef-cookbooks/private-chef"
+  directory: "/omnibus/files/server-ctl-cookbooks/infra-server"
   schedule:
     interval: daily
     time: "06:00"
     timezone: America/Los_Angeles
-  open-pull-requests-limit: 10  
+  open-pull-requests-limit: 10
 - package-ecosystem: bundler
   directory: "/oc-chef-pedant"
   schedule:

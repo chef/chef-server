@@ -9,7 +9,7 @@ add_command_under_category "master-recover", "high-availability", "Set this serv
   exit 1
 end
 
-add_command_under_category "backup-recover", "high-availability", "Set this server to HA backup state, ignoring VRRP", 1 do
+add_command_under_category "backup-recover", "high-availability", "Set this server to HA backup state, ignoring VRRP.", 1 do
   puts err_CONFIG_DRBD_HA_REMOVED("backup-recover")
   exit 1
 end
@@ -32,9 +32,9 @@ def err_CONFIG_DRBD_HA_REMOVED(command)
   <<EOM
 DRBD_HA_001: HA Command #{command} no longer supported.
 
-The DRBD/keepalived based HA subsystem was deprecated as of Chef Server
+The DRBD/keepalived based HA subsystem was deprecated as of #{ChefUtils::Dist::Server::PRODUCT}
 12.9, and officially reached end of life on 2019-03-31. It has been
-disabled in Chef Server 13.
+disabled in #{ChefUtils::Dist::Server::PRODUCT} 13.
 
 See this post for more details:
 https://blog.chef.io/2018/10/02/end-of-life-announcement-for-drbd-based-ha-support-in-chef-server/

@@ -25,13 +25,13 @@ require "chef/key"
 # TODO Check if this is still true in gem-world
 require "chef_server_ctl/helpers/key_ctl_helper"
 
-add_command_under_category "add-client-key", "key-rotation", "Create a new client key", 2 do
+add_command_under_category "add-client-key", "key-rotation", "Create a new client key.", 2 do
   cmd_args = ARGV[1..-1]
   @helper = ::ChefServerCtl::Helpers::KeyCtlHelper.new
   @options = OpenStruct.new
   @options.expiration_date = "infinity"
   @key = nil
-  @usage = "Usage: chef-server-ctl add-client-key ORGNAME CLIENTNAME [-p, --public-key-path, -e, --expiration-date DATE, -k, --key-name NAME]."
+  @usage = "Usage: #{ChefUtils::Dist::Server::SERVER_CTL} add-client-key ORGNAME CLIENTNAME [-p, --public-key-path, -e, --expiration-date DATE, -k, --key-name NAME]."
   @usage = @usage << @helper.add_key_usage
   @arg_list = ["-e", "--expiration-date", "-k", "--key-name", "-p", "--public-key-path"]
 
@@ -95,13 +95,13 @@ add_command_under_category "add-client-key", "key-rotation", "Create a new clien
   end
 end
 
-add_command_under_category "add-user-key", "key-rotation", "Create a new user key", 2 do
+add_command_under_category "add-user-key", "key-rotation", "Create a new user key.", 2 do
   cmd_args = ARGV[1..-1]
   @helper = ::ChefServerCtl::Helpers::KeyCtlHelper.new
   @options = OpenStruct.new
   @options.expiration_date = "infinity"
   @key = nil
-  @usage = "Usage: chef-server-ctl add-user-key USERNAME [-p, --public-key-path, -e, --expiration-date DATE, -k, --key-name NAME]"
+  @usage = "Usage: #{ChefUtils::Dist::Server::SERVER_CTL} add-user-key USERNAME [-p, --public-key-path, -e, --expiration-date DATE, -k, --key-name NAME]"
   @usage = @usage << @helper.add_key_usage
   @arg_list = ["-e", "--expiration-date", "-k", "--key-name", "-p", "--public-key-path"]
   opt_parser = OptionParser.new do |opts|
@@ -161,12 +161,12 @@ add_command_under_category "add-user-key", "key-rotation", "Create a new user ke
   end
 end
 
-add_command_under_category "list-client-keys", "key-rotation", "List keys for a client", 2 do
+add_command_under_category "list-client-keys", "key-rotation", "List keys for a client.", 2 do
   cmd_args = ARGV[1..-1]
   @helper = ::ChefServerCtl::Helpers::KeyCtlHelper.new
   @options = OpenStruct.new
   @options.show_public_keys = false
-  @usage = "Usage: chef-server-ctl list-client-keys ORGNAME CLIENTNAME [-v, --verbose]"
+  @usage = "Usage: #{ChefUtils::Dist::Server::SERVER_CTL} list-client-keys ORGNAME CLIENTNAME [-v, --verbose]"
   @arg_list = ["-v", "--verbose"]
 
   opt_parser = OptionParser.new do |opts|
@@ -202,13 +202,13 @@ add_command_under_category "list-client-keys", "key-rotation", "List keys for a 
   end
 end
 
-add_command_under_category "list-user-keys", "key-rotation", "List keys for a user", 2 do
+add_command_under_category "list-user-keys", "key-rotation", "List keys for a user.", 2 do
   cmd_args = ARGV[1..-1]
   @helper = ::ChefServerCtl::Helpers::KeyCtlHelper.new
 
   @options = OpenStruct.new
   @options.show_public_keys = false
-  @usage = "Usage: chef-server-ctl list-user-keys USERNAME [-v, --verbose]"
+  @usage = "Usage: #{ChefUtils::Dist::Server::SERVER_CTL} list-user-keys USERNAME [-v, --verbose]"
   @arg_list = ["-v", "--verbose"]
 
   opt_parser = OptionParser.new do |opts|
@@ -242,11 +242,11 @@ add_command_under_category "list-user-keys", "key-rotation", "List keys for a us
   end
 end
 
-add_command_under_category "delete-user-key", "key-rotation", "Delete a key", 2 do
+add_command_under_category "delete-user-key", "key-rotation", "Delete a key.", 2 do
   cmd_args = ARGV[1..-1]
   @helper = ::ChefServerCtl::Helpers::KeyCtlHelper.new
   @options = OpenStruct.new
-  @usage = "Usage: chef-server-ctl delete-user-key USERNAME KEYNAME"
+  @usage = "Usage: #{ChefUtils::Dist::Server::SERVER_CTL} delete-user-key USERNAME KEYNAME"
 
   @helper.get_required_arg!(@options, cmd_args, @usage, :username, "USERNAME", 1)
   @helper.get_required_arg!(@options, cmd_args, @usage, :key_name, "KEYNAME", 2)
@@ -264,11 +264,11 @@ add_command_under_category "delete-user-key", "key-rotation", "Delete a key", 2 
   end
 end
 
-add_command_under_category "delete-client-key", "key-rotation", "Delete a key", 2 do
+add_command_under_category "delete-client-key", "key-rotation", "Delete a key.", 2 do
   cmd_args = ARGV[1..-1]
   @helper = ::ChefServerCtl::Helpers::KeyCtlHelper.new
   @options = OpenStruct.new
-  @usage = "Usage: chef-server-ctl delete-client-key ORGNAME CLIENTNAME KEYNAME"
+  @usage = "Usage: #{ChefUtils::Dist::Server::SERVER_CTL} delete-client-key ORGNAME CLIENTNAME KEYNAME"
 
   @helper.get_required_arg!(@options, cmd_args, @usage, :orgname, "ORGNAME", 1)
   @helper.get_required_arg!(@options, cmd_args, @usage, :clientname, "CLIENTNAME", 2)

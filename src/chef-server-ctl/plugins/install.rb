@@ -7,7 +7,7 @@ KNOWN_ADDONS = %w{
   opscode-reporting
 }
 
-add_command_under_category "install", "general", "Install addon package by name, with optional --path parameter indicating directory containing packages", 2 do
+add_command_under_category "install", "general", "Install addon package by name, with optional --path parameter indicating directory containing packages.", 2 do
   package = ARGV[1]
 
   # Rewrite deprecated package name to current package name if it
@@ -44,7 +44,7 @@ add_command_under_category "install", "general", "Install addon package by name,
   end
 
   attributes_path = "#{base_path}/embedded/cookbooks/install_params.json"
-  json_src = { "run_list" => ["recipe[private-chef::add_ons_wrapper]"],
+  json_src = { "run_list" => ["recipe[infra-server::add_ons_wrapper]"],
     "private_chef" => { "addons" => {
         "install" => true,
         "packages" => [package],

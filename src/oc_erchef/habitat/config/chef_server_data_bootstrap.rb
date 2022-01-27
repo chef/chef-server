@@ -106,7 +106,7 @@ class ChefServerDataBootstrap
     # TODO: Need to cleanly guard that we only do this in one instance of chef-server-ctl
 
 
-    puts "Bootstrapping Chef Server Data"
+    puts "Bootstrapping Chef Infra Server Data"
     # This is done in a few stages. First we will see if the pivotal user exist
     EcPostgres.with_connection('opscode_chef') do |conn|
       get_or_create_superuser_in_erchef(conn)

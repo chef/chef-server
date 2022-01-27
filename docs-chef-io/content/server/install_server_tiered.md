@@ -14,8 +14,6 @@ aliases = ["/install_server_tiered.html", "/install_server_tiered/"]
     weight = 50
 +++
 
-{{% EOL_backend %}}
-
 This topic describes how to set up the Chef Infra Server with a single
 back end and multiple load-balanced frontend servers.
 
@@ -130,7 +128,7 @@ following:
 
 Use the following steps to set up the backend Chef Infra Server:
 
-1.  Download the packages from <https://downloads.chef.io/chef-server/>.
+1.  Download the packages from <https://www.chef.io/downloads/tools/infra-server>.
     For Red Hat and CentOS 6:
 
     ```bash

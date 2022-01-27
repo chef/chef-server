@@ -13,7 +13,7 @@
         ]).
 
 -include("chef_solr.hrl").
--define(JSON_HEADER, [{"Content-Type", "application/json"}]).
+-define(JSON_HEADER, chef_index_http:get_headers()).
 
 -spec ping() -> pong | pang.
 ping() ->

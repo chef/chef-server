@@ -32,16 +32,16 @@ Dependabot creates PRs for updating Ruby gems.  Verify pipeline builds
 are kicked-off automatically, but it is necessary to verify that they
 pass.  Any needed adhoc builds must be kicked-off by hand.
 
-Some Dependabot PRs will only need passing verify builds.  Others will
-need both passing verify and adhoc builds.  Look at the title of the PR,
+Some Dependabot PRs will only need passing verify tests.  Others will
+need passing verify tests, adhoc builds, and umbrella tests.  Look at the title of the PR,
 then consult the lists below to determine what you need to do with the PR.
 
-Needing passing verify builds only:
+Needing passing verify tests only:
 - src/oc-id/Gemfile.lock
 - src/oc\_erchef/apps/chef_objects/priv/depselector\_rb/Gemfile.lock
 - src/oc_bifrost/oc-bifrost-pedant/Gemfile.lock
 
-Needing passing verify + adhoc builds:
+Needing passing verify + adhoc + umbrella:
 - omnibus/Gemfile.lock
 - oc-chef-pedant/Gemfile.lock
 - src/chef-server-ctl/Gemfile.lock
@@ -258,3 +258,80 @@ index 36962f703..ac772214e 100644
        description: "Generate and upload release manifest"
        definition: .expeditor/post-promote.pipeline.yml
 ```
+On occasion you may encounter a strange or unfamiliar error in the build phase. This may occur on just one platform. Sometimes this is caused by a stale cache that needs to be refreshed with the `EXPIRE_CACHE=true` setting.  You may also try clicking the `Clean checkout` box in the GUI.
+
+An error message caused by a stale cache is depicted below (subsequently fixed with `EXPIRE_CACHE=true`):
+```
+[GitCache: preparation] I | 2021-12-20T06:26:13+00:00 | $ git -c core.autocrlf=false -c core.ignorecase=false --git-dir="/var/cache/omnibus/chef-server/cache/git_cache/opt/opscode" --work-tree="/opt/opscode" tag -f restore_here "preparation-cfb266e8545d283f3c6062a1e7eaa9f2c4b1ca45e729b4ff2b637fe59dc3972b-3"
+                          I | 2021-12-20T06:26:13+00:00 | fatal: cannot update ref 'refs/tags/restore_here': trying to write ref 'refs/tags/restore_here' with nonexistent object 9db05b5933b4399f57467e20f5a2d691f77a740e
+The following shell command exited with status 128:
+ 
+    $ git -c core.autocrlf=false -c core.ignorecase=false --git-dir="/var/cache/omnibus/chef-server/cache/git_cache/opt/opscode" --work-tree="/opt/opscode" tag -f restore_here "preparation-cfb266e8545d283f3c6062a1e7eaa9f2c4b1ca45e729b4ff2b637fe59dc3972b-3"
+ 
+Output:
+ 
+    (nothing)
+ 
+Error:
+ 
+    fatal: cannot update ref 'refs/tags/restore_here': trying to write ref 'refs/tags/restore_here' with nonexistent object 9db05b5933b4399f57467e20f5a2d691f77a740e
+```
+
+## Manual LDAP setup
+
+The easiest way to setup LDAP boxes is to use an Umbrella (Terraform) scenario.  A workflow for this is provided below.
+
+1) `cd` to the appropriate directory.
+`$ cd /umbrella/chef-server/scenarios/aws`
+
+2) Setup your credentials, create the vpc
+```
+$ okta_aws --all
+Fetching credentials for: chef-engineering
+Assuming AWS role Okta_AdministratorAccess...
+Temporary credentials stored in profile chef-engineering
+Credentials expire in 12 hours
+$ make create-vpc
+```
+3) Run the external-openldap scenario, using this template.  Fill-in the blanks with your chosen platform, chef-server version, etc.  If you need to use manage, leave `ENABLE_ADDON_CHEF_MANAGE=true` as manage is not automatically installed.  Example:
+
+$ PLATFORM=ubuntu-18.04 INSTALL_VERSION=14.11.21 UPGRADE_VERSION=14.11.21 SCENARIO=external-openldap ENABLE_ADDON_PUSH_JOBS=false ENABLE_GATHER_LOGS_TEST=false ENABLE_PEDANT_TEST=false ENABLE_PSQL_TEST=false ENABLE_SMOKE_TEST=false ENABLE_IPV6=false ENABLE_ADDON_CHEF_MANAGE=true MANAGE_VERSION=3.2.20 make apply | tee /tmp/out
+
+4) LDAP sets up multiple boxes.  If you captured the scenario output with `tee /tmp/out` above, use the command below to discover the IP addresses for the boxes, and to determine which box is which (chef-server, or ldap). The box labeled in the text to the left as 'ldap_config' is the LDAP box.  The box labeled either 'chef_server_config' or 'chef_server_test' is the chef-server box.  Use the chef-server address for the manage web GUI.
+```
+$ grep Host: /tmp/out
+null_resource.ldap_config (remote-exec):   Host: ec2-34-219-234-185.us-west-2.compute.amazonaws.com
+null_resource.chef_server_config (remote-exec):   Host: ec2-35-87-152-36.us-west-2.compute.amazonaws.com
+null_resource.chef_server_config (remote-exec): > Host: packages.chef.io
+null_resource.chef_server_config (remote-exec):   Host: ec2-35-87-152-36.us-west-2.compute.amazonaws.com
+null_resource.chef_server_config (remote-exec): > Host: packages.chef.io
+null_resource.chef_server_config (remote-exec):   Host: ec2-35-87-152-36.us-west-2.compute.amazonaws.com
+null_resource.chef_server_test (remote-exec):   Host: ec2-35-87-152-36.us-west-2.compute.amazonaws.com
+null_resource.chef_server_test (remote-exec):   Host: ec2-35-87-152-36.us-west-2.compute.amazonaws.com
+null_resource.chef_server_test (remote-exec):   Host: ec2-35-87-152-36.us-west-2.compute.amazonaws.com
+```
+
+Notes.
+
+If you've logged into a box via CLI, you can confirm which box it is by using this trick.  If it's the chef-server box, it will respond to `ctl` commands.  If it's the LDAP box, it won't:
+```
+$ chef-server-ctl status
+run: bookshelf: (pid 18881) 405s; run: log: (pid 18478) 425s
+run: elasticsearch: (pid 18862) 405s; run: log: (pid 18273) 468s
+run: nginx: (pid 2572) 179s; run: log: (pid 18686) 413s
+run: oc_bifrost: (pid 18736) 407s; run: log: (pid 18142) 480s
+run: oc_id: (pid 18782) 406s; run: log: (pid 18183) 473s
+run: opscode-erchef: (pid 18897) 404s; run: log: (pid 18601) 419s
+run: postgresql: (pid 18722) 407s; run: log: (pid 17655) 492s
+run: redis_lb: (pid 2278) 239s; run: log: (pid 18948) 404s
+```
+Note that the umbrella scenario automatically creates a `user1` account [ldap? chef-server?] with password `password`.
+
+If you are using the manage web GUI along with CLI, for a quick knife setup click on the Administration tab, and click on 'Generate Knife Config' on the left.  Copy the 'config.rb' file to your current directory on the chef-server box, and issue the following:
+```
+alias knife='/opt/opscode/bin/knife'
+export EDITOR=vim # edit this line to taste
+knife ssl fetch
+knife ssl check
+```
+

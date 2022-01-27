@@ -1,0 +1,248 @@
+  server {
+    <%= @helper.listen_port(@server_proto) %>
+    server_name <%= @helper.server_name %>;
+    more_clear_headers Server;
+
+    set_by_lua $data_collector_token 'return os.getenv("DATA_COLLECTOR_TOKEN")';
+
+    access_log <%= @helper.access_log(@server_proto) %> opscode;
+
+    <% if @server_proto == "https" %>
+      ssl_certificate <%= @ssl_certificate %>;
+      ssl_certificate_key <%= @ssl_certificate_key %>;
+      ssl_dhparam <%= @ssl_dhparam %>;
+
+      ssl_session_timeout 5m;
+
+      ssl_protocols <%= @ssl_protocols %>;
+      ssl_ciphers <%= @ssl_ciphers %>;
+      ssl_prefer_server_ciphers on;
+
+      <% if node['private_chef']['nginx']['ssl_client_ca'] -%>
+        ssl_verify_client on;
+        ssl_client_certificate <%= node['private_chef']['nginx']['ssl_client_ca'] %>;
+        ssl_verify_depth <%= node['private_chef']['nginx']['ssl_verify_depth'] %>;
+      <% end -%>
+    <% end %>
+
+    root <%= File.join(@dir, "html") %>;
+    client_max_body_size <%= @client_max_body_size %>;
+
+    proxy_set_header Host <%= @helper.host_header_var(@server_proto) %>;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto <%= @x_forwarded_proto %>;
+    proxy_pass_request_headers on;
+    proxy_connect_timeout   <%= node['private_chef']['nginx']['proxy_connect_timeout'] %>;
+    proxy_send_timeout      300;
+    proxy_read_timeout      300;
+
+    <% unless node['packages']['chef-manage'] %>
+    add_header X-Frame-Options DENY;
+    add_header Content-Security-Policy "default-src 'self';";
+    add_header X-Content-Type-Options nosniff;
+    add_header Permissions-Policy "camera=(); payment=(); microphone=(); gyroscope=(); magnetometer=(); midi=(); geolocation=()";
+    add_header Referrer-Policy 'strict-origin';
+      <% if @server_proto == 'https' %>
+    add_header Strict-Transport-Security "max-age=<%= @helper.get_max_age_for_hsts %>; includeSubDomains";
+      <% end %>
+    <% end %>
+
+    error_page 404 =404 /404.html;
+    error_page 503 =503 /503.json;
+    error_page 400 401 402 403 405 406 407 408 409 410 411 412 413 414 415 416 417 
+      418 421 422 423 424 425 426 428 429 431 451 500 501 502 504 505 506 507 508 510 511 = @errorrespfilter;
+
+    # Whitelist the docs necessary to serve up error pages and friendly
+    # html to non-chef clients hitting this host.
+    location ~ "^/[0-9]{3,3}\.(json|html)|favicon.ico|index.html$" {
+      add_header Content-Security-Policy "default-src 'self';";
+      add_header X-Frame-Options DENY;
+      add_header X-Content-Type-Options nosniff;
+      add_header Permissions-Policy "camera=(); payment=(); microphone=(); gyroscope=(); magnetometer=(); midi=(); geolocation=()";
+      add_header Referrer-Policy 'strict-origin';
+      <% if @server_proto == 'https' %>
+      add_header Strict-Transport-Security "max-age=<%= @helper.get_max_age_for_hsts %>; includeSubDomains";
+      <% end %>
+    }
+
+    location "/css/" {
+      add_header Content-Security-Policy "default-src 'self';";
+      add_header X-Frame-Options DENY;
+      add_header X-Content-Type-Options nosniff;
+      add_header Permissions-Policy "camera=(); payment=(); microphone=(); gyroscope=(); magnetometer=(); midi=(); geolocation=()";
+      add_header Referrer-Policy 'strict-origin';
+      <% if @server_proto == 'https' %>
+      add_header Strict-Transport-Security "max-age=<%= @helper.get_max_age_for_hsts %>; includeSubDomains";
+      <% end %>
+    }
+
+    location "/images/" {
+      add_header Content-Security-Policy "default-src 'self';";
+      add_header X-Frame-Options DENY;
+      add_header X-Content-Type-Options nosniff;
+      add_header Permissions-Policy "camera=(); payment=(); microphone=(); gyroscope=(); magnetometer=(); midi=(); geolocation=()";
+      add_header Referrer-Policy 'strict-origin';
+      <% if @server_proto == 'https' %>
+      add_header Strict-Transport-Security "max-age=<%= @helper.get_max_age_for_hsts %>; includeSubDomains";
+      <% end %>
+    }
+
+    location /version {
+      add_header Content-Security-Policy "default-src 'self';";
+      add_header X-Frame-Options DENY;
+      add_header X-Content-Type-Options nosniff;
+      add_header Permissions-Policy "camera=(); payment=(); microphone=(); gyroscope=(); magnetometer=(); midi=(); geolocation=()";
+      add_header Referrer-Policy 'strict-origin';
+      <% if @server_proto == 'https' %>
+      add_header Strict-Transport-Security "max-age=<%= @helper.get_max_age_for_hsts %>; includeSubDomains";
+      <% end %>
+      types { }
+      default_type text/plain;
+      alias /opt/opscode/version-manifest.txt;
+    }
+
+    location ~ "^/organizations/([^/]+)/validate" {
+      allow 127.0.0.1;
+      allow ::1;
+      deny all;
+      proxy_pass http://opscode_erchef;
+    }
+    <% if node['private_chef']['data_collector']['proxy'] -%>
+
+    location "/data-collector/" {
+      proxy_set_header Host $http_host;
+      proxy_set_header X-Real-IP $remote_addr;
+      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+      proxy_pass_request_headers on;
+      proxy_redirect off;
+      proxy_pass <%= node['private_chef']['data_collector']['root_url'] %>;
+    }
+    <% end -%>
+    <% if node['private_chef']['data_collector']['root_url'] -%>
+    
+    location ~ "^/organizations/([^/]+)/data-collector$" {
+      set $request_org $1;
+      access_by_lua_block { validator.validate("POST") }
+      proxy_set_header x-data-collector-token $data_collector_token;
+      proxy_set_header x-data-collector-auth "version=1.0";
+      rewrite ^ <%= URI.parse(node['private_chef']['data_collector']['root_url']).path %> break;
+      proxy_pass <%= URI.parse(node['private_chef']['data_collector']['root_url']).scheme %>://data-collector;
+    }
+    <% end -%>
+
+    location ~ "^/organizations/([^/]+)/required_recipe$" {
+    <% if node['private_chef']['required_recipe']['enable'] -%>
+      set $request_org $1;
+      access_by_lua_block { validator.validate("GET") }
+      types { }
+      default_type text/plain;
+      add_header Content-MD5 <%= Digest::MD5.base64digest(::File.read(node['private_chef']['required_recipe']['path'])) %>;
+      alias <%= ::File.join(@dir, "html", "required_recipe") %>;
+    <% else -%>
+      # This endpoint is unique because it is defined via nginx and is not
+      # handled by an upstream like oc_erchef. In order to make responses
+      # consistent between Chef server and chef-zero we'll always enable
+      # the location but explicitly return a 404 when the feature is disabled,
+      # rather than leave it undefined. If we were to leave it undefined any
+      # non-signed requests would be routed to the main index page and return
+      # a 200 instead of 404.
+      return 404;
+    <% end -%>
+    }
+
+    <% if node['private_chef']['profiles']['root_url'] -%>
+    # Compliance endpoint to forward profiles calls to the Automate API:
+    #   /organizations/ORG/owners/OWNER/compliance[/PROFILE]
+    # Supports the legacy(chef-gate) URLs as well:
+    #   /compliance/organizations/ORG/owners/OWNER/compliance[/PROFILE]
+    location ~ <%= @compliance_proxy_regex -%> {
+      set $request_org $1;
+      access_by_lua_block { validator.validate("GET") }
+      proxy_set_header x-data-collector-token $data_collector_token;
+      proxy_set_header x-data-collector-auth "version=1.0";
+      rewrite ^<%= @compliance_proxy_regex -%> /compliance/profiles/$2$3 break;
+      proxy_pass https://compliance-profiles;
+    }
+    <% end -%>
+
+    # bookshelf
+    <% if node['private_chef']['opscode-erchef']['nginx_bookshelf_caching'] != :off -%>
+    location ~ "^/<%= node['private_chef']['opscode-erchef']['s3_bucket'] %>/organization-.+" {
+      set $destination @cached;
+      if ($request_method !~ ^(GET)$) {
+         set $destination @uncached;
+      }
+      error_page 404 = $destination;
+      return 404;
+    }
+    location @cached {
+      proxy_cache cookbooks;
+      more_clear_headers 'Cache-Control';
+      add_header X-Proxy-Cache $upstream_cache_status;
+      proxy_pass http://bookshelf;
+    }
+    location @uncached {
+      proxy_pass http://bookshelf;
+    }
+    <% else -%>
+    location ~ "^/<%= node['private_chef']['opscode-erchef']['s3_bucket'] %>/organization-.+" {
+      proxy_pass http://bookshelf;
+    }
+    <% end -%>
+
+    # erchef status endpoint
+    location ~ "^/_status/?$" {
+      types { }
+      default_type application/json;
+      proxy_pass http://opscode_erchef;
+    }
+
+    # erchef stats endpoint
+    location ~ "^/_stats/?$" {
+      <% if node['private_chef']['opscode-erchef']['stats_auth_enable'] -%>
+      auth_basic "Chef Server Admin Stats";
+      auth_basic_user_file <%= node['private_chef']['opscode-erchef']['stats_password_file'] %>;
+      <% end -%>
+      types { }
+      default_type application/json;
+      proxy_pass http://opscode_erchef;
+    }
+
+    # This variable is set to an empty string here so it can be used in
+    # dispatch.lua later on. An add-on can set this variable to be used as an
+    # upstream if we determine the request was not intended to go to the API.
+    set $add_on_override_upstream "";
+
+    # Include external routes for addons
+    include <%= node['private_chef']['nginx']['dir'] %>/etc/addon.d/*_external.conf;
+
+    location /_route/ {
+      default_type 'application/json';
+      content_by_lua_file '<%= @script_path %>/dispatch_route.lua';
+    }
+
+    location / {
+      satisfy any;
+
+      <% if @access_by_lua_file %>
+      # access_by_lua_file acts as an access phase handler and executes Lua code
+      # contained in the given file for every request.  This is disabled by
+      # default, separate from the lua dispatch routing, and intended to do
+      # initial access authentication.
+      access_by_lua_file '<%= @access_by_lua_file %>';
+      <% end %>
+
+      set $mode "api";
+      set $upstream "";
+      rewrite_by_lua_file '<%=@script_path%>/dispatch.lua';
+      proxy_pass http://$upstream;
+      proxy_redirect http://$upstream /;
+    }
+    location @errorrespfilter {
+      header_filter_by_lua_block { ngx.header.content_length = nil }
+      body_filter_by_lua '
+      ngx.arg[1] = ngx.re.sub(ngx.arg[1],"openresty", "")
+      ';
+    }
+  }

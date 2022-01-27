@@ -37,30 +37,27 @@ Infra Server to use SSL certificates:
     nginx['ssl_protocols'] = 'TLSv1.2'
     ```
 
-<div class="admonition-note">
+    <div class="admonition-note">
+    <p class="admonition-note-title">Note</p>
+    <div class="admonition-note-text">
 
-<p class="admonition-note-title">Note</p>
+    See <https://www.openssl.org/docs/man1.0.2/man1/ciphers.html> for more
+    information about the values used with the `nginx['ssl_ciphers']` and
+    `nginx['ssl_protocols']` settings.
 
-<div class="admonition-note-text">
+    </div>
+    </div>
 
-See <https://www.openssl.org/docs/man1.0.2/man1/ciphers.html> for more
-information about the values used with the `nginx['ssl_ciphers']` and
-`nginx['ssl_protocols']` settings.
+    For example, after copying the SSL certificate files to the Chef Infra
+    Server, update the `nginx['ssl_certificate']` and
+    `nginx['ssl_certificate_key']` settings to specify the paths to those
+    files, and then (optionally) update the `nginx['ssl_ciphers']` and
+    `nginx['ssl_protocols']` settings to reflect the desired level of
+    hardness for the Chef Infra Server:
 
-</div>
-
-</div>
-
-For example, after copying the SSL certificate files to the Chef Infra
-Server, update the `nginx['ssl_certificate']` and
-`nginx['ssl_certificate_key']` settings to specify the paths to those
-files, and then (optionally) update the `nginx['ssl_ciphers']` and
-`nginx['ssl_protocols']` settings to reflect the desired level of
-hardness for the Chef Infra Server:
-
-```ruby
-nginx['ssl_certificate'] = '/etc/pki/tls/private/name.of.pem'
-nginx['ssl_certificate_key'] = '/etc/pki/tls/private/name.of.key'
-nginx['ssl_ciphers'] = 'HIGH:MEDIUM:!LOW:!kEDH:!aNULL:!ADH:!eNULL:!EXP:!SSLv2:!SEED:!CAMELLIA:!PSK'
-nginx['ssl_protocols'] = 'TLSv1.2'
-```
+    ```ruby
+    nginx['ssl_certificate'] = '/etc/pki/tls/private/name.of.pem'
+    nginx['ssl_certificate_key'] = '/etc/pki/tls/private/name.of.key'
+    nginx['ssl_ciphers'] = 'HIGH:MEDIUM:!LOW:!kEDH:!aNULL:!ADH:!eNULL:!EXP:!SSLv2:!SEED:!CAMELLIA:!PSK'
+    nginx['ssl_protocols'] = 'TLSv1.2'
+    ```

@@ -48,6 +48,8 @@
 
 %% Internal types
 -type cookbook_with_version() :: binary() | {binary(), binary()}.
+-define(CACHE_RETRY_INTERVAL, 200).
+-define(CACHE_MAX_RETRIES, 10).
 
 init(Config) ->
     oc_chef_wm_base:init(?MODULE, Config).
@@ -246,11 +248,12 @@ handle_depsolver_results(ok, {error, {unreachable_package, Unreachable}}, Req, S
     precondition_failed(Req, State,
                         not_reachable_message(Unreachable),
                         unreachable_dep);
-handle_depsolver_results(ok, {ok, Cookbooks}, Req, #base_state{chef_db_context = DbContext,
+handle_depsolver_results(ok, {ok, Cookbooks}, Req, #base_state{reqid = _ReqId,
+                                                               chef_db_context = DbContext,
                                                                organization_guid = OrgId } = State) ->
     %% TODO - helper function to deal with the call and match on a chef_cookbook version
-    CookbookRecords = chef_db:bulk_fetch_minimal_cookbook_versions(DbContext, OrgId, Cookbooks),
-    assemble_response(Req, State, CookbookRecords).
+    assemble_response(Req, State,
+                      chef_db:bulk_fetch_minimal_cookbook_versions(DbContext, OrgId, Cookbooks)).
 
 %% @doc Utility function to remove some of the verbosity
 precondition_failed(Req, State, ErrorData, LogMsg) ->
@@ -277,21 +280,64 @@ wm_halt(Code, Req, State, ErrorData, LogMsg) ->
 %% Note the cookbook object we return back is a stripped-down version,
 %% removing large fields such as long_description and attributes in
 %% the metadata that are not required by chef-client
-assemble_response(Req, #base_state{server_api_version = ApiVersion} = State, CookbookVersions) ->
+assemble_response(Req, #base_state{organization_guid = OrgId, server_api_version = ApiVersion} = State, CookbookVersions) ->
+
     case oc_chef_wm_base:check_cookbook_authz(CookbookVersions, Req, State) of
         ok ->
-            %% We iterate over the list again since we only want to construct the s3urls
-            %% if the authz check has succeeded.  We use a minimal version of the
-            %% cookbook which has just enough information for chef-client to run
-            JsonList = {
-                    [ { CBV#chef_cookbook_version.name,
-                       chef_cookbook_version:minimal_cookbook_ejson(CBV, chef_wm_util:base_uri(Req), ApiVersion) }
-                      || CBV <- CookbookVersions ]
-                    },
-            CBMapJson = chef_json:encode(JsonList),
-            {true, wrq:append_to_response_body(CBMapJson, Req), State};
+            case make_json_list(OrgId, CookbookVersions, chef_wm_util:base_uri(Req), ApiVersion) of
+                {error, busy} ->
+                  % Force backoff until the cache catches up with demand. Occurs when caching is enabled
+                  % and the cache message queue is overloaded. Also occurs when we give up on waiting for
+                  % another process that has claimed a given cache key to complete its work.
+                  wm_halt(503, Req, State, <<"cookbook versions cache unavailable. Try again shortly.">>, cbv_cache_timeout);
+                JsonList ->
+                 {true, wrq:append_to_response_body(chef_json:encode(JsonList), Req), State}
+            end;
         {error, Msg} ->
             forbid(Req, State, Msg, {forbidden, read})
+    end.
+
+make_json_list(OrgId, CookbookVersions, URI, ApiVersion) ->
+    Hash = erlang:phash2(CookbookVersions, 134217728),
+    make_json_list(CookbookVersions, URI, ApiVersion, {OrgId, Hash}, 0).
+
+make_json_list(_CookbookVersions, _URI, _ApiVersion, Key, ?CACHE_MAX_RETRIES) ->
+    % Waiting is good, but let's not hang the client up forever.
+    lager:info("chef_wm_depsolver:make_json_list ~p - forcing retry after giving up on ~p", [self(), Key]),
+    {error, busy};
+make_json_list(CookbookVersions, URI, ApiVersion, Key, NumAttempts) ->
+    case chef_cbv_cache:get(Key) of
+        {error, retry} ->
+            % Someone else is calculating this, pause to let them finish and try again
+            timer:sleep(?CACHE_RETRY_INTERVAL),
+            make_json_list(CookbookVersions, URI, ApiVersion, Key, NumAttempts + 1);
+        undefined ->
+            % It is not in the cache and nobody is working on it. Stake our claim and
+            % do the work.
+            case chef_cbv_cache:claim(Key) of
+                Response when Response =:= undefined orelse Response =:= ok->
+                    %% We iterate over the list again since we only want to construct the s3urls
+                    %% if the authz check has succeeded (in caller).  We respond with a minimal version of the
+                    %% cookbook which has just enough information for chef-client to run
+                    %% Note that it is possible for the final result to contain thousands of entries.
+                    Result = {
+                      [ { CBV#chef_cookbook_version.name,
+                          chef_cookbook_version:minimal_cookbook_ejson(CBV, URI, ApiVersion) }
+                        || CBV <- CookbookVersions ]
+                     },
+                    chef_cbv_cache:put(Key, Result),
+                    Result;
+                {error, retry} ->
+                    % Someone snuck in and claimed it at around the same time as us. They got
+                    % there first, so we'll wait and retry the get.
+                    timer:sleep(?CACHE_RETRY_INTERVAL),
+                    make_json_list(CookbookVersions, URI, ApiVersion, Key, NumAttempts + 1);
+                {error, busy} ->
+                    % cache service is overloaded, we're done here.
+                    {error, busy}
+            end;
+        Result ->
+            Result
     end.
 
 %%------------------------------------------------------------------------------

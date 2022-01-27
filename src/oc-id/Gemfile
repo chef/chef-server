@@ -5,26 +5,23 @@ git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 gem 'rails', '~> 6.1.4'
 gem 'chef', '~> 17'
 # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
-gem 'jbuilder', '~> 2.7'
+gem 'jbuilder', '~> 2.11'
 gem 'jquery-rails'
 gem 'jwt' # For Zendesk SSO
-gem 'config', '~> 2.2', '>= 2.2.1'  # Replacement of rails_config gem
+gem 'config', '~> 3.1' # Replacement of rails_config gem
 gem 'rb-readline', '~> 0.5.2', require: false
 gem 'sass-rails', '>= 4.0.3'
 gem 'turbolinks', '~> 5'
 gem 'unicorn-rails', '~> 2.2', '>= 2.2.1'
-gem 'nokogiri', '1.11.7'
+gem 'nokogiri', '1.13.1'
 gem 'pg', '>= 0.18', '< 2.0' # active_record 4.2.8 pins this but doesn't manifest this in the gemspec for some reason
 gem 'mixlib-authentication', '>= 2.1', '< 4'
 gem 'sentry-raven'
 gem 'responders', '~> 3.0', '>= 3.0.1'
-gem 'newrelic_rpm'
 gem 'doorkeeper', '~> 4.0'
-gem "sprockets-rails", git: 'https://github.com/rails/sprockets-rails.git'
+gem "sprockets-rails", ">= 3.4.2"
 gem 'therubyracer', '~> 0.12.3'
 gem 'bigdecimal', '1.3.5'
-
-gem 'foundation-rails', git: 'https://github.com/foundation/foundation-rails.git', tag: 'v5.5.3.2'
 gem 'veil', '~> 0.3.9'
 
 gem 'omniauth-chef', '~> 0.4'
@@ -40,7 +37,7 @@ group :node do
 end
 
 group :development, :test do
-  gem 'rspec-rails', '~> 5.0'
+  gem 'rspec-rails', '~> 5.1'
   gem 'rails-controller-testing'
   gem 'pry-byebug'
   gem 'mailcatcher'
@@ -51,7 +48,7 @@ group :development do
   gem 'binding_of_caller'
   gem 'spring' # App preloading
   gem 'spring-commands-rspec'
-  gem 'thor', '~> 1.0', '>= 1.0.1'
+  gem 'thor', '~> 1.2'
 end
 
 group :doc do
@@ -59,8 +56,8 @@ group :doc do
 end
 
 group :test do
-  gem 'capybara', '~> 3.33'
+  gem 'capybara', '~> 3.36'
   gem 'factory_girl_rails', '~> 4.4.0'
-  gem 'selenium-webdriver', '~> 3.142.7'
+  gem 'selenium-webdriver', '~> 4.1.0'
   gem 'timecop'
 end

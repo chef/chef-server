@@ -1,5 +1,3 @@
-//= require foundation/foundation
-//= require foundation
 
 (function($, window, document) {
 
@@ -34,7 +32,6 @@
   })();
 
   $.fn.chef = function() {
-    $(document).foundation.apply(this, arguments);
 
     var args = Array.prototype.slice.call(arguments, 0);
 

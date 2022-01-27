@@ -4,7 +4,6 @@ class Chef
   module Web
     module Core
       class Engine < ::Rails::Engine
-        require 'foundation-rails'
         require 'sass/rails'
 
         isolate_namespace Chef::Web::Core

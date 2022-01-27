@@ -1,4 +1,7 @@
 OcId::Application.routes.draw do
+
+  default_url_options host: "#{Settings.origin}"
+
   root 'home#index'
   get 'id', to: 'home#index'
 
@@ -16,7 +19,7 @@ OcId::Application.routes.draw do
 
     resource :profile, only: [:show, :update] do
       put  "password" => "profiles#change_password"
-   #  get  "email" => "profiles#change_email"
+      get  "email" => "profiles#change_email"
       post "regen_key"
     end
 

@@ -7,17 +7,17 @@ require "fileutils"
 load "dvmtools.rb"
 
 Variant = ENV['VAGRANT_MACHINE_VARIANT'] ? ("-" + ENV['VAGRANT_MACHINE_VARIANT'] ) : ''
-VMName = "chef-server#{Variant}" 
+VMName = "chef-server#{Variant}"
 
 IPS = {
-  cs: "192.168.33.100",
-  db: "192.168.33.150",
-  be: "192.168.33.151",
-  ldap: "192.168.33.152",
-  custom: "192.168.33.153",
-  reportingdb: "192.168.33.155",
-  elasticsearch: "192.168.33.156",
-  solr: "192.168.33.157"
+  cs: "192.168.56.100",
+  db: "192.168.56.150",
+  be: "192.168.56.151",
+  ldap: "192.168.56.152",
+  custom: "192.168.56.153",
+  reportingdb: "192.168.56.155",
+  elasticsearch: "192.168.56.156",
+  solr: "192.168.56.157"
 }
 
 # to run a chef-server vm with external postgresql,
@@ -56,7 +56,6 @@ end
 
 Vagrant.configure("2") do |config|
   attributes = load_settings
-
   config.vm.network 'public_network' if USE_AZURE
   # Use the official Ubuntu 18.04 box
   # Vagrant will auto resolve the url to download from Atlas
@@ -171,7 +170,7 @@ def define_chef_server(config, attributes)
              "opscode_erchef['db_pool_size']" => 10,
              "oc_id['db_pool_size']" => 10,
              "oc_bifrost['db_pool_size']" => 10 }
-      
+
       pg.merge!({
                   "postgresql['db_connection_superuser']" => "'#{DB_SUPERUSER}@#{IPS[:db]}'",
                   "postgresql['sql_connection_user']" => "'#{DB_SUPERUSER}@#{IPS[:db]}'",

@@ -90,7 +90,8 @@
          environment_exists/3,
          list_all_policy_revisions_by_orgid/2,
          find_all_policy_revisions_by_group_and_name/2,
-         find_all_policy_revisions_associated_to_group/3]).
+         find_all_policy_revisions_associated_to_group/3,
+         list_policy_groups_for_policy_revision/2]).
 
 -include("chef_db.hrl").
 -include("chef_types.hrl").
@@ -638,6 +639,15 @@ find_all_policy_revisions_associated_to_group(#context{reqid=ReqId}, OrgId, Grou
         {error, Error} ->
             {error, Error}
     end.
+
+list_policy_groups_for_policy_revision(#context{reqid=ReqId}, RevisionID) ->
+    case ?SH_TIME(ReqId, chef_sql, list_policy_groups_for_policy_revision, (RevisionID)) of
+        {ok, PolicyGroupNames} ->
+            PolicyGroupNames;
+        {error, Error} ->
+            {error, Error}
+    end.
+
 
 
 

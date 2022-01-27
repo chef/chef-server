@@ -16,7 +16,7 @@
 
 name "postgresql13"
 
-default_version "13.4"
+default_version "13.5"
 
 license "PostgreSQL"
 license_file "COPYRIGHT"
@@ -30,13 +30,13 @@ dependency "libossp-uuid"
 dependency "config_guess"
 
 source url: "https://ftp.postgresql.org/pub/source/v#{version}/postgresql-#{version}.tar.bz2"
-version("13.4") { source sha256: "ea93e10390245f1ce461a54eb5f99a48d8cabd3a08ce4d652ec2169a357bc0cd" }
+version("13.5") { source sha256: "9b81067a55edbaabc418aacef457dd8477642827499560b00615a6ea6c13f6b3" }
 
 relative_path "postgresql-#{version}"
 
 build do
   env = with_standard_compiler_flags(with_embedded_path)
-  short_version = version.gsub(/^([0-9]+).([0-9]+).[0-9]+$/, '\1.\2')
+  short_version = version.gsub(/^([0-9]+).[0-9]+$/, '\1')
 
   update_config_guess(target: "config")
 
