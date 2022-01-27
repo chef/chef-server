@@ -7,47 +7,52 @@
 - Update habitat channel to stable2021-q2 [#3126](https://github.com/chef/chef-server/pull/3126) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
 <!-- latest_release -->
 
-<!-- release_rollup since=14.11.36 -->
-### Changes since 14.11.36 release
+<!-- release_rollup since=14.12.21 -->
+### Changes since 14.12.21 release
 
 #### Merged Pull Requests
-- Update habitat channel to stable2021-q2 [#3126](https://github.com/chef/chef-server/pull/3126) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.12.24 -->
-- Fix typos [#3124](https://github.com/chef/chef-server/pull/3124) ([lbakerchef](https://github.com/lbakerchef)) <!-- 14.12.23 -->
-- Update release process documentation [#3122](https://github.com/chef/chef-server/pull/3122) ([lbakerchef](https://github.com/lbakerchef)) <!-- 14.12.22 -->
-- Update knife-ec-backup to 3.0.0. [#3121](https://github.com/chef/chef-server/pull/3121) ([lbakerchef](https://github.com/lbakerchef)) <!-- 14.12.21 -->
-- OCID: Triggered email update only if email is getting change . [#3105](https://github.com/chef/chef-server/pull/3105) ([antima-gupta](https://github.com/antima-gupta)) <!-- 14.12.20 -->
-- Bump chef_backup from 0.2.0 to 0.3.0 in /src/chef-server-ctl [#3119](https://github.com/chef/chef-server/pull/3119) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.12.19 -->
-- Bump rspec-rails from 5.0.2 to 5.1.0 in /src/oc-id [#3118](https://github.com/chef/chef-server/pull/3118) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.12.18 -->
-- Source sprockets-rails from rubygems in oc-id [#3053](https://github.com/chef/chef-server/pull/3053) ([tas50](https://github.com/tas50)) <!-- 14.12.17 -->
-- Remove newrelic_rpm gem from oc-id [#2993](https://github.com/chef/chef-server/pull/2993) ([tas50](https://github.com/tas50)) <!-- 14.12.16 -->
-- change find command to ignore /var/log/lastlog [#3103](https://github.com/chef/chef-server/pull/3103) ([y-me-y](https://github.com/y-me-y)) <!-- 14.12.15 -->
-- Remove documentation for flavor [#3081](https://github.com/chef/chef-server/pull/3081) ([tas50](https://github.com/tas50)) <!-- 14.12.14 -->
-- The version should still be 14.12 [#3112](https://github.com/chef/chef-server/pull/3112) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.12.13 -->
 - Removed foundation-rails gem [#3015](https://github.com/chef/chef-server/pull/3015) ([antima-gupta](https://github.com/antima-gupta)) <!-- 14.13.0 -->
-- Cookbook version caching updates  [#3079](https://github.com/chef/chef-server/pull/3079) ([marcparadise](https://github.com/marcparadise)) <!-- 14.12.12 -->
-- Minor updates to the static website [#3090](https://github.com/chef/chef-server/pull/3090) ([tas50](https://github.com/tas50)) <!-- 14.12.11 -->
-- Bump omnibus-software from `4707275` to `774125f` in /omnibus [#3088](https://github.com/chef/chef-server/pull/3088) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.12.10 -->
-- Bump thor from 1.1.0 to 1.2.1 in /src/oc-id [#3052](https://github.com/chef/chef-server/pull/3052) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.12.9 -->
-- Bump nokogiri from 1.12.5 to 1.13.1 in /src/oc-id [#3084](https://github.com/chef/chef-server/pull/3084) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.12.8 -->
-- Bump rspec_junit_formatter from 0.4.1 to 0.5.1 in /oc-chef-pedant [#3055](https://github.com/chef/chef-server/pull/3055) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.12.7 -->
-- Bump chef from 17.8.25 to 17.9.26 in /src/oc-id [#3057](https://github.com/chef/chef-server/pull/3057) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.12.6 -->
-- Bump chef from 17.9.18 to 17.9.26 in /oc-chef-pedant [#3062](https://github.com/chef/chef-server/pull/3062) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.12.5 -->
-- Bump newrelic_rpm from 8.2.0 to 8.3.0 in /src/oc-id [#3086](https://github.com/chef/chef-server/pull/3086) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.12.4 -->
-- Bump config from 3.1.0 to 3.1.1 in /src/oc-id [#3051](https://github.com/chef/chef-server/pull/3051) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.12.3 -->
-- Update Elasticsearch to 6.8.23 [#3083](https://github.com/chef/chef-server/pull/3083) ([tas50](https://github.com/tas50)) <!-- 14.12.2 -->
-- Update Redis to 5.0.14 [#3080](https://github.com/chef/chef-server/pull/3080) ([tas50](https://github.com/tas50)) <!-- 14.12.1 -->
-- Update PostgreSQL from 13.4 to 13.5 [#3071](https://github.com/chef/chef-server/pull/3071) ([tas50](https://github.com/tas50)) <!-- 14.12.0 -->
-- Update address ranges in use for vbox compat [#3072](https://github.com/chef/chef-server/pull/3072) ([marcparadise](https://github.com/marcparadise)) <!-- 14.11.43 -->
-- Update RELEASE_PROCESS.md [#3008](https://github.com/chef/chef-server/pull/3008) ([lbakerchef](https://github.com/lbakerchef)) <!-- 14.11.43 -->
-- Bump chef from 17.8.25 to 17.9.18 in /oc-chef-pedant [#3037](https://github.com/chef/chef-server/pull/3037) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.11.42 -->
-- Update rspec_junit_formatter requirement from &gt;= 0.1.1, &lt; 0.5.0 to &gt;= 0.1.1, &lt; 0.6.0 in /src/oc_bifrost/oc-bifrost-pedant [#3056](https://github.com/chef/chef-server/pull/3056) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.11.41 -->
-- Bump sdoc from 2.2.0 to 2.3.0 in /src/oc-id [#3058](https://github.com/chef/chef-server/pull/3058) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.11.40 -->
-- Bump chef_backup from 0.1.1 to 0.2.0 in /src/chef-server-ctl [#3021](https://github.com/chef/chef-server/pull/3021) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.11.39 -->
-- Bump chefstyle from 2.1.3 to 2.2.0 in /src/chef-server-ctl [#3054](https://github.com/chef/chef-server/pull/3054) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.11.38 -->
-- Update FrequentTasks.md [#3025](https://github.com/chef/chef-server/pull/3025) ([lbakerchef](https://github.com/lbakerchef)) <!-- 14.11.37 -->
+- Update release process documentation [#3122](https://github.com/chef/chef-server/pull/3122) ([lbakerchef](https://github.com/lbakerchef)) <!-- 14.12.22 -->
+- Fix typos [#3124](https://github.com/chef/chef-server/pull/3124) ([lbakerchef](https://github.com/lbakerchef)) <!-- 14.12.23 -->
+- Update habitat channel to stable2021-q2 [#3126](https://github.com/chef/chef-server/pull/3126) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.12.24 -->
 <!-- release_rollup -->
 
 <!-- latest_stable_release -->
+## [14.12.21](https://github.com/chef/chef-server/tree/14.12.21) (2022-01-27)
+
+#### Merged Pull Requests
+- Update FrequentTasks.md [#3025](https://github.com/chef/chef-server/pull/3025) ([lbakerchef](https://github.com/lbakerchef))
+- Bump chefstyle from 2.1.3 to 2.2.0 in /src/chef-server-ctl [#3054](https://github.com/chef/chef-server/pull/3054) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump chef_backup from 0.1.1 to 0.2.0 in /src/chef-server-ctl [#3021](https://github.com/chef/chef-server/pull/3021) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump sdoc from 2.2.0 to 2.3.0 in /src/oc-id [#3058](https://github.com/chef/chef-server/pull/3058) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Update rspec_junit_formatter requirement from &gt;= 0.1.1, &lt; 0.5.0 to &gt;= 0.1.1, &lt; 0.6.0 in /src/oc_bifrost/oc-bifrost-pedant [#3056](https://github.com/chef/chef-server/pull/3056) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump chef from 17.8.25 to 17.9.18 in /oc-chef-pedant [#3037](https://github.com/chef/chef-server/pull/3037) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Update RELEASE_PROCESS.md [#3008](https://github.com/chef/chef-server/pull/3008) ([lbakerchef](https://github.com/lbakerchef))
+- Update address ranges in use for vbox compat [#3072](https://github.com/chef/chef-server/pull/3072) ([marcparadise](https://github.com/marcparadise))
+- Update PostgreSQL from 13.4 to 13.5 [#3071](https://github.com/chef/chef-server/pull/3071) ([tas50](https://github.com/tas50))
+- Update Redis to 5.0.14 [#3080](https://github.com/chef/chef-server/pull/3080) ([tas50](https://github.com/tas50))
+- Update Elasticsearch to 6.8.23 [#3083](https://github.com/chef/chef-server/pull/3083) ([tas50](https://github.com/tas50))
+- Bump config from 3.1.0 to 3.1.1 in /src/oc-id [#3051](https://github.com/chef/chef-server/pull/3051) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump newrelic_rpm from 8.2.0 to 8.3.0 in /src/oc-id [#3086](https://github.com/chef/chef-server/pull/3086) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump chef from 17.9.18 to 17.9.26 in /oc-chef-pedant [#3062](https://github.com/chef/chef-server/pull/3062) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump chef from 17.8.25 to 17.9.26 in /src/oc-id [#3057](https://github.com/chef/chef-server/pull/3057) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump rspec_junit_formatter from 0.4.1 to 0.5.1 in /oc-chef-pedant [#3055](https://github.com/chef/chef-server/pull/3055) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump nokogiri from 1.12.5 to 1.13.1 in /src/oc-id [#3084](https://github.com/chef/chef-server/pull/3084) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump thor from 1.1.0 to 1.2.1 in /src/oc-id [#3052](https://github.com/chef/chef-server/pull/3052) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump omnibus-software from `4707275` to `774125f` in /omnibus [#3088](https://github.com/chef/chef-server/pull/3088) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Minor updates to the static website [#3090](https://github.com/chef/chef-server/pull/3090) ([tas50](https://github.com/tas50))
+- Cookbook version caching updates  [#3079](https://github.com/chef/chef-server/pull/3079) ([marcparadise](https://github.com/marcparadise))
+- The version should still be 14.12 [#3112](https://github.com/chef/chef-server/pull/3112) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Remove documentation for flavor [#3081](https://github.com/chef/chef-server/pull/3081) ([tas50](https://github.com/tas50))
+- change find command to ignore /var/log/lastlog [#3103](https://github.com/chef/chef-server/pull/3103) ([y-me-y](https://github.com/y-me-y))
+- Remove newrelic_rpm gem from oc-id [#2993](https://github.com/chef/chef-server/pull/2993) ([tas50](https://github.com/tas50))
+- Source sprockets-rails from rubygems in oc-id [#3053](https://github.com/chef/chef-server/pull/3053) ([tas50](https://github.com/tas50))
+- Bump rspec-rails from 5.0.2 to 5.1.0 in /src/oc-id [#3118](https://github.com/chef/chef-server/pull/3118) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump chef_backup from 0.2.0 to 0.3.0 in /src/chef-server-ctl [#3119](https://github.com/chef/chef-server/pull/3119) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- OCID: Triggered email update only if email is getting change . [#3105](https://github.com/chef/chef-server/pull/3105) ([antima-gupta](https://github.com/antima-gupta))
+- Update knife-ec-backup to 3.0.0. [#3121](https://github.com/chef/chef-server/pull/3121) ([lbakerchef](https://github.com/lbakerchef))
+<!-- latest_stable_release -->
+
 ## [14.11.36](https://github.com/chef/chef-server/tree/14.11.36) (2021-12-27)
 
 #### Merged Pull Requests
@@ -56,7 +61,6 @@
 - Improve security of the default site with more HTTP headers [#3031](https://github.com/chef/chef-server/pull/3031) ([tas50](https://github.com/tas50))
 - Add the definitions for solr4 external as they are called from scenarios with external databases. [#3034](https://github.com/chef/chef-server/pull/3034) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
 - moving back to opscode from chef in the uri of sqitch.plan [#3043](https://github.com/chef/chef-server/pull/3043) ([vinay-satish](https://github.com/vinay-satish))
-<!-- latest_stable_release -->
 
 ## [14.11.31](https://github.com/chef/chef-server/tree/14.11.31) (2021-12-21)
 
