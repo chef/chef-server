@@ -184,9 +184,8 @@ manage.
 
 <span class="title-ref">knife-acl</span> and the Chef Manage browser
 interface are incompatible. After engaging <span
-class="title-ref">knife-acl</span>, you will need to discontinue using
-the Chef Manage browser interface from that point forward due to
-possible incompatibilities.
+class="title-ref">knife-acl</span>, you will need to stop using
+the Chef Manage browser interface from that point forward because they are incompatible.
 
 ## Groups
 
