@@ -184,7 +184,7 @@ GEM
       tty-table (~> 0.10)
     ipaddress (0.8.3)
     json (2.6.0)
-    knife-ec-backup (2.5.3)
+    knife-ec-backup (3.0.0)
       chef (>= 11.8)
       knife-tidy
       pg
