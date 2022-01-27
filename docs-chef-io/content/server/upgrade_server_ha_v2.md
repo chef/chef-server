@@ -170,6 +170,56 @@ cluster downtime.
 
 8. To continue the upgrades on Chef Infra Server frontend nodes using this backend cluster, see [Upgrade Frontends Associated with a Chef Backend Cluster]({{< relref "install_server_ha/#upgrading-chef-infra-server-on-the-frontend-machines" >}}).
 
+## Chef Backend 2.x to 3.x Upgrade
+
+| Running Version | Upgrade To Version | Upgrade Type |
+|---------|---------|------|
+| 2.x | 2.x | Rolling |
+| 2.1 | 3.0 | Rolling |
+| 2.0 | 3.0 | Downtime |
+
+Upgrading from Chef Backend 2.0 to directly Chef Backend 3.0 requires full cluster downtime and is currently not supported.
+Upgrading to Chef Backend 3.0 first requires the Chef Backend to be upgraded to Chef Backend 2.1 or later.
+
+1. Identify the node with the **leader** role using the `chef-backend-ctl cluster-status` command:
+
+    ```none
+    Name       IP              GUID                              Role      PG        ES
+    backend-1  192.168.33.215  dc0c6ea77a751f94037cd950e8451fa3  leader    leader    not_master
+    backend-2  192.168.33.216  008782c59d3628b6bb7f43556ac0c66c  follower  follower  not_master
+    backend-3  192.168.33.217  1af654172b1830927a571d9a5ba7965b  follower  follower  master
+    ```
+
+    In this example, `backend-1` is the **leader** node, as indicated by its role in the **Role** column.
+
+2. Install the new Chef Backend package on all nodes in the cluster:
+
+    RHEL and CentOS:
+
+    ```bash
+    yum install PATH_TO_FILE.rpm
+    ```
+
+    Debian and Ubuntu:
+
+    ```bash
+    dpkg -i PATH_TO_FILE.deb
+    ```
+
+3. Initiate the upgrade on the follower nodes first:
+
+    ```bash
+    chef-backend-ctl upgrade
+    ```
+
+4. Then initiate the upgrade on the leader node with the `--failover` option:
+
+    ```bash
+    chef-backend-ctl upgrade --failover
+    ```
+
+5. To continue the upgrades on Chef Infra Server frontend nodes using this backend cluster, see [Upgrade Frontends Associated with a Chef Backend Cluster]({{< relref "install_server_ha/#upgrading-chef-infra-server-on-the-frontend-machines" >}}).
+
 ## DRBD/Keepalived HA to Chef Backend 2.x
 
 DRBD configurations are no longer supported. See [End of Life
