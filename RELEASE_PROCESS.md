@@ -48,6 +48,10 @@ One approach is to enter the following into a bash shell, where _version_ is the
 $ mixlib-install download chef-server -c current -a x86_64 -p ubuntu -l 18.04 -v <version>
 Starting download https://packages.chef.io/files/current/chef-server/14.2.23/ubuntu/18.04/chef-server-core_14.2.23-1_amd64.deb
 ```
+Sometimes it takes a while for mixlib to realize a new artifact is there, so you can also look here:
+```
+https://www.chef.io/downloads/tools/infra-server/current
+```
 
 ### Testing the Release
 
@@ -119,10 +123,7 @@ null_resource.chef_server_config (remote-exec): BEGIN INSTALL CHEF SERVER
 11. Enter the username and password to test the login.  The username and password are stored in the following script:
     https://github.com/chef/umbrella/blob/main/chef-server/common/files/add_user.sh.
 12. Verify that the login is successful.
-13. Navigate to `http://<hostname>/id` via web browser where _hostname_ is the DNS name of the emphemeral machine obtained in the previous step.
-14. Login with the same user/password as the previous login step above.
-15. Select the 'signed in as <username>' link in the upper-left. Confirm that the email is grayed-out.
-16. Clean-up:
+13. Clean-up:
 ```
 PLATFORM=ubuntu-18.04 INSTALL_VERSION=<version> UPGRADE_VERSION=<version> SCENARIO=standalone-fresh-install ENABLE_ADDON_PUSH_JOBS=false ENABLE_GATHER_LOGS_TEST=false ENABLE_PEDANT_TEST=false ENABLE_PSQL_TEST=false ENABLE_SMOKE_TEST=false MANAGE_VERSION=<manage_version> ENABLE_IPV6=true make destroy
 make destroy-vpc
@@ -138,8 +139,8 @@ $ PLATFORM=ubuntu-18.04 INSTALL_VERSION=<version> UPGRADE_VERSION=<version> SCEN
 IPV6 Scenario:
 $ PLATFORM=ubuntu-18.04 INSTALL_VERSION=<version> UPGRADE_VERSION=<version> SCENARIO=external-postgresql ENABLE_ADDON_PUSH_JOBS=false ENABLE_GATHER_LOGS_TEST=false ENABLE_PEDANT_TEST=false ENABLE_PSQL_TEST=false ENABLE_SMOKE_TEST=false MANAGE_VERSION=<manage_version> ENABLE_IPV6=true make apply
 ```
-17. Perform the same login processes specified above for AWS.
-18. Clean-up:
+14. Perform the same login processes specified above for AWS.
+15. Clean-up:
 
 ```
 IPV4 Scenario:
@@ -151,16 +152,16 @@ PLATFORM=ubuntu-18.04 INSTALL_VERSION=<version> UPGRADE_VERSION=<version> SCENAR
 make destroy-resource-group
 ```
 
-19. Any failures must be fixed before shipping a release, unless they are "known failures" or expected. A document at an unknown state of updatedness tracking known failures can be found at:
+16. Any failures must be fixed before shipping a release, unless they are "known failures" or expected. A document at an unknown state of updatedness tracking known failures can be found at:
 https://docs.google.com/spreadsheets/d/10LZszYuAIlrk1acy0GRhrZMd0YohLTQWmcNIdY6XuZU/edit#gid=0
 Use chef.io account credentials to access it.
 Note that no changes other than CHANGELOG/RELEASE_NOTES changes should land on main between testing and releasing since we typically tag HEAD of main. If something large does land on main, the release tag you create should point specifically at the build that you tested. The git SHA of the build you are testing can be found in /opt/opscode/version-manifest.json.
 
-20. Make sure the Habitat builds for main are passing. These are kicked-off automatically on every merge.
+17. Make sure the Habitat builds for main are passing. These are kicked-off automatically on every merge.
 Chef / [chef/chef-server:main] habitat/build / main
 https://buildkite.com/chef/chef-chef-server-main-habitat-build
 
-21. Test the chef-server version with Automate if there are any schema changes.
+18. Test the chef-server version with Automate if there are any schema changes.
 Follow the below document for testing the chef-server version in Automate environment.
 https://github.com/chef/automate/blob/main/dev-docs/DEV_ENVIRONMENT.md
 
@@ -173,6 +174,7 @@ Do any special testing specific to the particular release you are doing, as appl
 Verify that the manifest displays the correct version number of the release.
 
 http://packages.chef.io/manifests/current/chef-server/latest.json
+
 
 ### Building and Releasing the Release
 
@@ -190,10 +192,15 @@ Example:
 ```
 /expeditor promote chef/chef-server:main 14.2.2
 ```
+Some other projects use the same expeditor promote method.  Here is an example from Knife EC Backup:
+```
+/expeditor promote chef/knife-ec-backup:main 3.0.0
+```
+NOTE: As an aside, with respect to the above example, to update Chef Server to point to the Knife EC Backup gem you just released, update `src/chef-server-ctl/Gemfile.lock`.  You can confirm the existence of the gem at https://rubygems.org/gems/knife-ec-backup/versions/3.0.0.
 
-  Please do this in the `#chef-server` channel.  Once this is
-  done, the release is available to the public via the APT and YUM
-  repositories and https://downloads.chef.io/tools/infra-server.
+Please do expeditor promotes in the `#chef-server` channel.  Once this is
+done, the release is available to the public via the APT and YUM
+repositories and https://downloads.chef.io/tools/infra-server.
 
 ### Announce the release post-promote to the following channels:
 
