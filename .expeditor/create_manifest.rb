@@ -26,7 +26,7 @@ end
 def get_hab_deps_latest()
   ret = {}
   ["hab", "hab-sup", "hab-launcher"].each do |name|
-    d = get_latest("stable", "core", name)
+    d = get_latest("stable2021-q2", "core", name)
     ret[name] = "#{d["origin"]}/#{d["name"]}/#{d["version"]}/#{d["release"]}"
   end
   ret
