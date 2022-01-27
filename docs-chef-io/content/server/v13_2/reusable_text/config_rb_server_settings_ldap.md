@@ -144,7 +144,7 @@ This configuration file has the following settings for `ldap`:
     login", or "corporate password." Default value: `AD/LDAP`.
 
     {{< warning >}}
-    This setting is **not** used by the Chef Infra Server. It is used only by the Chef management console (Chef Manage).
+    This setting is used by Chef Manage and not Chef Infra Server. Chef Manage is deprecated.
     {{< /warning >}}
 
 `ldap['timeout']`
@@ -162,5 +162,5 @@ This configuration file has the following settings for `ldap`:
     {{< note >}}
 
     Previous versions of Chef Infra Server used the `ldap['ssl_enabled']` setting to first enable SSL, and then the `ldap['encryption']` setting to specify the encryption type. These settings are deprecated.
-    
+
     {{< /note >}}
