@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.12.24 -->
-## [14.12.24](https://github.com/chef/chef-server/tree/14.12.24) (2022-01-27)
+<!-- latest_release 14.12.25 -->
+## [14.12.25](https://github.com/chef/chef-server/tree/14.12.25) (2022-01-28)
 
 #### Merged Pull Requests
-- Update habitat channel to stable2021-q2 [#3126](https://github.com/chef/chef-server/pull/3126) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Bump omnibus from `2bf77bb` to `55e74ac` in /omnibus [#3127](https://github.com/chef/chef-server/pull/3127) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.12.21 -->
 ### Changes since 14.12.21 release
 
 #### Merged Pull Requests
+- Bump omnibus from `2bf77bb` to `55e74ac` in /omnibus [#3127](https://github.com/chef/chef-server/pull/3127) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.12.25 -->
 - Removed foundation-rails gem [#3015](https://github.com/chef/chef-server/pull/3015) ([antima-gupta](https://github.com/antima-gupta)) <!-- 14.13.0 -->
 - Update release process documentation [#3122](https://github.com/chef/chef-server/pull/3122) ([lbakerchef](https://github.com/lbakerchef)) <!-- 14.12.22 -->
 - Fix typos [#3124](https://github.com/chef/chef-server/pull/3124) ([lbakerchef](https://github.com/lbakerchef)) <!-- 14.12.23 -->
