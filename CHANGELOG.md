@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.12.26 -->
-## [14.12.26](https://github.com/chef/chef-server/tree/14.12.26) (2022-01-29)
+<!-- latest_release 14.12.27 -->
+## [14.12.27](https://github.com/chef/chef-server/tree/14.12.27) (2022-01-29)
 
 #### Merged Pull Requests
-- Bump pg from 1.2.3 to 1.3.0 in /src/chef-server-ctl [#3110](https://github.com/chef/chef-server/pull/3110) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump pg from 1.2.3 to 1.3.0 in /src/oc-id [#3111](https://github.com/chef/chef-server/pull/3111) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.12.21 -->
 ### Changes since 14.12.21 release
 
 #### Merged Pull Requests
+- Bump pg from 1.2.3 to 1.3.0 in /src/oc-id [#3111](https://github.com/chef/chef-server/pull/3111) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.12.27 -->
 - Bump pg from 1.2.3 to 1.3.0 in /src/chef-server-ctl [#3110](https://github.com/chef/chef-server/pull/3110) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.12.26 -->
 - Bump omnibus from `2bf77bb` to `55e74ac` in /omnibus [#3127](https://github.com/chef/chef-server/pull/3127) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.12.25 -->
 - Removed foundation-rails gem [#3015](https://github.com/chef/chef-server/pull/3015) ([antima-gupta](https://github.com/antima-gupta)) <!-- 14.13.0 -->
