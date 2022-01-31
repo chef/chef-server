@@ -1,3 +1,5 @@
+require 'chef-utils/dist'
+
 module Partybus
 
   def self.config
