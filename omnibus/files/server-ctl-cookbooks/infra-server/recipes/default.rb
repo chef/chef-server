@@ -169,7 +169,7 @@ include_recipe 'infra-server::log_cleanup'
 include_recipe 'infra-server::partybus'
 include_recipe 'infra-server::ctl_config'
 
-file "/etc/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/chef-server-running.json" do
+file "/etc/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/#{ChefUtils::Dist::Server::SERVER}-running.json" do
   owner OmnibusHelper.new(node).ownership['owner']
   group 'root'
   mode '0600'
