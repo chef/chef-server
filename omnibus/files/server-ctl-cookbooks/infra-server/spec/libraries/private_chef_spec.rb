@@ -4,11 +4,11 @@ require 'chef-utils'
 
 def expect_existing_secrets
   allow(File).to receive(:exists?).and_call_original
-  allow(File).to receive(:exists?).with("/etc/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/private-chef-secrets.json").and_return(true)
-  allow(File).to receive(:size).with("/etc/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/private-chef-secrets.json").and_return(1)
+  allow(File).to receive(:exists?).with("/etc/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/private-#{ChefUtils::Dist::Infra::SHORT}-secrets.json").and_return(true)
+  allow(File).to receive(:size).with("/etc/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/private-#{ChefUtils::Dist::Infra::SHORT}-secrets.json").and_return(1)
   allow(File).to receive(:exists?).with("/etc/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/pivotal.pem").and_return(false)
   allow(IO).to receive(:read).and_call_original
-  allow(IO).to receive(:read).with("/etc/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/private-chef-secrets.json").and_return(secrets)
+  allow(IO).to receive(:read).with("/etc/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/private-#{ChefUtils::Dist::Infra::SHORT}-secrets.json").and_return(secrets)
 end
 
 def config_for(hostname)
@@ -38,7 +38,7 @@ describe PrivateChef do
     allow(PrivateChef).to receive(:node).and_return(node)
     allow(PrivateChef).to receive(:exit!).and_raise(SystemExit)
     allow_any_instance_of(Veil::CredentialCollection::ChefSecretsFile).to receive(:save).and_return(true)
-    allow(File).to receive(:exists?).with("/etc/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/private-chef-secrets.json").and_return(false)
+    allow(File).to receive(:exists?).with("/etc/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/private-#{ChefUtils::Dist::Infra::SHORT}-secrets.json").and_return(false)
   end
 
   # Example content of /etc/opscode/private-chef-secrets.json
@@ -184,7 +184,7 @@ EOF
     end
 
     before do
-      allow(File).to receive(:exists?).with("/etc/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/private-chef-secrets.json").and_return false
+      allow(File).to receive(:exists?).with("/etc/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/private-#{ChefUtils::Dist::Infra::SHORT}-secrets.json").and_return false
     end
 
     it 'exits with a clear error warning that HA is unsupported' do
@@ -220,7 +220,7 @@ EOF
     end
 
     before do
-      allow(File).to receive(:exists?).with("/etc/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/private-chef-secrets.json").and_return false
+      allow(File).to receive(:exists?).with("/etc/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/private-#{ChefUtils::Dist::Infra::SHORT}-secrets.json").and_return false
     end
 
     it 'generates secrets on the bootstrap node' do

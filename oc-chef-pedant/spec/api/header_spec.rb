@@ -3,10 +3,12 @@
 # Author:: Douglas Triggs (<doug@chef.io>)
 # Copyright:: Copyright (c) 2014 Chef, Inc.
 
+require 'chef-utils/dist'
+
 describe "Headers", :headers do
   let (:request_url) { api_url("users") }
   let (:requestor) { platform.admin_user }
-  let (:config) { JSON.parse(IO.read("/etc/opscode/chef-server-running.json"))['private_chef'] }
+  let (:config) { JSON.parse(IO.read("/etc/opscode/#{::ChefUtils::Dist::Server::SERVER}-running.json"))['private_chef'] }
 
 
   context "Request Headers" do

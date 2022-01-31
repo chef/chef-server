@@ -1,6 +1,7 @@
+require 'chef-utils/dist'
 
 describe "Testing Status API with config", :config do
-  let (:config) { JSON.parse(IO.read("/etc/opscode/chef-server-running.json"))['private_chef'] }
+  let (:config) { JSON.parse(IO.read("/etc/opscode/#{::ChefUtils::Dist::Server::SERVER}-running.json"))['private_chef'] }
   context "Status API", :status, :smoke do
     it "GET /_status should respond with valid health data" do
       r = get("#{platform.server}/_status", superuser)
