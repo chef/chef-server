@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.12.30 -->
-## [14.12.30](https://github.com/chef/chef-server/tree/14.12.30) (2022-01-31)
+<!-- latest_release 14.12.31 -->
+## [14.12.31](https://github.com/chef/chef-server/tree/14.12.31) (2022-01-31)
 
 #### Merged Pull Requests
-- Update habitat build of openresty to 1.19.9.1 [#3115](https://github.com/chef/chef-server/pull/3115) ([btm](https://github.com/btm))
+- Adding more docs for backend restore scenario [#3114](https://github.com/chef/chef-server/pull/3114) ([vinay-satish](https://github.com/vinay-satish))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.12.21 -->
 ### Changes since 14.12.21 release
 
 #### Merged Pull Requests
+- Adding more docs for backend restore scenario [#3114](https://github.com/chef/chef-server/pull/3114) ([vinay-satish](https://github.com/vinay-satish)) <!-- 14.12.31 -->
 - Update habitat build of openresty to 1.19.9.1 [#3115](https://github.com/chef/chef-server/pull/3115) ([btm](https://github.com/btm)) <!-- 14.12.30 -->
 - Bump omnibus-software from `774125f` to `1c00b6d` in /omnibus [#3128](https://github.com/chef/chef-server/pull/3128) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.12.29 -->
 - Bump bigdecimal from 1.3.5 to 3.1.2 in /src/oc-id [#3099](https://github.com/chef/chef-server/pull/3099) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.12.28 -->
