@@ -20,7 +20,7 @@
 #
 # TODO: extract this into something that add-ons can use; no sense
 # cargo-culting it around everywhere
-server_running_json = "/etc/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/chef-server-running.json"
+server_running_json = "/etc/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/#{ChefUtils::Dist::Server::SERVER}-running.json"
 if File.exist?(server_running_json)
   old_config = JSON.parse(IO.read(server_running_json))
 

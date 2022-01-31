@@ -1,11 +1,12 @@
 require 'json'
 require 'pedant/rspec/common'
+require 'chef-utils/dist'
 #
 # These tests originally came from the reporting plugin, but really are general config tests that apply everywhere
 # For example, the postgres test below probably should remain even when reporting is totally gone.
 #
 describe "running configs required by Chef Server and plugins", :config do
-  let (:config) { JSON.parse(IO.read("/etc/opscode/chef-server-running.json"))['private_chef'] }
+  let (:config) { JSON.parse(IO.read("/etc/opscode/#{::ChefUtils::Dist::Server::SERVER}-running.json"))['private_chef'] }
 
   context "basic config" do
     it "role" do

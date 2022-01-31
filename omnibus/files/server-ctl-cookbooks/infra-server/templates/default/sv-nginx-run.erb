@@ -1,6 +1,6 @@
 #!/bin/sh
 exec 2>&1
-exec /opt/<%= ChefUtils::Dist::Org::LEGACY_CONF_DIR %>/embedded/bin/veil-env-helper -f /etc/<%= ChefUtils::Dist::Org::LEGACY_CONF_DIR %>/private-chef-secrets.json -o DATA_COLLECTOR_TOKEN=data_collector.token -s REDIS_PASSWORD=redis_lb.password -- \
+exec /opt/<%= ChefUtils::Dist::Org::LEGACY_CONF_DIR %>/embedded/bin/veil-env-helper -f /etc/<%= ChefUtils::Dist::Org::LEGACY_CONF_DIR %>/private-<%= ChefUtils::Dist::Infra::SHORT %>-secrets.json -o DATA_COLLECTOR_TOKEN=data_collector.token -s REDIS_PASSWORD=redis_lb.password -- \
   chpst \
   <% if node['private_chef']['nginx']['nginx_no_root'] %>
   -U <%= node['private_chef']['user']['username'] %> \

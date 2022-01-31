@@ -1,8 +1,9 @@
 require 'json'
 require 'pedant/rspec/common'
+require 'chef-utils/dist'
 
 describe "running configs required by Manages", :config do
-  let (:config) { JSON.parse(IO.read("/etc/opscode/chef-server-running.json"))['private_chef'] }
+  let (:config) { JSON.parse(IO.read("/etc/opscode/#{::ChefUtils::Dist::Server::SERVER}-running.json"))['private_chef'] }
 
   it "lb/api_fqdn" do
     expect(config['lb']['api_fqdn'].to_s).to_not eq ''

@@ -157,8 +157,8 @@ class BootstrapPreflightValidator < PreflightValidator
 
   def err_BOOT008_pivotal_public_key_mismatch
     <<~EOM
-      BOOT008: The pivotal key in /etc/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/private-chef-secrets.json exists, but its public key
-               does not match the key for the pivotal user in chef-server.
+      BOOT008: The pivotal key in /etc/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/private-#{ChefUtils::Dist::Infra::SHORT}-secrets.json exists, but its public key
+               does not match the key for the pivotal user in #{ChefUtils::Dist::Server::SERVER}.
 
                Critical maintenance operations cannot be performed.
 
@@ -182,7 +182,7 @@ class BootstrapPreflightValidator < PreflightValidator
                already exists in the database.
 
                Please ensure that you have copied the files 'pivotal.pem' and
-               'private-chef-secrets.json' from the node to be reconfigured
+               'private-#{ChefUtils::Dist::Infra::SHORT}-secrets.json' from the node to be reconfigured
                into '/etc/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/' on this node before attempting to run
                reconfigure again.
     EOM
@@ -194,7 +194,7 @@ class BootstrapPreflightValidator < PreflightValidator
                does not exist in the database.
 
                If this is the first node you're attempting to reconfigure,
-               please remove the file 'private-chef-secrets.json'
+               please remove the file 'private-#{ChefUtils::Dist::Infra::SHORT}-secrets.json'
                from '/etc/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}' before attempting to run reconfigure again.
     EOM
   end

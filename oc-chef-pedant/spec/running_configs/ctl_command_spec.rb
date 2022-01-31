@@ -2,7 +2,7 @@ require 'json'
 require 'pedant/rspec/common'
 
 describe "running configs required by chef-server-ctl", :config do
-  let (:complete_config) { JSON.parse(IO.read("/etc/opscode/chef-server-running.json")) }
+  let (:complete_config) { JSON.parse(IO.read("/etc/opscode/#{::ChefUtils::Dist::Server::SERVER}-running.json")) }
   let (:config) { complete_config['private_chef'] }
 
   context "partybus upgrade framework" do
