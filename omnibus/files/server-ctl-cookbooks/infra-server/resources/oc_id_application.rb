@@ -45,7 +45,7 @@ end
 action_class do
   def create!
     @attributes ||= begin
-                      env_helper = "veil-env-helper -f /etc/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/private-chef-secrets.json --use-file -s chef-server.webui_key -s oc_id.sql_password -s oc_id.secret_key_base"
+                      env_helper = "veil-env-helper -f /etc/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/private-#{ChefUtils::Dist::Infra::SHORT}-secrets.json --use-file -s chef-server.webui_key -s oc_id.sql_password -s oc_id.secret_key_base"
                       rails_script = <<~EOF
                               app = Doorkeeper::Application.find_or_create_by(:name => "#{new_resource.name}");
                               app.update(:redirect_uri => "#{new_resource.redirect_uri}");

@@ -1,8 +1,9 @@
 require 'json'
 require 'pedant/rspec/common'
+require 'chef-utils/dist'
 
 describe "running configs required by Reporting", :config do
-  let (:config) { JSON.parse(IO.read("/etc/opscode/chef-server-running.json"))['private_chef'] }
+  let (:config) { JSON.parse(IO.read("/etc/opscode/#{::ChefUtils::Dist::Server::SERVER}-running.json"))['private_chef'] }
 
   context "oc-reporting-pedant" do
 
