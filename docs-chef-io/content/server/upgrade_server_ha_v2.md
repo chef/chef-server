@@ -216,3 +216,7 @@ Upgrading to Chef Backend 3.0 require first upgrading Chef Backend to version 2.
 DRBD configurations are [End of Life Products]({{< relref "versions#end-of-life-eol" >}}) and no longer supported.
 
 For a guide to migrating to Chef Backend from DRBD see the [Best Practices for Migrating Your Chef Server](https://blog.chef.io/2018/04/06/best-practices-for-migrating-your-chef-server/) and the associated webinar from the [Chef Blog](https://blog.chef.io/).
+
+## Upgrade Frontends
+
+Frontend upgrades follow the typical steps of any standalone Chef Server upgrade. See https://docs.chef.io/server/upgrades/#standalone-server and start at Step 3.
