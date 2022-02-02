@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.12.31 -->
-## [14.12.31](https://github.com/chef/chef-server/tree/14.12.31) (2022-01-31)
+<!-- latest_release 14.12.32 -->
+## [14.12.32](https://github.com/chef/chef-server/tree/14.12.32) (2022-02-02)
 
 #### Merged Pull Requests
-- Adding more docs for backend restore scenario [#3114](https://github.com/chef/chef-server/pull/3114) ([vinay-satish](https://github.com/vinay-satish))
+- Bump knife-opc from 0.4.7 to 0.4.8 in /src/chef-server-ctl [#3138](https://github.com/chef/chef-server/pull/3138) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.12.21 -->
 ### Changes since 14.12.21 release
 
 #### Merged Pull Requests
+- Bump knife-opc from 0.4.7 to 0.4.8 in /src/chef-server-ctl [#3138](https://github.com/chef/chef-server/pull/3138) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.12.32 -->
 - Adding more docs for backend restore scenario [#3114](https://github.com/chef/chef-server/pull/3114) ([vinay-satish](https://github.com/vinay-satish)) <!-- 14.12.31 -->
 - Update habitat build of openresty to 1.19.9.1 [#3115](https://github.com/chef/chef-server/pull/3115) ([btm](https://github.com/btm)) <!-- 14.12.30 -->
 - Bump omnibus-software from `774125f` to `1c00b6d` in /omnibus [#3128](https://github.com/chef/chef-server/pull/3128) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.12.29 -->
