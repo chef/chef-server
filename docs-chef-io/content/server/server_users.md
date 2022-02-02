@@ -9,8 +9,8 @@ aliases = ["/server_users.html", "/server_users/"]
 [menu]
   [menu.server]
     title = "Server Users"
-    identifier = "server/overview/Server Users"
-    parent = "server/overview"
+    identifier = "server/users/Server Users"
+    parent = "server/users"
     weight = 30
 +++
 
