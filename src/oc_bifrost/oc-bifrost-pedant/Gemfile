@@ -4,4 +4,4 @@ gemspec
 
 # TODO(ssd) 2017-03-15: This in in this gemfile because bifrost
 # expects it to be in the path
-gem 'veil', git: 'https://github.com/chef/chef_secrets'
+gem 'veil', git: 'https://github.com/chef/chef_secrets', branch: 'main'
