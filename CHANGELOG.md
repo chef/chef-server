@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.12.33 -->
-## [14.12.33](https://github.com/chef/chef-server/tree/14.12.33) (2022-02-02)
+<!-- latest_release 14.12.34 -->
+## [14.12.34](https://github.com/chef/chef-server/tree/14.12.34) (2022-02-02)
 
 #### Merged Pull Requests
-- Reverted runit to 2.1.1 [#3135](https://github.com/chef/chef-server/pull/3135) ([jashaik](https://github.com/jashaik))
+- Update a pile of misc deps &amp; let dependabot bump more [#3129](https://github.com/chef/chef-server/pull/3129) ([tas50](https://github.com/tas50))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.12.21 -->
 ### Changes since 14.12.21 release
 
 #### Merged Pull Requests
+- Update a pile of misc deps &amp; let dependabot bump more [#3129](https://github.com/chef/chef-server/pull/3129) ([tas50](https://github.com/tas50)) <!-- 14.12.34 -->
 - Reverted runit to 2.1.1 [#3135](https://github.com/chef/chef-server/pull/3135) ([jashaik](https://github.com/jashaik)) <!-- 14.12.33 -->
 - Bump knife-opc from 0.4.7 to 0.4.8 in /src/chef-server-ctl [#3138](https://github.com/chef/chef-server/pull/3138) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.12.32 -->
 - Adding more docs for backend restore scenario [#3114](https://github.com/chef/chef-server/pull/3114) ([vinay-satish](https://github.com/vinay-satish)) <!-- 14.12.31 -->
