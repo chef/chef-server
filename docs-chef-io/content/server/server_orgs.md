@@ -1,5 +1,5 @@
 +++
-title = "Organizations and Groups"
+title = "RBAC: Organizations and Groups"
 draft = false
 gh_repo = "chef-server"
 aliases = ["/server_orgs.html", "/auth_authorization.html"]
@@ -8,9 +8,9 @@ product = ["client", "server"]
 [menu]
   [menu.server]
     title = "Organizations & Groups"
-    identifier = "server/overview/server_orgs.md Organizations & Groups"
-    parent = "server/overview"
-    weight = 65
+    identifier = "server/users/server_orgs.md Organizations & Groups"
+    parent = "server/users"
+    weight = 20
 +++
 
 {{% server_rbac %}}
