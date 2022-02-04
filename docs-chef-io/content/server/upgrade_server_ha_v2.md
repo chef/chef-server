@@ -10,9 +10,9 @@ aliases = ["/upgrade_server_ha_v2.html", "/upgrade_server_ha_v2/"]
   [menu.server]
     title = "Upgrade HA Cluster"
     description = "How to upgrade a Chef Backend (HA) Chef Infra Server cluster"
-    identifier = "server/installation/Upgrade HA Cluster"
-    parent = "server/installation"
-    weight = 70
+    identifier = "server/upgrade/Upgrade HA Cluster"
+    parent = "server/upgrade"
+    weight = 50
 +++
 
 {{% EOL_backend %}}
