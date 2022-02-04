@@ -334,7 +334,7 @@ module PrivateChef
 
     # TODO: 2017-02-28 mp:  configurable location:
     def secrets_json
-      "/etc/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/private-chef-secrets.json"
+      "/etc/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/private-#{ChefUtils::Dist::Infra::SHORT}-secrets.json"
     end
 
     def credentials
