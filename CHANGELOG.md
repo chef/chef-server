@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.13.0 -->
-## [14.13.0](https://github.com/chef/chef-server/tree/14.13.0) (2022-02-04)
+<!-- latest_release 14.13.1 -->
+## [14.13.1](https://github.com/chef/chef-server/tree/14.13.1) (2022-02-04)
 
 #### Merged Pull Requests
-- Bump pg from 1.3.0 to 1.3.1 in /src/chef-server-ctl [#3137](https://github.com/chef/chef-server/pull/3137) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump pg from 1.3.0 to 1.3.1 in /src/oc-id [#3140](https://github.com/chef/chef-server/pull/3140) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.12.21 -->
 ### Changes since 14.12.21 release
 
 #### Merged Pull Requests
+- Bump pg from 1.3.0 to 1.3.1 in /src/oc-id [#3140](https://github.com/chef/chef-server/pull/3140) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.13.1 -->
 - Bump pg from 1.3.0 to 1.3.1 in /src/chef-server-ctl [#3137](https://github.com/chef/chef-server/pull/3137) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.13.0 -->
 - Bump chef from 17.9.26 to 17.9.42 in /oc-chef-pedant [#3132](https://github.com/chef/chef-server/pull/3132) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.12.35 -->
 - Update a pile of misc deps &amp; let dependabot bump more [#3129](https://github.com/chef/chef-server/pull/3129) ([tas50](https://github.com/tas50)) <!-- 14.12.34 -->
