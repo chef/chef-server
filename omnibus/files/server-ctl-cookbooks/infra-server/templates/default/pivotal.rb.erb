@@ -1,7 +1,8 @@
 require "tempfile"
 require "veil"
+require 'chef-utils/dist'
 
-secrets_file = ENV['SECRETS_FILE'] || "/etc/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/private-chef-secrets.json"
+secrets_file = ENV['SECRETS_FILE'] || "/etc/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/private-#{ChefUtils::Dist::Infra::SHORT}-secrets.json"
 credentials = Veil::CredentialCollection::ChefSecretsFile.from_file(secrets_file)
 
 key = Tempfile.new("latovip")
