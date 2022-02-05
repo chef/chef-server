@@ -12,6 +12,15 @@ draft = false
     weight = 70
 +++
 
+This section describes the upgrade process for Chef Infra Server on a tiered server topology.
+
+{{< note >}}
+
+These instructions are for the Chef Infra Server `tier` topology.
+For the latest information on setting up a highly available server cluster, see [High Availability: Backend Cluster]({{< relref "install_server_ha" >}}).
+
+{{< /note >}}
+
 To upgrade to Chef Infra Server on a tiered Chef Infra Server configuration, do the following:
 
 1. Back up the Chef Infra Server data before starting the upgrade process using [knife-ec-backup](https://github.com/chef/knife-ec-backup).

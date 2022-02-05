@@ -51,22 +51,3 @@ Supported Release
    chef-server-ctl restore /path/to/tar/archive.tar.gz
    ```
 
-### Chef Backend Install
-
-{{% EOL_backend %}}
-
-The Chef Infra Server can operate in a high availability configuration that provides automated load balancing and failover for stateful components in the system architecture.
-
-To upgrade your Chef Backend installation, see [High Availability: Upgrade to Chef Backend 2]({{< relref "upgrade_server_ha_v2" >}}).
-
-### Tiered Install
-
-This section describes the upgrade process from a tiered server configuration.
-
-{{< note >}}
-
-These instructions are for the Chef Infra Server `tier` topology.
-For the latest information on setting up a highly available server cluster, see [High Availability: Backend Cluster]({{< relref "install_server_ha" >}}).
-
-{{< /note >}}
-
