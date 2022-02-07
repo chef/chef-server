@@ -246,7 +246,7 @@ GEM
       tilt
     hashie (4.1.0)
     httpclient (2.8.3)
-    i18n (1.8.11)
+    i18n (1.9.1)
       concurrent-ruby (~> 1.0)
     iniparse (1.5.0)
     inspec-core (4.52.9)
@@ -273,7 +273,8 @@ GEM
       tty-prompt (~> 0.17)
       tty-table (~> 0.10)
     ipaddress (0.8.3)
-    jbuilder (2.11.3)
+    jbuilder (2.11.5)
+      actionview (>= 5.0.0)
       activesupport (>= 5.0.0)
     jmespath (1.5.0)
     jquery-rails (4.4.0)
@@ -581,7 +582,7 @@ GEM
     wmi-lite (1.0.5)
     xpath (3.2.0)
       nokogiri (~> 1.8)
-    zeitwerk (2.5.3)
+    zeitwerk (2.5.4)
 
 PLATFORMS
   ruby
