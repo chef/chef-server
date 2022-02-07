@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.13.2 -->
-## [14.13.2](https://github.com/chef/chef-server/tree/14.13.2) (2022-02-04)
+<!-- latest_release 14.13.3 -->
+## [14.13.3](https://github.com/chef/chef-server/tree/14.13.3) (2022-02-07)
 
 #### Merged Pull Requests
-- Add &#39;Users&#39; nav grouping for User Managment [#3145](https://github.com/chef/chef-server/pull/3145) ([kagarmoe](https://github.com/kagarmoe))
+- Bump jbuilder from 2.11.3 to 2.11.5 in /src/oc-id [#3028](https://github.com/chef/chef-server/pull/3028) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.12.21 -->
 ### Changes since 14.12.21 release
 
 #### Merged Pull Requests
+- Bump jbuilder from 2.11.3 to 2.11.5 in /src/oc-id [#3028](https://github.com/chef/chef-server/pull/3028) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.13.3 -->
 - Add &#39;Users&#39; nav grouping for User Managment [#3145](https://github.com/chef/chef-server/pull/3145) ([kagarmoe](https://github.com/kagarmoe)) <!-- 14.13.2 -->
 - Bump pg from 1.3.0 to 1.3.1 in /src/oc-id [#3140](https://github.com/chef/chef-server/pull/3140) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.13.1 -->
 - Bump pg from 1.3.0 to 1.3.1 in /src/chef-server-ctl [#3137](https://github.com/chef/chef-server/pull/3137) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.13.0 -->
