@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.13.3 -->
-## [14.13.3](https://github.com/chef/chef-server/tree/14.13.3) (2022-02-07)
+<!-- latest_release 14.13.4 -->
+## [14.13.4](https://github.com/chef/chef-server/tree/14.13.4) (2022-02-08)
 
 #### Merged Pull Requests
-- Bump jbuilder from 2.11.3 to 2.11.5 in /src/oc-id [#3028](https://github.com/chef/chef-server/pull/3028) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Remove sentry-raven support in oc-id [#2994](https://github.com/chef/chef-server/pull/2994) ([tas50](https://github.com/tas50))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.12.21 -->
 ### Changes since 14.12.21 release
 
 #### Merged Pull Requests
+- Remove sentry-raven support in oc-id [#2994](https://github.com/chef/chef-server/pull/2994) ([tas50](https://github.com/tas50)) <!-- 14.13.4 -->
 - Bump jbuilder from 2.11.3 to 2.11.5 in /src/oc-id [#3028](https://github.com/chef/chef-server/pull/3028) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.13.3 -->
 - Add &#39;Users&#39; nav grouping for User Managment [#3145](https://github.com/chef/chef-server/pull/3145) ([kagarmoe](https://github.com/kagarmoe)) <!-- 14.13.2 -->
 - Bump pg from 1.3.0 to 1.3.1 in /src/oc-id [#3140](https://github.com/chef/chef-server/pull/3140) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.13.1 -->
