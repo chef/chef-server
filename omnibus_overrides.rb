@@ -10,6 +10,7 @@ override :ruby, version: "2.7.5"
 override :perl, version: "5.18.1"
 override :redis, version: "5.0.14"
 override :cpanminus, version: "1.7045"
+override :runit, version: "2.1.1" #standalone upgrade is failing, Needs to be reverted to 2.1.2 after fixing the umbrella
 override :logrotate, version: "3.9.2" # 3.18.0 patches fail
 
 # update `src/openresty-noroot/habitat/plan.sh` when updating this version.

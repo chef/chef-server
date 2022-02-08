@@ -1,6 +1,7 @@
 GIT
   remote: https://github.com/chef/chef_secrets
-  revision: 8bcee8d67d87a1c0acdf26ca0d1f64654f99dd84
+  revision: 47ae8d8d868fdc20c2d5bc19c77c65ae5da0a568
+  branch: main
   specs:
     veil (0.3.9)
       bcrypt (~> 3.1)
@@ -35,7 +36,7 @@ GEM
     http-accept (1.7.0)
     http-cookie (1.0.4)
       domain_name (~> 0.5)
-    i18n (1.8.11)
+    i18n (1.9.1)
       concurrent-ruby (~> 1.0)
     mime-types (3.4.1)
       mime-types-data (~> 3.2015)
@@ -69,7 +70,7 @@ GEM
     unf (0.1.4)
       unf_ext
     unf_ext (0.0.8)
-    zeitwerk (2.5.3)
+    zeitwerk (2.5.4)
 
 PLATFORMS
   ruby
