@@ -464,8 +464,6 @@ GEM
       rexml (~> 3.2, >= 3.2.5)
       rubyzip (>= 1.2.2)
     semverse (3.0.0)
-    sentry-raven (3.1.2)
-      faraday (>= 1.0)
     sinatra (2.1.0)
       mustermann (~> 1.0)
       rack (~> 2.2)
@@ -614,7 +612,6 @@ DEPENDENCIES
   sass-rails (>= 4.0.3)
   sdoc
   selenium-webdriver (~> 4.1.0)
-  sentry-raven
   spring
   spring-commands-rspec
   sprockets-rails (>= 3.4.2)
