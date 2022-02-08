@@ -209,10 +209,10 @@ GEM
     erubis (2.7.0)
     eventmachine (1.2.7)
     execjs (2.8.1)
-    factory_girl (4.4.0)
+    factory_girl (4.9.0)
       activesupport (>= 3.0.0)
-    factory_girl_rails (4.4.1)
-      factory_girl (~> 4.4.0)
+    factory_girl_rails (4.9.0)
+      factory_girl (~> 4.9.0)
       railties (>= 3.0.0)
     faraday (1.4.3)
       faraday-em_http (~> 1.0)
@@ -594,7 +594,7 @@ DEPENDENCIES
   coffee-rails (~> 5.0)
   config (~> 3.1)
   doorkeeper (~> 4.0)
-  factory_girl_rails (~> 4.4.0)
+  factory_girl_rails (~> 4.9.0)
   jbuilder (~> 2.11)
   jquery-rails
   jwt
