@@ -43,6 +43,9 @@ Next, bring up the VMs!
     cd dev
     vagrant up
 
+Provisioning ensures that you are able to use a default organization and admin user
+both in the VM as root, and from your host in the `dev` directory.
+
 In a separate terminal session/pane/window:
 
     vagrant ssh
@@ -51,30 +54,6 @@ In a separate terminal session/pane/window:
     dvm load oc_erchef
     dvm start oc_erchef
 
-To use your running Chef Server through standard commands such as knife,
-you'll need to create an organisation and a user, and then create a
-knife config on your workstation.
-
-    vagrant ssh
-    sudo -i
-    # create a user to access chef with
-    chef-server-ctl user-create -f /tmp/admin.pem admin Admin User admin@example.com password
-    # create an organization
-    chef-server-ctl org-create -f /tmp/test-validator.pem test Test
-    # associate the user with the organization
-    chef-server-ctl org-user-add test admin
-
-Now on your workstation, create `.chef/knife.rb` in the root of your
-chef-server checkout, with the following:
-
-    current_dir = File.dirname(__FILE__)
-	  log_level                :info
-	  log_location             STDOUT
-    node_name                "admin"
-    client_key               "#{current_dir}/admin.pem"
-    chef_server_url          "https://api.chef-server.dev/organizations/test"
-
-Then place `/tmp/admin.pem` from the vagrant node into the `.chef` directory.
 
 ### What can I do?
 
@@ -83,8 +62,11 @@ and/or chef-server-ctl commands.
 
 * Changes to erchef erlang files will be picked up and recompiled
   automatically shortly after you save them on the host.
-* To test cookbook changes, load them with `dvm load omnibus server-ctl-cookbooks`
-  run `chef-server-ctl reconfigure` in the VM as needed to pick up the changes.
+* To test cookbook changes, load them with `dvm load omnibus server-ctl-cookbooks`.
+  This will trigger a reconfigure. To avoid automatic reconfigure, set
+  `projects.omnibus.components.reconfigure_on_load: false` in your config.yml.
+  Any time you run `chef-server-ctl reconfigure` from this point forward it will
+  reconfigure using the cookbooks on the host.
 * To run pedant tests in the VM, use `dvm run oc-chef-pedant`.  You can also provide the
   usual flags, eg `dvm run oc-chef-pedant --focus-/skip-X`, `--smoke`, `--all`, etc.
 
@@ -93,30 +75,6 @@ to see them all.
 
 While all host changes are replicated to the dev vm only erlang projects support
 automatic hot compile and reload of changed modules on the host.
-
-### Dependency Loading
-
-If you find that you need to change an erlang project
-dependency, dvm simplifies that too. For example, let's say we want to
-modify `chef_authn` and pull it into the running erchef instance:
-
-    # From in the vm. assumes sudo -i
-    dvm load oc_erchef chef_authn
-
-This will  clone `chef_authn` onto your host[1], where you can begin
-editing it. It will link it into the project deps directory and hot-load
-it into the running VM[2].  This is available for nearly all dependencies
-declared in a project's rebar.config.
-
-[1] NOTE: Presently this will clone into chef-server directory. We will be
- fixing this, it's a side effect of the recent project merge.
-[2] There is currently a limitation here in that the owning project must
-be running to pick up the changes. We will be fixing that shortly.
-
-For a list of dependencies available for loading and their current
-status, use `dvm list $PROJECTNAME`.  Any dependency that is not a
-system library and declared in a project's app.src is typically
-available.
 
 ### Installing Chef Server Plugins
 
