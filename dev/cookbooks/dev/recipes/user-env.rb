@@ -22,6 +22,12 @@ end
     user who
   end
 
+  directory "#{homedir}/.chef" do
+    action :create
+    owner who
+    user who
+  end
+
   file "#{homedir}/.erlang" do
     content "code:load_abs(\"#{homedir}/bin/user_default\")."
     action :create
@@ -36,6 +42,7 @@ end
     owner who
     user who
   end
+
   execute "#{homedir}: set up user_default for erlang console use" do
     command "/opt/opscode/embedded/bin/erlc user_default.erl"
     cwd "#{homedir}/bin"
@@ -49,6 +56,13 @@ end
     owner who
     user who
   end
+end
+
+file "/root/.bashrc" do
+  content <<-EOC
+  export PATH="/opt/opscode/bin:/opt/opscode/embedded/bin:$PATH"
+  export EDITOR="vim"
+  EOC
 end
 
 directory "/vagrant/testdata/cover" do

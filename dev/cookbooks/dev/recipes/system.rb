@@ -1,6 +1,4 @@
 ## System setup
-# Hey neat - our packages have chef from main now
-# which means we can:
 package node['install_packages']
 
 # Time and zone should match the host so that erlang's sync module plays nicely with rsync'd files.
@@ -17,7 +15,6 @@ bash 'dpkg-reconfigure tzdata' do
   code "/usr/sbin/dpkg-reconfigure -f noninteractive tzdata"
   action :nothing
 end
-
 
 template "/etc/profile.d/omnibus-embedded.sh" do
   source "omnibus-embedded.sh.erb"

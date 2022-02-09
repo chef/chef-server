@@ -37,44 +37,23 @@ First, add the following configuration to your `/etc/hosts` file:
     192.168.56.153 custom.chef-server.dev
     192.168.56.155 reportingdb.chef-server.dev
     192.168.56.156 elasticsearch.chef-server.dev
-    192.168.56.157 solr.chef-server.dev
 
 Next, bring up the VMs!
 
     cd dev
     vagrant up
-    ./sync
+
+Provisioning ensures that you are able to use a default organization and admin user
+both in the VM as root, and from your host in the `dev` directory.
 
 In a separate terminal session/pane/window:
 
     vagrant ssh
     sudo -i
-    dvm quickstart oc_erchef
+    tmux # optional, allows you to disconnect and re-attach to a running sessino
+    dvm load oc_erchef
+    dvm start oc_erchef
 
-To use your running Chef Server through standard commands such as knife,
-you'll need to create an organisation and a user, and then create a
-knife config on your workstation.
-
-    vagrant ssh
-    sudo -i
-    # create a user to access chef with
-    chef-server-ctl user-create -f /tmp/admin.pem admin Admin User admin@example.com password
-    # create an organization
-    chef-server-ctl org-create -f /tmp/test-validator.pem test Test
-    # associate the user with the organization
-    chef-server-ctl org-user-add test admin
-
-Now on your workstation, create `.chef/knife.rb` in the root of your
-chef-server checkout, with the following:
-
-    current_dir = File.dirname(__FILE__)
-	log_level                :info
-	log_location             STDOUT
-	node_name                "admin"
-	client_key               "#{current_dir}/admin.pem"
-	chef_server_url          "https://api.chef-server.dev/organizations/test"
-
-Then place `/tmp/admin.pem` from the vagrant node into the `.chef` directory.
 
 ### What can I do?
 
@@ -83,10 +62,11 @@ and/or chef-server-ctl commands.
 
 * Changes to erchef erlang files will be picked up and recompiled
   automatically shortly after you save them on the host.
-* To test cookbook changes, load them with `dvm load omnibus private-chef-cookbooks`.
-  Then run `chef-server-ctl reconfigure` in the VM to pick up the changes.
-* upgrades and chef-server-ctl command changes/additions will be
-  available very quickly after you save them on the host (< 5 seconds)
+* To test cookbook changes, load them with `dvm load omnibus server-ctl-cookbooks`.
+  This will trigger a reconfigure. To avoid automatic reconfigure, set
+  `projects.omnibus.components.reconfigure_on_load: false` in your config.yml.
+  Any time you run `chef-server-ctl reconfigure` from this point forward it will
+  reconfigure using the cookbooks on the host.
 * To run pedant tests in the VM, use `dvm run oc-chef-pedant`.  You can also provide the
   usual flags, eg `dvm run oc-chef-pedant --focus-/skip-X`, `--smoke`, `--all`, etc.
 
@@ -94,34 +74,7 @@ and/or chef-server-ctl commands.
 to see them all.
 
 While all host changes are replicated to the dev vm only erlang projects support
-automatic hot compile and reload of changed modules on the host. To whatever
-extent supported by the language, we'll be adding the same for ruby service-based projects.
-
-### Dependency Loading
-
-If you find that you need to change an erlang project
-dependency, dvm simplifies that too. For example, let's say we want to
-modify `chef_authn` and pull it into the running erchef instance:
-
-    # From in the vm. assumes sudo -i
-    dvm load oc_erchef chef_authn
-
-This will  clone `chef_authn` onto your host[1], where you can begin
-editing it. It will link it into the project deps directory and hot-load
-it into the running VM[2].  This is available for nearly all dependencies
-declared in a project's rebar.config.
-
-[1] NOTE: Presently this will clone into chef-server directory. We will be
- fixing this, it's a side effect of the recent project merge.
-[2] There is currently a limitation here in that the owning project must
-be running to pick up the changes. We will be fixing that shortly.
-
-For a list of dependencies available for loading and their current
-status, use `dvm list $PROJECTNAME`.  Any dependency that is not a
-system library and declared in a project's app.src is typically
-available.
-
-Ruby project dependency loading support coming soon.
+automatic hot compile and reload of changed modules on the host.
 
 ### Installing Chef Server Plugins
 
@@ -147,11 +100,21 @@ vm:
 ### Configuring LDAP
 
 If you wish to setup your Chef Server to use an external LDAP service, please set
-`ldap start` to true in your config.yml. This LDAP server comes pre-configured
-with two users: `child` and `douglas`. You can add more by adding more LDIF files
-in the ldap-data directory of the provisioning cookbook.
+`ldap start` to true in your config.yml:
 
-_Note: The password should be the same as the username (for simplicity)_
+```
+vm:
+  ldap:
+    start: true
+```
+
+This LDAP server comes pre-configured with two users: `child` and `douglas`. You can add more by adding more LDIF files
+in the ldap-data directory of the provisioning cookbook. The password to authenticate matches the username.
+
+Chef Server will be configured to perform user authentication using ldap, however users mapped to `child` and/or `douglas` must
+be created on the server.
+
+TODO: show user create command for creating a user with external ID
 
 ### Setting up Chef Backend
 
@@ -159,10 +122,12 @@ If you wish to setup a development environment that is a 1 frontend, 1 backend
 HA topology, set `chef-backend start` to true in your config.yml. _Warning: Chef Backend
 is not compatible with the Push Jobs Server, Chef Reporting or LDAP DVM configurations._
 
+You can configure which package to install for chef-backend with the environment variable 'BACKEND_PKG'
+
 ### Installer Options
 
 If you have a package at a non-default location (defaults are `../omnibus/pkg` and this directory),
-you can specify it with the $INSTALLER variable. Also, you can automate the selection of which build
+you can specify it with the $SERVER_PKG variable. Also, you can automate the selection of which build
 to use with $AUTOPACKAGE. So, to automatically select a custom package, set $INSTALLER to it's path
 and $AUTOPACKAGE to 1.
 
@@ -206,55 +171,55 @@ And finally to disable coverage and re-enable automatic code sync:
 Note that enabling cover will disable automatic compile and load of changed
 modules, and disabling it will turn that back on.
 
-## Troubleshooting
+## oc-id
 
-If you see something like the following, or ever have trouble with Vagrant while running `./sync`:
+When loading oc-id, certain files will be replaced.  This will be reflected on the host/git status - you should not
+commit these modified files:
 
-```
-Files Transferred: 0
-         Next Sync: 0 seconds...Bad port '-o'force_available_locales will default to true in the future. If you really want to skip validation of your locale you can set I18n.enforce_available_locales =rsync: connection unexpectedly closed (0 bytes received so far) [sender]
-rsync error: error in rsync protocol data stream (code 12) at /SourceCache/rsync/rsync-45/rsync/io.c(453) [sender=2.6.9]
+* `src/oc-id/config/database.yml`
+* `src/oc-id/config/intializers/secret_token.rb`
+* `src/oc-id/config/settins/production.yml`
+* `src/oc-id/db/schema.rb`
 
-It appears that you've ran a newer version of Vagrant on this
-computer. Unfortunately, newer versions of Vagrant change internal
-directory layouts that cause older versions to break. This version
-of Vagrant cannot properly run.
-
-If you'd like to start from a clean state, please remove the
-Vagrant state directory: /Users/tyler/.vagrant.d
-
-Warning that this will remove all your boxes and potentially corrupt
-existing Vagrant environments that were running based on the future
-version.
-```
-
-It might be because ruby is picking up the ChefDK version of Vagrant instead of the one you normally use. For example:
+The ruby environment does not support hot code loading.  In order to pick up changes made to oc-id
+on the host, you will need to stop/start the service:
 
 ```
-which vagrant
-/usr/local/bin/vagrant
-++> irb
-`irb(main):001:0> `which vagrant`
-=> "/opt/chefdk/embedded/bin/vagrant\n"
+dvm stop oc-id; dvm start oc-id
 ```
 
-You can tell `./sync` what Vagrant to use by setting `$VAGRANT_PATH` like so:
+
+## Erlang Project Dependencies
+
+If you need to work on an erlang project dependency (for example, you want to modify chef_authn)
+this can also be loaded into the VM with hot code loading support.  After loading the service
+in the VM (eg. `dvm load oc_erchef`) , switch to the host and clone the dependency into `external-deps`
+directory. For example, to load `chef_authn` into a loaded and running `oc_erchef`:
 
 ```
-export VAGRANT_PATH=/usr/local/bin/vagrant
+# From the host in chef-server/
+
+cd external-deps
+git clone https://github.com/chef/chef_authn
 ```
+
+When you `dvm start oc_erchef`, or if you've already started it, you will see output when it picks
+the replacement dependency code.
+
+Note that other services running under dvm via `dvm start` will also load the `chef_authn` checkout.
+Services running normally (under runit/chef-server-ctl) will not.
 
 ## Chef Mover
 
-`chef-mover` does not currently support hot code loading. You can use it, but you have
-to interact with it a bit differently. To start it, run:
+`chef-mover` does not currently support hot code loading. However, you can build and run a modified version
+using `dvm load/start`:
 
 ```
 dvm load chef-mover
 dvm start chef-mover
 ```
 
-This will start it up, but if you make any changes, you will need to reload the application, like:
+If you make any changes, you will need to rebuild and load the application, like:
 
 ```
 dvm load chef-mover --force
@@ -263,19 +228,7 @@ dvm start chef-mover
 
 Then the new code will be loaded.
 
-## Not So Quick Start
 
-TODO: details of components, terminology, etc. explore more dvm
-commands?
-
-## Test Data
-
-[pending] If you want to load in test users, orgs, and nodes for testing outside
-of pedant, you can:
-
-`dvm populate`
-
-TODO: Provide a canned set of test data in ec-backup form for more thorough tests?
 ##  dvm
 
 At the heart of all this is the 'dvm' tool.  This tool
@@ -290,7 +243,6 @@ common activities:
 * run a test suite or subset thereof
 * run a project and/or start a loaded service
 * open a console to a running erlang app
-* etop a running erlang app
 * access the DB for a project
 
 And a few other things.  You can just use `dvm` by itself and a list of
@@ -305,7 +257,6 @@ To use an external database for Chef Server (and Reporting), create a `config.ym
 vm:
   postgresql:
     start: true
-    use-external: true
 ```
 
 To use an external Azure database for Chef Server, create a `config.yml` file with the following contents:
@@ -314,7 +265,6 @@ To use an external Azure database for Chef Server, create a `config.yml` file wi
 vm:
   postgresql:
     start: true
-    use-external: true
     use-azure:    true
     ip-azure:     <AZURE POSTGRESQL IP ADDRESS>
 ```
@@ -325,10 +275,8 @@ To use separate external databases for Chef Server and Chef Reporting, create a 
 vm:
   postgresql:
     start: true
-    use-external: true
   reporting_postgresql:
     start: true
-    use-external: true
 ```
 # Using elasticsearch
 
@@ -338,12 +286,5 @@ To create a separate elasticsearch vm create a `config.yml` file with the follow
     start: true
     # The major version family to use - either "2" or "5".
     version: "5"
-```
-# Using external solr
-
-To create a separate solr vm create a `config.yml` file with the following contents:
-```
-  external_solr:
-    start: true
 ```
 

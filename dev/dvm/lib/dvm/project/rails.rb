@@ -30,7 +30,7 @@ module DVM
     def start(args, background)
       raise DVMArgumentError, "#{name} appears to be already running." if is_running?
       if background
-        exec "#{server_start_cmd} > /var/log/#{omnibus_project}/#{service['name']}/current 2>&1 &", close_others: false
+        exec "#{server_start_cmd} > /var/log/#{install_path_key}/#{service['name']}/current 2>&1 &", close_others: false
       else
         exec server_start_cmd, close_others: false
       end
@@ -59,11 +59,11 @@ EOM
     #
     def do_links
       symlinks.each do |sync_file, omnibus_file|
-        if File.exists?("#{project_dir}/#{sync_file}") && !File.symlink?("#{project_dir}/#{sync_file}")
-          raise DVMArgumentError, "The sync utility will overwrite symlinks. Please add #{sync_file} to the exluded-files list."
-        end
+        # if File.exists?("#{project_dir}/#{sync_file}") && !File.symlink?("#{project_dir}/#{sync_file}")
+        #   raise DVMArgumentError, "The sync utility will overwrite symlinks. Please add #{sync_file} to the exluded-files list."
+        # end
         from_file = "#{project_dir}/#{sync_file}"
-        to_file = "/var/opt/#{omnibus_project}/#{service['name']}/#{omnibus_file}"
+        to_file = "/var/opt/#{install_path_key}/#{service['name']}/#{omnibus_file}"
         say("Creating Symlink: #{from_file} => #{to_file}")
         FileUtils.ln_sf(to_file, from_file)
       end
@@ -78,7 +78,7 @@ EOM
     def purge_links
       symlinks.each do |sync_file, omnibus_file|
         from_file = "#{project_dir}/#{sync_file}"
-        to_file = "/var/opt/#{omnibus_project}/#{service['name']}/#{omnibus_file}"
+        to_file = "/var/opt/#{install_path_key}/#{service['name']}/#{omnibus_file}"
         say("Removing Symlink: #{from_file} => #{to_file}")
         FileUtils.rm_rf(from_file)
       end
@@ -89,18 +89,18 @@ EOM
     end
 
     def console
-      raise DVMArgumentError, "Project is not loaded. Cannot console without loading the project first." unless is_running?
+      raise DVMArgumentError, "Project is not loaded. Cannot start console without loading the project first." unless is_running?
       console_cmd = "cd #{project_dir} && #{helper} -- bundle exec --keep-file-descriptors bin/rails console production"
       say("Running: #{console_cmd}")
       exec console_cmd
     end
 
     def enable_service
-      run_command("chef-server-ctl start #{service['name']}", "Starting #{omnibus_project} #{service['name']}")
+      run_command("chef-server-ctl start #{service['name']}", "Starting #{service['name']}")
     end
 
     def disable_service
-      run_command("chef-server-ctl stop #{service['name']}", "Stopping #{omnibus_project} #{service['name']}")
+      run_command("chef-server-ctl stop #{service['name']}", "Stopping  #{service['name']}")
     end
 
     def is_running?
