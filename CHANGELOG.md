@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.13.6 -->
-## [14.13.6](https://github.com/chef/chef-server/tree/14.13.6) (2022-02-08)
+<!-- latest_release 14.13.7 -->
+## [14.13.7](https://github.com/chef/chef-server/tree/14.13.7) (2022-02-09)
 
 #### Merged Pull Requests
-- Bump redis from 4.5.1 to 4.6.0 in /src/chef-server-ctl [#3144](https://github.com/chef/chef-server/pull/3144) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Updates to the Dev VM environment/tooling [#3149](https://github.com/chef/chef-server/pull/3149) ([marcparadise](https://github.com/marcparadise))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.12.21 -->
 ### Changes since 14.12.21 release
 
 #### Merged Pull Requests
+- Updates to the Dev VM environment/tooling [#3149](https://github.com/chef/chef-server/pull/3149) ([marcparadise](https://github.com/marcparadise)) <!-- 14.13.7 -->
 - Bump redis from 4.5.1 to 4.6.0 in /src/chef-server-ctl [#3144](https://github.com/chef/chef-server/pull/3144) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.13.6 -->
 - Bump factory_girl_rails from 4.4.1 to 4.9.0 in /src/oc-id [#2628](https://github.com/chef/chef-server/pull/2628) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.13.5 -->
 - Remove sentry-raven support in oc-id [#2994](https://github.com/chef/chef-server/pull/2994) ([tas50](https://github.com/tas50)) <!-- 14.13.4 -->
