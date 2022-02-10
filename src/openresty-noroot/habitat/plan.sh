@@ -1,6 +1,6 @@
 pkg_name=openresty-noroot
 pkg_origin=chef
-pkg_version=1.19.9.1
+pkg_version=1.21.4.1rc1
 pkg_description="Scalable Web Platform by Extending NGINX with Lua"
 pkg_maintainer="The Chef Server Maintainers <support@chef.io>"
 pkg_license=('BSD-2-Clause')
@@ -8,7 +8,7 @@ pkg_source=https://openresty.org/download/openresty-${pkg_version}.tar.gz
 pkg_dirname=openresty-${pkg_version}
 pkg_filename=openresty-${pkg_version}.tar.gz
 pkg_upstream_url=http://openresty.org/
-pkg_shasum=576ff4e546e3301ce474deef9345522b7ef3a9d172600c62057f182f3a68c1f6
+pkg_shasum=1cb216bc57a253149cb5c4b815bfe00e1c0713e7355774bbc26cf306d2ff632f
 pkg_deps=(
   core/bzip2
   core/coreutils
