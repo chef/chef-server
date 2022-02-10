@@ -252,7 +252,8 @@ GEM
       plist (~> 3.1)
       train-core
       wmi-lite (~> 1.0)
-    omnibus-ctl (0.6.4)
+    omnibus-ctl (0.6.9)
+      chef-utils (>= 16.5.54)
     parallel (1.21.0)
     parser (3.1.0.0)
       ast (~> 2.4.1)
