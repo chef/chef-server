@@ -622,9 +622,6 @@ DEPENDENCIES
   unicorn-rails (~> 2.2, >= 2.2.1)
   veil (~> 0.3.9)
 
-RUBY VERSION
-   ruby 3.1.0p0
-
 BUNDLED WITH
 <<<<<<< HEAD
    2.3.7
