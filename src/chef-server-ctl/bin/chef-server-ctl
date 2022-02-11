@@ -310,7 +310,7 @@ Cleansing data in a remote Opensearch instance is not currently supported.
       ca           = running_service_config('nginx')['ssl_client_ca']
       cert         = running_service_config('nginx')['pivotal_ssl_client_cert']
       key          = running_service_config('nginx')['pivotal_ssl_client_key']
-      command      = 'sudo --preserve-env=PATH /opt/opscode/embedded/bin/knife ssl fetch -c /etc/opscode/pivotal.rb'
+      command      = "sudo --preserve-env=PATH /opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/embedded/bin/knife ssl fetch -c /etc/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/pivotal.rb"
       # enabled if all are non-empty strings
       mtls_enabled = [ca, cert, key].all? { |x| x && !x.empty? }
       mtls_enabled ? run_command(command) : :ok
