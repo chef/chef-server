@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.13.7 -->
-## [14.13.7](https://github.com/chef/chef-server/tree/14.13.7) (2022-02-09)
+<!-- latest_release 14.13.8 -->
+## [14.13.8](https://github.com/chef/chef-server/tree/14.13.8) (2022-02-12)
 
 #### Merged Pull Requests
-- Updates to the Dev VM environment/tooling [#3149](https://github.com/chef/chef-server/pull/3149) ([marcparadise](https://github.com/marcparadise))
+- Bump chef from 17.9.42 to 17.9.46 in /src/oc-id [#3159](https://github.com/chef/chef-server/pull/3159) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.12.21 -->
 ### Changes since 14.12.21 release
 
 #### Merged Pull Requests
+- Bump chef from 17.9.42 to 17.9.46 in /src/oc-id [#3159](https://github.com/chef/chef-server/pull/3159) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.13.8 -->
 - Updates to the Dev VM environment/tooling [#3149](https://github.com/chef/chef-server/pull/3149) ([marcparadise](https://github.com/marcparadise)) <!-- 14.13.7 -->
 - Bump redis from 4.5.1 to 4.6.0 in /src/chef-server-ctl [#3144](https://github.com/chef/chef-server/pull/3144) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.13.6 -->
 - Bump factory_girl_rails from 4.4.1 to 4.9.0 in /src/oc-id [#2628](https://github.com/chef/chef-server/pull/2628) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.13.5 -->
