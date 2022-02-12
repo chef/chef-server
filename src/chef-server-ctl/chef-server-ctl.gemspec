@@ -24,15 +24,10 @@ Gem::Specification.new do |spec|
 
   spec.add_runtime_dependency "ffi-yajl", ">= 1.2.0"
 
-  spec.add_runtime_dependency "pry"
-  spec.add_runtime_dependency "rb-readline"
-
   spec.add_runtime_dependency "pg", "~> 1.2", ">= 1.2.3"
 
   spec.add_runtime_dependency "redis"
-  # TODO
-  # chef-server-ctl server-admins commands dep, will be removed in server-admins V2
-  # https://gist.github.com/tylercloke/a8d4bc1b915b958ac160#version-2
+
   spec.add_runtime_dependency "rest-client"
   spec.add_runtime_dependency "knife-opc"
   spec.add_runtime_dependency "mixlib-log"
@@ -57,7 +52,6 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency "mixlib-install"
 
   spec.add_development_dependency "chefstyle"
-  spec.add_development_dependency "bundler"
   spec.add_development_dependency "rake"
   spec.add_development_dependency "rspec"
   spec.add_development_dependency "berkshelf" # needed for the berks install
