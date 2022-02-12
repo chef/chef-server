@@ -7,7 +7,7 @@ PATH
       chef_backup
       chef_fixie (>= 1.0.3)
       ffi-yajl (>= 1.2.0)
-      highline (~> 1.6, >= 1.6.9)
+      highline (>= 1.6.9, < 3.0)
       knife-ec-backup
       knife-opc
       license-acceptance
@@ -151,7 +151,7 @@ GEM
     gyoku (1.3.1)
       builder (>= 2.1.2)
     hashie (4.1.0)
-    highline (1.7.10)
+    highline (2.0.3)
     http-accept (1.7.0)
     http-cookie (1.0.4)
       domain_name (~> 0.5)
