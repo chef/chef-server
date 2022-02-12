@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.13.9 -->
-## [14.13.9](https://github.com/chef/chef-server/tree/14.13.9) (2022-02-12)
+<!-- latest_release 14.13.10 -->
+## [14.13.10](https://github.com/chef/chef-server/tree/14.13.10) (2022-02-12)
 
 #### Merged Pull Requests
-- Bump omnibus-ctl from 0.6.4 to 0.6.9 in /src/chef-server-ctl [#3161](https://github.com/chef/chef-server/pull/3161) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Remove unused dependencies in chef-server-ctl [#3130](https://github.com/chef/chef-server/pull/3130) ([tas50](https://github.com/tas50))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.12.21 -->
 ### Changes since 14.12.21 release
 
 #### Merged Pull Requests
+- Remove unused dependencies in chef-server-ctl [#3130](https://github.com/chef/chef-server/pull/3130) ([tas50](https://github.com/tas50)) <!-- 14.13.10 -->
 - Bump omnibus-ctl from 0.6.4 to 0.6.9 in /src/chef-server-ctl [#3161](https://github.com/chef/chef-server/pull/3161) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.13.9 -->
 - Bump chef from 17.9.42 to 17.9.46 in /src/oc-id [#3159](https://github.com/chef/chef-server/pull/3159) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.13.8 -->
 - Updates to the Dev VM environment/tooling [#3149](https://github.com/chef/chef-server/pull/3149) ([marcparadise](https://github.com/marcparadise)) <!-- 14.13.7 -->
