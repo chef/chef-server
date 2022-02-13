@@ -277,8 +277,8 @@ for more information.
 : Automatically computed by Elasticsearch based on available memory.
   Specify in MB if you wish to override.
 
-`elasticsearch.java_opts`
-: Flags to directly pass to the JVM when launching Elasticsearch.
+`elasticsearch.jvm_opts`
+: An array of flags to directly pass to the JVM when launching Elasticsearch.
   If you override a heap flag here, the setting here takes precedence.
 
 `elasticsearch.new_size`
