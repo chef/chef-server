@@ -446,7 +446,7 @@ GEM
       sprockets (> 3.0)
       sprockets-rails
       tilt
-    sdoc (2.3.0)
+    sdoc (2.3.1)
       rdoc (>= 5.0, < 6.4.0)
     selenium-webdriver (4.1.0)
       childprocess (>= 0.5, < 5.0)
