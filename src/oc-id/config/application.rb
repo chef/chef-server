@@ -26,7 +26,7 @@ module OcId
     # config.i18n.default_locale = :de
 
     I18n.enforce_available_locales = true
-
+    config.active_record.legacy_connection_handling = false
     config.to_prepare do
       Doorkeeper::ApplicationController.layout 'application'
       Doorkeeper::ApplicationsController.layout 'application'
