@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.13.12 -->
-## [14.13.12](https://github.com/chef/chef-server/tree/14.13.12) (2022-02-12)
+<!-- latest_release 14.13.13 -->
+## [14.13.13](https://github.com/chef/chef-server/tree/14.13.13) (2022-02-14)
 
 #### Merged Pull Requests
-- Bump chef from 17.9.42 to 17.9.46 in /oc-chef-pedant [#3155](https://github.com/chef/chef-server/pull/3155) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump omnibus-software from `1c00b6d` to `70be4b4` in /omnibus [#3157](https://github.com/chef/chef-server/pull/3157) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.12.21 -->
 ### Changes since 14.12.21 release
 
 #### Merged Pull Requests
+- Bump omnibus-software from `1c00b6d` to `70be4b4` in /omnibus [#3157](https://github.com/chef/chef-server/pull/3157) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.13.13 -->
 - Bump chef from 17.9.42 to 17.9.46 in /oc-chef-pedant [#3155](https://github.com/chef/chef-server/pull/3155) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.13.12 -->
 - Update highline requirement from ~&gt; 1.6, &gt;= 1.6.9 to &gt;= 1.6.9, &lt; 3.0 in /src/chef-server-ctl [#3022](https://github.com/chef/chef-server/pull/3022) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.13.11 -->
 - Remove unused dependencies in chef-server-ctl [#3130](https://github.com/chef/chef-server/pull/3130) ([tas50](https://github.com/tas50)) <!-- 14.13.10 -->
