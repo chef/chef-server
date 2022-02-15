@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.13.18 -->
-## [14.13.18](https://github.com/chef/chef-server/tree/14.13.18) (2022-02-15)
+<!-- latest_release 14.13.19 -->
+## [14.13.19](https://github.com/chef/chef-server/tree/14.13.19) (2022-02-15)
 
 #### Merged Pull Requests
-- Update all the chef-server-ctl deps to the latest [#3165](https://github.com/chef/chef-server/pull/3165) ([tas50](https://github.com/tas50))
+- Bump spring from 3.1.1 to 4.0.0 in /src/oc-id [#2995](https://github.com/chef/chef-server/pull/2995) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.12.21 -->
 ### Changes since 14.12.21 release
 
 #### Merged Pull Requests
+- Bump spring from 3.1.1 to 4.0.0 in /src/oc-id [#2995](https://github.com/chef/chef-server/pull/2995) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.13.19 -->
 - Update all the chef-server-ctl deps to the latest [#3165](https://github.com/chef/chef-server/pull/3165) ([tas50](https://github.com/tas50)) <!-- 14.13.18 -->
 - Remove deprecated gemfile format in oc_bifrost [#3166](https://github.com/chef/chef-server/pull/3166) ([tas50](https://github.com/tas50)) <!-- 14.13.17 -->
 - Update activesupport requirement from &gt;= 4.2.7.1, &lt; 7.0 to &gt;= 4.2.7.1, &lt; 8.0 in /oc-chef-pedant [#3164](https://github.com/chef/chef-server/pull/3164) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.13.16 -->
