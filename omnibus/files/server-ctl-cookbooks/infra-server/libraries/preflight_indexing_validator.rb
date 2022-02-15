@@ -41,6 +41,7 @@ class IndexingPreflightValidator < PreflightValidator
     verify_es_disabled_if_user_set_external_solr
     verify_external_url
     verify_erchef_config
+    verify_search_engine_permissions
   end
 
   def verify_consistent_reindex_sleep_times
@@ -127,6 +128,22 @@ class IndexingPreflightValidator < PreflightValidator
 
     unless %w(batch inline).include?(@cs_erchef_attr['search_queue_mode'])
       fail_with err_INDEX007_bad_queue_mode
+    end
+  end
+
+  def verify_search_engine_permissions
+    if node['private_chef']['opscode-erchef']['search_provider'] != 'solr'
+      search_provider_url = helper.solr_url
+      begin
+        client = Chef::HTTP.new("#{search_provider_url}/_all/_settings")
+        response = JSON.parse(client.get(''))
+      rescue StandardError
+        Chef::Log.info('Elasticsearch is not yet up so skipping search engine permissions check.')
+      else
+        if response.dig('chef', 'settings', 'index', 'blocks', 'read_only_allow_delete')
+          fail_with err_INDEX008_bad_elasticsearch_config
+        end
+      end
     end
   end
 
@@ -257,6 +274,19 @@ class IndexingPreflightValidator < PreflightValidator
                     opscode_erchef['search_queue_mode'] = 'batch'
 
                 in #{CHEF_SERVER_CONFIG_FILE}
+    EOM
+  end
+
+  def err_INDEX008_bad_elasticsearch_config
+    <<~EOM
+
+      INDEX007: Invalid Elasticsearch configuration
+
+      The Elasticsearch index configuration is set to read only.
+      To reset the index configurations, run the following:
+
+          curl -XPUT -H "Content-Type: application/json" http://127.0.0.1:9200/_all/_settings -d '{"index.blocks.read_only_allow_delete": null}'
+
     EOM
   end
 end
