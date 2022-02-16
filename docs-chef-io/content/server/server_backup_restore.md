@@ -148,6 +148,10 @@ The Chef Infra Server HA install documentation includes a [second process](https
     chef-server-ctl reindex --all
     ```
 
+{{< note >}}
+If `knife search` does not return the expected results and data is present in the Chef Infra Server after reindex, then [verify the search index configuration](/server/ctl_chef_server/#reindex).
+{{< /note >}}
+
 ### Verify
 
 The best practice for maintaining useful backup is to periodically verify your backup by restoring:
