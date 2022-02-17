@@ -8,7 +8,7 @@ require 'chef-utils/dist'
 describe "Headers", :headers do
   let (:request_url) { api_url("users") }
   let (:requestor) { platform.admin_user }
-  let (:config) { JSON.parse(IO.read("/etc/opscode/#{::ChefUtils::Dist::Server::SERVER}-running.json"))['private_chef'] }
+  let (:config) { JSON.parse(IO.read("/etc/#{::ChefUtils::Dist::Org::LEGACY_CONF_DIR}/#{::ChefUtils::Dist::Server::SERVER}-running.json"))['private_chef'] }
 
 
   context "Request Headers" do
