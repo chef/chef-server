@@ -17,6 +17,7 @@
 require "chef/config"
 require "chef/org"
 require "omnibus_ctl_helper"
+require "chef-utils/dist"
 
 describe "chef-server-ctl reindex" do
   subject(:reindex) do
@@ -32,7 +33,7 @@ describe "chef-server-ctl reindex" do
   end
 
   before :each do
-    allow(Chef::Config).to receive(:from_file).with("/etc/opscode/pivotal.rb")
+    allow(Chef::Config).to receive(:from_file).with("/etc/#{::ChefUtils::Dist::Org::LEGACY_CONF_DIR}/pivotal.rb")
     allow(Chef::Org).to receive_message_chain(:list, :keys).and_return(
       ["testorg"]
     )
