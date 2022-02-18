@@ -204,3 +204,6 @@ old_runlists_and_search true
 
 # Log HTTP Requests
 log_file "/var/log/opscode/oc-chef-pedant/http-traffic.log"
+
+include_version_in_status false
+include_x_ops_api_info false

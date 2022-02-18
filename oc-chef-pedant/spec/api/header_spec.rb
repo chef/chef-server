@@ -6,7 +6,6 @@
 describe "Headers", :headers do
   let (:request_url) { api_url("users") }
   let (:requestor) { platform.admin_user }
-  let (:config) { JSON.parse(IO.read("/etc/opscode/chef-server-running.json"))['private_chef'] }
 
 
   context "Request Headers" do
@@ -54,7 +53,8 @@ describe "Headers", :headers do
   context "Responses Headers", :response_headers do
     it "x_ops_api_info should be configured" do
       response_header = get(request_url, requestor).headers
-      response_header[:x_ops_api_info].nil?.should eql !config['opscode-erchef']['include_x_ops_api_info']
+      include_x_ops_api_info = Pedant::Config.include_x_ops_api_info
+      response_header[:x_ops_api_info].nil?.should eql !include_x_ops_api_info
     end
   end # context "Responses Headers"
 
