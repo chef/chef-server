@@ -26,7 +26,7 @@ module ChefServerCtl
     DOC_PATENT_MSG = <<-DOC.freeze
 
 Documentation: #{ChefUtils::Dist::Server::SERVER_DOCS}
-Patents:       #{ChefUtils::Dist::Org::PATENT/etc/opscode/S}
+Patents:       #{ChefUtils::Dist::Org::PATENTS}
 
     DOC
 
