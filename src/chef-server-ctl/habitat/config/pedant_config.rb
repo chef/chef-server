@@ -199,3 +199,6 @@ required_recipe_enabled false
 reindex_endpoint "https://127.0.0.1"
 
 chef_pgsql_collector true
+
+include_version_in_status false
+include_x_ops_api_info false

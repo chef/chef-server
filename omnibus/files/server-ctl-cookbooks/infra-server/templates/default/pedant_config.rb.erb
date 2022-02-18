@@ -196,3 +196,6 @@ chef_pgsql_collector <%= @chef_pgsql_collector %>
 
 topology "<%= @topology %>"
 role "<%= @role %>"
+
+include_version_in_status <%= node['private_chef']['opscode-erchef']['include_version_in_status'] %>
+include_x_ops_api_info <%= node['private_chef']['opscode-erchef']['include_x_ops_api_info'] %>
