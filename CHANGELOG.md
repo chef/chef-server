@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.13.24 -->
-## [14.13.24](https://github.com/chef/chef-server/tree/14.13.24) (2022-02-22)
+<!-- latest_release 14.13.25 -->
+## [14.13.25](https://github.com/chef/chef-server/tree/14.13.25) (2022-02-22)
 
 #### Merged Pull Requests
-- Bump omnibus-software from `a4f4849` to `ca1f034` in /omnibus [#3192](https://github.com/chef/chef-server/pull/3192) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump chefstyle from 2.2.1 to 2.2.2 in /src/chef-server-ctl [#3188](https://github.com/chef/chef-server/pull/3188) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.12.21 -->
 ### Changes since 14.12.21 release
 
 #### Merged Pull Requests
+- Bump chefstyle from 2.2.1 to 2.2.2 in /src/chef-server-ctl [#3188](https://github.com/chef/chef-server/pull/3188) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.13.25 -->
 - Bump omnibus-software from `a4f4849` to `ca1f034` in /omnibus [#3192](https://github.com/chef/chef-server/pull/3192) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.13.24 -->
 - Update the bundler release in the oc-bifrost-pedant gemfile.lock [#3167](https://github.com/chef/chef-server/pull/3167) ([tas50](https://github.com/tas50)) <!-- 14.13.23 -->
 - pin sqitch to 0.973 [#3186](https://github.com/chef/chef-server/pull/3186) ([jayashrig158](https://github.com/jayashrig158)) <!-- 14.13.22 -->
