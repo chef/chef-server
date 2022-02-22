@@ -22,7 +22,7 @@ PATH
 GEM
   remote: https://rubygems.org/
   specs:
-    activesupport (6.1.4.4)
+    activesupport (6.1.4.6)
       concurrent-ruby (~> 1.0, >= 1.0.2)
       i18n (>= 1.6, < 2)
       minitest (>= 5.1)
@@ -80,4 +80,4 @@ DEPENDENCIES
   veil!
 
 BUNDLED WITH
-   1.17.3
+   2.1.4
