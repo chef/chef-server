@@ -76,22 +76,7 @@ Set the `postgresql['pg_upgrade_timeout']` attribute in [chef-server.rb]({{< rel
        vacuumdb: vacuuming database "template1"
     ```
 
-1. Run `ANALYZE` on the PostgreSQL database.This process gathers statistics for the query planner to create the most efficient query execution paths. Accurate statistics will help the planner to choose the most appropriate query plan, and thereby improve the speed of query processing.
-    ```bash
-       sudo su - opscode-pgsql
-       /opt/opscode/embedded/bin/vacuumdb --all --analyze-only
-    ```
-
-   You should then see output like:
-   
-    ```bash
-       vacuumdb: vacuuming database "bifrost"
-       vacuumdb: vacuuming database "oc_id"
-       vacuumdb: vacuuming database "opscode-pgsql"
-       vacuumdb: vacuuming database "opscode_chef"
-       vacuumdb: vacuuming database "postgres"
-       vacuumdb: vacuuming database "template1"
-    ```
+{{% server_analyze_postgresql_db %}}
 
 1. Back up the PostgreSQL database before upgrading so you can restore the full database to a previous release in the event of a failure. See [Backup and Restore]({{< relref "server_backup_restore" >}}) for more information.
 
@@ -235,22 +220,7 @@ If you are running a Chef Infra Server release before 12.3.0, please contact Che
    reindexdb: reindexing database "template1"
    ```
 
-1. Run `ANALYZE` on the PostgreSQL database.This process gathers statistics for the query planner to create the most efficient query execution paths. Accurate statistics will help the planner to choose the most appropriate query plan, and thereby improve the speed of query processing. Running this as part of [Database Preparation](#database-preparation) recommended to make the process faster.
-    ```bash
-       sudo su - opscode-pgsql
-       /opt/opscode/embedded/bin/vacuumdb --all --analyze-only
-    ```
-
-   You should then see output like:
-   
-    ```bash
-       vacuumdb: vacuuming database "bifrost"
-       vacuumdb: vacuuming database "oc_id"
-       vacuumdb: vacuuming database "opscode-pgsql"
-       vacuumdb: vacuuming database "opscode_chef"
-       vacuumdb: vacuuming database "postgres"
-       vacuumdb: vacuuming database "template1"
-    ```
+{{% server_analyze_postgresql_db %}}
 
 You are now finished with the upgrade.
 
@@ -505,21 +475,7 @@ The following External PostgreSQL upgrade steps are provided as a courtesy only.
    reindexdb: reindexing database "template1"
    ```
 
-1. Run `ANALYZE` on the PostgreSQL database.This process gathers statistics for the query planner to create the most efficient query execution paths. Accurate statistics will help the planner to choose the most appropriate query plan, and thereby improve the speed of query processing. Running this as part of [Database Preparation](#database-preparation) recommended to make the process faster.
-    ```bash
-       /usr/bin/vacuumdb --all --analyze-only
-    ```
-
-   You should then see output like:
-   
-    ```bash
-       vacuumdb: vacuuming database "bifrost"
-       vacuumdb: vacuuming database "oc_id"
-       vacuumdb: vacuuming database "opscode-pgsql"
-       vacuumdb: vacuuming database "opscode_chef"
-       vacuumdb: vacuuming database "postgres"
-       vacuumdb: vacuuming database "template1"
-    ```
+{{% server_analyze_postgresql_db %}}
 
 1. Log into the Chef Infra Server machine.
 
