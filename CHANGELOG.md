@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.13.32 -->
-## [14.13.32](https://github.com/chef/chef-server/tree/14.13.32) (2022-02-23)
+<!-- latest_release 14.13.33 -->
+## [14.13.33](https://github.com/chef/chef-server/tree/14.13.33) (2022-02-23)
 
 #### Merged Pull Requests
-- Bump pg from 1.3.2 to 1.3.3 in /src/oc-id [#3202](https://github.com/chef/chef-server/pull/3202) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump pg from 1.3.2 to 1.3.3 in /src/chef-server-ctl [#3199](https://github.com/chef/chef-server/pull/3199) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.12.21 -->
 ### Changes since 14.12.21 release
 
 #### Merged Pull Requests
+- Bump pg from 1.3.2 to 1.3.3 in /src/chef-server-ctl [#3199](https://github.com/chef/chef-server/pull/3199) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.13.33 -->
 - Bump pg from 1.3.2 to 1.3.3 in /src/oc-id [#3202](https://github.com/chef/chef-server/pull/3202) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.13.32 -->
 - Bump omnibus-software from `ca1f034` to `f64a223` in /omnibus [#3203](https://github.com/chef/chef-server/pull/3203) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.13.31 -->
 - Bump nokogiri from 1.13.1 to 1.13.3 in /src/oc-id [#3195](https://github.com/chef/chef-server/pull/3195) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.13.30 -->
