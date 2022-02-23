@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.13.28 -->
-## [14.13.28](https://github.com/chef/chef-server/tree/14.13.28) (2022-02-22)
+<!-- latest_release 14.13.29 -->
+## [14.13.29](https://github.com/chef/chef-server/tree/14.13.29) (2022-02-23)
 
 #### Merged Pull Requests
-- Bump config from 3.1.1 to 4.0.0 in /src/oc-id [#3171](https://github.com/chef/chef-server/pull/3171) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Remove the incorrect maintainer file [#3005](https://github.com/chef/chef-server/pull/3005) ([tas50](https://github.com/tas50))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.12.21 -->
 ### Changes since 14.12.21 release
 
 #### Merged Pull Requests
+- Remove the incorrect maintainer file [#3005](https://github.com/chef/chef-server/pull/3005) ([tas50](https://github.com/tas50)) <!-- 14.13.29 -->
 - Bump config from 3.1.1 to 4.0.0 in /src/oc-id [#3171](https://github.com/chef/chef-server/pull/3171) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.13.28 -->
 - Bump chef from 17.9.46 to 17.9.52 in /src/oc-id [#3191](https://github.com/chef/chef-server/pull/3191) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.13.27 -->
 - Bump chef from 17.9.46 to 17.9.52 in /oc-chef-pedant [#3190](https://github.com/chef/chef-server/pull/3190) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.13.26 -->
