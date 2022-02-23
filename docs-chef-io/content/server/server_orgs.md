@@ -1,16 +1,16 @@
 +++
-title = "Organizations and Groups"
+title = "RBAC: Organizations and Groups"
 draft = false
-gh_repo = "chef-web-docs"
+gh_repo = "chef-server"
 aliases = ["/server_orgs.html", "/auth_authorization.html"]
 product = ["client", "server"]
 
 [menu]
   [menu.server]
     title = "Organizations & Groups"
-    identifier = "server/overview/server_orgs.md Organizations & Groups"
-    parent = "server/overview"
-    weight = 65
+    identifier = "server/users/server_orgs.md Organizations & Groups"
+    parent = "server/users"
+    weight = 20
 +++
 
 {{% server_rbac %}}
@@ -184,9 +184,8 @@ manage.
 
 <span class="title-ref">knife-acl</span> and the Chef Manage browser
 interface are incompatible. After engaging <span
-class="title-ref">knife-acl</span>, you will need to discontinue using
-the Chef Manage browser interface from that point forward due to
-possible incompatibilities.
+class="title-ref">knife-acl</span>, you will need to stop using
+the Chef Manage browser interface from that point forward because they are incompatible.
 
 ## Groups
 

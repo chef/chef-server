@@ -7,3 +7,4 @@ webui_priv.pem
 dotfiles/.*
 testdata/
 nodes/
+.chef

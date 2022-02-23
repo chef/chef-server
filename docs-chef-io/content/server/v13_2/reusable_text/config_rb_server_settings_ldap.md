@@ -10,10 +10,10 @@
 The following settings **MUST** be in the config file for LDAP
 authentication to Active Directory to work:
 
--   `base_dn`
--   `bind_dn`
--   `group_dn`
--   `host`
+- `base_dn`
+- `bind_dn`
+- `group_dn`
+- `host`
 
 If those settings are missing, you will get authentication errors and be
 unable to proceed.
@@ -53,21 +53,14 @@ This configuration file has the following settings for `ldap`:
     'CN=user,OU=Employees,OU=Domainuser,DC=example,DC=com'
     ```
 
-    <div class="admonition-note">
-    <p class="admonition-note-title">Note</p>
-    <div class="admonition-note-text">
-
-    If you need to escape characters in a distinguished name, such as
-    when using Active Directory, they must be [escaped with a backslash
-    escape
-    character](https://social.technet.microsoft.com/wiki/contents/articles/5312.active-directory-characters-to-escape.aspx).
+    {{< note >}}
+    If you need to escape characters in a distinguished name, such as when using Active Directory, they must be [escaped with a backslash escape character](https://social.technet.microsoft.com/wiki/contents/articles/5312.active-directory-characters-to-escape.aspx).
 
     ```ruby
     'CN=example\\user,OU=Employees,OU=Domainuser,DC=example,DC=com'
     ```
+    {{< /note >}}
 
-    </div>
-    </div>
 
     Default value: `nil`.
 
@@ -133,26 +126,14 @@ This configuration file has the following settings for `ldap`:
     Default value: `false`. Must be `false` when `ldap['tls_enabled']`
     is `true`.
 
-    <div class="admonition-note">
-    <p class="admonition-note-title">Note</p>
-    <div class="admonition-note-text">
+    {{< note >}}
 
     It's recommended that you enable SSL for Active Directory.
 
-    </div>
-    </div>
+    Previous versions of Chef Infra Server used the `ldap['ssl_enabled']` setting to first enable SSL, and then the `ldap['encryption']` setting to specific the encryption type. These settings are deprecated.
 
-    <div class="admonition-note">
-    <p class="admonition-note-title">Note</p>
-    <div class="admonition-note-text">
+    {{< /note >}}
 
-    Previous versions of the Chef Infra Server used the
-    `ldap['ssl_enabled']` setting to first enable SSL, and then the
-    `ldap['encryption']` setting to specify the encryption type. These
-    settings are deprecated.
-
-    </div>
-    </div>
 
 `ldap['system_adjective']`
 
@@ -162,15 +143,9 @@ This configuration file has the following settings for `ldap`:
     will display strings like "the corporate login server", "corporate
     login", or "corporate password." Default value: `AD/LDAP`.
 
-    <div class="admonition-warning">
-    <p class="admonition-warning-title">Warning</p>
-    <div class="admonition-warning-text">
-
-    This setting is **not** used by the Chef Infra Server. It is used
-    only by the Chef management console.
-
-    </div>
-    </div>
+    {{< warning >}}
+    This setting is used by Chef Manage and not Chef Infra Server. Chef Manage is deprecated.
+    {{< /warning >}}
 
 `ldap['timeout']`
 
@@ -184,14 +159,8 @@ This configuration file has the following settings for `ldap`:
     `ldap['port']` is also set to `636`. Default value: `false`. Must be
     `false` when `ldap['ssl_enabled']` is `true`.
 
-    <div class="admonition-note">
-    <p class="admonition-note-title">Note</p>
-    <div class="admonition-note-text">
+    {{< note >}}
 
-    Previous versions of the Chef Infra Server used the
-    `ldap['ssl_enabled']` setting to first enable SSL, and then the
-    `ldap['encryption']` setting to specify the encryption type. These
-    settings are deprecated.
+    Previous versions of Chef Infra Server used the `ldap['ssl_enabled']` setting to first enable SSL, and then the `ldap['encryption']` setting to specify the encryption type. These settings are deprecated.
 
-    </div>
-    </div>
+    {{< /note >}}

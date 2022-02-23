@@ -23,39 +23,29 @@ vm:
   omnibus-autoload: [private-chef-cookbooks]
 
   #postgresql:
-  # enable a separate postgres vm but do not use it unless
-  # use-external is set.
+  # when true, enable a standalone postgres vm and configure chef-server to use it as
+  # an external postgres provider.
   # start: true
 
-  # When this is set true, and start is true,
-  # the chef-server node will be configured to use
-  # this vm as an external postgresql server from the start.
-  #  use-external: true
 
   # elasticsearch:
-  # enable a separate elasticsearch vm
+  # enable a separate elasticsearch vm and configure chef-server to use it as an external
+  # elasticsearch provider.
   # start: true
-  # version: "5" # options are "2" or "5"
-
-  # external_solr:
-  # enable a separate external vm
-  # start: true
-  # These will map directly to entries in the generated chef-server.rb
+  # version: "5" # options are "2", "5", or "7"
 
   # ldap:
-  # enable a separate ldap vm but do not use it unless use-external is set.
+  # when true enable a LDAP server VM and configure chef-server to perform user authentication
+  # against it.
   # start: true
 
 
   node-attributes:
     provisioning:
-      # uncomment to enable default configuration of remote postgres node.
-      # using your host as the server. Note that if you have postgresql: use-vm-for-external
-      # set, that will override any customization ehre.
-      # This assumes that that you've configured a local superuser with user/pass below
-      # and that you've configured a local superuser with user/pass below
-      # and tcp-based access.
       #chef-server-config:
+      #  This is an example to provide context - entries here will be directly added to
+      #  chef-server.rb
+      #
       #  postgresql['external']: true
       #  postgresql['vip']:  "\"192.168.56.1\""
       #  postgresql['port']: 5432

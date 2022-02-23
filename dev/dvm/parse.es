@@ -17,8 +17,12 @@ term_to_ruby_hash({Name, {git, URL, ""}}) ->
     io_lib:format("\"~s\" => { \"url\" => \"~s\", \"ref\" => \"HEAD\" } ", [Name, URL]);
 term_to_ruby_hash({Name, {git, URL, "master"}}) ->
     io_lib:format("\"~s\" => { \"url\" => \"~s\", \"ref\" => \"origin/master\" } ", [Name, URL]);
+term_to_ruby_hash({Name, {git, URL, "main"}}) ->
+    io_lib:format("\"~s\" => { \"url\" => \"~s\", \"ref\" => \"origin/main\" } ", [Name, URL]);
 term_to_ruby_hash({Name, {git, URL, {tag, Tag} } } )->
     io_lib:format("\"~s\" => { \"url\" => \"~s\", \"ref\" => \"~s\" } ", [Name, URL, Tag]);
+term_to_ruby_hash({Name, {git, URL, {ref, Hash} } } )->
+    io_lib:format("\"~s\" => { \"url\" => \"~s\", \"ref\" => \"~s\" } ", [Name, URL, Hash]);
 term_to_ruby_hash({Name, {git, URL, {branch, Branch} } } )->
     io_lib:format("\"~s\" => { \"url\" => \"~s\", \"ref\" => \"origin/~s\" } ", [Name, URL, Branch]);
 term_to_ruby_hash({Name, {git, URL, Ref}}) ->

@@ -609,23 +609,3 @@ To upgrade to Chef Infra Server on a tiered Chef Infra Server configuration, do 
    ```bash
    chef-server-ctl cleanup
    ```
-
-{{< note >}}
-
-Check the [post upgrade steps](#post-upgrade-steps) if you are upgrading from a version before Chef Infra Server 14.8 to a version greater than or equal to 14.8.
-
-{{</note >}}
-
-### Upgrading Manage Add-On
-
-Chef Manage is a management console for data bags, attributes, run-lists, roles, environments, and cookbooks from a web user interface.
-
-Chef Infra Server 14 supports the Chef Manage add-on. This add-on is [deprecated]({{< relref "versions#deprecated-products-and-versions" >}}) and will reach [EOL]({{< relref "versions#end-of-life-eol-products" >}}) on December 31, 2022. After upgrading Chef Infra Server, reinstall the add-on and then reconfigure Chef Infra Server and the add-on.
-
-#### Use Chef Downloads
-
-{{% ctl_chef_server_install_features_download %}}
-
-#### Use Local Packages
-
-{{% ctl_chef_server_install_features_manual %}}

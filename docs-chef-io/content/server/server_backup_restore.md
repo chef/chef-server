@@ -14,27 +14,25 @@ aliases = ["/server_backup_restore.html", "/runbook/server_backup_restore/"]
     weight = 10
 +++
 
-Periodic backups of Chef Infra Server data are an essential part of
-managing and maintaining a healthy configuration and ensuring that
-important data can be restored, if required. The backup takes around
-4 to 5 minutes per GB of data on a t3.2xlarge AWS EC2 instance.
+Periodic backups of Chef Infra Server are essential to managing and maintaining a healthy configuration and ensuring the availability of important data for restoring your system, if required. The backup takes around 4 to 5 minutes for each GB of data on a t3.2xlarge AWS EC2 instance.
+
+## Requirements
+
+- Chef Infra Server 14.11.36 or later
 
 ## chef-server-ctl
 
-For the majority of use cases, `chef-server-ctl backup` is the
-recommended way to take backups of the Chef Infra Server. Use the
-following commands for managing backups of Chef Infra Server data, and
-for restoring those backups.
+For the majority of use cases, `chef-server-ctl backup` is the recommended way to take backups of the Chef Infra Server. Use the following commands for managing backups of Chef Infra Server data, and for restoring those backups.
 
 ### backup
 
 {{% ctl_chef_server_backup %}}
 
-**Options**
+#### Options
 
 {{% ctl_chef_server_backup_options %}}
 
-**Syntax**
+#### Syntax
 
 {{% ctl_chef_server_backup_syntax %}}
 
@@ -42,15 +40,15 @@ for restoring those backups.
 
 {{% ctl_chef_server_restore %}}
 
-**Options**
+#### Options
 
 {{% ctl_chef_server_restore_options %}}
 
-**Syntax**
+#### Syntax
 
 {{% ctl_chef_server_restore_syntax %}}
 
-**Examples**
+#### Examples
 
 ```bash
 chef-server-ctl restore /path/to/tar/archive.tar.gz
@@ -60,58 +58,91 @@ chef-server-ctl restore /path/to/tar/archive.tar.gz
 
 {{% EOL_backend %}}
 
-In a disaster recovery scenario, the backup and restore processes allow
-you to restore a data backup into a newly built cluster. It is not
-intended for the recovery of an individual machine in the chef-backend
-cluster or for a point-in-time rollback of an existing cluster.
+In a disaster recovery scenario, the backup and restore processes allow you to restore a data backup into a newly built cluster. The restore process is not intended for recovering individual machine in the Chef Backend cluster or for a point-in-time rollback of an existing cluster.
 
 ### Backup
 
-Restoring your data in the case of an emergency depends on having
-previously made backups of:
+Restoring your data in an emergency requires existing backups in the `.tar` format of:
 
-- the data in your Chef Backend cluster
-- the configuration from your Chef server
+- The Chef Backend cluster data
+- The Chef Infra Server configuration file
 
-To make backups for future use in disaster scenarios:
+To make backups use in future disaster scenarios:
 
-1.  On a follower chef-backend node, run `chef-backend-ctl backup`
-2.  On a Chef Infra Server node run: `chef-server-ctl backup --config-only`
-3.  Move the tar archives created in steps (1) and (2) to a long-term
-    storage location.
+1. On a follower Chef Backend node, create the back-end data backup with: `chef-backend-ctl backup`
+2. On Chef Infra Server node, create the server configuration backup with: `chef-server-ctl backup --config-only`
+3. Move the tar archives created in steps (1) and (2) to a long-term storage location
 
 ### Restore
 
-To restore a Chef Backend-based Chef Infra Server cluster:
+The restore process requires Chef Infra Server 14.11.36 or later.
 
-1.  Restore the node and an IP address that can be used to reach the
-    node on the first machine that you want to use in your new Chef
-    Backend cluster. The argument to the `--publish_address` option
-    should be the IP address for reaching the node you are restoring.
+Restoring Chef Backend for a Chef Infra Server cluster has two steps:
 
-    ```bash
-    chef-backend-ctl restore --publish_address X.Y.Z.W /path/to/backup.tar.gz
-    ```
+1. Restore the back-end services
+2. Restore the front-end services
 
-2.  Join additional nodes to your Chef Backend cluster. (If you are only
-    testing and verifying your restore process you can test against a
-    single Chef Backend node and a single Chef Infra Server node.)
+#### Backend Restore
+
+1. Restoring the back-end services creates a new cluster. Select one node as the leader and restore the backup on that node first. Use the IP address of the leader node as the value for the `--publish_address` option.
 
     ```bash
-    chef-backend-ctl join-cluster IP_OF_FIRST_NODE --publish_address IP_OF_THIS_NODE
+    chef-backend-ctl restore --publish_address my.company.ip.address /path/to/backup.tar.gz
     ```
 
-3.  Restore Chef Infra Server from your backed up Infra Server configuration
-    (See step 2 in the backup instructions above). Alternatively, you
-    can generate new configuration for this node and reconfigure it
-    using the steps found in [the installation
-    instructions.]({{< relref "install_server_ha/#step-5-install-and-configure-first-frontend" >}}).
+    For example,
+
+    ```bash
+    chef-backend-ctl restore --publish_address 198.52.1000.0 /backups/2021/backup.tar.gz
+    ```
+
+2. The restore process creates a new cluster and generates a JSON secrets file for setting up communication between the nodes. Locate the file in `/etc/chef-backend/chef-backend-secrets.json` and copy it to each node as `tmp/chef-backend-secrets.json`
+
+3. Join follower nodes to your new Chef Backend cluster. For each follower node, run the `join-cluster` subcommand to establish communication in the cluster. The command uses:
+
+    1. The IP address of the new leader node.
+    2. The IP address of the follower node that joins through the `--publish_address` option.
+    3. The secrets option `-s` with the `/tmp/chef-backend-secrets.json` file on the node.
+
+    The `join-cluster` command is:
+
+    ```bash
+    chef-backend-ctl join-cluster --accept-license --yes --quiet IP_OF_LEADER_NODE --publish_address IP_OF_FOLLOWER_NODE -s /tmp/chef-backend-secrets.json
+    ```
+
+    For example:
+
+    ```bash
+    chef-backend-ctl join-cluster --accept-license --yes --quiet 198.51.100.0 --publish_address 203.0.113.0 -s /tmp/chef-backend-secrets.json
+    ```
+
+4. Generate the configuration for the front end from the new cluster:
+
+    ```bash
+    chef-backend-ctl gen-server-config chefserver.internal > /tmp/chef-server.rb
+    ```
+
+#### Frontend Restore
+
+{{< note >}}
+The Chef Infra Server HA install documentation includes a [second process](https://docs.chef.io/server/install_server_ha/#step-5-install-and-configure-the-first-frontend) for generating and reconfiguring the front-end configuration file.
+{{< /note >}}
+
+1. Restore Chef Infra Server from your backed-up Infra Server configuration generated by the new cluster.
 
     ```bash
     chef-server-ctl restore /path/to/chef-server-backup.tar.gz
     ```
 
-4.  Run the `reindex` command to re-populate your search index
+2. Copy the Chef generated config `/tmp/chef-server.rb`, to the front end node and replace it onto `/etc/opscode/chef-server.rb`.
+
+   Run reconfigure to apply the changes.
+
+   ```bash
+    chef-server-ctl reconfigure
+   ```
+
+3. Run the `reindex` command to re-populate your search index
 
     ```bash
     chef-server-ctl reindex --all
@@ -119,7 +150,43 @@ To restore a Chef Backend-based Chef Infra Server cluster:
 
 ### Verify
 
-We recommend periodically verifying your backup by restoring a single
-Chef Backend node, a single Chef Infra Server node, and ensuring that
-various knife commands and Chef Infra Client runs can successfully
-complete against your backup.
+The best practice for maintaining useful backup is to periodically verify your backup by restoring:
+
+- One Chef Backend node
+- One Chef Infra Server node
+
+Verify that you can execute knife commands and Chef Infra Client runs against your these restored nodes.
+
+## Troubleshoot
+
+The restore process requires Chef Infra Server 14.11.36 or later.
+
+For a quick fix you can edit `/opt/opscode/embedded/lib/ruby/gems/2.7.0/gems/chef-server-ctl-1.1.0/bin/chef-server-ctl` and add the following methods:
+
+```bash
+# External Solr/ElasticSearch Commands
+def external_status_opscode_solr4(_detail_level)
+  solr = external_services['opscode-solr4']['external_url']
+  begin
+    Chef::HTTP.new(solr).get(solr_status_url)
+    puts "run: opscode-solr4: connected OK to #{solr}"
+  rescue StandardError => e
+    puts "down: opscode-solr4: failed to connect to #{solr}: #{e.message.split("\n")[0]}"
+  end
+end
+
+def external_cleanse_opscode_solr4(perform_delete)
+  log <<-EOM
+   Cleansing data in a remote Sol4 instance is not currently supported.
+  EOM
+end
+
+def solr_status_url
+  case running_service_config('opscode-erchef')['search_provider']
+  when "elasticsearch"
+    "/chef"
+  else
+    "/admin/ping?wt=json"
+  end
+end
+```

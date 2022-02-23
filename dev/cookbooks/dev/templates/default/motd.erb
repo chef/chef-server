@@ -1,20 +1,21 @@
 DVM QuickStart
 ---------------
-1. On the host, cd to chef-server/dev, and run the below command. Leave it running.
-      $ ./sync
-2. In your active shell (this one!) use "sudo -i" to gain root. dvm needs it.
-3. To load the chef-server repo's erchef project and run it in the active shell:
-      # dvm quickstart oc_erchef
-4. To load the things you'll usually want - erchef, pedant, omnibus cookbooks:
-      # dvm quickstart chef-server
-4. To run oc-chef-pedant, the server REST API spec suite:
-      # dvm load oc-chef-pedant
-      # dvm run oc-chef-pedant [--pedant-flags,...]
+1. In your active shell (this one!) use "sudo -i" to gain root. dvm needs it.
+2. To load the chef-server repo's erchef project and run it in the active shell:
+    # dvm load oc_erchef
+    # dvm start oc_erchef
+3. To load the things you'll usually want - erchef, pedant, chef server configuration cookbooks:
+    # dvm load omnibus server-ctl-cookbooks
+    # dvm load oc-chef-pedant
+    # dvm load oc_erchef
+    # dvm start oc_erchef
+4. To run the chef-server repo's oc-chef-pedant suite:
+    # dvm run oc-chef-pedant [--pedant-flags,...]
 5. To start a psql session with a project's database, use:
-      # dvm psql $PROJECT
+    # dvm psql $PROJECT
 
 Use dvm list for a list of loadable projects, and dvm list $PROJECT for a list of loadable deps.
 For a lot more information about dvm see chef-server/dev/README.md
 
-Note that supported erlang projects will automatically hot-load your changes -
-just save them from the host and they'll loaded within a few seconds.
+Loaded erlang projects will automatically hot-load your changes.  Save source files
+on the host and they'll compile and load within a few seconds.

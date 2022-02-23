@@ -11,9 +11,7 @@ The following sections describe the various settings that are available
 in the chef-server.rb file.
 
 {{< note >}}
-
 {{< reusable_text_versioned file="notes_config_rb_server_must_reconfigure" >}}
-
 {{< /note >}}
 
 ### General
@@ -95,7 +93,7 @@ Chef Infra Server versions earlier than 14.5 configured with `nginx['enable_non_
 `notification_email`
 
 :   The email addressed to which email notifications are sent. Default
-    value: `'pc-default@opscode.com'`.
+    value: `'pc-default@chef.io'`.
 
 `role`
 
@@ -113,9 +111,7 @@ Chef Infra Server versions earlier than 14.5 configured with `nginx['enable_non_
 {{< reusable_text_versioned file="server_services_bookshelf" >}}
 
 {{< note >}}
-
 {{< reusable_text_versioned file="notes_server_aws_cookbook_storage" >}}
-
 {{< /note >}}
 
 This configuration file has the following settings for `bookshelf`:
@@ -692,7 +688,7 @@ Chef Infra Server versions earlier than 14.5 configured with `nginx['enable_non_
 :   The list of supported cipher suites that are used to establish a
     secure connection. To favor AES256 with ECDHE forward security, drop
     the `RC4-SHA:RC4-MD5:RC4:RSA` prefix. See [this
-    link](https://www.openssl.org/docs/man1.0.2/man1/ciphers.html) for more
+    link](https://www.openssl.org/docs/man1.1.1/man1/ciphers.html) for more
     information. For example:
 
     ```ruby
@@ -1470,11 +1466,10 @@ This configuration file has the following settings for `opscode-erchef`:
 :   The minimum time in milliseconds that Chef Infra Server will keep any given cookbook version response in the cache when
     when `cbv_cache_enabled` is enabled.
     Default value: `30000`.
+    
 {{< note >}}
-
 Be careful if increasing this number - requests for a given set of cookbook versions will be stale if the resolved cookbook versions are updated before the cache entry times out. This will
 not occur if you increment the version of a cookbook with every cookbook update, which is the recommended approach to updating cookbooks.
-
 {{< /note >}}
 
 ### Elasticsearch

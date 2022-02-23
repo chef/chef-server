@@ -26,6 +26,12 @@ start(_StartType, _StartArgs) ->
     %% If we're in a dev vm environment, start the code sync & compile tools
     case os:getenv("DEVVM") of
         "1" ->
+            {ok, Dir} = file:get_cwd(),
+            SrcDir =  filename:join([Dir, "../../../../../..", "external-deps"]),
+            EbinDir = filename:join([Dir, "../../../../../..", "external-deps/ebin"]),
+            application:set_env(sync, src_dirs, {add, [{SrcDir,
+                                                        [{outdir,EbinDir}]}]}),
+            application:set_env(sync, sync_method, scanner),
             application:start(sync);
         _ -> ok
     end,

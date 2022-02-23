@@ -5,7 +5,6 @@ chef:
   ssl_verify_mode: verify_none
 doorkeeper:
   administrators: []
-sentry_dsn:
 sign_up_url: https:///signup
 email_from_address: '"Opscode" <donotreply@chef.io>'
 origin:

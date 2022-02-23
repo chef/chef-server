@@ -51,5 +51,6 @@ build do
          " --path=#{install_dir}/embedded/service/gem" \
          " --without development test doc", env: env
 
+  bundle "exec rake assets:precompile", env: env
   sync project_dir, "#{install_dir}/embedded/service/oc_id/", exclude: ['**/.gitignore', 'log/', 'tmp/']
 end

@@ -13,15 +13,19 @@ module DVM
       @ctl_name  = config['ctl-name'] || 'chef-server-ctl'
       @bundler = config['bundler']
     end
+
     def unload
       unmount(source_path)
       if reconfigure_on_load
         run_command("#{ctl_name} reconfigure", "running #{ctl_name} reconfigure to up the changes.")
       end
     end
+
     def load(opts)
       if bundler
-        run_command("rm -rf .bundle/config ;  bundle install --path /opt/opscode/embedded/service/gem --no-binstubs", "Installing in-place...", cwd: @dest_path)
+        run_command("rm -rf .bundle/config;  bundle install --path /opt/opscode/embedded/service/gem --no-binstubs",
+                    "Installing in-place...",
+                    cwd: @dest_path)
       end
       bind_mount(source_path, dest_path)
       if reconfigure_on_load and not opts[:no_build]

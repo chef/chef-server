@@ -64,14 +64,16 @@ db_ctx() ->
 cov_enable(ProjectPath, all, Deps) ->
     % We must stop instead of pause because otherwise sync doesn't listen and still recompiles shit...
     sync_action(stop),
+    % Under rebar everything goes to _build/dev/lib/*/ebin - including deps.  Unless we want to manually split deps from built-ins,
+    % (We don't right now...) we're
     case Deps of
         true ->
             [cover:compile_beam_directory(Dir ) || Dir <- filelib:wildcard(filename:join(ProjectPath, "deps/*/ebin"))];
         _ ->
             noop
     end,
-    [cover:compile_beam_directory(Dir) || Dir <- filelib:wildcard(filename:join(ProjectPath, "ebin"))],
-    [cover:compile_beam_directory(Dir) || Dir <- filelib:wildcard(filename:join(ProjectPath, "apps/*/ebin"))],
+    %[cover:compile_beam_directory(Dir) || Dir <- filelib:wildcard(filename:join(ProjectPath, "ebin"))],
+    [cover:compile_beam_directory(Dir) || Dir <- filelib:wildcard(filename:join(ProjectPath, "_build/dev/lib/*/ebin"))],
     io:fwrite("Coverage enabled."),
     ok;
 cov_enable(_ProjectPath, Module, _Deps) ->

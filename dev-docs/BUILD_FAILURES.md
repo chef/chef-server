@@ -46,3 +46,39 @@ Allowed for distribution, but not for use in our products: Artistic-1.0, Artisti
 Not allowed: AGPL-\*, GPL-3.0-\*.
 
 Ask a manager if anything around licensing isn't explicitly clear
+
+#### Error Message
+
+```
+[Licensing] W | 2022-01-10T07:38:46+00:00 | Can not automatically detect licensing information for 'sqitch' using license_scout. Error is: 'Provided license file path 'README' can not be found under detected dependency path '/var/lib/buildkite-agent/.cpanm/latest-build/ExtUtils-ParseXS-3.44'.'
+
+Encountered error(s) with project's licensing information.
+Failing the build because :fatal_licensing_warnings is set in the configuration.
+Error(s):
+
+    Can not automatically detect licensing information for 'sqitch' using license_scout. Error is: 'Provided license file path 'README' can not be found under detected dependency path '/var/lib/buildkite-agent/.cpanm/latest-build/ExtUtils-ParseXS-3.44'.'
+
+    If you are encountering missing license or missing license file errors for **transitive** dependencies, you can provide overrides for the missing information at https://github.com/chef/license_scout/blob/1-stable/lib/license_scout/overrides.rb#L93.
+ Promote license_scout to Rubygems with `/expeditor promote chef/license_scout:1-stable X.Y.Z` in slack.
+
+/var/lib/buildkite-agent/builds/omnibus-ubuntu-1604-x86-64-prod-i-0a3a3e06444edd56e-1/chef/chef-chef-server-main-omnibus-adhoc/omnibus/vendor/bundle/ruby/2.7.0/bundler/gems/omnibus-2bf77bb5515a/lib/omnibus/licensing.rb:446:in `raise_if_warnings_fatal!'
+  /var/lib/buildkite-agent/builds/omnibus-ubuntu-1604-x86-64-prod-i-0a3a3e06444edd56e-1/chef/chef-chef-server-main-omnibus-adhoc/omnibus/vendor/bundle/ruby/2.7.0/bundler/gems/omnibus-2bf77bb5515a/lib/omnibus/licensing.rb:545:in `rescue in collect_transitive_dependency_licenses_for'
+  /var/lib/buildkite-agent/builds/omnibus-ubuntu-1604-x86-64-prod-i-0a3a3e06444edd56e-1/chef/chef-chef-server-main-omnibus-adhoc/omnibus/vendor/bundle/ruby/2.7.0/bundler/gems/omnibus-2bf77bb5515a/lib/omnibus/licensing.rb:515:in `collect_transitive_dependency_licenses_for'
+  /var/lib/buildkite-agent/builds/omnibus-ubuntu-1604-x86-64-prod-i-0a3a3e06444edd56e-1/chef/chef-chef-server-main-omnibus-adhoc/omnibus/vendor/bundle/ruby/2.7.0/bundler/gems/omnibus-2bf77bb5515a/lib/omnibus/licensing.rb:148:in `execute_post_build'
+```
+#### Next Steps
+
+Edit `lib/license_scout/overrides.rb` and change `["ExtUtils-ParseXS", "Perl-5", ["README"]]` to `["ExtUtils-ParseXS", "Perl-5", ["META.json"]]`.
+
+### Other Places to Look
+
+Some license scout errors may require edits to the following files in order to repair:
+
+Repo  - omnibus-software  
+Files - config/software/sqitch.rb
+
+Repo  - chef-server  
+Files - omnibus/Gemfile  
+        omnibus/Gemfile.lock
+
+A trick to avoid having to make changes to the chef-server repo to point to your omnibus-software changes while testing the fix is to set OMNIBUS_SOFTWARE_GITHUB_BRANCH=YOUR-OMNIBUS-SOFTWARE-BRANCH-NAME under the Options - Environment Variables section of the buildkite omnibus/adhoc GUI.  As you are avoiding having to create a custom branch to point to your omnibus-software changes, leave the branch set to main.
