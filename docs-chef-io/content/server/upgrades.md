@@ -76,6 +76,8 @@ Set the `postgresql['pg_upgrade_timeout']` attribute in [chef-server.rb]({{< rel
        vacuumdb: vacuuming database "template1"
     ```
 
+{{% server_analyze_postgresql_db %}}
+
 1. Back up the PostgreSQL database before upgrading so you can restore the full database to a previous release in the event of a failure. See [Backup and Restore]({{< relref "server_backup_restore" >}}) for more information.
 
 ##### Upgrade Steps
@@ -217,6 +219,8 @@ If you are running a Chef Infra Server release before 12.3.0, please contact Che
    reindexdb: reindexing database "postgres"
    reindexdb: reindexing database "template1"
    ```
+
+{{% server_analyze_postgresql_db %}}
 
 You are now finished with the upgrade.
 
@@ -470,6 +474,8 @@ The following External PostgreSQL upgrade steps are provided as a courtesy only.
    reindexdb: reindexing database "postgres"
    reindexdb: reindexing database "template1"
    ```
+
+{{% server_analyze_postgresql_db %}}
 
 1. Log into the Chef Infra Server machine.
 
