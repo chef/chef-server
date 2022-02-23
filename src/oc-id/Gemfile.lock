@@ -303,7 +303,7 @@ GEM
     matrix (0.4.2)
     method_source (1.0.0)
     mini_mime (1.1.2)
-    mini_portile2 (2.7.1)
+    mini_portile2 (2.8.0)
     minitest (5.15.0)
     mixlib-archive (1.1.7)
       mixlib-log
@@ -324,8 +324,8 @@ GEM
       net-ssh (>= 5.0.0, < 7.0.0)
     net-ssh (6.1.0)
     nio4r (2.5.8)
-    nokogiri (1.13.1)
-      mini_portile2 (~> 2.7.0)
+    nokogiri (1.13.3)
+      mini_portile2 (~> 2.8.0)
       racc (~> 1.4)
     nori (2.6.0)
     ohai (17.9.0)
@@ -589,7 +589,7 @@ DEPENDENCIES
   jwt
   mailcatcher
   mixlib-authentication (>= 2.1, < 4)
-  nokogiri (= 1.13.1)
+  nokogiri (= 1.13.3)
   omniauth-chef (~> 0.4)
   pg (>= 0.18, < 2.0)
   pry-byebug
