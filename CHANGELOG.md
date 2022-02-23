@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.13.30 -->
-## [14.13.30](https://github.com/chef/chef-server/tree/14.13.30) (2022-02-23)
+<!-- latest_release 14.13.31 -->
+## [14.13.31](https://github.com/chef/chef-server/tree/14.13.31) (2022-02-23)
 
 #### Merged Pull Requests
-- Bump nokogiri from 1.13.1 to 1.13.3 in /src/oc-id [#3195](https://github.com/chef/chef-server/pull/3195) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump omnibus-software from `ca1f034` to `f64a223` in /omnibus [#3203](https://github.com/chef/chef-server/pull/3203) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.12.21 -->
 ### Changes since 14.12.21 release
 
 #### Merged Pull Requests
+- Bump omnibus-software from `ca1f034` to `f64a223` in /omnibus [#3203](https://github.com/chef/chef-server/pull/3203) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.13.31 -->
 - Bump nokogiri from 1.13.1 to 1.13.3 in /src/oc-id [#3195](https://github.com/chef/chef-server/pull/3195) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.13.30 -->
 - Remove the incorrect maintainer file [#3005](https://github.com/chef/chef-server/pull/3005) ([tas50](https://github.com/tas50)) <!-- 14.13.29 -->
 - Bump config from 3.1.1 to 4.0.0 in /src/oc-id [#3171](https://github.com/chef/chef-server/pull/3171) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.13.28 -->
