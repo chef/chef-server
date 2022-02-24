@@ -57,7 +57,7 @@ end
 webui_key = OpenSSL::PKey::RSA.new(PrivateChef.credentials.get('chef-server', 'webui_key'))
 
 if node['private_chef']['insecure_addon_compat']
-  file "/etc/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/pivotal.pem"  do
+  file "/etc/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/pivotal.pem" do
     owner OmnibusHelper.new(node).ownership['owner']
     group 'root'
     mode '0600'
@@ -84,8 +84,8 @@ else
   #  These keys are no longer kept directly on the FS
   #  delete them if they're present.
   %W(
-    /etc/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/pivotal.pem 
-    /etc/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/webui_priv.pem 
+    /etc/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/pivotal.pem
+    /etc/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/webui_priv.pem
     /etc/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/webui_pub.pem
   ).each do |f|
     file f do
