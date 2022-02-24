@@ -4,7 +4,7 @@ GIT
   ref: 5040d0daea5f643074cb6d41254cf04bfd5ba29a
   branch: lbaker/upgrade-erlang-24.2
   specs:
-    veil (0.3.9)
+    veil!
       bcrypt (~> 3.1)
       pbkdf2
 
