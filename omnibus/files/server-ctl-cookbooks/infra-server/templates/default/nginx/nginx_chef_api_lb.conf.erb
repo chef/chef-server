@@ -178,6 +178,9 @@
     }
     location @cached {
       proxy_cache cookbooks;
+      <% if node['private_chef']['bookshelf']['external_url'] == :host_header -%>
+      proxy_cache_key $scheme$host$request_uri;
+      <% end -%>
       more_clear_headers 'Cache-Control';
       add_header X-Proxy-Cache $upstream_cache_status;
       proxy_pass http://bookshelf;
