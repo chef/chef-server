@@ -316,7 +316,7 @@ EOF
 
       it "exits with a clear error message if it can't find a server block for the current block for the current machine" do
         expect(Chef::Log).to receive(:fatal).with <<~EOF
-          No server configuration found for "backend-passive.chef.io" in /etc/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/#{ChefUtils::Dist::Server::SERVER}.rb.
+          No server configuration found for "backend-passive.chef.io" in #{ChefUtils::Dist::Server::CONF_DIR}/#{ChefUtils::Dist::Server::SERVER}.rb.
           Server configuration exists for the following hostnames:
 
             backend.chef.io
