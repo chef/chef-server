@@ -28,15 +28,54 @@
 -include_lib("eunit/include/eunit.hrl").
 -endif.
 
+hex2dec(X) when (X>=$0) andalso (X=<$9) -> X-$0;
+hex2dec(X) when (X>=$A) andalso (X=<$F) -> X-$A+10;
+hex2dec(X) when (X>=$a) andalso (X=<$f) -> X-$a+10.
+
+-type uri() :: string() | binary().
+-type hex_uri() :: string() | binary(). %% Hexadecimal encoded URI.
+-type maybe_hex_uri() :: string() | binary(). %% A possibly hexadecimal encoded URI.
+
+-spec http_uri_decode(maybe_hex_uri()) -> uri().
+http_uri_decode(String) when is_list(String) ->
+    do_decode(String).
+
+do_decode([$%,Hex1,Hex2|Rest]) ->
+    [hex2dec(Hex1)*16+hex2dec(Hex2)|do_decode(Rest)];
+do_decode([First|Rest]) ->
+    [First|do_decode(Rest)];
+do_decode([]) ->
+    [].
+
+reserved() ->
+    sets:from_list([$;, $:, $@, $&, $=, $+, $,, $/, $?,
+            $#, $[, $], $<, $>, $\", ${, $}, $|, %"
+                               $\\, $', $^, $%, $ ]).
+
+-spec http_uri_encode(uri()) -> hex_uri().
+http_uri_encode(URI) when is_list(URI) ->
+    Reserved = reserved(),
+    lists:append([uri_encode(Char, Reserved) || Char <- URI]).
+
+%% In this version of the function, we no longer need
+%% the Scheme argument, but just in case...
+uri_encode(Char, Reserved) ->
+    case sets:is_element(Char, Reserved) of
+        true ->
+            [ $% | http_util:integer_to_hexlist(Char)];
+        false ->
+            [Char]
+    end.
+
 encode(Data) when is_binary(Data) ->
     list_to_binary(encode(binary_to_list(Data)));
 encode(Data) when is_list(Data) ->
-    http_uri:encode(Data).
+    http_uri_encode(Data).
 
 decode(Data) when is_binary(Data) ->
     list_to_binary(decode(binary_to_list(Data)));
 decode(Data) when is_list(Data) ->
-    http_uri:decode(Data).
+    http_uri_decode(Data).
 
 bucket_path(Bucket) when Bucket =/= <<>> ->
     Root = bksw_conf:disk_store(),

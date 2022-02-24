@@ -19,6 +19,7 @@
 -include("internal.hrl").
 
 %-ifdef(namespaced_types). %% workaround for sqerl complaint
+-compile(nowarn_unused_type).
 -type dict() :: dict:dict().
 %-endif.
 
