@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.13.37 -->
-## [14.13.37](https://github.com/chef/chef-server/tree/14.13.37) (2022-02-24)
+<!-- latest_release 14.13.38 -->
+## [14.13.38](https://github.com/chef/chef-server/tree/14.13.38) (2022-02-24)
 
 #### Merged Pull Requests
-- Update rails to 6.1.4.6 in oc-id [#3204](https://github.com/chef/chef-server/pull/3204) ([tas50](https://github.com/tas50))
+- Bump sdoc from 2.3.0 to 2.3.1 in /src/oc-id [#3173](https://github.com/chef/chef-server/pull/3173) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.12.21 -->
 ### Changes since 14.12.21 release
 
 #### Merged Pull Requests
+- Bump sdoc from 2.3.0 to 2.3.1 in /src/oc-id [#3173](https://github.com/chef/chef-server/pull/3173) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.13.38 -->
 - Update rails to 6.1.4.6 in oc-id [#3204](https://github.com/chef/chef-server/pull/3204) ([tas50](https://github.com/tas50)) <!-- 14.13.37 -->
 - Consider the host header as part of the proxy cache key [#3131](https://github.com/chef/chef-server/pull/3131) ([bdwyertech](https://github.com/bdwyertech)) <!-- 14.13.36 -->
 - Moving back to stable channel for building habitat packages [#3197](https://github.com/chef/chef-server/pull/3197) ([vinay-satish](https://github.com/vinay-satish)) <!-- 14.13.35 -->
