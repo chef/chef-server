@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.13.34 -->
-## [14.13.34](https://github.com/chef/chef-server/tree/14.13.34) (2022-02-23)
+<!-- latest_release 14.13.35 -->
+## [14.13.35](https://github.com/chef/chef-server/tree/14.13.35) (2022-02-24)
 
 #### Merged Pull Requests
-- Update Chef Backend upgrade to 3.0 instructions [#3143](https://github.com/chef/chef-server/pull/3143) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Moving back to stable channel for building habitat packages [#3197](https://github.com/chef/chef-server/pull/3197) ([vinay-satish](https://github.com/vinay-satish))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.12.21 -->
 ### Changes since 14.12.21 release
 
 #### Merged Pull Requests
+- Moving back to stable channel for building habitat packages [#3197](https://github.com/chef/chef-server/pull/3197) ([vinay-satish](https://github.com/vinay-satish)) <!-- 14.13.35 -->
 - Update Chef Backend upgrade to 3.0 instructions [#3143](https://github.com/chef/chef-server/pull/3143) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 14.13.34 -->
 - Bump pg from 1.3.2 to 1.3.3 in /src/chef-server-ctl [#3199](https://github.com/chef/chef-server/pull/3199) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.13.33 -->
 - Bump pg from 1.3.2 to 1.3.3 in /src/oc-id [#3202](https://github.com/chef/chef-server/pull/3202) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.13.32 -->
