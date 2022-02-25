@@ -2271,7 +2271,9 @@ The response is similar to:
 
 #### POST
 
-The `POST` method is used to add a key for the specified client. This method has no parameters.
+The `POST` method is used to add a key for the specified client. 
+
+This method has no parameters.
 
 **Request**
 
