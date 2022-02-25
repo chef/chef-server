@@ -1075,6 +1075,19 @@ This subcommand has the following options:
 
 :   Use to skip confirmation prompts during the upgrade process.
 
+## Rebuild Migration Level File
+
+The rebuild-migration-state subcommand attempts to recreate the migration-level file found at `/var/opt/opscode/upgrades/migration-level`
+by inferring the current state of the database and system.
+
+**Syntax**
+
+This subcommand has the following syntax:
+
+```bash
+chef-server-ctl rebuild-migration-state
+```
+
 ## User Management
 
 {{% ctl_chef_server_user %}}
