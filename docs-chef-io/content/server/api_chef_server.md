@@ -14,9 +14,7 @@ aliases = ["/api_chef_server.html", "/api_chef_server/"]
     weight = 30
 +++
 
-The Chef Infra Server API is a REST API that provides access to objects
-on the Chef Infra Server, including nodes, environments, roles, users, organizations,
-cookbooks (and cookbook versions), and is used to manage an API client list and
+The Chef Infra Server API is a REST API that provides access to objects on the Chef Infra Server, including nodes, environments, roles, users, organizations, cookbooks (and cookbook versions), and is used to manage an API client list and
 the associated RSA public key-pairs.
 
 ## Requirements
@@ -31,22 +29,15 @@ The Chef Infra Server API has the following requirements:
 
 ## Authentication Headers
 
-Authentication to the Chef Infra Server requires a specific set of
-HTTP headers signed using a private key that is associated with the
-client making the request. The request is authorized if the
-Chef Infra Server can verify the signature using the public key. Only
+Authentication to the Chef Infra Server requires a specific set of HTTP headers signed using a private key associated with the
+client making the request. The request is authorized if the Chef Infra Server can verify the signature using the public key. Only
 authorized actions are allowed.
 
 {{< note >}}
 
-Most authentication requests made to the Chef Infra Server are
-abstracted from the user. Such as when using knife or the Chef Infra
-Server user interface. In some cases, such as when using the
-`knife exec` subcommand, the authentication requests need to be made
-more explicitly, but still in a way that does not require authentication
-headers. In a few cases, such as when using arbitrary Ruby code,
-a Chef Infra Server API client, or cURL, it may be necessary to include the
-full authentication header as part of the request to the Chef Infra Server.
+Most authentication requests made to the Chef Infra Server are abstracted from the user. Such as when using a *knife* or the Chef Infra
+Server user interface. In some cases, such as when using the `knife exec` subcommand, the authentication requests need to be made
+more explicitly, but still in a way that does not require authentication headers. In a few cases, such as using arbitrary Ruby code, a Chef Infra Server API client, or cURL, it may be necessary to include the full authentication header as part of the request to the Chef Infra Server.
 
 {{< /note >}}
 
@@ -120,18 +111,13 @@ For API Version 1.3. The result of the SHA-256 hash of the request body encoded 
 
 {{< note >}}
 
-Use `X-Ops-Server-API-Info` to identify the version of the Chef Infra
-Server API.
+Use `X-Ops-Server-API-Info` to identify the version of the Chef Infra Server API.
 
 {{< /note >}}
 
 #### Canonical Header Format 1.0 using SHA-1
 
-The signed headers are encrypted using the OpenSSL RSA_private_encrypt
-method and encoded in Base64.  The signed headers are used to create
-one or more X-Ops-Authorization-N headers of 60 character segments.
-The canonical header should be created by concatenating the following
-headers, encrypting and encoding:
+The signed headers are encrypted using the OpenSSL RSA_private_encrypt method and encoded in Base64.  The signed headers are used to create one or more X-Ops-Authorization-N headers of 60 character segments. The canonical header should be created by concatenating the following headers, encrypting and encoding:
 
 ```none
 Method:HTTP_METHOD
@@ -143,25 +129,14 @@ X-Ops-UserId:USERID
 
 where:
 
--   `HTTP_METHOD` is the method used in the API request (`GET`, `POST`,
-    and so on)
+-   `HTTP_METHOD` is the method used in the API request (`GET`, `POST`, and so on)
 -   `HASHED_PATH` is the path of the request:
-    `/organizations/NAME/name_of_endpoint`. The `HASHED_PATH` must be
-    hashed using SHA-1 and encoded using Base64, must not have repeated
-    forward slashes (`/`), must not end in a forward slash (unless the
-    path is `/`), and must not include a query string.
+    `/organizations/NAME/name_of_endpoint`. The `HASHED_PATH` must be hashed using SHA-1 and encoded using Base64, must not have repeated forward slashes (`/`), must not end in a forward slash (unless the path is `/`), and must not include a query string.
 -   `X-Ops-Content-Hash` is the Base64 encoded SHA256 hash of the json body of the request.
 -   `X-Ops-Timestamp` UTC time in RFC3339 format.
 -   `X-Ops-UserId` is the plain text client or user name.
 
-The Chef Infra Server decrypts this header and ensures its content
-matches the content of the non-encrypted headers that were in the
-request. The timestamp of the message is checked to ensure the request
-was received within a reasonable amount of time. One approach generating
-the signed headers is to use
-[mixlib-authentication](https://github.com/chef/mixlib-authentication),
-which is a class-based header signing authentication object similar to
-the one used by Chef Infra Client.
+The Chef Infra Server decrypts this header and ensures its content matches the content of the non-encrypted headers in the request. The timestamp of the message is checked to ensure the request was received within a reasonable amount of time. One approach to generating the signed headers is to use [mixlib-authentication](https://github.com/chef/mixlib-authentication), a class-based header signing authentication object similar to the one used by Chef Infra Client.
 
 ##### Example
 
@@ -189,9 +164,7 @@ GET /organizations/NAME/nodes HTTP/1.1
 
 #### Canonical Header Format 1.3 using SHA-256
 
-Chef Infra Server versions 12.4.0 and above support signing protocol version
-1.3, which adds support for SHA-256 algorithms. It can be enabled on
-Chef Infra Client via the `client.rb` file:
+Chef Infra Server versions 12.4.0 and above support signing protocol version 1.3, which supports for SHA-256 algorithms. It can be enabled on Chef Infra Client via the `client.rb` file:
 
 ```ruby
 authentication_protocol_version = '1.3'
@@ -203,12 +176,7 @@ And for Chef's knife CLI via `config.rb`:
 knife[:authentication_protocol_version] = '1.3'
 ```
 
-To create the signed headers for direct use. Gather the following
-headers in the order listed, convert the signature headers to a concatenated string,
-sign and Base64 encode the result. The concatenation of signature headers is
-signed using the client RSA private key, with SHA-256 hashing and PKCS1v15 padding.
-Chop the Base64 encoded value into 60 character chunks and create
-X-Ops-Authorization-N headers with the chunks.
+To create the signed headers for direct use. Gather the following headers in the order listed, convert the signature headers to a concatenated string, sign and Base64 encode the result. The concatenation of signature headers is signed using the client RSA private key, with SHA-256 hashing and PKCS1v15 padding. Chop the Base64 encoded value into 60 character chunks and create X-Ops-Authorization-N headers with the chunks.
 
 ```none
 Method:HTTP_METHOD
@@ -222,15 +190,13 @@ X-Ops-Server-API-Version
 
 where:
 
--   `HTTP_METHOD` is the method used in the API request (`GET`, `POST`, ...)
--   `PATH` is the path of the request: `/organizations/NAME/name_of_endpoint`.
-    The value must not have repeated forward slashes (`/`), must not end
-    in a forward slash (unless the path is `/`), and must not include a query string.
--   `X-Ops-Content-Hash` is the Base64 encoded SHA256 hash of the json body of the request.
--   `X-Ops-Sign` has the value "version=1.3".
--   `X-Ops-Timestamp` UTC time in RFC3339 format.
--   `X-Ops-UserId` is the plain text client or user name.
--   `X-Ops-Server-API-Version` is the numeric value of the Chef Infra Server API.
+- `HTTP_METHOD` is the method used in the API request (`GET`, `POST`, ...)
+- `PATH` is the path of the request: `/organizations/NAME/name_of_endpoint`. The value must not have repeated forward slashes (`/`), must not end in a forward slash (unless the path is `/`), and must not include a query string.
+- `X-Ops-Content-Hash` is the Base64 encoded SHA256 hash of the json body of the request.
+- `X-Ops-Sign` has the value "version=1.3".
+- `X-Ops-Timestamp` UTC time in RFC3339 format.
+- `X-Ops-UserId` is the plain text client or user name.
+- `X-Ops-Server-API-Version` is the numeric value of the Chef Infra Server API.
 
 ##### Example
 
@@ -266,8 +232,7 @@ GET /organizations/NAME/nodes HTTP/1.1
 
 ## Global Endpoints
 
-A global endpoint may be used to access all of the organizations on the
-Chef Infra Server.
+A global endpoint may be used to access all the organizations on the Chef Infra Server.
 
 ### /authenticate_user
 
@@ -275,11 +240,7 @@ The `/authenticate_user` endpoint has the following methods: `POST`.
 
 #### POST
 
-The `POST` method is used to authenticate a user. This endpoint is used
-by the Chef Identity Service to authenticate users of Chef Supermarket
-to the Chef Infra Server.
-
-This method has no parameters.
+The `POST` method is used to authenticate a user. This endpoint is used by the Chef Identity Service to authenticate users of Chef Supermarket to the Chef Infra Server. This method has no parameters.
 
 **Request**
 
@@ -329,11 +290,7 @@ This method has no response body.
 
 {{< note >}}
 
-This endpoint is used for information purposes only and to trigger a
-notification in the Chef management console about the number of licenses
-owned vs. the number of licenses that should be owned. No other action
-is taken and the functionality and behavior of the Chef Infra Server and
-any added component does not change.
+This endpoint is used for information purposes only and to trigger a notification in the Chef management console about the number of licenses owned vs. the number of licenses that should be owned. No other action is taken, and the functionality and behavior of the Chef Infra Server and any added component do not change.
 
 {{< /note >}}
 
@@ -341,10 +298,7 @@ The `/license` endpoint has the following methods: `GET`.
 
 #### GET
 
-The `GET` method is used to get license information for the Chef Infra
-Server.
-
-This method has no parameters.
+The `GET` method is used to get license information for the Chef Infra Server. This method has no parameters.
 
 **Request**
 
@@ -367,14 +321,9 @@ The response is similar to:
 }
 ```
 
-When `node_count` is greater than `node_license`, then `limit_exceeded`
-is `true` and the Chef management console will display a notification
-about this status. The way to resolve this is to visit the upgrade URL,
-add the appropriate number of licenses, and then update the
-configuration settings appropriately.
+When `node_count` is greater than `node_license`, then `limit_exceeded` is `true`, and the Chef management console will display a notification about this status. The way to resolve this is to visit the upgrade URL, add the appropriate number of licenses, and then update the configuration settings appropriately.
 
-The chef-server.rb file contains settings that can be used to edit the
-number of nodes that are under license:
+The chef-server.rb file contains settings that can be used to edit the number of nodes that are under license:
 
 <table>
 <colgroup>
@@ -430,24 +379,18 @@ number of nodes that are under license:
 
 ### /organizations
 
-The Chef Infra Server may contain multiple organizations.
-
-The `/organizations` endpoint has the following methods: `GET` and
+The Chef Infra Server may contain multiple organizations. The `/organizations` endpoint has the following methods: `GET` and
 `POST`.
 
 {{< warning >}}
 
-This endpoint may only be accessed by the `pivotal` user, which is
-created as part of the installation process for the Chef Infra Server.
-(See the "Query for Users and Orgs" example below for an example of how
-to access this endpoint with the `pivotal` user.)
+This endpoint may only be accessed by the `pivotal` user, which is created as part of the installation process for the Chef Infra Server. (See the "Query for Users and Orgs" example below on how to access this endpoint with the `pivotal` user.)
 
 {{< /warning >}}
 
 #### GET
 
-The `GET` method is used to get a list of organizations on the Chef
-Infra Server.
+The `GET` method is used to get a list of organizations on the Chef Infra Server.
 
 **Request**
 
@@ -493,10 +436,7 @@ The response is similar to:
 
 #### POST
 
-The `POST` method is used to create an organization on the Chef Infra
-Server.
-
-This method has no parameters.
+The `POST` method is used to create an organization on the Chef Infra Server. This method has no parameters.
 
 **Request**
 
@@ -515,16 +455,13 @@ with a request body similar to:
 
 where:
 
--   `name` must begin with a lower-case letter or digit, may only
-    contain lower-case letters, digits, hyphens, and underscores, and
+- `name` must begin with a lower-case letter or digit, may only contain lower-case letters, digits, hyphens, and underscores, and
     must be between 1 and 255 characters. For example: `chef`.
--   `full_name` must begin with a non-white space character and must be
-    between 1 and 1023 characters. For example: `Chef Software, Inc.`.
+- `full_name` must begin with a non-whitespace character and must be between 1 and 1023 characters. For example: `Chef Software, Inc.`.
 
 {{< note >}}
 
-An organization isn't usable until a user that belongs to the `admins`
-group is associated with the organization.
+An organization isn't usable until a user that belongs to the `admins` group is associated with the organization.
 
 {{< /note >}}
 
@@ -575,19 +512,14 @@ The response is similar to:
 
 ### /organizations/NAME
 
-An organization is a single instance of a Chef Infra Server, including
-all of the nodes that are managed by that Chef Infra Server and each of
-the workstations that will run knife and access the Chef Infra Server
+An organization is a single instance of a Chef Infra Server, including all the nodes that are managed by that Chef Infra Server and each of the workstations that will run knife and access the Chef Infra Server
 using the Chef Infra Server API.
 
-The `/organizations/NAME` endpoint has the following methods: `DELETE`,
-`GET`, and `PUT`.
+The `/organizations/NAME` endpoint has the following methods: `DELETE`, `GET`, and `PUT`.
 
 #### DELETE
 
-The `DELETE` method is used to delete an organization.
-
-This method has no parameters.
+The `DELETE` method is used to delete an organization. This method has no parameters.
 
 **Request**
 
@@ -634,9 +566,7 @@ The response is similar to:
 
 #### GET
 
-The `GET` method is used to get the details for the named organization.
-
-This method has no parameters.
+The `GET` method is used to get the details for the named organization. This method has no parameters.
 
 **Request**
 
@@ -684,9 +614,7 @@ The response is similar to:
 
 #### PUT
 
-The `PUT` method is used to update an organization definition.
-
-This method has no parameters.
+The `PUT` method is used to update an organization definition. This method has no parameters.
 
 **Request**
 
@@ -750,18 +678,13 @@ The response is similar to:
 
 ### /_stats
 
-Use the `/_stats` endpoint to display statistics about connection pool usage inside Erchef, Postgresql, and the Erlang VM.
-The `_stats` endpoint uses Basic Authorization instead of the X-Ops-Authorization scheme usually used to connect
-to the Chef Infra Server. The default user used to query the `_stats` endpoint is `statsuser`.  The password for the
-`statsuser` is available as the `opscode_erchef::stats_password` from the `chef-server-ctl show-service-credentials` command.
+Use the `/_stats` endpoint to display statistics about connection pool usage inside Erchef, Postgresql, and the Erlang VM. The `_stats` endpoint uses Basic Authorization instead of the X-Ops-Authorization scheme usually used to connect to the Chef Infra Server. The default user used to query the `_stats` endpoint is `statsuser`.  The password for the `statsuser` is available as the `opscode_erchef::stats_password` from the `chef-server-ctl show-service-credentials` command.
 
 The `/_stats` endpoint has the following method: `GET`.
 
 #### GET
 
-The `GET` method is used to get the statistics.
-
-This method has the following parameters:
+The `GET` method is used to get the statistics. This method has the following parameters:
 
 <table>
 <colgroup>
@@ -791,8 +714,7 @@ This method has the following parameters:
 GET /_stats
 ```
 
-This method has no parameters. This method has no request body.
-The `/_stats` endpoint does not require authentication headers.
+This method has no parameters. This method has no request body. The `/_stats` endpoint does not require authentication headers.
 
 **Response**
 
@@ -868,10 +790,8 @@ The response body is similar to:
 
 ### /_status
 
-Use the `/_status` endpoint to check the status of communications
-between the front and back end servers. This endpoint is located at
-`/_status` on the front end servers. The `/_status` endpoint does not
-require authentication headers.
+Use the `/_status` endpoint to check the status of communications between the front and back end servers. This endpoint is located at
+`/_status` on the front end servers. The `/_status` endpoint does not require authentication headers.
 
 #### GET
 
@@ -942,21 +862,16 @@ The response will return something like the following:
 
 ### /users
 
-A user is an individual account that is created to allow access to the
-Chef Infra Server. For example:
+A user is an individual account that is created to allow access to the Chef Infra Server. For example:
 
--   A hosted Chef Infra Server account
--   The user that operates the workstation from which a Chef Infra
-    Server will be managed
+- A hosted Chef Infra Server account
+- The user that operates the workstation from which a Chef Infra Server will be managed
 
 The `/users` endpoint has the following methods: `GET` and `POST`.
 
 {{< warning >}}
 
-This endpoint may only be accessed by the `pivotal` user, which is
-created as part of the installation process for the Chef Infra Server.
-(See the "Query for Users and Orgs" example below for an example of how
-to access this endpoint with the `pivotal` user.)
+This endpoint may only be accessed by the `pivotal` user, which is created as part of the installation process for the Chef Infra Server. (See the "Query for Users and Orgs" example below for an example of how to access this endpoint with the `pivotal` user.)
 
 {{< /warning >}}
 
@@ -968,8 +883,7 @@ This documentation for the `/users` endpoint is for version 1 of the Chef Infra 
 
 #### GET
 
-The `GET` method is used to get a list of users on the Chef Infra
-Server.
+The `GET` method is used to get a list of users on the Chef Infra Server.
 
 This method has the following parameters:
 
@@ -1061,11 +975,9 @@ The verbose response is similar to:
 
 **Optional Filtering**
 
-Filtering on `/users` can be done with the
-`external_authentication_uid`. This is to support SAML authentication.
+Filtering on `/users` can be done with the `external_authentication_uid`. This is to support SAML authentication.
 
-As an example, to retrieve users whos `external_authentication_uid` is
-`jane@doe.com`, you would do the following:
+As an example, to retrieve users whos `external_authentication_uid` is `jane@doe.com`, you would do the following:
 
 ```none
 GET /users?external_authentication_uid=jane%40doe.com
@@ -1101,21 +1013,13 @@ with a request body similar to:
 
 where:
 
--   `username` must begin with a lower-case letter or digit, may only
-    contain lower-case letters, digits, hyphens, and underscores. For
-    example: `chef`.
-    `username` is required to be present and have a valid value. A valid
-    username is a dot separated list of elements matching
-    `` a-z0-9!#$%&'*+/=?^_`{|}~- ``.
--   `display_name` is required to be present.
--   `email` is required to be present and have a valid value. The email
-    validation doesn't allow for all unicode characters.
--   Either `external_authentication_uid` or `password` are required to
-    be present and have a value.
--   During the POST, the `public_key` value will be broken out and
-    resubmitted to the keys portion of the API in the latest Chef Infra
-    Server versions.
--   Only one of the keys, `create_key` or `public_key`, may be specified.  If `create_key` is specified, a default private key is generated and returned.
+- `username` must begin with a lower-case letter or digit, may only contain lower-case letters, digits, hyphens, and underscores. For
+    example: `chef`. `username` is required to be present and have a valid value. A valid username is a dot separated list of elements matching `` a-z0-9!#$%&'*+/=?^_`{|}~- ``.
+- `display_name` is required to be present.
+- `email` is required to be present and have a valid value. The email validation doesn't allow for all unicode characters.
+- Either `external_authentication_uid` or `password` are required to be present and have a value.
+- During the POST, the `public_key` value will be broken out and resubmitted to the keys portion of the API in the latest Chef Infra Server versions.
+- Only one of the keys, `create_key` or `public_key`, may be specified.  If `create_key` is specified, a default private key is generated and returned.
 
 **Response**
 
@@ -1177,8 +1081,7 @@ The response is similar to:
 
 ### /users/NAME
 
-The `/users/USER_NAME` endpoint has the following methods: `DELETE`,
-`GET`, and `PUT`.
+The `/users/USER_NAME` endpoint has the following methods: `DELETE`, `GET`, and `PUT`.
 
 {{< note >}}
 
@@ -1188,9 +1091,7 @@ This documentation for the `/users/NAME` endpoint is for version 1 of the Chef I
 
 #### DELETE
 
-The `DELETE` method is used to delete a user.
-
-This method has no parameters.
+The `DELETE` method is used to delete a user. This method has no parameters.
 
 **Request**
 
@@ -1301,22 +1202,18 @@ The response is similar to:
 
 #### PUT
 
-The `PUT` method is used to update a specific user. If values are not
-specified for the `PUT` method, the Chef Infra Server will use the
-existing values rather than assign default values.
+The `PUT` method updates a specific user. If values are not specified for the `PUT` method, the Chef Infra Server will use the existing values rather than assign default values.
 
 {{< note >}}
 
-`PUT` supports renames. If `PUT /users/foo` is requested with
-`{ "username: "bar""}`, then it will rename `foo` to `bar` and all of the
+`PUT` supports renames. If `PUT /users/foo` is requested with `{ "username: "bar""}`, then it will rename `foo` to `bar` and all of the
 content previously associated with `foo` will be associated with `bar`.
 
 {{< /note >}}
 
 {{< note >}}
 
-As of 12.1.0, the `"public_key"`, `"private_key"`, and `"create_key"`
-parameters in PUT requests to clients/users will cause a 400 response.
+As of 12.1.0, the `"public_key"`, `"private_key"`, and `"create_key"` parameters in PUT requests to clients/users will cause a 400 response.
 
 {{< /note >}}
 
@@ -1359,8 +1256,7 @@ The response is similar to:
 }
 ```
 
-If a new private key was generated, both the private and public keys are
-returned.
+If a new private key was generated, both the private and public keys are returned.
 
 **Response Codes**
 
@@ -1413,17 +1309,12 @@ returned.
 
 ### /users/USER/keys/
 
-The `/users/USER/keys` endpoint has the following methods: `GET` and
-`POST`. User keys are public RSA keys in the SSL `.pem` file
-format and are used for authentication.  The Chef Infra Server
-does not save private keys for users.
+The `/users/USER/keys` endpoint has the following methods: `GET` and `POST`. User keys are public RSA keys in the SSL `.pem` file
+format and are used for authentication.  The Chef Infra Server does not save private keys for users.
 
 #### GET
 
-The `GET` method is used to retrieve all of the named user's key
-identifiers, associated URIs, and expiry states.
-
-This method has no parameters.
+The `GET` method is used to retrieve all of the named user's key identifiers, associated URIs, and expiry states. This method has no parameters.
 
 **Request**
 
@@ -1485,9 +1376,7 @@ The response is similar to:
 
 #### POST
 
-The `POST` method is used to add a key for the specified user.
-
-This method has no parameters.
+The `POST` method is used to add a key for the specified user. This method has no parameters.
 
 **Request**
 
@@ -1552,15 +1441,11 @@ The response is similar to:
 
 ### /users/USER/keys/KEY
 
-The `/users/USER/keys/KEY` endpoint has the following methods: `DELETE`,
-`GET`, and `PUT`.
+The `/users/USER/keys/KEY` endpoint has the following methods: `DELETE`, `GET`, and `PUT`.
 
 #### DELETE
 
-The `DELETE` method is used to delete the specified key for the
-specified user.
-
-This method has no parameters.
+The `DELETE` method is used to delete the specified key for the specified user. This method has no parameters.
 
 **Request**
 
@@ -1570,8 +1455,7 @@ DELETE /users/USER/keys/KEY
 
 **Response**
 
-The response returns the information about the deleted key and is
-similar to:
+The response returns the information about the deleted key and is similar to:
 
 ```javascript
 {
@@ -1616,10 +1500,7 @@ similar to:
 
 #### GET
 
-The `GET` method is used to return details for a specific key for a
-specific user.
-
-This method has no parameters.
+The `GET` method is used to return details for a specific key for a specific user. This method has no parameters.
 
 **Request**
 
@@ -1674,10 +1555,7 @@ The response is similar to:
 
 #### PUT
 
-The `PUT` method is used to update one or more properties for a specific
-key for a specific user.
-
-This method has no parameters.
+The `PUT` method is used to update one or more properties for a specific key for a specific user. This method has no parameters.
 
 **Request**
 
@@ -1697,8 +1575,7 @@ with a request body similar to:
 
 **Response**
 
-The response contains the updated information for the key, and is
-similar to:
+The response contains the updated information for the key, and is similar to:
 
 ```javascript
 {
@@ -1747,8 +1624,7 @@ similar to:
 
 ## Organization Endpoints
 
-Each organization-specific authentication request must include
-`/organizations/NAME` as part of the name for the endpoint. For example,
+Each organization-specific authentication request must include `/organizations/NAME` as part of the name for the endpoint. For example,
 the full endpoint for getting a list of roles:
 
 ```none
@@ -1759,18 +1635,13 @@ where `ORG_NAME` is the name of the organization.
 
 ### /association_requests
 
-Users may be invited to join organizations via the web user interface in
-the Chef management console or via the `POST` endpoint in the Chef Infra
-Server API.
+Users may be invited to join organizations via the web user interface in the Chef management console or via the `POST` endpoint in the Chef Infra Server API.
 
-The `/association_requests` endpoint has the following methods:
-`DELETE`, `GET`, and `POST`.
+The `/association_requests` endpoint has the following methods: `DELETE`, `GET`, and `POST`.
 
 #### DELETE
 
-The `DELETE` method is used to delete a pending invitation.
-
-This method has no parameters.
+The `DELETE` method is used to delete a pending invitation. This method has no parameters.
 
 **Request**
 
@@ -1827,9 +1698,7 @@ The response is similar to:
 
 #### GET
 
-The `GET` method is used to get a list of pending invitations.
-
-This method has no parameters.
+The `GET` method is used to get a list of pending invitations. This method has no parameters.
 
 **Request**
 
@@ -1887,9 +1756,7 @@ The response returns a dictionary similar to:
 
 #### POST
 
-The `POST` method is used to create an invitation.
-
-This method has no parameters.
+The `POST` method is used to create an invitation. This method has no parameters.
 
 **Request**
 
@@ -1964,24 +1831,17 @@ The response is similar to:
 
 ### /clients
 
-Use the `/clients` endpoint to manage clients and their associated RSA
-key-pairs. The `/clients` endpoint has the following methods: `GET` and `POST`.
+Use the `/clients` endpoint to manage clients and their associated RSA key-pairs. The `/clients` endpoint has the following methods: `GET` and `POST`.
 
 {{< note >}}
 
-The clients should be managed using knife as opposed to the Chef Infra Server API.
-The interactions between clients, nodes and acls are tricky.
+The clients should be managed using a knife as opposed to the Chef Infra Server API. The interactions between clients, , and acls are tricky.
 
 {{< /note >}}
 
 #### GET
 
-The `GET` method is used to return a client list on the Chef Infra
-Server, including clients for nodes that have been registered with the Chef Infra
-Server, the chef-validator clients, and the chef-server-webui clients
-for the entire organization.
-
-This method has no parameters.
+The `GET` method is used to return a client list on the Chef Infra Server, including clients for nodes that have been registered with the Chef Infra Server, the chef-validator clients, and the chef-server-webui clients for the entire organization. This method has no parameters.
 
 **Request**
 
@@ -2037,8 +1897,7 @@ The `POST` method is used to create a new API client.
 
 {{< note >}}
 
-As of 12.1.0, the `"admin"` parameter is no longer supported in
-client/user creation and support. If used in the `POST` or `PUT` of a
+As of 12.1.0, the `"admin"` parameter is no longer supported in client/user creation and support. If used in the `POST` or `PUT` of a
 client or user, the `"admin"` parameter is ignored.
 
 {{< /note >}}
@@ -2062,9 +1921,7 @@ with a request body similar to:
 }
 ```
 
-where `name_of_API_client` is the name of the API client to be created
-and `admin` indicates whether the API client will be run as an admin API
-client. Either name or clientname needs to be specified.
+where `name_of_API_client` is the name of the API client to be created and `admin` indicates whether the API client will be run as an admin API client. Either `name` or `clientname` needs to be specified.
 
 **Response**
 
@@ -2082,9 +1939,7 @@ The response is similar to:
 }
 ```
 
-Store the private key in a safe place. It will be required later (along
-with the client name) to access the Chef Infra Server when using the
-Chef Infra Server API.
+Store the private key in a safe place. It will be required later (along with the client name) to access the Chef Infra Server when using the Chef Infra Server API.
 
 **Response Codes**
 
@@ -2129,14 +1984,11 @@ Chef Infra Server API.
 
 ### /clients/NAME
 
-The `/clients/NAME` endpoint is used to manage a specific client.
-This endpoint has the following methods: `DELETE`, `GET`, and `PUT`.
+The `/clients/NAME` endpoint is used to manage a specific client. This endpoint has the following methods: `DELETE`, `GET`, and `PUT`.
 
 #### DELETE
 
-The `DELETE` method is used to remove a specific client.
-
-This method has no parameters.
+The `DELETE` method is used to remove a specific client. This method has no parameters.
 
 **Request**
 
@@ -2185,9 +2037,7 @@ The response has no body.
 
 #### GET
 
-The `GET` method is used to return a specific API client.
-
-This method has no parameters.
+The `GET` method is used to return a specific API client. This method has no parameters.
 
 **Request**
 
@@ -2247,42 +2097,35 @@ The response is similar to:
 
 #### PUT
 
-The `PUT` method is used to update a specific client. If values are
-not specified for the `PUT` method, the Chef Infra Server will use the
-existing values rather than assign default values.
+The `PUT` method updates a specific client. If values are not specified for the `PUT` method, the Chef Infra Server will use the existing values rather than assign default values.
 
 {{< note >}}
 
-`PUT` supports renames. If `PUT /client/foo` is requested with
-`{ "name: "bar""}`, then it will rename `foo` to `bar` and all of the
+`PUT` supports renames. If `PUT /client/foo` is requested with `{ "name: "bar""}`, then it will rename `foo` to `bar` and all of the
 content previously associated with `foo` will be associated with `bar`.
 
 {{< /note >}}
 
 {{< note >}}
 
-As of 12.1.0, the `"admin"` parameter is no longer supported in
-client/user creation and support. If used in the `POST` or `PUT` of a
+As of 12.1.0, the `"admin"` parameter is no longer supported in client/user creation and support. If used in the `POST` or `PUT` of a
 client or user, then it is ignored.
 
 {{< /note >}}
 
 {{< note >}}
 
-As of 12.1.0, including `"public_key"`, `"private_key"`, or
-`"create_key"` in PUT requests to clients/users will cause a 400
+As of 12.1.0, including `"public_key"`, `"private_key"`, or `"create_key"` in PUT requests to clients/users will cause a 400
 response.
 
 {{< /note >}}
 
 {{< note >}}
 
-`"name"` and `"clientname"` are not independent values. Making a PUT
-request with different values will return a 400 error. Either name
+`"name"` and `"clientname"` are not independent values. Making a PUT request with different values will return a 400 error. Either name
 may be specified to set both values.
 
 {{< /note >}}
-
 
 **Request**
 
@@ -2360,15 +2203,11 @@ The response is similar to:
 
 ### /clients/CLIENT/keys/
 
-The `/clients/CLIENT/keys` endpoint has the following methods: `GET` and
-`POST`.
+The `/clients/CLIENT/keys` endpoint has the following methods: `GET` and `POST`.
 
 #### GET
 
-The `GET` method is used to retrieve all of the named client's key
-identifiers, associated URIs, and expiry states.
-
-This method has no parameters.
+The `GET` method is used to retrieve all of the named client's key identifiers, associated URIs, and expiry states. This method has no parameters.
 
 **Request**
 
@@ -2432,7 +2271,7 @@ The response is similar to:
 
 #### POST
 
-The `POST` method is used to add a key for the specified client.
+The `POST` method is used to add a key for the specified client. 
 
 This method has no parameters.
 
@@ -2497,15 +2336,11 @@ The response is similar to:
 
 ### /clients/CLIENT/keys/KEY
 
-The `/clients/CLIENT/keys/KEY` endpoint has the following methods:
-`DELETE`, `GET`, and `PUT`.
+The `/clients/CLIENT/keys/KEY` endpoint has the following methods: `DELETE`, `GET`, and `PUT`.
 
 #### DELETE
 
-The `DELETE` method is used to delete the specified key for the
-specified client.
-
-This method has no parameters.
+The `DELETE` method is used to delete the specified key for the specified client. This method has no parameters.
 
 **Request**
 
@@ -2517,8 +2352,7 @@ This method has no request body.
 
 **Response**
 
-The response returns the information about the deleted key and is
-similar to:
+The response returns the information about the deleted key and is similar to:
 
 ```javascript
 {
@@ -2563,10 +2397,7 @@ similar to:
 
 #### GET
 
-The `GET` method is used to return details for a specific key for a
-specific client.
-
-This method has no parameters.
+The `GET` method is used to return details for a specific key for a specific client. This method has no parameters.
 
 **Request**
 
@@ -2623,10 +2454,7 @@ The response is similar to:
 
 #### PUT
 
-The `PUT` method is used to update one or more properties for a specific
-key for a specific client.
-
-This method has no parameters.
+The `PUT` method is used to update one or more properties for a specific key for a specific client. This method has no parameters.
 
 **Request**
 
@@ -2646,8 +2474,7 @@ with a request body similar to:
 
 **Response**
 
-The response contains the updated information for the key and is
-similar to:
+The response contains the updated information for the key and is similar to:
 
 ```javascript
 {
@@ -2700,11 +2527,13 @@ The `/containers` endpoint has the following methods: `GET`, `POST`.
 
 #### GET
 
-The `GET` method is used to get a list of containers.
+The `GET` method is used to get a list of containers. This method has no parameters.
 
-Note: The `/containers` endpoint is not useful outside of the Chef Infra Server code.
+{{< note >}}
 
-This method has no parameters.
+The `/containers` endpoint is not useful outside of the Chef Infra Server code.
+
+{{< /note >}}
 
 **Request**
 
@@ -2767,11 +2596,7 @@ The response is similar to:
 
 #### POST
 
-The `POST` method is used to create a container.
-
-Note: Using the `POST` method of the `/containers` endpoint may have unexpected effects and is likely to break your system. Use of this method is not supported.
-
-This method has no parameters.
+The `POST` method is used to create a container. Using the `POST` method of the `/containers` endpoint may have unexpected effects and likely break your system. Use of this method is not supported. This method has no parameters.
 
 **Request**
 
@@ -2837,11 +2662,13 @@ The response is similar to:
 
 The `DELETE` method is used to remove a container.
 
-The `/containers/Name` endpoint has the following methods: `DELETE`, `GET`.
+The `/containers/Name` endpoint has the following methods: `DELETE`, `GET`. This method has no parameters.
 
-Note: Using the `DELETE` method of the `/containers/NAME` endpoint may have unexpected effects and is likely to break your system. Use of this method is not supported.
+{{< note >}}
 
-This method has no parameters.
+Using the `DELETE` method of the `/containers/NAME` endpoint may have unexpected effects and is likely to break your system. Use of this method is not supported.
+
+{{< /note >}}
 
 **Request**
 
@@ -2890,9 +2717,7 @@ The response does not return response body.
 
 #### GET
 
-The `GET` method is used to get a container.
-
-This method has no parameters.
+The `GET` method is used to get a container. This method has no parameters.
 
 **Request**
 
@@ -2954,9 +2779,7 @@ The `/organization/NAME/cookbook_artifacts` endpoint has the following methods: 
 
 #### GET
 
-The `GET` method is used to return a hash of all cookbook artifacts and their versions.
-
-This method has no parameters.
+The `GET` method returns a hash of all cookbook artifacts and their versions. This method has no parameters.
 
 **Request**
 
@@ -3038,9 +2861,7 @@ The `/organization/NAME/cookbook_artifacts/NAME` endpoint has the following meth
 
 #### GET
 
-The `GET` method is used to return a hash of a single cookbook artifact and its versions.
-
-This method has no parameters.
+The `GET` method is used to return a hash of a single cookbook artifact and its versions. This method has no parameters.
 
 **Request**
 
@@ -3111,9 +2932,7 @@ The `/organization/NAME/cookbook_artifacts/NAME/ID` endpoint has the following m
 
 #### DELETE
 
-The `DELETE` method is used to delete a single cookbook artifact version.
-
-This method has no parameters.
+The `DELETE` method is used to delete a single cookbook artifact version. This method has no parameters.
 
 **Request**
 
@@ -3355,9 +3174,7 @@ The response contains the record of the deleted resource and is similar to:
 
 #### GET
 
-The `GET` method is used to return a single cookbook artifact version.
-
-This method has no parameters.
+The `GET` method is used to return a single cookbook artifact version. This method has no parameters.
 
 **Request**
 
@@ -3597,7 +3414,6 @@ The response is similar to:
 </tbody>
 </table>
 
-
 #### PUT
 
 The `PUT` method is used to create or update a single cookbook artifact version.
@@ -3688,10 +3504,7 @@ The request body is similar to:
 }
 ```
 
-where the `checksum` values must have already been uploaded to the Chef
-Infra Server using the sandbox endpoint. Once a file with a particular
-checksum has been uploaded by the user, redundant uploads are not
-necessary. Unused `checksum` values will be garbage collected.
+where the `checksum` values must have already been uploaded to the Chef Infra Server using the sandbox endpoint. Once the user has uploaded a file with a particular checksum, redundant uploads are not necessary. Unused `checksum` values will be garbage collected.
 
 **Response**
 
@@ -3734,23 +3547,13 @@ This method has no response body.
 
 {{% cookbooks_summary %}}
 
-When a cookbook is uploaded, only files that are new or updated will be
-included. This approach minimizes the amount of storage and time that is
-required during the modify-upload-test cycle. To keep track of which
-files have already been uploaded, Chef Infra Client uses a checksum and
-assigns a checksum to each file. These checksums are used in the
-cookbook version manifest, alongside the same records that store the
-file description (name, specificity, and so on), as well as the checksum
-and the URL from which the file's contents can be retrieved.
+When a cookbook is uploaded, only files that are new or updated is included. This approach minimizes the amount of storage and time that is required during the modify-upload-test cycle. Chef Infra Client uses a checksum and assigns a checksum to each file to keep track of which files have already been uploaded. These checksums are used in the cookbook version manifest, alongside the same records that store the file description (name, specificity, and so on), as well as the checksum and the URL from which the file's contents can be retrieved.
 
 The `/cookbooks` endpoint has the following methods: `GET`.
 
 #### GET
 
-The `GET` method is used to return a hash of all cookbooks and cookbook
-versions.
-
-This method has the following parameters:
+The `GET` method is used to return a hash of all cookbooks and cookbook versions. This method has the following parameters:
 
 <table>
 <colgroup>
@@ -3839,8 +3642,7 @@ The `/cookbooks/_latest` endpoint has the following methods: `GET`.
 
 #### GET
 
-The `GET` method is used to return a list of the most recent cookbook
-versions.
+The `GET` method is used to return a list of the most recent cookbook versions.
 
 This method has no parameters.
 
@@ -3852,9 +3654,7 @@ GET /organizations/NAME/cookbooks/_latest
 
 **Response**
 
-For example, if cookbooks `foo` and `bar` both exist on the Chef Infra
-Server and both with versions `0.1.0` and `0.2.0`, the response is
-similar to:
+For example, if cookbooks `foo` and `bar` both exist on the Chef Infra Server and both with versions `0.1.0` and `0.2.0`, the response is similar to:
 
 ```javascript
 {
@@ -3902,8 +3702,7 @@ The `/cookbooks/_recipes` endpoint has the following methods: `GET`.
 
 #### GET
 
-The `GET` method is used to return the names of all recipes in the most
-recent cookbook versions.
+The `GET` method is used to return the names of all recipes in the most recent cookbook versions.
 
 This method has no parameters.
 
@@ -3962,9 +3761,7 @@ The `/cookbooks/NAME` endpoint has the following methods: `GET`.
 
 #### GET
 
-The `GET` method is used to return a hash that contains a key-value pair
-that corresponds to the specified cookbook, with a URL for the cookbook
-and for each version of the cookbook.
+The `GET` method is used to return a hash that contains a key-value pair that corresponds to the specified cookbook, with a URL for the cookbook and for each version of the cookbook.
 
 **Request**
 
@@ -4027,14 +3824,11 @@ The response is similar to:
 
 {{% cookbooks_version %}}
 
-The `/cookbooks/NAME/VERSION` endpoint has the following methods:
-`DELETE`, `GET`, and `PUT`.
+The `/cookbooks/NAME/VERSION` endpoint has the following methods: `DELETE`, `GET`, and `PUT`.
 
 #### DELETE
 
-The `DELETE` method is used to delete a cookbook version.
-
-This method has no parameters.
+The `DELETE` method is used to delete a cookbook version. This method has no parameters.
 
 **Request**
 
@@ -4044,8 +3838,7 @@ DELETE /organizations/NAME/cookbooks/NAME/VERSION
 
 **Response**
 
-This method has no response body. Unused `checksum` values will be
-garbage collected.
+This method has no response body. Unused `checksum` values will be garbage collected.
 
 **Response Codes**
 
@@ -4082,10 +3875,7 @@ garbage collected.
 
 #### GET
 
-The `GET` method is used to return a description of a cookbook,
-including its metadata and links to component files.
-
-This method has no parameters.
+The `GET` method is used to return a description of a cookbook, including its metadata and links to component files. This method has no parameters.
 
 **Request**
 
@@ -4236,9 +4026,7 @@ The response is similar to:
 
 #### PUT
 
-The `PUT` method is used to create or update a cookbook version.
-
-This method has no parameters.
+The `PUT` method is used to create or update a cookbook version. This method has no parameters.
 
 **Request**
 
@@ -4326,10 +4114,7 @@ with a request body similar to:
 }
 ```
 
-where the `checksum` values must have already been uploaded to the Chef
-Infra Server using the sandbox endpoint. Once a file with a particular
-checksum has been uploaded by the user, redundant uploads are not
-necessary. Unused `checksum` values will be garbage collected.
+where the `checksum` values must have already been uploaded to the Chef Infra Server using the sandbox endpoint. Once the user has uploaded a file with a particular checksum, redundant uploads are not necessary. Unused `checksum` values will be garbage collected.
 
 **Response**
 
@@ -4376,8 +4161,7 @@ The `/data` endpoint has the following methods: `GET` and `POST`.
 
 #### GET
 
-The `GET` method is used to return a list of all data bags on the Chef
-Infra Server.
+The `GET` method is used to return a list of all data bags on the Chef Infra Server.
 
 This method has no parameters.
 
@@ -4433,10 +4217,7 @@ and `applications` are the names of data bags and
 
 #### POST
 
-The `POST` method is used to create a new data bag on the Chef Infra
-Server.
-
-This method has no parameters.
+The `POST` method is used to create a new data bag on the Chef Infra Server. This method has no parameters.
 
 **Request**
 
@@ -4508,14 +4289,11 @@ The response is similar to:
 
 ### /data/NAME
 
-The `/data/NAME` endpoint is used to view and update data for a specific
-data bag. This endpoint has the following methods: `DELETE`, `GET`, and `POST`.
+The `/data/NAME` endpoint is used to view and update data for a specific data bag. This endpoint has the following methods: `DELETE`, `GET`, and `POST`.
 
 #### DELETE
 
-The `DELETE` method is used to delete a data bag.
-
-This method has no parameters.
+The `DELETE` method is used to delete a data bag. This method has no parameters.
 
 **Request**
 
@@ -4574,10 +4352,7 @@ where the key-value pairs represent the last state of the data bag item.
 
 #### GET
 
-The `GET` method is used to return a hash of all entries in the
-specified data bag.
-
-This method has no parameters.
+The `GET` method returns a hash of all entries in the specified data bag. This method has no parameters.
 
 **Request**
 
@@ -4630,9 +4405,7 @@ The response is similar to:
 
 #### POST
 
-The `POST` method is used to create a new data bag item.
-
-This method has no parameters.
+The `POST` method is used to create a new data bag item. This method has no parameters.
 
 **Request**
 
@@ -4704,16 +4477,11 @@ This method has no response body.
 
 {{% data_bag_item %}}
 
-The `/data/NAME/ITEM` endpoint allows the key-value pairs within a data
-bag item to be viewed and managed. This endpoint has the following
-methods: `DELETE`, `GET`, and `PUT`.
+The `/data/NAME/ITEM` endpoint allows the key-value pairs within a data bag item to be viewed and managed. This endpoint has the following methods: `DELETE`, `GET`, and `PUT`.
 
 #### DELETE
 
-The `DELETE` method is used to delete a key-value pair in a data bag
-item.
-
-This method has no parameters.
+The `DELETE` method is used to delete a key-value pair in a data bag item. This method has no parameters.
 
 **Request**
 
@@ -4765,10 +4533,7 @@ The response is similar to:
 
 #### GET
 
-The `GET` method is used to view all of the key-value pairs in a data
-bag item.
-
-This method has no parameters.
+The `GET` method is used to view all of the key-value pairs in a data bag item. This method has no parameters.
 
 **Request**
 
@@ -4822,10 +4587,7 @@ The response is similar to:
 
 #### PUT
 
-The `PUT` method is used to replace the contents of a data bag item with
-the contents of this request.
-
-This method has no parameters.
+The `PUT` method is used to replace the contents of a data bag item with the contents of this request. This method has no parameters.
 
 **Request**
 
@@ -4894,15 +4656,11 @@ The response is similar to:
 
 {{% environment %}}
 
-The `/environments` endpoint has the following methods: `GET` and
-`POST`.
+The `/environments` endpoint has the following methods: `GET` and `POST`.
 
 #### GET
 
-The `GET` method is used to return a data structure that contains a link
-to each available environment.
-
-This method has no parameters.
+The `GET` method is used to return a data structure that contains a link to each available environment. This method has no parameters.
 
 **Request**
 
@@ -4952,9 +4710,7 @@ The response is similar to:
 
 #### POST
 
-The `POST` method is used to create a new environment.
-
-This method has no parameters.
+The `POST` method is used to create a new environment. This method has no parameters.
 
 **Request**
 
@@ -5030,10 +4786,7 @@ The `/environments/_default` endpoint has the following methods: `GET`.
 
 #### GET
 
-The `GET` method is used to get information about the `_default`
-environment on the Chef Infra Server.
-
-This method has no parameters.
+The `GET` method is used to get information about the `_default` environment on the Chef Infra Server. This method has no parameters.
 
 **Request**
 
@@ -5098,14 +4851,11 @@ The response is similar to:
 
 ### /environments/NAME
 
-The `/environments/NAME` endpoint has the following methods: `DELETE`,
-`GET`, and `PUT`.
+The `/environments/NAME` endpoint has the following methods: `DELETE`, `GET`, and `PUT`.
 
 #### DELETE
 
-The `DELETE` method is used to delete an environment.
-
-This method has no parameters.
+The `DELETE` method is used to delete an environment. This method has no parameters.
 
 **Request**
 
@@ -5115,8 +4865,7 @@ DELETE /organizations/NAME/environments/NAME
 
 **Response**
 
-The response will return the JSON for the environment that was deleted,
-similar to:
+The response will return the JSON for the environment that was deleted, similar to:
 
 ```javascript
 {
@@ -5165,10 +4914,7 @@ similar to:
 
 #### GET
 
-The `GET` method is used to return the details for an environment as
-JSON.
-
-This method has no parameters.
+The `GET` method is used to return the details for an environment as JSON. This method has no parameters.
 
 **Request**
 
@@ -5227,10 +4973,7 @@ The response is similar to:
 
 #### PUT
 
-The `PUT` method is used to update the details of an environment on the
-Chef Infra Server.
-
-This method has no parameters.
+The `PUT` method updates the details of an environment on the Chef Infra Server. This method has no parameters.
 
 **Request**
 
@@ -5238,8 +4981,7 @@ This method has no parameters.
 PUT /organizations/NAME/environments/NAME
 ```
 
-with a request body that contains the updated JSON for the environment
-and is similar to:
+with a request body that contains the updated JSON for the environment and is similar to:
 
 ```javascript
 {
@@ -5295,13 +5037,11 @@ The response will return the updated environment.
 
 ### /environments/NAME/cookbooks/NAME
 
-The `/environments/NAME/cookbooks/NAME` endpoint has the following
-methods: `GET`.
+The `/environments/NAME/cookbooks/NAME` endpoint has the following methods: `GET`.
 
 #### GET
 
-The `GET` method is used to return a hash of key-value pairs for the
-requested cookbook.
+The `GET` method returns a hash of key-value pairs for the requested cookbook.
 
 This method has the following parameters:
 
@@ -5330,8 +5070,7 @@ This method has the following parameters:
 GET /organizations/NAME/environments/NAME/cookbooks/NAME
 ```
 
-where the first instance of `NAME` is the name of the environment, and
-the second instance is the name of the cookbook.
+where the first instance of `NAME` is the name of the environment, and the second instance is the name of the cookbook.
 
 **Response**
 
@@ -5386,17 +5125,12 @@ The response is similar to:
 
 ### /environments/NAME/cookbook_versions
 
-The `/environments/NAME/cookbook_versions` endpoint has the following
-methods: `POST`.
+The `/environments/NAME/cookbook_versions` endpoint has the following methods: `POST`.
 
 #### POST
 
-The `POST` method is used to return a hash of the cookbooks and cookbook
-versions (including all dependencies) that are required by the
-`run_list` array. Version constraints may be specified using the `@`
-symbol after the cookbook name as a delimiter. Version constraints may
-also be present when the `cookbook_versions` attributes is specified for
-an environment or when dependencies are specified by a cookbook.
+The `POST` method is used to return a hash of the cookbooks and cookbook versions (including all dependencies) that are required by the
+`run_list` array. Version constraints may be specified using the `@` symbol after the cookbook name as a delimiter. Version constraints may also be present when the `cookbook_versions` attributes are specified for an environment or when a cookbook specifies dependencies.
 
 This method has no parameters.
 
@@ -5426,12 +5160,8 @@ where `@x.x.x` represents a constraint for a cookbook version.
 
 **Response**
 
-The response will return a list of cookbooks that are required by the
-`run_list` array contained in the request. The cookbooks that are
-returned are often the latest versions of each cookbook. Depending on
-any constraints present in the request or on dependencies a cookbook may
-have for specific cookbook versions, a request may not always return the
-latest cookbook version for each cookbook.
+The response returns a list of cookbooks that are required by the `run_list` array contained in the request. The cookbooks that are
+returned are often the latest versions of each cookbook. Depending on any constraints present in the request or on dependencies a cookbook may have for specific cookbook versions, a request may not always return the latest cookbook version for each cookbook.
 
 The response is similar to:
 
@@ -5739,8 +5469,7 @@ The `/environments/NAME/cookbooks` endpoint has the following methods:
 
 #### GET
 
-The `GET` method is used to get a list of cookbooks and cookbook
-versions that are available to the specified environment.
+The `GET` method is used to get a list of cookbooks and cookbook versions that are available to the specified environment.
 
 This method has the following parameters:
 
@@ -5831,15 +5560,11 @@ The response is similar to:
 
 ### /environments/NAME/nodes
 
-The `/environments/NAME/nodes` endpoint has the following methods:
-`GET`.
+The `/environments/NAME/nodes` endpoint has the following methods: `GET`.
 
 #### GET
 
-The `GET` method is used to return a list of nodes in a given
-environment.
-
-This method has no parameters.
+The `GET` method is used to return a list of nodes in a given environment. This method has no parameters.
 
 **Request**
 
@@ -5894,15 +5619,11 @@ The response is similar to:
 
 ### /environments/NAME/recipes
 
-The `/environments/NAME/recipes` endpoint has the following methods:
-`GET`.
+The `/environments/NAME/recipes` endpoint has the following methods: `GET`.
 
 #### GET
 
-The `GET` method is used to return a list of recipes available to a
-given environment.
-
-This method has no parameters.
+The `GET` method is used to return a list of recipes available to a given environment. This method has no parameters.
 
 **Request**
 
@@ -5910,8 +5631,7 @@ This method has no parameters.
 GET /organizations/NAME/environments/NAME/recipes
 ```
 
-where the first instance of `NAME` is the name of the environment, and
-the second instance is the name of the recipe.
+where the first instance of `NAME` is the name of the environment, and the second instance is the name of the recipe.
 
 **Response**
 
@@ -5934,10 +5654,7 @@ The response is similar to:
 ]
 ```
 
-The list of recipes will be the default recipes for a given cookbook. If
-an environment has multiple versions of a cookbook that matches its
-constraints, only the recipes from the latest version of that cookbook
-will be reported.
+The list of recipes will be the default recipes for a given cookbook. If an environment has multiple versions of a cookbook that matches its constraints, only the recipes from the latest version of that cookbook will be reported.
 
 **Response Codes**
 
@@ -5974,21 +5691,17 @@ will be reported.
 
 ### /environments/NAME/roles/NAME
 
-The `/environments/NAME/roles/NAME` endpoint has the following methods:
-`GET`.
+The `/environments/NAME/roles/NAME` endpoint has the following methods: `GET`.
 
 #### GET
 
-The `GET` method is used to return the `run_list` attribute of the role
-(when the name of the environment is `_default`) or to return
+The `GET` method is used to return the `run_list` attribute of the role (when the name of the environment is `_default`) or to return
 `env_run_lists[environment_name]` (for non-default environments).
 
 {{< note >}}
 
-The behavior of this endpoint is identical to
-`GET /roles/NAME/environments/NAME`; it is recommended (but not
-required) that `GET /roles/NAME/environments/NAME` be used instead of
-this endpoint.
+The behavior of this endpoint is identical to `GET /roles/NAME/environments/NAME`; it is recommended (but not
+required) that `GET /roles/NAME/environments/NAME` be used instead of this endpoint.
 
 {{< /note >}}
 
@@ -6000,8 +5713,7 @@ This method has no parameters.
 GET /organizations/NAME/environments/NAME/roles/NAME
 ```
 
-where the first instance of `NAME` is the name of the environment, and
-the second instance is the name of the role.
+where the first instance of `NAME` is the name of the environment, and the second instance is the name of the role.
 
 **Response**
 
@@ -6020,8 +5732,7 @@ The response is similar to:
 }
 ```
 
-Chef Infra Client will pick up the `_default` run-list if
-`env_run_list[environment_name]` is null or nonexistent.
+Chef Infra Client will pick up the `_default` run-list if `env_run_list[environment_name]` is null or nonexistent.
 
 **Response Codes**
 
@@ -6062,10 +5773,7 @@ The `/groups` endpoint has the following methods: `GET` and `POST`.
 
 #### GET
 
-The `GET` method is used to get a list of groups on the Chef Infra
-Server for a single organization.
-
-This method has no parameters.
+The `GET` method is used to get a list of groups on the Chef Infra Server for a single organization. This method has no parameters.
 
 **Request**
 
@@ -6123,8 +5831,7 @@ The response is similar to:
 
 #### POST
 
-The `POST` method is used to create a group on the Chef Infra
-Server for a single organization.
+The `POST` method is used to create a group on the Chef Infra Server for a single organization.
 
 **Request**
 
@@ -6195,14 +5902,11 @@ The response is similar to:
 
 ### /groups/GROUP_NAME
 
-The `/groups/GROUP_NAME` endpoint has the following methods: `DELETE`, `GET` and
-`PUT`.
+The `/groups/GROUP_NAME` endpoint has the following methods: `DELETE`, `GET` and `PUT`.
 
 #### DELETE
 
-The `DELETE` method is used to remove a group from a single organization.
-
-This method has no parameters.
+The `DELETE` method is used to remove a group from a single organization. This method has no parameters.
 
 **Request**
 
@@ -6256,9 +5960,7 @@ The response is similar to:
 
 #### GET
 
-The `GET` method is used to get lists of users and other groups that belong to a group.
-
-This method has no parameters.
+The `GET` method is used to get lists of users and other groups that belong to a group. This method has no parameters.
 
 **Request**
 
@@ -6327,11 +6029,7 @@ The response is similar to:
 
 #### PUT
 
-The `PUT` method is used to update a group on a single organization.
-Updating the clients, groups and users memberships replaces the definitions for
-the group. `GET` the group and merge changes to create the desired member lists.
-
-This method has no parameters.
+The `PUT` method is used to update a group on a single organization. Updating the clients, groups and users memberships replaces the definitions for the group. `GET` the group and merge changes to create the desired member lists. This method has no parameters.
 
 **Request**
 
@@ -6411,10 +6109,7 @@ The `/nodes` endpoint has the following methods: `GET` and `POST`.
 
 #### GET
 
-The `GET` method is used to return a hash of URIs for nodes on the Chef
-Infra Server.
-
-This method has no parameters.
+The `GET` method is used to return a hash of URIs for nodes on the Chef Infra Server. This method has no parameters.
 
 **Request**
 
@@ -6463,9 +6158,7 @@ The response is similar to:
 
 #### POST
 
-The `POST` method is used to create a new node.
-
-This method has no parameters.
+The `POST` method is used to create a new node. This method has no parameters.
 
 **Request**
 
@@ -6489,8 +6182,7 @@ with a request body similar to:
 }
 ```
 
-where `name` is the name of the node. Other attributes are optional. The
-order of the `run_list` attribute matters.
+where `name` is the name of the node. Other attributes are optional. The order of the `run_list` attribute matters.
 
 **Response**
 
@@ -6543,14 +6235,11 @@ The response is similar to:
 
 ### /nodes/NAME
 
-The `/nodes/NAME` endpoint has the following methods: `DELETE`, `GET`,
-`HEAD` and `PUT`.
+The `/nodes/NAME` endpoint has the following methods: `DELETE`, `GET`, `HEAD` and `PUT`.
 
 #### DELETE
 
-The `DELETE` method is used to delete a node.
-
-This method has no parameters.
+The `DELETE` method is used to delete a node. This method has no parameters.
 
 **Request**
 
@@ -6613,9 +6302,7 @@ The response will return the last known state of the node, similar to:
 
 #### GET
 
-The `GET` method is used to return the details of a node as JSON.
-
-This method has no parameters.
+The `GET` method is used to return the details of a node as JSON. This method has no parameters.
 
 **Request**
 
@@ -6678,9 +6365,7 @@ The response is similar to:
 
 #### HEAD
 
-The `HEAD` method is used to check the existence of a node.
-
-This method has no parameters.
+The `HEAD` method is used to check the existence of a node. This method has no parameters.
 
 **Request**
 
@@ -6727,9 +6412,7 @@ The method does not return a body.
 
 #### PUT
 
-The `PUT` method is used to update a node.
-
-This method has no parameters.
+The `PUT` method is used to update a node. This method has no parameters.
 
 **Request**
 
@@ -6758,7 +6441,7 @@ with a request body similar to:
 
 **Response**
 
-The response will return the updated node.
+The response returns the updated node.
 
 **Response Codes**
 
@@ -6803,10 +6486,7 @@ The `/policies` endpoint has the following methods: `GET`.
 
 #### GET
 
-The `GET` method is used to get a list of policies (including policy
-revisions) from the Chef Infra Server.
-
-This method has no parameters.
+The `GET` method is used to get a list of policies (including policy revisions) from the Chef Infra Server. This method has no parameters.
 
 **Request**
 
@@ -6874,18 +6554,10 @@ The response groups policies by name and revision and is similar to:
 
 The `/policy_groups` endpoint has the following methods: `GET`.
 
-Each node has a 1:many relationship with policy settings stored on the
-Chef Infra Server. This relationship is based on the policy group to
-which the node is associated, and then the policy settings assigned to
-that group:
+Each node has a 1:many relationship with policy settings stored on the Chef Infra Server. This relationship is based on the policy group to which the node is associated, and then the policy settings assigned to that group:
 
--   A policy is typically named after the functional role ahost
-    performs, such as "application server", "chat server", "load
-    balancer", and so on
--   A policy group defines a set of hosts in a deployed units, typically
-    mapped to organizational requirements such as "dev", "test",
-    "staging", and "production", but can also be mapped to more detailed
-    requirements as needed
+- A policy is typically named after the functional role ahost performs, such as "application server", "chat server", "load balancer", and so on.
+- A policy group defines a set of hosts in a deployed units, typically mapped to organizational requirements such as "dev", "test" "staging", and "production", but can also be mapped to more detailed requirements as needed.
 
 ### /principals/NAME
 
@@ -6893,11 +6565,8 @@ The `/principals/NAME` endpoint has the following methods: `GET`.
 
 #### GET
 
-The `GET` method is used to get a list of public keys for clients and
-users in order to ensure that enough information is present for
-authorized requests.
-
-This method has no parameters.
+The `GET` method is used to get a list of public keys for clients and users in order to ensure that enough information is present for
+authorized requests. This method has no parameters.
 
 **Request**
 
@@ -6907,8 +6576,7 @@ GET /organizations/NAME/principals/NAME
 
 **Response**
 
-For a user or client, the type value will vary. The response body
-returns an array of principals which allows for a client with the
+For a user or client, the type value will vary. The response body returns an array of principals which allows for a client with the
 same name as a user. The response for a user or client is similar to:
 
 ```javascript
@@ -6956,12 +6624,8 @@ The `/required_recipe` endpoint has the following method: `GET`.
 
 #### GET
 
-Use the `GET` method to view a recipe specified by a
-Chef Infra Server administrator as part of the Chef Infra Server configuration.
-This recipe will be run by all Chef Infra Clients that connect to the Chef Infra Server.
-The `required_recipe` feature is aimed at expert level practitioners delivering
-isolated configuration changes to target systems. The returned text is
-the content of a single recipe file.
+Use the `GET` method to view a recipe specified by a Chef Infra Server administrator as part of the Chef Infra Server configuration.
+This recipe will be run by all Chef Infra Clients that connect to the Chef Infra Server. The `required_recipe` feature is aimed at expert level practitioners delivering isolated configuration changes to target systems. The returned text is the content of a single recipe file.
 
 This method has no parameters.
 
@@ -7025,10 +6689,7 @@ The `/roles` endpoint has the following methods: `GET` and `POST`.
 
 #### GET
 
-The `GET` method is used to get a list of roles along with their
-associated URIs.
-
-This method has no parameters.
+The `GET` method is used to get a list of roles along with their associated URIs. This method has no parameters.
 
 **Request**
 
@@ -7077,9 +6738,7 @@ The response is similar to:
 
 #### POST
 
-The `POST` method is used to create a new role on the Chef Infra Server.
-
-This method has no parameters.
+The `POST` method is used to create a new role on the Chef Infra Server. This method has no parameters.
 
 **Request**
 
@@ -7158,14 +6817,11 @@ The response is similar to:
 
 ### /roles/NAME
 
-The `/roles/NAME` endpoint has the following methods: `GET`, `DELETE`,
-and `PUT`.
+The `/roles/NAME` endpoint has the following methods: `GET`, `DELETE`, and `PUT`.
 
 #### DELETE
 
-The `DELETE` method is used to delete a role on the Chef Infra Server.
-
-This method has no parameters.
+The `DELETE` method is used to delete a role on the Chef Infra Server. This method has no parameters.
 
 **Request**
 
@@ -7232,9 +6888,7 @@ The response is similar to:
 
 #### GET
 
-The `GET` method is used to return the details for a role as JSON.
-
-This method has no parameters.
+The `GET` method is used to return the details for a role as JSON. This method has no parameters.
 
 **Request**
 
@@ -7297,9 +6951,7 @@ The response is similar to:
 
 #### PUT
 
-The `PUT` method is used to update a role on the Chef Infra Server.
-
-This method has no parameters.
+The `PUT` method is used to update a role on the Chef Infra Server. This method has no parameters.
 
 **Request**
 
@@ -7370,10 +7022,7 @@ The `/roles/NAME/environments` endpoint has the following method: `GET`.
 
 #### GET
 
-The `GET` method returns a list of the environments that have
-environment-specific run-lists in the given role as JSON data.
-
-This method has no parameters.
+The `GET` method returns a list of the environments that have environment-specific run-lists in the given role as JSON data. This method has no parameters.
 
 **Request**
 
@@ -7424,15 +7073,11 @@ The response is similar to:
 
 ### /roles/NAME/environments/NAME
 
-The `/roles/NAME/environments/NAME` endpoint has the following method:
-`GET`.
+The `/roles/NAME/environments/NAME` endpoint has the following method: `GET`.
 
 #### GET
 
-The `GET` method returns the environment-specific run-list
-(`env_run_lists[environment_name]`) for a role.
-
-This method has no parameters.
+The `GET` method returns the environment-specific run-list (`env_run_lists[environment_name]`) for a role. This method has no parameters.
 
 **Request**
 
@@ -7440,8 +7085,7 @@ This method has no parameters.
 GET /organizations/NAME/roles/NAME/environments/NAME
 ```
 
-where the first `NAME` is the name of the role and the second is the
-name of the environment.
+where the first `NAME` is the name of the role and the second is the name of the environment.
 
 **Response**
 
@@ -7486,17 +7130,11 @@ The response is similar to:
 
 ### /sandboxes
 
-A sandbox is used to commit files so they only need to be updated one
-time, as opposed to every time a cookbook is uploaded. The `/sandboxes`
-endpoint has the following methods: `POST`.
+A sandbox is used to commit files so they only need to be updated one time, as opposed to every time a cookbook is uploaded. The `/sandboxes` endpoint has the following methods: `POST`.
 
 #### POST
 
-The `POST` method is used to create a new sandbox. This method accepts a
-list of checksums as input and returns the URLs against which to `PUT`
-files that need to be uploaded.
-
-This method has no parameters.
+The `POST` method is used to create a new sandbox. This method accepts a list of checksums as input and returns the URLs against which to `PUT` files that need to be uploaded. This method has no parameters.
 
 **Request**
 
@@ -7579,16 +7217,12 @@ The response is similar to:
 
 ### /sandboxes/ID
 
-Each sandbox has a unique identifier. The `/sandboxes/ID` endpoint has
-the following methods: `PUT`.
+Each sandbox has a unique identifier. The `/sandboxes/ID` endpoint has the following methods: `PUT`.
 
 #### PUT
 
-The `PUT` method is used to commit files that are in a sandbox to their
-final location so that changes to cookbooks will not require
-re-uploading the same data.
-
-This method has no parameters.
+The `PUT` method is used to commit files that are in a sandbox to their final location so that changes to cookbooks will not require
+re-uploading the same data. This method has no parameters.
 
 **Request**
 
@@ -7666,37 +7300,24 @@ The response is similar to:
 
 {{% search %}}
 
-The `/search` endpoint allows nodes, roles, data bags, environments to
-be searched. This endpoint has the following methods: `GET`.
+The `/search` endpoint allows nodes, roles, data bags, environments to be searched. This endpoint has the following methods: `GET`.
 
 {{< note >}}
 
-At the end of every Chef Infra Client run, the node object is saved to
-the Chef Infra Server. From the Chef Infra Server, each node object is
-then added to the Apache Solr search index. This process is
-asynchronous. By default, node objects are committed to the search index
-every 60 seconds or per 1000 node objects, whichever occurs first.
+At the end of every Chef Infra Client run, the node object is saved to the Chef Infra Server. From the Chef Infra Server, each node object is then added to the Apache Solr search index. This process is asynchronous. By default, node objects are committed to the search index every 60 seconds or per 1000 node objects, whichever occurs first.
 
 {{< /note >}}
 
 {{< note >}}
 
-This endpoint does not have any ACL restrictions, which means it may be
-used by any user or client that is able to make the request to the Chef
-Infra Server.
+This endpoint does not have any ACL restrictions, which means it may be used by any user or client that is able to make the request to the Chef Infra Server.
 
 {{< /note >}}
 
 #### GET
 
-The `GET` method is used to return a data structure that contains links
-to each available search index. By default, the `role`, `node`,
-`client`, and `data bag` indexes will always be available (where the
-`data bag` index is the name of the data bag on the Chef Infra Server).
-Search indexes may lag behind the most current data at any given time.
-If a situation occurs where data needs to be written and then
-immediately searched, an artificial delay (of at least 10 seconds) is
-recommended.
+The `GET` method is used to return a data structure that contains links to each available search index. By default, the `role`, `node`,
+`client`, and `data bag` indexes will always be available (where the `data bag` index is the name of the data bag on the Chef Infra Server). Search indexes may lag behind the most current data at any given time. If a situation occurs where data needs to be written and then immediately searched, an artificial delay (of at least 10 seconds) is recommended.
 
 This method has no parameters.
 
@@ -7752,16 +7373,14 @@ The response is similar to:
 
 ### /search/INDEX
 
-Use the `/search/INDEX` endpoint to access the search indexes on the
-Chef Infra Server. The `/search/INDEX` endpoint has the following
+Use the `/search/INDEX` endpoint to access the search indexes on the Chef Infra Server. The `/search/INDEX` endpoint has the following
 methods: `GET` and `POST`.
 
 {{% search_query_syntax %}}
 
 #### GET
 
-The `GET` method is used to return all of the data that matches the
-query in the `GET` request.
+The `GET` method is used to return all of the data that matches the query in the `GET` request.
 
 This method has the following parameters:
 
@@ -7800,8 +7419,7 @@ GET /organizations/NAME/search/INDEX
 
 **Response**
 
-The response contains the total number of rows that match the request
-and for a node index search is similar to:
+The response contains the total number of rows that match the request and for a node index search is similar to:
 
 ```javascript
 {
@@ -7858,18 +7476,7 @@ and for a node index search is similar to:
 
 #### POST
 
-A partial search query allows a search query to be made against specific
-attribute keys that are stored on the Chef Infra Server. A partial
-search query can search the same set of objects on the Chef Infra Server
-as a full search query, including specifying an object index and
-providing a query that can be matched to the relevant index. While a
-full search query will return an array of objects that match (each
-object containing a full set of attributes for the node), a partial
-search query will return only the values for the attributes that match.
-One primary benefit of using a partial search query is that it requires
-less memory and network bandwidth while Chef Infra Client processes the
-search results. The attributes to be returned by the partial search
-are specified in the request JSON body.
+A partial search query allows a search query to be made against specific attribute keys that are stored on the Chef Infra Server. A partial search query can search the same set of objects on the Chef Infra Server as a full search query, including specifying an object index and providing a query that can be matched to the relevant index. While a full search query will return an array of objects that match (each object containing a full set of attributes for the node), a partial search query will return only the values for the attributes that match. One primary benefit of using a partial search query is that it requires less memory and network bandwidth while Chef Infra Client processes the search results. The attributes to be returned by the partial search are specified in the request JSON body.
 
 This method has the following parameters:
 
@@ -7972,16 +7579,13 @@ The response is similar to:
 
 ### /universe
 
-Use the `/universe` endpoint to retrieve the known collection of
-cookbooks, and then use it with Berkshelf and Chef Supermarket.
+Use the `/universe` endpoint to retrieve the known collection of cookbooks, and then use it with Berkshelf and Chef Supermarket.
 
 The `/universe` endpoint has the following methods: `GET`.
 
 #### GET
 
-The `GET` method is used to retrieve the universe data.
-
-This method has no parameters. This method has no request body.
+The `GET` method is used to retrieve the universe data. This method has no parameters. This method has no request body.
 
 **Request**
 
@@ -7991,9 +7595,7 @@ GET /universe
 
 **Response**
 
-The response will return a json hash, with the name of each cookbook as
-a top-level key. Each cookbook will list each version, along with its
-location information and dependencies:
+The response will return a json hash, with the name of each cookbook as a top-level key. Each cookbook will list each version, along with its location information and dependencies:
 
 ```javascript
 {
@@ -8050,26 +7652,17 @@ location information and dependencies:
 
 ### /updated_since
 
-The `/updated_since` endpoint ensures that replica instances of the Chef
-Infra Server are able to synchronize with the primary Chef Infra Server.
-`/updated_since` was part of the Chef Replication product. Chef Replication
-is no longer available as a product and the `/updated_since` endpoint
-is also deprecated. The expectation for almost all chef users is that
-use of the endpoint will return an http status of 404.
-The `/organizations/NAME/updated_since` endpoint has the following
-methods: `GET`.
+The `/updated_since` endpoint ensures that replica instances of the Chef Infra Server are able to synchronize with the primary Chef Infra Server. `/updated_since` was part of the Chef Replication product. Chef Replication is no longer available as a product and the `/updated_since` endpoint is also deprecated. The expectation for almost all chef users is that use of the endpoint will return an http status of 404. The `/organizations/NAME/updated_since` endpoint has the following methods: `GET`.
 
 {{< warning >}}
 
-This update is available after Chef replication is installed on the Chef
-Infra Server.
+This update is available after Chef replication is installed on the Chef Infra Server.
 
 {{< /warning >}}
 
 #### GET
 
-The `GET` method is used to return the details of an organization as
-JSON.
+The `GET` method is used to return the details of an organization as JSON.
 
 **Request**
 
@@ -8081,8 +7674,7 @@ where `NUM` is the largest integer previously returned as an identifier.
 
 **Response**
 
-The response will return an array of paths for objects that have been
-created, updated, or deleted since `NUM`, similar to:
+The response will return an array of paths for objects that have been created, updated, or deleted since `NUM`, similar to:
 
 ```javascript
 [
@@ -8144,16 +7736,11 @@ created, updated, or deleted since `NUM`, similar to:
 
 ### /users
 
-A user may be associated with an organization.
-
-The `/users` endpoint has the following methods: `GET` and `POST`.
+A user may be associated with an organization. The `/users` endpoint has the following methods: `GET` and `POST`.
 
 #### GET
 
-The `GET` method is used to return an array of usernames for users
-associated with an organization.
-
-This method has no parameters.
+The `GET` method is used to return an array of usernames for users associated with an organization. This method has no parameters.
 
 **Request**
 
@@ -8204,10 +7791,7 @@ The response is similar to:
 
 #### POST
 
-The `POST` method is used to associate a user with an organization
-immediately. Superuser only.
-
-This method has no parameters.
+The `POST` method is used to associate a user with an organization immediately. Superuser only. This method has no parameters.
 
 **Request**
 
@@ -8272,10 +7856,7 @@ The `/users/NAME` endpoint has the following methods: `DELETE`, `GET`.
 
 #### DELETE
 
-The `DELETE` method is used to delete a user association with an
-organization.
-
-This method has no parameters.
+The `DELETE` method is used to delete a user association with an organization. This method has no parameters.
 
 **Request**
 
@@ -8333,9 +7914,7 @@ The response will return the end state of the user, similar to:
 
 #### GET
 
-The `GET` method is used to return the details of a user as JSON.
-
-This method has no parameters.
+The `GET` method is used to return the details of a user as JSON. This method has no parameters.
 
 **Request**
 
@@ -8397,14 +7976,9 @@ The following sections show examples of using the Chef Infra Server API.
 
 ### Query for Users and Orgs
 
-The following example shows how to query the Chef Infra Server API for a
-listing of organizations and users. The `/organizations` and `/users`
-endpoints may only be accessed by the `pivotal` user, which is a user
-account that is created by Chef during the installation of the Chef
-Infra Server.
+The following example shows how to query the Chef Infra Server API for a listing of organizations and users. The `/organizations` and `/users` endpoints may only be accessed by the `pivotal` user, which is a user account that is created by Chef during the installation of the Chef Infra Server.
 
-Run the following from a `.chef` directory that contains a `pivotal.rb`
-file:
+Run the following from a `.chef` directory that contains a `pivotal.rb` file:
 
 ```ruby
 require 'chef'
