@@ -215,7 +215,6 @@ The erlang crypto app provides `crypto` module implementation. We no longer use 
 - The code then interacts with the add\_user and update\_user functions in the back.
 - The upgrade path after Phase2 rollout includes upgrading to a release with Phase1 first.
 
-{{< /note >}}
 
 ## Buildkite
 
