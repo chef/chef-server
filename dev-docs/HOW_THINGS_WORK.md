@@ -210,7 +210,7 @@ The erlang crypto app provides `crypto` module implementation. We no longer use 
 - Delete and update triggers in keys\_update\_trigger.sql.
 - Delete the public\_key column in the users (and perhaps clients) table.
 
-
+Note:
 - This should be easier once all the users are on Phase1 release of chef-server.
 - The code then interacts with the add\_user and update\_user functions in the back.
 - The upgrade path after Phase2 rollout includes upgrading to a release with Phase1 first.
