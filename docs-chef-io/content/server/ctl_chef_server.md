@@ -1077,7 +1077,7 @@ This subcommand has the following options:
 
 ## Rebuild Migration Level File
 
-The rebuild-migration-state subcommand attempts to recreate the migration-level file found at /var/opt/opscode/upgrades/migration-level
+The rebuild-migration-state subcommand attempts to recreate the migration-level file found at `/var/opt/opscode/upgrades/migration-level`
 by inferring the current state of the database and system.
 
 **Syntax**
