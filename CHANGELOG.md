@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.13.41 -->
-## [14.13.41](https://github.com/chef/chef-server/tree/14.13.41) (2022-02-28)
+<!-- latest_release 14.13.42 -->
+## [14.13.42](https://github.com/chef/chef-server/tree/14.13.42) (2022-02-28)
 
 #### Merged Pull Requests
-- Updating status and response header tests [#3193](https://github.com/chef/chef-server/pull/3193) ([vinay-satish](https://github.com/vinay-satish))
+- Replace deprecated --without flag with bundle config [#2737](https://github.com/chef/chef-server/pull/2737) ([jayashrig158](https://github.com/jayashrig158))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.12.21 -->
 ### Changes since 14.12.21 release
 
 #### Merged Pull Requests
+- Replace deprecated --without flag with bundle config [#2737](https://github.com/chef/chef-server/pull/2737) ([jayashrig158](https://github.com/jayashrig158)) <!-- 14.13.42 -->
 - Updating status and response header tests [#3193](https://github.com/chef/chef-server/pull/3193) ([vinay-satish](https://github.com/vinay-satish)) <!-- 14.13.41 -->
 - Update the omnibus cookbook lock to the latest [#2682](https://github.com/chef/chef-server/pull/2682) ([tas50](https://github.com/tas50)) <!-- 14.13.40 -->
 - Bump omnibus-software from `f64a223` to `aa90acf` in /omnibus [#3207](https://github.com/chef/chef-server/pull/3207) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.13.39 -->
