@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.13.39 -->
-## [14.13.39](https://github.com/chef/chef-server/tree/14.13.39) (2022-02-24)
+<!-- latest_release 14.13.40 -->
+## [14.13.40](https://github.com/chef/chef-server/tree/14.13.40) (2022-02-28)
 
 #### Merged Pull Requests
-- Bump omnibus-software from `f64a223` to `aa90acf` in /omnibus [#3207](https://github.com/chef/chef-server/pull/3207) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Update the omnibus cookbook lock to the latest [#2682](https://github.com/chef/chef-server/pull/2682) ([tas50](https://github.com/tas50))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.12.21 -->
 ### Changes since 14.12.21 release
 
 #### Merged Pull Requests
+- Update the omnibus cookbook lock to the latest [#2682](https://github.com/chef/chef-server/pull/2682) ([tas50](https://github.com/tas50)) <!-- 14.13.40 -->
 - Bump omnibus-software from `f64a223` to `aa90acf` in /omnibus [#3207](https://github.com/chef/chef-server/pull/3207) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.13.39 -->
 - Bump sdoc from 2.3.0 to 2.3.1 in /src/oc-id [#3173](https://github.com/chef/chef-server/pull/3173) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.13.38 -->
 - Update rails to 6.1.4.6 in oc-id [#3204](https://github.com/chef/chef-server/pull/3204) ([tas50](https://github.com/tas50)) <!-- 14.13.37 -->
