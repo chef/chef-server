@@ -9,9 +9,6 @@
 
 <!-- latest_stable_release -->
 ## [14.13.42](https://github.com/chef/chef-server/tree/14.13.42) (2022-03-01)
-<!-- latest_stable_release -->
-
-## [14.13.42](https://github.com/chef/chef-server/tree/14.13.42) (2022-03-01)
 
 #### Merged Pull Requests
 - Update habitat channel to stable2021-q2 [#3126](https://github.com/chef/chef-server/pull/3126) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
@@ -72,6 +69,7 @@
 - Update the omnibus cookbook lock to the latest [#2682](https://github.com/chef/chef-server/pull/2682) ([tas50](https://github.com/tas50))
 - Updating status and response header tests [#3193](https://github.com/chef/chef-server/pull/3193) ([vinay-satish](https://github.com/vinay-satish))
 - Replace deprecated --without flag with bundle config [#2737](https://github.com/chef/chef-server/pull/2737) ([jayashrig158](https://github.com/jayashrig158))
+<!-- latest_stable_release -->
 
 ## [14.12.21](https://github.com/chef/chef-server/tree/14.12.21) (2022-01-27)
 
