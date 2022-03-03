@@ -1,10 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release -->
+<!-- latest_release 14.13.43 -->
+## [14.13.43](https://github.com/chef/chef-server/tree/14.13.43) (2022-03-03)
+
+#### Merged Pull Requests
+- Correct typo in versions [#3210](https://github.com/chef/chef-server/pull/3210) ([trickyearlobe](https://github.com/trickyearlobe))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.13.42 -->
 ### Changes since 14.13.42 release
+
+#### Merged Pull Requests
+- Correct typo in versions [#3210](https://github.com/chef/chef-server/pull/3210) ([trickyearlobe](https://github.com/trickyearlobe)) <!-- 14.13.43 -->
 <!-- release_rollup -->
 
 <!-- latest_stable_release -->
