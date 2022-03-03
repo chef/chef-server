@@ -163,7 +163,7 @@ Upgrading from Chef Backend 1.x to Chef Backend 2.x requires full cluster downti
     chef-server-ctl reconfigure
     ```
 
-8. To continue the upgrades on Chef Infra Server front-end nodes using this back-end cluster, see [Upgrade Front-ends Associated with a Chef Backend Cluster]({{< relref "install_server_ha/#upgrading-chef-infra-server-on-the-Chef Backend server-machines" >}}).
+8. To continue the upgrade on Chef Infra Server front-end nodes using this back-end cluster, see [Upgrade Front-ends Associated with a Chef Backend Cluster]({{< relref "install_server_ha/#upgrading-chef-infra-server-on-the-Chef Backend server-machines" >}}).
 
 ## Chef Backend Upgrade 2.x to 3.x
 
@@ -178,7 +178,7 @@ Upgrade earlier versions to Chef Backend 2.1 or later. Chef Backend 2.3.19 is th
 
 ### Planning
 
-The versions of Chef Backend, Elasticsearch, and Chef Infra Server running your system determines the strategy, index treatment, and steps required for your upgrade.
+The versions of Chef Backend, Elasticsearch, and Chef Infra Server running on your system determines the strategy, index treatment, and steps required for your upgrade.
 
 | Chef Backend Version | Elasticsearch Version | Release Date |
 |:---------|:---------|:------|:------|
@@ -194,10 +194,18 @@ See the [Chef Backend Release Notes]({{< relref "/release_notes_backend" >}}) fo
 
 #### Identify the Index Elasticsearch Version
 
-Find the version of Elasticsearch that created the indexes. Run the following command on a back-end node and find value of he `created_string:` in the output:
+Find the version of Elasticsearch that created the indexes. Run the following command on a back-end node and find value of the `created_string:` in the output:
 
 ```bash
 curl -XGET localhost:9200/chef/_settings/index.version.created*?pretty\&human
+```
+
+#### Check for index health
+
+All indexes should be green from a frontend server. There should be no other indexes present than the one named "chef", and definitely no non-green indexes. The command should have a return code of 1. Investigate by removing the grep otherwise.
+
+```bash
+curl -s -S "localhost:9200/_cat/indices?h=health,status,index" | grep -v '^green'
 ```
 
 #### Upgrade Strategy
@@ -220,16 +228,16 @@ The Chef Backend upgrade uses a rolling strategy, but the Elasticsearch version 
 
 #### Index Treatment
 
-The the version of Elasticsearch used to create the Chef Infra Server indexes determines the how the you will handle the indexes during the upgrade.
+The version of Elasticsearch used to create the Chef Infra Server indexes determines how you will need to handle the indexes during the upgrade.
 
 * Indexes created by Elasticsearch 5.4.1 (`created_string": 5.4.1`) or earlier require that you delete and then reindex after the upgrade.
 * Indexes created by Elasticsearch 5.4.1 (`created_string": 5.4.1`) or earlier _and then_ upgraded to version 6.8.23 require that you delete and then reindex after the upgrade.
-* Indexes created by Elasticsearch 5.6.16 (`created_string : 5.6.16`) or later will automatically reindexed.
+* Indexes created by Elasticsearch 5.6.16 (`created_string : 5.6.16`) or later will be automatically started and upgraded by 6.8.23.
 
 Elasticsearch Version | Index Treatment |
 |---------|--------|
-|`"created_string" : "6.8.23"` | Automatic reindex |
-|`"created_string" : "5.6.16"` | Automatic reindex |
+|`"created_string" : "6.8.23"` | Identical |
+|`"created_string" : "5.6.16"` | Automatic index upgrade |
 | `"created_string" : "5.4.1"` | Delete and reindex |
 | `"created_string" : "2.3.1"` | Delete and reindex |
 
@@ -243,15 +251,15 @@ The Chef Backend upgrade for installations with indexes created by Elasticsearch
 
     1. On Chef Infra Server 14.6.32 or later, put the server nodes into maintenance mode, to temporarily disable the API:
 
-      ```bash
-      sudo chef-server-ctl maintenance on
-      ```
+       ```bash
+       sudo chef-server-ctl maintenance on
+       ```
 
     1. On Chef Infra Server 14.6.31 or earlier, stop all server nodes with the command:
 
-      ```bash
-      sudo chef-server-ctl stop
-      ```
+       ```bash
+       sudo chef-server-ctl stop
+       ```
 
 #### Upgrade the Back-end Cluster
 
@@ -289,88 +297,8 @@ The Chef Backend upgrade for installations with indexes created by Elasticsearch
     chef-backend-ctl set-cluster-failover off
     ```
 
-1. Stop the Elasticsearch services:
+1. Proceed to rebuilding the "chef" index [Rebuild Index]({{< relref "#rebuild-the-chef-index" >}})
 
-  ```bash
-  sudo chef-backend-ctl stop elasticsearch
-  ```
-
-1. Delete the current Elasticsearch indexes. This step ensures that Elasticsearch creates new indexes with the upgraded Elasticsearch version. Use the command:
-
-  ```bash
-  sudo rm -fr /var/opt/chef-backend/elasticsearch/data/*
-  ```
-
-1. Restart the Elasticsearch services:
-
-  ```bash
-  sudo chef-backend-ctl start elasticsearch
-  ```
-
-#### Upgrade the Index Definitions
-
-1. Identify a front-end Chef Infra Server that does not serve requests. You can remove it from the load balancer or put in maintenance mode. If the front-end node is still in the load balancer:
-
-   * If a front-end Chef Infra Server is still in the load balancer and meets _both_ these conditions:
-
-      * Running version 14.6.32 or later
-      * `chef-server-ctl status` runs all services
-
-      Then you can disable the API temporarily by remote access with:
-
-      ```bash
-      sudo chef-server-ctl maintenance on
-      ```
-
-1. Run the `reconfigure` subcommand to apply the upgraded index definitions to the Chef Infra Server:
-
-   ```bash
-   sudo chef-server-ctl reconfigure
-   ```
-
-1. Restore failover:
-
-  ```bash
-  chef-backend-ctl set-cluster-failover on
-  ```
-
-#### Reindex the Chef Infra Servers
-
-{{< note >}}
-We estimate the reindexing operation will take 2 minutes for each 1000 nodes, but the it could take more time, depending on your server hardware and the complexity of your Chef data. See the [Standalone Server Upgrade](https://docs.chef.io/server/upgrades/#standalone-server) for more information.
-{{< /note >}}
-
-1. Test the process by reindexing a single organization:
-
-   ```bash
-   sudo chef-server-ctl reindex ORGNAME
-   ```
-
-   And then retrieving that organization's information:
-
-  ```bash
-  sudo /opt/opscode/bin/knife search node *:* -c /etc/opscode/pivotal.rb --server-url https://127.0.0.1:443/organizations/ORGNAME
-  ```
-
-1. If the test is successful, reindex all organizations:
-
-   ```bash
-   sudo chef-server-ctl reindex -a
-   ```
-
-#### Restore the Chef Infra Servers
-
-1. Restore front-end Chef Infra Servers that you placed in maintenance mode to regular status:
-
-   ```bash
-   sudo chef-server-ctl maintenance off
-   ```
-
-1. Restart the services on the front-end servers:
-
-   ```bash
-   chef-server-ctl start
-   ```
 
 ### Upgrade Chef Infra Servers with Elasticsearch 5.6.16
 
@@ -412,8 +340,116 @@ For indexes created by Elasticsearch version 5.6.16 (`"created_string" : "5.6.16
     ```bash
     chef-backend-ctl upgrade --failover
     ```
+    
+    If you see lines with the following output in /var/log/chef-backend/elasticsearch/current just after the attempted upgrade or a problem in the output from the upgrade command
+    
+    ```bash
+    unknown setting [path.scripts]
+    ```
+    
+    Then the system has not upgraded fully. Make sure it is not still the leader, then if it is not but the ES cluster is green
+    
+    ```bash
+    chef-backend-ctl upgrade
+    ```
+    
+    Afterwards, the original leader will have upgraded completely.
 
-1. To continue the upgrades on Chef Infra Server front-end nodes using this back-end cluster, see [Upgrade Front-ends Associated with a Chef Backend Cluster]({{< relref "install_server_ha.md/#upgrading-chef-infra-server-on-the-frontend-machines" >}}).
+1. To continue the upgrade, let's move to the Chef Infra Server front-end nodes using this back-end cluster, see [Upgrade Front-ends Associated with a Chef Backend Cluster]({{< relref "install_server_ha.md/#upgrading-chef-infra-server-on-the-frontend-machines" >}}).
+
+1. We strongly recommend rebuilding the "chef" index version to after the upgrade is complete on both backends and frontends by following these steps [Rebuild Index]({{< relref "#rebuild-the-chef-index" >}})
+
+## Rebuild the chef index
+
+1. Set cluster failover to off on a backend
+
+   ```bash
+   chef-backend-ctl set-cluster-failover off
+   ```
+
+1. Stop the Elasticsearch services on all backend nodes:
+
+   ```bash
+   sudo chef-backend-ctl stop elasticsearch
+   ```
+
+1. Delete the current Elasticsearch index. This step ensures that Elasticsearch creates a new index with the upgraded Elasticsearch version. Use the command:
+
+   ```bash
+   sudo rm -fr /var/opt/chef-backend/elasticsearch/data/*
+   ```
+
+1. Restart the Elasticsearch services:
+
+   ```bash
+   sudo chef-backend-ctl start elasticsearch
+   ```
+
+### Upgrade the Index Definitions
+
+1. Identify a front-end Chef Infra Server that does not serve requests. You can remove it from the load balancer or put it in maintenance mode. If the front-end node is still in the load balancer:
+
+   * If a front-end Chef Infra Server is still in the load balancer and meets _both_ these conditions:
+
+      * Running version 14.6.32 or later
+      * `chef-server-ctl status` shows all services running
+
+      Then you can disable the API temporarily by remote access with:
+
+      ```bash
+      sudo chef-server-ctl maintenance on
+      ```
+
+1. Run the `reconfigure` subcommand to apply the upgraded index definitions to the Chef Infra Server:
+
+   ```bash
+   sudo chef-server-ctl reconfigure
+   ```
+
+1. Restore cluster failover from a backend node:
+
+  ```bash
+  chef-backend-ctl set-cluster-failover on
+  ```
+
+### Reindex the Chef Infra Servers
+
+{{< note >}}
+We estimate the reindexing operation will take 2 minutes for each 1000 nodes, but the it could take more time, depending on your server hardware and the complexity of your Chef data. See the [Standalone Server Upgrade](https://docs.chef.io/server/upgrades/#standalone-server) for more information.
+{{< /note >}}
+
+1. Test the process by reindexing a single organization:
+
+   ```bash
+   sudo chef-server-ctl reindex ORGNAME
+   ```
+
+   And then retrieving that organization's information:
+
+   ```bash
+   sudo /opt/opscode/bin/knife search node *:* -c /etc/opscode/pivotal.rb --server-url https://127.0.0.1:443/organizations/ORGNAME
+   ```
+
+1. If the test is successful, reindex all organizations:
+
+   ```bash
+   sudo chef-server-ctl reindex -a
+   ```
+
+### Restore the Chef Infra Servers
+
+1. Restore front-end Chef Infra Servers that you placed in maintenance mode to regular status:
+
+   ```bash
+   sudo chef-server-ctl maintenance off
+   ```
+
+1. Restart the services on the front-end servers:
+
+   ```bash
+   chef-server-ctl start
+   ```
+
 
 ## DRBD/Keepalived HA to Chef Backend 2.x
 
