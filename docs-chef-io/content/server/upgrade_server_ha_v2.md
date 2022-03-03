@@ -453,6 +453,6 @@ We estimate the reindexing operation will take 2 minutes for each 1000 nodes, bu
 
 ## DRBD/Keepalived HA to Chef Backend 2.x
 
-DRBD configurations are [End of Life Products]({{< "versions.md#end-of-life-eol" >}}) and no longer supported.
+DRBD configurations are [End of Life Products]({{< relref "versions.md#end-of-life-eol" >}}) and no longer supported.
 
 For a guide to migrating to Chef Backend from DRBD see the [Best Practices for Migrating Your Chef Server](https://www.chef.io/blog/best-practices-for-migrating-your-chef-server) and the associated webinar from the [Chef Blog](https://blog.chef.io/).
