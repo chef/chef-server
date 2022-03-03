@@ -168,13 +168,13 @@ Upgrading from Chef Backend 1.x to Chef Backend 2.x requires full cluster downti
 ## Chef Backend Upgrade 2.x to 3.x
 
 The Chef Backend 3.0 upgrade requires Chef Backend 2.1 or later.
-Upgrade earlier versions to Chef Backend 2.1 or later. Chef Backend 2.3.19 is the latest of the version 2 releases.
+Upgrade earlier versions to Chef Backend 2.1 or later. Chef Backend 2.3.16 is the latest of the version 2 stable releases.
 
 | Chef Backend Version | Upgrade Target |
 |:---------|:---------|
-| 2.1.0--2.3.19 | 3.0.0 or later|
-| 2.0.0--2.0.45 | 2.3.19 |
-| 0.1.0--1.4.40| 2.3.19 |
+| 2.1.0--2.3.16 | 3.0.0 or later|
+| 2.0.0--2.0.45 | 2.3.16 |
+| 0.1.0--1.4.40| 2.3.16 |
 
 ### Planning
 
