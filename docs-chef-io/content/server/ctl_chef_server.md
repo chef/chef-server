@@ -401,6 +401,20 @@ EvBQGdNG39XYSEeF4LneYQKPHEZDdqe7TZdVE8ooU/syxlZgADtvkqEoc4zp1Im3
 -----END PUBLIC KEY-----
 ```
 
+## Maintenance Mode
+
+As of 14.6.32, you can now place your Chef Infra Server into maintenance mode to block requests from Chef Infra Clients or tools like knife. Maintenance mode also allows you to specify allowed IP addresses for testing your Infra Server without allowing access to all clients.
+
+**Syntax**
+
+This subcommand has the following syntax:
+
+* Turn on maintenance mode: `chef-server-ctl maintenance on`
+* Turn off maintenance mode: `chef-server-ctl maintenance off`
+* Add an allowed IP address: `chef-server-ctl maintenance -a IP_ADDRESS`
+* Remove an allowed IP address: `chef-server-ctl maintenance -r IP_ADDRESS`
+* List all allowed IP address: `chef-server-ctl maintenance -l`
+
 ## Secrets Management
 
 Use the following commands to manage and rotate shared secrets and
