@@ -136,6 +136,20 @@ This subcommand has the following options:
     required when packages are downloaded from
     <https://packages.chef.io/>.
 
+## maintenance mode
+
+As of 14.6.32, you can now place your Chef Infra Server into maintenance mode to block requests from Chef Infra Clients or tools like knife. Maintenance mode also allows you to specify allowed IP addresses for testing your Infra Server without allowing access to all clients.
+
+**Syntax**
+
+This subcommand has the following syntax:
+
+* Turn on maintenance mode: `chef-server-ctl maintenance on`
+* Turn off maintenance mode: `chef-server-ctl maintenance off`
+* Add an allowed IP address: `chef-server-ctl maintenance -a IP_ADDRESS`
+* Remove an allowed IP address: `chef-server-ctl maintenance -r IP_ADDRESS`
+* List all allowed IP address: `chef-server-ctl maintenance -l`
+
 ### Use Downloads
 
 {{% ctl_chef_server_install_features_download %}}
