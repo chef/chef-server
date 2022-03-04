@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.13.44 -->
-## [14.13.44](https://github.com/chef/chef-server/tree/14.13.44) (2022-03-03)
+<!-- latest_release 14.13.45 -->
+## [14.13.45](https://github.com/chef/chef-server/tree/14.13.45) (2022-03-04)
 
 #### Merged Pull Requests
-- Don&#39;t source veil from git in oc-bifrost-pedant [#3209](https://github.com/chef/chef-server/pull/3209) ([tas50](https://github.com/tas50))
+- Adding preflight validation for search engine [#3181](https://github.com/chef/chef-server/pull/3181) ([vinay-satish](https://github.com/vinay-satish))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.13.42 -->
 ### Changes since 14.13.42 release
 
 #### Merged Pull Requests
+- Adding preflight validation for search engine [#3181](https://github.com/chef/chef-server/pull/3181) ([vinay-satish](https://github.com/vinay-satish)) <!-- 14.13.45 -->
 - Don&#39;t source veil from git in oc-bifrost-pedant [#3209](https://github.com/chef/chef-server/pull/3209) ([tas50](https://github.com/tas50)) <!-- 14.13.44 -->
 - Correct typo in versions [#3210](https://github.com/chef/chef-server/pull/3210) ([trickyearlobe](https://github.com/trickyearlobe)) <!-- 14.13.43 -->
 <!-- release_rollup -->
