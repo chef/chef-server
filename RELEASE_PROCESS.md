@@ -83,7 +83,7 @@ Umbrella Testing Step-by-Step:
 
 #### Chef Manage Testing
 
-Currently (07/21), the Umbrella pipeline does not perform a test login to Chef Manage, so this should be done manually.  A successful test login should be verified on both IPV4 and IPV6 setups, and must use the latest stable version of Manage.  One method is to run representative AWS and Azure Umbrella scenarios from your local box to get running server instances to test.  For umbrella you should specify the Chef Manage version to install when creating the Umbrella scenario (see below), or it will pick the latest unstable version (that's generally not what you want).  For local non-Umbrella setups, `chef-server-ctl install chef-manage` will install the latest stable release of chef-manage.
+Currently (07/21), the Umbrella pipeline does not perform a test login to Chef Manage, so this should be done manually.  A successful test login should be verified on both IPV4 and IPV6 setups, and must use the latest stable version of Manage.  One method is to run representative AWS and Azure Umbrella scenarios from your local box to get running server instances to test.  For umbrella you should specify the Chef Manage version to install when creating the Umbrella scenario (see below), or it will pick the latest unstable version (that's generally not what you want).  For local non-Umbrella setups, `chef-server-ctl install chef-manage` will install the latest stable release of chef-manage. See document here for setting up and obtaining Umbrella credentials: https://chefio.atlassian.net/wiki/spaces/Policy/pages/2514386984/SOP-003+-+Gaining+access+to+AWS+accounts+via+the+AWS+API+CLI
 
 Chef Manage releases:
 https://downloads.chef.io/tools/manage
@@ -91,7 +91,7 @@ https://downloads.chef.io/tools/manage
 Typical Umbrella scenario for AWS, where _version_ is the version number of the release candidate you are testing, and _manage version_ is the latest stable version of Chef Manage:
 ```
 $ cd umbrella/chef-server/scenarios/aws
-$ okta_aws --all
+$ saml2aws login --profile chef-engineering
 Fetching credentials for: chef-engineering
 ...
 $ make create-vpc
@@ -155,6 +155,7 @@ make destroy-resource-group
 16. Any failures must be fixed before shipping a release, unless they are "known failures" or expected. A document at an unknown state of updatedness tracking known failures can be found at:
 https://docs.google.com/spreadsheets/d/10LZszYuAIlrk1acy0GRhrZMd0YohLTQWmcNIdY6XuZU/edit#gid=0
 Use chef.io account credentials to access it.
+Please update the spreadsheet as you resolve failures, especially on the resolution as to whether the issue is release-blocking or not.  This will save time in the future when the error is encountered again and the team has to investigate whether the issue is release-blocking.
 Note that no changes other than CHANGELOG/RELEASE_NOTES changes should land on main between testing and releasing since we typically tag HEAD of main. If something large does land on main, the release tag you create should point specifically at the build that you tested. The git SHA of the build you are testing can be found in /opt/opscode/version-manifest.json.
 
 17. Make sure the Habitat builds for main are passing. These are kicked-off automatically on every merge.
