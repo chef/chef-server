@@ -1486,7 +1486,7 @@ This configuration file has the following settings for `elasticsearch`:
 
 `elasticsearch['data_dir']`
 
-:The paths used to store data. Default value: `/var/opt/opscode/elasticsearch/data`
+: The paths used to store data. Default value: `/var/opt/opscode/elasticsearch/data`
 
 `elasticsearch['plugins_directory']`
 
@@ -1494,7 +1494,7 @@ This configuration file has the following settings for `elasticsearch`:
 
 `elasticsearch['scripts_directory']`
 
-:The default location of the scripts directory depends on which package you install. Default value: `/var/opt/opscode/elasticsearch/scripts`
+: The default location of the scripts directory depends on which package you install. Default value: `/var/opt/opscode/elasticsearch/scripts`
 
 `elasticsearch['temp_directory']`
 
