@@ -2,5 +2,6 @@ source "http://rubygems.org"
 
 gem "sequel", "~> 3.34.1"
 gem "pg", "~> 0.16.0"
-gem "veil", "0.3.9"
+gem "veil", git: "https://github.com/chef/chef_secrets", branch: "lbaker/upgrade-erlang-24.2", ref: "5040d0daea5f643074cb6d41254cf04bfd5ba29a"
+# the below was there after rebasing onto mp's branch
 gem "chef-utils", "~> 16.17"

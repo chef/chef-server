@@ -1,3 +1,13 @@
+GIT
+  remote: https://github.com/chef/chef_secrets
+  revision: 5040d0daea5f643074cb6d41254cf04bfd5ba29a
+  ref: 5040d0daea5f643074cb6d41254cf04bfd5ba29a
+  branch: lbaker/upgrade-erlang-24.2
+  specs:
+    veil (0.3.9)
+      bcrypt (~> 3.1)
+      pbkdf2
+
 GEM
   remote: http://rubygems.org/
   specs:
@@ -6,9 +16,6 @@ GEM
     pbkdf2 (0.1.0)
     pg (0.16.0)
     sequel (3.34.1)
-    veil (0.3.9)
-      bcrypt (~> 3.1)
-      pbkdf2
 
 PLATFORMS
   ruby
@@ -17,7 +24,7 @@ DEPENDENCIES
   chef-utils (~> 16.17)
   pg (~> 0.16.0)
   sequel (~> 3.34.1)
-  veil (= 0.3.9)
+  veil!
 
 BUNDLED WITH
    2.2.15
