@@ -224,12 +224,6 @@ If you are running a Chef Infra Server release before 12.3.0, please contact Che
 
 You are now finished with the upgrade.
 
-{{< note >}}
-
-Check the [post upgrade steps](#post-upgrade-steps) if you are upgrading from a version before Chef Infra Server 14.8 to a version greater than or equal to 14.8.
-
-{{</note >}}
-
 #### Upgrade Failure Troubleshooting
 
 1. If the upgrade failed and you have a corrupted Chef Infra Server and/or a corrupted database, **DO NOT RISK YOUR BACKUP OF THE DATABASE.** Take all steps necessary to preserve the backup, including copying it to another disk. Consult with a professional sysadmin for instructions and best practices.
