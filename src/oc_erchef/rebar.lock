@@ -18,7 +18,7 @@
   0},
  {<<"chef_secrets">>,
   {git,"https://github.com/chef/chef_secrets",
-       {ref,"47ae8d8d868fdc20c2d5bc19c77c65ae5da0a568"}},
+       {branch,"lbaker/upgrade-erlang-24.2"}},
   0},
  {<<"darklaunch">>,
   {git,"https://github.com/chef/opscode-darklaunch-erlang",
