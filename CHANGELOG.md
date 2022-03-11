@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.13.47 -->
-## [14.13.47](https://github.com/chef/chef-server/tree/14.13.47) (2022-03-11)
+<!-- latest_release 14.13.48 -->
+## [14.13.48](https://github.com/chef/chef-server/tree/14.13.48) (2022-03-11)
 
 #### Merged Pull Requests
-- remove note about post upgrade steps [#3227](https://github.com/chef/chef-server/pull/3227) ([IanMadd](https://github.com/IanMadd))
+- Bump activesupport from 7.0.2.2 to 7.0.2.3 in /oc-chef-pedant [#3221](https://github.com/chef/chef-server/pull/3221) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.13.42 -->
 ### Changes since 14.13.42 release
 
 #### Merged Pull Requests
+- Bump activesupport from 7.0.2.2 to 7.0.2.3 in /oc-chef-pedant [#3221](https://github.com/chef/chef-server/pull/3221) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.13.48 -->
 - remove note about post upgrade steps [#3227](https://github.com/chef/chef-server/pull/3227) ([IanMadd](https://github.com/IanMadd)) <!-- 14.13.47 -->
 - Update RELEASE_PROCESS.md [#3212](https://github.com/chef/chef-server/pull/3212) ([lbakerchef](https://github.com/lbakerchef)) <!-- 14.13.46 -->
 - Adding preflight validation for search engine [#3181](https://github.com/chef/chef-server/pull/3181) ([vinay-satish](https://github.com/vinay-satish)) <!-- 14.13.45 -->
