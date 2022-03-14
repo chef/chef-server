@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.13.49 -->
-## [14.13.49](https://github.com/chef/chef-server/tree/14.13.49) (2022-03-11)
+<!-- latest_release 14.13.50 -->
+## [14.13.50](https://github.com/chef/chef-server/tree/14.13.50) (2022-03-14)
 
 #### Merged Pull Requests
-- Update activesupport requirement from &gt;= 3.2.8, &lt; 6.2.0 to &gt;= 3.2.8, &lt; 7.1.0 in /src/oc_bifrost/oc-bifrost-pedant [#3222](https://github.com/chef/chef-server/pull/3222) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump rspec-rails from 5.1.0 to 5.1.1 in /src/oc-id [#3219](https://github.com/chef/chef-server/pull/3219) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.13.42 -->
 ### Changes since 14.13.42 release
 
 #### Merged Pull Requests
+- Bump rspec-rails from 5.1.0 to 5.1.1 in /src/oc-id [#3219](https://github.com/chef/chef-server/pull/3219) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.13.50 -->
 - Update activesupport requirement from &gt;= 3.2.8, &lt; 6.2.0 to &gt;= 3.2.8, &lt; 7.1.0 in /src/oc_bifrost/oc-bifrost-pedant [#3222](https://github.com/chef/chef-server/pull/3222) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.13.49 -->
 - Bump activesupport from 7.0.2.2 to 7.0.2.3 in /oc-chef-pedant [#3221](https://github.com/chef/chef-server/pull/3221) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.13.48 -->
 - remove note about post upgrade steps [#3227](https://github.com/chef/chef-server/pull/3227) ([IanMadd](https://github.com/IanMadd)) <!-- 14.13.47 -->
