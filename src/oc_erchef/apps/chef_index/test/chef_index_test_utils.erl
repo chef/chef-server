@@ -26,4 +26,6 @@ dumb_random_port() ->
 set_provider(solr) ->
     application:set_env(chef_index, search_provider, solr);
 set_provider(elasticsearch) ->
-    application:set_env(chef_index, search_provider, elasticsearch).
+    application:set_env(chef_index, search_provider, elasticsearch);
+set_provider(opensearch) ->
+    application:set_env(chef_index, search_provider, opensearch).

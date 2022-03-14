@@ -99,7 +99,7 @@ describe "/_stats API endpoint", :stats do
     "erlang_mnesia_restarted_transactions" => "COUNTER"
   }
 
-  CHEF_INDEX_TYPE_MAP = {
+  CHEF_INDEX_TYPE_MAP_ES = {
     "chef_elasticsearch_update_count" => "COUNTER",
     "chef_elasticsearch_search_count" => "COUNTER",
     "chef_elasticsearch_delete_search_db_count" => "COUNTER",
@@ -111,7 +111,18 @@ describe "/_stats API endpoint", :stats do
     #
     # "chef_index_http_req_failure_total" => "COUNTER"
     # "chef_elasticsearch_search_with_scroll_resp_count" => "COUNTER",
-    "chef_elasticsearch_search_resp_count" => "COUNTER",
+    "chef_elasticsearch_search_resp_count" => "COUNTER"
+  }
+
+  CHEF_INDEX_TYPE_MAP_OS = {
+    "chef_opensearch_update_count" => "COUNTER",
+    "chef_opensearch_search_count" => "COUNTER",
+    "chef_opensearch_delete_search_db_count" => "COUNTER",
+    "chef_opensearch_delete_search_db_by_type_count" => "COUNTER",
+    "chef_opensearch_search_resp_count" => "COUNTER"
+  }
+
+  CHEF_INDEX_TYPE_MAP_COM = {
     "chef_index_batch_current_batch_size_bytes" => "GAUGE",
     "chef_index_batch_current_batch_doc_count" => "GAUGE",
     "chef_index_batch_inflight_flushes_count" => "GAUGE",
@@ -148,6 +159,12 @@ describe "/_stats API endpoint", :stats do
     "chef_index_expand_make_doc_for_index_duration_ms_count" => "HISTOGRAM",
     "chef_index_expand_make_doc_for_index_duration_ms_sum" => "HISTOGRAM",
   }
+
+  if Pedant::Config.search_provider == 'opensearch'
+    CHEF_INDEX_TYPE_MAP = CHEF_INDEX_TYPE_MAP_COM.merge(CHEF_INDEX_TYPE_MAP_OS)
+  else
+    CHEF_INDEX_TYPE_MAP = CHEF_INDEX_TYPE_MAP_COM.merge(CHEF_INDEX_TYPE_MAP_ES)
+  end
 
   SHARED_TYPE_MAP = ERLANG_RESPONSE_TYPE_MAP.merge(CHEF_INDEX_TYPE_MAP)
   RESPONSE_TYPE_MAP = SHARED_TYPE_MAP.merge(CHEF_INDEX_JSON_TYPE_MAP)

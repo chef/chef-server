@@ -697,6 +697,23 @@ module Pedant
         }
       end
 
+      # Added for opensearch authorization header
+      def get_search_headers()
+        if Pedant::Config.search_provider == 'opensearch'
+          username = Pedant::Config.search_auth_username
+          password = Pedant::Config.search_auth_password
+          auth = Base64.strict_encode64("#{username}:#{password}")
+          {
+            "Accept" => "application/json",
+            "Authorization" => "Basic #{auth}"
+          }
+        else
+          {
+            "Accept" => "application/json"
+          }
+        end
+      end
+
       # Due to how we do indexing, the search results coming back from
       # Erchef are not quite what is in Solr.  As a result, we need to
       # actually hit Solr directly in order to verify that e.g., we
@@ -709,9 +726,7 @@ module Pedant
         # don't have an easy way to access the org's guid in the tests, so
         # I'm not using that. In any event, the following query works.
         url = "#{Pedant::Config.search_server}#{Pedant::Config.search_url_fmt}" % {:type => CGI.escape(type), :query => CGI.escape(query)}
-        headers = {
-          "Accept" => "application/json"
-        }
+        headers = get_search_headers()
         sleep Pedant::Config.direct_solr_query_sleep_time
         r = RestClient.send :get, url, headers
         parse(r)
@@ -738,7 +753,7 @@ module Pedant
         sleep Pedant::Config.direct_solr_query_sleep_time
         url = "#{Pedant::Config.search_server}#{Pedant::Config.search_commit_url}"
         body = ''
-        headers = {}
+        headers = get_search_headers()
         RestClient.send :post, url, body, headers
       end
 

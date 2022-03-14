@@ -248,10 +248,23 @@ EOM
     def external_status_elasticsearch(_detail_level)
       elasticsearch = external_services["elasticsearch"]["external_url"]
       begin
-        Chef::HTTP.new(elasticsearch).get(elasticsearch_status_url)
+        Chef::HTTP.new(elasticsearch).get(search_status_url)
         puts "run: elasticsearch: connected OK to #{elasticsearch}"
       rescue StandardError => e
         puts "down: elasticsearch: failed to connect to #{elasticsearch}: #{e.message.split("\n")[0]}"
+      end
+    end
+
+    def external_status_opensearch(_detail_level)
+      opensearch = external_services["opensearch"]["external_url"]
+      begin
+        username = running_service_config("opscode-erchef")["search_auth_username"]
+        password = running_service_config("opscode-erchef")["search_auth_password"]
+        auth = Base64.strict_encode64("#{username}:#{password}")
+        Chef::HTTP.new(opensearch).get(search_status_url, {"Authorization" => "Basic #{auth}"})
+        puts "run: opensearch: connected OK to #{opensearch}"
+      rescue StandardError => e
+        puts "down: opensearch: failed to connect to #{opensearch}: #{e.message.split("\n")[0]}"
       end
     end
 
@@ -261,9 +274,15 @@ Cleansing data in a remote Elasticsearch instance is not currently supported.
       EOM
     end
 
-    def elasticsearch_status_url
+    def external_cleanse_opensearch(perform_delete)
+      log <<-EOM
+Cleansing data in a remote Opensearch instance is not currently supported.
+      EOM
+    end
+
+    def search_status_url
       case running_service_config("opscode-erchef")["search_provider"]
-      when "elasticsearch"
+      when "elasticsearch", "opensearch"
         "/chef"
       else
         "/admin/ping?wt=json"
