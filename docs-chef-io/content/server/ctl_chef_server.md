@@ -403,7 +403,7 @@ EvBQGdNG39XYSEeF4LneYQKPHEZDdqe7TZdVE8ooU/syxlZgADtvkqEoc4zp1Im3
 
 ## Maintenance Mode
 
-As of 14.6.32, you can now place your Chef Infra Server into maintenance mode to block requests from Chef Infra Clients or tools like knife. Maintenance mode also allows you to specify allowed IP addresses for testing your Infra Server without allowing access to all clients.
+Starting with Chef Infra Server 14.6.32, you can now place your Chef Infra Server into maintenance mode to block requests from Chef Infra Clients or tools like knife. Maintenance mode also allows you to specify allowed IP addresses for testing your Infra Server without allowing access to all clients.
 
 **Syntax**
 
