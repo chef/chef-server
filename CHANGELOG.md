@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.13.54 -->
-## [14.13.54](https://github.com/chef/chef-server/tree/14.13.54) (2022-03-15)
+<!-- latest_release 14.13.55 -->
+## [14.13.55](https://github.com/chef/chef-server/tree/14.13.55) (2022-03-15)
 
 #### Merged Pull Requests
-- Bump pg from 1.3.3 to 1.3.4 in /src/oc-id [#3226](https://github.com/chef/chef-server/pull/3226) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump pg from 1.3.3 to 1.3.4 in /src/chef-server-ctl [#3225](https://github.com/chef/chef-server/pull/3225) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.13.42 -->
 ### Changes since 14.13.42 release
 
 #### Merged Pull Requests
+- Bump pg from 1.3.3 to 1.3.4 in /src/chef-server-ctl [#3225](https://github.com/chef/chef-server/pull/3225) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.13.55 -->
 - Bump pg from 1.3.3 to 1.3.4 in /src/oc-id [#3226](https://github.com/chef/chef-server/pull/3226) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.13.54 -->
 - External Opensearch Support [#3047](https://github.com/chef/chef-server/pull/3047) ([jashaik](https://github.com/jashaik)) <!-- 14.13.53 -->
 - Bump omnibus-software from `aa90acf` to `5947560` in /omnibus [#3218](https://github.com/chef/chef-server/pull/3218) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.13.52 -->
