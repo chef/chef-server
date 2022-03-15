@@ -955,6 +955,21 @@ This subcommand has the following options:
     option only works when run on a standalone Chef Infra Server or on a
     primary backend Chef server within a legacy tier.
 
+{{< note >}}
+If `knife search` does not return the expected results and data is present in the Chef Infra Server after reindex, then verify the search index configuration with the command:
+
+```bash
+curl -XGET http://127.0.0.1:9200/_all/_settings`
+```
+
+Set the `read_only_allow_delete` to false. Use this command to reset the search index configuration :
+
+```bash
+curl -XPUT -H "Content-Type: application/json" http://127.0.0.1:9200/_all/_settings -d '{"index.blocks.read_only_allow_delete": null}'
+```
+
+{{< /note >}}
+
 ## Server Admins
 
 {{% server_rbac_server_admins %}}
