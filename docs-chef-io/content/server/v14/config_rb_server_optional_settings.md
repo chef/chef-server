@@ -1463,13 +1463,29 @@ This configuration file has the following settings for `opscode-erchef`:
 
 `opscode_erchef['cbv_cache_item_ttl']`
 
-:   The minimum time in milliseconds that Chef Infra Server will keep any given cookbook version response in the cache when
+:   The maximum time in milliseconds that Chef Infra Server will keep any given cookbook version response in the cache when
     when `cbv_cache_enabled` is enabled.
     Default value: `30000`.
     
 {{< note >}}
 Be careful if increasing this number - requests for a given set of cookbook versions will be stale if the resolved cookbook versions are updated before the cache entry times out. This will
 not occur if you increment the version of a cookbook with every cookbook update, which is the recommended approach to updating cookbooks.
+{{< /note >}}
+
+### OpenSearch
+
+This configuration file has the following settings for `opensearch`:
+
+`opensearch['external']`
+
+: Enable external `opensearch` service by setting to `true`. Default value: `false`.
+
+`opensearch['external_url']`
+
+: The external OpenSearch URL. Example: `http://127.0.0.1:9200`. Default value: `nil`
+
+{{< note >}}
+Chef Infra Server supports OpenSearch only as an external indexing provider. You must provide values for `external` and `external_url` under this configuration.
 {{< /note >}}
 
 ### Elasticsearch
@@ -1486,7 +1502,7 @@ This configuration file has the following settings for `elasticsearch`:
 
 `elasticsearch['data_dir']`
 
-:The paths used to store data. Default value: `/var/opt/opscode/elasticsearch/data`
+: The paths used to store data. Default value: `/var/opt/opscode/elasticsearch/data`
 
 `elasticsearch['plugins_directory']`
 
@@ -1494,7 +1510,7 @@ This configuration file has the following settings for `elasticsearch`:
 
 `elasticsearch['scripts_directory']`
 
-:The default location of the scripts directory depends on which package you install. Default value: `/var/opt/opscode/elasticsearch/scripts`
+: The default location of the scripts directory depends on which package you install. Default value: `/var/opt/opscode/elasticsearch/scripts`
 
 `elasticsearch['temp_directory']`
 

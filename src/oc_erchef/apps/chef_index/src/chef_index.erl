@@ -39,7 +39,7 @@
 -define(NOT_A_QUERY, <<"not_a_query">>).
 
 search_provider() ->
-    envy:get(chef_index, search_provider, solr, envy:one_of([solr, elasticsearch])).
+    envy:get(chef_index, search_provider, solr, envy:one_of([solr, elasticsearch, opensearch])).
 
 histogram_buckets() ->
     [0.1, 0.5, 1, 5, 10, 25, 50, 100, 250, 500, 1000, 2000, 5000, 10000].
@@ -50,6 +50,8 @@ histogram_buckets() ->
                     {error, {solr_500, string()}}.
 search(Query = #chef_solr_query{search_provider=elasticsearch}) ->
     chef_elasticsearch:search(Query);
+search(Query = #chef_solr_query{search_provider=opensearch}) ->
+    chef_opensearch:search(Query);
 search(Query = #chef_solr_query{search_provider=solr}) ->
     chef_solr:search(Query).
 
@@ -59,6 +61,8 @@ update(Body) ->
 
 update(elasticsearch, Body) ->
     chef_elasticsearch:update(Body);
+update(opensearch, Body) ->
+    chef_opensearch:update(Body);
 update(solr, Body) ->
     chef_solr:update(Body).
 
@@ -66,6 +70,7 @@ update(solr, Body) ->
 delete_search_db(OrgId) ->
     case search_provider() of
         elasticsearch -> chef_elasticsearch:delete_search_db(OrgId);
+        opensearch -> chef_opensearch:delete_search_db(OrgId);
         solr -> chef_solr:delete_search_db(OrgId)
     end.
 
@@ -73,6 +78,7 @@ delete_search_db(OrgId) ->
 delete_search_db_by_type(OrgId, Type) ->
     case search_provider() of
         elasticsearch -> chef_elasticsearch:delete_search_db_by_type(OrgId, Type);
+        opensearch -> chef_opensearch:delete_search_db_by_type(OrgId, Type);
         solr -> chef_solr:delete_search_db_by_type(OrgId, Type)
     end.
 
@@ -92,6 +98,8 @@ transform_data(Data) ->
 
 transform_data(elasticsearch, Data) ->
     chef_elasticsearch:transform_data(Data);
+transform_data(opensearch, Data) ->
+    chef_opensearch:transform_data(Data);
 transform_data(solr, Data) ->
     chef_solr:transform_data(Data).
 

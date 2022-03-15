@@ -53,7 +53,7 @@ template erchef_config do
     node['private_chef']['opscode-erchef'].to_hash.merge(ldap_enabled: ldap_authentication_enabled,
                                                          enable_ssl: enable_ssl,
                                                          ldap_encryption_type: ldap_encryption_type,
-                                                         solr_elasticsearch_major_version: helper.elastic_search_major_version,
+                                                         solr_elasticsearch_major_version: helper.search_engine_major_version,
                                                          helper: helper)
   }
   notifies :run, 'execute[remove_erchef_siz_files]', :immediately
