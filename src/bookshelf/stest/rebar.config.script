@@ -66,7 +66,7 @@ fun(C) ->
                      end,
                 MergeConfig({deps,
                              [{edown, ".*",
-                               {git, "git://github.com/seth/edown.git",
+                               {git, "https://github.com/seth/edown",
                                 {branch, "master"}}}]},
                             C1)
         end
