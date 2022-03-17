@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.13.57 -->
-## [14.13.57](https://github.com/chef/chef-server/tree/14.13.57) (2022-03-15)
+<!-- latest_release 14.13.58 -->
+## [14.13.58](https://github.com/chef/chef-server/tree/14.13.58) (2022-03-17)
 
 #### Merged Pull Requests
-- Add maintenance mode to the docs [#3217](https://github.com/chef/chef-server/pull/3217) ([sean-horn](https://github.com/sean-horn))
+- Fix omnibus/adhoc pipeline [#3232](https://github.com/chef/chef-server/pull/3232) ([lbakerchef](https://github.com/lbakerchef))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.13.42 -->
 ### Changes since 14.13.42 release
 
 #### Merged Pull Requests
+- Fix omnibus/adhoc pipeline [#3232](https://github.com/chef/chef-server/pull/3232) ([lbakerchef](https://github.com/lbakerchef)) <!-- 14.13.58 -->
 - Add maintenance mode to the docs [#3217](https://github.com/chef/chef-server/pull/3217) ([sean-horn](https://github.com/sean-horn)) <!-- 14.13.57 -->
 - Documentation note about ES read-only [#3182](https://github.com/chef/chef-server/pull/3182) ([vinay-satish](https://github.com/vinay-satish)) <!-- 14.13.56 -->
 - Bump pg from 1.3.3 to 1.3.4 in /src/chef-server-ctl [#3225](https://github.com/chef/chef-server/pull/3225) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.13.55 -->
