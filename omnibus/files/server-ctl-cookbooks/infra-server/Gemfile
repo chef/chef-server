@@ -2,4 +2,4 @@ source 'https://rubygems.org'
 
 gem 'cookstyle'
 gem 'chefspec'
-gem 'veil', git: 'https://github.com/chef/chef_secrets', branch: 'lbaker/upgrade-erlang-24.2', ref: 'b2485af39c722f88ffbdab5048b799f26cb22237'
+gem 'veil', git: 'https://github.com/chef/chef_secrets', branch: 'lbaker/upgrade-erlang-24.2' #, ref: 'whatever...'
