@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.13.58 -->
-## [14.13.58](https://github.com/chef/chef-server/tree/14.13.58) (2022-03-17)
+<!-- latest_release 14.13.59 -->
+## [14.13.59](https://github.com/chef/chef-server/tree/14.13.59) (2022-03-18)
 
 #### Merged Pull Requests
-- Fix omnibus/adhoc pipeline [#3232](https://github.com/chef/chef-server/pull/3232) ([lbakerchef](https://github.com/lbakerchef))
+- Correcting es preflight validation after helper file changes [#3235](https://github.com/chef/chef-server/pull/3235) ([vinay-satish](https://github.com/vinay-satish))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.13.42 -->
 ### Changes since 14.13.42 release
 
 #### Merged Pull Requests
+- Correcting es preflight validation after helper file changes [#3235](https://github.com/chef/chef-server/pull/3235) ([vinay-satish](https://github.com/vinay-satish)) <!-- 14.13.59 -->
 - Fix omnibus/adhoc pipeline [#3232](https://github.com/chef/chef-server/pull/3232) ([lbakerchef](https://github.com/lbakerchef)) <!-- 14.13.58 -->
 - Add maintenance mode to the docs [#3217](https://github.com/chef/chef-server/pull/3217) ([sean-horn](https://github.com/sean-horn)) <!-- 14.13.57 -->
 - Documentation note about ES read-only [#3182](https://github.com/chef/chef-server/pull/3182) ([vinay-satish](https://github.com/vinay-satish)) <!-- 14.13.56 -->
