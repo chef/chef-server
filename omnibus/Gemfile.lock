@@ -1,7 +1,7 @@
 GIT
   remote: https://github.com/chef/omnibus-software.git
-  revision: a9b13a09c2f89e4618225dd41b2fd08f2150a1ba
-  branch: main
+  revision: 26d6406301fc2fa3e182336080ed4ddd38bb654b
+  branch: lbaker/upgrade-erlang-24.2
   specs:
     omnibus-software (4.0.0)
       omnibus (>= 9.0.0)
