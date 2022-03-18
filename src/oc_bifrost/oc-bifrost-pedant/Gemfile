@@ -6,4 +6,4 @@
 ## expects it to be in the path
 ##gem 'veil'
 
-gem 'veil', git: 'https://github.com/chef/chef_secrets', branch: 'lbaker/upgrade-erlang-24.2', ref: 'b2485af39c722f88ffbdab5048b799f26cb22237'
+gem 'veil', git: 'https://github.com/chef/chef_secrets', branch: 'lbaker/upgrade-erlang-24.2', ref: 'be7388bab6ffb74c3008622a96bf1694278f5be7'
