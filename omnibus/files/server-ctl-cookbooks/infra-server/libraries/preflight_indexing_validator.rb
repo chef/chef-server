@@ -133,7 +133,7 @@ class IndexingPreflightValidator < PreflightValidator
 
   def verify_search_engine_permissions
     if node['private_chef']['opscode-erchef']['search_provider'] != 'solr'
-      search_provider_url = helper.solr_url
+      search_provider_url = helper.search_engine_url
       begin
         client = Chef::HTTP.new("#{search_provider_url}/_all/_settings")
         response = JSON.parse(client.get(''))
