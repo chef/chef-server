@@ -221,6 +221,9 @@ https://discourse.chef.io/t/chef-infra-server-14-10-23-released/20438
 1. Confirm that the data for the Pending Release Notes at https://github.com/chef/chef-server/wiki/Pending-Release-Notes is automatically deleted by expeditor, and only the titles remain.  Notify releng at https://github.com/chef/release-engineering/issues if this does not automatically happen on promote.
 1. Confirm that the release notes appear at https://docs.chef.io/release_notes_server/ .  This should happen automatically via expeditor, but if it does not you need to perform the steps manually and create an issue with releng at https://github.com/chef/release-engineering/issues.
 
+In case of release failure, consult appropriate documentation to assist with troubleshooting and correcting the issue.
+https://expeditor.chef.io/dashboard/?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE2NDYxODMwMTgsImlhdCI6MTY0NjE2ODYxOCwiaXNzIjoiaHR0cHM6Ly9leHBlZGl0b3IuY2hlZi5pbyIsInVzZXJfbG9naW4iOiJQcmFqYWt0YVB1cm9oaXQiLCJ1c2VyX25hbWUiOm51bGwsImFjY2Vzc190b2tlbiI6ImdodV95R3o4MkE5dWg5TzdnVXhOMHhEbXQ5bHU1YXM0YUE0TVZuVjYiLCJhZG1pbiI6dHJ1ZX0.5EZ1GvD_ufWmXPzfosGbs11RXYnHNm7gABgc-TpLgkQ#/
+
 ### Automate
 
 1. Create issues in the chef-server repo and in the automate repo to update the version of Chef Infra Server in Automate. Make sure to link the issues to each other.
