@@ -33,3 +33,10 @@ directory "/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/sv/rabbitmq" do
   recursive true
   action :delete
 end
+
+::Dir.glob(::File.join(node['private_chef']['user']['home'], '/elasticsearch/lib/log4j*2.11.1*')).each do |filename|
+  file filename do
+    action :delete
+  end
+end
+
