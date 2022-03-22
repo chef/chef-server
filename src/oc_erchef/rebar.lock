@@ -77,7 +77,7 @@
  {<<"jsx">>,{pkg,<<"jsx">>,<<"2.9.0">>},1},
  {<<"lager">>,
   {git,"https://github.com/erlang-lager/lager",
-       {ref,"91575d4479c897451edf138c10fa86c3125ec52e"}},
+       {ref,"a140ea935eae9149bb35234bb40f6acf1c69caa1"}},
   0},
  {<<"lhttpc">>,{pkg,<<"lhttpc">>,<<"1.6.2">>},1},
  {<<"meck">>,
