@@ -63,7 +63,7 @@
   0},
  {<<"mini_s3">>,
   {git,"https://github.com/chef/mini_s3",
-       {ref,"8a6b80ec60be799c5f69d9b2f22eb0af55b4dc77"}},
+       {branch,"lbaker/upgrade-erlang-24.2"}},
   0},
  {<<"mixer">>,
   {git,"https://github.com/chef/mixer",
