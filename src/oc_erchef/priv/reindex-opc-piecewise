@@ -13,7 +13,7 @@
 %% A binary() index is taken to be a data bag name.
 -type index() :: client | environment | node | role | binary().
 
-%% @doc 
+%% @doc
 %%
 %% Examples:
 %%
@@ -178,7 +178,7 @@ get_org_id(Context, OrgName) ->
 %% @doc Connect to the node actually running Erchef.  Kind of hard to do RPC calls
 %% otherwise....
 init_network() ->
-    {ok, _} = net_kernel:start([?SELF, longnames]),
+    {ok, _} = net_kernel:start([make_node_name(), longnames]),
     true = erlang:set_cookie(node(), ?ERCHEF_COOKIE),
     pong = net_adm:ping(?ERCHEF).
 
@@ -191,3 +191,6 @@ find_dl_headers(OrgName, IntLB) when is_list(OrgName) ->
     {KVList} = SubJson,
     Headers = string:join(lists:map(fun({Key, Val}) -> binary_to_list(Key) ++ "=" ++ integer_to_list(Val) end, KVList), ";"),
     rpc:call(?ERCHEF, xdarklaunch_req,parse_header, [ fun(_) -> Headers end]).
+
+make_node_name() ->
+    list_to_atom("reindex-" ++ os:getpid() ++ "@127.0.0.1").
