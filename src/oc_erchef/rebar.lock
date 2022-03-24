@@ -55,7 +55,7 @@
   0},
  {<<"erlware_commons">>,
   {git,"https://github.com/chef/erlware_commons",
-       {ref,"3d3ed6d548a4baf8721db870b2afe003ec2ed748"}},
+       {ref,"f511ed875bea87212ba9ee40ade1c9f53498ce79"}},
   0},
  {<<"folsom">>,
   {git,"https://github.com/boundary/folsom",
