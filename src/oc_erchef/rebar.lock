@@ -55,7 +55,7 @@
   0},
  {<<"erlware_commons">>,
   {git,"https://github.com/chef/erlware_commons",
-       {ref,"20c611d8c457edfc84a915cf1026f22980a83e00"}},
+       {branch,"lbaker/upgrade-erlang-24.2"}},
   0},
  {<<"folsom">>,
   {git,"https://github.com/boundary/folsom",
