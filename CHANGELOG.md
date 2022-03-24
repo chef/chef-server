@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.13.60 -->
-## [14.13.60](https://github.com/chef/chef-server/tree/14.13.60) (2022-03-18)
+<!-- latest_release 14.13.61 -->
+## [14.13.61](https://github.com/chef/chef-server/tree/14.13.61) (2022-03-24)
 
 #### Merged Pull Requests
-- Update release process documentation [#3233](https://github.com/chef/chef-server/pull/3233) ([lbakerchef](https://github.com/lbakerchef))
+- WIP INFS-97 - lbaker/INFS-97/pg13.6 [#3230](https://github.com/chef/chef-server/pull/3230) ([lbakerchef](https://github.com/lbakerchef))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.13.42 -->
 ### Changes since 14.13.42 release
 
 #### Merged Pull Requests
+- WIP INFS-97 - lbaker/INFS-97/pg13.6 [#3230](https://github.com/chef/chef-server/pull/3230) ([lbakerchef](https://github.com/lbakerchef)) <!-- 14.13.61 -->
 - Update release process documentation [#3233](https://github.com/chef/chef-server/pull/3233) ([lbakerchef](https://github.com/lbakerchef)) <!-- 14.13.60 -->
 - Correcting es preflight validation after helper file changes [#3235](https://github.com/chef/chef-server/pull/3235) ([vinay-satish](https://github.com/vinay-satish)) <!-- 14.13.59 -->
 - Fix omnibus/adhoc pipeline [#3232](https://github.com/chef/chef-server/pull/3232) ([lbakerchef](https://github.com/lbakerchef)) <!-- 14.13.58 -->
