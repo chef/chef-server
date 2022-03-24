@@ -17,6 +17,8 @@
 
 -module(bksw_io_names).
 
+-compile([nowarn_deprecated_function]).
+
 -export([encode/1,
          decode/1,
          bucket_path/1,
