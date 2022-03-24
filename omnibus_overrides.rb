@@ -17,3 +17,5 @@ override :logrotate, version: "3.9.2" # 3.18.0 patches fail
 
 # update `src/openresty-noroot/habitat/plan.sh` when updating this version.
 override :openresty, version: "1.21.4.1rc1"
+
+override :openssl, version: "1.1.1m"
