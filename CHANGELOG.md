@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.13.63 -->
-## [14.13.63](https://github.com/chef/chef-server/tree/14.13.63) (2022-03-25)
+<!-- latest_release 14.13.64 -->
+## [14.13.64](https://github.com/chef/chef-server/tree/14.13.64) (2022-03-25)
 
 #### Merged Pull Requests
-- Bump chef from 17.9.52 to 17.10.0 in /src/oc-id [#3241](https://github.com/chef/chef-server/pull/3241) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Added cookbook version cache configs in hab [#3237](https://github.com/chef/chef-server/pull/3237) ([jashaik](https://github.com/jashaik))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.13.42 -->
 ### Changes since 14.13.42 release
 
 #### Merged Pull Requests
+- Added cookbook version cache configs in hab [#3237](https://github.com/chef/chef-server/pull/3237) ([jashaik](https://github.com/jashaik)) <!-- 14.13.64 -->
 - Bump chef from 17.9.52 to 17.10.0 in /src/oc-id [#3241](https://github.com/chef/chef-server/pull/3241) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.13.63 -->
 - support multiple instances of reindex-opc-piecewise [#3242](https://github.com/chef/chef-server/pull/3242) ([marcparadise](https://github.com/marcparadise)) <!-- 14.13.62 -->
 - WIP INFS-97 - lbaker/INFS-97/pg13.6 [#3230](https://github.com/chef/chef-server/pull/3230) ([lbakerchef](https://github.com/lbakerchef)) <!-- 14.13.61 -->
