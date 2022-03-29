@@ -379,7 +379,7 @@ For indexes created by Elasticsearch version 5.6.16 (`"created_string" : "5.6.16
    sudo chef-backend-ctl stop elasticsearch
    ```
 
-1. Delete the current Elasticsearch index. This step ensures that Elasticsearch creates a new index with the upgraded Elasticsearch version. Use the command:
+1. Delete the current Elasticsearch index. Elasticsearch will create a new index with the upgraded Elasticsearch index version. Use the command:
 
    ```bash
    sudo rm -fr /var/opt/chef-backend/elasticsearch/data/*
