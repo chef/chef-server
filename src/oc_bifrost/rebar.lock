@@ -27,7 +27,7 @@
  {<<"goldrush">>,{pkg,<<"goldrush">>,<<"0.1.9">>},1},
  {<<"jiffy">>,
   {git,"https://github.com/davisp/jiffy",
-       {branch, "master"},
+       {branch, "master"}},
   0},
  {<<"lager">>,
   {git,"https://github.com/erlang-lager/lager",
