@@ -365,7 +365,7 @@ For indexes created by Elasticsearch version 5.6.16 (`"created_string" : "5.6.16
 
 1. We strongly recommend [rebuilding the "chef" index]({{< relref "#rebuild-the-chef-index" >}}) after the upgrade is complete on both backend and frontend nodes.
 
-## Rebuild the chef index
+## Rebuild the Chef Index
 
 1. Set cluster failover to off on a backend
 
