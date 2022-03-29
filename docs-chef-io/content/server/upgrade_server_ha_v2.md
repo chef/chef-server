@@ -208,6 +208,12 @@ Only "chef" indexes should be present, and all indexes should have a green healt
 curl -s -S "localhost:9200/_cat/indices?h=health,status,index" | grep -v '^green'
 ```
 
+Investigate the health status of your indexes by running the same command without grep:
+
+```bash
+curl -s -S "localhost:9200/_cat/indices?h=health,status,index"
+```
+
 #### Upgrade Strategy
 
 The Chef Backend upgrade uses a rolling strategy, but the Elasticsearch version used to create the indexes determines if your upgrade is automatic or requires downtime.
