@@ -361,7 +361,7 @@ For indexes created by Elasticsearch version 5.6.16 (`"created_string" : "5.6.16
     
     Afterwards, the original leader will have upgraded completely.
 
-1. To continue the upgrade, let's move to the Chef Infra Server front-end nodes using this back-end cluster, see [Upgrade Front-ends Associated with a Chef Backend Cluster]({{< relref "install_server_ha.md/#upgrading-chef-infra-server-on-the-frontend-machines" >}}).
+1. Next, [upgrade the Chef Infra Server frontend nodes using this backend cluster]({{< relref "#upgrading-chef-infra-server-on-the-frontend-machines" >}}).
 
 1. We strongly recommend rebuilding the "chef" index version to after the upgrade is complete on both backends and frontends by following these steps [Rebuild Index]({{< relref "#rebuild-the-chef-index" >}})
 
