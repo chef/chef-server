@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.13.64 -->
-## [14.13.64](https://github.com/chef/chef-server/tree/14.13.64) (2022-03-25)
+<!-- latest_release 14.13.65 -->
+## [14.13.65](https://github.com/chef/chef-server/tree/14.13.65) (2022-03-29)
 
 #### Merged Pull Requests
-- Added cookbook version cache configs in hab [#3237](https://github.com/chef/chef-server/pull/3237) ([jashaik](https://github.com/jashaik))
+- Opscode wordmark replacements [#3238](https://github.com/chef/chef-server/pull/3238) ([lbakerchef](https://github.com/lbakerchef))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.13.42 -->
 ### Changes since 14.13.42 release
 
 #### Merged Pull Requests
+- Opscode wordmark replacements [#3238](https://github.com/chef/chef-server/pull/3238) ([lbakerchef](https://github.com/lbakerchef)) <!-- 14.13.65 -->
 - Added cookbook version cache configs in hab [#3237](https://github.com/chef/chef-server/pull/3237) ([jashaik](https://github.com/jashaik)) <!-- 14.13.64 -->
 - Bump chef from 17.9.52 to 17.10.0 in /src/oc-id [#3241](https://github.com/chef/chef-server/pull/3241) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.13.63 -->
 - support multiple instances of reindex-opc-piecewise [#3242](https://github.com/chef/chef-server/pull/3242) ([marcparadise](https://github.com/marcparadise)) <!-- 14.13.62 -->
