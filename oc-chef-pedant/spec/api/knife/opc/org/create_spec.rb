@@ -15,6 +15,7 @@
 
 require 'pedant/rspec/knife_util'
 require 'pedant/rspec/user_util'
+require 'chef-utils/dist'
 
 describe 'knife', :validation, :knife do
   context 'opc' do
@@ -24,7 +25,7 @@ describe 'knife', :validation, :knife do
         include Pedant::RSpec::UserUtil
 
         let(:org_name) { "org-#{rand(1<<32)}" }
-        let(:superuser_rb) { '/etc/opscode/pivotal.rb'}
+        let(:superuser_rb) { "/etc/#{::ChefUtils::Dist::Org::LEGACY_CONF_DIR}/pivotal.rb"}
         let(:requestor) { superuser }
         let(:admin_requestor) { superuser }
 

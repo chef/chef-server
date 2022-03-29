@@ -3,12 +3,12 @@ exec 2>&1
 
 ulimit -n 65536
 
-export ES_HOME=<%= node['private_chef']['elasticsearch']['dir'] %>            #/var/opt/opscode/elasticsearch
-export ES_DATA=<%= node['private_chef']['elasticsearch']['dir'] %>/data       #/var/opt/opscode/elasticsearch/data
+export ES_HOME=<%= node['private_chef']['elasticsearch']['dir'] %>            #/var/opt/<%= ChefUtils::Dist::Org::LEGACY_CONF_DIR %>/elasticsearch
+export ES_DATA=<%= node['private_chef']['elasticsearch']['dir'] %>/data       #/var/opt/<%= ChefUtils::Dist::Org::LEGACY_CONF_DIR %>/elasticsearch/data
 
-export JAVA_HOME=/opt/opscode/embedded/open-jre/
+export JAVA_HOME=/opt/<%= ChefUtils::Dist::Org::LEGACY_CONF_DIR %>/embedded/open-jre/
 export ES_PATH_CONF=<%= node['private_chef']['elasticsearch']['dir'] %>/config
-export PATH=<%= node['private_chef']['install_path'] %>/embedded/bin:$JAVA_HOME/bin:$ES_HOME:$PATH #/opt/opscode/embedded/bin
+export PATH=<%= node['private_chef']['install_path'] %>/embedded/bin:$JAVA_HOME/bin:$ES_HOME:$PATH #/opt/<%= ChefUtils::Dist::Org::LEGACY_CONF_DIR %>/embedded/bin
 
 export TMPDIR=<%= node['private_chef']['elasticsearch']['temp_directory'] %>
 export ES_TMPDIR=<%= node['private_chef']['elasticsearch']['temp_directory'] %>

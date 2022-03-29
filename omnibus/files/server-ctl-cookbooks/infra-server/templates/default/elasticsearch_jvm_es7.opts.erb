@@ -6,7 +6,7 @@
 <%=opt%>
 <% end %>
 # Do not override xmx/xms/newsize in
-# jvm_options - instead set the attributes in chef-server.rb
+# jvm_options - instead set the attributes in <%= ChefUtils::Dist::Server::SERVER %>.rb
 -Xmx<%=@heap_size%>m
 -Xms<%=@heap_size%>m
 -XX:NewSize=<%= @new_size %>M

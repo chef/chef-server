@@ -233,7 +233,7 @@ class PostgresqlPreflightValidator < PreflightValidator
   def err_CSPG002_missing_superuser_id
     <<~EOM
       CSPG002: You have not set a database superuser name under
-               "postgresql['db_superuser']" in chef-server.rb.  This is required
+               "postgresql['db_superuser']" in #{ChefUtils::Dist::Server::SERVER}.rb.  This is required
                for external database support - please set it now and
                then re-run 'chef-server-ctl reconfigure'.
 
@@ -258,7 +258,7 @@ class PostgresqlPreflightValidator < PreflightValidator
     <<~EOM
       CSPG004: Because postgresql['external'] is set to true, you must also set
                postgresql['vip'] to the host or IP of an external postgres database
-               in chef-server.rb.
+               in #{ChefUtils::Dist::Server::SERVER}.rb.
 
                See https://docs.chef.io/server/#postgresql-settings
                for more information.
@@ -282,7 +282,7 @@ class PostgresqlPreflightValidator < PreflightValidator
 CSPG011: I could not authenticate to #{cs_pg_attr['vip']} as
          #{cs_pg_attr['db_connection_superuser'] || cs_pg_attr['db_superuser']} using the password provided.
          Please make sure that the the password you provided in
-         chef-server.rb under "postgresql['db_superuser_password'] is correct
+         #{ChefUtils::Dist::Server::SERVER}.rb under "postgresql['db_superuser_password'] is correct
          for this user.
 
          See https://docs.chef.io/errors/#cspg011-cannot-authenticate
@@ -295,8 +295,8 @@ EOM
 CSPG012: There is a missing or incorrect pg_hba.conf entry for the
          user '#{cs_pg_attr['db_connection_superuser'] || cs_pg_attr['db_superuser']}' and/or this originating host.
          Please ensure that pg_hba.conf entries exist to allow the superuser
-         account to connect from the Chef Infra Server backend nodes, and to
-         allow the application accounts to connect from all Chef Infra Server
+         account to connect from the #{ChefUtils::Dist::Server::PRODUCT} backend nodes, and to
+         allow the application accounts to connect from all #{ChefUtils::Dist::Server::PRODUCT}
          nodes.
 
          See https://docs.chef.io/errors/#cspg012-incorrect-rules
@@ -317,7 +317,7 @@ EOM
 
   def err_CSPG014_bad_postgres_version(ver)
     <<~EOM
-      CSPG014: Chef Infra Server currently requires PostgreSQL version #{REQUIRED_VERSION} or greater.
+      CSPG014: #{ChefUtils::Dist::Server::PRODUCT} currently requires PostgreSQL version #{REQUIRED_VERSION} or greater.
                The database you have provided is running version #{ver}.
 
                See https://docs.chef.io/errors/#cspg014-incorrect-version
@@ -338,7 +338,7 @@ EOM
 
   def err_CSPG016_database_exists(dbname)
     <<~EOM
-      CSPG016: The Chef Infra Server database named '#{dbname}' already exists on the
+      CSPG016: The #{ChefUtils::Dist::Server::PRODUCT} database named '#{dbname}' already exists on the
                PostgreSQL server. Please remove it before proceeding.
 
                See https://docs.chef.io/errors/#cspg016-database-exists
@@ -348,11 +348,11 @@ EOM
 
   def err_CSPG017_role_exists(username)
     <<~EOM
-      CSPG017: The Chef Infra Server database role/user named '#{username}' already exists
+      CSPG017: #{ChefUtils::Dist::Server::PRODUCT} database role/user named '#{username}' already exists
                on the PostgreSQL server. If possible, please remove this user
                via 'DROP ROLE "#{username}"' before proceeding, or reference the
                troubleshooting link below for information about configuring
-               Chef Infra Server to use an alternative user name.
+               #{ChefUtils::Dist::Server::PRODUCT} to use an alternative user name.
 
                See https://docs.chef.io/errors/#cspg017-user-exists
                for more information.

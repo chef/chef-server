@@ -19,8 +19,8 @@ class PreflightValidationFailed < StandardError
 end
 
 class PreflightValidator
-  CHEF_SERVER_NAME = 'Chef Infra Server'.freeze
-  CHEF_SERVER_CONFIG_FILE = '/etc/opscode/chef-server.rb'.freeze
+  CHEF_SERVER_NAME = ChefUtils::Dist::Server::PRODUCT.freeze
+  CHEF_SERVER_CONFIG_FILE = "#{ChefUtils::Dist::Server::CONF_DIR}/#{ChefUtils::Dist::Server::SERVER}.rb".freeze
 
   attr_reader :node, :previous_run, :helper
   attr_reader :cs_pg_attr, :node_pg_attr

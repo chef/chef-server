@@ -252,13 +252,13 @@ component_runit_service 'nginx' do
 end
 
 # log rotation
-template '/etc/opscode/logrotate.d/nginx' do
+template "/etc/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/logrotate.d/nginx" do
   source 'logrotate.erb'
   owner 'root'
   group 'root'
   mode '0644'
   variables(node['private_chef']['nginx'].to_hash.merge(
-    'postrotate' => "/opt/opscode/embedded/sbin/nginx -c #{nginx_config} -s reopen",
+    'postrotate' => "/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/embedded/sbin/nginx -c #{nginx_config} -s reopen",
     'owner' => OmnibusHelper.new(node).ownership['owner'],
     'group' => OmnibusHelper.new(node).ownership['group']
   ))
@@ -266,7 +266,7 @@ end
 
 # Fix permissions for nginx directories, if required, based on nginx_no_root flag
 [
-  '/opt/opscode/embedded/nginx',
+  "/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/embedded/nginx",
   "#{node['private_chef']['nginx']['dir']}",
   "#{node['private_chef']['nginx']['log_directory']}",
 ].each do |nginx_no_root_perms_fix_path|

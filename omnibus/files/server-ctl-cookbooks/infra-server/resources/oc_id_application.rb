@@ -26,13 +26,13 @@ action :create do
     attributes = create!
 
     if new_resource.write_to_disk
-      directory '/etc/opscode/oc-id-applications' do
+      directory "/etc/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/oc-id-applications" do
         owner 'root'
         group 'root'
         mode '0755'
       end
 
-      file "/etc/opscode/oc-id-applications/#{new_resource.name}.json" do
+      file "/etc/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/oc-id-applications/#{new_resource.name}.json" do
         content Chef::JSONCompat.to_json_pretty(attributes)
         owner 'root'
         group 'root'
@@ -45,7 +45,7 @@ end
 action_class do
   def create!
     @attributes ||= begin
-                      env_helper = 'veil-env-helper --use-file -s chef-server.webui_key -s oc_id.sql_password -s oc_id.secret_key_base'
+                      env_helper = "veil-env-helper -f /etc/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/private-#{ChefUtils::Dist::Infra::SHORT}-secrets.json --use-file -s chef-server.webui_key -s oc_id.sql_password -s oc_id.secret_key_base"
                       rails_script = <<~EOF
                               app = Doorkeeper::Application.find_or_create_by(:name => "#{new_resource.name}");
                               app.update(:redirect_uri => "#{new_resource.redirect_uri}");
@@ -61,7 +61,7 @@ action_class do
                       #          (right here) ------^
                       # ```
                       json = shell_out!("#{env_helper} -- bin/rails runner -e production '#{rails_script}'",
-                        cwd: '/opt/opscode/embedded/service/oc_id').stdout.lines.last.chomp
+                        cwd: "/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/embedded/service/oc_id").stdout.lines.last.chomp
 
                       Chef::JSONCompat.from_json(json).delete_if { |key| %w( id created_at updated_at).include? key }
                     end

@@ -1,5 +1,5 @@
 global
-        stats socket /var/opt/opscode/haproxy/haproxy.sock mode 600
+        stats socket /var/opt/<%= ChefUtils::Dist::Org::LEGACY_CONF_DIR %>/haproxy/haproxy.sock mode 600
 
 defaults
         # Timeout for connect() calls to the backend servers. This

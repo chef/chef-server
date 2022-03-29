@@ -113,7 +113,7 @@ ruby_block 'wait for haproxy status socket' do
 
     unless connected
       Chef::Log.fatal('HAProxy status socket never appeared properly!')
-      Chef::Log.fatal('See /var/log/opscode/haproxy/current for more information')
+      Chef::Log.fatal("See /var/log/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/haproxy/current for more information")
       Kernel.exit! 1
     end
   end
@@ -165,7 +165,7 @@ ruby_block 'wait for backend leader to stabilize' do
 
     unless stable
       Chef::Log.fatal('HAProxy still showing multiple active backends')
-      Chef::Log.fatal('Please check /var/log/opscode/haproxy/current locally for problems.')
+      Chef::Log.fatal("Please check /var/log/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/haproxy/current locally for problems.")
       Chef::Log.fatal("Please check your backend cluster's status for problems.")
       Kernel.exit! 1
     end

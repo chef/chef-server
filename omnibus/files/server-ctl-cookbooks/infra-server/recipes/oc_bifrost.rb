@@ -33,7 +33,7 @@ oc_bifrost_sasl_log_dir = File.join(oc_bifrost_log_dir, 'sasl')
   end
 end
 
-link '/opt/opscode/embedded/service/oc_bifrost/log' do
+link "/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/embedded/service/oc_bifrost/log" do
   to oc_bifrost_log_dir
 end
 
@@ -48,7 +48,7 @@ template oc_bifrost_config do
   notifies :restart, 'component_runit_service[oc_bifrost]'
 end
 
-link '/opt/opscode/embedded/service/oc_bifrost/sys.config' do
+link "/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/embedded/service/oc_bifrost/sys.config" do
   to oc_bifrost_config
 end
 
@@ -62,7 +62,7 @@ template vmargs_config do
   notifies :restart, 'component_runit_service[oc_bifrost]'
 end
 
-link '/opt/opscode/embedded/service/oc_bifrost/vm.args' do
+link "/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/embedded/service/oc_bifrost/vm.args" do
   to vmargs_config
 end
 
