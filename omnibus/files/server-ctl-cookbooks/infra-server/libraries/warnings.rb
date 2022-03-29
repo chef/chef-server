@@ -13,7 +13,7 @@ module ChefServer
       puts <<~EOF
 
         The following warnings were encountered during the reconfiguration of
-        your Chef Infra Server:
+        your #{ChefUtils::Dist::Server::PRODUCT}:
 
       EOF
       @@warnings.each do |msg|

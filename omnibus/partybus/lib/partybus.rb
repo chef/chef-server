@@ -1,3 +1,5 @@
+require 'chef-utils/dist'
+
 module Partybus
 
   def self.config
@@ -10,8 +12,8 @@ module Partybus
 
   class Config
 
-    SECRETS_FILE = "/etc/opscode/private-chef-secrets.json"
-    RUNNING_CONFIG_FILE = "/etc/opscode/chef-server-running.json"
+    SECRETS_FILE = "/etc/#{::ChefUtils::Dist::Org::LEGACY_CONF_DIR}/private-#{::ChefUtils::Dist::Infra::SHORT}-secrets.json"
+    RUNNING_CONFIG_FILE = "/etc/#{::ChefUtils::Dist::Org::LEGACY_CONF_DIR}/#{::ChefUtils::Dist::Server::SERVER}-running.json"
 
     attr_accessor :database_service_name
     attr_accessor :partybus_migration_directory

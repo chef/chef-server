@@ -151,7 +151,7 @@ module PrivateChef
 
         ChefServer::Warnings.warn <<~EOF
           The configuration parameter postgresql['#{setting}'] is no longer used
-          by Chef Infra Server. To limit the amount of shared memory used by
+          by #{ChefUtils::Dist::Server::PRODUCT}. To limit the amount of shared memory used by
           postgresql use postgresql['shared_buffers'] instead.
         EOF
       end
@@ -336,7 +336,7 @@ module PrivateChef
 
     # TODO: 2017-02-28 mp:  configurable location:
     def secrets_json
-      '/etc/opscode/private-chef-secrets.json'
+      "/etc/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/private-#{ChefUtils::Dist::Infra::SHORT}-secrets.json"
     end
 
     def credentials
@@ -416,13 +416,13 @@ module PrivateChef
       if pass_in_secrets != pass_in_config
         warning = <<~WARN
           #{config_key_desc} in secrets store does not match the value
-          configured in chef-server.rb -- overriding secrets store password with
+          configured in #{ChefUtils::Dist::Server::SERVER}.rb -- overriding secrets store password with
           configuration file password.
         WARN
         if command_name
           warning << <<~WARN2
             If this is unexpected, consider removing the secret from
-            chef-server.rb and setting the correct value with:
+            #{ChefUtils::Dist::Server::SERVER}.rb and setting the correct value with:
 
                 chef-server-ctl #{command_name}
           WARN2
@@ -431,8 +431,8 @@ module PrivateChef
         unless PrivateChef['insecure_addon_compat']
           warning = <<~WARN
             #{config_key_desc} has been saved to the secrets store
-            but is also still in chef-server.rb. Please remove this from
-            chef-server.rb.
+            but is also still in #{ChefUtils::Dist::Server::SERVER}.rb. Please remove this from
+            #{ChefUtils::Dist::Server::SERVER}.rb.
           WARN
         end
       end
@@ -523,7 +523,7 @@ module PrivateChef
         end
       end
       if ldap_encryption
-        Chef::Log.warn("Please note that the ldap 'encryption' setting is deprecated as of Chef Infra Server 12.0. Use either "\
+        Chef::Log.warn("Please note that the ldap 'encryption' setting is deprecated as of #{ChefUtils::Dist::Server::PRODUCT} 12.0. Use either "\
                        "ldap['ssl_enabled'] = true or ldap['tls_enabled'] = true.")
         case ldap_encryption.to_s
         when 'simple_tls'
@@ -558,7 +558,7 @@ module PrivateChef
     def assert_server_config(node_name)
       unless PrivateChef['servers'].key?(node_name)
         Chef::Log.fatal <<~EOF
-          No server configuration found for "#{node_name}" in /etc/opscode/chef-server.rb.
+          No server configuration found for "#{node_name}" in #{ChefUtils::Dist::Server::CONF_DIR}/#{ChefUtils::Dist::Server::SERVER}.rb.
           Server configuration exists for the following hostnames:
 
             #{PrivateChef['servers'].keys.sort.join("\n  ")}
@@ -573,9 +573,9 @@ module PrivateChef
       when 'ha'
         Chef::Log.fatal <<~EOF
           DRBD_HA_002: Topology "ha" no longer supported.
-          The DRBD/keepalived based HA subsystem was deprecated as of Chef Infra Server
+          The DRBD/keepalived based HA subsystem was deprecated as of #{ChefUtils::Dist::Server::PRODUCT}
           12.9, and officially reached end of life on 2019-03-31. It has been
-          disabled in Chef Infra Server 13.
+          disabled in #{ChefUtils::Dist::Server::PRODUCT} 13.
 
           See this post for more details:
           https://blog.chef.io/end-of-life-announcement-for-drbd-based-ha-support-in-chef-server
@@ -584,10 +584,10 @@ module PrivateChef
 
           Chef Backend was announced over two years ago and is the recommended solution
           for all customers. It is a licensed product and available under the terms
-          of a Chef Infra License.
+          of a #{ChefUtils::Dist::Server::PRODUCT} License.
 
           For more information on migrating from DRBD HA to Chef Backend or other HA, see this blog
-          post and webinar: Best Practices for Migrating your Chef Infra Server at
+          post and webinar: Best Practices for Migrating your #{ChefUtils::Dist::Server::PRODUCT} at
           https://blog.chef.io/best-practices-for-migrating-your-chef-server
 
           Customers in cloud environments are also encouraged to look at AWS OpsWorks
@@ -635,8 +635,8 @@ module PrivateChef
 
     # If known private keys are on disk, add them to Veil and commit them.
     def migrate_keys
-      did_something = add_key_from_file_if_present('chef-server', 'superuser_key', '/etc/opscode/pivotal.pem')
-      did_something |= add_key_from_file_if_present('chef-server', 'webui_key', '/etc/opscode/webui_priv.pem')
+      did_something = add_key_from_file_if_present('chef-server', 'superuser_key', "/etc/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/pivotal.pem")
+      did_something |= add_key_from_file_if_present('chef-server', 'webui_key', "/etc/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/webui_priv.pem")
       # Ensure these are committed to disk before continuing -
       # the secrets recipe will delete the old files.
       credentials.save if did_something

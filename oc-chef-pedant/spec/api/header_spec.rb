@@ -7,7 +7,6 @@ describe "Headers", :headers do
   let (:request_url) { api_url("users") }
   let (:requestor) { platform.admin_user }
 
-
   context "Request Headers" do
 
     # Right, now, we're just checking header versions, this can also be a template

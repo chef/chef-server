@@ -36,7 +36,7 @@ opscode_chef_mover_sasl_log_dir = File.join(opscode_chef_mover_log_dir, 'sasl')
   end
 end
 
-link '/opt/opscode/embedded/service/opscode-chef-mover/log' do
+link "/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/embedded/service/opscode-chef-mover/log" do
   to opscode_chef_mover_log_dir
 end
 
@@ -51,7 +51,7 @@ template mover_config do
                                                                      redis_password: PrivateChef.credentials.get('redis_lb', 'password')))
 end
 
-link '/opt/opscode/embedded/service/opscode-chef-mover/sys.config' do
+link "/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/embedded/service/opscode-chef-mover/sys.config" do
   to mover_config
 end
 
@@ -64,7 +64,7 @@ template vmargs_config do
   mode '644'
 end
 
-link '/opt/opscode/embedded/service/opscode-chef-mover/vm.args' do
+link "/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/embedded/service/opscode-chef-mover/vm.args" do
   to vmargs_config
 end
 

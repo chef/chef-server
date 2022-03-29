@@ -1,4 +1,3 @@
-
 describe "Testing Status API" do
   context "Status API", :status, :smoke do
     it "GET /_status should respond with valid health data" do

@@ -1,16 +1,28 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.13.57 -->
-## [14.13.57](https://github.com/chef/chef-server/tree/14.13.57) (2022-03-15)
+<!-- latest_release 14.13.69 -->
+## [14.13.69](https://github.com/chef/chef-server/tree/14.13.69) (2022-03-29)
 
 #### Merged Pull Requests
-- Add maintenance mode to the docs [#3217](https://github.com/chef/chef-server/pull/3217) ([sean-horn](https://github.com/sean-horn))
+- Resolved cookbook style issues [#3248](https://github.com/chef/chef-server/pull/3248) ([jashaik](https://github.com/jashaik))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.13.42 -->
 ### Changes since 14.13.42 release
 
 #### Merged Pull Requests
+- Resolved cookbook style issues [#3248](https://github.com/chef/chef-server/pull/3248) ([jashaik](https://github.com/jashaik)) <!-- 14.13.69 -->
+- Removing the log4j files on reconfigure [#3236](https://github.com/chef/chef-server/pull/3236) ([vinay-satish](https://github.com/vinay-satish)) <!-- 14.13.68 -->
+- Bump chef from 16.17.39 to 17.10.0 in /src/chef-server-ctl [#3239](https://github.com/chef/chef-server/pull/3239) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.13.67 -->
+- Bump chef from 17.9.52 to 17.10.0 in /oc-chef-pedant [#3240](https://github.com/chef/chef-server/pull/3240) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.13.66 -->
+- Opscode wordmark replacements [#3238](https://github.com/chef/chef-server/pull/3238) ([lbakerchef](https://github.com/lbakerchef)) <!-- 14.13.65 -->
+- Added cookbook version cache configs in hab [#3237](https://github.com/chef/chef-server/pull/3237) ([jashaik](https://github.com/jashaik)) <!-- 14.13.64 -->
+- Bump chef from 17.9.52 to 17.10.0 in /src/oc-id [#3241](https://github.com/chef/chef-server/pull/3241) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.13.63 -->
+- support multiple instances of reindex-opc-piecewise [#3242](https://github.com/chef/chef-server/pull/3242) ([marcparadise](https://github.com/marcparadise)) <!-- 14.13.62 -->
+- WIP INFS-97 - lbaker/INFS-97/pg13.6 [#3230](https://github.com/chef/chef-server/pull/3230) ([lbakerchef](https://github.com/lbakerchef)) <!-- 14.13.61 -->
+- Update release process documentation [#3233](https://github.com/chef/chef-server/pull/3233) ([lbakerchef](https://github.com/lbakerchef)) <!-- 14.13.60 -->
+- Correcting es preflight validation after helper file changes [#3235](https://github.com/chef/chef-server/pull/3235) ([vinay-satish](https://github.com/vinay-satish)) <!-- 14.13.59 -->
+- Fix omnibus/adhoc pipeline [#3232](https://github.com/chef/chef-server/pull/3232) ([lbakerchef](https://github.com/lbakerchef)) <!-- 14.13.58 -->
 - Add maintenance mode to the docs [#3217](https://github.com/chef/chef-server/pull/3217) ([sean-horn](https://github.com/sean-horn)) <!-- 14.13.57 -->
 - Documentation note about ES read-only [#3182](https://github.com/chef/chef-server/pull/3182) ([vinay-satish](https://github.com/vinay-satish)) <!-- 14.13.56 -->
 - Bump pg from 1.3.3 to 1.3.4 in /src/chef-server-ctl [#3225](https://github.com/chef/chef-server/pull/3225) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.13.55 -->

@@ -87,7 +87,7 @@ end
 # just do a check against node['private_chef']['bootstrap']['enable'],
 # which would only run them one time.
 if is_data_master?
-  execute '/opt/opscode/bin/chef-server-ctl start postgresql' do
+  execute "/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/bin/chef-server-ctl start postgresql" do
     retries 20
   end
 
@@ -97,7 +97,7 @@ if is_data_master?
       2.times do |_i|
         # Note that we have to include the port even for a local pipe, because the port number
         # is included in the pipe default.
-        `echo 'SELECT * FROM pg_database;' | su - #{node['private_chef']['postgresql']['username']} -c '/opt/opscode/embedded/bin/psql -p #{node['private_chef']['postgresql']['port']} -U #{node['private_chef']['postgresql']['db_connection_superuser'] || node['private_chef']['postgresql']['db_superuser']} "dbname=postgres sslmode=#{node['private_chef']['postgresql']['sslmode']}" -t -A'`
+        `echo 'SELECT * FROM pg_database;' | su - #{node['private_chef']['postgresql']['username']} -c '/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/embedded/bin/psql -p #{node['private_chef']['postgresql']['port']} -U #{node['private_chef']['postgresql']['db_connection_superuser'] || node['private_chef']['postgresql']['db_superuser']} "dbname=postgres sslmode=#{node['private_chef']['postgresql']['sslmode']}" -t -A'`
         if $CHILD_STATUS.exitstatus != 0
           Chef::Log.fatal('Could not connect to database, retrying in 10 seconds.')
           sleep 10

@@ -336,7 +336,7 @@ action_class do
   #   levels, like "9.6.22" or "13.4"
   # @return [String] the absolute path to the binaries.
   def binary_path_for(version)
-    "/opt/opscode/embedded/postgresql/#{version}/bin"
+    "/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/embedded/postgresql/#{version}/bin"
   end
 
   def rename_existing_cluster_parent
