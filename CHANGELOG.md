@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.13.68 -->
-## [14.13.68](https://github.com/chef/chef-server/tree/14.13.68) (2022-03-29)
+<!-- latest_release 14.13.69 -->
+## [14.13.69](https://github.com/chef/chef-server/tree/14.13.69) (2022-03-29)
 
 #### Merged Pull Requests
-- Removing the log4j files on reconfigure [#3236](https://github.com/chef/chef-server/pull/3236) ([vinay-satish](https://github.com/vinay-satish))
+- Resolved cookbook style issues [#3248](https://github.com/chef/chef-server/pull/3248) ([jashaik](https://github.com/jashaik))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.13.42 -->
 ### Changes since 14.13.42 release
 
 #### Merged Pull Requests
+- Resolved cookbook style issues [#3248](https://github.com/chef/chef-server/pull/3248) ([jashaik](https://github.com/jashaik)) <!-- 14.13.69 -->
 - Removing the log4j files on reconfigure [#3236](https://github.com/chef/chef-server/pull/3236) ([vinay-satish](https://github.com/vinay-satish)) <!-- 14.13.68 -->
 - Bump chef from 16.17.39 to 17.10.0 in /src/chef-server-ctl [#3239](https://github.com/chef/chef-server/pull/3239) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.13.67 -->
 - Bump chef from 17.9.52 to 17.10.0 in /oc-chef-pedant [#3240](https://github.com/chef/chef-server/pull/3240) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.13.66 -->
