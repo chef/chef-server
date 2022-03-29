@@ -303,7 +303,7 @@ The Chef Backend upgrade for installations with indexes created by Elasticsearch
     chef-backend-ctl set-cluster-failover off
     ```
 
-1. Proceed to rebuilding the "chef" index [Rebuild Index]({{< relref "#rebuild-the-chef-index" >}})
+1. [Rebuild the "chef" Index]({{< relref "#rebuild-the-chef-index" >}})
 
 
 ### Upgrade Chef Infra Servers with Elasticsearch 5.6.16
