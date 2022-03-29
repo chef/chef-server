@@ -202,7 +202,7 @@ curl -XGET localhost:9200/chef/_settings/index.version.created*?pretty\&human
 
 #### Check for Index Health
 
-All indexes should be green from a frontend server. There should be no other indexes present than the one named "chef", and definitely no non-green indexes. The command should have a return code of 1. Investigate by removing the grep otherwise.
+Only "chef" indexes should be present, and all indexes should have a green health status. The following command should have a return code of 1:
 
 ```bash
 curl -s -S "localhost:9200/_cat/indices?h=health,status,index" | grep -v '^green'
