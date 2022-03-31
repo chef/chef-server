@@ -191,7 +191,7 @@ GEM
     mixlib-config (3.0.9)
       tomlrb
     mixlib-log (3.0.9)
-    mixlib-shellout (3.2.5)
+    mixlib-shellout (3.2.6)
       chef-utils
     multi_json (1.15.0)
     multipart-post (2.1.1)
