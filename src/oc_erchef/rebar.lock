@@ -26,7 +26,7 @@
   0},
  {<<"edown">>,
   {git,"https://github.com/uwiger/edown",
-       {ref,"754be25f71a04099c83f3ffdff268e70beeb0021"}},
+       {ref,"3c4f660c892e395fedac83b43476b23d38f4efb4"}},
   0},
  {<<"efast_xs">>,
   {git,"https://github.com/chef/efast_xs",
