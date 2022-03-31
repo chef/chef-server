@@ -71,7 +71,7 @@
        {ref,"d541f7190894734e2b69f4763c3664fb4d6bb9db"}},
   0},
  {<<"jiffy">>,
-  {git,"git://github.com/davisp/jiffy",
+  {git,"https://github.com/davisp/jiffy",
        {branch, "master"}},
   0},
  {<<"jsx">>,{pkg,<<"jsx">>,<<"2.9.0">>},1},
