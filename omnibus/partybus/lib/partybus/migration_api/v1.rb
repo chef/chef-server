@@ -1,5 +1,4 @@
 require 'partybus/service_manager'
-require 'partybus/migration_util'
 require 'partybus/command_runner'
 require 'partybus/migration_api/v1'
 
@@ -117,12 +116,6 @@ module Partybus
 
         {username: username, password: password,
          database: database, path: path }
-      end
-
-      def clean_mover_logs
-        log("\tCleaning migration related logs to prep for new migration")
-        migration_util = Partybus::MigrationUtil.new
-        migration_util.clean_mover_logs
       end
 
       def must_be_data_master

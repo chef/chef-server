@@ -23,6 +23,7 @@ log_base = "/var/log/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}"
 ###
 default['enterprise']['name'] = 'private_chef'
 
+# TODO: we don't seem to reference removed_services anywhere.
 default['private_chef']['removed_services'] = %w(
 opscode-webui
 opscode-solr
@@ -30,9 +31,6 @@ couchdb
 opscode-account
 opscode-org-creator
 opscode-certificate
-)
-
-default['private_chef']['hidden_services'] = %w(
 opscode-chef-mover
 )
 
@@ -765,32 +763,6 @@ default['private_chef']['dark_launch']['private-chef'] = true
 default['private_chef']['dark_launch']['sql_users'] = true
 default['private_chef']['dark_launch']['add_type_and_bag_to_items'] = true
 default['private_chef']['dark_launch']['reporting'] = true
-
-###
-# Chef Mover
-###
-default['private_chef']['opscode-chef-mover']['enable'] = true
-default['private_chef']['opscode-chef-mover']['dir'] = "#{var_base}/opscode-chef-mover"
-default['private_chef']['opscode-chef-mover']['data_dir'] = "#{var_base}/opscode-chef-mover/data"
-default['private_chef']['opscode-chef-mover']['log_directory'] = "#{log_base}/opscode-chef-mover"
-default['private_chef']['opscode-chef-mover']['log_rotation']['file_maxbytes'] = 1073741824
-default['private_chef']['opscode-chef-mover']['log_rotation']['num_to_keep'] = 10
-default['private_chef']['opscode-chef-mover']['bulk_fetch_batch_size'] = '5'
-default['private_chef']['opscode-chef-mover']['max_cache_size'] = '10000'
-default['private_chef']['opscode-chef-mover']['cache_ttl'] = '3600'
-default['private_chef']['opscode-chef-mover']['db_pool_size'] = '5'
-default['private_chef']['opscode-chef-mover']['udp_socket_pool_size'] = nil
-default['private_chef']['opscode-chef-mover']['sql_db_timeout'] = 5000
-default['private_chef']['opscode-chef-mover']['ibrowse_max_sessions'] = 256
-default['private_chef']['opscode-chef-mover']['ibrowse_max_pipeline_size'] = 1
-default['private_chef']['opscode-chef-mover']['solr_timeout'] = 30000
-default['private_chef']['opscode-chef-mover']['solr_http_init_count'] = 25
-default['private_chef']['opscode-chef-mover']['solr_http_max_count'] = 100
-default['private_chef']['opscode-chef-mover']['solr_http_cull_interval'] = '{1, min}'
-default['private_chef']['opscode-chef-mover']['solr_http_max_age'] = '{70, sec}'
-default['private_chef']['opscode-chef-mover']['solr_http_max_connection_duration'] = '{70,sec}'
-default['private_chef']['opscode-chef-mover']['solr_ibrowse_options'] = '[{connect_timeout, 10000}]'
-default['private_chef']['opscode-chef-mover']['bulk_fetch_batch_size'] = 5
 
 ###
 # Opscode Test
