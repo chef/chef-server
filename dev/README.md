@@ -209,26 +209,6 @@ the replacement dependency code.
 Note that other services running under dvm via `dvm start` will also load the `chef_authn` checkout.
 Services running normally (under runit/chef-server-ctl) will not.
 
-## Chef Mover
-
-`chef-mover` does not currently support hot code loading. However, you can build and run a modified version
-using `dvm load/start`:
-
-```
-dvm load chef-mover
-dvm start chef-mover
-```
-
-If you make any changes, you will need to rebuild and load the application, like:
-
-```
-dvm load chef-mover --force
-dvm start chef-mover
-```
-
-Then the new code will be loaded.
-
-
 ##  dvm
 
 At the heart of all this is the 'dvm' tool.  This tool

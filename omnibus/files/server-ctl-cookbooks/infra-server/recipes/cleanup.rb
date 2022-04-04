@@ -39,3 +39,14 @@ end
     action :delete
   end
 end
+
+# This component had been removed - it is no longer used
+# in any migrations in after 12.17.15
+component_runit_service 'opscode-chef-mover' do
+  action :disable
+end
+
+directory "/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/sv/opscode-chef-mover" do
+  recursive true
+  action :delete
+end
