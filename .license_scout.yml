@@ -57,6 +57,9 @@ fallbacks:
     - name: amqp_client
       license_id: MPL-1.1
       license_content: https://github.com/seth/amqp_client/blob/master/src/amqp_connection.erl
+    - name: base16
+      license_id: BSD-2-Clause
+      license_content: https://github.com/goj/base16/blob/master/LICENSE
     - name: bcrypt
       license_id: ISC
       license_content: https://github.com/smarkets/erlang-bcrypt/blob/master/LICENSE
@@ -87,6 +90,9 @@ fallbacks:
     - name: gen_server2
       license_id: MIT
       license_content: https://github.com/hyperthunk/gen_server2/blob/master/rebar.config
+    - name: goldrush
+      license_id: ISC
+      license_content: https://github.com/DeadZen/goldrush/blob/master/LICENSE
     - name: mixer
       license_id: Apache-2.0
       license_content: https://github.com/inaka/mixer/blob/master/LICENSE
