@@ -115,10 +115,22 @@ handle_undefined_start(undefined, Req) ->
 handle_undefined_start(Start, _Req) ->
     Start.
 
+% NOTE(Lincoln Baker):
+% http_uri:decode became deprecated, however there didn't appear to be a
+% direct drop-in library function to replace it for how we were using it.
+% uri_string:dissect_query/1 returns key-value pairs, and for our inputs
+% the value component will often or always be true based on my testing.
+unencode(X) ->
+    KVs = uri_string:dissect_query(X),
+    % We probably want this transformation:
+    % {"key", "value"} -> "key=value"
+    % {"key", true   } -> "key"
+    lists:flatten([case V of true -> K; _ -> [K, "=", V] end || {K, V} <- KVs]).
+
 decode(undefined) ->
     0;
 decode(Val) ->
-    list_to_integer(http_uri:decode(Val)).
+    list_to_integer(unencode(Val)).
 
 to_json(Req, #base_state{chef_db_context = DbContext,
                          resource_state = SearchState,
