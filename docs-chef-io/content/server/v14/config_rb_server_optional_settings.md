@@ -1472,6 +1472,22 @@ Be careful if increasing this number - requests for a given set of cookbook vers
 not occur if you increment the version of a cookbook with every cookbook update, which is the recommended approach to updating cookbooks.
 {{< /note >}}
 
+`opscode_erchef['search_queue_mode']`
+
+: The search index queue mode . Default value: `batch`.
+
+`opscode_erchef['search_provider']`
+
+: The search index provider. Default value: `elasticsearch`.
+
+`opscode_erchef['search_auth_username']`
+
+: The OpenSearch username. Default value: `opensearch_user`.
+
+`opscode_erchef['search_auth_password']`
+
+: The OpenSearch password. Default value: `nil`.
+
 ### OpenSearch
 
 This configuration file has the following settings for `opensearch`:
