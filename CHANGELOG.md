@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.14.0 -->
-## [14.14.0](https://github.com/chef/chef-server/tree/14.14.0) (2022-04-04)
+<!-- latest_release 14.14.1 -->
+## [14.14.1](https://github.com/chef/chef-server/tree/14.14.1) (2022-04-05)
 
 #### Merged Pull Requests
-- Bump pg from 1.3.4 to 1.3.5 in /src/oc-id [#3253](https://github.com/chef/chef-server/pull/3253) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Updated external opensearch docs [#3249](https://github.com/chef/chef-server/pull/3249) ([jashaik](https://github.com/jashaik))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.13.42 -->
 ### Changes since 14.13.42 release
 
 #### Merged Pull Requests
+- Updated external opensearch docs [#3249](https://github.com/chef/chef-server/pull/3249) ([jashaik](https://github.com/jashaik)) <!-- 14.14.1 -->
 - Bump pg from 1.3.4 to 1.3.5 in /src/oc-id [#3253](https://github.com/chef/chef-server/pull/3253) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.14.0 -->
 - Resolved cookbook style issues [#3248](https://github.com/chef/chef-server/pull/3248) ([jashaik](https://github.com/jashaik)) <!-- 14.13.69 -->
 - Removing the log4j files on reconfigure [#3236](https://github.com/chef/chef-server/pull/3236) ([vinay-satish](https://github.com/vinay-satish)) <!-- 14.13.68 -->
