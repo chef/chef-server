@@ -23,8 +23,16 @@
   {git,"https://github.com/chef/epgsql-1",
        {ref,"34b4182f0e21f9189ddd7b2e290f01a9e7d93bf1"}},
   1},
- {<<"fs">>,{pkg,<<"fs">>,<<"6.1.1">>},1},
- {<<"goldrush">>,{pkg,<<"goldrush">>,<<"0.1.9">>},1},
+% {<<"fs">>,{pkg,<<"fs">>,<<"6.1.1">>},1},
+ {<<"fs">>,
+  {git,"https://github.com/synrc/fs",
+       {ref,"936ba9dcf88186250ecc5995e25154bde44252a1"}},
+  1},
+% {<<"goldrush">>,{pkg,<<"goldrush">>,<<"0.1.9">>},1},
+ {<<"goldrush">>,
+  {git,"https://github.com/DeadZen/goldrush",
+       {ref,"57e71f2789632a085f0963e1244644fdcb1941b9"}},
+  0},
  {<<"jiffy">>,
   {git,"https://github.com/davisp/jiffy",
        {branch, "master"}},
@@ -57,7 +65,11 @@
   {git,"https://github.com/chef/pooler",
        {ref,"681c355abaacc5487ddf41a84b9ed53151a765fe"}},
   1},
- {<<"recon">>,{pkg,<<"recon">>,<<"2.5.1">>},1},
+% {<<"recon">>,{pkg,<<"recon">>,<<"2.5.1">>},1},
+ {<<"recon">>,
+  {git,"https://github.com/ferd/recon",
+       {tag,"2.5.1"}},
+  1},
  {<<"sqerl">>,
   {git,"https://github.com/chef/sqerl",
        {ref,"a27e3e58da53240dc9925ec03ecdb894b8231cf9"}},
@@ -74,9 +86,9 @@
   {git,"https://github.com/chef/webmachine",
        {ref,"1389b01a9fbc25d36aad8956e08d2d0db242625f"}},
   1}]}.
-[
-{pkg_hash,[
- {<<"fs">>, <<"9D147B944D60CFA48A349F12D06C8EE71128F610C90870BDF9A6773206452ED0">>},
- {<<"goldrush">>, <<"F06E5D5F1277DA5C413E84D5A2924174182FB108DABB39D5EC548B27424CD106">>},
- {<<"recon">>, <<"430FFA60685AC1EFDFB1FE4C97B8767C92D0D92E6E7C3E8621559BA77598678A">>}]}
-].
+%[
+%{pkg_hash,[
+%% {<<"fs">>, <<"9D147B944D60CFA48A349F12D06C8EE71128F610C90870BDF9A6773206452ED0">>},
+%% {<<"goldrush">>, <<"F06E5D5F1277DA5C413E84D5A2924174182FB108DABB39D5EC548B27424CD106">>},
+%% {<<"recon">>, <<"430FFA60685AC1EFDFB1FE4C97B8767C92D0D92E6E7C3E8621559BA77598678A">>}]}
+%].
