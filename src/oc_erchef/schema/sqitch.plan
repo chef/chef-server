@@ -1,4 +1,4 @@
-%syntax-version=1.0.0
+%syntax-version=1.0.0-b2
 %project=enterprise_chef
 %uri=https://github.com/opscode/enterprise-chef-server-schema
 
@@ -84,3 +84,5 @@ users_email_functional_index [users] 2017-05-30T12:10:32Z Stephan Renatus <srena
 create_and_update_users 2017-08-23T22:53:21Z Prajakta Purohit <prajakta@chef.io> # Adding functions to create and update users by inserting a sentinel value in the public_key_columns
 keys_update_trigger [keys_update_trigger@users_email_functional_index] 2017-08-23T23:12:29Z Prajakta Purohit <prajakta@chef.io> # The insert and update triggers ignore rows with sentinel value for public_key.
 @sentinel_public_key_for_users 2017-08-24T14:32:04Z Prajakta Purohit <prajakta@chef.io> # public_key only updated in the keys table
+
+test_add_table 2022-04-05T12:05:12Z vagrant,,, <vagrant@api> # testing perl upgrade
