@@ -1,3 +1,5 @@
 source 'https://supermarket.chef.io'
 
+cookbook "runit", git: "https://github.com/chef-cookbooks/runit.git", branch: "main"
 cookbook 'infra-server', path: './infra-server'
+
