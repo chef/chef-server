@@ -39,6 +39,15 @@ Supported Release
 
 ## Release-Specific Steps
 
+### Upgrading to 15.x
+
+Chef Infra Server 15.0 moved from Elasticsearch to OpenSearch as its search index.
+{{% server_upgrade_duration %}}
+
+The Chef Infra Server 15 upgrade does not automatically reindex existing external Elasticsearch installations.
+
+The upgrade duration might be more If you are upgrading from Chef Infra Server 12.x/13.x as It runs automatic reindexing.
+
 ### Upgrading to 14.x
 
 Chef Infra Server 14.0 moved from Solr to Elasticsearch as its search index.
