@@ -34,6 +34,8 @@ schedules:
 
 pipelines:
   - verify
+  - verify:
+      public: true
   - habitat/build
   - habitat/test:
       definition: .expeditor/habitat-test.pipeline.yml
