@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.14.4 -->
-## [14.14.4](https://github.com/chef/chef-server/tree/14.14.4) (2022-04-06)
+<!-- latest_release 14.14.5 -->
+## [14.14.5](https://github.com/chef/chef-server/tree/14.14.5) (2022-04-13)
 
 #### Merged Pull Requests
-- Bump pg from 1.3.4 to 1.3.5 in /src/chef-server-ctl [#3252](https://github.com/chef/chef-server/pull/3252) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Remove unsupported migrations (&lt; 12.17.15) [#3256](https://github.com/chef/chef-server/pull/3256) ([marcparadise](https://github.com/marcparadise))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.14.1 -->
 ### Changes since 14.14.1 release
 
 #### Merged Pull Requests
+- Remove unsupported migrations (&lt; 12.17.15) [#3256](https://github.com/chef/chef-server/pull/3256) ([marcparadise](https://github.com/marcparadise)) <!-- 14.14.5 -->
 - Bump pg from 1.3.4 to 1.3.5 in /src/chef-server-ctl [#3252](https://github.com/chef/chef-server/pull/3252) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.14.4 -->
 - Bump mixlib-shellout from 3.2.5 to 3.2.7 in /oc-chef-pedant [#3258](https://github.com/chef/chef-server/pull/3258) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.14.3 -->
 - Bump omnibus-software from `5947560` to `960cb6e` in /omnibus [#3259](https://github.com/chef/chef-server/pull/3259) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.14.2 -->
