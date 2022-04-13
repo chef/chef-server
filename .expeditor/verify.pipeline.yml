@@ -101,21 +101,6 @@ steps:
         environment:
           - COMPONENT=src/oc-id
 
-- label: chef-mover
-  command:
-    - /workdir/scripts/bk_tests/bk_install.sh
-    - cd /workdir/src/chef-mover; make install
-    - make ci
-  expeditor:
-    executor:
-      docker:
-        image: "chefes/a1-buildkite"
-        environment:
-          - PATH=/opt/asdf/shims:/opt/asdf/bin:/opt/ci-studio-common/bin:/go/bin:/go/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/opt/chefdk/bin
-          - PERL5LIB=~/perl5/lib/perl5/x86_64-linux-gnu-thread-multi:~/perl5/lib/perl5:/etc/perl:/usr/local/lib/perl/5.14.2:/usr/local/share/perl/5.14.2:/usr/lib/perl5:/usr/share/perl5:/usr/lib/perl/5.14:/usr/share/perl/5.14:/usr/local/lib/site_perl
-          - LUALIB=~/.luarocks/lib/lua/5.2
-          - COMPONENT=src/chef-mover
-
 - label: oc_bifrost
   command:
     - /workdir/scripts/bk_tests/bk_install.sh
