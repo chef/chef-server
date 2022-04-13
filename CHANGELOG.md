@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.14.7 -->
-## [14.14.7](https://github.com/chef/chef-server/tree/14.14.7) (2022-04-13)
+<!-- latest_release 14.14.8 -->
+## [14.14.8](https://github.com/chef/chef-server/tree/14.14.8) (2022-04-13)
 
 #### Merged Pull Requests
-- Bump omnibus from `55e74ac` to `27c37fc` in /omnibus [#3267](https://github.com/chef/chef-server/pull/3267) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Add el 8 builders [#3264](https://github.com/chef/chef-server/pull/3264) ([vinay-satish](https://github.com/vinay-satish))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.14.1 -->
 ### Changes since 14.14.1 release
 
 #### Merged Pull Requests
+- Add el 8 builders [#3264](https://github.com/chef/chef-server/pull/3264) ([vinay-satish](https://github.com/vinay-satish)) <!-- 14.14.8 -->
 - Bump omnibus from `55e74ac` to `27c37fc` in /omnibus [#3267](https://github.com/chef/chef-server/pull/3267) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.14.7 -->
 - Bump omnibus-software from `960cb6e` to `518f3f8` in /omnibus [#3266](https://github.com/chef/chef-server/pull/3266) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.14.6 -->
 - Remove unsupported migrations (&lt; 12.17.15) [#3256](https://github.com/chef/chef-server/pull/3256) ([marcparadise](https://github.com/marcparadise)) <!-- 14.14.5 -->
