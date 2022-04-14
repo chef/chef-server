@@ -603,14 +603,15 @@ yap6MUYSjPOa7eCrhg2zFZiqO6VLEogPc1nsjb9Zl2UWLLYyCVz=
     end
 
     def gen_rsa_key(name)
+      require "openssl" unless defined?(OpenSSL)
       priv = Tempfile.new("pedant-key-#{name}")
       pub = Tempfile.new("pedant-key-#{name}.pub")
-      `openssl genrsa -out #{priv.path} 2048 1>/dev/null 2>&1`
-      `openssl rsa -in #{priv.path} -pubout -out #{pub.path} 2>/dev/null`
+      rsakey = OpenSSL::PKey::RSA.new(2048)
+      open priv.path, 'w' do |io| io.write rsakey.to_pem end
+      open pub.path, 'w' do |io| io.write rsakey.public_key.to_pem end
       key = { :path => "#{pub.path}",
               :private => File.read(priv.path),
               :public => File.read(pub.path) }
-
       priv.close
       priv.unlink
       pub.close
