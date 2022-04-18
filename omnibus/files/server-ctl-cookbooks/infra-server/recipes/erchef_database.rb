@@ -13,6 +13,8 @@
 # limitations under the License.
 #
 
+# removed 'schema' from directory paths
+
 postgres = node['private_chef']['postgresql']
 erchef = node['private_chef']['opscode-erchef']
 
@@ -28,7 +30,7 @@ end
 
 pg_database 'opscode_chef' do
   owner erchef['sql_user']
-  notifies :deploy, "pg_sqitch[/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/embedded/service/opscode-erchef/schema/baseline]", :immediately
+  notifies :deploy, "pg_sqitch[/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/embedded/service/opscode-erchef/baseline]", :immediately
 end
 
 # For existing installations, make sure the database owner is set to sql_user
@@ -44,7 +46,7 @@ end
 # At this time, we're using partybus to apply upgrade-related sqitch migrations,
 # so that we can also apply any necessary data migrations (not yet managed through sqitch)
 # at that time.
-pg_sqitch "/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/embedded/service/opscode-erchef/schema/baseline" do
+pg_sqitch "/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/embedded/service/opscode-erchef/baseline" do
   hostname  postgres['vip']
   port      postgres['port']
   username  postgres['db_connection_superuser'] || postgres['db_superuser']
@@ -52,10 +54,10 @@ pg_sqitch "/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/embedded/service/opscod
   database  'opscode_chef'
   sslmode   postgres['sslmode']
   action :nothing
-  notifies :deploy, "pg_sqitch[/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/embedded/service/opscode-erchef/schema]", :immediately
+  notifies :deploy, "pg_sqitch[/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/embedded/service/opscode-erchef]", :immediately
 end
 
-pg_sqitch "/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/embedded/service/opscode-erchef/schema" do
+pg_sqitch "/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/embedded/service/opscode-erchef" do
   hostname  postgres['vip']
   port      postgres['port']
   username  postgres['db_connection_superuser'] || postgres['db_superuser']
