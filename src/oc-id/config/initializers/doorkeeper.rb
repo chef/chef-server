@@ -1,7 +1,8 @@
 Doorkeeper.configure do
   # Change the ORM that doorkeeper will use (needs plugins)
   orm :active_record
-
+  default_scopes  :public
+  default_generator_method :hex
   # This block will be called to check whether the resource owner is authenticated or not.
   resource_owner_authenticator do
     user = User.find(session[:username])
