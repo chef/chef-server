@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.14.9 -->
-## [14.14.9](https://github.com/chef/chef-server/tree/14.14.9) (2022-04-14)
+<!-- latest_release 14.14.10 -->
+## [14.14.10](https://github.com/chef/chef-server/tree/14.14.10) (2022-04-26)
 
 #### Merged Pull Requests
-- updating cert creation for universal platform compatibility [#3269](https://github.com/chef/chef-server/pull/3269) ([johnmccrae](https://github.com/johnmccrae))
+- opensearch_index recipe is not applied if elasticsearch[&#39;enable&#39;] = false [#3273](https://github.com/chef/chef-server/pull/3273) ([jashaik](https://github.com/jashaik))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.14.1 -->
 ### Changes since 14.14.1 release
 
 #### Merged Pull Requests
+- opensearch_index recipe is not applied if elasticsearch[&#39;enable&#39;] = false [#3273](https://github.com/chef/chef-server/pull/3273) ([jashaik](https://github.com/jashaik)) <!-- 14.14.10 -->
 - updating cert creation for universal platform compatibility [#3269](https://github.com/chef/chef-server/pull/3269) ([johnmccrae](https://github.com/johnmccrae)) <!-- 14.14.9 -->
 - Add el 8 builders [#3264](https://github.com/chef/chef-server/pull/3264) ([vinay-satish](https://github.com/vinay-satish)) <!-- 14.14.8 -->
 - Bump omnibus from `55e74ac` to `27c37fc` in /omnibus [#3267](https://github.com/chef/chef-server/pull/3267) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.14.7 -->
