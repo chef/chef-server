@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.15.0 -->
-## [14.15.0](https://github.com/chef/chef-server/tree/14.15.0) (2022-04-26)
+<!-- latest_release 14.15.1 -->
+## [14.15.1](https://github.com/chef/chef-server/tree/14.15.1) (2022-04-26)
 
 #### Merged Pull Requests
-- Bump rspec-rails from 5.1.1 to 5.1.2 in /src/oc-id [#3279](https://github.com/chef/chef-server/pull/3279) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump omnibus-software from `518f3f8` to `8f141a6` in /omnibus [#3278](https://github.com/chef/chef-server/pull/3278) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.14.1 -->
 ### Changes since 14.14.1 release
 
 #### Merged Pull Requests
+- Bump omnibus-software from `518f3f8` to `8f141a6` in /omnibus [#3278](https://github.com/chef/chef-server/pull/3278) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.15.1 -->
 - Bump rspec-rails from 5.1.1 to 5.1.2 in /src/oc-id [#3279](https://github.com/chef/chef-server/pull/3279) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.15.0 -->
 - opensearch_index recipe is not applied if elasticsearch[&#39;enable&#39;] = false [#3273](https://github.com/chef/chef-server/pull/3273) ([jashaik](https://github.com/jashaik)) <!-- 14.14.10 -->
 - updating cert creation for universal platform compatibility [#3269](https://github.com/chef/chef-server/pull/3269) ([johnmccrae](https://github.com/johnmccrae)) <!-- 14.14.9 -->
