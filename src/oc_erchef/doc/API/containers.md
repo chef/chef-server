@@ -22,11 +22,11 @@ specification should incorporate more sources.
 
 TODO: Read tests in detail, verify that these are correct, and identify missing tests. In the end
 tests should define this spec exactly
-TODO: Read erchef implementation, and note differences
-TODO: Walk through all version specific annotations and clarify when they apply
-TODO: Consider extending this to ACLs
-TODO: Write a similar doc for ORGs
-TODO: Explain what system containers mean.
+TODO: Read erchef implementation, and note differences  
+TODO: Walk through all version specific annotations and clarify when they apply  
+TODO: Consider extending this to ACLs  
+TODO: Write a similar doc for ORGs  
+TODO: Explain what system containers mean.  
 
 Containers
 ----------
@@ -36,10 +36,10 @@ an entity in authz; they are a way of providing a default set of permissions for
 object. Second, they serve as the source of the ACL used to authorize LIST and CREATE operations on
 objects.
 
-There's a container for every chef object type that has an ACL. At the present time these are:
+There's a container for every Chef object type that has an ACL. At the present time these are:
 'clients', 'containers, 'cookbooks',  'data', 'environments', 'groups', 'nodes', 'roles',
 'sandboxes'.
-These may be extended in the future. These are specific to an org, and each org as it's own
+These may be extended in the future. These are specific to an org, and each org has its own
 copies. These are created when an org is created, and required for an org to function properly.
 
 There are also two global containers 'users' and 'organizations', used to regulate who can create
