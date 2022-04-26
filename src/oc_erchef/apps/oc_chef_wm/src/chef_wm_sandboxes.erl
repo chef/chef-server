@@ -84,10 +84,11 @@ from_json(Req, #base_state{chef_db_context = DbContext,
                            requestor_id = ActorId,
                            organization_guid = OrgId,
                            resource_state =
-                               #sandbox_state{sandbox_data = SandboxData}} = State) ->
+                               #sandbox_state{sandbox_data = SandboxData, sandbox_authz_id = SBAuthz}} = State) ->
     Checksums = checksums_from_sandbox_ejson(SandboxData),
     case chef_db:make_sandbox(DbContext, OrgId, ActorId, Checksums) of
         #chef_sandbox{} = Sandbox ->
+            ok = oc_chef_authz:delete_resource(ActorId, object, SBAuthz),
             Response = sandbox_to_response(Req, Sandbox),
             {true, chef_wm_util:set_json_body(Req, Response), State};
         {conflict, _Msg} ->
