@@ -2,18 +2,31 @@ require "pg"
 
 CREATE_SQL = <<SQL
 BEGIN;
+
 CREATE UNLOGGED TABLE IF NOT EXISTS cleanup_tracking_auth_actors(
+    authz_id  CHAR(32)
+);
+CREATE UNLOGGED TABLE IF NOT EXISTS cleanup_tracking_auth_objects(
     authz_id  CHAR(32)
 );
 
 CREATE OR REPLACE RULE cleanup_auth_actor_creation_tracking AS ON INSERT TO auth_actor DO INSERT INTO cleanup_tracking_auth_actors VALUES (NEW.authz_id);
+CREATE OR REPLACE RULE cleanup_auth_object_creation_tracking AS ON INSERT TO auth_object DO INSERT INTO cleanup_tracking_auth_objects VALUES (NEW.authz_id);
+
 COMMIT;
 SQL
 
 CREATE_SQL2 = <<SQL
+BEGIN;
+
 CREATE UNLOGGED TABLE IF NOT EXISTS cleanup_known_auth_actors(
     authz_id  CHAR(32)
 );
+CREATE UNLOGGED TABLE IF NOT EXISTS cleanup_known_auth_objects(
+    authz_id  CHAR(32)
+);
+
+COMMIT;
 SQL
 
 DELETE_SQL = <<SQL
@@ -21,6 +34,9 @@ BEGIN;
 DROP RULE IF EXISTS cleanup_auth_actor_creation_tracking ON auth_actor;
 DROP TABLE IF EXISTS cleanup_tracking_auth_actors;
 DROP TABLE IF EXISTS cleanup_known_auth_actors;
+DROP RULE IF EXISTS cleanup_auth_object_creation_tracking ON auth_object;
+DROP TABLE IF EXISTS cleanup_tracking_auth_objects;
+DROP TABLE IF EXISTS cleanup_known_auth_objects;
 COMMIT;
 SQL
 
@@ -38,13 +54,28 @@ WITH good_auth_actors AS (
 DELETE FROM auth_actor WHERE authz_id IN (SELECT authz_id FROM orphaned_auth_actors)
 SQL
 
+CLEANUP_SQL2 = <<SQL
+WITH good_auth_objects AS (
+         SELECT authz_id FROM cleanup_tracking_auth_objects
+         UNION
+         SELECT authz_id FROM cleanup_known_auth_objects
+         ),
+     orphaned_auth_objects AS (
+         SELECT authz_id
+         FROM auth_object
+         WHERE authz_id NOT IN (SELECT authz_id FROM good_auth_objects)
+         ORDER BY id LIMIT $1
+         )
+DELETE FROM auth_object WHERE authz_id IN (SELECT authz_id FROM orphaned_auth_objects)
+SQL
+
 add_command_under_category "cleanup-bifrost", "cleanup", "Cleanup orphaned bifrost objects.", 2 do
   cleanup_args = ARGV[1..-1]
   options = {}
 
   OptionParser.new do |opts|
     opts.banner = "#{ChefUtils::Dist::Server::SERVER_CTL} cleanup-bifrost [options]"
-    opts.on("-b SIZE", "--batch-size SIZE", "How many authz actors to delete at a time") do |b|
+    opts.on("-b SIZE", "--batch-size SIZE", "How many authz actors to delete at a time (default: 10000)") do |b|
       options[:batch_size] = b.to_i
     end
 
@@ -98,7 +129,7 @@ add_command_under_category "cleanup-bifrost", "cleanup", "Cleanup orphaned bifro
   end
 
   if options[:estimate_only]
-    print_and_return_estimate(known_actor_list, bifrost_db)
+    print_and_return_estimate(known_actor_list, known_object_list, bifrost_db)
     exit(0)
   end
 
@@ -112,14 +143,14 @@ def run_cleanup(bifrost_db, batch_size, wait_time)
   begin
     puts "Sleeping #{wait_time} seconds to account for in-flight requests not captured by tracking table"
     sleep wait_time
-    estimated_deletion_count = print_and_return_estimate(known_actor_list, bifrost_db)
+    estimated_deletion_count = print_and_return_estimate(known_actor_list, known_object_list, bifrost_db)
 
     if estimated_deletion_count <= 0
       puts "Estimated deletion count 0. Aborting"
       exit(0)
     end
 
-    install_known_actor_table(known_actor_list, bifrost_db)
+    install_known_actor_object_table(known_actor_list, known_object_list, bifrost_db)
     run_bifrost_scan(batch_size, bifrost_db)
   ensure
     remove_bifrost_tracking_table(bifrost_db)
@@ -135,11 +166,36 @@ def known_actor_list
   end
 end
 
+def known_object_list
+  @known_object_list ||= timed "Fetching initial opscode_chef objects list" do
+    objects = erchef_db.exec("SELECT authz_id FROM cookbook_artifacts
+                                UNION SELECT authz_id FROM cookbooks
+                                UNION SELECT authz_id FROM data_bags
+                                UNION SELECT authz_id FROM environments
+                                UNION SELECT authz_id FROM nodes
+                                UNION SELECT authz_id FROM orgs
+                                UNION SELECT authz_id FROM policies
+                                UNION SELECT authz_id FROM policy_groups
+                                UNION SELECT authz_id FROM roles")
+    objects.map do |object|
+      object["authz_id"]
+    end
+  end
+end
+
 def safety_check(db)
   res = db.exec("SELECT * FROM pg_tables
                           WHERE tablename='cleanup_tracking_auth_actors'")
   if res.ntuples > 0
     puts "ERROR: cleanup_tracking_auth_actors already exists.  cleanup-bifrost may be running."
+    puts "ERROR: If you are sure cleanup-bifrost is not running, you can clean up the tracking tables with: #{ChefUtils::Dist::Server::SERVER_CTL} cleanup-bifrost --force-cleanup"
+    exit(1)
+  end
+
+  res = db.exec("SELECT * FROM pg_tables
+                          WHERE tablename='cleanup_tracking_auth_objects'")
+  if res.ntuples > 0
+    puts "ERROR: cleanup_tracking_auth_objects already exists.  cleanup-bifrost may be running."
     puts "ERROR: If you are sure cleanup-bifrost is not running, you can clean up the tracking tables with: #{ChefUtils::Dist::Server::SERVER_CTL} cleanup-bifrost --force-cleanup"
     exit(1)
   end
@@ -151,11 +207,16 @@ def install_bifrost_tracking_table(db)
   end
 end
 
-def install_known_actor_table(list, db)
+def install_known_actor_object_table(actor_list, object_list, db)
   timed "Populating known actor table" do
     db.exec(CREATE_SQL2)
     db.copy_data("COPY cleanup_known_auth_actors FROM STDIN") do
-      list.each do |id|
+      actor_list.each do |id|
+        db.put_copy_data(id.concat("\n"))
+      end
+    end
+    db.copy_data("COPY cleanup_known_auth_objects FROM STDIN") do
+      object_list.each do |id|
         db.put_copy_data(id.concat("\n"))
       end
     end
@@ -168,37 +229,58 @@ def remove_bifrost_tracking_table(db)
   end
 end
 
-def fetch_auth_actor_count(db)
-  timed "Fetching count from bifrost auth_actor" do
-    db.exec("SELECT count(*) FROM auth_actor").first["count"].to_i
+def fetch_auth_count(db, type)
+  timed "Fetching count from bifrost auth_" + type do
+    db.exec("SELECT count(*) FROM auth_" + type).first["count"].to_i
   end
 end
 
-def print_and_return_estimate(known_actor_list, db)
-  tcount = fetch_auth_actor_count(db)
-  estimated_del_count = [0, tcount - known_actor_list.length].max
+def print_and_return_estimate(known_actor_list, known_object_list, db)
+  total_actors_count = fetch_auth_count(db, "actor")
+  estimated_actors_del_count = [0, total_actors_count - known_actor_list.length].max
   puts "\n----------------------------------------"
   puts " Total #{ChefUtils::Dist::Infra::SHORT} users+clients: #{known_actor_list.length}"
-  puts "Total bifrost auth_actors: #{tcount}"
-  puts "Deletion Candidates (est): #{estimated_del_count}"
+  puts "Total bifrost auth_actors: #{total_actors_count}"
+  puts "Deletion Candidates (est): #{estimated_actors_del_count}"
   puts "----------------------------------------\n"
 
-  estimated_del_count
+  total_objects_count = fetch_auth_count(db, "object")
+  estimated_objects_del_count = [0, total_objects_count - known_object_list.length].max
+  puts "\n----------------------------------------"
+  puts " Total #{ChefUtils::Dist::Infra::SHORT} objects: #{known_object_list.length}"
+  puts "Total bifrost auth_objects: #{total_objects_count}"
+  puts "Deletion Candidates (est): #{estimated_objects_del_count}"
+  puts "----------------------------------------\n"
+
+  estimated_actors_del_count + estimated_objects_del_count
 end
 
 def run_bifrost_scan(batch_size, db)
-  total_deleted = 0
+  total_actors_deleted = 0
   loop do
     deletion_count = timed "Processing batch of #{batch_size} unknown auth_actors. " do
       count = db.exec(CLEANUP_SQL, [batch_size]).cmd_tuples
-      printf "Deleted #{count} actor#{count == 1 ? "" : "s"} (total = #{total_deleted + count})"
+      printf "Deleted #{count} actor#{count == 1 ? "" : "s"} (total = #{total_actors_deleted + count})"
       count
     end
 
-    total_deleted += deletion_count
+    total_actors_deleted += deletion_count
     break if deletion_count == 0
   end
-  puts "Total auth_actors removed: #{total_deleted}"
+  puts "Total auth_actors removed: #{total_actors_deleted}"
+
+  total_object_deleted = 0
+  loop do
+    deletion_count = timed "Processing batch of #{batch_size} unknown auth_objects. " do
+      count = db.exec(CLEANUP_SQL2, [batch_size]).cmd_tuples
+      printf "Deleted #{count} object#{count == 1 ? "" : "s"} (total = #{total_object_deleted + count})"
+      count
+    end
+
+    total_object_deleted += deletion_count
+    break if deletion_count == 0
+  end
+  puts "Total auth_objects removed: #{total_object_deleted}"
 end
 
 def timed(description)
