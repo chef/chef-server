@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.15.3 -->
-## [14.15.3](https://github.com/chef/chef-server/tree/14.15.3) (2022-04-27)
+<!-- latest_release 14.15.4 -->
+## [14.15.4](https://github.com/chef/chef-server/tree/14.15.4) (2022-04-27)
 
 #### Merged Pull Requests
-- remove opscode-chef-mover service [#3257](https://github.com/chef/chef-server/pull/3257) ([marcparadise](https://github.com/marcparadise))
+- Non default api_fqdn / bookshelf examples [#3270](https://github.com/chef/chef-server/pull/3270) ([sean-horn](https://github.com/sean-horn))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.14.1 -->
 ### Changes since 14.14.1 release
 
 #### Merged Pull Requests
+- Non default api_fqdn / bookshelf examples [#3270](https://github.com/chef/chef-server/pull/3270) ([sean-horn](https://github.com/sean-horn)) <!-- 14.15.4 -->
 - remove opscode-chef-mover service [#3257](https://github.com/chef/chef-server/pull/3257) ([marcparadise](https://github.com/marcparadise)) <!-- 14.15.3 -->
 - Bump sdoc from 2.3.1 to 2.3.2 in /src/oc-id [#3277](https://github.com/chef/chef-server/pull/3277) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.15.2 -->
 - Bump omnibus-software from `518f3f8` to `8f141a6` in /omnibus [#3278](https://github.com/chef/chef-server/pull/3278) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.15.1 -->
