@@ -61,7 +61,6 @@ vm:
        - rel/
        - _rel/
        - _build/
-       - chef-mover/rel/mover/
        - ebin/
        - .eunit/
        - .kitchen/
@@ -172,20 +171,6 @@ projects:
           - chef-server.webui_pub_key
           - opscode-reporting.sql_password
           - rabbitmq.actions_password
-  chef-mover:
-    type: erlang
-    service:
-      rel-type: rebar3
-      rel-name: mover
-      name:  opscode-chef-mover
-      cookie: mover
-      node: mover@127.0.0.1
-      secrets:
-        args: --use-file
-        list:
-          - opscode_erchef.sql_password
-          - oc_bifrost.superuser_id
-          - redis_lb.password
   bookshelf:
     type: erlang
     service:

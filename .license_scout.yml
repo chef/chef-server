@@ -3,7 +3,6 @@ name: chef-server
 directories:
   - ./
   - ./src/bookshelf
-  - ./src/chef-mover
   - ./src/chef-server-ctl
   - ./src/nginx
   - ./src/oc_bifrost

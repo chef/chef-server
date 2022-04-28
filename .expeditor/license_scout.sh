@@ -39,7 +39,6 @@ done
 
 erlang_install_dirs=(
   bookshelf
-  chef-mover
   oc_bifrost
   oc_erchef
 )

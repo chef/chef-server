@@ -69,7 +69,6 @@ module PrivateChef
   log_retention Mash.new
   log_rotation Mash.new
   dark_launch Mash.new
-  opscode_chef_mover Mash.new
   oc_chef_pedant Mash.new
 
   license Mash.new
@@ -219,7 +218,6 @@ module PrivateChef
         'postgresql',
         'oc_bifrost',
         'oc_id',
-        'opscode_chef_mover',
         'bookshelf',
         'bootstrap',
         'estatsd',
@@ -303,7 +301,6 @@ module PrivateChef
       authaddr << '::/0' if PrivateChef['use_ipv6']
       PrivateChef['postgresql']['md5_auth_cidr_addresses'] ||= authaddr
 
-      PrivateChef['opscode_chef_mover']['enable'] = !!bootstrap
       PrivateChef['bootstrap']['enable'] = !!bootstrap
     end
 
@@ -323,7 +320,6 @@ module PrivateChef
                                                      else
                                                        [ PrivateChef['backend_vips']['ipaddress'] ]
                                                      end
-      PrivateChef['opscode_chef_mover']['enable'] = false
       PrivateChef['bootstrap']['enable'] = false
     end
 

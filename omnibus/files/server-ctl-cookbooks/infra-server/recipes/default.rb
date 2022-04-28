@@ -131,7 +131,6 @@ include_recipe 'infra-server::fix_permissions'
   opscode-erchef
   nginx
   bootstrap
-  opscode-chef-mover
   redis_lb
 ).each do |service|
   if node['private_chef'][service]['external']

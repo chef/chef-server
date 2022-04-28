@@ -194,6 +194,7 @@ osc_migrated_examples() ->
 ec_migrated_examples() ->
     [ {Password, do_ec_migration(SHA1, Salt)} || {Password, SHA1, Salt} <- ec_sha1_examples()  ].
 
+% TODO - candidate for deletion, this should no longer be getting used
 % Perform midway migration to sha+bcrypt for OSC
 % this function only existed in chef_password for purpsoses
 % of testing, so it is moved here
@@ -204,9 +205,8 @@ do_osc_migration(SHA, Salt) ->
     {list_to_binary(HashedPass), CompoundSalt, ?OSC_MIGRATION_HASH_TYPE}.
 
 
+% TODO - candidate for deletion, this should no longer be getting used
 % Perform midway migration to sha+bcrypt for EC
-% this currently exists in chef_mover/src/mover_user_hash_converter.erl
-% and is executed during the user password migration phase of an EC upgrade.
 % Very similar to OSC migration, but does not store compound salt - instead
 % stores the original salt, because bcrypt salt is part of the bcrypt hash itself.
 do_ec_migration(SHA, Salt) ->
