@@ -188,7 +188,6 @@ file, using /host as the root directory, e.g. /host/src/chef-server-ctl.
   that is included with Chef Infra Server.
 - The following erlang apps need to be updated:
   - bookshelf
-  - chef-mover
   - oc_erchef
   - oc_bifrost
 - Check for the current rebar3 version with `./rebar3 --version`
@@ -265,15 +264,15 @@ An error message caused by a stale cache is depicted below (subsequently fixed w
 [GitCache: preparation] I | 2021-12-20T06:26:13+00:00 | $ git -c core.autocrlf=false -c core.ignorecase=false --git-dir="/var/cache/omnibus/chef-server/cache/git_cache/opt/opscode" --work-tree="/opt/opscode" tag -f restore_here "preparation-cfb266e8545d283f3c6062a1e7eaa9f2c4b1ca45e729b4ff2b637fe59dc3972b-3"
                           I | 2021-12-20T06:26:13+00:00 | fatal: cannot update ref 'refs/tags/restore_here': trying to write ref 'refs/tags/restore_here' with nonexistent object 9db05b5933b4399f57467e20f5a2d691f77a740e
 The following shell command exited with status 128:
- 
+
     $ git -c core.autocrlf=false -c core.ignorecase=false --git-dir="/var/cache/omnibus/chef-server/cache/git_cache/opt/opscode" --work-tree="/opt/opscode" tag -f restore_here "preparation-cfb266e8545d283f3c6062a1e7eaa9f2c4b1ca45e729b4ff2b637fe59dc3972b-3"
- 
+
 Output:
- 
+
     (nothing)
- 
+
 Error:
- 
+
     fatal: cannot update ref 'refs/tags/restore_here': trying to write ref 'refs/tags/restore_here' with nonexistent object 9db05b5933b4399f57467e20f5a2d691f77a740e
 ```
 
