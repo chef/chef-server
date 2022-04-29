@@ -228,20 +228,9 @@ EOF
       expect(PrivateChef.credentials.exist?('redis_lb', 'password')).to eq(true)
     end
 
-    it 'enables opscode-chef-mover on the bootstrap node' do
-      rendered_config = config_for('backend.chef.io')
-      expect(rendered_config['private_chef']['opscode-chef-mover']['enable']).to eq(true)
-    end
-
     it 'enables bootstrap recipe on the bootstrap node' do
       rendered_config = config_for('backend.chef.io')
       expect(rendered_config['private_chef']['bootstrap']['enable']).to eq(true)
-    end
-
-    it 'disables opscode-chef-mover on the frontend nodes' do
-      expect_existing_secrets
-      rendered_config = config_for('frontend.chef.io')
-      expect(rendered_config['private_chef']['opscode-chef-mover']['enable']).to eq(false)
     end
 
     it 'disables bootstrap recipe on the frontend node' do

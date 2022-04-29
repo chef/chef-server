@@ -36,7 +36,6 @@ This repository contains the core services that make up the Chef Infra Server.
 |-- scripts: Utility scripts
 `-- src
     |-- bookshelf: S3-compatible engine for storing cookbook data
-    |-- chef-mover: data migration orchestrator used in upgrades
     |-- oc-id: OAuth2 provider for extensions like Supermarket
     |-- oc_bifrost: Chef Infra Server's authorization service
     |-- oc_erchef: The core REST API server

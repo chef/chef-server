@@ -9,7 +9,6 @@ fips-platforms:
 builder-to-testers-map:
   el-7-x86_64:
     - el-7-x86_64
-    - el-8-x86_64
     - amazon-2-x86_64
   sles-12-x86_64:
     - sles-12-x86_64
@@ -18,3 +17,5 @@ builder-to-testers-map:
     - ubuntu-16.04-x86_64
     - ubuntu-18.04-x86_64
     - ubuntu-20.04-x86_64
+  el-8-x86_64:
+    - el-8-x86_64

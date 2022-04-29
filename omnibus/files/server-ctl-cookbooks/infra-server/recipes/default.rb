@@ -131,7 +131,6 @@ include_recipe 'infra-server::fix_permissions'
   opscode-erchef
   nginx
   bootstrap
-  opscode-chef-mover
   redis_lb
 ).each do |service|
   if node['private_chef'][service]['external']
@@ -149,11 +148,9 @@ include_recipe 'infra-server::fix_permissions'
       action :disable
     end
   elsif node['private_chef'][service]['enable']
-    if service == 'elasticsearch' && node['private_chef']['opscode-erchef']['search_provider'] == 'opensearch' && node['private_chef']['opensearch']['external']
-      include_recipe 'infra-server::opensearch-external'
-    else
-      include_recipe "infra-server::#{service}"
-    end
+    include_recipe "infra-server::#{service}"
+  elsif service == 'elasticsearch' && node['private_chef']['opscode-erchef']['search_provider'] == 'opensearch' && node['private_chef']['opensearch']['external']
+    include_recipe 'infra-server::opensearch-external'
   else
     # bootstrap isn't a service, nothing to disable.
     next if service == 'bootstrap'

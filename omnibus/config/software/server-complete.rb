@@ -62,7 +62,6 @@ dependency "partybus"
 # for situations where we're changing these components.
 # These are roughly sorted by build time and change frequency,
 # with the quickest builds coming last.
-dependency "opscode-chef-mover"
 dependency "oc_erchef"
 dependency "oc-chef-pedant"
 dependency "private-chef-upgrades"

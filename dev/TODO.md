@@ -8,8 +8,6 @@
       then add to .gitignore
 - [ ] we're all in one place - can we use and include a ../concrete.mk
       to simplify keeping things up to date?
-- [ ] add 'sync' erlang dependency to chef-mover
-- [ ] mover to relx and concrete
 - [ ] option to auto-modify /etc/hosts to add the vm name
       Also ensure DNS for named host resolves to external IP and
       everything works with this.

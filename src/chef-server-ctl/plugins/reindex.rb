@@ -68,22 +68,22 @@ end
 
 # Disk space verification for running reindex
 # It needs enough disk space to hold a second copy of the data plus whatever change in size the new index might need if the schema has changed.
-# Required Disk Space = (2 * size of ES data directory)
+# Required Disk Space = (2 * size of OS data directory)
 def verify_disk_space
-  data_dir = running_config["private_chef"]["elasticsearch"]["data_dir"]
+  data_dir = running_config["private_chef"]["opensearch"]["data_dir"]
   if Dir.exist?(data_dir)
     data_dir_size = Du.du(data_dir)
     free_disk_space = Statfs.new("#{data_dir}/..").free_space
     if (2.2 * data_dir_size) < free_disk_space # The minimum space should be double the existing data size
-      puts "Free space is sufficient to start Elasticsearch reindex"
+      puts "Free space is sufficient to start OpenSearch reindex"
     else
       $stderr.puts "Insufficient free space on disk to complete reindex."
-      $stderr.puts "The current elasticsearch data directory contains #{data_dir_size} KB of data but only #{free_disk_space} KB is available on disk."
+      $stderr.puts "The current opensearch data directory contains #{data_dir_size} KB of data but only #{free_disk_space} KB is available on disk."
       $stderr.puts "The reindex process requires at least #{2.2 * data_dir_size} KB."
       exit 1
     end
   else
-    puts "Elasticsearch data path does not exist, so skipping the disk space verification: #{data_dir}"
+    puts "OpenSearch data path does not exist, so skipping the disk space verification: #{data_dir}"
   end
 rescue => exception
   puts "Skipping the disk space verification due to #{exception.message}"
