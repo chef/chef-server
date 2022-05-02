@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.15.4 -->
-## [14.15.4](https://github.com/chef/chef-server/tree/14.15.4) (2022-04-27)
+<!-- latest_release 14.15.5 -->
+## [14.15.5](https://github.com/chef/chef-server/tree/14.15.5) (2022-05-02)
 
 #### Merged Pull Requests
-- Non default api_fqdn / bookshelf examples [#3270](https://github.com/chef/chef-server/pull/3270) ([sean-horn](https://github.com/sean-horn))
+- Bump activesupport from 7.0.2.3 to 7.0.2.4 in /oc-chef-pedant [#3282](https://github.com/chef/chef-server/pull/3282) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.14.1 -->
 ### Changes since 14.14.1 release
 
 #### Merged Pull Requests
+- Bump activesupport from 7.0.2.3 to 7.0.2.4 in /oc-chef-pedant [#3282](https://github.com/chef/chef-server/pull/3282) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.15.5 -->
 - Non default api_fqdn / bookshelf examples [#3270](https://github.com/chef/chef-server/pull/3270) ([sean-horn](https://github.com/sean-horn)) <!-- 14.15.4 -->
 - remove opscode-chef-mover service [#3257](https://github.com/chef/chef-server/pull/3257) ([marcparadise](https://github.com/marcparadise)) <!-- 14.15.3 -->
 - Bump sdoc from 2.3.1 to 2.3.2 in /src/oc-id [#3277](https://github.com/chef/chef-server/pull/3277) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.15.2 -->
