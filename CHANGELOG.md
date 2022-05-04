@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.15.8 -->
-## [14.15.8](https://github.com/chef/chef-server/tree/14.15.8) (2022-05-02)
+<!-- latest_release 14.15.9 -->
+## [14.15.9](https://github.com/chef/chef-server/tree/14.15.9) (2022-05-04)
 
 #### Merged Pull Requests
-- Bump berkshelf from 7.2.2 to 8.0.0 in /omnibus [#3287](https://github.com/chef/chef-server/pull/3287) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Added opensearch-index-init.json for habitat builds [#3291](https://github.com/chef/chef-server/pull/3291) ([jashaik](https://github.com/jashaik))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.14.1 -->
 ### Changes since 14.14.1 release
 
 #### Merged Pull Requests
+- Added opensearch-index-init.json for habitat builds [#3291](https://github.com/chef/chef-server/pull/3291) ([jashaik](https://github.com/jashaik)) <!-- 14.15.9 -->
 - Bump berkshelf from 7.2.2 to 8.0.0 in /omnibus [#3287](https://github.com/chef/chef-server/pull/3287) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.15.8 -->
 - Bump berkshelf from 7.2.2 to 8.0.0 in /src/chef-server-ctl [#3285](https://github.com/chef/chef-server/pull/3285) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.15.7 -->
 - Bump activesupport from 7.0.2.3 to 7.0.2.4 in /src/oc_bifrost/oc-bifrost-pedant [#3283](https://github.com/chef/chef-server/pull/3283) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.15.6 -->
