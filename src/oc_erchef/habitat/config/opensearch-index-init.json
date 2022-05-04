@@ -1,0 +1,44 @@
+{
+    "settings": {
+      "analysis": {
+        "analyzer": {
+          "default": {
+            "type": "whitespace"
+          }
+        }
+      },
+      "number_of_shards": 3,
+      "number_of_replicas": 2
+    },
+    "mappings": {
+      "_source": {
+        "enabled": false
+      },
+      "properties": {
+        "X_CHEF_database_CHEF_X": {
+          "type": "keyword",
+          "index": true,
+          "norms": false
+        },
+        "X_CHEF_type_CHEF_X": {
+          "type": "keyword",
+          "index": true,
+          "norms": false
+        },
+        "X_CHEF_id_CHEF_X": {
+          "type": "keyword",
+          "index": true,
+          "norms": false
+        },
+        "data_bag": {
+          "type": "keyword",
+          "index": true,
+          "norms": false
+        },
+        "content": {
+          "type": "text",
+          "index": true
+        }
+      }
+    }
+  }
