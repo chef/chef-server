@@ -1,38 +1,36 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.15.9 -->
-## [14.15.9](https://github.com/chef/chef-server/tree/14.15.9) (2022-05-04)
-
-#### Merged Pull Requests
-- Added opensearch-index-init.json for habitat builds [#3291](https://github.com/chef/chef-server/pull/3291) ([jashaik](https://github.com/jashaik))
+<!-- latest_release -->
 <!-- latest_release -->
 
-<!-- release_rollup since=14.14.1 -->
-### Changes since 14.14.1 release
-
-#### Merged Pull Requests
-- Added opensearch-index-init.json for habitat builds [#3291](https://github.com/chef/chef-server/pull/3291) ([jashaik](https://github.com/jashaik)) <!-- 14.15.9 -->
-- Bump berkshelf from 7.2.2 to 8.0.0 in /omnibus [#3287](https://github.com/chef/chef-server/pull/3287) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.15.8 -->
-- Bump berkshelf from 7.2.2 to 8.0.0 in /src/chef-server-ctl [#3285](https://github.com/chef/chef-server/pull/3285) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.15.7 -->
-- Bump activesupport from 7.0.2.3 to 7.0.2.4 in /src/oc_bifrost/oc-bifrost-pedant [#3283](https://github.com/chef/chef-server/pull/3283) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.15.6 -->
-- Bump activesupport from 7.0.2.3 to 7.0.2.4 in /oc-chef-pedant [#3282](https://github.com/chef/chef-server/pull/3282) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.15.5 -->
-- Non default api_fqdn / bookshelf examples [#3270](https://github.com/chef/chef-server/pull/3270) ([sean-horn](https://github.com/sean-horn)) <!-- 14.15.4 -->
-- remove opscode-chef-mover service [#3257](https://github.com/chef/chef-server/pull/3257) ([marcparadise](https://github.com/marcparadise)) <!-- 14.15.3 -->
-- Bump sdoc from 2.3.1 to 2.3.2 in /src/oc-id [#3277](https://github.com/chef/chef-server/pull/3277) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.15.2 -->
-- Bump omnibus-software from `518f3f8` to `8f141a6` in /omnibus [#3278](https://github.com/chef/chef-server/pull/3278) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.15.1 -->
-- Bump rspec-rails from 5.1.1 to 5.1.2 in /src/oc-id [#3279](https://github.com/chef/chef-server/pull/3279) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.15.0 -->
-- opensearch_index recipe is not applied if elasticsearch[&#39;enable&#39;] = false [#3273](https://github.com/chef/chef-server/pull/3273) ([jashaik](https://github.com/jashaik)) <!-- 14.14.10 -->
-- updating cert creation for universal platform compatibility [#3269](https://github.com/chef/chef-server/pull/3269) ([johnmccrae](https://github.com/johnmccrae)) <!-- 14.14.9 -->
-- Add el 8 builders [#3264](https://github.com/chef/chef-server/pull/3264) ([vinay-satish](https://github.com/vinay-satish)) <!-- 14.14.8 -->
-- Bump omnibus from `55e74ac` to `27c37fc` in /omnibus [#3267](https://github.com/chef/chef-server/pull/3267) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.14.7 -->
-- Bump omnibus-software from `960cb6e` to `518f3f8` in /omnibus [#3266](https://github.com/chef/chef-server/pull/3266) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.14.6 -->
-- Remove unsupported migrations (&lt; 12.17.15) [#3256](https://github.com/chef/chef-server/pull/3256) ([marcparadise](https://github.com/marcparadise)) <!-- 14.14.5 -->
-- Bump pg from 1.3.4 to 1.3.5 in /src/chef-server-ctl [#3252](https://github.com/chef/chef-server/pull/3252) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.14.4 -->
-- Bump mixlib-shellout from 3.2.5 to 3.2.7 in /oc-chef-pedant [#3258](https://github.com/chef/chef-server/pull/3258) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.14.3 -->
-- Bump omnibus-software from `5947560` to `960cb6e` in /omnibus [#3259](https://github.com/chef/chef-server/pull/3259) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.14.2 -->
+<!-- release_rollup -->
 <!-- release_rollup -->
 
 <!-- latest_stable_release -->
+## [14.15.9](https://github.com/chef/chef-server/tree/14.15.9) (2022-05-04)
+
+#### Merged Pull Requests
+- Bump omnibus-software from `5947560` to `960cb6e` in /omnibus [#3259](https://github.com/chef/chef-server/pull/3259) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump mixlib-shellout from 3.2.5 to 3.2.7 in /oc-chef-pedant [#3258](https://github.com/chef/chef-server/pull/3258) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump pg from 1.3.4 to 1.3.5 in /src/chef-server-ctl [#3252](https://github.com/chef/chef-server/pull/3252) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Remove unsupported migrations (&lt; 12.17.15) [#3256](https://github.com/chef/chef-server/pull/3256) ([marcparadise](https://github.com/marcparadise))
+- Bump omnibus-software from `960cb6e` to `518f3f8` in /omnibus [#3266](https://github.com/chef/chef-server/pull/3266) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump omnibus from `55e74ac` to `27c37fc` in /omnibus [#3267](https://github.com/chef/chef-server/pull/3267) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Add el 8 builders [#3264](https://github.com/chef/chef-server/pull/3264) ([vinay-satish](https://github.com/vinay-satish))
+- updating cert creation for universal platform compatibility [#3269](https://github.com/chef/chef-server/pull/3269) ([johnmccrae](https://github.com/johnmccrae))
+- opensearch_index recipe is not applied if elasticsearch[&#39;enable&#39;] = false [#3273](https://github.com/chef/chef-server/pull/3273) ([jashaik](https://github.com/jashaik))
+- Bump rspec-rails from 5.1.1 to 5.1.2 in /src/oc-id [#3279](https://github.com/chef/chef-server/pull/3279) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump omnibus-software from `518f3f8` to `8f141a6` in /omnibus [#3278](https://github.com/chef/chef-server/pull/3278) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump sdoc from 2.3.1 to 2.3.2 in /src/oc-id [#3277](https://github.com/chef/chef-server/pull/3277) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- remove opscode-chef-mover service [#3257](https://github.com/chef/chef-server/pull/3257) ([marcparadise](https://github.com/marcparadise))
+- Non default api_fqdn / bookshelf examples [#3270](https://github.com/chef/chef-server/pull/3270) ([sean-horn](https://github.com/sean-horn))
+- Bump activesupport from 7.0.2.3 to 7.0.2.4 in /oc-chef-pedant [#3282](https://github.com/chef/chef-server/pull/3282) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump activesupport from 7.0.2.3 to 7.0.2.4 in /src/oc_bifrost/oc-bifrost-pedant [#3283](https://github.com/chef/chef-server/pull/3283) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump berkshelf from 7.2.2 to 8.0.0 in /src/chef-server-ctl [#3285](https://github.com/chef/chef-server/pull/3285) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump berkshelf from 7.2.2 to 8.0.0 in /omnibus [#3287](https://github.com/chef/chef-server/pull/3287) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Added opensearch-index-init.json for habitat builds [#3291](https://github.com/chef/chef-server/pull/3291) ([jashaik](https://github.com/jashaik))
+<!-- latest_stable_release -->
+
 ## [14.14.1](https://github.com/chef/chef-server/tree/14.14.1) (2022-04-05)
 
 #### Merged Pull Requests
@@ -65,7 +63,6 @@
 - Resolved cookbook style issues [#3248](https://github.com/chef/chef-server/pull/3248) ([jashaik](https://github.com/jashaik))
 - Bump pg from 1.3.4 to 1.3.5 in /src/oc-id [#3253](https://github.com/chef/chef-server/pull/3253) ([dependabot[bot]](https://github.com/dependabot[bot]))
 - Updated external opensearch docs [#3249](https://github.com/chef/chef-server/pull/3249) ([jashaik](https://github.com/jashaik))
-<!-- latest_stable_release -->
 
 ## [14.13.42](https://github.com/chef/chef-server/tree/14.13.42) (2022-03-01)
 
