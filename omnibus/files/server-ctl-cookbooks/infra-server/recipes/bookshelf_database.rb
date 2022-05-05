@@ -28,12 +28,22 @@ pg_user bookshelf_attrs['sql_ro_user'] do
   superuser false
 end
 
-bash 'LIST DIRECTORY' do
-  #cwd ::File.dirname(src_filepath)
-  code <<-LIST
-    ls /opt/opscode/embedded/service/bookshelf
-    find /opt/opscode/embedded/service/bookshelf -name sqitch.plan
-  LIST
+#bash 'LIST DIRECTORY' do
+#  #cwd ::File.dirname(src_filepath)
+#  code <<-LIST
+#    ls /opt/opscode/embedded/service/bookshelf
+#    find /opt/opscode/embedded/service/bookshelf -name sqitch.plan
+#  LIST
+#end
+
+execute 'LIST DIR' do
+  command 'ls /opt/opscode/embedded/service/bookshelf'
+  live_stream true
+end
+
+execute 'FIND SQITCH.PLAN' do
+  command 'find /opt/opscode/embedded/service/bookshelf -name sqitch.plan'
+  live_stream true
 end
 
 pg_database 'bookshelf' do
