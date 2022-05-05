@@ -20,55 +20,55 @@ given time. The supervisor starts two processes per service.
 
 ## Service Subcommands
 
-{{% ctl_common_service_subcommands %}}
+{{% chef-server/ctl_common_service_subcommands %}}
 
 ### hup
 
-{{% ctl_chef_server_hup %}}
+{{% chef-server/ctl_chef_server_hup %}}
 
 ### int
 
-{{% ctl_chef_server_int %}}
+{{% chef-server/ctl_chef_server_int %}}
 
 ### kill
 
-{{% ctl_chef_server_kill %}}
+{{% chef-server/ctl_chef_server_kill %}}
 
 ### once
 
-{{% ctl_chef_server_once %}}
+{{% chef-server/ctl_chef_server_once %}}
 
 ### restart
 
-{{% ctl_chef_server_restart %}}
+{{% chef-server/ctl_chef_server_restart %}}
 
 ### service-list
 
-{{% ctl_chef_server_service_list %}}
+{{% chef-server/ctl_chef_server_service_list %}}
 
 ### start
 
-{{% ctl_chef_server_start %}}
+{{% chef-server/ctl_chef_server_start %}}
 
 ### status
 
-{{% ctl_chef_server_status %}}
+{{% chef-server/ctl_chef_server_status %}}
 
 #### Log Files
 
-{{% ctl_chef_server_status_logs %}}
+{{% chef-server/ctl_chef_server_status_logs %}}
 
 ### stop
 
-{{% ctl_chef_server_stop %}}
+{{% chef-server/ctl_chef_server_stop %}}
 
 ### tail
 
-{{% ctl_chef_server_tail %}}
+{{% chef-server/ctl_chef_server_tail %}}
 
 ### term
 
-{{% ctl_chef_server_term %}}
+{{% chef-server/ctl_chef_server_term %}}
 
 ## List of Services
 
@@ -84,7 +84,7 @@ The following services are part of the Chef Infra Server:
 
 ### bifrost
 
-{{% server_services_bifrost %}}
+{{% chef-server/server_services_bifrost %}}
 
 #### status
 
@@ -156,7 +156,7 @@ chef-server-ctl tail bifrost
 
 ### bookshelf
 
-{{% server_services_bookshelf %}}
+{{% chef-server/server_services_bookshelf %}}
 
 #### status
 
@@ -372,11 +372,11 @@ chef-server-ctl once nginx
 
 #### tail
 
-{{% server_services_nginx_tail %}}
+{{% chef-server/server_services_nginx_tail %}}
 
 ### opscode-erchef
 
-{{% server_services_erchef %}}
+{{% chef-server/server_services_erchef %}}
 
 #### status
 
@@ -448,7 +448,7 @@ chef-server-ctl tail opscode-erchef
 
 ### postgresql
 
-{{% server_services_postgresql %}}
+{{% chef-server/server_services_postgresql %}}
 
 #### status
 
@@ -520,7 +520,7 @@ chef-server-ctl tail postgresql
 
 ### redis
 
-{{% server_services_redis %}}
+{{% chef-server/server_services_redis %}}
 
 #### status
 

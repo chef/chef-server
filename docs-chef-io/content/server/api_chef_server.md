@@ -228,7 +228,7 @@ GET /organizations/NAME/nodes HTTP/1.1
 
 {{% plugin_knife_summary %}}
 
-{{% plugin_knife_using_authenticated_requests %}}
+{{% chef-server/plugin_knife_using_authenticated_requests %}}
 
 ## Global Endpoints
 

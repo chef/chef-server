@@ -31,19 +31,56 @@ particular setting.
 
 ## Customize the Config File
 
-{{% config_rb_server_summary %}}
+{{% chef-server/config_rb_server_summary %}}
 
 ### Use Conditions
 
-{{% config_add_condition %}}
+Use a `case` statement to apply different values based on whether the
+setting exists on the front-end or back-end servers. Add code to the
+server configuration file similar to the following:
+
+```ruby
+role_name = ChefServer['servers'][node['fqdn']]['role']
+case role_name
+when 'backend'
+  # backend-specific configuration here
+when 'frontend'
+  # frontend-specific configuration here
+end
+```
 
 ## Recommended Settings
 
-{{% server_tuning_general %}}
+The following settings are typically added to the server configuration
+file (no equal sign is necessary to set the value):
+
+`api_fqdn`
+
+:   The FQDN for the Chef Infra Server. This setting is not in the
+    server configuration file by default. When added, its value should
+    be equal to the FQDN for the service URI used by the Chef Infra
+    Server. For example: `api_fqdn "chef.example.com"`.
+
+`bootstrap`
+
+:   Default value: `true`.
+
+`ip_version`
+
+:   Use to set the IP version: `"ipv4"` or `"ipv6"`. When set to
+    `"ipv6"`, the API listens on IPv6 and front end and back end
+    services communicate using IPv6 when a high availability configuration
+    is used. When configuring for IPv6 in a high availability
+    configuration, be sure to set the netmask on the IPv6 `backend_vip`
+    attribute. Default value: `"ipv4"`.
+
+`notification_email`
+
+:   Default value: `info@example.com`.
 
 ### SSL Protocols
 
-{{% server_tuning_nginx %}}
+{{% chef-server/server_tuning_nginx %}}
 
 ## Optional Services Tuning
 
@@ -51,17 +88,76 @@ The following settings are often used to for performance tuning of the
 Chef Infra Server in larger installations.
 
 {{< note >}}
-{{% notes_config_rb_server_must_reconfigure %}}
+{{% chef-server/notes_config_rb_server_must_reconfigure %}}
 {{< /note >}}
 
 ### bookshelf
 
-{{% server_tuning_bookshelf %}}
+The following setting is often modified from the default as part of the
+tuning effort for the **bookshelf** service:
+
+`bookshelf['vip']`
+
+:   The virtual IP address. Default value: `node['fqdn']`.
 
 ### opscode-erchef
 
-{{% server_tuning_erchef %}}
+The following settings are often modified from the default as part of
+the tuning effort for the **opscode-erchef** service:
+
+`opscode_erchef['db_pool_size']`
+
+:   The number of open connections to PostgreSQL that are maintained by
+    the service. If failures indicate that the **opscode-erchef**
+    service ran out of connections, try increasing the
+    `postgresql['max_connections']` setting. If failures persist, then
+    increase this value (in small increments) and also increase the
+    value for `postgresql['max_connections']`. Default value: `20`.
+
+`opscode_erchef['s3_url_ttl']`
+
+:   The amount of time (in seconds) before connections to the server
+    expire. If Chef Infra Client runs are timing out, increase this
+    setting to `3600`, and then adjust again if necessary. Default
+    value: `900`.
+
+`opscode_erchef['strict_search_result_acls']`
+
+:   {{ readFile "layouts/shortcodes/settings_strict_search_result_acls.md" | markdownify }}
 
 ### postgresql
 
-{{% server_tuning_postgresql %}}
+The following setting is often modified from the default as part of the tuning effort for the **postgresql** service:
+
+`postgresql['max_connections']`
+
+:   The maximum number of allowed concurrent connections. This value should only be tuned when the `opscode_erchef['db_pool_size']` value used by the **opscode-erchef** service is modified. Default value: `350`.
+    If there are more than two front end machines in a cluster, the
+    `postgresql['max_connections']` setting should be increased. The
+    increased value depends on the number of machines in the front end,
+    but also the number of services that are running on each of these
+    machines.
+
+    - Each front end machine always runs the **oc_bifrost** and
+        **opscode-erchef** services.
+    - The Reporting add-on adds the **reporting** service.
+
+    Each of these services requires 25 connections, above the default
+    value.
+
+    Use the following formula to help determine what the increased value
+    should be:
+
+    ```ruby
+    new_value = current_value + [
+                (# of front end machines - 2) * (25 * # of services)
+             ]
+    ```
+
+    For example, if the current value is 350, there are four front end
+    machines, and all add-ons are installed, then the formula looks
+    like:
+
+    ```ruby
+    550 = 350 + [(4 - 2) * (25 * 4)]
+    ```

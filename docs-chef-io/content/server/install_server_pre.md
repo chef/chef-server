@@ -20,7 +20,7 @@ for installation instructions.
 
 ## Platforms
 
-{{% adopted_platforms_server %}}
+{{% chef-server/adopted_platforms_server %}}
 
 ### Untested Platforms
 

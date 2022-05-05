@@ -14,11 +14,11 @@ aliases = ["/config_rb_backend.html", "/config_rb_backend/"]
     weight = 30
 +++
 
-{{% EOL_backend %}}
+{{% chef-server/EOL_backend %}}
 
 ## chef-backend.rb Options
 
-{{% config_rb_backend_summary %}}
+{{% chef-server/config_rb_backend_summary %}}
 
 ### Common 'Runit' Flags for Any Backend Service
 

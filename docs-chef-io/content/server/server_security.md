@@ -110,7 +110,7 @@ than 64 characters.
 
 ### SSL Protocols
 
-{{% server_tuning_nginx %}}
+{{% chef-server/server_tuning_nginx %}}
 
 **Example: Configure SSL Keys for Nginx**
 
@@ -169,7 +169,7 @@ end
 
 ### Knife, Chef Infra Client
 
-{{% server_security_ssl_cert_client %}}
+{{% chef-server/server_security_ssl_cert_client %}}
 
 See [Chef Infra Client SSL
 Certificates]({{< relref "chef_client_security#ssl-certificates" >}}) for more

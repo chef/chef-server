@@ -14,7 +14,7 @@ aliases = ["/install_server_ha.html"]
     weight = 20
 +++
 
-{{% EOL_backend %}}
+{{% chef-server/EOL_backend %}}
 
 This topic introduces the underlying concepts behind the architecture of
 the high availability Chef Infra Server cluster. The topic then
@@ -346,9 +346,9 @@ To restore a backup to this system, follow the [chef-server-ctl]({{< relref "ser
 
 {{< /note >}}
 
-1.  {{< readFile_shortcode file="ctl_chef_server_user_create_admin.md" >}}
+1.  {{< readfile file="layouts/shortcodes/chef-server/ctl_chef_server_user_create_admin.md" >}}
 
-1.  {{< readFile_shortcode file="ctl_chef_server_org_create_summary.md" >}}
+1.  {{< readfile file="layouts/shortcodes/chef-server/ctl_chef_server_org_create_summary.md" >}}
 
 
 ### Upgrading Chef Infra Server on the Frontend Machines
@@ -599,7 +599,7 @@ ticket with <support@chef.io>.
 
 ## chef-backend.rb Options
 
-{{% config_rb_backend_summary %}}
+{{% chef-server/config_rb_backend_summary %}}
 
 For information on all the available settings, see the
 [chef-backend.rb documentation]({{< relref "config_rb_backend" >}}).

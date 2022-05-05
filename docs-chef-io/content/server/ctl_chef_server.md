@@ -14,7 +14,7 @@ aliases = ["/ctl_chef_server.html", "/ctl_chef_server/"]
     weight = 10
 +++
 
-{{% ctl_chef_server_summary %}}
+{{% chef-server/ctl_chef_server_summary %}}
 
 ## Backup / Restore
 
@@ -23,27 +23,27 @@ and then to restore those backups.
 
 ### backup
 
-{{% ctl_chef_server_backup %}}
+{{% chef-server/ctl_chef_server_backup %}}
 
 **Options**
 
-{{% ctl_chef_server_backup_options %}}
+{{% chef-server/ctl_chef_server_backup_options %}}
 
 **Syntax**
 
-{{% ctl_chef_server_backup_syntax %}}
+{{% chef-server/ctl_chef_server_backup_syntax %}}
 
 ### restore
 
-{{% ctl_chef_server_restore %}}
+{{% chef-server/ctl_chef_server_restore %}}
 
 **Options**
 
-{{% ctl_chef_server_restore_options %}}
+{{% chef-server/ctl_chef_server_restore_options %}}
 
 **Syntax**
 
-{{% ctl_chef_server_restore_syntax %}}
+{{% chef-server/ctl_chef_server_restore_syntax %}}
 
 **Examples**
 
@@ -138,11 +138,11 @@ This subcommand has the following options:
 
 ### Use Downloads
 
-{{% ctl_chef_server_install_features_download %}}
+{{% chef-server/ctl_chef_server_install_features_download %}}
 
 ### Use Local Packages
 
-{{% ctl_chef_server_install_features_manual %}}
+{{% chef-server/ctl_chef_server_install_features_manual %}}
 
 ## Key Rotation
 
@@ -702,19 +702,19 @@ This subcommand has the following options:
 
 ## Manage Organizations
 
-{{% ctl_chef_server_org %}}
+{{% chef-server/ctl_chef_server_org %}}
 
 ### org-create
 
-{{% ctl_chef_server_org_create %}}
+{{% chef-server/ctl_chef_server_org_create %}}
 
 **Syntax**
 
-{{% ctl_chef_server_org_create_syntax %}}
+{{% chef-server/ctl_chef_server_org_create_syntax %}}
 
 **Options**
 
-{{% ctl_chef_server_org_create_options %}}
+{{% chef-server/ctl_chef_server_org_create_options %}}
 
 **Examples**
 
@@ -736,11 +736,11 @@ chef-server-ctl org-create dev Development --association_user grantmc
 
 ### org-delete
 
-{{% ctl_chef_server_org_delete %}}
+{{% chef-server/ctl_chef_server_org_delete %}}
 
 **Syntax**
 
-{{% ctl_chef_server_org_delete_syntax %}}
+{{% chef-server/ctl_chef_server_org_delete_syntax %}}
 
 **Examples**
 
@@ -754,35 +754,35 @@ chef-server-ctl org-delete pedant-testing-org
 
 ### org-list
 
-{{% ctl_chef_server_org_list %}}
+{{% chef-server/ctl_chef_server_org_list %}}
 
 **Syntax**
 
-{{% ctl_chef_server_org_list_syntax %}}
+{{% chef-server/ctl_chef_server_org_list_syntax %}}
 
 **Options**
 
-{{% ctl_chef_server_org_list_options %}}
+{{% chef-server/ctl_chef_server_org_list_options %}}
 
 ### org-show
 
-{{% ctl_chef_server_org_show %}}
+{{% chef-server/ctl_chef_server_org_show %}}
 
 **Syntax**
 
-{{% ctl_chef_server_org_show_syntax %}}
+{{% chef-server/ctl_chef_server_org_show_syntax %}}
 
 ### org-user-add
 
-{{% ctl_chef_server_org_user_add %}}
+{{% chef-server/ctl_chef_server_org_user_add %}}
 
 **Syntax**
 
-{{% ctl_chef_server_org_user_add_syntax %}}
+{{% chef-server/ctl_chef_server_org_user_add_syntax %}}
 
 **Options**
 
-{{% ctl_chef_server_org_user_add_options %}}
+{{% chef-server/ctl_chef_server_org_user_add_options %}}
 
 **Examples**
 
@@ -800,7 +800,7 @@ chef-server-ctl org-user-add dev grantmc --admin
 
 ### org-user-remove
 
-{{% ctl_chef_server_org_user_remove %}}
+{{% chef-server/ctl_chef_server_org_user_remove %}}
 
 {{< warning >}}
 
@@ -810,7 +810,7 @@ chef-server-ctl org-user-add dev grantmc --admin
 
 **Syntax**
 
-{{% ctl_chef_server_org_user_remove_syntax %}}
+{{% chef-server/ctl_chef_server_org_user_remove_syntax %}}
 
 **Options**
 
@@ -986,31 +986,31 @@ curl -XPUT -H "Content-Type: application/json" http://127.0.0.1:9200/_all/_setti
 
 ## Server Admins
 
-{{% server_rbac_server_admins %}}
+{{% chef-server/server_rbac_server_admins %}}
 
 ### Scenario
 
-{{% server_rbac_server_admins_scenario %}}
+{{% chef-server/server_rbac_server_admins_scenario %}}
 
 #### Superuser Accounts
 
-{{% server_rbac_server_admins_superusers %}}
+{{% chef-server/server_rbac_server_admins_superusers %}}
 
 ### Manage server-admins Group
 
-{{% ctl_chef_server_server_admin %}}
+{{% chef-server/ctl_chef_server_server_admin %}}
 
 #### Add Members
 
-{{% ctl_chef_server_server_admin_grant_user %}}
+{{% chef-server/ctl_chef_server_server_admin_grant_user %}}
 
 #### Remove Members
 
-{{% ctl_chef_server_server_admin_remove_user %}}
+{{% chef-server/ctl_chef_server_server_admin_remove_user %}}
 
 #### List Membership
 
-{{% ctl_chef_server_server_admin_list %}}
+{{% chef-server/ctl_chef_server_server_admin_list %}}
 
 ## show-config
 
@@ -1119,19 +1119,19 @@ chef-server-ctl rebuild-migration-state
 
 ## User Management
 
-{{% ctl_chef_server_user %}}
+{{% chef-server/ctl_chef_server_user %}}
 
 ### user-create
 
-{{% ctl_chef_server_user_create %}}
+{{% chef-server/ctl_chef_server_user_create %}}
 
 **Syntax**
 
-{{% ctl_chef_server_user_create_syntax %}}
+{{% chef-server/ctl_chef_server_user_create_syntax %}}
 
 **Options**
 
-{{% ctl_chef_server_user_create_options %}}
+{{% chef-server/ctl_chef_server_user_create_options %}}
 
 **Examples**
 
@@ -1149,11 +1149,11 @@ chef-server-ctl user-create waldendude Henry David Thoreau waldendude@example.co
 
 ### user-delete
 
-{{% ctl_chef_server_user_delete %}}
+{{% chef-server/ctl_chef_server_user_delete %}}
 
 **Syntax**
 
-{{% ctl_chef_server_user_delete_syntax %}}
+{{% chef-server/ctl_chef_server_user_delete_syntax %}}
 
 **Examples**
 
@@ -1176,11 +1176,11 @@ This subcommand has the following options:
 
 ### user-edit
 
-{{% ctl_chef_server_user_edit %}}
+{{% chef-server/ctl_chef_server_user_edit %}}
 
 **Syntax**
 
-{{% ctl_chef_server_user_edit_syntax %}}
+{{% chef-server/ctl_chef_server_user_edit_syntax %}}
 
 **Examples**
 
@@ -1194,31 +1194,31 @@ chef-server-ctl user-edit jane_doe
 
 ### user-list
 
-{{% ctl_chef_server_user_list %}}
+{{% chef-server/ctl_chef_server_user_list %}}
 
 **Syntax**
 
-{{% ctl_chef_server_user_list_syntax %}}
+{{% chef-server/ctl_chef_server_user_list_syntax %}}
 
 **Options**
 
-{{% ctl_chef_server_user_list_options %}}
+{{% chef-server/ctl_chef_server_user_list_options %}}
 
 ### user-show
 
-{{% ctl_chef_server_user_show %}}
+{{% chef-server/ctl_chef_server_user_show %}}
 
 **Syntax**
 
-{{% ctl_chef_server_user_show_syntax %}}
+{{% chef-server/ctl_chef_server_user_show_syntax %}}
 
 **Options**
 
-{{% ctl_chef_server_user_show_options %}}
+{{% chef-server/ctl_chef_server_user_show_options %}}
 
 ## Service Subcommands
 
-{{% ctl_common_service_subcommands %}}
+{{% chef-server/ctl_common_service_subcommands %}}
 
 {{< warning >}}
 
@@ -1230,48 +1230,48 @@ is configured for the Chef Infra Server: `hup`, `int`, `kill`, `once`,
 
 ### hup
 
-{{% ctl_chef_server_hup %}}
+{{% chef-server/ctl_chef_server_hup %}}
 
 ### int
 
-{{% ctl_chef_server_int %}}
+{{% chef-server/ctl_chef_server_int %}}
 
 ### kill
 
-{{% ctl_chef_server_kill %}}
+{{% chef-server/ctl_chef_server_kill %}}
 
 ### once
 
-{{% ctl_chef_server_once %}}
+{{% chef-server/ctl_chef_server_once %}}
 
 ### restart
 
-{{% ctl_chef_server_restart %}}
+{{% chef-server/ctl_chef_server_restart %}}
 
 ### service-list
 
-{{% ctl_chef_server_service_list %}}
+{{% chef-server/ctl_chef_server_service_list %}}
 
 ### start
 
-{{% ctl_chef_server_start %}}
+{{% chef-server/ctl_chef_server_start %}}
 
 ### status
 
-{{% ctl_chef_server_status %}}
+{{% chef-server/ctl_chef_server_status %}}
 
 #### Log Files
 
-{{% ctl_chef_server_status_logs %}}
+{{% chef-server/ctl_chef_server_status_logs %}}
 
 ### stop
 
-{{% ctl_chef_server_stop %}}
+{{% chef-server/ctl_chef_server_stop %}}
 
 ### tail
 
-{{% ctl_chef_server_tail %}}
+{{% chef-server/ctl_chef_server_tail %}}
 
 ### term
 
-{{% ctl_chef_server_term %}}
+{{% chef-server/ctl_chef_server_term %}}

@@ -26,27 +26,27 @@ For the majority of use cases, `chef-server-ctl backup` is the recommended way t
 
 ### backup
 
-{{% ctl_chef_server_backup %}}
+{{% chef-server/ctl_chef_server_backup %}}
 
 #### Options
 
-{{% ctl_chef_server_backup_options %}}
+{{% chef-server/ctl_chef_server_backup_options %}}
 
 #### Syntax
 
-{{% ctl_chef_server_backup_syntax %}}
+{{% chef-server/ctl_chef_server_backup_syntax %}}
 
 ### restore
 
-{{% ctl_chef_server_restore %}}
+{{% chef-server/ctl_chef_server_restore %}}
 
 #### Options
 
-{{% ctl_chef_server_restore_options %}}
+{{% chef-server/ctl_chef_server_restore_options %}}
 
 #### Syntax
 
-{{% ctl_chef_server_restore_syntax %}}
+{{% chef-server/ctl_chef_server_restore_syntax %}}
 
 #### Examples
 
@@ -56,7 +56,7 @@ chef-server-ctl restore /path/to/tar/archive.tar.gz
 
 ## Backup and restore a Chef Backend install
 
-{{% EOL_backend %}}
+{{% chef-server/EOL_backend %}}
 
 In a disaster recovery scenario, the backup and restore processes allow you to restore a data backup into a newly built cluster. The restore process is not intended for recovering individual machine in the Chef Backend cluster or for a point-in-time rollback of an existing cluster.
 

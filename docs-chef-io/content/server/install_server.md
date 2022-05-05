@@ -26,7 +26,7 @@ There are three configuration scenarios for the Chef Infra Server:
 
 ## Supported Platforms
 
-{{% adopted_platforms_server %}}
+{{% chef-server/adopted_platforms_server %}}
 
 ## Prerequisites
 
@@ -76,7 +76,7 @@ To install Chef Infra Server:
     Server, and then record its location on the file system. The rest of
     these steps assume this location is in the `/tmp` directory.
 
-3.  {{< readFile_shortcode file="install_chef_server_install_package.md" >}}
+3.  {{< readfile file="layouts/shortcodes/chef-server/install_chef_server_install_package.md" >}}
 
 4.  Run the following to start all of the services:
 
@@ -88,9 +88,9 @@ To install Chef Infra Server:
     that work together to create a functioning system, this step may
     take a few minutes to complete.
 
-5.  {{< readFile_shortcode file="ctl_chef_server_user_create_admin.md" >}}
+5.  {{< readfile file="layouts/shortcodes/chef-server/ctl_chef_server_user_create_admin.md" >}}
 
-6.  {{< readFile_shortcode file="ctl_chef_server_org_create_summary.md" >}}
+6.  {{< readfile file="layouts/shortcodes/chef-server/ctl_chef_server_org_create_summary.md" >}}
 
 ## Update Configuration for Purchased Nodes
 
