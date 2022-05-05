@@ -28,29 +28,11 @@ pg_user bookshelf_attrs['sql_ro_user'] do
   superuser false
 end
 
-#bash 'LIST DIRECTORY' do
-#  #cwd ::File.dirname(src_filepath)
-#  code <<-LIST
-#    ls /opt/opscode/embedded/service/bookshelf
-#    find /opt/opscode/embedded/service/bookshelf -name sqitch.plan
-#  LIST
-#end
-
-execute 'LIST DIR' do
-  command 'ls /opt/opscode/embedded/service/bookshelf'
-  live_stream true
-end
-
-execute 'FIND SQITCH.PLAN' do
-  command 'find /opt/opscode/embedded/service/bookshelf -name sqitch.plan'
-  live_stream true
-end
-
 pg_database 'bookshelf' do
   owner bookshelf_attrs['sql_user']
   # This is used to trigger creation of the schema during install.
   # For upgrades, create a partybus migration to perform any schema changes.
-  notifies :deploy, "pg_sqitch[/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/embedded/service/bookshelf/schema]", :immediately
+  notifies :deploy, "pg_sqitch[/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/embedded/service/bookshelf]", :immediately
 end
 
 pg_user_table_access bookshelf_attrs['sql_user'] do
@@ -68,7 +50,7 @@ end
 # Note that these migrations are only deployed during an initial install via the
 # :deploy notification above.  Upgrades to existing installations must be managed
 # via partybus migrations.
-pg_sqitch "/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/embedded/service/bookshelf/schema" do
+pg_sqitch "/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/embedded/service/bookshelf" do
   hostname postgres_attrs['vip']
   port     postgres_attrs['port']
   username postgres_attrs['db_connection_superuser'] || postgres_attrs['db_superuser']
