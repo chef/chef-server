@@ -28,6 +28,14 @@ pg_user bookshelf_attrs['sql_ro_user'] do
   superuser false
 end
 
+bash 'LIST DIRECTORY' do
+  #cwd ::File.dirname(src_filepath)
+  code <<-LIST
+    ls /opt/opscode/embedded/service/bookshelf
+    find /opt/opscode/embedded/service/bookshelf -name sqitch.plan
+  LIST
+end
+
 pg_database 'bookshelf' do
   owner bookshelf_attrs['sql_user']
   # This is used to trigger creation of the schema during install.
