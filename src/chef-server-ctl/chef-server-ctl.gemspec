@@ -36,12 +36,13 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency "veil"
 
   spec.add_runtime_dependency "chef_backup"
-  spec.add_runtime_dependency "omnibus-ctl"
+  spec.add_runtime_dependency "omnibus-ctl", "<= 0.6.10"
   spec.add_runtime_dependency "license-acceptance"
 
   spec.add_runtime_dependency "appbundler"
 
   spec.add_runtime_dependency "chef"
+  spec.add_runtime_dependency "knife"
 
   # tools we bundle in the chef-server install and include here so we can have a single Gemfile.lock
   # for the overall chef-server "app"
