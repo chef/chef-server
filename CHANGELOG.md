@@ -1,9 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release -->
+<!-- latest_release 14.15.10 -->
+## [14.15.10](https://github.com/chef/chef-server/tree/14.15.10) (2022-05-10)
+
+#### Merged Pull Requests
+- Added knife to chef-server-ctl gemfile [#3298](https://github.com/chef/chef-server/pull/3298) ([jashaik](https://github.com/jashaik))
 <!-- latest_release -->
 
-<!-- release_rollup -->
+<!-- release_rollup since=14.15.9 -->
+### Changes since 14.15.9 release
+
+#### Merged Pull Requests
+- Added knife to chef-server-ctl gemfile [#3298](https://github.com/chef/chef-server/pull/3298) ([jashaik](https://github.com/jashaik)) <!-- 14.15.10 -->
 <!-- release_rollup -->
 
 <!-- latest_stable_release -->
