@@ -1,20 +1,18 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.15.10 -->
+<!-- latest_release -->
+<!-- latest_release -->
+
+<!-- release_rollup -->
+<!-- release_rollup -->
+
+<!-- latest_stable_release -->
 ## [14.15.10](https://github.com/chef/chef-server/tree/14.15.10) (2022-05-10)
 
 #### Merged Pull Requests
 - Added knife to chef-server-ctl gemfile [#3298](https://github.com/chef/chef-server/pull/3298) ([jashaik](https://github.com/jashaik))
-<!-- latest_release -->
-
-<!-- release_rollup since=14.15.9 -->
-### Changes since 14.15.9 release
-
-#### Merged Pull Requests
-- Added knife to chef-server-ctl gemfile [#3298](https://github.com/chef/chef-server/pull/3298) ([jashaik](https://github.com/jashaik)) <!-- 14.15.10 -->
-<!-- release_rollup -->
-
 <!-- latest_stable_release -->
+
 ## [14.15.9](https://github.com/chef/chef-server/tree/14.15.9) (2022-05-04)
 
 #### Merged Pull Requests
@@ -37,7 +35,6 @@
 - Bump berkshelf from 7.2.2 to 8.0.0 in /src/chef-server-ctl [#3285](https://github.com/chef/chef-server/pull/3285) ([dependabot[bot]](https://github.com/dependabot[bot]))
 - Bump berkshelf from 7.2.2 to 8.0.0 in /omnibus [#3287](https://github.com/chef/chef-server/pull/3287) ([dependabot[bot]](https://github.com/dependabot[bot]))
 - Added opensearch-index-init.json for habitat builds [#3291](https://github.com/chef/chef-server/pull/3291) ([jashaik](https://github.com/jashaik))
-<!-- latest_stable_release -->
 
 ## [14.14.1](https://github.com/chef/chef-server/tree/14.14.1) (2022-04-05)
 
