@@ -1,9 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release -->
+<!-- latest_release 14.15.11 -->
+## [14.15.11](https://github.com/chef/chef-server/tree/14.15.11) (2022-05-11)
+
+#### Merged Pull Requests
+- Adding verify pipeline in Chef Open Source org [#3268](https://github.com/chef/chef-server/pull/3268) ([vinay-satish](https://github.com/vinay-satish))
 <!-- latest_release -->
 
-<!-- release_rollup -->
+<!-- release_rollup since=14.15.10 -->
+### Changes since 14.15.10 release
+
+#### Merged Pull Requests
+- Adding verify pipeline in Chef Open Source org [#3268](https://github.com/chef/chef-server/pull/3268) ([vinay-satish](https://github.com/vinay-satish)) <!-- 14.15.11 -->
 <!-- release_rollup -->
 
 <!-- latest_stable_release -->
