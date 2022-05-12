@@ -245,6 +245,7 @@ def define_ldap_server(config, attributes)
     chef.cookbooks_path = "cookbooks"
     chef.add_recipe("provisioning::ldap-server")
     chef.nodes_path = "nodes"
+    chef.install = false
     chef.json = {
       'provisioning' => { 'hosts' =>  ips_to_fqdns },
       'ldap' => {'password' => LDAP_PASSWORD }
