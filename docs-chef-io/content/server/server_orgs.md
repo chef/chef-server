@@ -13,7 +13,7 @@ product = ["client", "server"]
     weight = 20
 +++
 
-{{% server_rbac %}}
+{{% chef-server/server_rbac %}}
 
 The Chef Infra Server uses organizations, groups, and users to define
 role-based access control:
@@ -95,11 +95,11 @@ when:
 
 ### Permissions
 
-{{% server_rbac_permissions %}}
+{{% chef-server/server_rbac_permissions %}}
 
 #### Object Permissions
 
-{{% server_rbac_permissions_object %}}
+{{% chef-server/server_rbac_permissions_object %}}
 
 #### Global Permissions
 
@@ -632,92 +632,92 @@ Infra Server, that Chef Infra Client is added to the `clients` group:
 
 ## Server Admins
 
-{{% server_rbac_server_admins %}}
+{{% chef-server/server_rbac_server_admins %}}
 
 ### Scenario
 
-{{< readFile_shortcode file="server_rbac_server_admins_scenario.md" >}}
+{{< readfile file="layouts/shortcodes/chef-server/server_rbac_server_admins_scenario.md" >}}
 
 #### Superuser Accounts
 
-{{< readFile_shortcode file="server_rbac_server_admins_superusers.md" >}}
+{{< readfile file="layouts/shortcodes/chef-server/server_rbac_server_admins_superusers.md" >}}
 
 ### Manage server-admins Group
 
-{{% ctl_chef_server_server_admin %}}
+{{% chef-server/ctl_chef_server_server_admin %}}
 
 #### Add Members
 
-{{% ctl_chef_server_server_admin_grant_user %}}
+{{% chef-server/ctl_chef_server_server_admin_grant_user %}}
 
 #### Remove Members
 
-{{% ctl_chef_server_server_admin_remove_user %}}
+{{% chef-server/ctl_chef_server_server_admin_remove_user %}}
 
 #### List Membership
 
-{{% ctl_chef_server_server_admin_list %}}
+{{% chef-server/ctl_chef_server_server_admin_list %}}
 
 ## Manage Organizations
 
-{{% ctl_chef_server_org %}}
+{{% chef-server/ctl_chef_server_org %}}
 
 ### org-create
 
-{{% ctl_chef_server_org_create %}}
+{{% chef-server/ctl_chef_server_org_create %}}
 
 **Syntax**
 
-{{% ctl_chef_server_org_create_syntax %}}
+{{% chef-server/ctl_chef_server_org_create_syntax %}}
 
 **Options**
 
-{{% ctl_chef_server_org_create_options %}}
+{{% chef-server/ctl_chef_server_org_create_options %}}
 
 ### org-delete
 
-{{% ctl_chef_server_org_delete %}}
+{{% chef-server/ctl_chef_server_org_delete %}}
 
 **Syntax**
 
-{{% ctl_chef_server_org_delete_syntax %}}
+{{% chef-server/ctl_chef_server_org_delete_syntax %}}
 
 ### org-list
 
-{{% ctl_chef_server_org_list %}}
+{{% chef-server/ctl_chef_server_org_list %}}
 
 **Syntax**
 
-{{% ctl_chef_server_org_list_syntax %}}
+{{% chef-server/ctl_chef_server_org_list_syntax %}}
 
 **Options**
 
-{{% ctl_chef_server_org_list_options %}}
+{{% chef-server/ctl_chef_server_org_list_options %}}
 
 ### org-show
 
-{{% ctl_chef_server_org_show %}}
+{{% chef-server/ctl_chef_server_org_show %}}
 
 **Syntax**
 
-{{% ctl_chef_server_org_show_syntax %}}
+{{% chef-server/ctl_chef_server_org_show_syntax %}}
 
 ### org-user-add
 
-{{% ctl_chef_server_org_user_add %}}
+{{% chef-server/ctl_chef_server_org_user_add %}}
 
 **Syntax**
 
-{{% ctl_chef_server_org_user_add_syntax %}}
+{{% chef-server/ctl_chef_server_org_user_add_syntax %}}
 
 **Options**
 
-{{% ctl_chef_server_org_user_add_options %}}
+{{% chef-server/ctl_chef_server_org_user_add_options %}}
 
 ### org-user-remove
 
-{{% ctl_chef_server_org_user_remove %}}
+{{% chef-server/ctl_chef_server_org_user_remove %}}
 
 **Syntax**
 
-{{% ctl_chef_server_org_user_remove_syntax %}}
+{{% chef-server/ctl_chef_server_org_user_remove_syntax %}}

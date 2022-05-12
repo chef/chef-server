@@ -40,7 +40,7 @@ which log files will be viewed.
 
 ### tail Log Files
 
-{{% ctl_chef_server_tail %}}
+{{% chef-server/ctl_chef_server_tail %}}
 
 Another common approach to tailing the log files for a service is to use
 the system utility `tail`. For example:
@@ -206,7 +206,7 @@ require external log rotation.
 </tbody>
 </table>
 
-{{% server_services_nginx_tail %}}
+{{% chef-server/server_services_nginx_tail %}}
 
 #### Read Log Files
 

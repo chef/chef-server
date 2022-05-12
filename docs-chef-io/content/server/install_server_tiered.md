@@ -218,7 +218,7 @@ Add the following settings to the chef-server.rb file:
     address, which should be equal to the FQDN for the service URI that
     is used by the Chef Infra Server.
 
-6.  {{% install_chef_server_reconfigure %}}
+6.  {{% chef-server/install_chef_server_reconfigure %}}
 
 ## Frontend
 
@@ -243,7 +243,7 @@ Infra Server:
     contents of the `/etc/opscode` directory from the primary backend
     server, including all certificates and the chef-server.rb file.
 
-3.  {{% install_chef_server_reconfigure %}}
+3.  {{% chef-server/install_chef_server_reconfigure %}}
 
 4.  Start the Chef Infra Server:
 
@@ -254,8 +254,8 @@ Infra Server:
 On a single frontend server, create an administrator and an
 organization:
 
-1.  {{% ctl_chef_server_user_create_admin %}}
-2.  {{% ctl_chef_server_org_create_summary %}}
+1.  {{% chef-server/ctl_chef_server_user_create_admin %}}
+2.  {{% chef-server/ctl_chef_server_org_create_summary %}}
 
 ## Enable Features
 
@@ -311,7 +311,7 @@ Chef Manage
 
 **Use Local Packages**
 
-{{% ctl_chef_server_install_features_manual %}}
+{{% chef-server/ctl_chef_server_install_features_manual %}}
 
 ## Reference
 
@@ -401,16 +401,16 @@ api_fqdn "chef.example.com"
 
 ### Firewalls
 
-{{% server_firewalls_and_ports_summary %}}
+{{% chef-server/server_firewalls_and_ports_summary %}}
 
-{{% server_firewalls_and_ports_listening %}}
+{{% chef-server/server_firewalls_and_ports_listening %}}
 
-{{% server_firewalls_and_ports_loopback %}}
+{{% chef-server/server_firewalls_and_ports_loopback %}}
 
 #### Backend
 
-{{% server_firewalls_and_ports_tiered %}}
+{{% chef-server/server_firewalls_and_ports_tiered %}}
 
 #### Frontend
 
-{{% server_firewalls_and_ports_fe %}}
+{{% chef-server/server_firewalls_and_ports_fe %}}

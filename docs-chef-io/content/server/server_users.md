@@ -26,118 +26,118 @@ Server:
 
 ## chef-server-ctl
 
-{{% ctl_chef_server_summary %}}
+{{% chef-server/ctl_chef_server_summary %}}
 
-{{% ctl_chef_server_user %}}
+{{% chef-server/ctl_chef_server_user %}}
 
 ### org-create
 
-{{% ctl_chef_server_org_create %}}
+{{% chef-server/ctl_chef_server_org_create %}}
 
 **Syntax**
 
-{{% ctl_chef_server_org_create_syntax %}}
+{{% chef-server/ctl_chef_server_org_create_syntax %}}
 
 **Options**
 
-{{% ctl_chef_server_org_create_options %}}
+{{% chef-server/ctl_chef_server_org_create_options %}}
 
 ### org-delete
 
-{{% ctl_chef_server_org_delete %}}
+{{% chef-server/ctl_chef_server_org_delete %}}
 
 **Syntax**
 
-{{% ctl_chef_server_org_delete_syntax %}}
+{{% chef-server/ctl_chef_server_org_delete_syntax %}}
 
 ### org-list
 
-{{% ctl_chef_server_org_list %}}
+{{% chef-server/ctl_chef_server_org_list %}}
 
 **Syntax**
 
-{{% ctl_chef_server_org_list_syntax %}}
+{{% chef-server/ctl_chef_server_org_list_syntax %}}
 
 **Options**
 
-{{% ctl_chef_server_org_list_options %}}
+{{% chef-server/ctl_chef_server_org_list_options %}}
 
 ### org-show
 
-{{% ctl_chef_server_org_show %}}
+{{% chef-server/ctl_chef_server_org_show %}}
 
 **Syntax**
 
-{{% ctl_chef_server_org_show_syntax %}}
+{{% chef-server/ctl_chef_server_org_show_syntax %}}
 
 ### org-user-add
 
-{{% ctl_chef_server_org_user_add %}}
+{{% chef-server/ctl_chef_server_org_user_add %}}
 
 **Syntax**
 
-{{% ctl_chef_server_org_user_add_syntax %}}
+{{% chef-server/ctl_chef_server_org_user_add_syntax %}}
 
 **Options**
 
-{{% ctl_chef_server_org_user_add_options %}}
+{{% chef-server/ctl_chef_server_org_user_add_options %}}
 
 ### org-user-remove
 
-{{% ctl_chef_server_org_user_remove %}}
+{{% chef-server/ctl_chef_server_org_user_remove %}}
 
 **Syntax**
 
-{{% ctl_chef_server_org_user_remove_syntax %}}
+{{% chef-server/ctl_chef_server_org_user_remove_syntax %}}
 
 ### user-create
 
-{{% ctl_chef_server_user_create %}}
+{{% chef-server/ctl_chef_server_user_create %}}
 
 **Syntax**
 
-{{% ctl_chef_server_user_create_syntax %}}
+{{% chef-server/ctl_chef_server_user_create_syntax %}}
 
 **Options**
 
-{{% ctl_chef_server_user_create_options %}}
+{{% chef-server/ctl_chef_server_user_create_options %}}
 
 ### user-delete
 
-{{% ctl_chef_server_user_delete %}}
+{{% chef-server/ctl_chef_server_user_delete %}}
 
 **Syntax**
 
-{{% ctl_chef_server_user_delete_syntax %}}
+{{% chef-server/ctl_chef_server_user_delete_syntax %}}
 
 ### user-edit
 
-{{% ctl_chef_server_user_edit %}}
+{{% chef-server/ctl_chef_server_user_edit %}}
 
 **Syntax**
 
-{{% ctl_chef_server_user_edit_syntax %}}
+{{% chef-server/ctl_chef_server_user_edit_syntax %}}
 
 ### user-list
 
-{{% ctl_chef_server_user_list %}}
+{{% chef-server/ctl_chef_server_user_list %}}
 
 **Syntax**
 
-{{% ctl_chef_server_user_list_syntax %}}
+{{% chef-server/ctl_chef_server_user_list_syntax %}}
 
 **Options**
 
-{{% ctl_chef_server_user_list_options %}}
+{{% chef-server/ctl_chef_server_user_list_options %}}
 
 ### user-show
 
-{{% ctl_chef_server_user_show %}}
+{{% chef-server/ctl_chef_server_user_show %}}
 
 **Syntax**
 
-{{% ctl_chef_server_user_show_syntax %}}
+{{% chef-server/ctl_chef_server_user_show_syntax %}}
 
 **Options**
 
-{{% ctl_chef_server_user_show_options %}}
+{{% chef-server/ctl_chef_server_user_show_options %}}

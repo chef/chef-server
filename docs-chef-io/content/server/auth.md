@@ -12,9 +12,9 @@ gh_repo = "chef-server"
     weight = 10
 +++
 
-{{% chef_auth %}}
+{{% chef-server/chef_auth %}}
 
-{{% chef_auth_authentication %}}
+{{% chef-server/chef_auth_authentication %}}
 
 ## Public and Private Keys
 
@@ -22,7 +22,7 @@ gh_repo = "chef-server"
 
 ### Chef Infra Server Key Use
 
-{{% chef_auth_authentication %}}
+{{% chef-server/chef_auth_authentication %}}
 
 #### Chef Infra Client
 
@@ -68,7 +68,8 @@ copy it to the `~/.chef` directory again.
 
 {{% chef_repo_description %}}
 
-{{% all_directory_chef %}}
+The .chef directory is a hidden directory that is used to store
+validation key files and optionally a [config.rb]({{< relref "workstation/config_rb" >}}) file.
 
 ### Chef Infra Server API Authentication
 
@@ -76,7 +77,7 @@ copy it to the `~/.chef` directory again.
 
 {{% plugin_knife_summary %}}
 
-{{% plugin_knife_using_authenticated_requests %}}
+{{% chef-server/plugin_knife_using_authenticated_requests %}}
 
 #### From the Web Interface
 

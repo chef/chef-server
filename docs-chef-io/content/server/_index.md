@@ -15,7 +15,7 @@ aliases = ["/server_overview.html", "/server_components.html", "/server_overview
     weight = 10
 +++
 
-{{% chef_server %}}
+{{% chef-server/chef_server %}}
 
 The Chef Infra Server API is written in [Erlang](http://www.erlang.org/), which is an excellent language for critical enterprise concerns like concurrency, fault-tolerance, and distributed environments. The Chef Infra Server can scale to the size of any enterprise.
 
@@ -54,7 +54,9 @@ Chef Infra Server deployment and how they relate to one another.
 </tr>
 <tr class="even">
 <td>Load Balancer</td>
-<td>{{< readFile_shortcode file="chef_server_component_nginx.md" >}}</td>
+<td>Nginx is an open-source HTTP and reverse proxy server that is used as
+the front-end load balancer for the Chef Infra Server. All requests to
+the Chef Infra Server API are routed through Nginx.</td>
 </tr>
 <tr class="odd">
 <td>Chef Manage</td>
@@ -62,21 +64,21 @@ Chef Infra Server deployment and how they relate to one another.
 </tr>
 <tr class="even">
 <td>Chef Infra Server</td>
-<td>{{< readFile_shortcode file="chef_server_component_erchef.md" >}}</td>
+<td>{{< readfile file="layouts/shortcodes/chef-server/chef_server_component_erchef.md" >}}</td>
 </tr>
 <tr class="odd">
 <td><p>Bookshelf</p></td>
-<td><p>{{< readFile_shortcode file="chef_server_component_bookshelf.md" >}}</p>
+<td><p>{{< readfile file="layouts/shortcodes/chef-server/chef_server_component_bookshelf.md" >}}</p>
 <p>All cookbooks are stored in a dedicated repository.</p></td>
 </tr>
 <tr class="even">
 <td><p>Messages</p></td>
-<td><p>{{< readFile_shortcode file="chef_server_component_elasticsearch.md" >}}
+<td><p>chef-elasticsearch wraps Elastisearch and exposes its REST API for indexing and search.
 All messages are added to a dedicated search index repository.</p></td>
 </tr>
 <tr class="odd">
 <td>PostgreSQL</td>
-<td>{{< readFile_shortcode file="chef_server_component_postgresql.md" >}}</td>
+<td>{{< readfile file="layouts/shortcodes/chef-server/chef_server_component_postgresql.md" >}}</td>
 </tr>
 </tbody>
 </table>
@@ -115,11 +117,11 @@ at an external location:
 </tr>
 <tr class="odd">
 <td>Chef Infra Server</td>
-<td>{{< readFile_shortcode file="chef_server_component_erchef.md" >}}</td>
+<td>{{< readfile file="layouts/shortcodes/chef-server/chef_server_component_erchef.md" >}}</td>
 </tr>
 <tr class="even">
 <td><p>Amazon Simple Storage Service (S3)</p></td>
-<td><p>{{< readFile_shortcode file="chef_server_component_bookshelf.md" >}}</p>
+<td><p>{{< readfile file="layouts/shortcodes/chef-server/chef_server_component_bookshelf.md" >}}</p>
 <p>This represents external cookbooks storage at Amazon Simple Storage Service (S3).</p></td>
 </tr>
 </tbody>
@@ -248,7 +250,7 @@ Chef Infra Server:
 </tr>
 <tr class="even">
 <td><p>PostgreSQL</p></td>
-<td><p>{{< readFile_shortcode file="chef_server_component_postgresql.md" >}}</p>
+<td><p>{{< readfile file="layouts/shortcodes/chef-server/chef_server_component_postgresql.md" >}}</p>
 <p>This represents the independently configured set of servers that are running PostgreSQL and are configured to act as the data store for the Chef Infra Server.</p></td>
 </tr>
 </tbody>

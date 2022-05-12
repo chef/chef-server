@@ -14,9 +14,9 @@ aliases = ["/server_firewalls_and_ports.html", "/runbook/server_firewalls_and_po
     weight = 40
 +++
 
-{{% server_firewalls_and_ports_summary %}}
+{{% chef-server/server_firewalls_and_ports_summary %}}
 
-{{% server_firewalls_and_ports_listening %}}
+{{% chef-server/server_firewalls_and_ports_listening %}}
 
 {{< note >}}
 
@@ -33,7 +33,7 @@ Infra Server in a standalone configuration:
 
 ![image](/images/server/chef_server_ports_standalone.png)
 
-{{% server_firewalls_and_ports_loopback %}}
+{{% chef-server/server_firewalls_and_ports_loopback %}}
 
 For a standalone installation, ensure that ports marked as external
 (marked as `yes` in the **External** column) are open and accessible via
@@ -56,13 +56,13 @@ any firewalls that are in use:
 <tr class="odd">
 <td><p>4321</p></td>
 <td><p><strong>bookshelf</strong></p>
-<p>{{< readFile_shortcode file="server_services_bookshelf.md" >}}</p></td>
+<p>{{< readfile file="layouts/shortcodes/chef-server/server_services_bookshelf.md" >}}</p></td>
 <td><p>no</p></td>
 </tr>
 <tr class="even">
 <td><p>80, 443, 9683</p></td>
 <td><p><strong>nginx</strong></p>
-<p>{{< readFile_shortcode file="server_services_nginx.md" >}}</p>
+<p>{{< readfile file="layouts/shortcodes/chef-server/server_services_nginx.md" >}}</p>
 {{< note >}}
 <p>Port 9683 is used to internally load balance the <strong>oc_bifrost</strong> service.</p>
 {{< /note >}}</td>
@@ -71,37 +71,37 @@ any firewalls that are in use:
 <tr class="odd">
 <td><p>9463</p></td>
 <td><p><strong>oc_bifrost</strong></p>
-<p>{{< readFile_shortcode file="server_services_bifrost.md" >}}</p></td>
+<p>{{< readfile file="layouts/shortcodes/chef-server/server_services_bifrost.md" >}}</p></td>
 <td></td>
 </tr>
 <tr class="even">
 <td><p>9090</p></td>
 <td><p><strong>oc-id</strong></p>
-<p>{{< readFile_shortcode file="server_services_oc_id.md" >}}</p></td>
+<p>{{< readfile file="layouts/shortcodes/chef-server/server_services_oc_id.md" >}}</p></td>
 <td></td>
 </tr>
 <tr class="odd">
 <td><p>8000</p></td>
 <td><p><strong>opscode-erchef</strong></p>
-<p>{{< readFile_shortcode file="server_services_erchef.md" >}}</p></td>
+<p>{{< readfile file="layouts/shortcodes/chef-server/server_services_erchef.md" >}}</p></td>
 <td></td>
 </tr>
 <tr class="even">
 <td><p>5432</p></td>
 <td><p><strong>postgresql</strong></p>
-<p>{{< readFile_shortcode file="server_services_postgresql.md" >}}</p></td>
+<p>{{< readfile file="layouts/shortcodes/chef-server/server_services_postgresql.md" >}}</p></td>
 <td></td>
 </tr>
 <tr class="odd">
 <td><p>9200</p></td>
 <td><p><strong>elasticsearch</strong></p>
-<p>{{< readFile_shortcode file="server_services_elasticsearch.md" >}}</p></td>
+<p>{{< readfile file="layouts/shortcodes/chef-server/server_services_elasticsearch.md" >}}</p></td>
 <td></td>
 </tr>
 <tr class="even">
 <td><p>16379</p></td>
 <td><p><strong>redis_lb</strong></p>
-<p>{{< readFile_shortcode file="server_services_redis.md" >}}</p></td>
+<p>{{< readfile file="layouts/shortcodes/chef-server/server_services_redis.md" >}}</p></td>
 <td></td>
 </tr>
 </tbody>
@@ -114,12 +114,12 @@ Infra Server in a tiered configuration:
 
 ![image](/images/server/chef_server_ports_tiered.png)
 
-{{% server_firewalls_and_ports_loopback %}}
+{{% chef-server/server_firewalls_and_ports_loopback %}}
 
 ### Front End
 
-{{% server_firewalls_and_ports_fe %}}
+{{% chef-server/server_firewalls_and_ports_fe %}}
 
 ### Back End
 
-{{% server_firewalls_and_ports_tiered %}}
+{{% chef-server/server_firewalls_and_ports_tiered %}}
