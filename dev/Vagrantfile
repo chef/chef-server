@@ -63,6 +63,7 @@ Vagrant.configure("2") do |config|
   config.vm.network 'public_network' if USE_AZURE
   config.vm.box = "bento/ubuntu-20.04"
   config.ssh.forward_agent = true
+  config.omnibus.chef_version = :latest
 
   if start_external_service?("postgresql" , attributes)
     config.vm.define("database") do |c|
