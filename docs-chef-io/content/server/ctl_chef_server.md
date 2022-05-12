@@ -1027,7 +1027,7 @@ chef-server-ctl show-config
 
 ## uninstall
 
-{{% ctl_chef_server_uninstall %}}
+{{% chef-server/ctl_chef_server_uninstall %}}
 
 ## upgrade
 
