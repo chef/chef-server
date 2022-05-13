@@ -1,16 +1,22 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.15.13 -->
-## [14.15.13](https://github.com/chef/chef-server/tree/14.15.13) (2022-05-12)
+<!-- latest_release 14.15.19 -->
+## [14.15.19](https://github.com/chef/chef-server/tree/14.15.19) (2022-05-13)
 
 #### Merged Pull Requests
-- Move server shortcodes to chef-server [#3295](https://github.com/chef/chef-server/pull/3295) ([IanMadd](https://github.com/IanMadd))
+- Docs change for Dev VM, ldap config [#3310](https://github.com/chef/chef-server/pull/3310) ([lbakerchef](https://github.com/lbakerchef))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.15.10 -->
 ### Changes since 14.15.10 release
 
 #### Merged Pull Requests
+- Docs change for Dev VM, ldap config [#3310](https://github.com/chef/chef-server/pull/3310) ([lbakerchef](https://github.com/lbakerchef)) <!-- 14.15.19 -->
+- Bump activesupport from 7.0.2.4 to 7.0.3 in /oc-chef-pedant [#3304](https://github.com/chef/chef-server/pull/3304) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.15.18 -->
+- Bump activesupport from 7.0.2.4 to 7.0.3 in /src/oc_bifrost/oc-bifrost-pedant [#3305](https://github.com/chef/chef-server/pull/3305) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.15.17 -->
+- Bump knife from 17.9.26 to 17.10.0 in /src/chef-server-ctl [#3307](https://github.com/chef/chef-server/pull/3307) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.15.16 -->
+- Bump sdoc from 2.3.2 to 2.4.0 in /src/oc-id [#3308](https://github.com/chef/chef-server/pull/3308) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.15.15 -->
+- Bump capybara from 3.36.0 to 3.37.1 in /src/oc-id [#3306](https://github.com/chef/chef-server/pull/3306) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.15.14 -->
 - Move server shortcodes to chef-server [#3295](https://github.com/chef/chef-server/pull/3295) ([IanMadd](https://github.com/IanMadd)) <!-- 14.15.13 -->
 - Fix ldap for dev vm. [#3309](https://github.com/chef/chef-server/pull/3309) ([lbakerchef](https://github.com/lbakerchef)) <!-- 14.15.12 -->
 - Adding verify pipeline in Chef Open Source org [#3268](https://github.com/chef/chef-server/pull/3268) ([vinay-satish](https://github.com/vinay-satish)) <!-- 14.15.11 -->

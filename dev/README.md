@@ -108,6 +108,9 @@ vm:
     start: true
 ```
 
+NOTE:
+You must currently make the above config change in defaults.yml, not config.yml (it is unknown why the change is not being picked up in config.yml).
+
 This LDAP server comes pre-configured with two users: `child` and `douglas`. You can add more by adding more LDIF files
 in the ldap-data directory of the provisioning cookbook. The password to authenticate matches the username.
 
