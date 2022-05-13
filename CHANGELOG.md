@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.15.13 -->
-## [14.15.13](https://github.com/chef/chef-server/tree/14.15.13) (2022-05-12)
+<!-- latest_release 14.15.14 -->
+## [14.15.14](https://github.com/chef/chef-server/tree/14.15.14) (2022-05-13)
 
 #### Merged Pull Requests
-- Move server shortcodes to chef-server [#3295](https://github.com/chef/chef-server/pull/3295) ([IanMadd](https://github.com/IanMadd))
+- Bump capybara from 3.36.0 to 3.37.1 in /src/oc-id [#3306](https://github.com/chef/chef-server/pull/3306) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.15.10 -->
 ### Changes since 14.15.10 release
 
 #### Merged Pull Requests
+- Bump capybara from 3.36.0 to 3.37.1 in /src/oc-id [#3306](https://github.com/chef/chef-server/pull/3306) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.15.14 -->
 - Move server shortcodes to chef-server [#3295](https://github.com/chef/chef-server/pull/3295) ([IanMadd](https://github.com/IanMadd)) <!-- 14.15.13 -->
 - Fix ldap for dev vm. [#3309](https://github.com/chef/chef-server/pull/3309) ([lbakerchef](https://github.com/lbakerchef)) <!-- 14.15.12 -->
 - Adding verify pipeline in Chef Open Source org [#3268](https://github.com/chef/chef-server/pull/3268) ([vinay-satish](https://github.com/vinay-satish)) <!-- 14.15.11 -->
