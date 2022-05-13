@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.15.19 -->
-## [14.15.19](https://github.com/chef/chef-server/tree/14.15.19) (2022-05-13)
+<!-- latest_release 14.15.20 -->
+## [14.15.20](https://github.com/chef/chef-server/tree/14.15.20) (2022-05-13)
 
 #### Merged Pull Requests
-- Docs change for Dev VM, ldap config [#3310](https://github.com/chef/chef-server/pull/3310) ([lbakerchef](https://github.com/lbakerchef))
+- More cleanup related to #3295 [#3312](https://github.com/chef/chef-server/pull/3312) ([IanMadd](https://github.com/IanMadd))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.15.10 -->
 ### Changes since 14.15.10 release
 
 #### Merged Pull Requests
+- More cleanup related to #3295 [#3312](https://github.com/chef/chef-server/pull/3312) ([IanMadd](https://github.com/IanMadd)) <!-- 14.15.20 -->
 - Docs change for Dev VM, ldap config [#3310](https://github.com/chef/chef-server/pull/3310) ([lbakerchef](https://github.com/lbakerchef)) <!-- 14.15.19 -->
 - Bump activesupport from 7.0.2.4 to 7.0.3 in /oc-chef-pedant [#3304](https://github.com/chef/chef-server/pull/3304) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.15.18 -->
 - Bump activesupport from 7.0.2.4 to 7.0.3 in /src/oc_bifrost/oc-bifrost-pedant [#3305](https://github.com/chef/chef-server/pull/3305) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.15.17 -->
