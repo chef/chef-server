@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.15.17 -->
-## [14.15.17](https://github.com/chef/chef-server/tree/14.15.17) (2022-05-13)
+<!-- latest_release 14.15.18 -->
+## [14.15.18](https://github.com/chef/chef-server/tree/14.15.18) (2022-05-13)
 
 #### Merged Pull Requests
-- Bump activesupport from 7.0.2.4 to 7.0.3 in /src/oc_bifrost/oc-bifrost-pedant [#3305](https://github.com/chef/chef-server/pull/3305) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump activesupport from 7.0.2.4 to 7.0.3 in /oc-chef-pedant [#3304](https://github.com/chef/chef-server/pull/3304) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.15.10 -->
 ### Changes since 14.15.10 release
 
 #### Merged Pull Requests
+- Bump activesupport from 7.0.2.4 to 7.0.3 in /oc-chef-pedant [#3304](https://github.com/chef/chef-server/pull/3304) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.15.18 -->
 - Bump activesupport from 7.0.2.4 to 7.0.3 in /src/oc_bifrost/oc-bifrost-pedant [#3305](https://github.com/chef/chef-server/pull/3305) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.15.17 -->
 - Bump knife from 17.9.26 to 17.10.0 in /src/chef-server-ctl [#3307](https://github.com/chef/chef-server/pull/3307) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.15.16 -->
 - Bump sdoc from 2.3.2 to 2.4.0 in /src/oc-id [#3308](https://github.com/chef/chef-server/pull/3308) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.15.15 -->
