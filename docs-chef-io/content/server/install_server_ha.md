@@ -83,7 +83,7 @@ later if/when your node count grows.
 
 -   64-bit architecture
 
-{{% system_requirements_ha %}}
+{{% chef-server/system_requirements_ha %}}
 
 ### Network Services
 
