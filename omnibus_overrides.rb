@@ -12,7 +12,7 @@ override :redis, version: "5.0.14"
 override :runit, version: "2.1.1" #standalone upgrade is failing, Needs to be reverted to 2.1.2 after fixing the umbrella
 override :sqitch, version: "0.973"
 
-override :logrotate, version: "3.9.2" # 3.18.0 patches fail
+override :logrotate, version: "3.19.0"
 
 # update `src/openresty-noroot/habitat/plan.sh` when updating this version.
 override :openresty, version: "1.21.4.1rc1"
