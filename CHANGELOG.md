@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.15.20 -->
-## [14.15.20](https://github.com/chef/chef-server/tree/14.15.20) (2022-05-13)
+<!-- latest_release 14.15.21 -->
+## [14.15.21](https://github.com/chef/chef-server/tree/14.15.21) (2022-05-16)
 
 #### Merged Pull Requests
-- More cleanup related to #3295 [#3312](https://github.com/chef/chef-server/pull/3312) ([IanMadd](https://github.com/IanMadd))
+- Bump sinatra from 2.1.0 to 2.2.0 in /src/oc-id [#3290](https://github.com/chef/chef-server/pull/3290) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.15.10 -->
 ### Changes since 14.15.10 release
 
 #### Merged Pull Requests
+- Bump sinatra from 2.1.0 to 2.2.0 in /src/oc-id [#3290](https://github.com/chef/chef-server/pull/3290) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.15.21 -->
 - More cleanup related to #3295 [#3312](https://github.com/chef/chef-server/pull/3312) ([IanMadd](https://github.com/IanMadd)) <!-- 14.15.20 -->
 - Docs change for Dev VM, ldap config [#3310](https://github.com/chef/chef-server/pull/3310) ([lbakerchef](https://github.com/lbakerchef)) <!-- 14.15.19 -->
 - Bump activesupport from 7.0.2.4 to 7.0.3 in /oc-chef-pedant [#3304](https://github.com/chef/chef-server/pull/3304) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.15.18 -->
