@@ -19,7 +19,7 @@ fetcher_read_timeout 120
 # software_gems ['omnibus-software', 'my-company-software']
 # local_software_dirs ['/path/to/local/software']
 
-fatal_transitive_dependency_licensing_warnings false
+fatal_transitive_dependency_licensing_warnings true
 
 # Build in FIPS compatability mode
 # ------------------------------
