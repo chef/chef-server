@@ -59,7 +59,7 @@
   0},
  {<<"opscoderl_wm">>,
   {git,"https://github.com/chef/opscoderl_wm",
-       {ref,"7b222296b2f0eecd86f3c858f2185d21d55e8fa4"}},
+       {branch,"lbaker/upgrade-erlang-24.2"}},
   0},
  {<<"pooler">>,
   {git,"https://github.com/chef/pooler",
