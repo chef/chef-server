@@ -438,7 +438,6 @@ GEM
     rb-readline (0.5.5)
     rdoc (6.4.0)
       psych (>= 4.0.0)
-    ref (2.0.0)
     regexp_parser (2.4.0)
     responders (3.0.1)
       actionpack (>= 5.0)
