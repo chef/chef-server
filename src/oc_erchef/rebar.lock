@@ -138,7 +138,7 @@
   0},
  {<<"opscoderl_wm">>,
   {git,"https://github.com/chef/opscoderl_wm",
-       {ref,"7b222296b2f0eecd86f3c858f2185d21d55e8fa4"}},
+       {ref,"b858c27b398f459869ae3580e85808e08e340c72"}},
   0},
  {<<"poolboy">>,
   {git,"https://github.com/devinus/poolboy",
