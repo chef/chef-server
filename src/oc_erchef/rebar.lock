@@ -2,7 +2,7 @@
 [{<<"base16">>,{pkg,<<"base16">>,<<"1.0.0">>},1},
  {<<"bcrypt">>,
   {git,"https://github.com/erlangpack/bcrypt",
-       {branch,"master"}},
+       {ref,"826291ebd232ebfc4fb69f1c27d35706eecb8fc2"}},
   0},
  {<<"bear">>,
   {git,"https://github.com/boundary/bear",
