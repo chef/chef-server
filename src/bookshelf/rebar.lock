@@ -9,7 +9,7 @@
   0},
  {<<"chef_secrets">>,
   {git,"https://github.com/chef/chef_secrets",
-       {ref,"8c16fb93aa227a248cb555637c63aa865890c2a1"}},
+       {branch,"lbaker/upgrade-erlang-24.2"}},
   0},
  {<<"eini">>,
   {git,"https://github.com/erlcloud/eini",
