@@ -308,7 +308,7 @@ chef-server-ctl tail elasticsearch
 
 ### nginx
 
-{{% server_services_nginx %}}
+{{% chef-server/server_services_nginx %}}
 
 #### status
 
