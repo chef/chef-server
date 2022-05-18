@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.15.23 -->
-## [14.15.23](https://github.com/chef/chef-server/tree/14.15.23) (2022-05-17)
+<!-- latest_release 14.15.24 -->
+## [14.15.24](https://github.com/chef/chef-server/tree/14.15.24) (2022-05-18)
 
 #### Merged Pull Requests
-- Bump omnibus from `27c37fc` to `63be4f1` in /omnibus [#3303](https://github.com/chef/chef-server/pull/3303) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- upgrading redis to 6.2.7 [#3284](https://github.com/chef/chef-server/pull/3284) ([vinay-satish](https://github.com/vinay-satish))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.15.10 -->
 ### Changes since 14.15.10 release
 
 #### Merged Pull Requests
+- upgrading redis to 6.2.7 [#3284](https://github.com/chef/chef-server/pull/3284) ([vinay-satish](https://github.com/vinay-satish)) <!-- 14.15.24 -->
 - Bump omnibus from `27c37fc` to `63be4f1` in /omnibus [#3303](https://github.com/chef/chef-server/pull/3303) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.15.23 -->
 - Bump nokogiri from 1.13.3 to 1.13.6 in /src/oc-id [#3301](https://github.com/chef/chef-server/pull/3301) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.15.22 -->
 - Bump sinatra from 2.1.0 to 2.2.0 in /src/oc-id [#3290](https://github.com/chef/chef-server/pull/3290) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.15.21 -->
