@@ -6,7 +6,7 @@
   0},
  {<<"chef_secrets">>,
   {git,"https://github.com/chef/chef_secrets",
-       {ref,"8c16fb93aa227a248cb555637c63aa865890c2a1"}},
+       {ref,"5040d0daea5f643074cb6d41254cf04bfd5ba29a"}},
   0},
  {<<"eini">>,{pkg,<<"eini">>,<<"1.2.6">>},1},
  {<<"ej">>,
