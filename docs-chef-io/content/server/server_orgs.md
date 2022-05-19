@@ -492,10 +492,6 @@ By default, the `public_key_read_access` assigns all members of the
 
 The `users` group is assigned the following:
 
-#### users
-
-The `users` group is assigned the following:
-
 <table>
 <colgroup>
 <col style="width: 28%" />
