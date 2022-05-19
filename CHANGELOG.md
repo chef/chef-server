@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.16.0 -->
-## [14.16.0](https://github.com/chef/chef-server/tree/14.16.0) (2022-05-19)
+<!-- latest_release 14.16.1 -->
+## [14.16.1](https://github.com/chef/chef-server/tree/14.16.1) (2022-05-19)
 
 #### Merged Pull Requests
-- Bump omnibus-software from `50d05bc` to `1692d72` in /omnibus [#3317](https://github.com/chef/chef-server/pull/3317) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Use shortcode in server repo [#3319](https://github.com/chef/chef-server/pull/3319) ([IanMadd](https://github.com/IanMadd))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.15.10 -->
 ### Changes since 14.15.10 release
 
 #### Merged Pull Requests
+- Use shortcode in server repo [#3319](https://github.com/chef/chef-server/pull/3319) ([IanMadd](https://github.com/IanMadd)) <!-- 14.16.1 -->
 - Bump omnibus-software from `50d05bc` to `1692d72` in /omnibus [#3317](https://github.com/chef/chef-server/pull/3317) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.16.0 -->
 - Update open-jre to 11.0.15 [#3314](https://github.com/chef/chef-server/pull/3314) ([vinay-satish](https://github.com/vinay-satish)) <!-- 14.15.25 -->
 - upgrading redis to 6.2.7 [#3284](https://github.com/chef/chef-server/pull/3284) ([vinay-satish](https://github.com/vinay-satish)) <!-- 14.15.24 -->
