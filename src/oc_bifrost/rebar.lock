@@ -76,7 +76,7 @@
   0},
  {<<"stats_hero">>,
   {git,"https://github.com/chef/stats_hero",
-       {branch,"lbaker/upgrade-erlang-24.2"}},
+       {branch,"lbaker/drop-erl24"}},
   0},
  {<<"sync">>,
   {git,"https://github.com/rustyio/sync",
