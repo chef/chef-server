@@ -104,7 +104,7 @@
   1},
  {<<"mini_s3">>,
   {git,"https://github.com/chef/mini_s3",
-       {branch,"lbaker/upgrade-erlang-24.2"}},
+       {branch,"main"}},
   0},
  {<<"mixer">>,
   {git,"https://github.com/inaka/mixer",
