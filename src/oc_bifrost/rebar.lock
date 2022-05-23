@@ -33,7 +33,7 @@
   0},
  {<<"jiffy">>,
   {git,"https://github.com/davisp/jiffy",
-       {branch, "master"}},
+       {ref,"051a74338c089c39f09532188bc82cf1adedbdc8"}},
   0},
  {<<"lager">>,
   {git,"https://github.com/erlang-lager/lager",
