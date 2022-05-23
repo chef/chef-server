@@ -2,7 +2,6 @@
 
 [build.environment]
   HUGO_ENABLEGITINFO = "true"
-  GO_VERSION = "1.15"
   NODE_ENV = "development"
 
 [build.processing]
