@@ -84,7 +84,7 @@ describe "running configs required by Chef Server and plugins", :config do
     end
 
     it "opscode-erchef/search_provider" do
-      expect(config['opscode-erchef']['search_provider'].to_s).to eq('solr').or eq('elasticsearch')
+      expect(config['opscode-erchef']['search_provider'].to_s).to eq('solr').or eq('elasticsearch').or eq('opensearch')
     end
 
     it "opscode-erchef/listen" do
@@ -119,7 +119,7 @@ describe "running configs required by Chef Server and plugins", :config do
     end
 
     it "opscode-erchef/search_provider" do
-      expect(config['opscode-erchef']['search_provider'].to_s).to eq('solr').or eq('elasticsearch')
+      expect(config['opscode-erchef']['search_provider'].to_s).to eq('solr').or eq('elasticsearch').or eq('opensearch')
     end
 
     it "opscode-erchef/solr_timeout" do
