@@ -1399,7 +1399,7 @@ This configuration file has the following settings for `opensearch`:
 
 `opensearch['dir']`
 
-: The working directory. Default value (recommended): `/var/opt/opscode/opensearch`
+: The working directory.  The default value is the recommended value. Default value: `/var/opt/opscode/opensearch`
 
 `opensearch['data_dir']`
 
@@ -1423,11 +1423,11 @@ This configuration file has the following settings for `opensearch`:
 
 `opensearch['log_rotation']['file_maxbytes']`
 
-: The log rotation policy for this service. Log files are rotated when they exceed file_maxbytes. Default value for 'file_maxbytes': `104857600`
+: The log rotation policy for this service. Log files are rotated when they exceed `file_maxbytes`. Default value: `104857600`.
 
 `opensearch['log_rotation']['num_to_keep']`
 
-: The log rotation policy for this service. The maximum number of log files in the rotation is defined by num_to_keep.  Default value for 'num_to_keep': => `10`
+: The log rotation policy for this service. `num_to_keep` specifies the maximum number of log files in the rotation. Default value: `10`.
 
 `opensearch['vip']`
 
@@ -1439,7 +1439,7 @@ This configuration file has the following settings for `opensearch`:
 
 `opensearch['port']`
 
-: The port on which the service is to listen. Default value: `9200`
+: The port on which the service is listening. Default value: `9200`
 
 `opensearch['enable_gc_log']`
 
@@ -1453,40 +1453,40 @@ This configuration file has the following settings for `opensearch`:
 
 : Default values are set based on [JVM configuration options](https://github.com/elastic/elasticsearch/blob/6.8/distribution/src/config/jvm.options).
 
-{{< note >}}
+    {{< note spaces=4 >}}
 
-Each item in this list will be placed as is into the java_opts config file. Entries are set in chef-server.rb as:
+    Each item in this list will be placed as is into the `java_opts` config file. Entries are set in chef-server.rb as:
 
-```ruby
- opensearch.jvm_opts = [
-  "-xoption1",
-  "-xoption2",
-  ...
-  "optionN"
- ]
-```
+    ```ruby
+    opensearch.jvm_opts = [
+    "-xoption1",
+    "-xoption2",
+    ...
+    "optionN"
+    ]
+    ```
 
-{{< /note >}}
+    {{< /note >}}
 
 `opensearch['heap_size']`
 
 : The amount of memory (in MBs) available to OpenSearch. If there is not enough memory available, search queries made by nodes to OpenSearch may fail. The amount of memory that must be available also depends on the number of nodes in the organization, the frequency of search queries, and other characteristics that are unique to each organization. In general, as the number of nodes increases, so does the amount of memory. The default value should work for many organizations with fewer than 25 nodes. For an organization with several hundred nodes, the amount of memory that is required often exceeds 3GB. Default value is is equivalent to 25% of the system memory or 1024 MB, whichever is greater.
 
-{{< note >}}
+    {{< note spaces=4 >}}
 
-If new_size or heap_size is also specified directly in java_opts, it will be ignored in favor of the chef-server.rb values or the defaults as calculated here. Only use chef-server.rb to set heap and new sizes. It will error out if the system memory is less than 4 GB. This value is bounded between 1 GB - 28 GB.
+    If `heap_size` is also specified directly in `java_opts`, it will be ignored in favor of the chef-server.rb values or the defaults as calculated here. Only use chef-server.rb to set `heap_size`. It will raise an error if the system memory is less than 4 GB. This value is bounded between 1 GB - 28 GB.
 
-{{< /note >}}
+    {{< /note >}}
 
 `opensearch['new_size']`
 
-: Defaults to the larger of 1/16th the heap_size and 32 MB.
+: Defaults to the larger of 1/16th of the `heap_size` or 32 MB.
 
-{{< note >}}
+    {{< note spaces=4 >}}
 
-If new_size or heap_size is also specified directly in java_opts, it will be ignored in favor of the chef-server.rb values or the defaults as calculated here.  Only use chef-server.rb to set heap and new sizes.
+    If `new_size` is also specified directly in `java_opts`, it will be ignored in favor of the chef-server.rb values or the defaults calculated here. Only use chef-server.rb to set `new_size`.
 
-{{< /note >}}
+    {{< /note >}}
 
 ### External OpenSearch
 
