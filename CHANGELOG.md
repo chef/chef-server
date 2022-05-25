@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.16.3 -->
-## [14.16.3](https://github.com/chef/chef-server/tree/14.16.3) (2022-05-23)
+<!-- latest_release 14.16.4 -->
+## [14.16.4](https://github.com/chef/chef-server/tree/14.16.4) (2022-05-25)
 
 #### Merged Pull Requests
-- Fixed opensearch pedant tests for umbrella [#3323](https://github.com/chef/chef-server/pull/3323) ([jashaik](https://github.com/jashaik))
+- Remove go version from netlify config [#3325](https://github.com/chef/chef-server/pull/3325) ([IanMadd](https://github.com/IanMadd))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.15.10 -->
 ### Changes since 14.15.10 release
 
 #### Merged Pull Requests
+- Remove go version from netlify config [#3325](https://github.com/chef/chef-server/pull/3325) ([IanMadd](https://github.com/IanMadd)) <!-- 14.16.4 -->
 - Fixed opensearch pedant tests for umbrella [#3323](https://github.com/chef/chef-server/pull/3323) ([jashaik](https://github.com/jashaik)) <!-- 14.16.3 -->
 - Minor typo in docs [#3281](https://github.com/chef/chef-server/pull/3281) ([williamtheaker](https://github.com/williamtheaker)) <!-- 14.16.2 -->
 - Use shortcode in server repo [#3319](https://github.com/chef/chef-server/pull/3319) ([IanMadd](https://github.com/IanMadd)) <!-- 14.16.1 -->
