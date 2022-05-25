@@ -42,7 +42,9 @@ local function auth_not_required(err)
   -- conservatively try to determine if auth is not required.
   -- if auth isn't required, we can safely ignore an error from
   -- the AUTH command
-  return err == "ERR Client sent AUTH, but no password is set"
+  -- return err == "ERR Client sent AUTH, but no password is set"
+  -- The above error message was for redis 5 and it was replaced with the below error message in redis 6
+  return err == "ERR AUTH <password> called without any password configured for the default user. Are you sure your configuration is correct?"
 end
 
 local function connect_redis()

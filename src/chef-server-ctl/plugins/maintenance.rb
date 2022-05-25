@@ -6,8 +6,7 @@ def redis
   @redis ||= begin
                vip = running_config["private_chef"]["redis_lb"]["vip"]
                port = running_config["private_chef"]["redis_lb"]["port"]
-               password = credentials.get("redis_lb", "password")
-               Redis.new(port: port, ip: vip, password: password)
+               Redis.new(port: port, ip: vip)
              end
 end
 
