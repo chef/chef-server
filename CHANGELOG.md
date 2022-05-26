@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.16.4 -->
-## [14.16.4](https://github.com/chef/chef-server/tree/14.16.4) (2022-05-25)
+<!-- latest_release 14.16.5 -->
+## [14.16.5](https://github.com/chef/chef-server/tree/14.16.5) (2022-05-26)
 
 #### Merged Pull Requests
-- Remove go version from netlify config [#3325](https://github.com/chef/chef-server/pull/3325) ([IanMadd](https://github.com/IanMadd))
+- Reverting redis back to 5.0.14 from 6.2.7 [#3332](https://github.com/chef/chef-server/pull/3332) ([vinay-satish](https://github.com/vinay-satish))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.15.10 -->
 ### Changes since 14.15.10 release
 
 #### Merged Pull Requests
+- Reverting redis back to 5.0.14 from 6.2.7 [#3332](https://github.com/chef/chef-server/pull/3332) ([vinay-satish](https://github.com/vinay-satish)) <!-- 14.16.5 -->
 - Remove go version from netlify config [#3325](https://github.com/chef/chef-server/pull/3325) ([IanMadd](https://github.com/IanMadd)) <!-- 14.16.4 -->
 - Fixed opensearch pedant tests for umbrella [#3323](https://github.com/chef/chef-server/pull/3323) ([jashaik](https://github.com/jashaik)) <!-- 14.16.3 -->
 - Minor typo in docs [#3281](https://github.com/chef/chef-server/pull/3281) ([williamtheaker](https://github.com/williamtheaker)) <!-- 14.16.2 -->
