@@ -109,13 +109,9 @@ ruby_block 'set_lb_redis_values' do
   only_if { is_data_master? }
   block do
     require 'redis'
-    require 'mixlib/shellout'
-    password = PrivateChef.credentials.get('redis_lb', 'password')
     redis = Redis.new(host: redis_data['vip'],
                       port: redis_data['port'],
-                      password: password)
-    command = "echo 'CONFIG SET requirepass #{password}' | /opt/opscode/embedded/bin/redis-cli -p 16379 -a #{password}"
-    Mixlib::ShellOut.new(command, {}).run_command
+                      password: PrivateChef.credentials.get('redis_lb', 'password'))
     xdl = node['private_chef']['lb']['xdl_defaults']
     xmaint_allowed_ips_list = node['private_chef']['lb']['xmaint_allowed_ips_list']
     banned_ips = PrivateChef['banned_ips']
