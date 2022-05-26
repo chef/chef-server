@@ -111,7 +111,7 @@
   0},
  {<<"opscoderl_httpc">>,
   {git,"https://github.com/chef/opscoderl_httpc",
-       {ref,"4cd52e707bf05e093abaf5bb35a16068feca1b75"}},
+       {branch,"lbaker/erlang-debug"}},
   0},
  {<<"opscoderl_wm">>,
   {git,"https://github.com/chef/opscoderl_wm",
