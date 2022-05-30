@@ -82,6 +82,15 @@ opscode_erchef['search_auth_username'] = "OPEN_SEARCH_USER"
 opscode_erchef['search_auth_password'] = "OPEN_SEARCH_PWD"
 ```
 
+{{< note >}}
+
+The OpenSearch user should have full access to the cluster, including access to all cluster-wide operations and the ability to write to all indices. We recommend that the user has the admin backend role. 
+
+Please refer to OpenSearch's documentation on [predefined roles](https://opensearch.org/docs/latest/security-plugin/access-control/users-roles/#predefined-roles) and [role mapping configuration](https://opensearch.org/docs/latest/security-plugin/configuration/yaml#roles_mappingyml).
+
+This user must be created on the external OpenSearch cluster. The Chef Infra Server executable cannot be used to create this user on external OpenSearch setups.
+{{</note >}}
+
 #### Steps To Migrate from Elasticsearch to External OpenSearch
 
 There are two ways to migrate from Elasticsearch to external OpenSearch: migrating your data, or reindexing and reconfiguring your database.
