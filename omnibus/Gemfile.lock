@@ -1,6 +1,6 @@
 GIT
   remote: https://github.com/chef/omnibus-software.git
-  revision: 1692d7258263f5739e5a10c2fea59e900bcb3636
+  revision: a63bd71702f5bf350ca17ee0726ac36fc418d54e
   branch: main
   specs:
     omnibus-software (4.0.0)
@@ -192,7 +192,7 @@ GEM
       tomlrb (>= 1.2, < 3.0)
       tty-box (~> 0.6)
       tty-prompt (~> 0.20)
-    license_scout (1.3.0)
+    license_scout (1.3.1)
       ffi-yajl (~> 2.2)
       mixlib-shellout (>= 2.2, < 4.0)
       toml-rb (>= 1, < 3)
