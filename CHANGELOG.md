@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.16.7 -->
-## [14.16.7](https://github.com/chef/chef-server/tree/14.16.7) (2022-06-01)
+<!-- latest_release 14.16.8 -->
+## [14.16.8](https://github.com/chef/chef-server/tree/14.16.8) (2022-06-01)
 
 #### Merged Pull Requests
-- Bump jquery-rails from 4.4.0 to 4.5.0 in /src/oc-id [#3328](https://github.com/chef/chef-server/pull/3328) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump berkshelf from 8.0.0 to 8.0.1 in /omnibus [#3322](https://github.com/chef/chef-server/pull/3322) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.15.10 -->
 ### Changes since 14.15.10 release
 
 #### Merged Pull Requests
+- Bump berkshelf from 8.0.0 to 8.0.1 in /omnibus [#3322](https://github.com/chef/chef-server/pull/3322) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.16.8 -->
 - Bump jquery-rails from 4.4.0 to 4.5.0 in /src/oc-id [#3328](https://github.com/chef/chef-server/pull/3328) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.16.7 -->
 - Bump omnibus from `63be4f1` to `83d8428` in /omnibus [#3334](https://github.com/chef/chef-server/pull/3334) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.16.6 -->
 - Reverting redis back to 5.0.14 from 6.2.7 [#3332](https://github.com/chef/chef-server/pull/3332) ([vinay-satish](https://github.com/vinay-satish)) <!-- 14.16.5 -->
