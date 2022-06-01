@@ -6,7 +6,7 @@
   0},
  {<<"chef_secrets">>,
   {git,"https://github.com/chef/chef_secrets",
-       {branch,"lbaker/upgrade-erlang-24.2"}},
+       {ref,"3d8d967fbff7e0c494b8806f533c5e80ac0a9e4d"}},
   0},
  {<<"eini">>,{pkg,<<"eini">>,<<"1.2.6">>},1},
  {<<"ej">>,
