@@ -115,7 +115,7 @@
   0},
  {<<"opscoderl_wm">>,
   {git,"https://github.com/chef/opscoderl_wm",
-       {ref,"88a656726d1b8f7c7c6122de363f9f22f5f56ca9"}},
+       {ref,"5436cc600db462226a5d2f3ed585ab39eaf20ee5"}},
   0},
  {<<"poolboy">>,{pkg,<<"poolboy">>,<<"1.5.2">>},1},
  {<<"pooler">>,
