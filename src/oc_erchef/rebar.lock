@@ -22,7 +22,7 @@
   0},
  {<<"darklaunch">>,
   {git,"https://github.com/chef/opscode-darklaunch-erlang",
-       {ref,"1bd902a629e69ed69db8b9b2999869e0cfe8b02e"}},
+       {ref,"33a4f070eede8b7e71fceab1ed1e30ef6ddea3fb"}},
   0},
  {<<"edown">>,
   {git,"https://github.com/uwiger/edown",
