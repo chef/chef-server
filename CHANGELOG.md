@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.16.9 -->
-## [14.16.9](https://github.com/chef/chef-server/tree/14.16.9) (2022-06-01)
+<!-- latest_release 14.16.10 -->
+## [14.16.10](https://github.com/chef/chef-server/tree/14.16.10) (2022-06-01)
 
 #### Merged Pull Requests
-- Bump berkshelf from 8.0.0 to 8.0.1 in /src/chef-server-ctl [#3320](https://github.com/chef/chef-server/pull/3320) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Updated log rotate version to 3.19 [#3313](https://github.com/chef/chef-server/pull/3313) ([jashaik](https://github.com/jashaik))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.15.10 -->
 ### Changes since 14.15.10 release
 
 #### Merged Pull Requests
+- Updated log rotate version to 3.19 [#3313](https://github.com/chef/chef-server/pull/3313) ([jashaik](https://github.com/jashaik)) <!-- 14.16.10 -->
 - Bump berkshelf from 8.0.0 to 8.0.1 in /src/chef-server-ctl [#3320](https://github.com/chef/chef-server/pull/3320) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.16.9 -->
 - Bump berkshelf from 8.0.0 to 8.0.1 in /omnibus [#3322](https://github.com/chef/chef-server/pull/3322) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.16.8 -->
 - Bump jquery-rails from 4.4.0 to 4.5.0 in /src/oc-id [#3328](https://github.com/chef/chef-server/pull/3328) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.16.7 -->
