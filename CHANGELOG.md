@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.16.11 -->
-## [14.16.11](https://github.com/chef/chef-server/tree/14.16.11) (2022-06-01)
+<!-- latest_release 14.16.12 -->
+## [14.16.12](https://github.com/chef/chef-server/tree/14.16.12) (2022-06-02)
 
 #### Merged Pull Requests
-- [INFS-168] Split out dev-docs and add notes on what is next [#3318](https://github.com/chef/chef-server/pull/3318) ([marcparadise](https://github.com/marcparadise))
+- Bump rack from 2.2.3 to 2.2.3.1 in /src/oc-id [#3345](https://github.com/chef/chef-server/pull/3345) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.15.10 -->
 ### Changes since 14.15.10 release
 
 #### Merged Pull Requests
+- Bump rack from 2.2.3 to 2.2.3.1 in /src/oc-id [#3345](https://github.com/chef/chef-server/pull/3345) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.16.12 -->
 - [INFS-168] Split out dev-docs and add notes on what is next [#3318](https://github.com/chef/chef-server/pull/3318) ([marcparadise](https://github.com/marcparadise)) <!-- 14.16.11 -->
 - Updated log rotate version to 3.19 [#3313](https://github.com/chef/chef-server/pull/3313) ([jashaik](https://github.com/jashaik)) <!-- 14.16.10 -->
 - Bump berkshelf from 8.0.0 to 8.0.1 in /src/chef-server-ctl [#3320](https://github.com/chef/chef-server/pull/3320) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.16.9 -->
