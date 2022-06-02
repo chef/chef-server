@@ -111,6 +111,7 @@ ruby_block 'set_lb_redis_values' do
     require 'redis'
     redis = Redis.new(host: redis_data['vip'],
                       port: redis_data['port'],
+                      username: 'default',
                       password: PrivateChef.credentials.get('redis_lb', 'password'))
     xdl = node['private_chef']['lb']['xdl_defaults']
     xmaint_allowed_ips_list = node['private_chef']['lb']['xmaint_allowed_ips_list']
