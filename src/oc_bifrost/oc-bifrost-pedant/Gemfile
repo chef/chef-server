@@ -1,7 +1,9 @@
-source 'https://rubygems.org'
+##source 'https://rubygems.org'
+##
+##gemspec
+#
+## TODO(ssd) 2017-03-15: This in in this gemfile because bifrost
+## expects it to be in the path
+##gem 'veil'
 
-gemspec
-
-# TODO(ssd) 2017-03-15: This in in this gemfile because bifrost
-# expects it to be in the path
-gem 'veil'
+gem 'veil', git: 'https://github.com/chef/chef_secrets', branch: 'main', ref: '51a81adeb85582b4acc905835c4f3d33e7216697'
