@@ -4,9 +4,8 @@ GIT
   ref: 51a81adeb85582b4acc905835c4f3d33e7216697
   branch: main
   specs:
-    veil!
-      bcrypt (~> 3.1)
-      pbkdf2
+    bcrypt (~> 3.1)
+    pbkdf2
 
 GEM
   remote: http://rubygems.org/
@@ -24,7 +23,6 @@ DEPENDENCIES
   chef-utils (~> 16.17)
   pg (~> 0.16.0)
   sequel (~> 3.34.1)
-  veil!
 
 BUNDLED WITH
    2.2.15
