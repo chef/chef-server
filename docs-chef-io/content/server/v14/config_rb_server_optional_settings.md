@@ -1393,6 +1393,103 @@ not occur if you increment the version of a cookbook with every cookbook update,
 
 This configuration file has the following settings for `opensearch`:
 
+`opensearch['enable']`
+
+: Enable the service. Default value: `true`.
+
+`opensearch['dir']`
+
+: The working directory.  The default value is the recommended value. Default value: `/var/opt/opscode/opensearch`
+
+`opensearch['data_dir']`
+
+: The paths used to store data. Default value: `/var/opt/opscode/elasticsearch/data`
+
+`opensearch['plugins_directory']`
+
+: The default location of the plugins directory depends on which package you install. Default value: `/var/opt/opscode/opensearch/plugins`
+
+`opensearch['scripts_directory']`
+
+: The default location of the scripts directory depends on which package you install. Default value: `/var/opt/opscode/opensearch/scripts`
+
+`opensearch['temp_directory']`
+
+: By default, OpenSearch uses a private temporary directory that the startup script creates immediately below the system temporary directory. Default value: `/var/opt/opscode/opensearch/tmp`
+
+`opensearch['log_directory']`
+
+: The directory in which log data is stored. The default value is the recommended value. Default value: `/var/log/opscode/opensearch`
+
+`opensearch['log_rotation']['file_maxbytes']`
+
+: The log rotation policy for this service. Log files are rotated when they exceed `file_maxbytes`. Default value: `104857600`.
+
+`opensearch['log_rotation']['num_to_keep']`
+
+: The log rotation policy for this service. `num_to_keep` specifies the maximum number of log files in the rotation. Default value: `10`.
+
+`opensearch['vip']`
+
+: The virtual IP address for the machine on which Apache Solr is running. Default value: `127.0.0.1`
+
+`opensearch['listen']`
+
+: The IP address for the machine on which Apache Solr is running. Default value: `127.0.0.1`
+
+`opensearch['port']`
+
+: The port on which the service is listening. Default value: `9200`
+
+`opensearch['enable_gc_log']`
+
+: Enable or disable GC logging. Default value: `false`
+
+`opensearch['initial_cluster_join_timeout']`
+
+: Default value: `90`
+
+`opensearch['jvm_opts']`
+
+: Default values are set based on [JVM configuration options](https://github.com/elastic/elasticsearch/blob/6.8/distribution/src/config/jvm.options).
+
+    {{< note spaces=4 >}}
+
+    Each item in this list will be placed as is into the `java_opts` config file. Entries are set in chef-server.rb as:
+
+    ```ruby
+    opensearch.jvm_opts = [
+    "-xoption1",
+    "-xoption2",
+    ...
+    "optionN"
+    ]
+    ```
+
+    {{< /note >}}
+
+`opensearch['heap_size']`
+
+: The amount of memory (in MBs) available to OpenSearch. If there is not enough memory available, search queries made by nodes to OpenSearch may fail. The amount of memory that must be available also depends on the number of nodes in the organization, the frequency of search queries, and other characteristics that are unique to each organization. In general, as the number of nodes increases, so does the amount of memory. The default value should work for many organizations with fewer than 25 nodes. For an organization with several hundred nodes, the amount of memory that is required often exceeds 3GB. Default value is is equivalent to 25% of the system memory or 1024 MB, whichever is greater.
+
+    {{< note spaces=4 >}}
+
+    If `heap_size` is also specified directly in `java_opts`, it will be ignored in favor of the chef-server.rb values or the defaults as calculated here. Only use chef-server.rb to set `heap_size`. It will raise an error if the system memory is less than 4 GB. This value is bounded between 1 GB - 28 GB.
+
+    {{< /note >}}
+
+`opensearch['new_size']`
+
+: Defaults to the larger of 1/16th of the `heap_size` or 32 MB.
+
+    {{< note spaces=4 >}}
+
+    If `new_size` is also specified directly in `java_opts`, it will be ignored in favor of the chef-server.rb values or the defaults calculated here. Only use chef-server.rb to set `new_size`.
+
+    {{< /note >}}
+
+### External OpenSearch
+
 `opensearch['external']`
 
 : Enable external `opensearch` service by setting to `true`. Default value: `false`.
