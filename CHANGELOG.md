@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.16.17 -->
-## [14.16.17](https://github.com/chef/chef-server/tree/14.16.17) (2022-06-03)
+<!-- latest_release 14.16.18 -->
+## [14.16.18](https://github.com/chef/chef-server/tree/14.16.18) (2022-06-06)
 
 #### Merged Pull Requests
-- Docs - Internal OpenSearch configurations [#3263](https://github.com/chef/chef-server/pull/3263) ([jashaik](https://github.com/jashaik))
+- Fixing growing bifros DB issue [#3275](https://github.com/chef/chef-server/pull/3275) ([vinay-satish](https://github.com/vinay-satish))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.15.10 -->
 ### Changes since 14.15.10 release
 
 #### Merged Pull Requests
+- Fixing growing bifros DB issue [#3275](https://github.com/chef/chef-server/pull/3275) ([vinay-satish](https://github.com/vinay-satish)) <!-- 14.16.18 -->
 - Docs - Internal OpenSearch configurations [#3263](https://github.com/chef/chef-server/pull/3263) ([jashaik](https://github.com/jashaik)) <!-- 14.16.17 -->
 - Shahid/redis 6 auth issue [#3337](https://github.com/chef/chef-server/pull/3337) ([jashaik](https://github.com/jashaik)) <!-- 14.16.16 -->
 - Bump omnibus-software from `1692d72` to `a9b13a0` in /omnibus [#3342](https://github.com/chef/chef-server/pull/3342) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.16.15 -->
