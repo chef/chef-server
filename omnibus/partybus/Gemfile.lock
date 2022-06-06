@@ -6,7 +6,7 @@ GEM
     pbkdf2 (0.1.0)
     pg (0.16.0)
     sequel (3.34.1)
-    veil (0.3.9)
+    veil (0.3.11)
       bcrypt (~> 3.1)
       pbkdf2
 
@@ -17,7 +17,7 @@ DEPENDENCIES
   chef-utils (~> 16.17)
   pg (~> 0.16.0)
   sequel (~> 3.34.1)
-  veil (= 0.3.9)
+  veil (= 0.3.11)
 
 BUNDLED WITH
    2.2.15
