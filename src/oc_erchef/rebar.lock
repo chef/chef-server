@@ -102,7 +102,7 @@
 % {<<"lhttpc">>,{pkg,<<"lhttpc">>,<<"1.6.2">>},1},
  {<<"lhttpc">>,
   {git,"https://github.com/erlcloud/lhttpc",
-       {branch,"master"}},
+       {ref,"8e34985a3cd0ac2a7fc2a88a041554c64d33e74b"}},
   1},
  {<<"meck">>,
   {git,"https://github.com/eproxus/meck",
