@@ -1,9 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release -->
+<!-- latest_release 14.16.20 -->
+## [14.16.20](https://github.com/chef/chef-server/tree/14.16.20) (2022-06-08)
+
+#### Merged Pull Requests
+- chore: Set permissions for GitHub actions [#3362](https://github.com/chef/chef-server/pull/3362) ([lbakerchef](https://github.com/lbakerchef))
 <!-- latest_release -->
 
-<!-- release_rollup -->
+<!-- release_rollup since=14.16.19 -->
+### Changes since 14.16.19 release
+
+#### Merged Pull Requests
+- chore: Set permissions for GitHub actions [#3362](https://github.com/chef/chef-server/pull/3362) ([lbakerchef](https://github.com/lbakerchef)) <!-- 14.16.20 -->
 <!-- release_rollup -->
 
 <!-- latest_stable_release -->
