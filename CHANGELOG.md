@@ -1,59 +1,56 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.16.19 -->
-## [14.16.19](https://github.com/chef/chef-server/tree/14.16.19) (2022-06-07)
-
-#### Merged Pull Requests
-- OpenSearch user permissions documented [#3338](https://github.com/chef/chef-server/pull/3338) ([jashaik](https://github.com/jashaik))
+<!-- latest_release -->
 <!-- latest_release -->
 
-<!-- release_rollup since=14.15.10 -->
-### Changes since 14.15.10 release
-
-#### Merged Pull Requests
-- OpenSearch user permissions documented [#3338](https://github.com/chef/chef-server/pull/3338) ([jashaik](https://github.com/jashaik)) <!-- 14.16.19 -->
-- Fixing growing bifros DB issue [#3275](https://github.com/chef/chef-server/pull/3275) ([vinay-satish](https://github.com/vinay-satish)) <!-- 14.16.18 -->
-- Docs - Internal OpenSearch configurations [#3263](https://github.com/chef/chef-server/pull/3263) ([jashaik](https://github.com/jashaik)) <!-- 14.16.17 -->
-- Shahid/redis 6 auth issue [#3337](https://github.com/chef/chef-server/pull/3337) ([jashaik](https://github.com/jashaik)) <!-- 14.16.16 -->
-- Bump omnibus-software from `1692d72` to `a9b13a0` in /omnibus [#3342](https://github.com/chef/chef-server/pull/3342) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.16.15 -->
-- Bump rack from 2.2.3 to 2.2.3.1 in /oc-chef-pedant [#3343](https://github.com/chef/chef-server/pull/3343) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.16.14 -->
-- Bump rack from 2.2.3 to 2.2.3.1 in /src/chef-server-ctl [#3344](https://github.com/chef/chef-server/pull/3344) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.16.13 -->
-- Bump rack from 2.2.3 to 2.2.3.1 in /src/oc-id [#3345](https://github.com/chef/chef-server/pull/3345) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.16.12 -->
-- [INFS-168] Split out dev-docs and add notes on what is next [#3318](https://github.com/chef/chef-server/pull/3318) ([marcparadise](https://github.com/marcparadise)) <!-- 14.16.11 -->
-- Updated log rotate version to 3.19 [#3313](https://github.com/chef/chef-server/pull/3313) ([jashaik](https://github.com/jashaik)) <!-- 14.16.10 -->
-- Bump berkshelf from 8.0.0 to 8.0.1 in /src/chef-server-ctl [#3320](https://github.com/chef/chef-server/pull/3320) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.16.9 -->
-- Bump berkshelf from 8.0.0 to 8.0.1 in /omnibus [#3322](https://github.com/chef/chef-server/pull/3322) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.16.8 -->
-- Bump jquery-rails from 4.4.0 to 4.5.0 in /src/oc-id [#3328](https://github.com/chef/chef-server/pull/3328) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.16.7 -->
-- Bump omnibus from `63be4f1` to `83d8428` in /omnibus [#3334](https://github.com/chef/chef-server/pull/3334) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.16.6 -->
-- Reverting redis back to 5.0.14 from 6.2.7 [#3332](https://github.com/chef/chef-server/pull/3332) ([vinay-satish](https://github.com/vinay-satish)) <!-- 14.16.5 -->
-- Remove go version from netlify config [#3325](https://github.com/chef/chef-server/pull/3325) ([IanMadd](https://github.com/IanMadd)) <!-- 14.16.4 -->
-- Fixed opensearch pedant tests for umbrella [#3323](https://github.com/chef/chef-server/pull/3323) ([jashaik](https://github.com/jashaik)) <!-- 14.16.3 -->
-- Minor typo in docs [#3281](https://github.com/chef/chef-server/pull/3281) ([williamtheaker](https://github.com/williamtheaker)) <!-- 14.16.2 -->
-- Use shortcode in server repo [#3319](https://github.com/chef/chef-server/pull/3319) ([IanMadd](https://github.com/IanMadd)) <!-- 14.16.1 -->
-- Bump omnibus-software from `50d05bc` to `1692d72` in /omnibus [#3317](https://github.com/chef/chef-server/pull/3317) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.16.0 -->
-- Update open-jre to 11.0.15 [#3314](https://github.com/chef/chef-server/pull/3314) ([vinay-satish](https://github.com/vinay-satish)) <!-- 14.15.25 -->
-- upgrading redis to 6.2.7 [#3284](https://github.com/chef/chef-server/pull/3284) ([vinay-satish](https://github.com/vinay-satish)) <!-- 14.15.24 -->
-- Bump omnibus from `27c37fc` to `63be4f1` in /omnibus [#3303](https://github.com/chef/chef-server/pull/3303) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.15.23 -->
-- Bump nokogiri from 1.13.3 to 1.13.6 in /src/oc-id [#3301](https://github.com/chef/chef-server/pull/3301) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.15.22 -->
-- Bump sinatra from 2.1.0 to 2.2.0 in /src/oc-id [#3290](https://github.com/chef/chef-server/pull/3290) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.15.21 -->
-- More cleanup related to #3295 [#3312](https://github.com/chef/chef-server/pull/3312) ([IanMadd](https://github.com/IanMadd)) <!-- 14.15.20 -->
-- Docs change for Dev VM, ldap config [#3310](https://github.com/chef/chef-server/pull/3310) ([lbakerchef](https://github.com/lbakerchef)) <!-- 14.15.19 -->
-- Bump activesupport from 7.0.2.4 to 7.0.3 in /oc-chef-pedant [#3304](https://github.com/chef/chef-server/pull/3304) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.15.18 -->
-- Bump activesupport from 7.0.2.4 to 7.0.3 in /src/oc_bifrost/oc-bifrost-pedant [#3305](https://github.com/chef/chef-server/pull/3305) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.15.17 -->
-- Bump knife from 17.9.26 to 17.10.0 in /src/chef-server-ctl [#3307](https://github.com/chef/chef-server/pull/3307) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.15.16 -->
-- Bump sdoc from 2.3.2 to 2.4.0 in /src/oc-id [#3308](https://github.com/chef/chef-server/pull/3308) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.15.15 -->
-- Bump capybara from 3.36.0 to 3.37.1 in /src/oc-id [#3306](https://github.com/chef/chef-server/pull/3306) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.15.14 -->
-- Move server shortcodes to chef-server [#3295](https://github.com/chef/chef-server/pull/3295) ([IanMadd](https://github.com/IanMadd)) <!-- 14.15.13 -->
-- Fix ldap for dev vm. [#3309](https://github.com/chef/chef-server/pull/3309) ([lbakerchef](https://github.com/lbakerchef)) <!-- 14.15.12 -->
-- Adding verify pipeline in Chef Open Source org [#3268](https://github.com/chef/chef-server/pull/3268) ([vinay-satish](https://github.com/vinay-satish)) <!-- 14.15.11 -->
+<!-- release_rollup -->
 <!-- release_rollup -->
 
 <!-- latest_stable_release -->
+## [14.16.19](https://github.com/chef/chef-server/tree/14.16.19) (2022-06-08)
+
+#### Merged Pull Requests
+- Adding verify pipeline in Chef Open Source org [#3268](https://github.com/chef/chef-server/pull/3268) ([vinay-satish](https://github.com/vinay-satish))
+- Fix ldap for dev vm. [#3309](https://github.com/chef/chef-server/pull/3309) ([lbakerchef](https://github.com/lbakerchef))
+- Move server shortcodes to chef-server [#3295](https://github.com/chef/chef-server/pull/3295) ([IanMadd](https://github.com/IanMadd))
+- Bump capybara from 3.36.0 to 3.37.1 in /src/oc-id [#3306](https://github.com/chef/chef-server/pull/3306) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump sdoc from 2.3.2 to 2.4.0 in /src/oc-id [#3308](https://github.com/chef/chef-server/pull/3308) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump knife from 17.9.26 to 17.10.0 in /src/chef-server-ctl [#3307](https://github.com/chef/chef-server/pull/3307) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump activesupport from 7.0.2.4 to 7.0.3 in /src/oc_bifrost/oc-bifrost-pedant [#3305](https://github.com/chef/chef-server/pull/3305) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump activesupport from 7.0.2.4 to 7.0.3 in /oc-chef-pedant [#3304](https://github.com/chef/chef-server/pull/3304) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Docs change for Dev VM, ldap config [#3310](https://github.com/chef/chef-server/pull/3310) ([lbakerchef](https://github.com/lbakerchef))
+- More cleanup related to #3295 [#3312](https://github.com/chef/chef-server/pull/3312) ([IanMadd](https://github.com/IanMadd))
+- Bump sinatra from 2.1.0 to 2.2.0 in /src/oc-id [#3290](https://github.com/chef/chef-server/pull/3290) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump nokogiri from 1.13.3 to 1.13.6 in /src/oc-id [#3301](https://github.com/chef/chef-server/pull/3301) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump omnibus from `27c37fc` to `63be4f1` in /omnibus [#3303](https://github.com/chef/chef-server/pull/3303) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- upgrading redis to 6.2.7 [#3284](https://github.com/chef/chef-server/pull/3284) ([vinay-satish](https://github.com/vinay-satish))
+- Update open-jre to 11.0.15 [#3314](https://github.com/chef/chef-server/pull/3314) ([vinay-satish](https://github.com/vinay-satish))
+- Bump omnibus-software from `50d05bc` to `1692d72` in /omnibus [#3317](https://github.com/chef/chef-server/pull/3317) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Use shortcode in server repo [#3319](https://github.com/chef/chef-server/pull/3319) ([IanMadd](https://github.com/IanMadd))
+- Minor typo in docs [#3281](https://github.com/chef/chef-server/pull/3281) ([williamtheaker](https://github.com/williamtheaker))
+- Fixed opensearch pedant tests for umbrella [#3323](https://github.com/chef/chef-server/pull/3323) ([jashaik](https://github.com/jashaik))
+- Remove go version from netlify config [#3325](https://github.com/chef/chef-server/pull/3325) ([IanMadd](https://github.com/IanMadd))
+- Reverting redis back to 5.0.14 from 6.2.7 [#3332](https://github.com/chef/chef-server/pull/3332) ([vinay-satish](https://github.com/vinay-satish))
+- Bump omnibus from `63be4f1` to `83d8428` in /omnibus [#3334](https://github.com/chef/chef-server/pull/3334) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump jquery-rails from 4.4.0 to 4.5.0 in /src/oc-id [#3328](https://github.com/chef/chef-server/pull/3328) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump berkshelf from 8.0.0 to 8.0.1 in /omnibus [#3322](https://github.com/chef/chef-server/pull/3322) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump berkshelf from 8.0.0 to 8.0.1 in /src/chef-server-ctl [#3320](https://github.com/chef/chef-server/pull/3320) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Updated log rotate version to 3.19 [#3313](https://github.com/chef/chef-server/pull/3313) ([jashaik](https://github.com/jashaik))
+- [INFS-168] Split out dev-docs and add notes on what is next [#3318](https://github.com/chef/chef-server/pull/3318) ([marcparadise](https://github.com/marcparadise))
+- Bump rack from 2.2.3 to 2.2.3.1 in /src/oc-id [#3345](https://github.com/chef/chef-server/pull/3345) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump rack from 2.2.3 to 2.2.3.1 in /src/chef-server-ctl [#3344](https://github.com/chef/chef-server/pull/3344) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump rack from 2.2.3 to 2.2.3.1 in /oc-chef-pedant [#3343](https://github.com/chef/chef-server/pull/3343) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump omnibus-software from `1692d72` to `a9b13a0` in /omnibus [#3342](https://github.com/chef/chef-server/pull/3342) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Shahid/redis 6 auth issue [#3337](https://github.com/chef/chef-server/pull/3337) ([jashaik](https://github.com/jashaik))
+- Docs - Internal OpenSearch configurations [#3263](https://github.com/chef/chef-server/pull/3263) ([jashaik](https://github.com/jashaik))
+- Fixing growing bifros DB issue [#3275](https://github.com/chef/chef-server/pull/3275) ([vinay-satish](https://github.com/vinay-satish))
+- OpenSearch user permissions documented [#3338](https://github.com/chef/chef-server/pull/3338) ([jashaik](https://github.com/jashaik))
+<!-- latest_stable_release -->
+
 ## [14.15.10](https://github.com/chef/chef-server/tree/14.15.10) (2022-05-10)
 
 #### Merged Pull Requests
 - Added knife to chef-server-ctl gemfile [#3298](https://github.com/chef/chef-server/pull/3298) ([jashaik](https://github.com/jashaik))
-<!-- latest_stable_release -->
 
 ## [14.15.9](https://github.com/chef/chef-server/tree/14.15.9) (2022-05-04)
 
