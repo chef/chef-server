@@ -15,7 +15,7 @@
   0},
  {<<"opscoderl_httpc">>,
   {git,"https://github.com/chef/opscoderl_httpc",
-       {ref,"d9578f44726ca69af5bdadaa602756692d3b1460"}},
+       {branch,"lbaker/upgrade-erlang-24.2"}},
   0},
  {<<"pooler">>,
   {git,"https://github.com/chef/pooler",

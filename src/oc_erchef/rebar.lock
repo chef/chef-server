@@ -110,7 +110,7 @@
   0},
  {<<"opscoderl_httpc">>,
   {git,"https://github.com/chef/opscoderl_httpc",
-       {ref,"58efd00f9e21f119890a3b105089878140ecd6fe"}},
+       {branch,"lbaker/upgrade-erlang-24.2"}},
   0},
  {<<"opscoderl_wm">>,
   {git,"https://github.com/chef/opscoderl_wm",
