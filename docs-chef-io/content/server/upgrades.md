@@ -122,6 +122,23 @@ Set the `postgresql['pg_upgrade_timeout']` attribute in [chef-server.rb]({{< rel
 
 {{</note >}}
 
+#### Upgrading to 14.16
+
+Chef Infra Server 14.16 includes a bug fix for the bifrost database. This bug may create unused authorization IDs in the bifrost database. After upgrading to Chef Infra Server 14.16, the unused authorization IDs must be manually deleted.
+
+To analyze the data that gets deleted and get an estimate of the time needed to delete the data, run:
+
+```bash
+chef-server-ctl cleanup-bifrost --estimate-only
+```
+
+To delete the unused authorization IDs from the bifrost database, run:
+
+
+```bash
+chef-server-ctl cleanup-bifrost
+```
+
 ##### Database Preparation
 
 1. Run `VACUUM FULL` on the PostgreSQL database if you don't have automatic vacuuming set up. This process will reduce the size of the database by deleting unnecessary data and speeds up the migration. The `VACUUM FULL` operation takes around 1 to 2 minutes per gigabyte of data depending on the complexity of the data, and requires free disk space at least as large as the size of your database.

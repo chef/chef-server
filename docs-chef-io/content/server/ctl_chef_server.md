@@ -659,13 +659,18 @@ chef-server-ctl show-service-credentials
 
 ### cleanup-bifrost
 
-The `cleanup-bifrost` subcommand removes unused authorization objects
-from the authorization database (called bifrost). These unused objects
-can accumulate on long-running Chef Infra Servers as a result of failed object
-creation requests. For most users, the unused authorization objects do
+The `cleanup-bifrost` subcommand removes unused authorization IDs for actors and objects
+from the authorization database (called bifrost).
+
+These unused actor authorization IDs
+can accumulate on long-running Chef Infra Servers as a result of failed actor creation
+requests. For most users, the unused authorization actors do
 not substantially affect the performance of Chef Infra Server; however
-in certain situations it can be helpful to clean them up. This command
-is primarily intended for use by Chef support.
+in certain situations it can be helpful to clean them up.
+
+The unused object authorization IDs can accumulate while cookbooks are uploading.
+During the cookbook upload, Infra Server creates a sandbox atomic transaction to verify that partial cookbook content
+is not uploaded to the server. This issue is fixed in Chef Infra Server 14.16.
 
 **Syntax**
 
