@@ -11,7 +11,7 @@
 % 1},
  {<<"lager">>,
   {git,"https://github.com/basho/lager",
-       {ref,"a140ea935eae9149bb35234bb40f6acf1c69caa1"}},
+       {ref,"81eaef0ce98fdbf64ab95665e3bc2ec4b24c7dac"}},
   0},
  {<<"opscoderl_httpc">>,
   {git,"https://github.com/chef/opscoderl_httpc",
