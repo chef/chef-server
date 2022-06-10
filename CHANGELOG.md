@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.16.20 -->
-## [14.16.20](https://github.com/chef/chef-server/tree/14.16.20) (2022-06-08)
+<!-- latest_release 14.16.21 -->
+## [14.16.21](https://github.com/chef/chef-server/tree/14.16.21) (2022-06-10)
 
 #### Merged Pull Requests
-- chore: Set permissions for GitHub actions [#3362](https://github.com/chef/chef-server/pull/3362) ([lbakerchef](https://github.com/lbakerchef))
+- Bump selenium-webdriver from 4.1.0 to 4.2.1 in /src/oc-id [#3347](https://github.com/chef/chef-server/pull/3347) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.16.19 -->
 ### Changes since 14.16.19 release
 
 #### Merged Pull Requests
+- Bump selenium-webdriver from 4.1.0 to 4.2.1 in /src/oc-id [#3347](https://github.com/chef/chef-server/pull/3347) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.16.21 -->
 - chore: Set permissions for GitHub actions [#3362](https://github.com/chef/chef-server/pull/3362) ([lbakerchef](https://github.com/lbakerchef)) <!-- 14.16.20 -->
 <!-- release_rollup -->
 
