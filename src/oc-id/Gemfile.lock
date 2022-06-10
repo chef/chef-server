@@ -282,7 +282,7 @@ GEM
       railties (>= 4.2.0)
       thor (>= 0.14, < 2.0)
     json (2.6.1)
-    jwt (2.3.0)
+    jwt (2.4.1)
     kgio (2.11.4)
     libv8 (3.16.14.19)
     libyajl2 (2.1.0)
