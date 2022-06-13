@@ -126,7 +126,7 @@ include_recipe 'infra-server::fix_permissions'
   postgresql
   oc_bifrost
   oc_id
-  elasticsearch
+  opensearch
   bookshelf
   opscode-erchef
   nginx
@@ -149,8 +149,6 @@ include_recipe 'infra-server::fix_permissions'
     end
   elsif node['private_chef'][service]['enable']
     include_recipe "infra-server::#{service}"
-  elsif service == 'elasticsearch' && node['private_chef']['opscode-erchef']['search_provider'] == 'opensearch' && node['private_chef']['opensearch']['external']
-    include_recipe 'infra-server::opensearch-external'
   else
     # bootstrap isn't a service, nothing to disable.
     next if service == 'bootstrap'

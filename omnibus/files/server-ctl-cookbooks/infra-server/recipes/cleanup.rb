@@ -50,3 +50,15 @@ directory "/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/sv/opscode-chef-mover" 
   recursive true
   action :delete
 end
+
+[
+  '/opt/opscode/sv/elasticsearch',
+  '/opt/opscode/embedded/elasticsearch',
+  '/opt/opscode/service/elasticsearch',
+  '/var/log/opscode/elasticsearch/',
+].each do |dir_name|
+  directory dir_name do
+    recursive true
+    action :delete
+  end
+end

@@ -188,7 +188,7 @@
         {reindex_item_retries, <%= @reindex_item_retries -%>},
         {solr_elasticsearch_major_version, <%= @solr_elasticsearch_major_version %>},
         {search_auth_username, "<%= node['private_chef']['opscode-erchef']['search_auth_username'] %>"},
-        {search_auth_password, "<%= node['private_chef']['opscode-erchef']['search_auth_password'] %>"},
+        {search_auth_password, "<%= @helper.search_auth_password() %>"},
         {solr_service, [
             {root_url, "<%= @helper.search_engine_url() %>"},
             {timeout, <%= @solr_timeout %>},

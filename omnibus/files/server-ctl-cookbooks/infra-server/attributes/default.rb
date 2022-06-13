@@ -156,7 +156,7 @@ elasticsearch = default['private_chef']['elasticsearch']
 # These attributes cannot be overridden in chef-server.rb
 # elasticsearch['tunable_blacklist'] = %w{dir data_dir try_start}
 # elasticsearch['try_start'] = true
-elasticsearch['enable'] = true
+elasticsearch['enable'] = false
 # elasticsearch['external'] = nil
 # elasticsearch['external_url'] = nil
 elasticsearch['dir'] = "#{var_base}/elasticsearch"
@@ -224,10 +224,23 @@ opensearch['external'] = nil
 opensearch['external_url'] = nil
 opensearch['shard_count'] = 5
 opensearch['replica_count'] = 1
-# Tobe added in the internal opensearch changes
-# opensearch['vip'] = '54.183.208.113'
-# opensearch['port'] = 9200
-# opensearch['username'] = 'admin'
+opensearch['jvm_opts'] = []
+opensearch['heap_size'] = Opensearch.heap_size_default(node)
+opensearch['new_size'] = Opensearch.new_size_default(node)
+opensearch['enable'] = true
+opensearch['dir'] = "#{var_base}/opensearch"
+opensearch['data_dir'] = "#{var_base}/opensearch/data"
+opensearch['plugins_directory'] = "#{var_base}/opensearch/plugins"
+opensearch['scripts_directory'] = "#{var_base}/opensearch/scripts"
+opensearch['temp_directory'] = "#{var_base}/opensearch/tmp"
+opensearch['log_directory'] = "#{log_base}/opensearch"
+opensearch['log_rotation']['file_maxbytes'] = 104857600
+opensearch['log_rotation']['num_to_keep'] = 10
+opensearch['vip'] = '127.0.0.1'
+opensearch['listen'] = '127.0.0.1'
+opensearch['port'] = 9200
+opensearch['enable_gc_log'] = false
+opensearch['initial_cluster_join_timeout'] = 90
 
 ####
 # Erlang Chef Server API
@@ -326,11 +339,11 @@ default['private_chef']['opscode-erchef']['ibrowse_max_sessions'] = 256
 default['private_chef']['opscode-erchef']['ibrowse_max_pipeline_size'] = 1
 default['private_chef']['opscode-erchef']['enable_ibrowse_traces'] = false
 # general search settings used to set up chef_index
-default['private_chef']['opscode-erchef']['search_provider'] = 'elasticsearch'
+default['private_chef']['opscode-erchef']['search_provider'] = 'opensearch'
 default['private_chef']['opscode-erchef']['search_queue_mode'] = 'batch'
 default['private_chef']['opscode-erchef']['search_batch_max_size'] = '5000000'
 default['private_chef']['opscode-erchef']['search_batch_max_wait'] = '10'
-# default['private_chef']['opscode-erchef']['search_auth_username'] = "admin"
+default['private_chef']['opscode-erchef']['search_auth_username'] = 'opensearch_user'
 # default['private_chef']['opscode-erchef']['search_auth_password'] = "admin"
 # solr_service configuration for erchef. These are used to configure an opscoderl_httpc pool
 # of HTTP connecton workers.
