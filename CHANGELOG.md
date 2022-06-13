@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 14.16.26 -->
-## [14.16.26](https://github.com/chef/chef-server/tree/14.16.26) (2022-06-10)
+<!-- latest_release 15.0.0 -->
+## [15.0.0](https://github.com/chef/chef-server/tree/15.0.0) (2022-06-13)
 
 #### Merged Pull Requests
-- Bump veil from 0.3.9 to 0.3.11 in /src/oc-id [#3357](https://github.com/chef/chef-server/pull/3357) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Internal Opensearch Support [#3175](https://github.com/chef/chef-server/pull/3175) ([jashaik](https://github.com/jashaik))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.16.19 -->
 ### Changes since 14.16.19 release
 
 #### Merged Pull Requests
+- Internal Opensearch Support [#3175](https://github.com/chef/chef-server/pull/3175) ([jashaik](https://github.com/jashaik)) <!-- 15.0.0 -->
 - Bump veil from 0.3.9 to 0.3.11 in /src/oc-id [#3357](https://github.com/chef/chef-server/pull/3357) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.16.26 -->
 - Bump veil from 0.3.9 to 0.3.11 in /src/oc_bifrost/oc-bifrost-pedant [#3356](https://github.com/chef/chef-server/pull/3356) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.16.25 -->
 - Bump veil from 0.3.9 to 0.3.11 in /src/chef-server-ctl [#3355](https://github.com/chef/chef-server/pull/3355) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.16.24 -->
