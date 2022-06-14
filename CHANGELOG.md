@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.0.1 -->
-## [15.0.1](https://github.com/chef/chef-server/tree/15.0.1) (2022-06-13)
+<!-- latest_release 15.0.2 -->
+## [15.0.2](https://github.com/chef/chef-server/tree/15.0.2) (2022-06-14)
 
 #### Merged Pull Requests
-- Bump mixlib-config from 3.0.9 to 3.0.27 in /oc-chef-pedant [#3363](https://github.com/chef/chef-server/pull/3363) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump mixlib-config from 3.0.9 to 3.0.27 in /src/oc_bifrost/oc-bifrost-pedant [#3364](https://github.com/chef/chef-server/pull/3364) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.16.19 -->
 ### Changes since 14.16.19 release
 
 #### Merged Pull Requests
+- Bump mixlib-config from 3.0.9 to 3.0.27 in /src/oc_bifrost/oc-bifrost-pedant [#3364](https://github.com/chef/chef-server/pull/3364) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.0.2 -->
 - Bump mixlib-config from 3.0.9 to 3.0.27 in /oc-chef-pedant [#3363](https://github.com/chef/chef-server/pull/3363) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.0.1 -->
 - Internal Opensearch Support [#3175](https://github.com/chef/chef-server/pull/3175) ([jashaik](https://github.com/jashaik)) <!-- 15.0.0 -->
 - Bump veil from 0.3.9 to 0.3.11 in /src/oc-id [#3357](https://github.com/chef/chef-server/pull/3357) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.16.26 -->
