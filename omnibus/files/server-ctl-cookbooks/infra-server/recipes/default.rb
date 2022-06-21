@@ -147,6 +147,8 @@ include_recipe 'infra-server::fix_permissions'
     component_runit_service service do
       action :disable
     end
+  elsif service == 'opensearch' && node['private_chef']['opscode-erchef']['search_provider'] == 'elasticsearch' && (node['private_chef']['elasticsearch']['external'] || node['private_chef']['opscode-solr4']['external'])
+    include_recipe 'infra-server::elasticsearch-external'
   elsif node['private_chef'][service]['enable']
     include_recipe "infra-server::#{service}"
   else
