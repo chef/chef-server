@@ -6,7 +6,7 @@ define_upgrade do
       # Run these migrations only if elasticsearch has been enabled in the config
       # We do not want to run this if solr is enabled
   
-      if es["enable"] && Gem::Version.new(version) >= Gem::Version.new("1.2.4")
+      if !es["external"] && es["enable"] && Gem::Version.new(version) >= Gem::Version.new("1.2.4")
   
         must_be_data_master
 
