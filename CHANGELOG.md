@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.0.4 -->
-## [15.0.4](https://github.com/chef/chef-server/tree/15.0.4) (2022-06-21)
+<!-- latest_release 15.0.5 -->
+## [15.0.5](https://github.com/chef/chef-server/tree/15.0.5) (2022-06-22)
 
 #### Merged Pull Requests
-- Fixed chef backend issue with opensearch changes [#3374](https://github.com/chef/chef-server/pull/3374) ([jashaik](https://github.com/jashaik))
+- fixing version check in 37 upgrade script [#3377](https://github.com/chef/chef-server/pull/3377) ([vinay-satish](https://github.com/vinay-satish))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.16.19 -->
 ### Changes since 14.16.19 release
 
 #### Merged Pull Requests
+- fixing version check in 37 upgrade script [#3377](https://github.com/chef/chef-server/pull/3377) ([vinay-satish](https://github.com/vinay-satish)) <!-- 15.0.5 -->
 - Fixed chef backend issue with opensearch changes [#3374](https://github.com/chef/chef-server/pull/3374) ([jashaik](https://github.com/jashaik)) <!-- 15.0.4 -->
 - Upgrading dependencies [#3361](https://github.com/chef/chef-server/pull/3361) ([lbakerchef](https://github.com/lbakerchef)) <!-- 15.0.3 -->
 - Bump mixlib-config from 3.0.9 to 3.0.27 in /src/oc_bifrost/oc-bifrost-pedant [#3364](https://github.com/chef/chef-server/pull/3364) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.0.2 -->
