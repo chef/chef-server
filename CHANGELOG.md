@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.0.6 -->
-## [15.0.6](https://github.com/chef/chef-server/tree/15.0.6) (2022-06-22)
+<!-- latest_release 15.0.7 -->
+## [15.0.7](https://github.com/chef/chef-server/tree/15.0.7) (2022-06-22)
 
 #### Merged Pull Requests
-- Skipping the reindexing for external opensearch [#3379](https://github.com/chef/chef-server/pull/3379) ([vinay-satish](https://github.com/vinay-satish))
+- Fix dev vm #1 [#3311](https://github.com/chef/chef-server/pull/3311) ([lbakerchef](https://github.com/lbakerchef))
 <!-- latest_release -->
 
 <!-- release_rollup since=14.16.19 -->
 ### Changes since 14.16.19 release
 
 #### Merged Pull Requests
+- Fix dev vm #1 [#3311](https://github.com/chef/chef-server/pull/3311) ([lbakerchef](https://github.com/lbakerchef)) <!-- 15.0.7 -->
 - Skipping the reindexing for external opensearch [#3379](https://github.com/chef/chef-server/pull/3379) ([vinay-satish](https://github.com/vinay-satish)) <!-- 15.0.6 -->
 - fixing version check in 37 upgrade script [#3377](https://github.com/chef/chef-server/pull/3377) ([vinay-satish](https://github.com/vinay-satish)) <!-- 15.0.5 -->
 - Fixed chef backend issue with opensearch changes [#3374](https://github.com/chef/chef-server/pull/3374) ([jashaik](https://github.com/jashaik)) <!-- 15.0.4 -->
