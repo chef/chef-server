@@ -7,31 +7,36 @@
 - Updating release_branch version_constraint to 15* [#3381](https://github.com/chef/chef-server/pull/3381) ([vinay-satish](https://github.com/vinay-satish))
 <!-- latest_release -->
 
-<!-- release_rollup since=14.16.19 -->
-### Changes since 14.16.19 release
+<!-- release_rollup since=15.0.9 -->
+### Changes since 15.0.9 release
 
 #### Merged Pull Requests
 - Updating release_branch version_constraint to 15* [#3381](https://github.com/chef/chef-server/pull/3381) ([vinay-satish](https://github.com/vinay-satish)) <!-- 15.0.10 -->
-- Correcting the upgrade script 37 for external elasticsearch [#3380](https://github.com/chef/chef-server/pull/3380) ([vinay-satish](https://github.com/vinay-satish)) <!-- 15.0.9 -->
-- Fix dev vm #2 [#3373](https://github.com/chef/chef-server/pull/3373) ([lbakerchef](https://github.com/lbakerchef)) <!-- 15.0.8 -->
-- Fix dev vm #1 [#3311](https://github.com/chef/chef-server/pull/3311) ([lbakerchef](https://github.com/lbakerchef)) <!-- 15.0.7 -->
-- Skipping the reindexing for external opensearch [#3379](https://github.com/chef/chef-server/pull/3379) ([vinay-satish](https://github.com/vinay-satish)) <!-- 15.0.6 -->
-- fixing version check in 37 upgrade script [#3377](https://github.com/chef/chef-server/pull/3377) ([vinay-satish](https://github.com/vinay-satish)) <!-- 15.0.5 -->
-- Fixed chef backend issue with opensearch changes [#3374](https://github.com/chef/chef-server/pull/3374) ([jashaik](https://github.com/jashaik)) <!-- 15.0.4 -->
-- Upgrading dependencies [#3361](https://github.com/chef/chef-server/pull/3361) ([lbakerchef](https://github.com/lbakerchef)) <!-- 15.0.3 -->
-- Bump mixlib-config from 3.0.9 to 3.0.27 in /src/oc_bifrost/oc-bifrost-pedant [#3364](https://github.com/chef/chef-server/pull/3364) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.0.2 -->
-- Bump mixlib-config from 3.0.9 to 3.0.27 in /oc-chef-pedant [#3363](https://github.com/chef/chef-server/pull/3363) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.0.1 -->
-- Internal Opensearch Support [#3175](https://github.com/chef/chef-server/pull/3175) ([jashaik](https://github.com/jashaik)) <!-- 15.0.0 -->
-- Bump veil from 0.3.9 to 0.3.11 in /src/oc-id [#3357](https://github.com/chef/chef-server/pull/3357) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.16.26 -->
-- Bump veil from 0.3.9 to 0.3.11 in /src/oc_bifrost/oc-bifrost-pedant [#3356](https://github.com/chef/chef-server/pull/3356) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.16.25 -->
-- Bump veil from 0.3.9 to 0.3.11 in /src/chef-server-ctl [#3355](https://github.com/chef/chef-server/pull/3355) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.16.24 -->
-- Bump berkshelf from 8.0.1 to 8.0.2 in /src/chef-server-ctl [#3349](https://github.com/chef/chef-server/pull/3349) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.16.23 -->
-- Bump mixlib-install from 3.12.16 to 3.12.19 in /src/chef-server-ctl [#3348](https://github.com/chef/chef-server/pull/3348) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.16.22 -->
-- Bump selenium-webdriver from 4.1.0 to 4.2.1 in /src/oc-id [#3347](https://github.com/chef/chef-server/pull/3347) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 14.16.21 -->
-- chore: Set permissions for GitHub actions [#3362](https://github.com/chef/chef-server/pull/3362) ([lbakerchef](https://github.com/lbakerchef)) <!-- 14.16.20 -->
 <!-- release_rollup -->
 
 <!-- latest_stable_release -->
+## [15.0.9](https://github.com/chef/chef-server/tree/15.0.9) (2022-06-23)
+
+#### Merged Pull Requests
+- chore: Set permissions for GitHub actions [#3362](https://github.com/chef/chef-server/pull/3362) ([lbakerchef](https://github.com/lbakerchef))
+- Bump selenium-webdriver from 4.1.0 to 4.2.1 in /src/oc-id [#3347](https://github.com/chef/chef-server/pull/3347) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump mixlib-install from 3.12.16 to 3.12.19 in /src/chef-server-ctl [#3348](https://github.com/chef/chef-server/pull/3348) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump berkshelf from 8.0.1 to 8.0.2 in /src/chef-server-ctl [#3349](https://github.com/chef/chef-server/pull/3349) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump veil from 0.3.9 to 0.3.11 in /src/chef-server-ctl [#3355](https://github.com/chef/chef-server/pull/3355) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump veil from 0.3.9 to 0.3.11 in /src/oc_bifrost/oc-bifrost-pedant [#3356](https://github.com/chef/chef-server/pull/3356) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump veil from 0.3.9 to 0.3.11 in /src/oc-id [#3357](https://github.com/chef/chef-server/pull/3357) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Internal Opensearch Support [#3175](https://github.com/chef/chef-server/pull/3175) ([jashaik](https://github.com/jashaik))
+- Bump mixlib-config from 3.0.9 to 3.0.27 in /oc-chef-pedant [#3363](https://github.com/chef/chef-server/pull/3363) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump mixlib-config from 3.0.9 to 3.0.27 in /src/oc_bifrost/oc-bifrost-pedant [#3364](https://github.com/chef/chef-server/pull/3364) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Upgrading dependencies [#3361](https://github.com/chef/chef-server/pull/3361) ([lbakerchef](https://github.com/lbakerchef))
+- Fixed chef backend issue with opensearch changes [#3374](https://github.com/chef/chef-server/pull/3374) ([jashaik](https://github.com/jashaik))
+- fixing version check in 37 upgrade script [#3377](https://github.com/chef/chef-server/pull/3377) ([vinay-satish](https://github.com/vinay-satish))
+- Skipping the reindexing for external opensearch [#3379](https://github.com/chef/chef-server/pull/3379) ([vinay-satish](https://github.com/vinay-satish))
+- Fix dev vm #1 [#3311](https://github.com/chef/chef-server/pull/3311) ([lbakerchef](https://github.com/lbakerchef))
+- Fix dev vm #2 [#3373](https://github.com/chef/chef-server/pull/3373) ([lbakerchef](https://github.com/lbakerchef))
+- Correcting the upgrade script 37 for external elasticsearch [#3380](https://github.com/chef/chef-server/pull/3380) ([vinay-satish](https://github.com/vinay-satish))
+<!-- latest_stable_release -->
+
 ## [14.16.19](https://github.com/chef/chef-server/tree/14.16.19) (2022-06-08)
 
 #### Merged Pull Requests
@@ -70,7 +75,6 @@
 - Docs - Internal OpenSearch configurations [#3263](https://github.com/chef/chef-server/pull/3263) ([jashaik](https://github.com/jashaik))
 - Fixing growing bifros DB issue [#3275](https://github.com/chef/chef-server/pull/3275) ([vinay-satish](https://github.com/vinay-satish))
 - OpenSearch user permissions documented [#3338](https://github.com/chef/chef-server/pull/3338) ([jashaik](https://github.com/jashaik))
-<!-- latest_stable_release -->
 
 ## [14.15.10](https://github.com/chef/chef-server/tree/14.15.10) (2022-05-10)
 
