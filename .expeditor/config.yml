@@ -23,7 +23,7 @@ github:
     - "Expeditor: Bump Version Major"
   release_branch:
     - main:
-        version_constraint: 14*
+        version_constraint: 15*
 
 # At the given time, trigger the following scheduled workloads
 # https://expeditor.chef.io/docs/patterns/scheduled-action-sets/
