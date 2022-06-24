@@ -115,10 +115,17 @@ handle_undefined_start(undefined, Req) ->
 handle_undefined_start(Start, _Req) ->
     Start.
 
+unencode(X) ->
+    KVs = uri_string:dissect_query(X),
+    % We probably want this transformation:
+    % {"key", "value"} -> "key=value"
+    % {"key", true   } -> "key"
+    lists:flatten([case V of true -> K; _ -> [K, "=", V] end || {K, V} <- KVs]).
+
 decode(undefined) ->
     0;
 decode(Val) ->
-    list_to_integer(http_uri:decode(Val)).
+    list_to_integer(unencode(Val)).
 
 to_json(Req, #base_state{chef_db_context = DbContext,
                          resource_state = SearchState,

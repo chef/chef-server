@@ -31,12 +31,12 @@
 encode(Data) when is_binary(Data) ->
     list_to_binary(encode(binary_to_list(Data)));
 encode(Data) when is_list(Data) ->
-    http_uri:encode(Data).
+    http_uri1:encode(Data).
 
 decode(Data) when is_binary(Data) ->
     list_to_binary(decode(binary_to_list(Data)));
 decode(Data) when is_list(Data) ->
-    http_uri:decode(Data).
+    http_uri1:decode(Data).
 
 bucket_path(Bucket) when Bucket =/= <<>> ->
     Root = bksw_conf:disk_store(),
