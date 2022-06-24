@@ -73,7 +73,7 @@
   0},
  {<<"jiffy">>,
   {git,"https://github.com/davisp/jiffy",
-       {ref,"051a74338c089c39f09532188bc82cf1adedbdc8"}},
+       {ref,"9ea1b35b6e60ba21dfd4adbd18e7916a831fd7d4"}},
   0},
  {<<"jsx">>,{pkg,<<"jsx">>,<<"2.9.0">>},1},
  {<<"lager">>,
