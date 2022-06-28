@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.0.11 -->
-## [15.0.11](https://github.com/chef/chef-server/tree/15.0.11) (2022-06-28)
+<!-- latest_release 15.0.12 -->
+## [15.0.12](https://github.com/chef/chef-server/tree/15.0.12) (2022-06-28)
 
 #### Merged Pull Requests
-- Adding docs for addressing the growing bifrost db issue [#3366](https://github.com/chef/chef-server/pull/3366) ([vinay-satish](https://github.com/vinay-satish))
+- Bump jwt from 2.3.0 to 2.4.1 in /src/oc-id [#3360](https://github.com/chef/chef-server/pull/3360) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.0.9 -->
 ### Changes since 15.0.9 release
 
 #### Merged Pull Requests
+- Bump jwt from 2.3.0 to 2.4.1 in /src/oc-id [#3360](https://github.com/chef/chef-server/pull/3360) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.0.12 -->
 - Adding docs for addressing the growing bifrost db issue [#3366](https://github.com/chef/chef-server/pull/3366) ([vinay-satish](https://github.com/vinay-satish)) <!-- 15.0.11 -->
 - Updating release_branch version_constraint to 15* [#3381](https://github.com/chef/chef-server/pull/3381) ([vinay-satish](https://github.com/vinay-satish)) <!-- 15.0.10 -->
 <!-- release_rollup -->
