@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.0.13 -->
-## [15.0.13](https://github.com/chef/chef-server/tree/15.0.13) (2022-06-29)
+<!-- latest_release 15.0.14 -->
+## [15.0.14](https://github.com/chef/chef-server/tree/15.0.14) (2022-06-29)
 
 #### Merged Pull Requests
-- Bump octokit from 4.23.0 to 4.25.0 in /omnibus [#3370](https://github.com/chef/chef-server/pull/3370) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump redis from 4.6.0 to 4.7.0 in /src/chef-server-ctl [#3384](https://github.com/chef/chef-server/pull/3384) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.0.9 -->
 ### Changes since 15.0.9 release
 
 #### Merged Pull Requests
+- Bump redis from 4.6.0 to 4.7.0 in /src/chef-server-ctl [#3384](https://github.com/chef/chef-server/pull/3384) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.0.14 -->
 - Bump octokit from 4.23.0 to 4.25.0 in /omnibus [#3370](https://github.com/chef/chef-server/pull/3370) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.0.13 -->
 - Bump jwt from 2.3.0 to 2.4.1 in /src/oc-id [#3360](https://github.com/chef/chef-server/pull/3360) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.0.12 -->
 - Adding docs for addressing the growing bifrost db issue [#3366](https://github.com/chef/chef-server/pull/3366) ([vinay-satish](https://github.com/vinay-satish)) <!-- 15.0.11 -->
