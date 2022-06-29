@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.0.16 -->
-## [15.0.16](https://github.com/chef/chef-server/tree/15.0.16) (2022-06-29)
+<!-- latest_release 15.0.17 -->
+## [15.0.17](https://github.com/chef/chef-server/tree/15.0.17) (2022-06-29)
 
 #### Merged Pull Requests
-- Bump pg from 1.3.5 to 1.4.1 in /src/oc-id [#3386](https://github.com/chef/chef-server/pull/3386) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump octokit from 4.24.0 to 4.25.0 in /src/chef-server-ctl [#3371](https://github.com/chef/chef-server/pull/3371) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.0.9 -->
 ### Changes since 15.0.9 release
 
 #### Merged Pull Requests
+- Bump octokit from 4.24.0 to 4.25.0 in /src/chef-server-ctl [#3371](https://github.com/chef/chef-server/pull/3371) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.0.17 -->
 - Bump pg from 1.3.5 to 1.4.1 in /src/oc-id [#3386](https://github.com/chef/chef-server/pull/3386) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.0.16 -->
 - Bump selenium-webdriver from 4.2.1 to 4.3.0 in /src/oc-id [#3385](https://github.com/chef/chef-server/pull/3385) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.0.15 -->
 - Bump redis from 4.6.0 to 4.7.0 in /src/chef-server-ctl [#3384](https://github.com/chef/chef-server/pull/3384) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.0.14 -->
