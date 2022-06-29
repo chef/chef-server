@@ -462,7 +462,7 @@ GEM
       tilt
     sdoc (2.4.0)
       rdoc (>= 5.0)
-    selenium-webdriver (4.2.1)
+    selenium-webdriver (4.3.0)
       childprocess (>= 0.5, < 5.0)
       rexml (~> 3.2, >= 3.2.5)
       rubyzip (>= 1.2.2, < 3.0)
@@ -617,7 +617,7 @@ DEPENDENCIES
   rspec-rails (~> 5.1)
   sass-rails (>= 4.0.3)
   sdoc
-  selenium-webdriver (~> 4.2.1)
+  selenium-webdriver (~> 4.3.0)
   spring
   spring-commands-rspec
   sprockets-rails (>= 3.4.2)
