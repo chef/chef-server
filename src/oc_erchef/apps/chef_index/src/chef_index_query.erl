@@ -86,7 +86,7 @@ check_query(RawQuery) ->
             %% thou shalt not query with the empty string
             throw({bad_query, ""});
         Query ->
-            transform_query(http_uri:decode(Query))
+            transform_query(http_uri_decode(Query))
     end.
 
 transform_query(RawQuery) when is_list(RawQuery) ->
@@ -106,7 +106,8 @@ decode({nonneg_int, Key}, Val, Default) ->
                 {Default, default};
             Value ->
                 try
-                    {list_to_integer(http_uri:decode(Value)), Value}
+                    % @mp: remove http_uri_decode here, or keep it?
+                    {list_to_integer(http_uri_decode(Value)), Value}
                 catch
                     error:badarg ->
                         throw({bad_param, {Key, Value}})
@@ -133,3 +134,30 @@ search_db_from_orgid(OrgId) ->
 
 db_from_orgid(OrgId) ->
     "chef_" ++ binary_to_list(OrgId).
+
+hex2dec(X) when (X>=$0) andalso (X=<$9) -> X-$0;
+hex2dec(X) when (X>=$A) andalso (X=<$F) -> X-$A+10;
+hex2dec(X) when (X>=$a) andalso (X=<$f) -> X-$a+10.
+
+-type maybe_hex_uri() :: string() | binary(). %% A possibly hexadecimal encoded URI.
+-type uri() :: string() | binary().
+
+-spec http_uri_decode(maybe_hex_uri()) -> uri().
+http_uri_decode(String) when is_list(String) ->
+    do_decode(String);
+http_uri_decode(String) when is_binary(String) ->
+    do_decode_binary(String).
+
+do_decode([$%,Hex1,Hex2|Rest]) ->
+    [hex2dec(Hex1)*16+hex2dec(Hex2)|do_decode(Rest)];
+do_decode([First|Rest]) ->
+    [First|do_decode(Rest)];
+do_decode([]) ->
+    [].
+
+do_decode_binary(<<$%, Hex:2/binary, Rest/bits>>) ->
+    <<(binary_to_integer(Hex, 16)), (do_decode_binary(Rest))/binary>>;
+do_decode_binary(<<First:1/binary, Rest/bits>>) ->
+    <<First/binary, (do_decode_binary(Rest))/binary>>;
+do_decode_binary(<<>>) ->
+    <<>>.
