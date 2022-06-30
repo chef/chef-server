@@ -85,8 +85,8 @@ def verify_disk_space
   else
     puts "OpenSearch data path does not exist, so skipping the disk space verification: #{data_dir}"
   end
-rescue => exception
-  puts "Skipping the disk space verification due to #{exception.message}"
+rescue
+  # This is to catch the exceptions while checking data directory sizes.
 end
 
 add_command_under_category "reindex", "general", "Reindex all server data for a given organization.", 2 do
