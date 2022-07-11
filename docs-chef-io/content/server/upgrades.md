@@ -619,21 +619,75 @@ To upgrade to Chef Infra Server on a tiered Chef Infra Server configuration, do 
 
 1. Back up the Chef Infra Server data before starting the upgrade process using [knife-ec-backup](https://github.com/chef/knife-ec-backup).
 
-2. Confirm that the Chef Infra Server services are operational:
+2. Chef Infra Server 14.14 supports external OpenSearch for indexing.
+
+#### Steps To Enable External OpenSearch
+
+1. Set the `elasticsearch['enable']` attribute to `false`.
+1. Set the `opensearch['external']` attribute to `true`.
+1. Set the `opensearch['external_url']` attribute to the external OpenSearch URL.
+1. Set the `opscode_erchef['search_queue_mode']` attribute to `batch`.
+1. Set the `opscode_erchef['search_provider']` attribute to `opensearch`.
+1. Set the `opscode_erchef['search_auth_username']` attribute to OpenSearch username.
+1. Set the `opscode_erchef['search_auth_password']` attribute to OpenSearch password.
+
+For example:
+
+```bash
+elasticsearch['enable'] = false
+opscode_erchef['search_queue_mode'] = 'batch'
+opscode_erchef['search_provider'] = 'opensearch'
+opensearch['external'] = true
+opensearch['external_url'] = "http://127.0.0.1:9200"
+opscode_erchef['search_auth_username'] = "OPEN_SEARCH_USER"
+opscode_erchef['search_auth_password'] = "OPEN_SEARCH_PWD"
+```
+
+{{< note >}}
+
+The OpenSearch user should have full access to the cluster, including access to all cluster-wide operations and the ability to write to all indices. We recommend that the user has the admin backend role. 
+
+Please refer to OpenSearch's documentation on [predefined roles](https://opensearch.org/docs/latest/security-plugin/access-control/users-roles/#predefined-roles) and [role mapping configuration](https://opensearch.org/docs/latest/security-plugin/configuration/yaml#roles_mappingyml).
+
+This user must be created on the external OpenSearch cluster. The Chef Infra Server executable cannot be used to create this user on external OpenSearch setups.
+{{</note >}}
+
+#### Steps To Migrate from Elasticsearch to External OpenSearch
+
+There are two ways to migrate from Elasticsearch to external OpenSearch: migrating your data, or reindexing and reconfiguring your database.
+
+We recommend migrating your data over reindexing and reconfiguring.
+
+**Migrate Data**
+
+Copy or move your Elasticsearch OSS data and logs directories to the newly installed OpenSearch paths. See OpenSearch's [documentation on upgrading to OpenSearch](https://opensearch.org/docs/latest/upgrade-to/upgrade-to/#upgrade-to-opensearch). 
+
+**Reindex and Reconfigure**
+
+Reindex and reconfigure your database after upgrading to Chef Infra Server 14.13. The duration of this operation will vary depending on your server hardware and the number of node objects on your Chef Infra Server. 
+
+Use the Chef Infra Server command-line tool to reindex and reconfigure your database:
+
+```bash
+chef-server-ctl reindex
+chef-server-ctl reconfigure
+```
+
+3. Confirm that the Chef Infra Server services are operational:
 
     ```bash
     chef-server-ctl reconfigure
     ```
 
-3. Download the desired Chef Infra Server version from the [Chef Infra Server Downloads](https://www.chef.io/downloads/tools/infra-server) page, then copy it to each server.
+4. Download the desired Chef Infra Server version from the [Chef Infra Server Downloads](https://www.chef.io/downloads/tools/infra-server) page, then copy it to each server.
 
-4. Stop all front end servers:
+5. Stop all front end servers:
 
     ```bash
     chef-server-ctl stop
     ```
 
-5. Install the Chef Infra Server package on all servers:
+6. Install the Chef Infra Server package on all servers:
 
     To install with `dpkg`:
 
@@ -647,13 +701,13 @@ To upgrade to Chef Infra Server on a tiered Chef Infra Server configuration, do 
     rpm -Uvh --nopostun /path/to/chef-server-core-<version>.rpm
     ```
 
-6. Stop the back end server:
+7. Stop the back end server:
 
     ```bash
     chef-server-ctl stop
     ```
 
-7. Upgrade the server and accept the Chef Software license by entering `Yes` at the prompt:
+8. Upgrade the server and accept the Chef Software license by entering `Yes` at the prompt:
 
     ```bash
     chef-server-ctl upgrade
@@ -665,29 +719,29 @@ To upgrade to Chef Infra Server on a tiered Chef Infra Server configuration, do 
     CHEF_LICENSE='accept' chef-server-ctl upgrade
     ```
 
-8. Copy the entire `/etc/opscode` directory from the back end server to all front end servers:
+9. Copy the entire `/etc/opscode` directory from the back end server to all front end servers:
 
     ```bash
     scp -r /etc/opscode <each server's IP>:/etc
     ```
 
-9. Upgrade each of the front end servers:
+10. Upgrade each of the front end servers:
 
     ```bash
     chef-server-ctl upgrade
     ```
 
-10. Run the following command on both the front end, and back end servers:
+11. Run the following command on both the front end, and back end servers:
 
     ```bash
     chef-server-ctl start
     ```
 
-11. [Upgrade]({{< relref "#upgrading-manage-add-on" >}}) any Chef Infra Server add-ons.
+12. [Upgrade]({{< relref "#upgrading-manage-add-on" >}}) any Chef Infra Server add-ons.
 
-12. After the upgrade process is complete, test and verify that the server works.
+13. After the upgrade process is complete, test and verify that the server works.
 
-13. Clean up the server by removing the old data:
+14. Clean up the server by removing the old data:
 
    ```bash
    chef-server-ctl cleanup
