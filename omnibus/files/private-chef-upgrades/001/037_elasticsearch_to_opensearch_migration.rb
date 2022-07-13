@@ -18,7 +18,7 @@ define_upgrade do
         if Dir.exist?("/var/opt/opscode/elasticsearch/data/")
           # Make sure API is down
           stop_services(["nginx", "opscode-erchef", "opensearch"])
-          log "Coping Elasticserch data to OpenSearch..."
+          log "Copying Elasticsearch data to OpenSearch..."
           run_command("rm -rf /var/opt/opscode/opensearch/data/")
           run_command("cp -r /var/opt/opscode/elasticsearch/data/ /var/opt/opscode/opensearch/")
           run_command("chmod 777 -R /var/opt/opscode/opensearch/data/")
