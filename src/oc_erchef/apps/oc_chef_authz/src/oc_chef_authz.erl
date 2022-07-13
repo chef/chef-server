@@ -123,6 +123,7 @@ create_entity_if_authorized(Context, OrgId, CreatorAId, ObjectType) ->
             {error, forbidden};
         true ->
             create_entity_with_container_acl(CreatorAId, ContainerAId, ObjectType)
+
     end.
 
 %%%
@@ -318,7 +319,7 @@ get_data_for_id([Id | _Ids] = OIds , [{RId, RData} | Resources], Denied, Permitt
 %
 -spec is_authorized_on_resource(requestor_id(), resource_type(), object_id(),
                                 'actor'|'group', actor_id(), access_method())
-                               -> true|false|{error,server_error}.
+                               -> true|false|{error,any()}.
 is_authorized_on_resource(RequestorId, ResourceType, ResourceId, ActorType, ActorId, AccessMethod)
   when is_atom(ResourceType) and is_atom(ActorType) and is_atom(AccessMethod) ->
     Url = make_url([pluralize_resource(ResourceType), ResourceId, <<"acl">>,
@@ -328,7 +329,7 @@ is_authorized_on_resource(RequestorId, ResourceType, ResourceId, ActorType, Acto
         %% This api returns not found for any missing permission
         {error, not_found} -> false;
         %% Otherwise, we expect server_error; not forbidden
-        {error, server_error} -> {error, server_error}
+        {error, Error} -> {error, Error}
     end.
 
 %
