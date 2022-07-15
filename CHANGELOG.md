@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.0.19 -->
-## [15.0.19](https://github.com/chef/chef-server/tree/15.0.19) (2022-07-15)
+<!-- latest_release 15.0.20 -->
+## [15.0.20](https://github.com/chef/chef-server/tree/15.0.20) (2022-07-15)
 
 #### Merged Pull Requests
-- Upgrade dependencies 2 [#3368](https://github.com/chef/chef-server/pull/3368) ([lbakerchef](https://github.com/lbakerchef))
+- Bump activesupport from 7.0.3 to 7.0.3.1 in /oc-chef-pedant [#3403](https://github.com/chef/chef-server/pull/3403) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.0.9 -->
 ### Changes since 15.0.9 release
 
 #### Merged Pull Requests
+- Bump activesupport from 7.0.3 to 7.0.3.1 in /oc-chef-pedant [#3403](https://github.com/chef/chef-server/pull/3403) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.0.20 -->
 - Upgrade dependencies 2 [#3368](https://github.com/chef/chef-server/pull/3368) ([lbakerchef](https://github.com/lbakerchef)) <!-- 15.0.19 -->
 - Bump pg from 1.3.5 to 1.4.1 in /src/chef-server-ctl [#3383](https://github.com/chef/chef-server/pull/3383) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.0.18 -->
 - Bump octokit from 4.24.0 to 4.25.0 in /src/chef-server-ctl [#3371](https://github.com/chef/chef-server/pull/3371) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.0.17 -->
