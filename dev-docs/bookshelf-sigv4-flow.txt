@@ -1,0 +1,50 @@
+Bookshelf Sigv4 Authentication
+Basic High-Level Flow
+Lincoln Baker lbaker@chef.io
+
+PURPOSE
+
+The purpose of this document is to capture the high-level flow for Bookshelf sigv4 authentication and present a 'basic scaffolding.'  The depicted flow is purposefully somewhat simplified or idealized and is not meant to capture every single eye-glazing detail.  The assumption is that if the developer can understand the high-level flow, details can be dug into and understood at one's leisure.
+
+MODULES
+
+The two most relevant modules for understanding Bookshelf's sigv4 authentication flow are:
+bksw_wm_base.erl
+bksw_sec.erl
+For our purposes here, the flow starts in bksw_wm_base, which at some point calls bksw_sec.
+
+BKSW_WM_BASE
+
+The bulk of what bksw_wm_base does is parse or disassemble the request, and then determine whether the request is malformed, all via malformed_request/2.  'Malformed' basically means the request can't be parsed, has erroneous or nonexistent constituent parts, etc.  If the request is malformed, access is denied.  Otherwise, authentication proceeds with bksw_sec:is_authorized/2.
+
+malformed_request/2 branches by matching on two function clause heads:
+
+1) If auth_check_disabled = true, the request is deemed NOT malformed.  This is used to bypass checking whether the request is malformed.  One reason to do this might be for special testing purposes.
+
+2) Otherwise, validation (request malformed or not) proceeds as normal.
+
+After branching on auth_check_disabled = false, the request is parsed, and the constituent parts of the request are examined as to whether they are present, whether they are correct according to the spec, etc.  Note that this may be done slightly differently depending on whether the request is a presigned url or an authorization header request.
+
+BKSW_SEC
+
+Except for a few utility functions, is_authorized/2 is the only exported API or outwardly-facing function.  Everything else in this module is there to support is_authorized/2.
+
+In summary, is_authorized/2 determines whether a sigv4 request is valid.  'Valid' basically means a matching signature can be reconstructed from various constituent parts.  If the request is determined to be valid, the request is authenticated by returning an appropriate response.  If the request is determined to be invalid, the request is not authenticated and a response is returned to that effect.
+
+is_authorized/2 branches by matching on three function clause heads:
+
+1) If auth_check_disabled = true, the request is authenticated.  This is basically used to bypass authentication.
+
+2) If auth_type = presigned_url, authentication proceeds by way of presigned url authentication.
+
+3) If auth_type = auth_header, authentication proceeds by way of authorization header authentication.
+
+For both presigned url and authorization header authentication, the basic process for authenticating the request is the same, although naturally there are differences in the minutiae.  The basic process is thus:
+
+1) Recreate the presigned url or the authorization header using the information contained in the request itself.
+
+2) Calculate the 'signature' of the recreated request.  If the signature matches the signature of the original request, proceed to step #3 with this signature (actually either signature - they are the same).  Otherwise, do an alternative signature calculation by removing a port number in the host header of the request if it was in the request originally, or adding it if it was not in the request originally, then recreate the request.  Recalculate the signature of the request, and proceed to step #3 with this alternative signature.  (It is important to note that the alternative signature calculation here is not part of any official AWS sigv4 authentication process.  Various Chef clients are inconsistent in whether they include a port number in the host header of the request or not; sometimes they do, sometimes they don't, and they might make a request using a port number in the host header when it wasn't used in the creation of the original request and signature, or vice versa.  Basically this is a 'hack' deployed in order to not break clients.  For more information regarding this, see the 'Host Header Problem' section by Lincoln Baker in https://github.com/chef/chef-server/issues/1911, and comments by stevendanna further down in the same document.)
+
+3) Compare the signature arrived at here with the signature of the original request.  If they are the same, make checks such as whether the request has expired or not, and authenticate or not appropriately.
+
+See bksw_sec.erl.jpeg or bksw_sec.erl.vsdx (visio doc) in dev-docs for a flowchart.

@@ -7,6 +7,7 @@ The goal of these documents is to provide overviews of how various systems work 
  * [Build and Test Pipelines](BUILD_AND_TEST_PIPELINES.md)
  * [FIPS](FIPS.md) - FIPS-mode support
  * [Development Environment Setup and Configuration](../dev/README.md)
+ * [Bookshelf](BOOKSHELF.md)
 
 
 
