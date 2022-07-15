@@ -15,7 +15,7 @@
   0},
  {<<"opscoderl_httpc">>,
   {git,"https://github.com/chef/opscoderl_httpc",
-       {ref,"d9578f44726ca69af5bdadaa602756692d3b1460"}},
+       {ref,"3cdc661e55a48af321b7097941b9a03e8d7b113f"}},
   0},
  {<<"pooler">>,
   {git,"https://github.com/chef/pooler",
