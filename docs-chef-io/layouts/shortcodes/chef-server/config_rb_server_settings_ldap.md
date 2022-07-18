@@ -125,7 +125,7 @@ This configuration file has the following settings for `ldap`:
 
 `ldap['ssl_enabled']`
 
-:   Cause the Chef Infra Server to connect to the LDAP server using SSL.
+:   Cause the Chef Infra Server to connect to the LDAP server using SSL. Synonymous with simple_tls
     Default value: `false`. Must be `false` when `ldap['tls_enabled']`
     is `true`.
 
@@ -176,7 +176,7 @@ This configuration file has the following settings for `ldap`:
 `ldap['tls_enabled']`
 
 :   Enable TLS. When enabled, communication with the LDAP server is done
-    using a secure SSL connection on a dedicated port. When `true`,
+    using a secure SSL connection on a dedicated port. Synonymous with STARTTLS. This mode is rarely used. When `true`,
     `ldap['port']` is also set to `636`. Default value: `false`. Must be
     `false` when `ldap['ssl_enabled']` is `true`.
 
