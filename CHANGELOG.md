@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.0.21 -->
-## [15.0.21](https://github.com/chef/chef-server/tree/15.0.21) (2022-07-18)
+<!-- latest_release 15.0.22 -->
+## [15.0.22](https://github.com/chef/chef-server/tree/15.0.22) (2022-07-18)
 
 #### Merged Pull Requests
-- Clarify tls_enabled usage [#3411](https://github.com/chef/chef-server/pull/3411) ([sean-horn](https://github.com/sean-horn))
+- Bump redis from 4.7.0 to 4.7.1 in /src/chef-server-ctl [#3392](https://github.com/chef/chef-server/pull/3392) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.0.9 -->
 ### Changes since 15.0.9 release
 
 #### Merged Pull Requests
+- Bump redis from 4.7.0 to 4.7.1 in /src/chef-server-ctl [#3392](https://github.com/chef/chef-server/pull/3392) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.0.22 -->
 - Clarify tls_enabled usage [#3411](https://github.com/chef/chef-server/pull/3411) ([sean-horn](https://github.com/sean-horn)) <!-- 15.0.21 -->
 - Bump activesupport from 7.0.3 to 7.0.3.1 in /oc-chef-pedant [#3403](https://github.com/chef/chef-server/pull/3403) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.0.20 -->
 - Upgrade dependencies 2 [#3368](https://github.com/chef/chef-server/pull/3368) ([lbakerchef](https://github.com/lbakerchef)) <!-- 15.0.19 -->
