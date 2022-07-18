@@ -33,7 +33,9 @@ en:
     errors:
       messages:
         # Common error messages
-        invalid_request: 'The request is missing a required parameter, includes an unsupported parameter value, or is otherwise malformed.'
+        invalid_request:
+          missing_param: 'Missing required parameter: %{value}.'
+          unknown: 'The request is missing a required parameter, includes an unsupported parameter value, or is otherwise malformed.'
         invalid_redirect_uri: 'The redirect uri included is not valid.'
         unauthorized_client: 'The client is not authorized to perform this request using this method.'
         access_denied: 'The resource owner or authorization server denied the request.'

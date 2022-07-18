@@ -5,7 +5,7 @@ class Chef
   module Web
     module Core
       class Component
-        include Chef::Web::Core::URLHelpers
+        include Chef::Web::Core::UrlHelpers
 
         attr_accessor :type
 

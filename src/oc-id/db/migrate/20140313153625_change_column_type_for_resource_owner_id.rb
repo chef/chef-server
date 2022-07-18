@@ -1,4 +1,4 @@
-class ChangeColumnTypeForResourceOwnerId < ActiveRecord::Migration[6.0]
+class ChangeColumnTypeForResourceOwnerId < ActiveRecord::Migration[7.0]
   def change
 
     change_table :oauth_access_grants do |t|
