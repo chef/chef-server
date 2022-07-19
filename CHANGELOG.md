@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.0.25 -->
-## [15.0.25](https://github.com/chef/chef-server/tree/15.0.25) (2022-07-19)
+<!-- latest_release 15.0.26 -->
+## [15.0.26](https://github.com/chef/chef-server/tree/15.0.26) (2022-07-19)
 
 #### Merged Pull Requests
-- Bump nokogiri from 1.13.6 to 1.13.7 in /src/oc-id [#3407](https://github.com/chef/chef-server/pull/3407) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump omnibus-software from `b544000` to `6da95e8` in /omnibus [#3405](https://github.com/chef/chef-server/pull/3405) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.0.9 -->
 ### Changes since 15.0.9 release
 
 #### Merged Pull Requests
+- Bump omnibus-software from `b544000` to `6da95e8` in /omnibus [#3405](https://github.com/chef/chef-server/pull/3405) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.0.26 -->
 - Bump nokogiri from 1.13.6 to 1.13.7 in /src/oc-id [#3407](https://github.com/chef/chef-server/pull/3407) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.0.25 -->
 - Bump rails-html-sanitizer from 1.4.2 to 1.4.3 in /src/oc-id [#3396](https://github.com/chef/chef-server/pull/3396) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.0.24 -->
 - Bump test-kitchen from 3.2.2 to 3.3.1 in /omnibus [#3394](https://github.com/chef/chef-server/pull/3394) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.0.23 -->
