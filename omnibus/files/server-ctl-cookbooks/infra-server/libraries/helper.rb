@@ -28,7 +28,7 @@ class OmnibusHelper
   end
 
   def hash_password(password)
-    cmd = Mixlib::ShellOut.new("export JAVA_HOME=\"/opt/opscode/embedded/open-jre/\"; /opt/opscode/embedded/opensearch/plugins/opensearch-security/tools/hash.sh -p '#{password}'")
+    cmd = Mixlib::ShellOut.new("export JAVA_HOME=\"/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/embedded/open-jre/\"; /opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/embedded/opensearch/plugins/opensearch-security/tools/hash.sh -p '#{password}'")
     cmd.run_command
     unless cmd.status.success?
       raise 'Failed to generate apr1 password hash'
