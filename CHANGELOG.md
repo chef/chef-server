@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.0.28 -->
-## [15.0.28](https://github.com/chef/chef-server/tree/15.0.28) (2022-07-21)
+<!-- latest_release 15.0.29 -->
+## [15.0.29](https://github.com/chef/chef-server/tree/15.0.29) (2022-07-26)
 
 #### Merged Pull Requests
-- Reindex all orgs - sending ssl options to ibrowse for automate [#3390](https://github.com/chef/chef-server/pull/3390) ([jashaik](https://github.com/jashaik))
+- Bump activesupport from 7.0.3 to 7.0.3.1 in /src/oc_bifrost/oc-bifrost-pedant [#3404](https://github.com/chef/chef-server/pull/3404) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.0.9 -->
 ### Changes since 15.0.9 release
 
 #### Merged Pull Requests
+- Bump activesupport from 7.0.3 to 7.0.3.1 in /src/oc_bifrost/oc-bifrost-pedant [#3404](https://github.com/chef/chef-server/pull/3404) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.0.29 -->
 - Reindex all orgs - sending ssl options to ibrowse for automate [#3390](https://github.com/chef/chef-server/pull/3390) ([jashaik](https://github.com/jashaik)) <!-- 15.0.28 -->
 - Corrected the es to os migration logs [#3409](https://github.com/chef/chef-server/pull/3409) ([jashaik](https://github.com/jashaik)) <!-- 15.0.27 -->
 - Bump omnibus-software from `b544000` to `6da95e8` in /omnibus [#3405](https://github.com/chef/chef-server/pull/3405) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.0.26 -->
