@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.0.31 -->
-## [15.0.31](https://github.com/chef/chef-server/tree/15.0.31) (2022-07-28)
+<!-- latest_release 15.0.32 -->
+## [15.0.32](https://github.com/chef/chef-server/tree/15.0.32) (2022-07-28)
 
 #### Merged Pull Requests
-- Bump nokogiri from 1.13.7 to 1.13.8 in /src/oc-id [#3413](https://github.com/chef/chef-server/pull/3413) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Revise gem update process [#3354](https://github.com/chef/chef-server/pull/3354) ([lbakerchef](https://github.com/lbakerchef))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.0.9 -->
 ### Changes since 15.0.9 release
 
 #### Merged Pull Requests
+- Revise gem update process [#3354](https://github.com/chef/chef-server/pull/3354) ([lbakerchef](https://github.com/lbakerchef)) <!-- 15.0.32 -->
 - Bump nokogiri from 1.13.7 to 1.13.8 in /src/oc-id [#3413](https://github.com/chef/chef-server/pull/3413) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.0.31 -->
 - Bump omnibus-software from `6da95e8` to `1d540dc` in /omnibus [#3412](https://github.com/chef/chef-server/pull/3412) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.0.30 -->
 - Bump activesupport from 7.0.3 to 7.0.3.1 in /src/oc_bifrost/oc-bifrost-pedant [#3404](https://github.com/chef/chef-server/pull/3404) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.0.29 -->
