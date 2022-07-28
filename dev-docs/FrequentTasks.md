@@ -64,9 +64,6 @@ out and stable.
 - omnibus/Gemfile.lock
 - oc-chef-pedant/Gemfile.lock
 - src/oc-id/Gemfile.lock
-  DO NOT update this file unless Rails is upgraded.
-  Due to the Rails version, we've locked a lot of dependencies. Make
-  sure we can build and run oc-id before merging to main.
   You'll need the libsqlite3-dev library if doing this on Ubuntu.
 - src/oc\_erchef/apps/chef_objects/priv/depselector\_rb/Gemfile.lock
 - src/chef-server-ctl/Gemfile.lock
