@@ -68,8 +68,14 @@ SEARCHUSR=$(chef-server-ctl show-config | grep 'search_auth_username' |awk '{pri
 [[ -n $SEARCHUSR ]] && OPENSEARCHUSR=$SEARCHUSR || OPENSEARCHUSR="opensearch_user"
 OPENSEARCHPW=$(chef-server-ctl show-secret opscode_erchef search_auth_password)
 gather_opensearch() {
+    curl -sS -X GET "http://localhost:$1/_cat/health?v" -u "$OPENSEARCHUSR:$OPENSEARCHPW" > "$tmpdir/opensearch_cat_health.txt"
     curl -sS -X GET "http://localhost:$1/_cluster/health?pretty" -u "$OPENSEARCHUSR:$OPENSEARCHPW" > "$tmpdir/opensearch_cluster_health.txt"
+    curl -sS -X GET "http://localhost:$1/_cluster/settings?pretty" -u "$OPENSEARCHUSR:$OPENSEARCHPW" > "$tmpdir/opensearch_cluster_settings.txt"
     curl -sS -X GET "http://localhost:$1/_cluster/state?pretty" -u "$OPENSEARCHUSR:$OPENSEARCHPW" > "$tmpdir/opensearch_cluster_state.txt"
+    curl -sS -X GET "http://localhost:$1/_cluster/stats?pretty" -u "$OPENSEARCHUSR:$OPENSEARCHPW" > "$tmpdir/opensearch_cluster_stats.txt"
+    curl -sS -X GET "http://localhost:$1/_nodes?pretty" -u "$OPENSEARCHUSR:$OPENSEARCHPW" > "$tmpdir/opensearch_nodes.txt"
+    curl -sS -X GET "http://localhost:$1/_nodes/_all?pretty" -u "$OPENSEARCHUSR:$OPENSEARCHPW" > "$tmpdir/opensearch_nodes_all.txt"
+    curl -sS -X GET "http://localhost:$1/_cluster/stats/nodes/all?pretty" -u "$OPENSEARCHUSR:$OPENSEARCHPW" > "$tmpdir/opensearch_nodes_stats.txt"
     curl -sS -X GET "http://localhost:$1/_cat/indices?v" -u "$OPENSEARCHUSR:$OPENSEARCHPW" > "$tmpdir/opensearch_cat_indices.txt"
     curl -sS -X GET "http://localhost:$1/_cat/shards?h=index,shard,prirep,state,unassigned.reason&pretty" -u "$OPENSEARCHUSR:$OPENSEARCHPW" > "$tmpdir/opensearch_cat_shards.txt"
     curl -sS -X GET "http://localhost:$1/_cluster/allocation/explain?pretty" -u "$OPENSEARCHUSR:$OPENSEARCHPW" > "$tmpdir/opensearch_cluster_shards_explain.txt"
@@ -112,18 +118,29 @@ if [[ -S "/tmp/.s.PGSQL.5432" ]]; then
 fi
 
 # Retrieve Platform and Platform Version
-if [[ -f "/etc/lsb-release" ]] && grep -q DISTRIB_ID /etc/lsb-release; then
-    cp "/etc/lsb-release" "$tmpdir/platform_version.txt"
-    known_platform="ubuntu"
-elif [[ -f "/etc/redhat-release" ]]; then
-    cp "/etc/redhat-release" "$tmpdir/platform_version.txt"
-    known_platform="rhel"
-elif [[ -f "/etc/os-release" ]] && grep -q "Amazon Linux 2" /etc/os-release; then
-    known_platform="amazon"
-    cat "/etc/os-release" >> "$tmpdir/platform_version.txt"
-    cat "/etc/system-release-cpe" >> "$tmpdir/platform_version.txt"
+if [[ -f "/etc/os-release" ]] then
+    os_name=`grep "^NAME=" /etc/os-release | cut -d'=' -f2- | tr -d '"'`
+    os_version=`grep "^VERSION_ID=" /etc/os-release | cut -d'=' -f2- | tr -d '"'`
+    if echo "${os_name}" | grep -iq "SLES"; then
+        known_platform="sles"
+        cp "/etc/os-release" "$tmpdir/platform_os_release.txt"
+    elif echo "${os_name}" | grep -iq "CentOS"; then
+        known_platform="centos"
+        cp "/etc/os-release" "$tmpdir/platform_os_release.txt"
+    elif echo "${os_name}" | grep -iq "Red Hat"; then
+        known_platform="rhel"
+        cp "/etc/os-release" "$tmpdir/platform_os_release.txt"
+    elif echo "${os_name}" | grep -iq "Ubuntu"; then
+        known_platform="ubuntu"
+        cp "/etc/os-release" "$tmpdir/platform_os_release.txt"
+    elif echo "${os_name}" | grep -iq "Amazon Linux"; then
+        known_platform="amazon"
+        cp "/etc/os-release" "$tmpdir/platform_os_release.txt"
+    else
+        echo "Platform and version are unknown." > "$tmpdir/platform_os_release.txt"
+    fi
 else
-    echo "Platform and version are unknown." > "$tmpdir/platform_version.txt"
+    echo "/etc/os-release file not present." > "$tmpdir/platform_os_release.txt"
 fi
 
 # version / os information we want regardless of platform
@@ -273,6 +290,8 @@ elif [[ $known_platform == 'amazon' ]]; then
     rpm -qa | $installed_packages_grep >> "$installed_packages_file"
 elif [[ $known_platform == 'ubuntu' ]]; then
     dpkg -l | $installed_packages_grep >> "$installed_packages_file"
+elif [[ $known_platform == 'sles' ]]; then
+    rpm -qa | $installed_packages_grep >> "$installed_packages_file"
 else
     echo "!!! Unknown platform !!!" >> "$installed_packages_file"
 fi
