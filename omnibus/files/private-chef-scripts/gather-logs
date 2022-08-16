@@ -121,21 +121,17 @@ fi
 if [[ -f "/etc/os-release" ]]; then
     os_name=`grep "^NAME=" /etc/os-release | cut -d'=' -f2- | tr -d '"'`
     os_version=`grep "^VERSION_ID=" /etc/os-release | cut -d'=' -f2- | tr -d '"'`
+    cp "/etc/os-release" "$tmpdir/platform_os_release.txt"
     if echo "${os_name}" | grep -iq "SLES"; then
         known_platform="sles"
-        cp "/etc/os-release" "$tmpdir/platform_os_release.txt"
     elif echo "${os_name}" | grep -iq "CentOS"; then
         known_platform="centos"
-        cp "/etc/os-release" "$tmpdir/platform_os_release.txt"
     elif echo "${os_name}" | grep -iq "Red Hat"; then
         known_platform="rhel"
-        cp "/etc/os-release" "$tmpdir/platform_os_release.txt"
     elif echo "${os_name}" | grep -iq "Ubuntu"; then
         known_platform="ubuntu"
-        cp "/etc/os-release" "$tmpdir/platform_os_release.txt"
     elif echo "${os_name}" | grep -iq "Amazon Linux"; then
         known_platform="amazon"
-        cp "/etc/os-release" "$tmpdir/platform_os_release.txt"
     else
         echo "Platform and version are unknown." > "$tmpdir/platform_os_release.txt"
     fi
@@ -284,16 +280,10 @@ fi
 #What packages do we have installed on our supported platforms?
 installed_packages_file="$tmpdir/installed-packages.txt"
 installed_packages_grep="grep -i -E (chef|opscode)"
-if [[ $known_platform == 'rhel' ]]; then
-    rpm -qa | $installed_packages_grep >> "$installed_packages_file"
-elif [[ $known_platform == 'centos' ]]; then
-    rpm -qa | $installed_packages_grep >> "$installed_packages_file"
-elif [[ $known_platform == 'amazon' ]]; then
+if [[ $known_platform == 'rhel' || $known_platform == 'centos' || $known_platform == 'amazon' || $known_platform == 'sles' ]]; then
     rpm -qa | $installed_packages_grep >> "$installed_packages_file"
 elif [[ $known_platform == 'ubuntu' ]]; then
     dpkg -l | $installed_packages_grep >> "$installed_packages_file"
-elif [[ $known_platform == 'sles' ]]; then
-    rpm -qa | $installed_packages_grep >> "$installed_packages_file"
 else
     echo "!!! Unknown platform !!!" >> "$installed_packages_file"
 fi
