@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.0.33 -->
-## [15.0.33](https://github.com/chef/chef-server/tree/15.0.33) (2022-08-11)
+<!-- latest_release 15.0.34 -->
+## [15.0.34](https://github.com/chef/chef-server/tree/15.0.34) (2022-08-17)
 
 #### Merged Pull Requests
-- introduced error cases to supress case_clause errors because of bifrost delayed response. [#3408](https://github.com/chef/chef-server/pull/3408) ([sreepuramsudheer](https://github.com/sreepuramsudheer))
+- Update gather-logs to include additional information [#3416](https://github.com/chef/chef-server/pull/3416) ([sreepuramsudheer](https://github.com/sreepuramsudheer))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.0.9 -->
 ### Changes since 15.0.9 release
 
 #### Merged Pull Requests
+- Update gather-logs to include additional information [#3416](https://github.com/chef/chef-server/pull/3416) ([sreepuramsudheer](https://github.com/sreepuramsudheer)) <!-- 15.0.34 -->
 - introduced error cases to supress case_clause errors because of bifrost delayed response. [#3408](https://github.com/chef/chef-server/pull/3408) ([sreepuramsudheer](https://github.com/sreepuramsudheer)) <!-- 15.0.33 -->
 - Revise gem update process [#3354](https://github.com/chef/chef-server/pull/3354) ([lbakerchef](https://github.com/lbakerchef)) <!-- 15.0.32 -->
 - Bump nokogiri from 1.13.7 to 1.13.8 in /src/oc-id [#3413](https://github.com/chef/chef-server/pull/3413) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.0.31 -->
