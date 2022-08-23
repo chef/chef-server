@@ -130,7 +130,7 @@ find_and_authenticate_user(Session, User, Password, Config) ->
             end
     end.
 
-search_result({ok, {eldap_search_result, Result, _}}) ->
+search_result({ok, {eldap_search_result, Result, _, _}}) ->
     {ok, Result};
 search_result({error, Reason}) ->
     %% An error response means some kind of failure occurred - no
