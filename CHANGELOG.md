@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.1.2 -->
-## [15.1.2](https://github.com/chef/chef-server/tree/15.1.2) (2022-08-23)
+<!-- latest_release 15.1.3 -->
+## [15.1.3](https://github.com/chef/chef-server/tree/15.1.3) (2022-08-23)
 
 #### Merged Pull Requests
-- Bump pry-byebug from 3.8.0 to 3.10.1 in /oc-chef-pedant [#3428](https://github.com/chef/chef-server/pull/3428) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump omnibus-software from `1d540dc` to `7e22da8` in /omnibus [#3425](https://github.com/chef/chef-server/pull/3425) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.0.9 -->
 ### Changes since 15.0.9 release
 
 #### Merged Pull Requests
+- Bump omnibus-software from `1d540dc` to `7e22da8` in /omnibus [#3425](https://github.com/chef/chef-server/pull/3425) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.1.3 -->
 - Bump pry-byebug from 3.8.0 to 3.10.1 in /oc-chef-pedant [#3428](https://github.com/chef/chef-server/pull/3428) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.1.2 -->
 - Bump omnibus from `83d8428` to `ec19442` in /omnibus [#3429](https://github.com/chef/chef-server/pull/3429) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.1.1 -->
 - Bump pry-byebug from 3.9.0 to 3.10.1 in /src/oc-id [#3430](https://github.com/chef/chef-server/pull/3430) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.1.0 -->
