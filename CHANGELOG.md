@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.1.4 -->
-## [15.1.4](https://github.com/chef/chef-server/tree/15.1.4) (2022-08-23)
+<!-- latest_release 15.1.5 -->
+## [15.1.5](https://github.com/chef/chef-server/tree/15.1.5) (2022-08-23)
 
 #### Merged Pull Requests
-- Bump pg from 1.4.1 to 1.4.3 in /src/oc-id [#3424](https://github.com/chef/chef-server/pull/3424) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Upgrade Erlang to 24.2 [#3206](https://github.com/chef/chef-server/pull/3206) ([lbakerchef](https://github.com/lbakerchef))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.0.9 -->
 ### Changes since 15.0.9 release
 
 #### Merged Pull Requests
+- Upgrade Erlang to 24.2 [#3206](https://github.com/chef/chef-server/pull/3206) ([lbakerchef](https://github.com/lbakerchef)) <!-- 15.1.5 -->
 - Bump pg from 1.4.1 to 1.4.3 in /src/oc-id [#3424](https://github.com/chef/chef-server/pull/3424) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.1.4 -->
 - Bump omnibus-software from `1d540dc` to `7e22da8` in /omnibus [#3425](https://github.com/chef/chef-server/pull/3425) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.1.3 -->
 - Bump pry-byebug from 3.8.0 to 3.10.1 in /oc-chef-pedant [#3428](https://github.com/chef/chef-server/pull/3428) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.1.2 -->
