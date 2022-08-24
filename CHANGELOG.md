@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.1.6 -->
-## [15.1.6](https://github.com/chef/chef-server/tree/15.1.6) (2022-08-24)
+<!-- latest_release 15.1.7 -->
+## [15.1.7](https://github.com/chef/chef-server/tree/15.1.7) (2022-08-24)
 
 #### Merged Pull Requests
-- Bump pg from 1.4.1 to 1.4.3 in /src/chef-server-ctl [#3422](https://github.com/chef/chef-server/pull/3422) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump selenium-webdriver from 4.3.0 to 4.4.0 in /src/oc-id [#3421](https://github.com/chef/chef-server/pull/3421) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.0.9 -->
 ### Changes since 15.0.9 release
 
 #### Merged Pull Requests
+- Bump selenium-webdriver from 4.3.0 to 4.4.0 in /src/oc-id [#3421](https://github.com/chef/chef-server/pull/3421) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.1.7 -->
 - Bump pg from 1.4.1 to 1.4.3 in /src/chef-server-ctl [#3422](https://github.com/chef/chef-server/pull/3422) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.1.6 -->
 - Upgrade Erlang to 24.2 [#3206](https://github.com/chef/chef-server/pull/3206) ([lbakerchef](https://github.com/lbakerchef)) <!-- 15.1.5 -->
 - Bump pg from 1.4.1 to 1.4.3 in /src/oc-id [#3424](https://github.com/chef/chef-server/pull/3424) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.1.4 -->
