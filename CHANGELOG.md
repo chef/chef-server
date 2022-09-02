@@ -1,9 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release -->
+<!-- latest_release 15.1.8 -->
+## [15.1.8](https://github.com/chef/chef-server/tree/15.1.8) (2022-09-02)
+
+#### Merged Pull Requests
+- Bump berkshelf from 8.0.1 to 8.0.2 in /omnibus [#3350](https://github.com/chef/chef-server/pull/3350) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
-<!-- release_rollup -->
+<!-- release_rollup since=15.1.7 -->
+### Changes since 15.1.7 release
+
+#### Merged Pull Requests
+- Bump berkshelf from 8.0.1 to 8.0.2 in /omnibus [#3350](https://github.com/chef/chef-server/pull/3350) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.1.8 -->
 <!-- release_rollup -->
 
 <!-- latest_stable_release -->
