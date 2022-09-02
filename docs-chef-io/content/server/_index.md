@@ -34,7 +34,7 @@ additional information.
 The following diagram shows the various components that are part of a
 Chef Infra Server deployment and how they relate to one another.
 
-<img src="/images/server/server_components_14.svg" width="500" alt="Diagram of Chef Infra Server deployment" />
+{{< figure src="/images/server/server_components_14.svg" width="500" alt="Diagram of Chef Infra Server deployment.">}}
 
 <table>
 <colgroup>
@@ -89,7 +89,7 @@ The following diagram highlights the specific changes that occur when
 cookbooks are stored at an external location, such as Amazon Simple
 Storage Service (S3).
 
-<img src="/images/server/server_components_s3_14.svg" width="500" alt="image" />
+{{< figure src="/images/server/server_components_s3_14.svg" width="500" alt="Diagram showing changes when cookbooks stored at external location.">}}
 
 The following table describes the components that are different from the
 default configuration of the Chef Infra Server when cookbooks are stored
@@ -226,7 +226,8 @@ The following diagram highlights the specific changes that occur when
 PostgreSQL is configured and managed independently of the Chef Infra
 Server configuration.
 
-<img src="/images/server/server_components_postgresql_14.svg" width="500" alt="image" />
+{{< figure src="/images/server/server_components_postgresql_14.svg" width="500" alt="Diagram showing changes when PostgreSQL is configured and managed independently of the Chef Infra Server configuration.">}}
+
 
 The following table describes the components in an external PostgreSQL
 configuration that are different from the default configuration of the
