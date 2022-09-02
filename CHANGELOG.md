@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.1.11 -->
-## [15.1.11](https://github.com/chef/chef-server/tree/15.1.11) (2022-09-02)
+<!-- latest_release 15.1.12 -->
+## [15.1.12](https://github.com/chef/chef-server/tree/15.1.12) (2022-09-02)
 
 #### Merged Pull Requests
-- Bump omnibus-software from `7e22da8` to `73a95f2` in /omnibus [#3434](https://github.com/chef/chef-server/pull/3434) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump jwt from 2.4.1 to 2.5.0 in /src/oc-id [#3435](https://github.com/chef/chef-server/pull/3435) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.1.7 -->
 ### Changes since 15.1.7 release
 
 #### Merged Pull Requests
+- Bump jwt from 2.4.1 to 2.5.0 in /src/oc-id [#3435](https://github.com/chef/chef-server/pull/3435) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.1.12 -->
 - Bump omnibus-software from `7e22da8` to `73a95f2` in /omnibus [#3434](https://github.com/chef/chef-server/pull/3434) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.1.11 -->
 - Bump test-kitchen from 3.3.1 to 3.3.2 in /omnibus [#3418](https://github.com/chef/chef-server/pull/3418) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.1.10 -->
 - Minor docs fixes [#3438](https://github.com/chef/chef-server/pull/3438) ([IanMadd](https://github.com/IanMadd)) <!-- 15.1.9 -->
