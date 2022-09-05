@@ -145,6 +145,11 @@ cp "/etc/os-release" "$tmpdir/etc/os-release"
 cp "/etc/system-release" "$tmpdir/etc/system-release" 2>/dev/null
 uname -a > "$tmpdir/uname_a.txt"
 
+if [[ -f "/var/opt/opscode/chef_version_history.txt" ]]; then
+    mkdir -p "$tmpdir/var/opt/opscode"
+    cp "/var/opt/opscode/chef_version_history.txt" "$tmpdir/var/opt/opscode"
+fi
+
 # gather the configured umask
 umask > "$tmpdir/umask.txt"
 
