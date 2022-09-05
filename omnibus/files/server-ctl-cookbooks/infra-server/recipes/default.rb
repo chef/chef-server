@@ -164,6 +164,7 @@ end
 
 include_recipe 'infra-server::cleanup'
 
+include_recipe 'infra-server::log_version'
 include_recipe 'infra-server::private-chef-sh'
 include_recipe 'infra-server::oc-chef-pedant'
 include_recipe 'infra-server::log_cleanup'
