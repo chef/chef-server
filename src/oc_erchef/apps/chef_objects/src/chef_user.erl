@@ -294,8 +294,7 @@ parse_binary_json(_ApiVersion, Bin, Operation, User) ->
     % indicators are present.
     EJ = chef_json:decode(Bin),
     chef_key_base:validate_public_key_fields(opt, EJ, user, Operation),
-    common_user_validation(EJ, User, Operation),
-    {ok, EJ}.
+    common_user_validation(EJ, User, Operation).
 
 %% If user is invalid, an error is thrown
 common_user_validation(EJ, User, Operation) ->
