@@ -251,7 +251,7 @@ GEM
     mixlib-cli (2.1.8)
     mixlib-config (3.0.27)
       tomlrb
-    mixlib-install (3.12.19)
+    mixlib-install (3.12.20)
       mixlib-shellout
       mixlib-versioning
       thor
