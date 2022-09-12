@@ -318,7 +318,7 @@ You are now finished with the upgrade.
 1. Consult the [restore documentation]({{< relref "server_backup_restore" >}}) and restore the database from the path to where it was saved:
 
    ```bash
-   chef-server-ctl restore /path/to/tar/archive.tar.gz
+   chef-server-ctl restore /path/to/tar/archive.tgz
    ```
 
 ### External PostgreSQL
