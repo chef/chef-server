@@ -16,23 +16,23 @@
 # limitations under the License.
 #
 
-chef_server_version_history = "/var/opt/opscode/chef_version_history.txt"
+chef_server_version_history = '/var/opt/opscode/chef_version_history.txt'
 
 file chef_server_version_history do
   mode '0755'
   action :create_if_missing
 end
 
-bash "append_to_config" do
-   code <<-EOF
-      date1=`date`
-      version_line=`grep "chef-server " /opt/opscode/version-manifest.txt`
-      version=`echo "$version_line" | cut -d' ' -f2`
-      grep -qw "$version" < "#{chef_server_version_history}"
-      ret_val=$?
-      if [[ ${ret_val} -ne 0 ]]
-      then
-        echo "$date1: $version_line" >> "#{chef_server_version_history}"
-      fi
-   EOF
+bash 'append_to_config' do
+  code <<-EOF
+    date1=`date`
+    version_line=`grep 'chef-server ' /opt/opscode/version-manifest.txt`
+    version=`echo "$version_line" | cut -d' ' -f2`
+    grep -qw "$version" < "#{chef_server_version_history}"
+    ret_val=$?
+    if [[ ${ret_val} -ne 0 ]]
+    then
+      echo "$date1: $version_line" >> "#{chef_server_version_history}"
+    fi
+  EOF
 end
