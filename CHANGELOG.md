@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.1.13 -->
-## [15.1.13](https://github.com/chef/chef-server/tree/15.1.13) (2022-09-08)
+<!-- latest_release 15.1.14 -->
+## [15.1.14](https://github.com/chef/chef-server/tree/15.1.14) (2022-09-27)
 
 #### Merged Pull Requests
-- Correcting the email validation for knife user cerate [#3442](https://github.com/chef/chef-server/pull/3442) ([vinay-satish](https://github.com/vinay-satish))
+- Bump mixlib-install from 3.12.19 to 3.12.20 in /src/chef-server-ctl [#3443](https://github.com/chef/chef-server/pull/3443) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.1.7 -->
 ### Changes since 15.1.7 release
 
 #### Merged Pull Requests
+- Bump mixlib-install from 3.12.19 to 3.12.20 in /src/chef-server-ctl [#3443](https://github.com/chef/chef-server/pull/3443) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.1.14 -->
 - Correcting the email validation for knife user cerate [#3442](https://github.com/chef/chef-server/pull/3442) ([vinay-satish](https://github.com/vinay-satish)) <!-- 15.1.13 -->
 - Bump jwt from 2.4.1 to 2.5.0 in /src/oc-id [#3435](https://github.com/chef/chef-server/pull/3435) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.1.12 -->
 - Bump omnibus-software from `7e22da8` to `73a95f2` in /omnibus [#3434](https://github.com/chef/chef-server/pull/3434) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.1.11 -->
