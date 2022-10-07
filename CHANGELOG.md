@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.1.14 -->
-## [15.1.14](https://github.com/chef/chef-server/tree/15.1.14) (2022-09-27)
+<!-- latest_release 15.1.15 -->
+## [15.1.15](https://github.com/chef/chef-server/tree/15.1.15) (2022-10-07)
 
 #### Merged Pull Requests
-- Bump mixlib-install from 3.12.19 to 3.12.20 in /src/chef-server-ctl [#3443](https://github.com/chef/chef-server/pull/3443) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Add knowledge of previous installed versions of server to gather logs. [#3439](https://github.com/chef/chef-server/pull/3439) ([sreepuramsudheer](https://github.com/sreepuramsudheer))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.1.7 -->
 ### Changes since 15.1.7 release
 
 #### Merged Pull Requests
+- Add knowledge of previous installed versions of server to gather logs. [#3439](https://github.com/chef/chef-server/pull/3439) ([sreepuramsudheer](https://github.com/sreepuramsudheer)) <!-- 15.1.15 -->
 - Bump mixlib-install from 3.12.19 to 3.12.20 in /src/chef-server-ctl [#3443](https://github.com/chef/chef-server/pull/3443) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.1.14 -->
 - Correcting the email validation for knife user cerate [#3442](https://github.com/chef/chef-server/pull/3442) ([vinay-satish](https://github.com/vinay-satish)) <!-- 15.1.13 -->
 - Bump jwt from 2.4.1 to 2.5.0 in /src/oc-id [#3435](https://github.com/chef/chef-server/pull/3435) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.1.12 -->
