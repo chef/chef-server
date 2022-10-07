@@ -21,6 +21,8 @@ if [[ "${BUILDKITE:-false}" == "true" ]]; then
   # Since we don't use any software from this repository in our tests,
   # we can temporarily remove it from our sources.
   rm /etc/apt/sources.list.d/microsoft-prod.list
+  apt-get clean
+  apt-get autoremove 
   apt-get update
   apt-get install -y libpq-dev libsqlite3-dev
 fi
