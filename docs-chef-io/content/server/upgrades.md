@@ -25,9 +25,9 @@ Before upgrading a production server make sure to upgrade a test server to confi
 If running a Chef Infra Server 12.17.15 or later you can upgrade directly to the latest releases of Chef Infra Server. If you are running a release before 12.17.15 you must perform a stepped upgrade as outlined below.
 
 | Running Version | Upgrade To Version | Requires License | Supported Version |
-|---------|---------|------|-----------|
+|---------|---------|------|-------------------|
 | 14 | 15 | Yes | Yes |
-| 13 | 15 | Yes | Yes |
+| 13 | 15 | Yes | No |
 | 12.17.15 | 15 | Yes | No |
 | 12.3.0 | 12.17.15 | No | No |
 | 11 | 12.3.0 | No | No |
