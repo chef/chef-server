@@ -42,7 +42,7 @@ Supported Release
 
 ### Standalone Server
 
-{{% chef-server/server_upgrade_duration %}}
+Please see any special notes for the version you are upgrading to in the [Release-Specific Steps](#release-specific-steps) section.
 
 1. Run `vacuumdb` before starting the upgrade:
 
@@ -235,7 +235,7 @@ The following External PostgreSQL upgrade steps are provided as a courtesy only.
 
 1. If you are running Chef Infra Server version 12.17.15 or greater, proceed to the next step below. Otherwise consult the [upgrade matrix](#upgrade-matrix) and perform a stepped upgrade.
 
-   If you are running a Chef Infra Server release before 12.17.15, you cannot upgrade directly to 14.8.X. You must perform a stepped upgrade first.
+   If you are running a Chef Infra Server release before 12.17.15, you cannot upgrade directly to the latest. You must perform a stepped upgrade first.
 
    - If you are running Chef Infra Server 12.3.0, upgrade to 12.17.15.
    - If you are running Chef Infra Server 11, you must first upgrade to 12.3.0, and then to 12.17.15.
