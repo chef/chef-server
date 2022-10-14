@@ -22,15 +22,13 @@ Before upgrading a production server make sure to upgrade a test server to confi
 
 ## Upgrade Matrix
 
-If running a Chef Infra Server 12.17.15 or later you can upgrade directly to the latest releases of Chef Infra Server 14. If you are running a release before 12.17.15 you must perform a stepped upgrade as outlined below.
+If running a Chef Infra Server 12.17.15 or later you can upgrade directly to the latest releases of Chef Infra Server. If you are running a release before 12.17.15 you must perform a stepped upgrade as outlined below.
 
 | Running Version | Upgrade To Version | Requires License | Supported Version |
 |---------|---------|------|-----------|
 | 14 | 15 | Yes | Yes |
 | 13 | 15 | Yes | Yes |
 | 12.17.15 | 15 | Yes | No |
-| 13 | 14 | Yes | Yes |
-| 12.17.15 | 14 | Yes | No |
 | 12.3.0 | 12.17.15 | No | No |
 | 11 | 12.3.0 | No | No |
 
@@ -445,6 +443,105 @@ The following External PostgreSQL upgrade steps are provided as a courtesy only.
 
 1. Do not continue upgrading PostgreSQL until you have an uncorrupted Chef Infra Server and an uncorrupted PostgreSQL database.
 
+### Chef Backend Install
+
+{{% chef-server/EOL_backend %}}
+
+The Chef Infra Server can operate in a high availability configuration that provides automated load balancing and failover for stateful components in the system architecture.
+
+To upgrade your Chef Backend installation, see [High Availability: Upgrade to Chef Backend 2]({{< relref "upgrade_server_ha_v2" >}}).
+
+### Tiered Install
+
+This section describes the upgrade process from a tiered server configuration.
+
+{{< note >}}
+
+These instructions are for the Chef Infra Server `tier` topology.
+For the latest information on setting up a highly available server cluster, see [High Availability: Backend Cluster]({{< relref "install_server_ha" >}}).
+
+{{< /note >}}
+
+### Tiered Upgrade Steps
+
+To upgrade to Chef Infra Server on a tiered Chef Infra Server configuration, do the following:
+
+1. Back up the Chef Infra Server data before starting the upgrade process using [knife-ec-backup](https://github.com/chef/knife-ec-backup).
+
+2. Confirm that the Chef Infra Server services are operational:
+
+    ```bash
+    chef-server-ctl reconfigure
+    ```
+
+3. Download the desired Chef Infra Server version from the [Chef Infra Server Downloads](https://www.chef.io/downloads/tools/infra-server) page, then copy it to each server.
+
+4. Stop all front end servers:
+
+    ```bash
+    chef-server-ctl stop
+    ```
+
+5. Install the Chef Infra Server package on all servers:
+
+   To install with `dpkg`:
+
+    ```bash
+    dpkg -i /path/to/chef-server-core-<version>.deb
+    ```
+
+   To install with the RPM Package Manager:
+
+    ```bash
+    rpm -Uvh --nopostun /path/to/chef-server-core-<version>.rpm
+    ```
+
+6. Stop the back end server:
+
+    ```bash
+    chef-server-ctl stop
+    ```
+
+7. Upgrade the server and accept the Chef Software license by entering `Yes` at the prompt:
+
+    ```bash
+    chef-server-ctl upgrade
+    ```
+
+   To accept the license and upgrade in one command:
+
+    ```bash
+    CHEF_LICENSE='accept' chef-server-ctl upgrade
+    ```
+
+8. Copy the entire `/etc/opscode` directory from the back end server to all front end servers:
+
+    ```bash
+    scp -r /etc/opscode <each server's IP>:/etc
+    ```
+
+9. Upgrade each of the front end servers:
+
+    ```bash
+    chef-server-ctl upgrade
+    ```
+
+10. Run the following command on both the front end, and back end servers:
+
+    ```bash
+    chef-server-ctl start
+    ```
+
+11. [Upgrade]({{< relref "#upgrading-manage-add-on" >}}) any Chef Infra Server add-ons.
+
+12. After the upgrade process is complete, test and verify that the server works.
+
+13. Clean up the server by removing the old data:
+
+```bash
+chef-server-ctl cleanup
+```
+
 ## Release-Specific Steps
 
 ### Upgrading to 15.x
@@ -596,102 +693,3 @@ For more information on password generation, including a list of supported add-o
 ### Upgrading to 12.3.0
 
 If you are running a Chef Infra Server release before 12.3.0, please contact Chef Support for guidance on upgrading your Chef Infra Server installation.
-
-### Chef Backend Install
-
-{{% chef-server/EOL_backend %}}
-
-The Chef Infra Server can operate in a high availability configuration that provides automated load balancing and failover for stateful components in the system architecture.
-
-To upgrade your Chef Backend installation, see [High Availability: Upgrade to Chef Backend 2]({{< relref "upgrade_server_ha_v2" >}}).
-
-### Tiered Install
-
-This section describes the upgrade process from a tiered server configuration.
-
-{{< note >}}
-
-These instructions are for the Chef Infra Server `tier` topology.
-For the latest information on setting up a highly available server cluster, see [High Availability: Backend Cluster]({{< relref "install_server_ha" >}}).
-
-{{< /note >}}
-
-### Tiered Upgrade Steps
-
-To upgrade to Chef Infra Server on a tiered Chef Infra Server configuration, do the following:
-
-1. Back up the Chef Infra Server data before starting the upgrade process using [knife-ec-backup](https://github.com/chef/knife-ec-backup).
-
-2. Confirm that the Chef Infra Server services are operational:
-
-    ```bash
-    chef-server-ctl reconfigure
-    ```
-
-3. Download the desired Chef Infra Server version from the [Chef Infra Server Downloads](https://www.chef.io/downloads/tools/infra-server) page, then copy it to each server.
-
-4. Stop all front end servers:
-
-    ```bash
-    chef-server-ctl stop
-    ```
-
-5. Install the Chef Infra Server package on all servers:
-
-    To install with `dpkg`:
-
-    ```bash
-    dpkg -i /path/to/chef-server-core-<version>.deb
-    ```
-
-    To install with the RPM Package Manager:
-
-    ```bash
-    rpm -Uvh --nopostun /path/to/chef-server-core-<version>.rpm
-    ```
-
-6. Stop the back end server:
-
-    ```bash
-    chef-server-ctl stop
-    ```
-
-7. Upgrade the server and accept the Chef Software license by entering `Yes` at the prompt:
-
-    ```bash
-    chef-server-ctl upgrade
-    ```
-
-    To accept the license and upgrade in one command:
-
-    ```bash
-    CHEF_LICENSE='accept' chef-server-ctl upgrade
-    ```
-
-8. Copy the entire `/etc/opscode` directory from the back end server to all front end servers:
-
-    ```bash
-    scp -r /etc/opscode <each server's IP>:/etc
-    ```
-
-9. Upgrade each of the front end servers:
-
-    ```bash
-    chef-server-ctl upgrade
-    ```
-
-10. Run the following command on both the front end, and back end servers:
-
-    ```bash
-    chef-server-ctl start
-    ```
-
-11. [Upgrade]({{< relref "#upgrading-manage-add-on" >}}) any Chef Infra Server add-ons.
-
-12. After the upgrade process is complete, test and verify that the server works.
-
-13. Clean up the server by removing the old data:
-
-   ```bash
-   chef-server-ctl cleanup
-   ```
