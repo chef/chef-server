@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.1.19 -->
-## [15.1.19](https://github.com/chef/chef-server/tree/15.1.19) (2022-10-18)
+<!-- latest_release 15.1.20 -->
+## [15.1.20](https://github.com/chef/chef-server/tree/15.1.20) (2022-10-18)
 
 #### Merged Pull Requests
-- Bump rspec_junit_formatter from 0.5.1 to 0.6.0 in /oc-chef-pedant [#3459](https://github.com/chef/chef-server/pull/3459) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump chef_fixie from 1.0.3 to 1.0.8 in /src/chef-server-ctl [#3460](https://github.com/chef/chef-server/pull/3460) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.1.7 -->
 ### Changes since 15.1.7 release
 
 #### Merged Pull Requests
+- Bump chef_fixie from 1.0.3 to 1.0.8 in /src/chef-server-ctl [#3460](https://github.com/chef/chef-server/pull/3460) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.1.20 -->
 - Bump rspec_junit_formatter from 0.5.1 to 0.6.0 in /oc-chef-pedant [#3459](https://github.com/chef/chef-server/pull/3459) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.1.19 -->
 - Bump activesupport from 7.0.3.1 to 7.0.4 in /src/oc_bifrost/oc-bifrost-pedant [#3447](https://github.com/chef/chef-server/pull/3447) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.1.18 -->
 - Bump activesupport from 7.0.3.1 to 7.0.4 in /oc-chef-pedant [#3446](https://github.com/chef/chef-server/pull/3446) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.1.17 -->
