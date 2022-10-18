@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.1.16 -->
-## [15.1.16](https://github.com/chef/chef-server/tree/15.1.16) (2022-10-18)
+<!-- latest_release 15.1.17 -->
+## [15.1.17](https://github.com/chef/chef-server/tree/15.1.17) (2022-10-18)
 
 #### Merged Pull Requests
-- Bump doorkeeper from 4.4.3 to 5.6.0 in /src/oc-id [#3444](https://github.com/chef/chef-server/pull/3444) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump activesupport from 7.0.3.1 to 7.0.4 in /oc-chef-pedant [#3446](https://github.com/chef/chef-server/pull/3446) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.1.7 -->
 ### Changes since 15.1.7 release
 
 #### Merged Pull Requests
+- Bump activesupport from 7.0.3.1 to 7.0.4 in /oc-chef-pedant [#3446](https://github.com/chef/chef-server/pull/3446) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.1.17 -->
 - Bump doorkeeper from 4.4.3 to 5.6.0 in /src/oc-id [#3444](https://github.com/chef/chef-server/pull/3444) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.1.16 -->
 - Add knowledge of previous installed versions of server to gather logs. [#3439](https://github.com/chef/chef-server/pull/3439) ([sreepuramsudheer](https://github.com/sreepuramsudheer)) <!-- 15.1.15 -->
 - Bump mixlib-install from 3.12.19 to 3.12.20 in /src/chef-server-ctl [#3443](https://github.com/chef/chef-server/pull/3443) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.1.14 -->
