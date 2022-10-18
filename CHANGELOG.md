@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.1.22 -->
-## [15.1.22](https://github.com/chef/chef-server/tree/15.1.22) (2022-10-18)
+<!-- latest_release 15.1.23 -->
+## [15.1.23](https://github.com/chef/chef-server/tree/15.1.23) (2022-10-18)
 
 #### Merged Pull Requests
-- Bump pg from 1.4.3 to 1.4.4 in /src/oc-id [#3465](https://github.com/chef/chef-server/pull/3465) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump omnibus-software from `73a95f2` to `7d0e0fe` in /omnibus [#3470](https://github.com/chef/chef-server/pull/3470) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.1.7 -->
 ### Changes since 15.1.7 release
 
 #### Merged Pull Requests
+- Bump omnibus-software from `73a95f2` to `7d0e0fe` in /omnibus [#3470](https://github.com/chef/chef-server/pull/3470) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.1.23 -->
 - Bump pg from 1.4.3 to 1.4.4 in /src/oc-id [#3465](https://github.com/chef/chef-server/pull/3465) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.1.22 -->
 - Update rspec_junit_formatter requirement from &gt;= 0.1.1, &lt; 0.6.0 to &gt;= 0.1.1, &lt; 0.7.0 in /src/oc_bifrost/oc-bifrost-pedant [#3461](https://github.com/chef/chef-server/pull/3461) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.1.21 -->
 - Bump chef_fixie from 1.0.3 to 1.0.8 in /src/chef-server-ctl [#3460](https://github.com/chef/chef-server/pull/3460) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.1.20 -->
