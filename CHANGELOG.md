@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.1.26 -->
-## [15.1.26](https://github.com/chef/chef-server/tree/15.1.26) (2022-10-19)
+<!-- latest_release 15.1.27 -->
+## [15.1.27](https://github.com/chef/chef-server/tree/15.1.27) (2022-10-20)
 
 #### Merged Pull Requests
-- Bump selenium-webdriver from 4.4.0 to 4.5.0 in /src/oc-id [#3462](https://github.com/chef/chef-server/pull/3462) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Add Infra-Server 15 and re-organize for easier use [#3469](https://github.com/chef/chef-server/pull/3469) ([Stromweld](https://github.com/Stromweld))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.1.7 -->
 ### Changes since 15.1.7 release
 
 #### Merged Pull Requests
+- Add Infra-Server 15 and re-organize for easier use [#3469](https://github.com/chef/chef-server/pull/3469) ([Stromweld](https://github.com/Stromweld)) <!-- 15.1.27 -->
 - Bump selenium-webdriver from 4.4.0 to 4.5.0 in /src/oc-id [#3462](https://github.com/chef/chef-server/pull/3462) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.1.26 -->
 - Bump omnibus from `ec19442` to `5bc091a` in /omnibus [#3472](https://github.com/chef/chef-server/pull/3472) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.1.25 -->
 - Bump spring from 4.0.0 to 4.1.0 in /src/oc-id [#3457](https://github.com/chef/chef-server/pull/3457) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.1.24 -->
