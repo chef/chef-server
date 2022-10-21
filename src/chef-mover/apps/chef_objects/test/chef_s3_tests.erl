@@ -23,55 +23,6 @@
 -module(chef_s3_tests).
 
 -include_lib("eunit/include/eunit.hrl").
--include_lib("erlcloud/include/erlcloud_aws.hrl").
-
-% construct url (scheme://host) from config
--spec get_host_noport(aws_config()) -> string().
-get_host_noport(Config) ->
-    UrlRaw  = get_host_port(Config),
-    UrlTemp = string:trim(UrlRaw, trailing, "1234568790"),
-    string:trim(UrlTemp, trailing, ":").
-
-% construct url (scheme://host:port) from config
--spec get_host_port(aws_config()) -> string().
-get_host_port(Config) ->
-    Url0 = erlcloud_s3:get_object_url("", "", Config),
-    Url1 = string:trim(Url0, trailing, "/"),
-    case Config#aws_config.s3_port of
-        80 ->
-            % won't contain port if port == 80, so add it
-            Url1 ++ ":80";
-        _ ->
-            Url1
-    end.
-
-% erlcloud, and therefore mini_s3, reconstructs the URL from the aws_config record.
-% thus, neither have any idea whether the original URL contained a port.  but this
-% module, among other things, tests whether the original URL, which may or may not
-% have contained a port, is being used.  therefore this function supplies the correct
-% URL (with or without port).
-port_or_no_port(InternalS3Url, ExternalS3Url) ->
-    case {InternalS3Url, ExternalS3Url} of
-        {_, host_header} ->
-            fun get_host_port/1;
-        _ ->
-            fun get_host_noport/1
-    end.
-
-% construct url from aws_config record
-get_host_test() ->
-    Config0 = mini_s3:new("", "", "http://1.2.3.4" ),
-    "http://1.2.3.4"      = get_host_noport(Config0),
-    "http://1.2.3.4:80"   = get_host_port(  Config0),
-    Config1 = mini_s3:new("", "", "https://1.2.3.4"),
-    "https://1.2.3.4"     = get_host_noport(Config1),
-    "https://1.2.3.4:443" = get_host_port(  Config1),
-    Config2 = mini_s3:new("", "", "http://1.2.3.4:443"),
-    "http://1.2.3.4"      = get_host_noport(Config2),
-    "http://1.2.3.4:443"  = get_host_port(  Config2),
-    Config3 = mini_s3:new("", "", "https://1.2.3.4:80"),
-    "https://1.2.3.4"     = get_host_noport(Config3),
-    "https://1.2.3.4:80"  = get_host_port(  Config3).
 
 base64_checksum_test_() ->
     TestData = [{<<"00ba0db453b47c4c0bb530cf8e481a70">>, <<"ALoNtFO0fEwLtTDPjkgacA==">>},
@@ -85,6 +36,7 @@ base64_checksum_test_() ->
      } || {MD5, Base64} <- TestData
     ].
 
+
 make_key_test() ->
     OrgId = <<"deadbeefdeadbeefdeadbeefdeadbeef">>,
     Checksum = <<"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb">>,
@@ -92,21 +44,21 @@ make_key_test() ->
     ?assertEqual(chef_s3:make_key(OrgId, Checksum),
                  "organization-deadbeefdeadbeefdeadbeefdeadbeef/checksum-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb").
 
-setup_chef_secrets() ->
-    application:set_env(chef_secrets, provider, chef_secrets_mock_provider),
-    application:set_env(chef_secrets, provider_config, []),
-    {ok, FileContent} = file:read_file(filename:join(code:priv_dir(chef_objects), "../test/secrets.json")),
-    FakeSecretsData = jiffy:decode(FileContent),
-    meck:new(chef_secrets_mock_provider, [non_strict]),
-    meck:expect(chef_secrets_mock_provider, read, fun(_Config) -> {ok, FakeSecretsData} end),
-    application:ensure_all_started(chef_secrets).
+%% There are no public API functions in mini_s3 for deserializing
+%% AWS config information
+-record(config, {
+          s3_url="http://s3.amazonaws.com"::string(),
+          access_key_id::string(),
+          secret_access_key::string(),
+          bucket_access_type=vhost
 
+}).
 setup_s3(InternalS3Url, ExternalS3Url) ->
-    setup_chef_secrets(),
-
     MockedModules = [mini_s3],
     chef_objects_test_utils:mock(MockedModules, [passthrough]),
     application:set_env(chef_objects, s3_platform_bucket_name, "testbucket"),
+    application:set_env(chef_objects, s3_access_key_id, "super_id"),
+    application:set_env(chef_objects, s3_secret_key_id, "super_secret"),
     application:set_env(chef_objects, s3_url, InternalS3Url),
     application:set_env(chef_objects, s3_external_url, ExternalS3Url),
 
@@ -114,25 +66,18 @@ setup_s3(InternalS3Url, ExternalS3Url) ->
     meck:expect(mini_s3, get_object_metadata, 4, mock_metadata).
 
 generate_presigned_url_uses_configured_s3_url_test_() ->
-    MockedModules = [mini_s3, chef_secrets_mock_provider],
+    MockedModules = [mini_s3],
     HostHeaderUrl = "https://api.example.com:443",
     OrgId = <<"deadbeefdeadbeefdeadbeefdeadbeef">>,
     Checksum = <<"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa">>,
-    Lifetime = 3600,
-    Expect_s3_url = fun(ExpectMethod, ExpectUrl, _ExpectLifetime) ->
+    Lifetime = 15,
+    Expect_s3_url = fun(ExpectMethod, ExpectUrl) ->
                             meck:expect(mini_s3, s3_url,
-                                        fun(HTTPMethod, Bucket, _Key, _MyLifetime, _ContentMD5,
-                                            Config) ->
+                                        fun(HTTPMethod, Bucket, _Key, MyLifeTime, _ContentMD5,
+                                            #config{s3_url = S3Url}) ->
                                                 ?assertEqual(ExpectMethod, HTTPMethod),
                                                 ?assertEqual("testbucket", Bucket),
-                                                % CODE REVIEW: disable expiry window. expiry windows were redone,
-                                                % and are now tested at: mini_s3 test/mini_s3_tests.erl
-                                                % NOTE: now using prajakta's expwins - revisit this
-                                                %?assertEqual(ExpectLifetime, MyLifetime),
-                                                {ok, InternalS3Url} = application:get_env(chef_objects, s3_url),
-                                                {ok, ExternalS3Url} = application:get_env(chef_objects, s3_external_url),
-                                                PortOrNoPort = port_or_no_port(InternalS3Url, ExternalS3Url),
-                                                S3Url = PortOrNoPort(Config),
+                                                ?assertEqual(Lifetime, MyLifeTime),
                                                 ?assertEqual(ExpectUrl, S3Url),
                                                 stub_s3_url_response
                                         end)
@@ -141,23 +86,20 @@ generate_presigned_url_uses_configured_s3_url_test_() ->
       "external s3 url is set to host_header",
       {foreach,
        fun() ->
-               application:set_env(chef_objects, s3_url_expiry_window_size, {15, minutes}),
-               ExpectedExpiry = {3600, 900},
                InternalS3Url = "https://FAKE_S3.com",
                ExternalS3Url = host_header,
                setup_s3(InternalS3Url, ExternalS3Url),
-               {InternalS3Url, ExternalS3Url, ExpectedExpiry}
+               {InternalS3Url, ExternalS3Url}
        end,
        fun(_) ->
-               chef_objects_test_utils:unmock(MockedModules),
-               application:stop(chef_secrets)
+               chef_objects_test_utils:unmock(MockedModules)
        end,
        [
-        fun({_InternalS3Url, _ExternalS3Url, ExpectedExpiry}) ->
+        fun({_InternalS3Url, _ExternalS3Url}) ->
                 [
                  {" (" ++ atom_to_list(Method) ++ ")",
                   fun() ->
-                          Expect_s3_url(Method, HostHeaderUrl, ExpectedExpiry),
+                          Expect_s3_url(Method, HostHeaderUrl),
                           chef_s3:generate_presigned_url(OrgId, Lifetime, Method,
                                                          Checksum, HostHeaderUrl),
                           chef_objects_test_utils:validate_modules(MockedModules)
@@ -168,7 +110,7 @@ generate_presigned_url_uses_configured_s3_url_test_() ->
                               Checksums = [<<"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa">>,
                                            <<"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb">>,
                                            <<"cccccccccccccccccccccccccccccccc">>],
-                              Expect_s3_url(put, HostHeaderUrl, ExpectedExpiry),
+                              Expect_s3_url(put, HostHeaderUrl),
                               chef_s3:generate_presigned_urls(OrgId, Lifetime, put,
                                                               Checksums, HostHeaderUrl),
                               chef_objects_test_utils:validate_modules(MockedModules)
@@ -179,22 +121,20 @@ generate_presigned_url_uses_configured_s3_url_test_() ->
       "external s3 url is set same as internal",
       {foreach,
        fun() ->
-               application:set_env(chef_objects, s3_url_expiry_window_size, {15, percent}),
-               ExpectedExpiry = {3600, 540},
                InternalS3Url = "https://FAKE_S3.com",
                ExternalS3Url = InternalS3Url,
                setup_s3(InternalS3Url, ExternalS3Url),
-               {InternalS3Url, ExternalS3Url, ExpectedExpiry}
+               {InternalS3Url, ExternalS3Url}
        end,
        fun(_) ->
                chef_objects_test_utils:unmock(MockedModules)
        end,
        [
-        fun({InternalS3Url, _ExternalS3Url, ExpectedExpiry}) ->
+        fun({InternalS3Url, _ExternalS3Url}) ->
                 [
                  {" (" ++ atom_to_list(Method) ++ ")",
                   fun() ->
-                          Expect_s3_url(Method, InternalS3Url, ExpectedExpiry),
+                          Expect_s3_url(Method, InternalS3Url),
                           chef_s3:generate_presigned_url(OrgId, Lifetime, Method,
                                                          Checksum, HostHeaderUrl),
                           chef_objects_test_utils:validate_modules(MockedModules)
@@ -205,7 +145,7 @@ generate_presigned_url_uses_configured_s3_url_test_() ->
                               Checksums = [<<"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa">>,
                                            <<"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb">>,
                                            <<"cccccccccccccccccccccccccccccccc">>],
-                              Expect_s3_url(put, InternalS3Url, ExpectedExpiry),
+                              Expect_s3_url(put, InternalS3Url),
                               chef_s3:generate_presigned_urls(OrgId, Lifetime, put,
                                                               Checksums, HostHeaderUrl),
                               chef_objects_test_utils:validate_modules(MockedModules)
@@ -216,22 +156,20 @@ generate_presigned_url_uses_configured_s3_url_test_() ->
       "external s3 url is customized",
       {foreach,
        fun() ->
-               application:set_env(chef_objects, s3_url_expiry_window_size, off),
-               ExpectedExpiry = 3600,
                InternalS3Url = "https://FAKE_S3.com",
                ExternalS3Url = "https://external-s3.com",
                setup_s3(InternalS3Url, ExternalS3Url),
-               {InternalS3Url, ExternalS3Url, ExpectedExpiry}
+               {InternalS3Url, ExternalS3Url}
        end,
        fun(_) ->
                chef_objects_test_utils:unmock(MockedModules)
        end,
        [
-        fun({_InternalS3Url, ExternalS3Url, ExpectedExpiry}) ->
+        fun({_InternalS3Url, ExternalS3Url}) ->
                 [
                  {" (" ++ atom_to_list(Method) ++ ")",
                   fun() ->
-                          Expect_s3_url(Method, ExternalS3Url, ExpectedExpiry),
+                          Expect_s3_url(Method, ExternalS3Url),
                           chef_s3:generate_presigned_url(OrgId, Lifetime, Method,
                                                          Checksum, HostHeaderUrl),
                           chef_objects_test_utils:validate_modules(MockedModules)
@@ -242,7 +180,7 @@ generate_presigned_url_uses_configured_s3_url_test_() ->
                               Checksums = [<<"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa">>,
                                            <<"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb">>,
                                            <<"cccccccccccccccccccccccccccccccc">>],
-                              Expect_s3_url(put, ExternalS3Url, ExpectedExpiry),
+                              Expect_s3_url(put, ExternalS3Url),
                               chef_s3:generate_presigned_urls(OrgId, Lifetime, put,
                                                               Checksums, HostHeaderUrl),
                               chef_objects_test_utils:validate_modules(MockedModules)

@@ -82,14 +82,15 @@
 
 -record(context, {
                   auth_check_disabled = false :: boolean(),
+
                   %% AWS credentials
-                  access_key_id :: binary() | undefined,
+                  access_key_id     :: binary() | undefined,
                   secret_access_key :: binary() | undefined,
 
-                  stream_download :: any() | undefined,
+                  stream_download   :: any() | undefined,
 
                   % Do we retry sql when we get no_connections. ms to wait
-                  sql_retry_delay :: pos_integer() | undefined,
+                  sql_retry_delay     :: pos_integer() | undefined,
                   sql_retry_count = 0 :: non_neg_integer(),
 
                   %% unique request ID from nginx header (or generated if not
@@ -99,6 +100,7 @@
                   %% The name of the HTTP request header containing the unique ID set by the load
                   %% balancer
                   reqid_header_name :: string() | undefined,
+                  
                   %% List of known buckets, only populated in places we want to avoid
                   %% multiple lookups
                   bucket_list :: list() | undefined,
@@ -107,6 +109,16 @@
 
                   entry_md :: #object{} | #db_file{} | undefined,
 
-                  transfer_state :: #file_transfer_state{} | undefined
+                  transfer_state :: #file_transfer_state{} | undefined,
 
+                  %% sigv4 authentication
+                  aws_access_key_id         :: undefined | string(),
+                  auth_type                 :: undefined | auth_header | presigned_url,
+                  date                      :: undefined | string(),
+                  incoming_sig              :: undefined | binary()    | list(),
+                  region                    :: undefined | string(),
+                  signed_header_keys_str    :: undefined | string(),
+                  signed_headers            :: undefined | list(),
+                  x_amz_expires_int         :: undefined | pos_integer(),
+                  x_amz_expires_str         :: undefined | string()
               }).
