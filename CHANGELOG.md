@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.1.28 -->
-## [15.1.28](https://github.com/chef/chef-server/tree/15.1.28) (2022-10-21)
+<!-- latest_release 15.1.29 -->
+## [15.1.29](https://github.com/chef/chef-server/tree/15.1.29) (2022-10-25)
 
 #### Merged Pull Requests
-- Replace AWS sigv2 with sigv4 [#2097](https://github.com/chef/chef-server/pull/2097) ([lbakerchef](https://github.com/lbakerchef))
+- Update knife-tidy [#3473](https://github.com/chef/chef-server/pull/3473) ([vkarve-chef](https://github.com/vkarve-chef))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.1.7 -->
 ### Changes since 15.1.7 release
 
 #### Merged Pull Requests
+- Update knife-tidy [#3473](https://github.com/chef/chef-server/pull/3473) ([vkarve-chef](https://github.com/vkarve-chef)) <!-- 15.1.29 -->
 - Replace AWS sigv2 with sigv4 [#2097](https://github.com/chef/chef-server/pull/2097) ([lbakerchef](https://github.com/lbakerchef)) <!-- 15.1.28 -->
 - Add Infra-Server 15 and re-organize for easier use [#3469](https://github.com/chef/chef-server/pull/3469) ([Stromweld](https://github.com/Stromweld)) <!-- 15.1.27 -->
 - Bump selenium-webdriver from 4.4.0 to 4.5.0 in /src/oc-id [#3462](https://github.com/chef/chef-server/pull/3462) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.1.26 -->
