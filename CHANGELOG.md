@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.1.32 -->
-## [15.1.32](https://github.com/chef/chef-server/tree/15.1.32) (2022-10-26)
+<!-- latest_release 15.1.33 -->
+## [15.1.33](https://github.com/chef/chef-server/tree/15.1.33) (2022-10-26)
 
 #### Merged Pull Requests
-- Bump rspec-rails from 5.1.2 to 6.0.1 in /src/oc-id [#3474](https://github.com/chef/chef-server/pull/3474) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- INFS-331 - Making sure to clean the cache before apt-get update [#3463](https://github.com/chef/chef-server/pull/3463) ([jashaik](https://github.com/jashaik))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.1.7 -->
 ### Changes since 15.1.7 release
 
 #### Merged Pull Requests
+- INFS-331 - Making sure to clean the cache before apt-get update [#3463](https://github.com/chef/chef-server/pull/3463) ([jashaik](https://github.com/jashaik)) <!-- 15.1.33 -->
 - Bump rspec-rails from 5.1.2 to 6.0.1 in /src/oc-id [#3474](https://github.com/chef/chef-server/pull/3474) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.1.32 -->
 - Bump nokogiri from 1.13.8 to 1.13.9 in /src/oc-id [#3475](https://github.com/chef/chef-server/pull/3475) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.1.31 -->
 - Upgrades edits [#3477](https://github.com/chef/chef-server/pull/3477) ([IanMadd](https://github.com/IanMadd)) <!-- 15.1.30 -->
