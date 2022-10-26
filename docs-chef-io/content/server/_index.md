@@ -153,7 +153,7 @@ Service (S3) set the following configuration settings in the
 </tr>
 <tr class="even">
 <td><code>bookshelf['external_url']</code></td>
-<td>The full URL of the S3 bucket.</td>
+<td>The S3 URL.  Do not include the bucket name in the URL.</td>
 </tr>
 <tr class="odd">
 <td><code>bookshelf['secret_access_key']</code></td>
@@ -165,7 +165,11 @@ Service (S3) set the following configuration settings in the
 </tr>
 <tr class="odd">
 <td><code>bookshelf['vip']</code></td>
-<td>The virtual IP address or host name of the Amazon Simple Service (S3) API. Default value: <code>127.0.0.1</code>.</td>
+<td>The virtual IP address or host name of the Amazon Simple Service (S3) API.  Do not include the bucket name in the URL.  Default value: <code>127.0.0.1</code>.</td>
+</tr>
+<tr class="even">
+<td><code>bookshelf['enable']</code></td>
+<td>Enable bookshelf. When connecting to S3, this should normally be set to <code>false</code>. Default value: <code>true</code>.</td>
 </tr>
 </tbody>
 </table>
@@ -173,8 +177,9 @@ Service (S3) set the following configuration settings in the
 An example `chef-server.rb` configuration:
 
 ```ruby
-bookshelf['vip'] = 's3-external-1.amazonaws.com'
-bookshelf['external_url'] = 'https://s3-external-1.amazonaws.com'
+bookshelf['enable'] = false
+bookshelf['vip'] = 's3.us-west-2.amazonaws.com'
+bookshelf['external_url'] = 'https://s3.us-west-2.amazonaws.com'
 bookshelf['access_key_id'] = '<ACCESS_ID>'
 bookshelf['secret_access_key'] = '<ACCESS_KEY>'
 opscode_erchef['s3_bucket'] = '<BUCKET_NAME>'
@@ -216,6 +221,10 @@ modification when using an external S3 provider:
 <tr class="odd">
 <td><code>opscode_erchef['s3_url_ttl']</code></td>
 <td>The amount of time (in seconds) before connections to the server expire. If node bootstraps are timing out, increase this setting. Default value: <code>28800</code>.</td>
+</tr>
+<tr class="even">
+<td><code>opscode_erchef['s3_url_type']</code></td>
+<td> The URL style to use (<code>path</code> or <code>vhost</code>) when connecting to S3. Mainly used to manually override the default setting. Note that Amazon may eliminate path-style URLs on some or all S3 buckets in the future. Default value: <code>vhost</code>.</td>
 </tr>
 </tbody>
 </table>
