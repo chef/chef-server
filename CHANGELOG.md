@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.1.30 -->
-## [15.1.30](https://github.com/chef/chef-server/tree/15.1.30) (2022-10-26)
+<!-- latest_release 15.1.31 -->
+## [15.1.31](https://github.com/chef/chef-server/tree/15.1.31) (2022-10-26)
 
 #### Merged Pull Requests
-- Upgrades edits [#3477](https://github.com/chef/chef-server/pull/3477) ([IanMadd](https://github.com/IanMadd))
+- Bump nokogiri from 1.13.8 to 1.13.9 in /src/oc-id [#3475](https://github.com/chef/chef-server/pull/3475) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.1.7 -->
 ### Changes since 15.1.7 release
 
 #### Merged Pull Requests
+- Bump nokogiri from 1.13.8 to 1.13.9 in /src/oc-id [#3475](https://github.com/chef/chef-server/pull/3475) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.1.31 -->
 - Upgrades edits [#3477](https://github.com/chef/chef-server/pull/3477) ([IanMadd](https://github.com/IanMadd)) <!-- 15.1.30 -->
 - Update knife-tidy [#3473](https://github.com/chef/chef-server/pull/3473) ([vkarve-chef](https://github.com/vkarve-chef)) <!-- 15.1.29 -->
 - Replace AWS sigv2 with sigv4 [#2097](https://github.com/chef/chef-server/pull/2097) ([lbakerchef](https://github.com/lbakerchef)) <!-- 15.1.28 -->
