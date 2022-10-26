@@ -38,11 +38,17 @@ Requires License
 Supported Release
 : Chef Infra Server 14 and later are supported Chef Software releases. Earlier releases are not supported. For more information about supported Chef Software see the [Supported Versions]({{< relref "/versions#supported-commercial-distributions" >}}) documentation.
 
-##  General Chef Infra Server Upgrade Process
+## General Chef Infra Server Upgrade Process
 
 ### Standalone Server
 
-Please see any special notes for the version you are upgrading to in the [Release-Specific Steps](#release-specific-steps) section.
+{{< note >}}
+
+See the [Release-Specific Steps](#release-specific-steps) for information about upgrading specific versions of Chef Infra Server **before** starting the upgrade process.
+
+{{< /note >}}
+
+{{% chef-server/server_upgrade_duration %}}
 
 1. Run `vacuumdb` before starting the upgrade:
 
