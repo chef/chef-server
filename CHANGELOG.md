@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.2.3 -->
-## [15.2.3](https://github.com/chef/chef-server/tree/15.2.3) (2022-10-26)
+<!-- latest_release 15.2.4 -->
+## [15.2.4](https://github.com/chef/chef-server/tree/15.2.4) (2022-10-27)
 
 #### Merged Pull Requests
-- Add S3 configuration instructions to FrequentTasks.md [#3458](https://github.com/chef/chef-server/pull/3458) ([lbakerchef](https://github.com/lbakerchef))
+- Update opensearch version to 1.3.6. [#3479](https://github.com/chef/chef-server/pull/3479) ([sreepuramsudheer](https://github.com/sreepuramsudheer))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.1.7 -->
 ### Changes since 15.1.7 release
 
 #### Merged Pull Requests
+- Update opensearch version to 1.3.6. [#3479](https://github.com/chef/chef-server/pull/3479) ([sreepuramsudheer](https://github.com/sreepuramsudheer)) <!-- 15.2.4 -->
 - Add S3 configuration instructions to FrequentTasks.md [#3458](https://github.com/chef/chef-server/pull/3458) ([lbakerchef](https://github.com/lbakerchef)) <!-- 15.2.3 -->
 - Dev Doc - Suppressing Credentials Info in Umbrella [#3467](https://github.com/chef/chef-server/pull/3467) ([lbakerchef](https://github.com/lbakerchef)) <!-- 15.2.2 -->
 - Bump omnibus from `5bc091a` to `d1fe3bb` in /omnibus [#3476](https://github.com/chef/chef-server/pull/3476) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.2.1 -->
