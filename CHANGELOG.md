@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.2.4 -->
-## [15.2.4](https://github.com/chef/chef-server/tree/15.2.4) (2022-10-27)
+<!-- latest_release 15.2.5 -->
+## [15.2.5](https://github.com/chef/chef-server/tree/15.2.5) (2022-10-27)
 
 #### Merged Pull Requests
-- Update opensearch version to 1.3.6. [#3479](https://github.com/chef/chef-server/pull/3479) ([sreepuramsudheer](https://github.com/sreepuramsudheer))
+- Bump knife-ec-backup from 3.0.0 to 3.0.1 in /src/chef-server-ctl [#3480](https://github.com/chef/chef-server/pull/3480) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.1.7 -->
 ### Changes since 15.1.7 release
 
 #### Merged Pull Requests
+- Bump knife-ec-backup from 3.0.0 to 3.0.1 in /src/chef-server-ctl [#3480](https://github.com/chef/chef-server/pull/3480) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.2.5 -->
 - Update opensearch version to 1.3.6. [#3479](https://github.com/chef/chef-server/pull/3479) ([sreepuramsudheer](https://github.com/sreepuramsudheer)) <!-- 15.2.4 -->
 - Add S3 configuration instructions to FrequentTasks.md [#3458](https://github.com/chef/chef-server/pull/3458) ([lbakerchef](https://github.com/lbakerchef)) <!-- 15.2.3 -->
 - Dev Doc - Suppressing Credentials Info in Umbrella [#3467](https://github.com/chef/chef-server/pull/3467) ([lbakerchef](https://github.com/lbakerchef)) <!-- 15.2.2 -->
