@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.2.6 -->
-## [15.2.6](https://github.com/chef/chef-server/tree/15.2.6) (2022-10-28)
+<!-- latest_release 15.2.7 -->
+## [15.2.7](https://github.com/chef/chef-server/tree/15.2.7) (2022-10-28)
 
 #### Merged Pull Requests
-- Bump omnibus-software from `7d0e0fe` to `e9632cb` in /omnibus [#3487](https://github.com/chef/chef-server/pull/3487) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump berkshelf from 8.0.2 to 8.0.5 in /omnibus [#3486](https://github.com/chef/chef-server/pull/3486) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.1.7 -->
 ### Changes since 15.1.7 release
 
 #### Merged Pull Requests
+- Bump berkshelf from 8.0.2 to 8.0.5 in /omnibus [#3486](https://github.com/chef/chef-server/pull/3486) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.2.7 -->
 - Bump omnibus-software from `7d0e0fe` to `e9632cb` in /omnibus [#3487](https://github.com/chef/chef-server/pull/3487) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.2.6 -->
 - Bump knife-ec-backup from 3.0.0 to 3.0.1 in /src/chef-server-ctl [#3480](https://github.com/chef/chef-server/pull/3480) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.2.5 -->
 - Update opensearch version to 1.3.6. [#3479](https://github.com/chef/chef-server/pull/3479) ([sreepuramsudheer](https://github.com/sreepuramsudheer)) <!-- 15.2.4 -->
