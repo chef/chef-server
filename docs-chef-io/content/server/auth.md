@@ -386,6 +386,61 @@ common causes:
     minutes. This can be fixed by syncing the clock with an Network Time
     Protocol (NTP) server.
 
+## User public key update
+
+Chef infra server user can update public_key using below methods.
+-   Using reregister method
+    Use the reregister argument in knife command to regenerate an RSA key pair for a user. The public key will be stored on the Chef Infra Server and the private key will be displayed on STDOUT or written to a named file.
+    
+    Syntax:- knife user reregister USER_NAME (options)
+    Ex:- knife user reregister "Arjun Koch" 
+
+-  Using knife user key command
+    User can have multiple public keys associated with his account in chef server, each public key have a name and expiration date associated with it.
+    Name is an ascii string used to identify public key, expiration date for the public key is specified as an ISO 8601 formatted string: YYYY-MM-DDTHH:MM:SSZ.
+    User can list, add, edit and delete public keys with knife user key command, below are the operations supported.
+        knife user key create to create public key.
+        knife user key delete to delete public key.
+        knife user key list to list user public keys.
+        knife user key edit to edit public keys.
+
+    Constraints: User can't edit key details which is currently in use.
+
+    Ex:- To change the key pair of user1.
+       1) Check current keys associated with the user with the help of knife user key list USERNAME.
+          #knife user key list user1
+          default
+
+       2) Create new key pair with the help of knife user key create.
+          #knife user key create user1 --key-name new_key_03_11_2022
+
+              {
+                "user": "user1",
+                "name": "new_key_03_11_2022",
+                "expiration_date": "infinity",
+                "create_key": true
+              }
+
+       3) Make new key effective by placing it in user private key file.
+ 
+       4) Check current keys associated with the user.
+          # knife user key list user1
+          default
+          new_key_03_11_2022
+
+       5) Delete unwanted keys to minimise the security risks.
+          # knife user key delete user1 default
+              Do you really want to delete the key named default for the user named user1? (Y/N) Y
+          Deleted key named default for the user named user1
+
+       6) Check current keys associated with the user.
+          # knife user key list user1
+          new_key_03_11_2022
+
+-  Using knife user update command
+    public_key can be updated with the help of knife user update command, It is supported in the API V0 of the chef server and depricated in the API V1.
+    As of 12.1.0 public_key in reregister requests will cause a 400 response.
+
 ## Authorization
 
 For more information about Chef Infra Server Authorization, see
