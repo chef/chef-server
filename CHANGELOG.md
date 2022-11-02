@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.2.8 -->
-## [15.2.8](https://github.com/chef/chef-server/tree/15.2.8) (2022-10-28)
+<!-- latest_release 15.2.9 -->
+## [15.2.9](https://github.com/chef/chef-server/tree/15.2.9) (2022-11-02)
 
 #### Merged Pull Requests
-- Bump rspec from 3.11.0 to 3.12.0 in /src/chef-server-ctl [#3483](https://github.com/chef/chef-server/pull/3483) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Pin chef for omnibus to v 17 [#3490](https://github.com/chef/chef-server/pull/3490) ([marcparadise](https://github.com/marcparadise))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.1.7 -->
 ### Changes since 15.1.7 release
 
 #### Merged Pull Requests
+- Pin chef for omnibus to v 17 [#3490](https://github.com/chef/chef-server/pull/3490) ([marcparadise](https://github.com/marcparadise)) <!-- 15.2.9 -->
 - Bump rspec from 3.11.0 to 3.12.0 in /src/chef-server-ctl [#3483](https://github.com/chef/chef-server/pull/3483) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.2.8 -->
 - Bump berkshelf from 8.0.2 to 8.0.5 in /omnibus [#3486](https://github.com/chef/chef-server/pull/3486) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.2.7 -->
 - Bump omnibus-software from `7d0e0fe` to `e9632cb` in /omnibus [#3487](https://github.com/chef/chef-server/pull/3487) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.2.6 -->
