@@ -10,5 +10,6 @@ end
 group :test do
   gem 'test-kitchen' # for Test Kitchen testing of the omnibus builds
   gem 'berkshelf' # depsolving the Test Kitchen suite
+  gem 'chef', '< 18' # Do not pull in chef 18 until the build image is updated with > ruby 3.0
   gem 'rake'
 end
