@@ -31,6 +31,8 @@
                   pooler
                  ]},
   {env, [
+         {s3_url_type, undefined},
+
          %% S3 Access credentials for Bookshelf operations
          {s3_access_key_id, undefined},
          {s3_secret_key_id, undefined},

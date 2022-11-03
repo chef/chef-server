@@ -21,15 +21,16 @@
 
 -module(bksw_sec).
 
--export([encode_access_denied_error_response/3] ).
--export([is_authorized/2                      ] ).
--export([parse_authorization/1                ] ).
 -include("internal.hrl"                         ).
 -include_lib("erlcloud/include/erlcloud_aws.hrl").
 
 -ifdef(TEST).
--compile([export_all, nowarn_export_all       ] ).
+-compile([export_all, nowarn_export_all        ]).
 -endif.
+
+-export([encode_access_denied_error_response/3,
+         is_authorized/2,
+         parse_authorization/1                 ]).
 
 %%===================================================================
 %% API functions
