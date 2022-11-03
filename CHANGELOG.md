@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.3.0 -->
-## [15.3.0](https://github.com/chef/chef-server/tree/15.3.0) (2022-11-03)
+<!-- latest_release 15.3.1 -->
+## [15.3.1](https://github.com/chef/chef-server/tree/15.3.1) (2022-11-03)
 
 #### Merged Pull Requests
-- Vhost [#2147](https://github.com/chef/chef-server/pull/2147) ([lbakerchef](https://github.com/lbakerchef))
+- Revert &quot;Bump doorkeeper from 4.4.3 to 5.6.0 in /src/oc-id&quot; [#3495](https://github.com/chef/chef-server/pull/3495) ([vinay-satish](https://github.com/vinay-satish))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.1.7 -->
 ### Changes since 15.1.7 release
 
 #### Merged Pull Requests
+- Revert &quot;Bump doorkeeper from 4.4.3 to 5.6.0 in /src/oc-id&quot; [#3495](https://github.com/chef/chef-server/pull/3495) ([vinay-satish](https://github.com/vinay-satish)) <!-- 15.3.1 -->
 - Vhost [#2147](https://github.com/chef/chef-server/pull/2147) ([lbakerchef](https://github.com/lbakerchef)) <!-- 15.3.0 -->
 - Add ubuntu-22.04 builder and tester [#3491](https://github.com/chef/chef-server/pull/3491) ([jashaik](https://github.com/jashaik)) <!-- 15.2.10 -->
 - Pin chef for omnibus to v 17 [#3490](https://github.com/chef/chef-server/pull/3490) ([marcparadise](https://github.com/marcparadise)) <!-- 15.2.9 -->
