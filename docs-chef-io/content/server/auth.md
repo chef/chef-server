@@ -388,17 +388,17 @@ common causes:
 
 ## User public key update
 
-Chef infra server user can update public_key using below methods.
+Chef infra server user can update public_key using the following methods.
 -   Using reregister method
-    Use the reregister argument in knife command to regenerate an RSA key pair for a user. The public key will be stored on the Chef Infra Server and the private key will be displayed on STDOUT or written to a named file.
+    Use the reregister argument in the knife command to regenerate an RSA key pair for a user. The public key will be stored on the Chef Infra Server and the private key will be displayed on STDOUT or written to a named file.
     
     Syntax:- knife user reregister USER_NAME (options)
     Ex:- knife user reregister "Arjun Koch" 
 
 -  Using knife user key command
-    User can have multiple public keys associated with his account in chef server, each public key have a name and expiration date associated with it.
-    Name is an ascii string used to identify public key, expiration date for the public key is specified as an ISO 8601 formatted string: YYYY-MM-DDTHH:MM:SSZ.
-    User can list, add, edit and delete public keys with knife user key command, below are the operations supported.
+    User can have multiple public keys associated with his chef server account.  Each public key has a name and expiration date associated with it.
+    Name is an ASCII string used to identify the public key.  The expiration date for the public key is specified as an ISO 8601 formatted string: YYYY-MM-DDTHH:MM:SSZ.
+    User can list, add, edit and delete public keys with knife user key command.  The following operations supported.
         knife user key create to create public key.
         knife user key delete to delete public key.
         knife user key list to list user public keys.
