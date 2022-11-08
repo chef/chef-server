@@ -22,6 +22,8 @@
 
 # Completely clean up after a given service / package
 
+require 'fileutils'
+
 property :package, String, name_property: true
 
 # Directories that should be recursively removed
@@ -64,6 +66,11 @@ end
 
 action_class do
   def remove_directory(dir)
+    fileutils dir do
+      action :delete
+      recursive true
+      force true
+    end
     directory dir do
       action :delete
       recursive true
