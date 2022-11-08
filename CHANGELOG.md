@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.3.1 -->
-## [15.3.1](https://github.com/chef/chef-server/tree/15.3.1) (2022-11-03)
+<!-- latest_release 15.3.2 -->
+## [15.3.2](https://github.com/chef/chef-server/tree/15.3.2) (2022-11-08)
 
 #### Merged Pull Requests
-- Revert &quot;Bump doorkeeper from 4.4.3 to 5.6.0 in /src/oc-id&quot; [#3495](https://github.com/chef/chef-server/pull/3495) ([vinay-satish](https://github.com/vinay-satish))
+- Revise docs for AWS Settings; Add new `s3_path_or_vhost` configuration [#3481](https://github.com/chef/chef-server/pull/3481) ([lbakerchef](https://github.com/lbakerchef))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.1.7 -->
 ### Changes since 15.1.7 release
 
 #### Merged Pull Requests
+- Revise docs for AWS Settings; Add new `s3_path_or_vhost` configuration [#3481](https://github.com/chef/chef-server/pull/3481) ([lbakerchef](https://github.com/lbakerchef)) <!-- 15.3.2 -->
 - Revert &quot;Bump doorkeeper from 4.4.3 to 5.6.0 in /src/oc-id&quot; [#3495](https://github.com/chef/chef-server/pull/3495) ([vinay-satish](https://github.com/vinay-satish)) <!-- 15.3.1 -->
 - Vhost [#2147](https://github.com/chef/chef-server/pull/2147) ([lbakerchef](https://github.com/lbakerchef)) <!-- 15.3.0 -->
 - Add ubuntu-22.04 builder and tester [#3491](https://github.com/chef/chef-server/pull/3491) ([jashaik](https://github.com/jashaik)) <!-- 15.2.10 -->
