@@ -1,59 +1,57 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.3.2 -->
-## [15.3.2](https://github.com/chef/chef-server/tree/15.3.2) (2022-11-08)
-
-#### Merged Pull Requests
-- Revise docs for AWS Settings; Add new `s3_path_or_vhost` configuration [#3481](https://github.com/chef/chef-server/pull/3481) ([lbakerchef](https://github.com/lbakerchef))
+<!-- latest_release -->
 <!-- latest_release -->
 
-<!-- release_rollup since=15.1.7 -->
-### Changes since 15.1.7 release
-
-#### Merged Pull Requests
-- Revise docs for AWS Settings; Add new `s3_path_or_vhost` configuration [#3481](https://github.com/chef/chef-server/pull/3481) ([lbakerchef](https://github.com/lbakerchef)) <!-- 15.3.2 -->
-- Revert &quot;Bump doorkeeper from 4.4.3 to 5.6.0 in /src/oc-id&quot; [#3495](https://github.com/chef/chef-server/pull/3495) ([vinay-satish](https://github.com/vinay-satish)) <!-- 15.3.1 -->
-- Vhost [#2147](https://github.com/chef/chef-server/pull/2147) ([lbakerchef](https://github.com/lbakerchef)) <!-- 15.3.0 -->
-- Add ubuntu-22.04 builder and tester [#3491](https://github.com/chef/chef-server/pull/3491) ([jashaik](https://github.com/jashaik)) <!-- 15.2.10 -->
-- Pin chef for omnibus to v 17 [#3490](https://github.com/chef/chef-server/pull/3490) ([marcparadise](https://github.com/marcparadise)) <!-- 15.2.9 -->
-- Bump rspec from 3.11.0 to 3.12.0 in /src/chef-server-ctl [#3483](https://github.com/chef/chef-server/pull/3483) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.2.8 -->
-- Bump berkshelf from 8.0.2 to 8.0.5 in /omnibus [#3486](https://github.com/chef/chef-server/pull/3486) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.2.7 -->
-- Bump omnibus-software from `7d0e0fe` to `e9632cb` in /omnibus [#3487](https://github.com/chef/chef-server/pull/3487) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.2.6 -->
-- Bump knife-ec-backup from 3.0.0 to 3.0.1 in /src/chef-server-ctl [#3480](https://github.com/chef/chef-server/pull/3480) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.2.5 -->
-- Update opensearch version to 1.3.6. [#3479](https://github.com/chef/chef-server/pull/3479) ([sreepuramsudheer](https://github.com/sreepuramsudheer)) <!-- 15.2.4 -->
-- Add S3 configuration instructions to FrequentTasks.md [#3458](https://github.com/chef/chef-server/pull/3458) ([lbakerchef](https://github.com/lbakerchef)) <!-- 15.2.3 -->
-- Dev Doc - Suppressing Credentials Info in Umbrella [#3467](https://github.com/chef/chef-server/pull/3467) ([lbakerchef](https://github.com/lbakerchef)) <!-- 15.2.2 -->
-- Bump omnibus from `5bc091a` to `d1fe3bb` in /omnibus [#3476](https://github.com/chef/chef-server/pull/3476) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.2.1 -->
-- Bump test-kitchen from 3.3.2 to 3.4.0 in /omnibus [#3478](https://github.com/chef/chef-server/pull/3478) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.2.0 -->
-- INFS-331 - Making sure to clean the cache before apt-get update [#3463](https://github.com/chef/chef-server/pull/3463) ([jashaik](https://github.com/jashaik)) <!-- 15.1.33 -->
-- Bump rspec-rails from 5.1.2 to 6.0.1 in /src/oc-id [#3474](https://github.com/chef/chef-server/pull/3474) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.1.32 -->
-- Bump nokogiri from 1.13.8 to 1.13.9 in /src/oc-id [#3475](https://github.com/chef/chef-server/pull/3475) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.1.31 -->
-- Upgrades edits [#3477](https://github.com/chef/chef-server/pull/3477) ([IanMadd](https://github.com/IanMadd)) <!-- 15.1.30 -->
-- Update knife-tidy [#3473](https://github.com/chef/chef-server/pull/3473) ([vkarve-chef](https://github.com/vkarve-chef)) <!-- 15.1.29 -->
-- Replace AWS sigv2 with sigv4 [#2097](https://github.com/chef/chef-server/pull/2097) ([lbakerchef](https://github.com/lbakerchef)) <!-- 15.1.28 -->
-- Add Infra-Server 15 and re-organize for easier use [#3469](https://github.com/chef/chef-server/pull/3469) ([Stromweld](https://github.com/Stromweld)) <!-- 15.1.27 -->
-- Bump selenium-webdriver from 4.4.0 to 4.5.0 in /src/oc-id [#3462](https://github.com/chef/chef-server/pull/3462) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.1.26 -->
-- Bump omnibus from `ec19442` to `5bc091a` in /omnibus [#3472](https://github.com/chef/chef-server/pull/3472) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.1.25 -->
-- Bump spring from 4.0.0 to 4.1.0 in /src/oc-id [#3457](https://github.com/chef/chef-server/pull/3457) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.1.24 -->
-- Bump omnibus-software from `73a95f2` to `7d0e0fe` in /omnibus [#3470](https://github.com/chef/chef-server/pull/3470) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.1.23 -->
-- Bump pg from 1.4.3 to 1.4.4 in /src/oc-id [#3465](https://github.com/chef/chef-server/pull/3465) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.1.22 -->
-- Update rspec_junit_formatter requirement from &gt;= 0.1.1, &lt; 0.6.0 to &gt;= 0.1.1, &lt; 0.7.0 in /src/oc_bifrost/oc-bifrost-pedant [#3461](https://github.com/chef/chef-server/pull/3461) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.1.21 -->
-- Bump chef_fixie from 1.0.3 to 1.0.8 in /src/chef-server-ctl [#3460](https://github.com/chef/chef-server/pull/3460) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.1.20 -->
-- Bump rspec_junit_formatter from 0.5.1 to 0.6.0 in /oc-chef-pedant [#3459](https://github.com/chef/chef-server/pull/3459) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.1.19 -->
-- Bump activesupport from 7.0.3.1 to 7.0.4 in /src/oc_bifrost/oc-bifrost-pedant [#3447](https://github.com/chef/chef-server/pull/3447) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.1.18 -->
-- Bump activesupport from 7.0.3.1 to 7.0.4 in /oc-chef-pedant [#3446](https://github.com/chef/chef-server/pull/3446) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.1.17 -->
-- Bump doorkeeper from 4.4.3 to 5.6.0 in /src/oc-id [#3444](https://github.com/chef/chef-server/pull/3444) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.1.16 -->
-- Add knowledge of previous installed versions of server to gather logs. [#3439](https://github.com/chef/chef-server/pull/3439) ([sreepuramsudheer](https://github.com/sreepuramsudheer)) <!-- 15.1.15 -->
-- Bump mixlib-install from 3.12.19 to 3.12.20 in /src/chef-server-ctl [#3443](https://github.com/chef/chef-server/pull/3443) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.1.14 -->
-- Correcting the email validation for knife user cerate [#3442](https://github.com/chef/chef-server/pull/3442) ([vinay-satish](https://github.com/vinay-satish)) <!-- 15.1.13 -->
-- Bump jwt from 2.4.1 to 2.5.0 in /src/oc-id [#3435](https://github.com/chef/chef-server/pull/3435) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.1.12 -->
-- Bump omnibus-software from `7e22da8` to `73a95f2` in /omnibus [#3434](https://github.com/chef/chef-server/pull/3434) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.1.11 -->
-- Bump test-kitchen from 3.3.1 to 3.3.2 in /omnibus [#3418](https://github.com/chef/chef-server/pull/3418) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.1.10 -->
-- Minor docs fixes [#3438](https://github.com/chef/chef-server/pull/3438) ([IanMadd](https://github.com/IanMadd)) <!-- 15.1.9 -->
-- Bump berkshelf from 8.0.1 to 8.0.2 in /omnibus [#3350](https://github.com/chef/chef-server/pull/3350) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.1.8 -->
+<!-- release_rollup -->
 <!-- release_rollup -->
 
 <!-- latest_stable_release -->
+## [15.3.2](https://github.com/chef/chef-server/tree/15.3.2) (2022-11-09)
+
+#### Merged Pull Requests
+- Bump berkshelf from 8.0.1 to 8.0.2 in /omnibus [#3350](https://github.com/chef/chef-server/pull/3350) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Minor docs fixes [#3438](https://github.com/chef/chef-server/pull/3438) ([IanMadd](https://github.com/IanMadd))
+- Bump test-kitchen from 3.3.1 to 3.3.2 in /omnibus [#3418](https://github.com/chef/chef-server/pull/3418) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump omnibus-software from `7e22da8` to `73a95f2` in /omnibus [#3434](https://github.com/chef/chef-server/pull/3434) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump jwt from 2.4.1 to 2.5.0 in /src/oc-id [#3435](https://github.com/chef/chef-server/pull/3435) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Correcting the email validation for knife user cerate [#3442](https://github.com/chef/chef-server/pull/3442) ([vinay-satish](https://github.com/vinay-satish))
+- Bump mixlib-install from 3.12.19 to 3.12.20 in /src/chef-server-ctl [#3443](https://github.com/chef/chef-server/pull/3443) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Add knowledge of previous installed versions of server to gather logs. [#3439](https://github.com/chef/chef-server/pull/3439) ([sreepuramsudheer](https://github.com/sreepuramsudheer))
+- Bump doorkeeper from 4.4.3 to 5.6.0 in /src/oc-id [#3444](https://github.com/chef/chef-server/pull/3444) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump activesupport from 7.0.3.1 to 7.0.4 in /oc-chef-pedant [#3446](https://github.com/chef/chef-server/pull/3446) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump activesupport from 7.0.3.1 to 7.0.4 in /src/oc_bifrost/oc-bifrost-pedant [#3447](https://github.com/chef/chef-server/pull/3447) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump rspec_junit_formatter from 0.5.1 to 0.6.0 in /oc-chef-pedant [#3459](https://github.com/chef/chef-server/pull/3459) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump chef_fixie from 1.0.3 to 1.0.8 in /src/chef-server-ctl [#3460](https://github.com/chef/chef-server/pull/3460) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Update rspec_junit_formatter requirement from &gt;= 0.1.1, &lt; 0.6.0 to &gt;= 0.1.1, &lt; 0.7.0 in /src/oc_bifrost/oc-bifrost-pedant [#3461](https://github.com/chef/chef-server/pull/3461) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump pg from 1.4.3 to 1.4.4 in /src/oc-id [#3465](https://github.com/chef/chef-server/pull/3465) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump omnibus-software from `73a95f2` to `7d0e0fe` in /omnibus [#3470](https://github.com/chef/chef-server/pull/3470) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump spring from 4.0.0 to 4.1.0 in /src/oc-id [#3457](https://github.com/chef/chef-server/pull/3457) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump omnibus from `ec19442` to `5bc091a` in /omnibus [#3472](https://github.com/chef/chef-server/pull/3472) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump selenium-webdriver from 4.4.0 to 4.5.0 in /src/oc-id [#3462](https://github.com/chef/chef-server/pull/3462) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Add Infra-Server 15 and re-organize for easier use [#3469](https://github.com/chef/chef-server/pull/3469) ([Stromweld](https://github.com/Stromweld))
+- Replace AWS sigv2 with sigv4 [#2097](https://github.com/chef/chef-server/pull/2097) ([lbakerchef](https://github.com/lbakerchef))
+- Update knife-tidy [#3473](https://github.com/chef/chef-server/pull/3473) ([vkarve-chef](https://github.com/vkarve-chef))
+- Upgrades edits [#3477](https://github.com/chef/chef-server/pull/3477) ([IanMadd](https://github.com/IanMadd))
+- Bump nokogiri from 1.13.8 to 1.13.9 in /src/oc-id [#3475](https://github.com/chef/chef-server/pull/3475) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump rspec-rails from 5.1.2 to 6.0.1 in /src/oc-id [#3474](https://github.com/chef/chef-server/pull/3474) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- INFS-331 - Making sure to clean the cache before apt-get update [#3463](https://github.com/chef/chef-server/pull/3463) ([jashaik](https://github.com/jashaik))
+- Bump test-kitchen from 3.3.2 to 3.4.0 in /omnibus [#3478](https://github.com/chef/chef-server/pull/3478) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump omnibus from `5bc091a` to `d1fe3bb` in /omnibus [#3476](https://github.com/chef/chef-server/pull/3476) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Dev Doc - Suppressing Credentials Info in Umbrella [#3467](https://github.com/chef/chef-server/pull/3467) ([lbakerchef](https://github.com/lbakerchef))
+- Add S3 configuration instructions to FrequentTasks.md [#3458](https://github.com/chef/chef-server/pull/3458) ([lbakerchef](https://github.com/lbakerchef))
+- Update opensearch version to 1.3.6. [#3479](https://github.com/chef/chef-server/pull/3479) ([sreepuramsudheer](https://github.com/sreepuramsudheer))
+- Bump knife-ec-backup from 3.0.0 to 3.0.1 in /src/chef-server-ctl [#3480](https://github.com/chef/chef-server/pull/3480) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump omnibus-software from `7d0e0fe` to `e9632cb` in /omnibus [#3487](https://github.com/chef/chef-server/pull/3487) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump berkshelf from 8.0.2 to 8.0.5 in /omnibus [#3486](https://github.com/chef/chef-server/pull/3486) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump rspec from 3.11.0 to 3.12.0 in /src/chef-server-ctl [#3483](https://github.com/chef/chef-server/pull/3483) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Pin chef for omnibus to v 17 [#3490](https://github.com/chef/chef-server/pull/3490) ([marcparadise](https://github.com/marcparadise))
+- Add ubuntu-22.04 builder and tester [#3491](https://github.com/chef/chef-server/pull/3491) ([jashaik](https://github.com/jashaik))
+- Vhost [#2147](https://github.com/chef/chef-server/pull/2147) ([lbakerchef](https://github.com/lbakerchef))
+- Revert &quot;Bump doorkeeper from 4.4.3 to 5.6.0 in /src/oc-id&quot; [#3495](https://github.com/chef/chef-server/pull/3495) ([vinay-satish](https://github.com/vinay-satish))
+- Revise docs for AWS Settings; Add new `s3_path_or_vhost` configuration [#3481](https://github.com/chef/chef-server/pull/3481) ([lbakerchef](https://github.com/lbakerchef))
+<!-- latest_stable_release -->
+
 ## [15.1.7](https://github.com/chef/chef-server/tree/15.1.7) (2022-08-30)
 
 #### Merged Pull Requests
@@ -91,7 +89,6 @@
 - Upgrade Erlang to 24.2 [#3206](https://github.com/chef/chef-server/pull/3206) ([lbakerchef](https://github.com/lbakerchef))
 - Bump pg from 1.4.1 to 1.4.3 in /src/chef-server-ctl [#3422](https://github.com/chef/chef-server/pull/3422) ([dependabot[bot]](https://github.com/dependabot[bot]))
 - Bump selenium-webdriver from 4.3.0 to 4.4.0 in /src/oc-id [#3421](https://github.com/chef/chef-server/pull/3421) ([dependabot[bot]](https://github.com/dependabot[bot]))
-<!-- latest_stable_release -->
 
 ## [15.0.9](https://github.com/chef/chef-server/tree/15.0.9) (2022-06-23)
 
