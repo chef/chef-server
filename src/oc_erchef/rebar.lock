@@ -14,7 +14,7 @@
   0},
  {<<"chef_authn">>,
   {git,"https://github.com/chef/chef_authn",
-       {ref,"2ba22845aa5d706cd4e3d5b867f0d9ca038e649a"}},
+       {branch,"lbaker/https"}},
   0},
  {<<"chef_secrets">>,
   {git,"https://github.com/chef/chef_secrets",
