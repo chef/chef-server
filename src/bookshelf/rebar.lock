@@ -27,7 +27,7 @@
   1},
  {<<"erlcloud">>,
   {git,"https://github.com/chef/erlcloud",
-       {ref,"52ff8e7a0361a206bb0efb56453e9f1cffd142fb"}},
+       {branch,"lbaker/deps-scratch"}},
   0},
  {<<"erlsom">>,
   {git,"https://github.com/chef/erlsom",
