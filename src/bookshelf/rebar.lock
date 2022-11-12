@@ -27,7 +27,7 @@
   1},
  {<<"erlcloud">>,
   {git,"https://github.com/chef/erlcloud",
-       {branch,"lbaker/presigned-headers"}},
+       {branch,"lbaker/deps-scratch"}},
   0},
  {<<"erlsom">>,
   {git,"https://github.com/chef/erlsom",
