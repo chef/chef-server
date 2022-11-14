@@ -569,7 +569,17 @@ The Chef Infra Server 14 upgrade does not automatically reindex existing externa
 
 #### Upgrading to 14.14
 
-Chef Infra Server 14.14 supports external OpenSearch for indexing. Please follow the migration section below to migrate from Elasticsearch to external OpenSearch.
+Chef Infra Server 14.14 supports external OpenSearch for indexing. Please follow the migration section below to migrate from
+Elasticsearch to external OpenSearch.
+
+{{< warning >}} 
+
+Moving to an external data store install topology results in many additional requirements and responsibilities of the customer, as maintenance, management, and upgrades of external data stores are not automated as they are with embedded data stores.
+
+If you are not aware of these items and have a standalone Chef Infra Server installation with embedded data stores, move back to the
+general upgrade steps and the 14.16.x section at the [14.16.19 specific upgrade steps](#upgrading-to-1416)
+
+{{< /warning >}}
 
 #### Steps To Enable External OpenSearch
 
