@@ -676,7 +676,7 @@ chef-server-ctl cleanup-bifrost
 
 ##### Upgrade Steps
 
-Follow the Chef Infra Server upgrade instructions below.
+Continue with the upgrade by following the general upgrade steps at [General Standalone Upgrade Process](#general-chef-infra-server-upgrade-process). You will only have to perform the full vacuumdb once.
 
 {{< note >}}
 
