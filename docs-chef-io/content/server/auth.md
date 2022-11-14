@@ -110,7 +110,7 @@ cURL:
 _chef_dir () {
   # Helper function:
   # Recursive function that searches for chef configuration directory
-  # It looks upward from the cwd until it hits /.  If no directory is found,
+  # It looks upward from the cwd until it hits /. If no directory is found,
   # ~/.chef is chosen if it exists
   # You could simply hard-code the path below
 
@@ -386,60 +386,76 @@ common causes:
     minutes. This can be fixed by syncing the clock with an Network Time
     Protocol (NTP) server.
 
-## User public key update
+## Update a User's Key Pair for Authenticating With Chef Infra Server
 
-Chef infra server user can update public_key using the following methods.
--   Using reregister method
-    Use the reregister argument in the knife command to regenerate an RSA key pair for a user. The public key will be stored on the Chef Infra Server and the private key will be displayed on STDOUT or written to a named file.
-    
-    Syntax:- knife user reregister USER_NAME (options)
-    Ex:- knife user reregister "Arjun Koch" 
+You can update a user's key pair on Chef Infra Server with knife using either the [`knife user reregister`]({{< relref "/workstation/knife_user#reregister" >}}) subcommand, or the [`knife user key`]({{< relref "/workstation/knife_user" >}}) subcommands.
 
--  Using knife user key command
-    User can have multiple public keys associated with his chef server account.  Each public key has a name and expiration date associated with it.
-    Name is an ASCII string used to identify the public key.  The expiration date for the public key is specified as an ISO 8601 formatted string: YYYY-MM-DDTHH:MM:SSZ.
-    User can list, add, edit and delete public keys with knife user key command.  The following operations supported.
-        knife user key create to create public key.
-        knife user key delete to delete public key.
-        knife user key list to list user public keys.
-        knife user key edit to edit public keys.
+### knife user reregister
 
-    Constraints: User can't edit key details which is currently in use.
+Use [`knife user reregister`]({{< relref "/workstation/knife_user#reregister" >}}) to regenerate an RSA key pair for a user. Knife will store the public key on the Chef Infra Server and the private key will be displayed in the standard output, or use the `--file` option to write to a named file.
 
-    Ex:- To change the key pair of user1.
-       1) Check current keys associated with the user with the help of knife user key list USERNAME.
-          #knife user key list user1
-          default
+```sh
+knife user reregister USERNAME (options)
+```
 
-       2) Create new key pair with the help of knife user key create.
-          #knife user key create user1 --key-name new_key_03_11_2022
+### knife user key
 
-              {
-                "user": "user1",
-                "name": "new_key_03_11_2022",
-                "expiration_date": "infinity",
-                "create_key": true
-              }
+You can list, add, edit, and delete public keys using the following subcommands:
 
-       3) Make new key effective by placing it in user private key file.
- 
-       4) Check current keys associated with the user.
-          # knife user key list user1
-          default
-          new_key_03_11_2022
+- [`knife user key create`]({{< relref "/workstation/knife_user#key-create" >}})
+- [`knife user key delete`]({{< relref "/workstation/knife_user#key-delete" >}})
+- [`knife user key list`]({{< relref "/workstation/knife_user#key-list" >}})
+- [`knife user key edit`]({{< relref "/workstation/knife_user#key-edit" >}})
 
-       5) Delete unwanted keys to minimise the security risks.
-          # knife user key delete user1 default
-              Do you really want to delete the key named default for the user named user1? (Y/N) Y
-          Deleted key named default for the user named user1
+{{< note >}}
 
-       6) Check current keys associated with the user.
-          # knife user key list user1
-          new_key_03_11_2022
+You can't modify a public key while using that same key to authenticate with Chef Infra Server. To update a user's key pair using the `knife user key` subcommands, create a new key pair and then delete the old key pair.
 
--  Using knife user update command
-    public_key can be updated with the help of knife user update command, It is supported in the API V0 of the chef server and depricated in the API V1.
-    As of 12.1.0 public_key in reregister requests will cause a 400 response.
+{{< /note >}}
+
+To update a user's key pair:
+
+1. Check the current keys associated with the user:
+
+   ```sh
+   knife user key list USERNAME
+   ```
+
+1. Create a new key pair:
+
+   ```sh
+   knife user key create USERNAME --key-name KEYNAME --expiration-date YYYY-MM-DDTHH:MM:SSZ
+   ```
+
+   Knife will open the `config.rb` or `credentials` file in your text editor. Modify the user credentials to match the newly created key pair name and expiration date.
+
+   {{< note >}}
+
+   Specify the expiration date in ISO 8601 format.
+
+   The expiration date is optional. User keys don't expire if an expiration date isn't specified.
+
+   {{< /note >}}
+
+1. Make the new user key active by placing the generated PEM file in the `.chef` directory on your workstation.
+
+1. Check the list of current keys associated with the user:
+
+   ```sh
+   knife user key list USERNAME
+   ```
+
+1. Delete any old or unwanted keys to reduce security risks:
+
+   ```sh
+   knife user key delete USERNAME OLD_KEY_NAME
+   ```
+
+1. Check the list of current keys associated with the user to verify that the new key has been added and any older keys have been deleted:
+
+   ```sh
+   knife user key list USERNAME
+   ```
 
 ## Authorization
 
