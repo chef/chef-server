@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.3.3 -->
-## [15.3.3](https://github.com/chef/chef-server/tree/15.3.3) (2022-11-16)
+<!-- latest_release 15.3.4 -->
+## [15.3.4](https://github.com/chef/chef-server/tree/15.3.4) (2022-11-16)
 
 #### Merged Pull Requests
-- Bump selenium-webdriver from 4.5.0 to 4.6.1 in /src/oc-id [#3498](https://github.com/chef/chef-server/pull/3498) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump capybara from 3.37.1 to 3.38.0 in /src/oc-id [#3499](https://github.com/chef/chef-server/pull/3499) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.3.2 -->
 ### Changes since 15.3.2 release
 
 #### Merged Pull Requests
+- Bump capybara from 3.37.1 to 3.38.0 in /src/oc-id [#3499](https://github.com/chef/chef-server/pull/3499) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.3.4 -->
 - Bump selenium-webdriver from 4.5.0 to 4.6.1 in /src/oc-id [#3498](https://github.com/chef/chef-server/pull/3498) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.3.3 -->
 <!-- release_rollup -->
 
