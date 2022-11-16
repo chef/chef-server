@@ -427,11 +427,11 @@ To update a user's key pair:
    knife user key create USERNAME --key-name KEYNAME --expiration-date YYYY-MM-DDTHH:MM:SSZ --file FILENAME
    ```
 
-   Knife will generate a new private key (PEM file) using the specified filename.
-
    Knife will open your text editor with a data file containing the username, key name, and key pair expiration date that will be sent to the Chef Infra Server.
 
    Modify the username, key name, and key expiration date to match the new key pair that you are creating, then save the file and close your editor.
+
+   Knife will also generate a new private key (PEM file) using the specified filename.
 
    {{< note >}}
 
@@ -441,9 +441,9 @@ To update a user's key pair:
 
    {{< /note >}}
 
-1. Open your `config.rb` file or `credentials` file and modify it to match the new key name.
-
 1. Make the new user key active by placing the generated PEM file in the `.chef` directory on your workstation.
+
+1. Open your `config.rb` file or `credentials` file and modify it to match the new key name.
 
 1. Check the list of current keys associated with the user:
 
