@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.3.9 -->
-## [15.3.9](https://github.com/chef/chef-server/tree/15.3.9) (2022-11-17)
+<!-- latest_release 15.3.10 -->
+## [15.3.10](https://github.com/chef/chef-server/tree/15.3.10) (2022-11-17)
 
 #### Merged Pull Requests
-- Bump omnibus-software from `e9632cb` to `ab655a5` in /omnibus [#3512](https://github.com/chef/chef-server/pull/3512) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- sqerl master -&gt; main [#3504](https://github.com/chef/chef-server/pull/3504) ([lbakerchef](https://github.com/lbakerchef))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.3.2 -->
 ### Changes since 15.3.2 release
 
 #### Merged Pull Requests
+- sqerl master -&gt; main [#3504](https://github.com/chef/chef-server/pull/3504) ([lbakerchef](https://github.com/lbakerchef)) <!-- 15.3.10 -->
 - Bump omnibus-software from `e9632cb` to `ab655a5` in /omnibus [#3512](https://github.com/chef/chef-server/pull/3512) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.3.9 -->
 - Document: Added documentation for user public key update methods. [#3492](https://github.com/chef/chef-server/pull/3492) ([sreepuramsudheer](https://github.com/sreepuramsudheer)) <!-- 15.3.8 -->
 - Made nginx[ssl_port] read from config for reindex. [#3501](https://github.com/chef/chef-server/pull/3501) ([sreepuramsudheer](https://github.com/sreepuramsudheer)) <!-- 15.3.7 -->
