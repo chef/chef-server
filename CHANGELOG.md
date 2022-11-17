@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.3.6 -->
-## [15.3.6](https://github.com/chef/chef-server/tree/15.3.6) (2022-11-17)
+<!-- latest_release 15.3.7 -->
+## [15.3.7](https://github.com/chef/chef-server/tree/15.3.7) (2022-11-17)
 
 #### Merged Pull Requests
-- Bump jquery-rails from 4.5.0 to 4.5.1 in /src/oc-id [#3509](https://github.com/chef/chef-server/pull/3509) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Made nginx[ssl_port] read from config for reindex. [#3501](https://github.com/chef/chef-server/pull/3501) ([sreepuramsudheer](https://github.com/sreepuramsudheer))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.3.2 -->
 ### Changes since 15.3.2 release
 
 #### Merged Pull Requests
+- Made nginx[ssl_port] read from config for reindex. [#3501](https://github.com/chef/chef-server/pull/3501) ([sreepuramsudheer](https://github.com/sreepuramsudheer)) <!-- 15.3.7 -->
 - Bump jquery-rails from 4.5.0 to 4.5.1 in /src/oc-id [#3509](https://github.com/chef/chef-server/pull/3509) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.3.6 -->
 - Bump mixlib-install from 3.12.20 to 3.12.24 in /src/chef-server-ctl [#3507](https://github.com/chef/chef-server/pull/3507) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.3.5 -->
 - Bump capybara from 3.37.1 to 3.38.0 in /src/oc-id [#3499](https://github.com/chef/chef-server/pull/3499) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.3.4 -->
