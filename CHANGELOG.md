@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.3.7 -->
-## [15.3.7](https://github.com/chef/chef-server/tree/15.3.7) (2022-11-17)
+<!-- latest_release 15.3.8 -->
+## [15.3.8](https://github.com/chef/chef-server/tree/15.3.8) (2022-11-17)
 
 #### Merged Pull Requests
-- Made nginx[ssl_port] read from config for reindex. [#3501](https://github.com/chef/chef-server/pull/3501) ([sreepuramsudheer](https://github.com/sreepuramsudheer))
+- Document: Added documentation for user public key update methods. [#3492](https://github.com/chef/chef-server/pull/3492) ([sreepuramsudheer](https://github.com/sreepuramsudheer))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.3.2 -->
 ### Changes since 15.3.2 release
 
 #### Merged Pull Requests
+- Document: Added documentation for user public key update methods. [#3492](https://github.com/chef/chef-server/pull/3492) ([sreepuramsudheer](https://github.com/sreepuramsudheer)) <!-- 15.3.8 -->
 - Made nginx[ssl_port] read from config for reindex. [#3501](https://github.com/chef/chef-server/pull/3501) ([sreepuramsudheer](https://github.com/sreepuramsudheer)) <!-- 15.3.7 -->
 - Bump jquery-rails from 4.5.0 to 4.5.1 in /src/oc-id [#3509](https://github.com/chef/chef-server/pull/3509) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.3.6 -->
 - Bump mixlib-install from 3.12.20 to 3.12.24 in /src/chef-server-ctl [#3507](https://github.com/chef/chef-server/pull/3507) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.3.5 -->
