@@ -34,7 +34,7 @@ decode(Bin) ->
     try
         jiffy:decode(Bin)
     catch
-        throw:{error, _} ->
+        error:_ ->
             throw({error, invalid_json})
     end.
 

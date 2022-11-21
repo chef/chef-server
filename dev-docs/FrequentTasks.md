@@ -64,9 +64,6 @@ out and stable.
 - omnibus/Gemfile.lock
 - oc-chef-pedant/Gemfile.lock
 - src/oc-id/Gemfile.lock
-  DO NOT update this file unless Rails is upgraded.
-  Due to the Rails version, we've locked a lot of dependencies. Make
-  sure we can build and run oc-id before merging to main.
   You'll need the libsqlite3-dev library if doing this on Ubuntu.
 - src/oc\_erchef/apps/chef_objects/priv/depselector\_rb/Gemfile.lock
 - src/chef-server-ctl/Gemfile.lock
@@ -334,3 +331,34 @@ knife ssl fetch
 knife ssl check
 ```
 
+## Using S3 instead of Bookshelf
+
+If you would like to configure chef-server to use S3 instead of Bookshelf, you can
+type (copy/paste) the following script into the bash shell of your chef-server.
+This assumes you are using a root login.  Make obvious substitutions as needed, e.g.
+`vip`, `external_url`, `s3_bucket`, `access_key_id`, etc:
+
+```
+# add the following to the bottom of /etc/opscode/chef-server.rb
+echo "
+bookshelf['enable'] =               false
+bookshelf['vip'] =                  's3.us-west-2.amazonaws.com'         # alter to taste
+bookshelf['external_url'] =         'https://s3.us-west-2.amazonaws.com' # alter to taste
+opscode_erchef['s3_bucket'] =       'YOUR-BUCKET-HERE'
+bookshelf['access_key_id'] =        'YOUR-ID-HERE'
+bookshelf['secret_access_key'] =    'YOUR-SECRET-HERE'">>/etc/opscode/chef-server.rb
+
+# put these values into /etc/environment
+echo '
+AWS_ACCESS_KEY_ID="YOUR-ID-HERE"
+AWS_SECRET_ACCESS_KEY="YOUR-SECRET-HERE"'>>/etc/environment
+
+# reconfigure the system
+chef-server-ctl set-secret bookshelf access_key_id YOUR-ID-HERE
+chef-server-ctl set-secret bookshelf secret_access_key YOUR-SECRET-HERE
+exit
+sudo -i
+chef-server-ctl reconfigure
+chef-server-ctl stop opscode-erchef
+chef-server-ctl start opscode-erchef
+```

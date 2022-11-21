@@ -118,7 +118,7 @@ handle_undefined_start(Start, _Req) ->
 decode(undefined) ->
     0;
 decode(Val) ->
-    list_to_integer(http_uri:decode(Val)).
+    list_to_integer(Val).
 
 to_json(Req, #base_state{chef_db_context = DbContext,
                          resource_state = SearchState,

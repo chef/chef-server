@@ -59,7 +59,7 @@ process_post(Req, State) ->
                 bifrost_wm_error:set_db_exception(Req, State, Error)
         end
     catch
-        throw:{error, ErrorType} ->
+        error:ErrorType ->
             {_Return, ErrReq, _State} =
                 bifrost_wm_error:set_malformed_request(Req, State, ErrorType),
             {{halt, 400}, ErrReq, State};
@@ -110,18 +110,18 @@ parse_body(Body) ->
                 throw(BadSpec)
         end
     catch
-        throw:{error, {_, invalid_json}} ->
-            throw({error, invalid_json});
-        throw:{error, {_, truncated_json}} ->
-            throw({error, invalid_json});
+        error:{_, invalid_json} ->
+            error(invalid_json);
+        error:{_, truncated_json} ->
+            error(invalid_json);
         throw:{ej_invalid, string_match, _, _, _, _, Message} ->
-            throw({error, {ej_invalid, Message}});
+            error({ej_invalid, Message});
         throw:{ej_invalid, fun_match, _, _, _, _, Message} ->
-            throw({error, {ej_invalid, Message}});
+            error({ej_invalid, Message});
         throw:{ej_invalid, array_elt, _, _, _, _, Message} ->
-            throw({error, {ej_invalid, Message}});
+            error({ej_invalid, Message});
         throw:{ej_invalid, missing, Type, _, _, _, _} ->
-            throw({error, {missing, Type}});
+            error({missing, Type});
         throw:{ej_invalid, json_type, Type, _, _, _, _} ->
-            throw({error, {json_type, Type}})
+            error({json_type, Type})
     end.

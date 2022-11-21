@@ -63,6 +63,7 @@ Vagrant.configure("2") do |config|
   config.vm.network 'public_network' if USE_AZURE
   config.vm.box = "bento/ubuntu-20.04"
   config.ssh.forward_agent = true
+  config.omnibus.chef_version = :latest
 
   if start_external_service?("postgresql" , attributes)
     config.vm.define("database") do |c|
@@ -182,6 +183,11 @@ def define_chef_server(config, attributes)
     config.vm.synced_folder File.absolute_path(File.join(Dir.pwd, "../")), "/host", SharedFoldersEnableSymlinksCreate: true
     config.vm.synced_folder package_path, "/packages"
     config.vm.synced_folder File.expand_path(dotfiles_path), "/dotfiles"
+
+    # temporary hack to prevent error on /vagrant/.chef directory not existing.
+    # this should be looked into properly later when we have the bandwidth.
+    config.vm.provision "shell", inline: 'mkdir -p /vagrant'
+    config.vm.provision "shell", inline: 'mkdir -p /vagrant/.chef'
 
     # Preserve gitconfig from host - note that this can be a source of errors so if you start
     # seeing bundler or rebar git clone failures, try removing /root/.gitconfig

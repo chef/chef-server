@@ -13,7 +13,6 @@ This subcommand has the following options:
 
 `--pg-options`
 
-```suggestion
 :   Use to specify and pass additional options PostgreSQL during backups. See the [PostgreSQL documentation](https://www.postgresql.org/docs/13/runtime-config.html) for more information.
 
 `-t`, `--timeout`

@@ -3,3 +3,4 @@ source 'https://rubygems.org'
 gem 'cookstyle'
 gem 'chefspec'
 gem 'veil'
+gem 'chef', '< 18' # Do not pull in chef 18 until the build image is updated with > ruby 3.0

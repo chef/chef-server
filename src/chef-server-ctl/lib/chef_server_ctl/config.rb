@@ -72,7 +72,12 @@ Patents:       #{ChefUtils::Dist::Org::PATENTS}
       elsif fips_enabled
         DEFAULT_FIPS_LB_URL
       else
-        DEFAULT_LB_URL
+        nginx = @@ctl.running_service_config("nginx")
+        if nginx and nginx["ssl_port"] and (nginx["ssl_port"] != 443)
+          "#{DEFAULT_LB_URL}:#{nginx["ssl_port"]}"
+        else
+          DEFAULT_LB_URL
+        end
       end
     end
 
