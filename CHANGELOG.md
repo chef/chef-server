@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.3.13 -->
-## [15.3.13](https://github.com/chef/chef-server/tree/15.3.13) (2022-11-26)
+<!-- latest_release 15.3.14 -->
+## [15.3.14](https://github.com/chef/chef-server/tree/15.3.14) (2022-12-01)
 
 #### Merged Pull Requests
-- Bump pg from 1.4.4 to 1.4.5 in /src/oc-id [#3520](https://github.com/chef/chef-server/pull/3520) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump pg from 1.4.4 to 1.4.5 in /src/chef-server-ctl [#3518](https://github.com/chef/chef-server/pull/3518) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.3.2 -->
 ### Changes since 15.3.2 release
 
 #### Merged Pull Requests
+- Bump pg from 1.4.4 to 1.4.5 in /src/chef-server-ctl [#3518](https://github.com/chef/chef-server/pull/3518) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.3.14 -->
 - Bump pg from 1.4.4 to 1.4.5 in /src/oc-id [#3520](https://github.com/chef/chef-server/pull/3520) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.3.13 -->
 - Fix chef_authn reference [#3523](https://github.com/chef/chef-server/pull/3523) ([lbakerchef](https://github.com/lbakerchef)) <!-- 15.3.12 -->
 - Fix Makefile for bumping Erlang deps [#3503](https://github.com/chef/chef-server/pull/3503) ([lbakerchef](https://github.com/lbakerchef)) <!-- 15.3.11 -->
