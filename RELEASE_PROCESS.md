@@ -27,6 +27,11 @@ In order to release, you will need the following accounts/permissions:
 
 ## THE PROCESS
 
+### Upgrade Erlang Dependencies
+
+Upgrade Erlang dependencies via automated script.  
+See https://github.com/chef/chef-server/blob/main/dev-docs/FrequentTasks.md#updating-erlang-dependencies-using-rebar3 .
+
 ### Update Release Notes
 
 #### Pending Release Notes In Wiki

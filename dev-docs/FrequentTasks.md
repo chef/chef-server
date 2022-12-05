@@ -189,13 +189,20 @@ file, using /host as the root directory, e.g. /host/src/chef-server-ctl.
   - oc_bifrost
 - Check for the current rebar3 version with `./rebar3 --version`
 - Latest version for rebar3 can be found at: https://www.rebar3.org/
-- Download and update the current rebar3 executable with it.
+- Download and update the current rebar3 executable with it.  If you have wget, you can try the scriptlet below after `cd`ing to your chef-server repo.
+```
+pushd /tmp
+wget https://s3.amazonaws.com/rebar3/rebar3 && chmod +x rebar3
+popd
+cp /tmp/rebar3 src/bookshelf && cp /tmp/rebar3 src/oc_bifrost && cp /tmp/rebar3 src/oc_erchef
+```
 
 ## Updating Erlang Dependencies using rebar3
 
-- There are 2 approaches to updating the dependencies
+- There are 3 approaches to updating the dependencies
   - From the dev-vm (Preferred method)
-  - From the host machine (mac in most cases)
+  - From the host machine by hand (mac in most cases)
+  - Automated script
 - Updating the erlang deps from the dev-vm
   - cd chef-server/dev
   - vagrant up
@@ -232,6 +239,51 @@ chef-server/src/bookshelf/rebar.lock
 chef-server/src/oc_erchef/rebar.lock
 chef-server/src/oc_bifrost/rebar.lock
 ```
+- Automated script
+
+1) Create your new branch in the chef-server repo for upgrading the Erlang dependencies.
+```
+cd chef-server
+git checkout main
+git pull
+git checkout -b YOUR-BRANCH
+```
+2) OPTIONAL STEP: Upgrade to the latest rebar3.
+```
+pushd /tmp
+wget https://s3.amazonaws.com/rebar3/rebar3 && chmod +x rebar3
+popd
+cp /tmp/rebar3 src/bookshelf && cp /tmp/rebar3 src/oc_bifrost && cp /tmp/rebar3 src/oc_erchef
+git add src/bookshelf/rebar3 src/oc_bifrost/rebar3 src/oc_erchef/rebar3
+git commit -sm 'Upgrade rebar3 to X.Y.Z'
+```
+3) Upgrade the Erlang dependencies using the automated script.  The script upgrades most dependencies, but a few are not updated because upgrading those dependencies creates hex `pkg` references which cause problems for license scout after the upgrade to rebar3 3.20.0.
+```
+make bump_rebars
+```
+4) Test compilation locally.  If you have environmental or other issues with local compilation, skip this step and test on buildkite instead.
+```
+pushd src/bookshelf
+./rebar3 compile
+popd
+
+pushd src/oc_bifrost
+./rebar3 compile
+popd
+
+pushd src/oc_erchef
+./rebar3 compile
+popd
+```
+5) Commit rebar.locks and push the branch.
+```
+git add src/bookshelf/rebar.lock src/oc_bifrost/rebar.lock src/oc_erchef/rebar.lock
+git commit -sm 'Upgrade Erlang dependencies'
+git push
+```
+6) Test on buildkite.
+
+7) Fix any issues, revert any problem dependencies, etc.
 
 ## Buildkite Artifacts (omnibus/adhoc)
 
