@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.3.16 -->
-## [15.3.16](https://github.com/chef/chef-server/tree/15.3.16) (2022-12-07)
+<!-- latest_release 15.3.17 -->
+## [15.3.17](https://github.com/chef/chef-server/tree/15.3.17) (2022-12-08)
 
 #### Merged Pull Requests
-- Upgrade most bookshelf, bifrost, and oc_erchef Erlang dependencies. [#3537](https://github.com/chef/chef-server/pull/3537) ([lbakerchef](https://github.com/lbakerchef))
+- Bump timecop from 0.9.5 to 0.9.6 in /src/oc-id [#3531](https://github.com/chef/chef-server/pull/3531) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.3.2 -->
 ### Changes since 15.3.2 release
 
 #### Merged Pull Requests
+- Bump timecop from 0.9.5 to 0.9.6 in /src/oc-id [#3531](https://github.com/chef/chef-server/pull/3531) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.3.17 -->
 - Upgrade most bookshelf, bifrost, and oc_erchef Erlang dependencies. [#3537](https://github.com/chef/chef-server/pull/3537) ([lbakerchef](https://github.com/lbakerchef)) <!-- 15.3.16 -->
 - Update ruby-setup to the actively maintained codebase. Update actions to v3 [#3539](https://github.com/chef/chef-server/pull/3539) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 15.3.15 -->
 - Bump pg from 1.4.4 to 1.4.5 in /src/chef-server-ctl [#3518](https://github.com/chef/chef-server/pull/3518) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.3.14 -->
