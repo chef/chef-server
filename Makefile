@@ -4,7 +4,7 @@ bump_rebars: rebar_bookshelf rebar_oc_bifrost rebar_oc_erchef
 bump_bundles: bundle_oc-id
 
 rebar_%:
-	cd src/$* && ./rebar3 upgrade $$TARGET
+	cd src/$* && ./rebar3 upgrade --all $$TARGET
 
 bundle_%:
 	cd src/$* && bundle install --no-deployment && bundle update $$TARGET

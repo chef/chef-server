@@ -1,16 +1,26 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.3.6 -->
-## [15.3.6](https://github.com/chef/chef-server/tree/15.3.6) (2022-11-17)
+<!-- latest_release 15.3.16 -->
+## [15.3.16](https://github.com/chef/chef-server/tree/15.3.16) (2022-12-07)
 
 #### Merged Pull Requests
-- Bump jquery-rails from 4.5.0 to 4.5.1 in /src/oc-id [#3509](https://github.com/chef/chef-server/pull/3509) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Upgrade most bookshelf, bifrost, and oc_erchef Erlang dependencies. [#3537](https://github.com/chef/chef-server/pull/3537) ([lbakerchef](https://github.com/lbakerchef))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.3.2 -->
 ### Changes since 15.3.2 release
 
 #### Merged Pull Requests
+- Upgrade most bookshelf, bifrost, and oc_erchef Erlang dependencies. [#3537](https://github.com/chef/chef-server/pull/3537) ([lbakerchef](https://github.com/lbakerchef)) <!-- 15.3.16 -->
+- Update ruby-setup to the actively maintained codebase. Update actions to v3 [#3539](https://github.com/chef/chef-server/pull/3539) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 15.3.15 -->
+- Bump pg from 1.4.4 to 1.4.5 in /src/chef-server-ctl [#3518](https://github.com/chef/chef-server/pull/3518) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.3.14 -->
+- Bump pg from 1.4.4 to 1.4.5 in /src/oc-id [#3520](https://github.com/chef/chef-server/pull/3520) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.3.13 -->
+- Fix chef_authn reference [#3523](https://github.com/chef/chef-server/pull/3523) ([lbakerchef](https://github.com/lbakerchef)) <!-- 15.3.12 -->
+- Fix Makefile for bumping Erlang deps [#3503](https://github.com/chef/chef-server/pull/3503) ([lbakerchef](https://github.com/lbakerchef)) <!-- 15.3.11 -->
+- sqerl master -&gt; main [#3504](https://github.com/chef/chef-server/pull/3504) ([lbakerchef](https://github.com/lbakerchef)) <!-- 15.3.10 -->
+- Bump omnibus-software from `e9632cb` to `ab655a5` in /omnibus [#3512](https://github.com/chef/chef-server/pull/3512) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.3.9 -->
+- Document: Added documentation for user public key update methods. [#3492](https://github.com/chef/chef-server/pull/3492) ([sreepuramsudheer](https://github.com/sreepuramsudheer)) <!-- 15.3.8 -->
+- Made nginx[ssl_port] read from config for reindex. [#3501](https://github.com/chef/chef-server/pull/3501) ([sreepuramsudheer](https://github.com/sreepuramsudheer)) <!-- 15.3.7 -->
 - Bump jquery-rails from 4.5.0 to 4.5.1 in /src/oc-id [#3509](https://github.com/chef/chef-server/pull/3509) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.3.6 -->
 - Bump mixlib-install from 3.12.20 to 3.12.24 in /src/chef-server-ctl [#3507](https://github.com/chef/chef-server/pull/3507) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.3.5 -->
 - Bump capybara from 3.37.1 to 3.38.0 in /src/oc-id [#3499](https://github.com/chef/chef-server/pull/3499) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.3.4 -->
