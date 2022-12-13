@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.3.22 -->
-## [15.3.22](https://github.com/chef/chef-server/tree/15.3.22) (2022-12-13)
+<!-- latest_release 15.3.23 -->
+## [15.3.23](https://github.com/chef/chef-server/tree/15.3.23) (2022-12-13)
 
 #### Merged Pull Requests
-- Bump sinatra from 2.2.0 to 3.0.4 in /src/oc-id [#3532](https://github.com/chef/chef-server/pull/3532) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump omnibus from `d1fe3bb` to `2c058e1` in /omnibus [#3546](https://github.com/chef/chef-server/pull/3546) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.3.2 -->
 ### Changes since 15.3.2 release
 
 #### Merged Pull Requests
+- Bump omnibus from `d1fe3bb` to `2c058e1` in /omnibus [#3546](https://github.com/chef/chef-server/pull/3546) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.3.23 -->
 - Bump sinatra from 2.2.0 to 3.0.4 in /src/oc-id [#3532](https://github.com/chef/chef-server/pull/3532) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.3.22 -->
 - Bump config from 4.0.0 to 4.1.0 in /src/oc-id [#3513](https://github.com/chef/chef-server/pull/3513) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.3.21 -->
 - Bump selenium-webdriver from 4.6.1 to 4.7.1 in /src/oc-id [#3536](https://github.com/chef/chef-server/pull/3536) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.3.20 -->
