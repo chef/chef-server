@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.3.19 -->
-## [15.3.19](https://github.com/chef/chef-server/tree/15.3.19) (2022-12-13)
+<!-- latest_release 15.3.20 -->
+## [15.3.20](https://github.com/chef/chef-server/tree/15.3.20) (2022-12-13)
 
 #### Merged Pull Requests
-- Bump nokogiri from 1.13.9 to 1.13.10 in /src/oc-id [#3542](https://github.com/chef/chef-server/pull/3542) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump selenium-webdriver from 4.6.1 to 4.7.1 in /src/oc-id [#3536](https://github.com/chef/chef-server/pull/3536) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.3.2 -->
 ### Changes since 15.3.2 release
 
 #### Merged Pull Requests
+- Bump selenium-webdriver from 4.6.1 to 4.7.1 in /src/oc-id [#3536](https://github.com/chef/chef-server/pull/3536) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.3.20 -->
 - Bump nokogiri from 1.13.9 to 1.13.10 in /src/oc-id [#3542](https://github.com/chef/chef-server/pull/3542) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.3.19 -->
 - Bump bigdecimal from 3.1.2 to 3.1.3 in /src/oc-id [#3535](https://github.com/chef/chef-server/pull/3535) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.3.18 -->
 - Bump timecop from 0.9.5 to 0.9.6 in /src/oc-id [#3531](https://github.com/chef/chef-server/pull/3531) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.3.17 -->
