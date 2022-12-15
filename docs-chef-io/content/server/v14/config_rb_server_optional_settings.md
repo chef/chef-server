@@ -1321,6 +1321,13 @@ This configuration file has the following settings for `opscode-erchef`:
     expire. If node bootstraps are timing out, increase this setting.
     Default value: `28800`.
 
+`opscode_erchef['s3_url_type']`
+
+:   The URL style to use (`path` or `vhost`) when connecting to S3.
+    Mainly used to manually override the default setting. Note that
+    Amazon may eliminate path-style URLs on some or all S3 buckets
+    in the future. Default value: `vhost`.
+
 `opscode_erchef['sql_connection_user']`
 
 :   The PostgreSQL user name in `'username@hostname'` format (e.g.
