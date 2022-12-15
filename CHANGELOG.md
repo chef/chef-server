@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.3.24 -->
-## [15.3.24](https://github.com/chef/chef-server/tree/15.3.24) (2022-12-13)
+<!-- latest_release 15.3.25 -->
+## [15.3.25](https://github.com/chef/chef-server/tree/15.3.25) (2022-12-15)
 
 #### Merged Pull Requests
-- Automate upgrade of Erlang rebar dependencies [#3534](https://github.com/chef/chef-server/pull/3534) ([lbakerchef](https://github.com/lbakerchef))
+- Add s3_url_type config setting to docs [#3556](https://github.com/chef/chef-server/pull/3556) ([lbakerchef](https://github.com/lbakerchef))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.3.2 -->
 ### Changes since 15.3.2 release
 
 #### Merged Pull Requests
+- Add s3_url_type config setting to docs [#3556](https://github.com/chef/chef-server/pull/3556) ([lbakerchef](https://github.com/lbakerchef)) <!-- 15.3.25 -->
 - Automate upgrade of Erlang rebar dependencies [#3534](https://github.com/chef/chef-server/pull/3534) ([lbakerchef](https://github.com/lbakerchef)) <!-- 15.3.24 -->
 - Bump omnibus from `d1fe3bb` to `2c058e1` in /omnibus [#3546](https://github.com/chef/chef-server/pull/3546) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.3.23 -->
 - Bump sinatra from 2.2.0 to 3.0.4 in /src/oc-id [#3532](https://github.com/chef/chef-server/pull/3532) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.3.22 -->
