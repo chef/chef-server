@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.3.25 -->
-## [15.3.25](https://github.com/chef/chef-server/tree/15.3.25) (2022-12-15)
+<!-- latest_release 15.3.26 -->
+## [15.3.26](https://github.com/chef/chef-server/tree/15.3.26) (2022-12-15)
 
 #### Merged Pull Requests
-- Add s3_url_type config setting to docs [#3556](https://github.com/chef/chef-server/pull/3556) ([lbakerchef](https://github.com/lbakerchef))
+- Upgrade rebar3 3.6.2 -&gt; 3.20.0 [#3551](https://github.com/chef/chef-server/pull/3551) ([lbakerchef](https://github.com/lbakerchef))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.3.2 -->
 ### Changes since 15.3.2 release
 
 #### Merged Pull Requests
+- Upgrade rebar3 3.6.2 -&gt; 3.20.0 [#3551](https://github.com/chef/chef-server/pull/3551) ([lbakerchef](https://github.com/lbakerchef)) <!-- 15.3.26 -->
 - Add s3_url_type config setting to docs [#3556](https://github.com/chef/chef-server/pull/3556) ([lbakerchef](https://github.com/lbakerchef)) <!-- 15.3.25 -->
 - Automate upgrade of Erlang rebar dependencies [#3534](https://github.com/chef/chef-server/pull/3534) ([lbakerchef](https://github.com/lbakerchef)) <!-- 15.3.24 -->
 - Bump omnibus from `d1fe3bb` to `2c058e1` in /omnibus [#3546](https://github.com/chef/chef-server/pull/3546) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.3.23 -->
