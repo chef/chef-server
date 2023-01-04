@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.3.26 -->
-## [15.3.26](https://github.com/chef/chef-server/tree/15.3.26) (2022-12-15)
+<!-- latest_release 15.3.27 -->
+## [15.3.27](https://github.com/chef/chef-server/tree/15.3.27) (2023-01-04)
 
 #### Merged Pull Requests
-- Upgrade rebar3 3.6.2 -&gt; 3.20.0 [#3551](https://github.com/chef/chef-server/pull/3551) ([lbakerchef](https://github.com/lbakerchef))
+- Changed erlang version to 24. [#3560](https://github.com/chef/chef-server/pull/3560) ([sreepuramsudheer](https://github.com/sreepuramsudheer))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.3.2 -->
 ### Changes since 15.3.2 release
 
 #### Merged Pull Requests
+- Changed erlang version to 24. [#3560](https://github.com/chef/chef-server/pull/3560) ([sreepuramsudheer](https://github.com/sreepuramsudheer)) <!-- 15.3.27 -->
 - Upgrade rebar3 3.6.2 -&gt; 3.20.0 [#3551](https://github.com/chef/chef-server/pull/3551) ([lbakerchef](https://github.com/lbakerchef)) <!-- 15.3.26 -->
 - Add s3_url_type config setting to docs [#3556](https://github.com/chef/chef-server/pull/3556) ([lbakerchef](https://github.com/lbakerchef)) <!-- 15.3.25 -->
 - Automate upgrade of Erlang rebar dependencies [#3534](https://github.com/chef/chef-server/pull/3534) ([lbakerchef](https://github.com/lbakerchef)) <!-- 15.3.24 -->
