@@ -1,43 +1,43 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.3.26 -->
-## [15.3.26](https://github.com/chef/chef-server/tree/15.3.26) (2022-12-15)
-
-#### Merged Pull Requests
-- Upgrade rebar3 3.6.2 -&gt; 3.20.0 [#3551](https://github.com/chef/chef-server/pull/3551) ([lbakerchef](https://github.com/lbakerchef))
+<!-- latest_release -->
 <!-- latest_release -->
 
-<!-- release_rollup since=15.3.2 -->
-### Changes since 15.3.2 release
-
-#### Merged Pull Requests
-- Upgrade rebar3 3.6.2 -&gt; 3.20.0 [#3551](https://github.com/chef/chef-server/pull/3551) ([lbakerchef](https://github.com/lbakerchef)) <!-- 15.3.26 -->
-- Add s3_url_type config setting to docs [#3556](https://github.com/chef/chef-server/pull/3556) ([lbakerchef](https://github.com/lbakerchef)) <!-- 15.3.25 -->
-- Automate upgrade of Erlang rebar dependencies [#3534](https://github.com/chef/chef-server/pull/3534) ([lbakerchef](https://github.com/lbakerchef)) <!-- 15.3.24 -->
-- Bump omnibus from `d1fe3bb` to `2c058e1` in /omnibus [#3546](https://github.com/chef/chef-server/pull/3546) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.3.23 -->
-- Bump sinatra from 2.2.0 to 3.0.4 in /src/oc-id [#3532](https://github.com/chef/chef-server/pull/3532) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.3.22 -->
-- Bump config from 4.0.0 to 4.1.0 in /src/oc-id [#3513](https://github.com/chef/chef-server/pull/3513) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.3.21 -->
-- Bump selenium-webdriver from 4.6.1 to 4.7.1 in /src/oc-id [#3536](https://github.com/chef/chef-server/pull/3536) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.3.20 -->
-- Bump nokogiri from 1.13.9 to 1.13.10 in /src/oc-id [#3542](https://github.com/chef/chef-server/pull/3542) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.3.19 -->
-- Bump bigdecimal from 3.1.2 to 3.1.3 in /src/oc-id [#3535](https://github.com/chef/chef-server/pull/3535) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.3.18 -->
-- Bump timecop from 0.9.5 to 0.9.6 in /src/oc-id [#3531](https://github.com/chef/chef-server/pull/3531) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.3.17 -->
-- Upgrade most bookshelf, bifrost, and oc_erchef Erlang dependencies. [#3537](https://github.com/chef/chef-server/pull/3537) ([lbakerchef](https://github.com/lbakerchef)) <!-- 15.3.16 -->
-- Update ruby-setup to the actively maintained codebase. Update actions to v3 [#3539](https://github.com/chef/chef-server/pull/3539) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 15.3.15 -->
-- Bump pg from 1.4.4 to 1.4.5 in /src/chef-server-ctl [#3518](https://github.com/chef/chef-server/pull/3518) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.3.14 -->
-- Bump pg from 1.4.4 to 1.4.5 in /src/oc-id [#3520](https://github.com/chef/chef-server/pull/3520) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.3.13 -->
-- Fix chef_authn reference [#3523](https://github.com/chef/chef-server/pull/3523) ([lbakerchef](https://github.com/lbakerchef)) <!-- 15.3.12 -->
-- Fix Makefile for bumping Erlang deps [#3503](https://github.com/chef/chef-server/pull/3503) ([lbakerchef](https://github.com/lbakerchef)) <!-- 15.3.11 -->
-- sqerl master -&gt; main [#3504](https://github.com/chef/chef-server/pull/3504) ([lbakerchef](https://github.com/lbakerchef)) <!-- 15.3.10 -->
-- Bump omnibus-software from `e9632cb` to `ab655a5` in /omnibus [#3512](https://github.com/chef/chef-server/pull/3512) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.3.9 -->
-- Document: Added documentation for user public key update methods. [#3492](https://github.com/chef/chef-server/pull/3492) ([sreepuramsudheer](https://github.com/sreepuramsudheer)) <!-- 15.3.8 -->
-- Made nginx[ssl_port] read from config for reindex. [#3501](https://github.com/chef/chef-server/pull/3501) ([sreepuramsudheer](https://github.com/sreepuramsudheer)) <!-- 15.3.7 -->
-- Bump jquery-rails from 4.5.0 to 4.5.1 in /src/oc-id [#3509](https://github.com/chef/chef-server/pull/3509) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.3.6 -->
-- Bump mixlib-install from 3.12.20 to 3.12.24 in /src/chef-server-ctl [#3507](https://github.com/chef/chef-server/pull/3507) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.3.5 -->
-- Bump capybara from 3.37.1 to 3.38.0 in /src/oc-id [#3499](https://github.com/chef/chef-server/pull/3499) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.3.4 -->
-- Bump selenium-webdriver from 4.5.0 to 4.6.1 in /src/oc-id [#3498](https://github.com/chef/chef-server/pull/3498) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.3.3 -->
+<!-- release_rollup -->
 <!-- release_rollup -->
 
 <!-- latest_stable_release -->
+## [15.4.0](https://github.com/chef/chef-server/tree/15.4.0) (2023-01-05)
+
+#### Merged Pull Requests
+- Bump selenium-webdriver from 4.5.0 to 4.6.1 in /src/oc-id [#3498](https://github.com/chef/chef-server/pull/3498) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump capybara from 3.37.1 to 3.38.0 in /src/oc-id [#3499](https://github.com/chef/chef-server/pull/3499) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump mixlib-install from 3.12.20 to 3.12.24 in /src/chef-server-ctl [#3507](https://github.com/chef/chef-server/pull/3507) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump jquery-rails from 4.5.0 to 4.5.1 in /src/oc-id [#3509](https://github.com/chef/chef-server/pull/3509) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Made nginx[ssl_port] read from config for reindex. [#3501](https://github.com/chef/chef-server/pull/3501) ([sreepuramsudheer](https://github.com/sreepuramsudheer))
+- Document: Added documentation for user public key update methods. [#3492](https://github.com/chef/chef-server/pull/3492) ([sreepuramsudheer](https://github.com/sreepuramsudheer))
+- Bump omnibus-software from `e9632cb` to `ab655a5` in /omnibus [#3512](https://github.com/chef/chef-server/pull/3512) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- sqerl master -&gt; main [#3504](https://github.com/chef/chef-server/pull/3504) ([lbakerchef](https://github.com/lbakerchef))
+- Fix Makefile for bumping Erlang deps [#3503](https://github.com/chef/chef-server/pull/3503) ([lbakerchef](https://github.com/lbakerchef))
+- Fix chef_authn reference [#3523](https://github.com/chef/chef-server/pull/3523) ([lbakerchef](https://github.com/lbakerchef))
+- Bump pg from 1.4.4 to 1.4.5 in /src/oc-id [#3520](https://github.com/chef/chef-server/pull/3520) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump pg from 1.4.4 to 1.4.5 in /src/chef-server-ctl [#3518](https://github.com/chef/chef-server/pull/3518) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Update ruby-setup to the actively maintained codebase. Update actions to v3 [#3539](https://github.com/chef/chef-server/pull/3539) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Upgrade most bookshelf, bifrost, and oc_erchef Erlang dependencies. [#3537](https://github.com/chef/chef-server/pull/3537) ([lbakerchef](https://github.com/lbakerchef))
+- Bump timecop from 0.9.5 to 0.9.6 in /src/oc-id [#3531](https://github.com/chef/chef-server/pull/3531) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump bigdecimal from 3.1.2 to 3.1.3 in /src/oc-id [#3535](https://github.com/chef/chef-server/pull/3535) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump nokogiri from 1.13.9 to 1.13.10 in /src/oc-id [#3542](https://github.com/chef/chef-server/pull/3542) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump selenium-webdriver from 4.6.1 to 4.7.1 in /src/oc-id [#3536](https://github.com/chef/chef-server/pull/3536) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump config from 4.0.0 to 4.1.0 in /src/oc-id [#3513](https://github.com/chef/chef-server/pull/3513) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump sinatra from 2.2.0 to 3.0.4 in /src/oc-id [#3532](https://github.com/chef/chef-server/pull/3532) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump omnibus from `d1fe3bb` to `2c058e1` in /omnibus [#3546](https://github.com/chef/chef-server/pull/3546) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Automate upgrade of Erlang rebar dependencies [#3534](https://github.com/chef/chef-server/pull/3534) ([lbakerchef](https://github.com/lbakerchef))
+- Add s3_url_type config setting to docs [#3556](https://github.com/chef/chef-server/pull/3556) ([lbakerchef](https://github.com/lbakerchef))
+- Upgrade rebar3 3.6.2 -&gt; 3.20.0 [#3551](https://github.com/chef/chef-server/pull/3551) ([lbakerchef](https://github.com/lbakerchef))
+- Changed erlang version to 24. [#3560](https://github.com/chef/chef-server/pull/3560) ([sreepuramsudheer](https://github.com/sreepuramsudheer))
+- Bump omnibus-software from `ab655a5` to `2be3816` in /omnibus [#3558](https://github.com/chef/chef-server/pull/3558) ([dependabot[bot]](https://github.com/dependabot[bot]))
+<!-- latest_stable_release -->
+
 ## [15.3.2](https://github.com/chef/chef-server/tree/15.3.2) (2022-11-09)
 
 #### Merged Pull Requests
@@ -81,7 +81,6 @@
 - Vhost [#2147](https://github.com/chef/chef-server/pull/2147) ([lbakerchef](https://github.com/lbakerchef))
 - Revert &quot;Bump doorkeeper from 4.4.3 to 5.6.0 in /src/oc-id&quot; [#3495](https://github.com/chef/chef-server/pull/3495) ([vinay-satish](https://github.com/vinay-satish))
 - Revise docs for AWS Settings; Add new `s3_path_or_vhost` configuration [#3481](https://github.com/chef/chef-server/pull/3481) ([lbakerchef](https://github.com/lbakerchef))
-<!-- latest_stable_release -->
 
 ## [15.1.7](https://github.com/chef/chef-server/tree/15.1.7) (2022-08-30)
 
