@@ -216,7 +216,7 @@ Add the following settings to the chef-server.rb file:
 
     Replace `FQDN` with the FQDN of the load balanced virtual IP
     address, which should be equal to the FQDN for the service URI that
-    is used by the Chef Infra Server.
+    is used by the Chef Infra Server. FQDNs must always be in lowercase. 
 
 6.  {{% chef-server/install_chef_server_reconfigure %}}
 

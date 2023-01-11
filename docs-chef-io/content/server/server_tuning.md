@@ -59,7 +59,8 @@ file (no equal sign is necessary to set the value):
 :   The FQDN for the Chef Infra Server. This setting is not in the
     server configuration file by default. When added, its value should
     be equal to the FQDN for the service URI used by the Chef Infra
-    Server. For example: `api_fqdn "chef.example.com"`.
+    Server. FQDNs must always be in lowercase.
+    For example: `api_fqdn "chef.example.com"`.
 
 `bootstrap`
 

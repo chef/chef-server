@@ -411,7 +411,7 @@ This configuration file has the following settings for `lb`:
 
 `lb['api_fqdn']`
 
-:   Default value: `node['fqdn']`.
+:   The FQDN for the Chef Infra Server. FQDNs must always be in lowercase.  Default value: `node['fqdn']`.
 
 `lb['ban_refresh_interval']`
 
@@ -497,7 +497,7 @@ This configuration file has the following settings for `lb`:
 
 `lb['web_ui_fqdn']`
 
-:   Default value: `node['fqdn']`.
+:   FQDNs must always be in lowercase. Default value: `node['fqdn']`.
 
 `lb['xdl_defaults']['503_mode']`
 
@@ -671,7 +671,7 @@ Chef Infra Server versions earlier than 14.5 configured with `nginx['enable_non_
 
 `nginx['server_name']`
 
-:   The FQDN for the server. Default value: `node['fqdn']`.
+:   The FQDN for the server. FQDNs must always be in lowercase. Default value: `node['fqdn']`.
 
 `nginx['ssl_certificate']`
 
@@ -1068,8 +1068,9 @@ This configuration file has the following settings for `oc-id`:
 
 `oc_id['origin']`
 
-:   The FQDN for the server that is sending outbound email. Defaults to
-    the `'api_fqdn'` value, which is the FQDN for the Chef Infra Server.
+:   The FQDN for the server that is sending outbound email. FQDNs must
+    always be in lowercase.  Defaults to the `'api_fqdn'` value, which
+    is the FQDN for the Chef Infra Server.
 
 `oc_id['num_to_keep']`
 
