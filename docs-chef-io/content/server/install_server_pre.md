@@ -314,8 +314,8 @@ The `api_fqdn` setting can be added to the private-chef.rb file (it is
 not there by default). When added, its value should be equal to the FQDN
 or IP address for the service URI used by the Chef Infra Server. Then
 configure the same value for the `bookshelf['vip']` setting prior to
-installing the Chef Infra Server. For example:
-`api_fqdn "chef.example.com"` or `api_fqdn 123.45.67.890`.
+installing the Chef Infra Server. FQDNs must always be in lowercase.
+For example: `api_fqdn "chef.example.com"` or `api_fqdn "123.45.67.890"`.
 
 #### Configure Hostnames
 
