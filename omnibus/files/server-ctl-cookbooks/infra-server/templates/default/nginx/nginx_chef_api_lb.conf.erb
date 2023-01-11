@@ -56,6 +56,8 @@
     # Whitelist the docs necessary to serve up error pages and friendly
     # html to non-chef clients hitting this host.
     location ~ "^/[0-9]{3,3}\.(json|html)|favicon.ico|index.html$" {
+      add_header Cache-Control no-store always;
+      add_header Pragma no-cache always;
       add_header Content-Security-Policy "default-src 'self';";
       add_header X-Frame-Options DENY;
       add_header X-Content-Type-Options nosniff;
@@ -67,6 +69,8 @@
     }
 
     location "/css/" {
+      add_header Cache-Control no-store always;
+      add_header Pragma no-cache always;
       add_header Content-Security-Policy "default-src 'self';";
       add_header X-Frame-Options DENY;
       add_header X-Content-Type-Options nosniff;
@@ -78,6 +82,8 @@
     }
 
     location "/images/" {
+      add_header Cache-Control no-store always;
+      add_header Pragma no-cache always;
       add_header Content-Security-Policy "default-src 'self';";
       add_header X-Frame-Options DENY;
       add_header X-Content-Type-Options nosniff;
@@ -89,6 +95,8 @@
     }
 
     location /version {
+      add_header Cache-Control no-store always;
+      add_header Pragma no-cache always;
       add_header Content-Security-Policy "default-src 'self';";
       add_header X-Frame-Options DENY;
       add_header X-Content-Type-Options nosniff;
@@ -103,6 +111,8 @@
     }
 
     location ~ "^/organizations/([^/]+)/validate" {
+      add_header Cache-Control no-store always;
+      add_header Pragma no-cache always;
       allow 127.0.0.1;
       allow ::1;
       deny all;
@@ -111,6 +121,8 @@
     <% if node['private_chef']['data_collector']['proxy'] -%>
 
     location "/data-collector/" {
+      add_header Cache-Control no-store always;
+      add_header Pragma no-cache always;
       proxy_set_header Host $http_host;
       proxy_set_header X-Real-IP $remote_addr;
       proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -122,6 +134,8 @@
     <% if node['private_chef']['data_collector']['root_url'] -%>
     
     location ~ "^/organizations/([^/]+)/data-collector$" {
+      add_header Cache-Control no-store always;
+      add_header Pragma no-cache always;
       set $request_org $1;
       access_by_lua_block { validator.validate("POST") }
       proxy_set_header x-data-collector-token $data_collector_token;
@@ -132,6 +146,8 @@
     <% end -%>
 
     location ~ "^/organizations/([^/]+)/required_recipe$" {
+      add_header Cache-Control no-store always;
+      add_header Pragma no-cache always;
     <% if node['private_chef']['required_recipe']['enable'] -%>
       set $request_org $1;
       access_by_lua_block { validator.validate("GET") }
@@ -159,6 +175,8 @@
     location ~ <%= @compliance_proxy_regex -%> {
       set $request_org $1;
       access_by_lua_block { validator.validate("GET") }
+      add_header Cache-Control no-store always;
+      add_header Pragma no-cache always;
       proxy_set_header x-data-collector-token $data_collector_token;
       proxy_set_header x-data-collector-auth "version=1.0";
       rewrite ^<%= @compliance_proxy_regex -%> /compliance/profiles/$2$3 break;
@@ -170,6 +188,8 @@
     <% if node['private_chef']['opscode-erchef']['nginx_bookshelf_caching'] != :off -%>
     location ~ "^/<%= node['private_chef']['opscode-erchef']['s3_bucket'] %>/organization-.+" {
       set $destination @cached;
+      add_header Cache-Control no-store always;
+      add_header Pragma no-cache always;
       if ($request_method !~ ^(GET)$) {
          set $destination @uncached;
       }
@@ -177,6 +197,8 @@
       return 404;
     }
     location @cached {
+      add_header Cache-Control no-store always;
+      add_header Pragma no-cache always;
       proxy_cache cookbooks;
       <% if node['private_chef']['bookshelf']['external_url'] == :host_header -%>
       proxy_cache_key $scheme$host$request_uri;
@@ -186,16 +208,22 @@
       proxy_pass http://bookshelf;
     }
     location @uncached {
+      add_header Cache-Control no-store always;
+      add_header Pragma no-cache always;
       proxy_pass http://bookshelf;
     }
     <% else -%>
     location ~ "^/<%= node['private_chef']['opscode-erchef']['s3_bucket'] %>/organization-.+" {
+      add_header Cache-Control no-store always;
+      add_header Pragma no-cache always;
       proxy_pass http://bookshelf;
     }
     <% end -%>
 
     # erchef status endpoint
     location ~ "^/_status/?$" {
+      add_header Cache-Control no-store always;
+      add_header Pragma no-cache always;
       types { }
       default_type application/json;
       proxy_pass http://opscode_erchef;
@@ -203,6 +231,8 @@
 
     # erchef stats endpoint
     location ~ "^/_stats/?$" {
+      add_header Cache-Control no-store always;
+      add_header Pragma no-cache always;
       <% if node['private_chef']['opscode-erchef']['stats_auth_enable'] -%>
       auth_basic "Chef Server Admin Stats";
       auth_basic_user_file <%= node['private_chef']['opscode-erchef']['stats_password_file'] %>;
@@ -221,11 +251,15 @@
     include <%= node['private_chef']['nginx']['dir'] %>/etc/addon.d/*_external.conf;
 
     location /_route/ {
+      add_header Cache-Control no-store always;
+      add_header Pragma no-cache always;
       default_type 'application/json';
       content_by_lua_file '<%= @script_path %>/dispatch_route.lua';
     }
 
     location / {
+      add_header Cache-Control no-store always;
+      add_header Pragma no-cache always;
       satisfy any;
 
       <% if @access_by_lua_file %>
@@ -242,7 +276,10 @@
       proxy_pass http://$upstream;
       proxy_redirect http://$upstream /;
     }
+
     location @errorrespfilter {
+      add_header Cache-Control no-store always;
+      add_header Pragma no-cache always;
       header_filter_by_lua_block { ngx.header.content_length = nil }
       body_filter_by_lua '
       ngx.arg[1] = ngx.re.sub(ngx.arg[1],"openresty", "")
