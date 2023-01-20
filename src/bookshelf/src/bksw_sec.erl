@@ -107,13 +107,13 @@ is_authorized(Req0, #context{auth_type           = auth_header,
     % inconsistent treatment of host headers by various chef clients
     % (present or missing ports).  Determining whether alt sig comparison is
     % still necessary would require investigation and testing.
-
+io:format("~n~nauth failed ~n~n"),   
     CalculatedSig =
         case const_time_compare(IncomingSignature, ComparisonSig, true) of
             true ->
                 IncomingSignature;
             _ ->
-                AltSigV4Headers   = erlcloud_aws:sign_v4(method(Auth), path(Auth), config(Auth), alt_signed_headers(Auth), <<>>, Region, "s3", QueryParams, Date),
+                AltSigV4Headers  = erlcloud_aws:sign_v4(method(Auth), path(Auth), config(Auth), alt_signed_headers(Auth), <<>>, Region, "s3", QueryParams, Date),
                 parseauth(proplists:get_value("Authorization", AltSigV4Headers, ""))
             end,
 
