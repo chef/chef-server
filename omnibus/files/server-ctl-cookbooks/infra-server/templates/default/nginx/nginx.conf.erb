@@ -162,7 +162,10 @@ http {
           }
       <%- end -%>
     <%-  end %>
-
+  map $http_host $newhostheader{
+    default <%= @helper.host_header_var(@server_proto) %>;
+    "~..*" $http_host;
+  }
     # Chef HTTPS API
     include <%= @chef_https_config %>;
   <%- end -%>
