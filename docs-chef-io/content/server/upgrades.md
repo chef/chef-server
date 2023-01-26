@@ -600,6 +600,8 @@ The OpenSearch user should have full access to the cluster, including access to 
 Please refer to OpenSearch's documentation on [predefined roles](https://opensearch.org/docs/latest/security-plugin/access-control/users-roles/#predefined-roles) and [role mapping configuration](https://opensearch.org/docs/latest/security-plugin/configuration/yaml#roles_mappingyml).
 
 This user must be created on the external OpenSearch cluster. The Chef Infra Server executable cannot be used to create this user on external OpenSearch setups.
+
+As with External PostgreSQL, the external config and following migration steps are provided as a courtesy only. It is the responsibility of the user to upgrade and maintain any External OpenSearch configurations, including through upgrades. Chef Infra Server supports certain major versions of OpenSearch and those only. These versions are defined in the standard standalone Chef Infra Server automation and OS packages.
 {{</note >}}
 
 #### Steps To Migrate from Elasticsearch to External OpenSearch
