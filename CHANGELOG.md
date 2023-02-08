@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.5.0 -->
-## [15.5.0](https://github.com/chef/chef-server/tree/15.5.0) (2023-02-08)
+<!-- latest_release 15.5.1 -->
+## [15.5.1](https://github.com/chef/chef-server/tree/15.5.1) (2023-02-08)
 
 #### Merged Pull Requests
-- Forward ports from dev vm to host [#3594](https://github.com/chef/chef-server/pull/3594) ([lbakerchef](https://github.com/lbakerchef))
+- Updated upgrade docs with a note [#3600](https://github.com/chef/chef-server/pull/3600) ([jashaik](https://github.com/jashaik))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.4.0 -->
 ### Changes since 15.4.0 release
 
 #### Merged Pull Requests
+- Updated upgrade docs with a note [#3600](https://github.com/chef/chef-server/pull/3600) ([jashaik](https://github.com/jashaik)) <!-- 15.5.1 -->
 - Forward ports from dev vm to host [#3594](https://github.com/chef/chef-server/pull/3594) ([lbakerchef](https://github.com/lbakerchef)) <!-- 15.5.0 -->
 - Adding opensearch config to gen_frontend/backend [#3596](https://github.com/chef/chef-server/pull/3596) ([jashaik](https://github.com/jashaik)) <!-- 15.4.4 -->
 - Update opensearch version to 1.3.7 in chef-server. [#3573](https://github.com/chef/chef-server/pull/3573) ([sreepuramsudheer](https://github.com/sreepuramsudheer)) <!-- 15.4.3 -->
