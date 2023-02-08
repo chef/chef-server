@@ -567,6 +567,12 @@ The Chef Infra Server 15.5 upgrade from 15.0.X or later does not automatically r
 chef-server-ctl reindex
 ```
 
+{{< note >}}
+
+`chef-server-ctl reindex` is a downtime operation.
+
+{{</note >}}
+
 Chef Infra Server 15.5 is the minimum recommended version for upgrade from older versions lessthan 15 for tiered installations.
 
 ### Upgrading to 15.x
