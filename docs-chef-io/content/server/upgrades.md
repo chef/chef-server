@@ -525,24 +525,30 @@ To upgrade to Chef Infra Server on a tiered Chef Infra Server configuration, do 
     ```bash
     scp -r /etc/opscode <each server's IP>:/etc
     ```
-
-9. Upgrade each of the front end servers:
-
-    ```bash
-    chef-server-ctl upgrade
-    ```
-
-10. Run the following command on both the front end, and back end servers:
+   
+9. Run the following command on the back end servers:
 
     ```bash
     chef-server-ctl start
     ```
 
-11. [Upgrade]({{< relref "#upgrading-manage-add-on" >}}) any Chef Infra Server add-ons.
+10. Upgrade each of the front end servers:
 
-12. After the upgrade process is complete, test and verify that the server works.
+    ```bash
+    chef-server-ctl upgrade
+    ```
 
-13. Clean up the server by removing the old data:
+11. Run the following command on both the front end:
+
+    ```bash
+    chef-server-ctl start
+    ```
+
+12. [Upgrade]({{< relref "#upgrading-manage-add-on" >}}) any Chef Infra Server add-ons.
+
+13. After the upgrade process is complete, test and verify that the server works.
+
+14. Clean up the server by removing the old data:
 
 ```bash
 chef-server-ctl cleanup
@@ -550,13 +556,26 @@ chef-server-ctl cleanup
 
 ## Release-Specific Steps
 
+### Upgrading to 15.5 or later (tiered installations only)
+
+The Chef Infra Server 15.5 upgrade from 15.0.X or later does not automatically reindex for  Tiered installations.
+{{% chef-server/server_upgrade_duration %}}
+
+#### steps for reindex
+1. Run the below command on frontend server's
+```bash
+chef-server-ctl reindex
+```
+
+Chef Infra Server 15.5 is the minimum recommended version for upgrade from older versions lessthan 15 for tiered installations.
+
 ### Upgrading to 15.x
 
 Chef Infra Server 15.0 moved from Elasticsearch to OpenSearch as its search index.
 
 {{% chef-server/server_upgrade_duration %}}
 
-The Chef Infra Server 15 upgrade does not automatically reindex existing external Elasticsearch installations.
+The Chef Infra Server 15 will automatically transfer search data from Elasticsearch to OpenSearch without the need for a reindex. The Chef Infra Server 15 upgrade will need to manually reindex existing external Elasticsearch installations.
 
 The upgrade duration might take more time if you are upgrading from Chef Infra Server 12.x/13.x, as it automatically reindexes your database.
 
