@@ -1,25 +1,23 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.5.1 -->
-## [15.5.1](https://github.com/chef/chef-server/tree/15.5.1) (2023-02-08)
-
-#### Merged Pull Requests
-- Updated upgrade docs with a note [#3600](https://github.com/chef/chef-server/pull/3600) ([jashaik](https://github.com/jashaik))
+<!-- latest_release -->
 <!-- latest_release -->
 
-<!-- release_rollup since=15.4.0 -->
-### Changes since 15.4.0 release
-
-#### Merged Pull Requests
-- Updated upgrade docs with a note [#3600](https://github.com/chef/chef-server/pull/3600) ([jashaik](https://github.com/jashaik)) <!-- 15.5.1 -->
-- Forward ports from dev vm to host [#3594](https://github.com/chef/chef-server/pull/3594) ([lbakerchef](https://github.com/lbakerchef)) <!-- 15.5.0 -->
-- Adding opensearch config to gen_frontend/backend [#3596](https://github.com/chef/chef-server/pull/3596) ([jashaik](https://github.com/jashaik)) <!-- 15.4.4 -->
-- Update opensearch version to 1.3.7 in chef-server. [#3573](https://github.com/chef/chef-server/pull/3573) ([sreepuramsudheer](https://github.com/sreepuramsudheer)) <!-- 15.4.3 -->
-- Updated license_scout to 1.3.4 [#3595](https://github.com/chef/chef-server/pull/3595) ([jashaik](https://github.com/jashaik)) <!-- 15.4.2 -->
-- Update release process documentation [#3567](https://github.com/chef/chef-server/pull/3567) ([lbakerchef](https://github.com/lbakerchef)) <!-- 15.4.1 -->
+<!-- release_rollup -->
 <!-- release_rollup -->
 
 <!-- latest_stable_release -->
+## [15.5.1](https://github.com/chef/chef-server/tree/15.5.1) (2023-02-08)
+
+#### Merged Pull Requests
+- Update release process documentation [#3567](https://github.com/chef/chef-server/pull/3567) ([lbakerchef](https://github.com/lbakerchef))
+- Updated license_scout to 1.3.4 [#3595](https://github.com/chef/chef-server/pull/3595) ([jashaik](https://github.com/jashaik))
+- Update opensearch version to 1.3.7 in chef-server. [#3573](https://github.com/chef/chef-server/pull/3573) ([sreepuramsudheer](https://github.com/sreepuramsudheer))
+- Adding opensearch config to gen_frontend/backend [#3596](https://github.com/chef/chef-server/pull/3596) ([jashaik](https://github.com/jashaik))
+- Forward ports from dev vm to host [#3594](https://github.com/chef/chef-server/pull/3594) ([lbakerchef](https://github.com/lbakerchef))
+- Updated upgrade docs with a note [#3600](https://github.com/chef/chef-server/pull/3600) ([jashaik](https://github.com/jashaik))
+<!-- latest_stable_release -->
+
 ## [15.4.0](https://github.com/chef/chef-server/tree/15.4.0) (2023-01-05)
 
 #### Merged Pull Requests
@@ -49,7 +47,6 @@
 - Upgrade rebar3 3.6.2 -&gt; 3.20.0 [#3551](https://github.com/chef/chef-server/pull/3551) ([lbakerchef](https://github.com/lbakerchef))
 - Changed erlang version to 24. [#3560](https://github.com/chef/chef-server/pull/3560) ([sreepuramsudheer](https://github.com/sreepuramsudheer))
 - Bump omnibus-software from `ab655a5` to `2be3816` in /omnibus [#3558](https://github.com/chef/chef-server/pull/3558) ([dependabot[bot]](https://github.com/dependabot[bot]))
-<!-- latest_stable_release -->
 
 ## [15.3.2](https://github.com/chef/chef-server/tree/15.3.2) (2022-11-09)
 
