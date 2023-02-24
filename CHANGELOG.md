@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.5.3 -->
-## [15.5.3](https://github.com/chef/chef-server/tree/15.5.3) (2023-02-22)
+<!-- latest_release 15.5.4 -->
+## [15.5.4](https://github.com/chef/chef-server/tree/15.5.4) (2023-02-24)
 
 #### Merged Pull Requests
-- Normalize host header case [#3587](https://github.com/chef/chef-server/pull/3587) ([lbakerchef](https://github.com/lbakerchef))
+- Bump omnibus-software to pull in the OpenJRE update [#3609](https://github.com/chef/chef-server/pull/3609) ([lbakerchef](https://github.com/lbakerchef))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.5.1 -->
 ### Changes since 15.5.1 release
 
 #### Merged Pull Requests
+- Bump omnibus-software to pull in the OpenJRE update [#3609](https://github.com/chef/chef-server/pull/3609) ([lbakerchef](https://github.com/lbakerchef)) <!-- 15.5.4 -->
 - Normalize host header case [#3587](https://github.com/chef/chef-server/pull/3587) ([lbakerchef](https://github.com/lbakerchef)) <!-- 15.5.3 -->
 - Disable caching on SSL pages [#3570](https://github.com/chef/chef-server/pull/3570) ([lbakerchef](https://github.com/lbakerchef)) <!-- 15.5.2 -->
 <!-- release_rollup -->
