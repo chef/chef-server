@@ -48,7 +48,7 @@
   0},
  {<<"mochiweb">>,
   {git,"https://github.com/mochi/mochiweb",
-       {ref,"7c4d3110b1889a5d58eb4dda2b1ddbb5645df3e9"}},
+       {ref,"666ac57d5cad8da0341e53db884855ee9a9805b0"}},
   0},
  {<<"observer_cli">>,
   {git,"https://github.com/zhongwencool/observer_cli",
