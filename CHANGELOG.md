@@ -1,24 +1,22 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.6.1 -->
-## [15.6.1](https://github.com/chef/chef-server/tree/15.6.1) (2023-03-02)
-
-#### Merged Pull Requests
-- Bump spring from 4.1.0 to 4.1.1 in /src/oc-id [#3572](https://github.com/chef/chef-server/pull/3572) ([dependabot[bot]](https://github.com/dependabot[bot]))
+<!-- latest_release -->
 <!-- latest_release -->
 
-<!-- release_rollup since=15.5.1 -->
-### Changes since 15.5.1 release
-
-#### Merged Pull Requests
-- Bump spring from 4.1.0 to 4.1.1 in /src/oc-id [#3572](https://github.com/chef/chef-server/pull/3572) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.6.1 -->
-- Update Erlang dependencies [#3611](https://github.com/chef/chef-server/pull/3611) ([lbakerchef](https://github.com/lbakerchef)) <!-- 15.6.0 -->
-- Bump omnibus-software to pull in the OpenJRE update [#3609](https://github.com/chef/chef-server/pull/3609) ([lbakerchef](https://github.com/lbakerchef)) <!-- 15.5.4 -->
-- Normalize host header case [#3587](https://github.com/chef/chef-server/pull/3587) ([lbakerchef](https://github.com/lbakerchef)) <!-- 15.5.3 -->
-- Disable caching on SSL pages [#3570](https://github.com/chef/chef-server/pull/3570) ([lbakerchef](https://github.com/lbakerchef)) <!-- 15.5.2 -->
+<!-- release_rollup -->
 <!-- release_rollup -->
 
 <!-- latest_stable_release -->
+## [15.6.1](https://github.com/chef/chef-server/tree/15.6.1) (2023-03-07)
+
+#### Merged Pull Requests
+- Disable caching on SSL pages [#3570](https://github.com/chef/chef-server/pull/3570) ([lbakerchef](https://github.com/lbakerchef))
+- Normalize host header case [#3587](https://github.com/chef/chef-server/pull/3587) ([lbakerchef](https://github.com/lbakerchef))
+- Bump omnibus-software to pull in the OpenJRE update [#3609](https://github.com/chef/chef-server/pull/3609) ([lbakerchef](https://github.com/lbakerchef))
+- Update Erlang dependencies [#3611](https://github.com/chef/chef-server/pull/3611) ([lbakerchef](https://github.com/lbakerchef))
+- Bump spring from 4.1.0 to 4.1.1 in /src/oc-id [#3572](https://github.com/chef/chef-server/pull/3572) ([dependabot[bot]](https://github.com/dependabot[bot]))
+<!-- latest_stable_release -->
+
 ## [15.5.1](https://github.com/chef/chef-server/tree/15.5.1) (2023-02-08)
 
 #### Merged Pull Requests
@@ -28,7 +26,6 @@
 - Adding opensearch config to gen_frontend/backend [#3596](https://github.com/chef/chef-server/pull/3596) ([jashaik](https://github.com/jashaik))
 - Forward ports from dev vm to host [#3594](https://github.com/chef/chef-server/pull/3594) ([lbakerchef](https://github.com/lbakerchef))
 - Updated upgrade docs with a note [#3600](https://github.com/chef/chef-server/pull/3600) ([jashaik](https://github.com/jashaik))
-<!-- latest_stable_release -->
 
 ## [15.4.0](https://github.com/chef/chef-server/tree/15.4.0) (2023-01-05)
 
