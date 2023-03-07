@@ -268,8 +268,16 @@ fi
 
 # gather important file permissions
 for fileperms in \
+    /var \
+    /var/opt \
+    /var/opt/opscode \
     /var/opt/opscode* \
-        /var/log/opscode*; do
+    /var/log \
+    /var/log/opscode \
+    /var/log/opscode* \
+    /opt \
+    /opt/opscode \
+    /etc/opscode ; do
     ls -altuhR "$fileperms" >> "$tmpdir/perms.txt"
 done
 
