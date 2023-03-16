@@ -1,9 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release -->
+<!-- latest_release 15.6.2 -->
+## [15.6.2](https://github.com/chef/chef-server/tree/15.6.2) (2023-03-16)
+
+#### Merged Pull Requests
+- Update default OpenJRE to 11.0.18+10 [#3623](https://github.com/chef/chef-server/pull/3623) ([lbakerchef](https://github.com/lbakerchef))
 <!-- latest_release -->
 
-<!-- release_rollup -->
+<!-- release_rollup since=15.6.1 -->
+### Changes since 15.6.1 release
+
+#### Merged Pull Requests
+- Update default OpenJRE to 11.0.18+10 [#3623](https://github.com/chef/chef-server/pull/3623) ([lbakerchef](https://github.com/lbakerchef)) <!-- 15.6.2 -->
 <!-- release_rollup -->
 
 <!-- latest_stable_release -->
