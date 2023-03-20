@@ -116,10 +116,27 @@ Restoring Chef Backend for a Chef Infra Server cluster has two steps:
     chef-backend-ctl join-cluster --accept-license --yes --quiet 198.51.100.0 --publish_address 203.0.113.0 -s /tmp/chef-backend-secrets.json
     ```
 
+    In case of corrupted node join cluster may fail, follow below steps to cleanse the node
+    1. Take the backup of /etc/chef-backend/chef-backend.rb file
+    2. Cleanse node to remove all existing data.
+    3. Replace the chef-backend.rb and try joining the cluster.
+
+    ```bash
+    cp /etc/chef-backend/chef-backend.rb /tmp/chef-backend.rb
+    chef-backend-ctl cleanse
+    cp /tmp/chef-backend.rb /etc/chef-backend/chef-backend.rb
+    ```
+
 4. Generate the configuration for the front end from the new cluster:
 
     ```bash
     chef-backend-ctl gen-server-config chefserver.internal > /tmp/chef-server.rb
+    ```
+
+    add root_url to the generated chef-server.rb file.
+
+    ```bash
+    echo "profiles['root_url'] = 'https://chefserver.internal:9998'" | tee -a /tmp/chef-server.rb
     ```
 
 #### Frontend Restore
