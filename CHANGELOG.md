@@ -1,9 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release -->
+<!-- latest_release 15.6.3 -->
+## [15.6.3](https://github.com/chef/chef-server/tree/15.6.3) (2023-03-21)
+
+#### Merged Pull Requests
+- Integrating with sonarcubes [#3628](https://github.com/chef/chef-server/pull/3628) ([vinay-satish](https://github.com/vinay-satish))
 <!-- latest_release -->
 
-<!-- release_rollup -->
+<!-- release_rollup since=15.6.2 -->
+### Changes since 15.6.2 release
+
+#### Merged Pull Requests
+- Integrating with sonarcubes [#3628](https://github.com/chef/chef-server/pull/3628) ([vinay-satish](https://github.com/vinay-satish)) <!-- 15.6.3 -->
 <!-- release_rollup -->
 
 <!-- latest_stable_release -->
