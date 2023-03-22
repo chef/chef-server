@@ -171,6 +171,18 @@ https://buildkite.com/chef/chef-chef-server-main-habitat-build
 Follow the below document for testing the chef-server version in Automate environment.
 https://github.com/chef/automate/blob/main/dev-docs/DEV_ENVIRONMENT.md
 
+#### Software Versions Check
+
+If any software was bumped or updated (including any CVEs addressed), load up a dev VM and verify that the software is the correct version.
+
+For example, after an OpenJRE bump:
+```
+# /opt/opscode/embedded/open-jre/bin/java --version
+openjdk 11.0.18 2023-01-17
+OpenJDK Runtime Environment Temurin-11.0.18+10 (build 11.0.18+10)
+OpenJDK 64-Bit Server VM Temurin-11.0.18+10 (build 11.0.18+10, mixed mode)
+```
+
 #### Special Testing
 
 Do any special testing specific to the particular release you are doing, as applicable.
