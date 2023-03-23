@@ -16,7 +16,6 @@ DEST={{pkg.svc_files_path}}
 cd $DEST
 ln -sf {{pkg.svc_config_path}} config
 {{pkgPathFor "core/rsync"}}/bin/rsync -a $SRC/ . \
-  --keep-dirlinks \
-  --exclude vendor/ \
+  --keep-dirlinks --no-perms -O \
   --exclude database.yml \
   --exclude production.yml

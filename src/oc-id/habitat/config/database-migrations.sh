@@ -6,17 +6,17 @@ export TZ="UTC"
 {{#if bind.database}}
   {{#eachAlive bind.database.members as |member|}}
     {{#if @last}}
-HOST="{{member.sys.ip}}"
-PORT="{{member.cfg.port}}"
-USER="{{member.cfg.superuser_name}}"
-PASS="{{member.cfg.superuser_password}}"
+HOST="192.168.0.105"
+PORT="5432"
+USER="rpaul"
+PASS="123456"
     {{/if}}
   {{/eachAlive}}
 {{else}}
-HOST="{{cfg.postgresql.vip}}"
-PORT="{{cfg.postgresql.port}}"
-USER="{{cfg.sql_user}}"
-PASS="{{cfg.sql_password}}"
+HOST="{{cfg.db.host}}"
+PORT="{{cfg.db.port}}"
+USER="{{cfg.db.user}}"
+PASS="{{cfg.db.password}}"
 {{/if}}
 DB="{{cfg.db.name}}"
 
