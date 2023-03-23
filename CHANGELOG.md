@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.6.3 -->
-## [15.6.3](https://github.com/chef/chef-server/tree/15.6.3) (2023-03-21)
+<!-- latest_release 15.6.4 -->
+## [15.6.4](https://github.com/chef/chef-server/tree/15.6.4) (2023-03-23)
 
 #### Merged Pull Requests
-- Integrating with sonarcubes [#3628](https://github.com/chef/chef-server/pull/3628) ([vinay-satish](https://github.com/vinay-satish))
+- Bump activesupport from 7.0.4.1 to 7.0.4.2 in /oc-chef-pedant [#3588](https://github.com/chef/chef-server/pull/3588) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.6.2 -->
 ### Changes since 15.6.2 release
 
 #### Merged Pull Requests
+- Bump activesupport from 7.0.4.1 to 7.0.4.2 in /oc-chef-pedant [#3588](https://github.com/chef/chef-server/pull/3588) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.6.4 -->
 - Integrating with sonarcubes [#3628](https://github.com/chef/chef-server/pull/3628) ([vinay-satish](https://github.com/vinay-satish)) <!-- 15.6.3 -->
 <!-- release_rollup -->
 
