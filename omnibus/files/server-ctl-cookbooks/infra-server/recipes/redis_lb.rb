@@ -120,7 +120,7 @@ ruby_block 'set_lb_redis_values' do
     # Ensure there is no stale data, but first institute
     # a brief maint mode to avoid potential misrouting when
     # we delete old keys.
-    redis.hset 'dl_default', '503_mode', true
+    redis.hset 'dl_default', '503_mode', 'true'
     next until redis.spop('banned_ips').nil?
     next until redis.spop('xmaint_allowed_ips_list').nil?
     keys = redis.hkeys 'dl_default'
