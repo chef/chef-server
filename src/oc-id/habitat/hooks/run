@@ -20,7 +20,7 @@ NODE_PATH=$(hab pkg path 'core/node')/bin
 export PATH=$PATH:$NODE_PATH
 
 bundle package --no-install
-bundle install --local
+bundle install --path=vendor/bundle
 
 # Habitat Todo
 # move assets compile into the build phase
