@@ -12,8 +12,18 @@ export CHEF_SECRETS_DATA=$(cat {{pkg.svc_config_path}}/veil-secrets.json)
 
 cd $HOME
 echo "DB VERSION: $VERSION"
+
+RUBY_PATH=$(hab pkg path 'core/ruby27')/bin
+export PATH=$PATH:$RUBY_PATH
+
+NODE_PATH=$(hab pkg path 'core/node')/bin
+export PATH=$PATH:$NODE_PATH
+
+bundle package --no-install
+bundle install --local
+
 # Habitat Todo
 # move assets compile into the build phase
-$(hab pkg path "core/bundler")/bin/bundle exec bin/rake assets:precompile
-$(hab pkg path "core/bundler")/bin/bundle exec bin/rake db:migrate
-$(hab pkg path "core/bundler")/bin/bundle exec bin/rails server -p {{cfg.port}} -b 0.0.0.0
+bundle exec bin/rake assets:precompile
+bundle exec bin/rake db:migrate
+bundle exec bin/rails server -p {{cfg.port}} -b 0.0.0.0

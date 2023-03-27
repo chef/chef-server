@@ -15,6 +15,7 @@ pkg_deps=(
   core/openssl
   core/gcc-libs
   core/glibc
+  core/bundler
 )
 pkg_build_deps=(
   core/git

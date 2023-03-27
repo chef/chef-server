@@ -283,6 +283,7 @@ GEM
     json (2.6.1)
     jwt (2.5.0)
     kgio (2.11.4)
+    libv8 (3.16.14.19)
     libyajl2 (2.1.0)
     license-acceptance (2.1.13)
       pastel (~> 0.7)
@@ -415,6 +416,7 @@ GEM
     rb-readline (0.5.5)
     rdoc (6.4.0)
       psych (>= 4.0.0)
+    ref (2.0.0)
     regexp_parser (2.6.0)
     responders (3.0.1)
       actionpack (>= 5.0)
@@ -494,6 +496,9 @@ GEM
     strings-ansi (0.2.0)
     syslog-logger (1.6.8)
     temple (0.8.2)
+    therubyracer (0.12.3)
+      libv8 (~> 3.16.14.15)
+      ref
     thin (1.8.1)
       daemons (~> 1.0, >= 1.0.9)
       eventmachine (~> 1.0, >= 1.0.4)
@@ -536,7 +541,7 @@ GEM
     turbolinks-source (5.2.0)
     tzinfo (2.0.5)
       concurrent-ruby (~> 1.0)
-    tzinfo-data (1.2022.7)
+    tzinfo-data (1.2023.2)
       tzinfo (>= 1.0.0)
     uglifier (4.2.0)
       execjs (>= 0.3.0, < 3)
@@ -616,6 +621,7 @@ DEPENDENCIES
   spring
   spring-commands-rspec
   sprockets-rails (>= 3.4.2)
+  therubyracer (~> 0.12.3)
   thor (~> 1.2)
   timecop
   turbolinks (~> 5)
