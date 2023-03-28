@@ -8,7 +8,7 @@ export LD_RUN_PATH=$(hab pkg path "core/gcc-libs")/lib:$LD_RUN_PATH
 export VERSION=`ls -1 {{pkg.svc_files_path}}/db/migrate | tail -n 1 | $(hab pkg path "core/sed")/bin/sed -e "s/_.*//g"`
 export LD_LIBRARY_PATH=$LD_RUN_PATH
 export PATH=$HOME/bin:$PATH
-export CHEF_SECRETS_DATA=$(cat {{pkg.svc_config_path}}/veil-secrets.json)
+export CHEF_SECRETS_DATA=$(cat {{pkg.svc_config_path}}/private-chef-secrets.json)
 
 cd $HOME
 echo "DB VERSION: $VERSION"
@@ -19,11 +19,10 @@ export PATH=$PATH:$RUBY_PATH
 NODE_PATH=$(hab pkg path 'core/node')/bin
 export PATH=$PATH:$NODE_PATH
 
-bundle package --no-install
-bundle install --path=vendor/bundle
+bundle config path {{pkg.svc_files_path}}/vendor/bundle
 
 # Habitat Todo
 # move assets compile into the build phase
 bundle exec bin/rake assets:precompile
-bundle exec bin/rake db:migrate
-bundle exec bin/rails server -p {{cfg.port}} -b 0.0.0.0
+bundle exec bin/rake db:migrate RAILS_ENV=production
+bundle exec bin/rails server -p {{cfg.port}} -b 0.0.0.0 -e production
