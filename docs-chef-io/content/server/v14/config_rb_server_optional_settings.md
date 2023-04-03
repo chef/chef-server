@@ -1329,6 +1329,14 @@ This configuration file has the following settings for `opscode-erchef`:
     Amazon may eliminate path-style URLs on some or all S3 buckets
     in the future. Default value: `vhost`.
 
+{{< note >}}
+
+For automate or A2HA environment the `chef-server.rb` will not be present. In that case, we need to update
+the `s3_url`, `s3_external_url` and `s3_platform_bucket_name` with appropriate value in the `sys.config`
+present at the location `$(hab pkg path chef/automate-cs-oc-erchef)/config/sys.config`
+
+{{< /note >}}
+
 `opscode_erchef['sql_connection_user']`
 
 :   The PostgreSQL user name in `'username@hostname'` format (e.g.

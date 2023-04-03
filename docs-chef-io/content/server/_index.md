@@ -229,6 +229,14 @@ modification when using an external S3 provider:
 </tbody>
 </table>
 
+{{< note >}}
+
+For automate or A2HA environment the `chef-server.rb` will not be present. In that case, we need to update
+the `s3_url`, `s3_external_url` and `s3_platform_bucket_name` with appropriate value in the `sys.config`
+present at the location `$(hab pkg path chef/automate-cs-oc-erchef)/config/sys.config`
+
+{{< /note >}}
+
 ## External PostgreSQL
 
 The following diagram highlights the specific changes that occur when
