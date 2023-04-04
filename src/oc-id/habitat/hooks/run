@@ -19,10 +19,18 @@ export PATH=$PATH:$RUBY_PATH
 NODE_PATH=$(hab pkg path 'core/node')/bin
 export PATH=$PATH:$NODE_PATH
 
+OPENSSL_PATH=$(hab pkg path 'core/openssl')/bin
+export PATH=$PATH:$OPENSSL_PATH
+
+# Generate self signed certificate to run OC-ID on https
+openssl req -new -newkey rsa:4096 -days 365 -nodes -x509 \
+    -subj "/C=US/ST=Denial/L=Springfield/O=Dis/CN=localhost" \
+    -keyout localhost.key  -out localhost.crt
+
 bundle config path {{pkg.svc_files_path}}/vendor/bundle
 
 # Habitat Todo
 # move assets compile into the build phase
 bundle exec bin/rake assets:precompile
 bundle exec bin/rake db:migrate RAILS_ENV=production
-bundle exec bin/rails server -p {{cfg.port}} -b 0.0.0.0 -e production
+bundle exec bin/rails server -u puma -e production -b 'ssl://0.0.0.0:{{cfg.port}}?key=localhost.key&cert=localhost.crt&verify_mode=none'

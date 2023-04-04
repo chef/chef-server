@@ -6,10 +6,10 @@ export TZ="UTC"
 {{#if bind.database}}
   {{#eachAlive bind.database.members as |member|}}
     {{#if @last}}
-HOST="192.168.0.105"
-PORT="5432"
-USER="rpaul"
-PASS="123456"
+HOST="{{member.sys.ip}}"
+PORT="{{member.cfg.port}}"
+USER="{{member.cfg.superuser_name}}"
+PASS="{{member.cfg.superuser_password}}"
     {{/if}}
   {{/eachAlive}}
 {{else}}

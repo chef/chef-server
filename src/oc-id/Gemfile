@@ -25,6 +25,7 @@ gem 'veil', '~> 0.3.11'
 gem "tzinfo-data"
 
 gem 'omniauth-chef', '~> 0.4'
+gem 'puma'
 
 #
 # These gems require a javascript runtime.  We don't want to ship a
