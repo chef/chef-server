@@ -1,16 +1,21 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.6.3 -->
-## [15.6.3](https://github.com/chef/chef-server/tree/15.6.3) (2023-03-21)
+<!-- latest_release 15.6.8 -->
+## [15.6.8](https://github.com/chef/chef-server/tree/15.6.8) (2023-04-06)
 
 #### Merged Pull Requests
-- Integrating with sonarcubes [#3628](https://github.com/chef/chef-server/pull/3628) ([vinay-satish](https://github.com/vinay-satish))
+- Update release process docs [#3631](https://github.com/chef/chef-server/pull/3631) ([lbakerchef](https://github.com/lbakerchef))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.6.2 -->
 ### Changes since 15.6.2 release
 
 #### Merged Pull Requests
+- Update release process docs [#3631](https://github.com/chef/chef-server/pull/3631) ([lbakerchef](https://github.com/lbakerchef)) <!-- 15.6.8 -->
+- Bump pg from 1.4.5 to 1.4.6 in /src/chef-server-ctl [#3612](https://github.com/chef/chef-server/pull/3612) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.6.7 -->
+- Bump nokogiri from 1.14.0 to 1.14.2 in /src/oc-id [#3602](https://github.com/chef/chef-server/pull/3602) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.6.6 -->
+- Bump mixlib-install from 3.12.24 to 3.12.27 in /src/chef-server-ctl [#3591](https://github.com/chef/chef-server/pull/3591) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.6.5 -->
+- Bump activesupport from 7.0.4.1 to 7.0.4.2 in /oc-chef-pedant [#3588](https://github.com/chef/chef-server/pull/3588) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.6.4 -->
 - Integrating with sonarcubes [#3628](https://github.com/chef/chef-server/pull/3628) ([vinay-satish](https://github.com/vinay-satish)) <!-- 15.6.3 -->
 <!-- release_rollup -->
 
