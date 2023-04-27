@@ -232,7 +232,7 @@ And a few other things.  You can just use `dvm` by itself and a list of
 commands will be generated. You may also want to take a look in
 defaults.yml, in which project definitions and other things are set up.
 
-# Using external databases
+## Using external databases
 
 To use an external database for Chef Server (and Reporting), create a `config.yml` file with the following contents:
 
@@ -261,7 +261,7 @@ vm:
   reporting_postgresql:
     start: true
 ```
-# Using elasticsearch
+## Using elasticsearch
 
 To create a separate elasticsearch vm create a `config.yml` file with the following contents:
 ```
@@ -271,3 +271,23 @@ To create a separate elasticsearch vm create a `config.yml` file with the follow
     version: "5"
 ```
 
+## Connecting to Chef Infra Server from the local machine
+
+Many times Chef Infra Server is used through `knife` (from the workstation) or `chef-client` (from chef client) CLI commands. There is a possibility to recreate such scenarios in the dev vm if it is required for any testing.
+
+### Connecting through knife
+
+We will be connecting to our chef server in the dev vm from our local machine through `knife`. Make sure that `knife` CLI command is installed in your local machine.
+
+The `knife` command can be directly used from the `dev` directory of your local machine. The `.chef` folder present in the `dev` directory has the necessary knife configuration to connect with the dev vm. If there is some problem with the connection, try running `knife ssl fetch`. You can run a bunch of `knife` commands like cookbook upload, download etc as per your testing requirements.
+
+```
+knife cookbook upload dev --cookbook-repo-paths ./cookbooks
+knife cookbook download dev
+```
+
+### Connecting through chef-client
+
+We will be connecting to our chef server in the dev vm from our local machine through `chef-client`. Make sure that `chef-client` CLI command is installed in your local machine.
+
+The `chef-client` command can be directly used from the `dev` directory of your local machine. The `client.rb` file present in the `dev` directory has the necessary client configuration to connect with the dev vm. If there is some problem with the connection, you can try bootstrapping using the command `knife bootstrap`. You can run the `chef-client` command and the cookbook from the chef server present in the dev vm will be pulled into your local machine and executed.
