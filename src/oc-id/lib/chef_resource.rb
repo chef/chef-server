@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module ChefResource
   def get
     attrs = chef.get_rest(url)
@@ -25,14 +27,14 @@ module ChefResource
   end
 
   def key
-    Secrets.get("chef-server", "webui_key")
+    Secrets.get('chef-server', 'webui_key')
   end
 
   def parameters
-    { headers: headers,
+    { headers:,
       client_name: Settings.chef.superuser,
       client_key: nil,
-      api_version: "0",
+      api_version: '0',
       raw_key: key }
   end
 end

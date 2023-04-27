@@ -1,6 +1,7 @@
-OcId::Application.routes.draw do
+# frozen_string_literal: true
 
-  default_url_options host: "#{Settings.origin}"
+OcId::Application.routes.draw do
+  default_url_options host: Settings.origin.to_s
 
   root 'home#index'
   get 'id', to: 'home#index'
@@ -14,13 +15,13 @@ OcId::Application.routes.draw do
     post '/auth/chef/callback', to: 'sessions#create'
     get '/auth/failure', to: 'sessions#retry'
 
-    resources :sessions, only: [:new, :create, :destroy]
-    resource :password_reset, path: '/password-reset', except: [:destroy, :edit]
+    resources :sessions, only: %i[new create destroy]
+    resource :password_reset, path: '/password-reset', except: %i[destroy edit]
 
-    resource :profile, only: [:show, :update] do
-      put  "password" => "profiles#change_password"
-      get  "email" => "profiles#change_email"
-      post "regen_key"
+    resource :profile, only: %i[show update] do
+      put  'password' => 'profiles#change_password'
+      get  'email' => 'profiles#change_email'
+      post 'regen_key'
     end
 
     resource :zendesk, only: [:show] do

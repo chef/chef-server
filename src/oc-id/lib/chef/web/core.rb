@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'chef/web/core/engine' if Object.const_defined?(:Rails)
 require 'chef/web/core/version'
 

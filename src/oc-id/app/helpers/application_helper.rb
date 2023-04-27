@@ -1,24 +1,26 @@
+# frozen_string_literal: true
+
 require 'chef/web/core/asset_helpers'
 require 'chef/web/core/url_helpers'
 
 module ApplicationHelper
   include Chef::Web::Core::AssetHelpers
-  include Chef::Web::Core::URLHelpers
+  include Chef::Web::Core::UrlHelpers
 
   def error_message_for(model, attr)
     msgs = model.errors[attr]
 
-    if msgs.present?
-      content_tag(:small, msgs.join("\n"), :class => 'error')
-    end
+    return unless msgs.present?
+
+    content_tag(:small, msgs.join("\n"), class: 'error')
   end
 
   def chef_class_for(flash_type)
     classes = {
-      success:  'success',
-      error:    'alert',
-      alert:    'warning',
-      notice:   'info'
+      success: 'success',
+      error: 'alert',
+      alert: 'warning',
+      notice: 'info'
     }
 
     classes[flash_type.to_sym] || flash_type.to_s
@@ -28,9 +30,9 @@ module ApplicationHelper
     button_to(
       text,
       url,
-      :class => 'button alert',
-      :method => :delete,
-      :data => {
+      class: 'button alert',
+      method: :delete,
+      data: {
         'abide' => '',
         'confirm' => 'Are you sure?'
       }

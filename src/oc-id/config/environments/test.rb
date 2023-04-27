@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 OcId::Application.configure do
   # Settings specified here will take precedence over those in config/application.rb.
 
@@ -14,7 +16,7 @@ OcId::Application.configure do
 
   # Configure static asset server for tests with Cache-Control for performance.
   config.serve_static_files = true
-  config.static_cache_control = "public, max-age=3600"
+  config.static_cache_control = 'public, max-age=3600'
 
   # Show full error reports and disable caching.
   config.consider_all_requests_local       = true
@@ -27,8 +29,8 @@ OcId::Application.configure do
   config.action_controller.allow_forgery_protection = false
 
   config.action_mailer.default_url_options = {
-    :host => "example.com",
-    :protocol => Settings.protocol
+    host: 'example.com',
+    protocol: Settings.protocol
   }
 
   # Tell Action Mailer not to deliver emails to the real world.

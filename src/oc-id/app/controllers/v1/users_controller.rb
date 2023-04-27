@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module V1
   class UsersController < ApplicationController
     before_action :doorkeeper_authorize!, except: :show

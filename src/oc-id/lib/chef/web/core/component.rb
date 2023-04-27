@@ -1,15 +1,14 @@
+# frozen_string_literal: true
+
 require 'erb'
 require 'chef/web/core/url_helpers'
 
-class Chef
-  module Web
-    module Core
-      class Component
-        include Chef::Web::Core::URLHelpers
+      class Chef::Web::Core::Component
+        include Chef::Web::Core::UrlHelpers
 
         attr_accessor :type
 
-        def initialize(opts={})
+        def initialize(opts = {})
           opts.each do |k, v|
             instance_variable_set("@#{k}", v) unless v.nil?
           end
@@ -20,6 +19,4 @@ class Chef
           erb.result(binding)
         end
       end
-    end
-  end
-end
+

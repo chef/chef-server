@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
 describe ProfilesController do
@@ -5,33 +7,33 @@ describe ProfilesController do
   let(:email) { 'jim.kirk@federation-captains.org' }
   let(:user1) do
     User.new({
-      :username => username,
-      :first_name => 'jimmy',
-      :last_name => 'jammy',
-      :middle_name => 'jam',
-      :email => email,
-      :public_key => 'fake public key',
-      :display_name => 'jimmy jammy',
-      :password => 'awesomefuntimes'
-    })
+               username:,
+               first_name: 'jimmy',
+               last_name: 'jammy',
+               middle_name: 'jam',
+               email:,
+               public_key: 'fake public key',
+               display_name: 'jimmy jammy',
+               password: 'awesomefuntimes'
+             })
   end
   let(:user2) do
     User.new({
-      :username => 'spock',
-      :first_name => 'Spock',
-      :last_name => 'Son Of Sarek',
-      :middle_name => '',
-      :email => 'spock@vulcan.net',
-      :public_key => 'fake public key',
-      :display_name => 'Spock',
-      :password => 'highlylogical'
-    })
+               username: 'spock',
+               first_name: 'Spock',
+               last_name: 'Son Of Sarek',
+               middle_name: '',
+               email: 'spock@vulcan.net',
+               public_key: 'fake public key',
+               display_name: 'Spock',
+               password: 'highlylogical'
+             })
   end
 
   let(:logged_in_user) { user1 }
-  let(:fake_chef) {
-    double(:chef_api, :put_rest => {'private_key' => 'fake private key'})
-  }
+  let(:fake_chef) do
+    double(:chef_api, put_rest: { 'private_key' => 'fake private key' })
+  end
 
   before do
     allow(User).to receive(:find).with(user1.username).and_return(user1)
@@ -73,9 +75,8 @@ describe ProfilesController do
       expect(response).to redirect_to(profile_path)
     end
 
-
     it "should not update user's email" do
-      put :update, params: { user:  put_user.merge(email: 'abc@test.com') }
+      put :update, params: { user: put_user.merge(email: 'abc@test.com') }
 
       expect(assigns(:user).email).not_to eq('abc@test.com')
     end
@@ -88,195 +89,234 @@ describe ProfilesController do
     end
   end
 
- describe 'GET #change_email' do
-   let(:new_email) { 'new-email@somewhere.org' }
-   let(:signature) { Signature.new(username, email, expires, Settings.secret_key_base, new_email) }
-   let(:expires) { 1.day.from_now.to_i }
+  describe 'GET #change_email' do
+    let(:new_email) { 'new-email@somewhere.org' }
+    let(:signature) { Signature.new(username, email, expires, Settings.secret_key_base, new_email) }
+    let(:expires) { 1.day.from_now.to_i }
 
-   describe 'when logged in as user' do
-     describe 'invalid params' do
-       it 'requires a username' do
-         get :change_email, params: { user:  Base64.urlsafe_encode64({ email: new_email }.to_json), signature: signature, expires: expires }
-         expect(response).to render_template('show')
-         expect(flash[:alert]).to match /not a valid username/
-       end
+    describe 'when logged in as user' do
+      describe 'invalid params' do
+        it 'requires a username' do
+          get :change_email,
+              params: { user: Base64.urlsafe_encode64({ email: new_email }.to_json), signature:,
+                        expires: }
+          expect(response).to render_template('show')
+          expect(flash[:alert]).to match(/not a valid username/)
+        end
 
-       it 'requires a new email' do
-         get :change_email, params: { user:  Base64.urlsafe_encode64({ username: username }.to_json), signature: signature, expires: expires }
-         expect(response).to render_template('show')
-         expect(flash[:alert]).to match /invalid signature/
-       end
+        it 'requires a new email' do
+          get :change_email,
+              params: { user: Base64.urlsafe_encode64({ username: }.to_json), signature:,
+                        expires: }
+          expect(response).to render_template('show')
+          expect(flash[:alert]).to match(/invalid signature/)
+        end
 
-       it 'requires an expiration date' do
-         get :change_email, params: { user:  Base64.urlsafe_encode64({ username: username, email: new_email }.to_json), signature: signature }
-         expect(response).to render_template('show')
-         expect(flash[:alert]).to match /invalid signature/
-       end
+        it 'requires an expiration date' do
+          get :change_email,
+              params: { user: Base64.urlsafe_encode64({ username:, email: new_email }.to_json),
+                        signature: }
+          expect(response).to render_template('show')
+          expect(flash[:alert]).to match(/invalid signature/)
+        end
 
-       it 'requires a signature' do
-         get :change_email, params: { user:  Base64.urlsafe_encode64({ username: username, email: new_email }.to_json), expires: expires }
-         expect(response).to render_template('show')
-         expect(flash[:alert]).to match /invalid signature/
-       end
+        it 'requires a signature' do
+          get :change_email,
+              params: { user: Base64.urlsafe_encode64({ username:, email: new_email }.to_json),
+                        expires: }
+          expect(response).to render_template('show')
+          expect(flash[:alert]).to match(/invalid signature/)
+        end
 
-       it 'requires a valid signature - signing the new email address' do
-         get :change_email, params: { user:  Base64.urlsafe_encode64({ username: username, email: new_email }.to_json), expires: expires, signature: 'foo' }
-         expect(response).to render_template('show')
-         expect(flash[:alert]).to match /invalid signature/
-       end
+        it 'requires a valid signature - signing the new email address' do
+          get :change_email,
+              params: { user: Base64.urlsafe_encode64({ username:, email: new_email }.to_json), expires:,
+                        signature: 'foo' }
+          expect(response).to render_template('show')
+          expect(flash[:alert]).to match(/invalid signature/)
+        end
 
-       it 'requires new email in the response from verification to match the new email specified in the profile page' do
-         get :change_email, params: { user:  Base64.urlsafe_encode64({ username: username, email: "malicious_change@user.com" }.to_json), expires: expires, signature: signature }
-         expect(response).to render_template('show')
-         expect(flash[:alert]).to match /invalid signature/
-       end
-       
-       describe 'invalid signature - when new email specified for verification is same as previous email' do
-         let(:old_email) { logged_in_user.email }
-         it 'should reject the link if email specified for verification is match with previous email' do
-           get :change_email, params: { user:  Base64.urlsafe_encode64({ username: username, email: old_email }.to_json), expires: expires, signature: signature }
-           expect(response).to render_template('show')
-           expect(flash[:alert]).to match /invalid signature/
-         end
-       end
-     end
+        it 'requires new email in the response from verification to match the new email specified in the profile page' do
+          get :change_email,
+              params: { user: Base64.urlsafe_encode64({ username:, email: 'malicious_change@user.com' }.to_json),
+                        expires:, signature: }
+          expect(response).to render_template('show')
+          expect(flash[:alert]).to match(/invalid signature/)
+        end
 
-     describe 'expired link' do
-       let(:expires) { 1.day.ago.to_i }
+        describe 'invalid signature - when new email specified for verification is same as previous email' do
+          let(:old_email) { logged_in_user.email }
+          it 'should reject the link if email specified for verification is match with previous email' do
+            get :change_email,
+                params: { user: Base64.urlsafe_encode64({ username:, email: old_email }.to_json), expires:,
+                          signature: }
+            expect(response).to render_template('show')
+            expect(flash[:alert]).to match(/invalid signature/)
+          end
+        end
+      end
 
-       it 'rejects the link' do
-         get :change_email, params: { user:  Base64.urlsafe_encode64({ username: username, email: new_email }.to_json), expires: expires, signature: signature }
-         expect(response).to render_template('show')
-         expect(flash[:alert]).to match /invalid signature/
-       end
+      describe 'expired link' do
+        let(:expires) { 1.day.ago.to_i }
 
-     end
+        it 'rejects the link' do
+          get :change_email,
+              params: { user: Base64.urlsafe_encode64({ username:, email: new_email }.to_json), expires:,
+                        signature: }
+          expect(response).to render_template('show')
+          expect(flash[:alert]).to match(/invalid signature/)
+        end
+      end
 
-     describe 'link with stale email' do
-       let(:old_email) { 'myfirstemail@email.org' }
-       let(:signature) { Signature.new(username, old_email, expires, Settings.secret_key_base, new_email) }
+      describe 'link with stale email' do
+        let(:old_email) { 'myfirstemail@email.org' }
+        let(:signature) { Signature.new(username, old_email, expires, Settings.secret_key_base, new_email) }
 
-       it 'rejects the link' do
-         get :change_email, params: { user:  Base64.urlsafe_encode64({ username: username, email: new_email }.to_json), expires: expires, signature: signature }
-         expect(response).to render_template('show')
-         expect(flash[:alert]).to match /invalid signature/
-       end
-     end
+        it 'rejects the link' do
+          get :change_email,
+              params: { user: Base64.urlsafe_encode64({ username:, email: new_email }.to_json), expires:,
+                        signature: }
+          expect(response).to render_template('show')
+          expect(flash[:alert]).to match(/invalid signature/)
+        end
+      end
 
-     describe 'valid params' do
-       before do
-         get :change_email, params: { user:  Base64.urlsafe_encode64({ username: username, email: new_email }.to_json), expires: expires, signature: signature }
-       end
+      describe 'valid params' do
+        before do
+          get :change_email,
+              params: { user: Base64.urlsafe_encode64({ username:, email: new_email }.to_json), expires:,
+                        signature: }
+        end
 
-       it 'redirects to the profile page' do
-         expect(response).to redirect_to(profile_path)
-       end
+        it 'redirects to the profile page' do
+          expect(response).to redirect_to(profile_path)
+        end
 
-       it 'updates the email address' do
-         expect(logged_in_user.email).to eql(new_email)
-       end
-     end
-   end
+        it 'updates the email address' do
+          expect(logged_in_user.email).to eql(new_email)
+        end
+      end
+    end
 
-   describe 'when not logged in' do
-     let(:logged_in_user) { nil }
+    describe 'when not logged in' do
+      let(:logged_in_user) { nil }
 
-     describe 'invalid params' do
-       it 'requires a username' do
-         get :change_email, params: { user:  Base64.urlsafe_encode64({ email: new_email }.to_json), signature: signature, expires: expires }
-         expect(response).to redirect_to(signin_path)
-       end
+      describe 'invalid params' do
+        it 'requires a username' do
+          get :change_email,
+              params: { user: Base64.urlsafe_encode64({ email: new_email }.to_json), signature:,
+                        expires: }
+          expect(response).to redirect_to(signin_path)
+        end
 
-       it 'requires a new email' do
-         get :change_email, params: { user:  Base64.urlsafe_encode64({ username: username }.to_json), signature: signature, expires: expires }
-         expect(response).to redirect_to(signin_path)
-       end
+        it 'requires a new email' do
+          get :change_email,
+              params: { user: Base64.urlsafe_encode64({ username: }.to_json), signature:,
+                        expires: }
+          expect(response).to redirect_to(signin_path)
+        end
 
-       it 'requires an expiration date' do
-         get :change_email, params: { user:  Base64.urlsafe_encode64({ username: username, email: new_email }.to_json), signature: signature }
-         expect(response).to redirect_to(signin_path)
-       end
+        it 'requires an expiration date' do
+          get :change_email,
+              params: { user: Base64.urlsafe_encode64({ username:, email: new_email }.to_json),
+                        signature: }
+          expect(response).to redirect_to(signin_path)
+        end
 
-       it 'requires a signature' do
-         get :change_email, params: { user:  Base64.urlsafe_encode64({ username: username, email: new_email }.to_json), expires: expires }
-         expect(response).to redirect_to(signin_path)
-       end
+        it 'requires a signature' do
+          get :change_email,
+              params: { user: Base64.urlsafe_encode64({ username:, email: new_email }.to_json),
+                        expires: }
+          expect(response).to redirect_to(signin_path)
+        end
 
-       it 'requires a valid signature - signing the new email address' do
-         get :change_email, params: { user:  Base64.urlsafe_encode64({ username: username, email: new_email }.to_json), expires: expires, signature: 'foo' }
-         expect(response).to redirect_to(signin_path)
-       end
-     end
+        it 'requires a valid signature - signing the new email address' do
+          get :change_email,
+              params: { user: Base64.urlsafe_encode64({ username:, email: new_email }.to_json), expires:,
+                        signature: 'foo' }
+          expect(response).to redirect_to(signin_path)
+        end
+      end
 
-     describe 'expired link' do
-       let(:expires) { 1.day.ago.to_i }
+      describe 'expired link' do
+        let(:expires) { 1.day.ago.to_i }
 
-       it 'rejects the link' do
-         get :change_email, params: { user:  Base64.urlsafe_encode64({ username: username, email: new_email }.to_json), expires: expires, signature: signature }
-         expect(response).to redirect_to(signin_path)
-       end
+        it 'rejects the link' do
+          get :change_email,
+              params: { user: Base64.urlsafe_encode64({ username:, email: new_email }.to_json), expires:,
+                        signature: }
+          expect(response).to redirect_to(signin_path)
+        end
+      end
 
-     end
+      describe 'link with stale email' do
+        let(:signature) do
+          Signature.new(username, 'myfirstemail@email.org', expires, Settings.secret_key_base, new_email)
+        end
 
-     describe 'link with stale email' do
-       let(:signature) { Signature.new(username, 'myfirstemail@email.org', expires, Settings.secret_key_base, new_email) }
+        it 'rejects the link' do
+          get :change_email,
+              params: { user: Base64.urlsafe_encode64({ username:, email: new_email }.to_json), expires:,
+                        signature: }
+          expect(response).to redirect_to(signin_path)
+        end
+      end
 
-       it 'rejects the link' do
-         get :change_email, params: { user:  Base64.urlsafe_encode64({ username: username, email: new_email }.to_json), expires: expires, signature: signature }
-         expect(response).to redirect_to(signin_path)
-       end
-     end
+      describe 'valid params' do
+        before do
+          get :change_email,
+              params: { user: Base64.urlsafe_encode64({ username:, email: new_email }.to_json), expires:,
+                        signature: }
+        end
 
-     describe 'valid params' do
-       before do
-         get :change_email, params: { user:  Base64.urlsafe_encode64({ username: username, email: new_email }.to_json), expires: expires, signature: signature }
-       end
+        it 'redirects to the signin page' do
+          expect(response).to redirect_to(signin_path)
+        end
 
-       it 'redirects to the signin page' do
-         expect(response).to redirect_to(signin_path)
-       end
+        it 'updates the email address' do
+          expect(user1.email).to eql(new_email)
+        end
+      end
+    end
 
-       it 'updates the email address' do
-         expect(user1.email).to eql(new_email)
-       end
-     end
-   end
+    describe 'when logged in as someone else' do
+      let(:logged_in_user) { user2 }
 
-   describe 'when logged in as someone else' do
-     let(:logged_in_user) { user2 }
+      describe 'link with stale email' do
+        let(:signature) { Signature.new(username, user2.email, expires, Settings.secret_key_base, new_email) }
 
-     describe 'link with stale email' do
-       let(:signature) { Signature.new(username, user2.email, expires, Settings.secret_key_base, new_email) }
+        it 'rejects the link' do
+          get :change_email,
+              params: { user: Base64.urlsafe_encode64({ username:, email: new_email }.to_json), expires:,
+                        signature: }
+          expect(response).to render_template('show')
+          expect(flash[:alert]).to match(/invalid signature/)
+        end
+      end
 
-       it 'rejects the link' do
-         get :change_email, params: { user:  Base64.urlsafe_encode64({ username: username, email: new_email }.to_json), expires: expires, signature: signature }
-         expect(response).to render_template('show')
-         expect(flash[:alert]).to match /invalid signature/
-       end
-     end
+      describe 'valid params' do
+        before do
+          get :change_email,
+              params: { user: Base64.urlsafe_encode64({ username:, email: new_email }.to_json), expires:,
+                        signature: }
+        end
 
-     describe 'valid params' do
-       before do
-         get :change_email, params: { user:  Base64.urlsafe_encode64({ username: username, email: new_email }.to_json), expires: expires, signature: signature }
-       end
+        it 'redirects to the profile page' do
+          expect(response).to redirect_to(profile_path)
+        end
 
-       it 'redirects to the profile page' do
-         expect(response).to redirect_to(profile_path)
-       end
-
-       it 'updates the email address' do
-         expect(user1.email).to eql(new_email)
-       end
-     end
-   end
- end
+        it 'updates the email address' do
+          expect(user1.email).to eql(new_email)
+        end
+      end
+    end
+  end
 
   describe 'PUT #change_password' do
     it 'redirects to the profile page if the update succeeded' do
-      put :change_password, params: { :current_password => 'haha',
-                              :new_password => 'password',
-                              :password_confirmation => 'password'
-                            }
+      put :change_password, params: { current_password: 'haha',
+                                      new_password: 'password',
+                                      password_confirmation: 'password' }
 
       expect(response).to redirect_to(profile_path)
     end

@@ -1,8 +1,9 @@
+# frozen_string_literal: true
+
 class Chef
   module Web
     module Core
-      module URLHelpers
-
+      module UrlHelpers
         def chef_domain
           ENV['CHEF_DOMAIN'] || 'chef.io'
         end

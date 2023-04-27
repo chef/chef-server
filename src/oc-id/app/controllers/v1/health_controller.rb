@@ -1,4 +1,6 @@
-require "health_check"
+# frozen_string_literal: true
+
+require 'health_check'
 
 module V1
   class HealthController < ApplicationController
@@ -15,7 +17,7 @@ module V1
 
       status = @health.ok? ? :ok : :service_unavailable
 
-      respond_with @health, status: status
+      respond_with @health, status:
     end
   end
 end

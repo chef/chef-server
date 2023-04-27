@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
 describe 'Authentication' do
@@ -17,12 +19,12 @@ describe 'Authentication' do
       let(:user) { FactoryGirl.build(:user) }
 
       before do
-        fill_in 'username', :with => user.username
-        fill_in 'password', :with => user.password
+        fill_in 'username', with: user.username
+        fill_in 'password', with: user.password
         click_button 'Sign In'
       end
 
-      it { should have_link 'Sign Out', :href => signout_path }
+      it { should have_link 'Sign Out', href: signout_path }
       it { should_not have_link 'Sign In' }
       it { should_not have_link 'Sign Up' }
       it { should have_content 'Applications' }
@@ -39,12 +41,12 @@ describe 'Authentication' do
       let(:user) { FactoryGirl.build(:user) }
 
       before do
-        fill_in 'username', :with => user.email
-        fill_in 'password', :with => user.password
+        fill_in 'username', with: user.email
+        fill_in 'password', with: user.password
         click_button 'Sign In'
       end
 
-      it { should have_link 'Sign Out', :href => signout_path }
+      it { should have_link 'Sign Out', href: signout_path }
       it { should_not have_link 'Sign In' }
       it { should_not have_link 'Sign Up' }
       it { should have_content 'Applications' }
@@ -61,14 +63,14 @@ describe 'Authentication' do
       let(:user) { FactoryGirl.build(:user) }
 
       before do
-        fill_in 'username', :with => user.username
-        fill_in 'password', :with => 'something-totally-wrong'
+        fill_in 'username', with: user.username
+        fill_in 'password', with: 'something-totally-wrong'
         click_button 'Sign In'
       end
 
       it { should have_link 'Forgot your password?' }
       it { should have_link 'Sign Up' }
-      it { should_not have_link 'Sign Out', :href => signout_path }
+      it { should_not have_link 'Sign Out', href: signout_path }
       it { should have_button 'Sign In' }
       it { should have_selector('.alert-box.alert') }
 

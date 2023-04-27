@@ -1,6 +1,7 @@
 chef:
-  endpoint: https://192.168.33.100
+  endpoint: https://18.220.198.195
   superuser: pivotal
+  ssl_verify_mode: verify_none
 doorkeeper:
   administrators:
     - rainbowdash

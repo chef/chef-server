@@ -1,10 +1,12 @@
+# frozen_string_literal: true
+
 require 'digest/sha1'
 
 # Manages signatures used for password resets
 class Signature
   attr_reader :email, :expiration, :payload, :secret_token, :username
 
-  def initialize(username, email, expiration, secret_token, payload=nil)
+  def initialize(username, email, expiration, secret_token, payload = nil)
     @username = username
     @email = email
     @expiration = expiration

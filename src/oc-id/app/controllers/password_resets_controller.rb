@@ -1,10 +1,11 @@
+# frozen_string_literal: true
+
 class PasswordResetsController < ApplicationController
-  def new
-  end
+  def new; end
 
   def create
     if params[:username].blank?
-      flash.now[:alert] = I18n.t("errors.password_resets.username_blank")
+      flash.now[:alert] = I18n.t('errors.password_resets.username_blank')
       render 'new', status: :unprocessable_entity
       return
     end
@@ -16,14 +17,14 @@ class PasswordResetsController < ApplicationController
         user_not_found
       else
         PasswordResetMailer.password_reset(user).deliver_now
-        flash.now[:notice] = I18n.t("errors.password_resets.completion")
+        flash.now[:notice] = I18n.t('errors.password_resets.completion')
         @status = :ok
       end
     rescue Net::HTTPServerException => e
       if e.response.code.to_i == 404
         user_not_found
       elsif e.response.code.to_i == 406
-        flash.now[:alert] = I18n.t("errors.password_resets.invalid_username", :name => params[:username])
+        flash.now[:alert] = I18n.t('errors.password_resets.invalid_username', name: params[:username])
         @status = :forbidden
       else
         raise
@@ -34,18 +35,18 @@ class PasswordResetsController < ApplicationController
   end
 
   def show
-    unless valid_signature?
-      flash[:alert] = I18n.t("errors.password_resets.invalid_signature")
-      redirect_to action: 'new'
-    end
+    return if valid_signature?
+
+    flash[:alert] = I18n.t('errors.password_resets.invalid_signature')
+    redirect_to action: 'new'
   end
 
   def update
     if params[:password].blank?
-      flash.now[:alert] = I18n.t("errors.passwords.blank", :label => 'Password')
+      flash.now[:alert] = I18n.t('errors.passwords.blank', label: 'Password')
       render 'show', status: :forbidden
     elsif !valid_signature?
-      flash.now[:alert] = I18n.t("errors.password_resets.invalid_signature")
+      flash.now[:alert] = I18n.t('errors.password_resets.invalid_signature')
       render 'show', status: :forbidden
     else
       begin
@@ -55,7 +56,7 @@ class PasswordResetsController < ApplicationController
         # it's already verified when we examine the signature.
         user = User.find(escaped_username)
         if user.email != params[:email]
-          flash.now[:alert] = I18n.t("errors.password_resets.invalid_signature")
+          flash.now[:alert] = I18n.t('errors.password_resets.invalid_signature')
           render 'show', status: :forbidden
         else
           user.update_attributes('password' => params[:password])
@@ -64,7 +65,7 @@ class PasswordResetsController < ApplicationController
         end
       rescue Net::HTTPServerException => e
         if e.response.code.to_i == 404
-          flash[:notice] = I18n.t("errors.password_resets.completion")
+          flash[:notice] = I18n.t('errors.password_resets.completion')
           redirect_to action: 'new'
         elsif e.response.code.to_i == 400
           flash.now[:alert] = error_from_json(e)['error']
@@ -79,7 +80,7 @@ class PasswordResetsController < ApplicationController
   private
 
   def user_not_found
-    flash.now[:notice] = I18n.t("errors.password_resets.completion")
+    flash.now[:notice] = I18n.t('errors.password_resets.completion')
   end
 
   def escaped_username
@@ -87,12 +88,12 @@ class PasswordResetsController < ApplicationController
   end
 
   def valid_signature?
-    [:signature, :username, :email, :expires].all? { |p| params[p].present? } &&
-    Signature.new(
-      params[:username],
-      params[:email],
-      params[:expires],
-      Settings.secret_key_base
-    ).valid_for?(params[:signature])
+    %i[signature username email expires].all? { |p| params[p].present? } &&
+      Signature.new(
+        params[:username],
+        params[:email],
+        params[:expires],
+        Settings.secret_key_base
+      ).valid_for?(params[:signature])
   end
 end

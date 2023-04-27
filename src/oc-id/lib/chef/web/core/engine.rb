@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require_relative 'version'
 
 class Chef
@@ -9,18 +11,15 @@ class Chef
         isolate_namespace Chef::Web::Core
 
         initializer 'chef-web-core.assets.precompile' do |app|
-
           # Suppress asset caching in dev and test
           app.config.assets.configure do |env|
-            if Rails.env.development? || Rails.env.test?
-              env.cache = ActiveSupport::Cache.lookup_store(:memory_store)
-            end
+            env.cache = ActiveSupport::Cache.lookup_store(:memory_store) if Rails.env.development? || Rails.env.test?
           end
 
           require 'compass'
           Sass.load_paths << Compass::Frameworks['compass'].stylesheets_directory
 
-          app.config.assets.precompile += %w(
+          app.config.assets.precompile += %w[
             *.png
             *.svg
             *.eot
@@ -28,7 +27,7 @@ class Chef
             *.woff
             *.ai
             *.pptx
-          )
+          ]
         end
       end
     end

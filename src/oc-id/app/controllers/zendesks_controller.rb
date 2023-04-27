@@ -1,15 +1,17 @@
+# frozen_string_literal: true
+
 class ZendesksController < ApplicationController
   include SessionsHelper
   include ZendesksHelper
-  
+
   # In latest rails `before_action` is just a new syntax for `before_filter`.
 
   before_action :not_found_if_zendesk_not_enabled
 
   def show
     if signed_in?
-      if (current_user.email =~ /@chef.io$/i || current_user.email =~ /@progress.com$/i)
-        render json: {message: "This account is not permitted for ZenDesk SSO"}, status: :forbidden
+      if current_user.email =~ /@chef.io$/i || current_user.email =~ /@progress.com$/i
+        render json: { message: 'This account is not permitted for ZenDesk SSO' }, status: :forbidden
       else
         redirect_to zendesk_sso_url(current_user, params[:return_to])
       end

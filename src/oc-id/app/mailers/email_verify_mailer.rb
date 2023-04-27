@@ -1,7 +1,9 @@
+# frozen_string_literal: true
+
 class EmailVerifyMailer < ActionMailer::Base
   # Input:
   #   user: chef object returned by server
-  # 
+  #
   # Sends an email to the given user to ascertain that said user controls the
   # email address requested. Note that the signature embeds the new email
   # address here. This is because we want to actually verify that the user
@@ -25,7 +27,7 @@ class EmailVerifyMailer < ActionMailer::Base
       email
     )
     mail from: Settings.email_from_address,
-         subject: "Verify Your Chef Email",
+         subject: 'Verify Your Chef Email',
          to: email
   end
 end

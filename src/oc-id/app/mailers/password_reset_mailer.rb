@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class PasswordResetMailer < ActionMailer::Base
   # Input:
   #   user: chef object returned by server
@@ -11,7 +13,7 @@ class PasswordResetMailer < ActionMailer::Base
       Settings.secret_key_base
     )
     mail from: Settings.email_from_address,
-         subject: "Reset Your Chef Password",
+         subject: 'Reset Your Chef Password',
          to: @user.email
   end
 end

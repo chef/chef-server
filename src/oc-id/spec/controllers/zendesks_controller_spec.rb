@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
 describe ZendesksController do
@@ -31,9 +33,9 @@ describe ZendesksController do
       context 'when signed in' do
         let(:testuser) do
           User.new({
-            :username => 'jimmy',
-            :email => 'jim.kirk@federation-captains.org',
-          })
+                     username: 'jimmy',
+                     email: 'jim.kirk@federation-captains.org'
+                   })
         end
         before :each do
           allow(controller).to receive(:signed_in?).and_return(true)
@@ -50,9 +52,9 @@ describe ZendesksController do
       context 'when signed in' do
         let(:chefuser) do
           User.new({
-            :username => 'jammy',
-            :email => 'jam.kirk@chef.io',
-          })
+                     username: 'jammy',
+                     email: 'jam.kirk@chef.io'
+                   })
         end
         before :each do
           allow(controller).to receive(:signed_in?).and_return(true)
@@ -61,7 +63,7 @@ describe ZendesksController do
 
         it 'renders json and a 403' do
           get 'show'
-          expect(response.body).to eq("{\"message\":\"This account is not permitted for ZenDesk SSO\"}")
+          expect(response.body).to eq('{"message":"This account is not permitted for ZenDesk SSO"}')
           expect(response.status).to eq 403
         end
       end

@@ -1,13 +1,15 @@
+# frozen_string_literal: true
+
 class HealthCheck
   include ChefResource
 
-  OK = 'ok'.freeze
-  NOT_OK = 'not ok'.freeze
-  REACHABLE = 'reachable'.freeze
-  TIMEOUT = 'timeout'.freeze
-  UNREACHABLE = 'unreachable'.freeze
-  ERRORING = 'erroring'.freeze
-  AUTHERROR = 'authentication error'.freeze
+  OK = 'ok'
+  NOT_OK = 'not ok'
+  REACHABLE = 'reachable'
+  TIMEOUT = 'timeout'
+  UNREACHABLE = 'unreachable'
+  ERRORING = 'erroring'
+  AUTHERROR = 'authentication error'
 
   attr_reader :status, :erchef, :postgres
 
@@ -43,9 +45,7 @@ class HealthCheck
     erchef_health_metric do
       output = chef.get_rest '_status'
 
-      if output['status'] != 'pong'
-        @erchef[:status] = ERRORING
-      end
+      @erchef[:status] = ERRORING if output['status'] != 'pong'
     end
   end
 
@@ -64,39 +64,35 @@ class HealthCheck
   # general health
   #
   def postgres_health
-    begin
-      ActiveRecord::Base.connection.query(
-        'SELECT count(*) FROM pg_stat_activity'
-      ).flatten.first.to_i.tap do |connections|
-        @postgres[:connections] = connections
-      end
-    rescue ActiveRecord::ConnectionTimeoutError
-      @postgres[:status] = TIMEOUT
-    rescue PG::ConnectionBad
-      @postgres[:status] = UNREACHABLE
+    ActiveRecord::Base.connection.query(
+      'SELECT count(*) FROM pg_stat_activity'
+    ).flatten.first.to_i.tap do |connections|
+      @postgres[:connections] = connections
     end
+  rescue ActiveRecord::ConnectionTimeoutError
+    @postgres[:status] = TIMEOUT
+  rescue PG::ConnectionBad
+    @postgres[:status] = UNREACHABLE
   end
 
   #
   # What is the overall system status
   #
   def overall
-    if @postgres[:status] != REACHABLE || @erchef[:status] != REACHABLE
-      @status = NOT_OK
-    end
+    return unless @postgres[:status] != REACHABLE || @erchef[:status] != REACHABLE
+
+    @status = NOT_OK
   end
 
   def erchef_health_metric
-    begin
-      yield
-    rescue Errno::ETIMEDOUT
-      @erchef[:status] = TIMEOUT
-    rescue Net::HTTPServerException => e
-      if e.message =~ /401/
-        @erchef[:status] = AUTHERROR
-      else
-        @erchef[:status] = ERRORING
-      end
-    end
+    yield
+  rescue Errno::ETIMEDOUT
+    @erchef[:status] = TIMEOUT
+  rescue Net::HTTPServerException => e
+    @erchef[:status] = if e.message =~ /401/
+                         AUTHERROR
+                       else
+                         ERRORING
+                       end
   end
 end

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
 class ErchefUnauthorizedException < StandardError
@@ -24,21 +26,21 @@ describe HealthCheck do
       expect(subject.status).to eql('not ok')
     end
 
-    it "should show something meaningful in the erchef status when there is an authentication problem" do
+    it 'should show something meaningful in the erchef status when there is an authentication problem' do
       chefstub = double('chef')
-      allow(chefstub).to receive(:get_rest).with('_status').and_return({'status' => 'pong'})
+      allow(chefstub).to receive(:get_rest).with('_status').and_return({ 'status' => 'pong' })
       allow(chefstub).to receive(:get_rest).with('/users/pivotal').and_raise(ErchefUnauthorizedException)
       allow(subject).to receive(:chef).and_return(chefstub)
       subject.check
       expect(subject.erchef[:status]).to eql('authentication error')
     end
 
-    it "should show something meaningful in the erchef status when there is a timeout" do
+    it 'should show something meaningful in the erchef status when there is a timeout' do
       subject.check
       expect(subject.erchef[:status]).to eql('timeout')
     end
 
-    it "should show something meaningful in the erchef status when there is a different kind of error" do
+    it 'should show something meaningful in the erchef status when there is a different kind of error' do
       allow(subject).to receive(:chef).and_raise(ErchefOtherException)
       subject.check
       expect(subject.erchef[:status]).to eql('erroring')
@@ -46,7 +48,7 @@ describe HealthCheck do
 
     it "should show that erchef is erroring if the status received is not 'pong'" do
       chefstub = double('chef')
-      allow(chefstub).to receive(:get_rest).with('_status').and_return({'status' => 'pang'})
+      allow(chefstub).to receive(:get_rest).with('_status').and_return({ 'status' => 'pang' })
       allow(chefstub).to receive(:get_rest).with('/users/pivotal').and_return(true)
       allow(subject).to receive(:chef).and_return(chefstub)
       subject.check
@@ -56,7 +58,7 @@ describe HealthCheck do
 
   context 'postgres is having problems' do
     before do
-      allow(subject).to receive(:chef).and_return(double('chef', :get_rest => {'status' => 'pong'}))
+      allow(subject).to receive(:chef).and_return(double('chef', get_rest: { 'status' => 'pong' }))
       allow(ActiveRecord::Base).to receive(:connection).and_raise(ActiveRecord::ConnectionTimeoutError)
     end
 
@@ -65,12 +67,12 @@ describe HealthCheck do
       expect(subject.status).to eql('not ok')
     end
 
-    it "should show something meaningful in the postgres status when there is a timeout" do
+    it 'should show something meaningful in the postgres status when there is a timeout' do
       subject.check
       expect(subject.postgres[:status]).to eql('timeout')
     end
 
-    it "should show something meaningful in the postgres status when the connection is bad" do
+    it 'should show something meaningful in the postgres status when the connection is bad' do
       allow(ActiveRecord::Base).to receive(:connection).and_raise(PG::ConnectionBad)
       subject.check
       expect(subject.postgres[:status]).to eql('unreachable')
@@ -79,7 +81,7 @@ describe HealthCheck do
 
   context 'everything is running smoothly' do
     before do
-      allow(subject).to receive(:chef).and_return(double('chef', :get_rest => {'status' => 'pong'}))
+      allow(subject).to receive(:chef).and_return(double('chef', get_rest: { 'status' => 'pong' }))
       allow(ActiveRecord::Base).to receive_message_chain('connection.query') { ['2'] }
       subject.check
     end

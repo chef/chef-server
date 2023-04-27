@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 OcId::Application.configure do
   # Settings specified here will take precedence over those in config/application.rb.
 
@@ -49,8 +51,8 @@ OcId::Application.configure do
   # config.log_tags = [ :subdomain, :uuid ]
 
   # Use a different logger for distributed setups.
-  #config.logger = ActiveSupport::TaggedLogging.new(SyslogLogger.new)
-  config.logger = Logger.new(STDOUT)
+  # config.logger = ActiveSupport::TaggedLogging.new(SyslogLogger.new)
+  config.logger = Logger.new($stdout)
 
   # Use a different cache store in production.
   # config.cache_store = :mem_cache_store

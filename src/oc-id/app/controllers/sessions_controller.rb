@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class SessionsController < ApplicationController
   rescue_from ActionController::InvalidAuthenticityToken, with: :destroy
 
@@ -11,7 +13,7 @@ class SessionsController < ApplicationController
   end
 
   def retry
-    flash.now[:error] = I18n.t("errors.logins.invalid_credentials")
+    flash.now[:error] = I18n.t('errors.logins.invalid_credentials')
     render :new
   end
 
@@ -29,5 +31,4 @@ class SessionsController < ApplicationController
   def session_parameters
     { provider: credentials[:provider], uid: credentials[:uid] }
   end
-
 end

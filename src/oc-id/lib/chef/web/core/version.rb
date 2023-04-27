@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Chef
   module Web
     module Core

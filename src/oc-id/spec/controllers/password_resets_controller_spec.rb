@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 require 'timecop'
 
@@ -138,39 +140,39 @@ describe PasswordResetsController do
       let!(:signature) { Signature.new(name, email, expires, Settings.secret_key_base) }
 
       it 'succeeds when given a valid signature' do
-        get :show, params: { expires: expires, signature: signature, username: name, email: email }
+        get :show, params: { expires:, signature:, username: name, email: }
         expect(response).to have_http_status(:success)
       end
 
       describe 'invalid params' do
         it 'requires an email' do
-          get :show, params: { expires: expires, signature: signature, username: name }
+          get :show, params: { expires:, signature:, username: name }
           expect(response).to redirect_to(action: 'new')
-          expect(flash[:alert]).to match /invalid signature/
+          expect(flash[:alert]).to match(/invalid signature/)
         end
 
         it 'requires a username' do
-          get :show, params: { expires: expires, signature: signature, email: email }
+          get :show, params: { expires:, signature:, email: }
           expect(response).to redirect_to(action: 'new')
-          expect(flash[:alert]).to match /invalid signature/
+          expect(flash[:alert]).to match(/invalid signature/)
         end
 
         it 'requires an expiration date' do
-          get :show, params: { username: name, signature: signature, email: email }
+          get :show, params: { username: name, signature:, email: }
           expect(response).to redirect_to(action: 'new')
-          expect(flash[:alert]).to match /invalid signature/
+          expect(flash[:alert]).to match(/invalid signature/)
         end
 
         it 'requires a signature' do
-          get :show, params: { expires: expires, username: name, email: email }
+          get :show, params: { expires:, username: name, email: }
           expect(response).to redirect_to(action: 'new')
-          expect(flash[:alert]).to match /invalid signature/
+          expect(flash[:alert]).to match(/invalid signature/)
         end
 
         it 'requires a valid signature' do
-          get :show, params: { expires: expires, signature: 'haha', username: name, email: email }
+          get :show, params: { expires:, signature: 'haha', username: name, email: }
           expect(response).to redirect_to(action: 'new')
-          expect(flash[:alert]).to match /invalid signature/
+          expect(flash[:alert]).to match(/invalid signature/)
         end
       end
     end
@@ -224,7 +226,8 @@ describe PasswordResetsController do
               r = Net::HTTPNotFound.new('1.0', '404', 'Not Found')
               e = Net::HTTPServerException.new('fake exception', r)
               allow(User).to receive(:find).and_raise(e)
-              put :update, params: { password: 'haha', signature: signature, expires: expires, username: name, email: email }
+              put :update,
+                  params: { password: 'haha', signature:, expires:, username: name, email: }
             end
 
             it 'shows a flash message that is informative but not revealing' do
@@ -242,9 +245,10 @@ describe PasswordResetsController do
               e = Net::HTTPServerException.new('fake exception', r)
               allow(User).to receive(:find).and_raise(e)
               allow(controller).to receive(:error_from_json).and_return({
-                'error' => 'oh no!'
-              })
-              put :update, params: { password: 'haha', signature: signature, expires: expires, username: name, email: email }
+                                                                          'error' => 'oh no!'
+                                                                        })
+              put :update,
+                  params: { password: 'haha', signature:, expires:, username: name, email: }
             end
 
             it 'shows a flash message explaining the problem' do
@@ -273,7 +277,8 @@ describe PasswordResetsController do
 
             before do
               allow(User).to receive(:find).with(name).and_return(user)
-              put :update, params: { password: 'haha', signature: signature, expires: expires, username: name, email: email }
+              put :update,
+                  params: { password: 'haha', signature:, expires:, username: name, email: }
             end
 
             it 'shows a flash message explaining the problem' do
@@ -292,19 +297,21 @@ describe PasswordResetsController do
       end
 
       describe 'no errors' do
-        let!(:user) {
+        let!(:user) do
           User.new(
             first_name: 'Jimmy',
             last_name: 'Smith',
-            email: email,
+            email:,
             username: name,
             display_name: 'Jimmy Smith'
           )
-        }
+        end
         before do
           allow(User).to receive(:find).with(name).and_return(user)
-          allow(user).to receive_message_chain(:chef, :put_rest).and_return({'private_key' => 'my awesome private key'})
-          put :update, params: { password: 'haha', signature: signature, expires: expires, username: name, email: email }
+          allow(user).to receive_message_chain(:chef,
+                                               :put_rest).and_return({ 'private_key' => 'my awesome private key' })
+          put :update,
+              params: { password: 'haha', signature:, expires:, username: name, email: }
         end
 
         it 'updates the user\'s password' do

@@ -1,10 +1,12 @@
-require File.expand_path('../boot', __FILE__)
+# frozen_string_literal: true
+
+require File.expand_path('boot', __dir__)
 
 # Pick the frameworks you want:
-require "active_record/railtie"
-require "action_controller/railtie"
-require "action_mailer/railtie"
-require "sprockets/railtie"
+require 'active_record/railtie'
+require 'action_controller/railtie'
+require 'action_mailer/railtie'
+require 'sprockets/railtie'
 # require "rails/test_unit/railtie"
 
 # Require the gems listed in Gemfile, including any gems
@@ -34,8 +36,8 @@ module OcId
       Doorkeeper::AuthorizedApplicationsController.layout 'application'
     end
 
-    config.autoload_paths += %W(#{config.root}/lib)
-    config.assets.prefix = "/id/assets"
+    config.autoload_paths += %W[#{config.root}/lib]
+    config.assets.prefix = '/id/assets'
 
     # If you want to use the rails_config Settings object here in application.rb, uncomment below.
     # config.before_initialize do

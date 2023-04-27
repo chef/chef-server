@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 Doorkeeper.configure do
   # Change the ORM that doorkeeper will use (needs plugins)
   orm :active_record
@@ -20,7 +22,7 @@ Doorkeeper.configure do
   #
   # oc-id supports either a username and password, passed in as parameters
   # or a standard Chef signed message, using a user certificate
-  resource_owner_from_credentials do |routes|
+  resource_owner_from_credentials do |_routes|
     if request.headers['x-ops-userid'].nil?
       User.authenticate(params[:username], params[:password])
     else
@@ -117,7 +119,7 @@ Doorkeeper.configure do
   #   http://tools.ietf.org/html/rfc6819#section-4.4.2
   #   http://tools.ietf.org/html/rfc6819#section-4.4.3
   #
-  grant_flows %w(authorization_code implicit)
+  grant_flows %w[authorization_code implicit]
 
   # Under some circumstances you might want to have applications auto-approved,
   # so that the user skips the authorization step.
@@ -127,5 +129,5 @@ Doorkeeper.configure do
   # end
 
   # WWW-Authenticate Realm (default "Doorkeeper").
-  realm "Chef-ID"
+  realm 'Chef-ID'
 end

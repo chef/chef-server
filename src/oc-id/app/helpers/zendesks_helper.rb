@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'zendesk_sso_url'
 
 module ZendesksHelper

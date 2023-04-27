@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'mixlib/authentication/signatureverification'
 
 class User
@@ -7,22 +9,22 @@ class User
   include ActiveModel::AttributeMethods
   include ChefResource
 
-  ATTRIBUTES = [
-    :username,
-    :first_name,
-    :last_name,
-    :middle_name,
-    :email,
-    :public_key,
-    :private_key,
-    :display_name,
-    :password
-  ]
+  ATTRIBUTES = %i[
+    username
+    first_name
+    last_name
+    middle_name
+    email
+    public_key
+    private_key
+    display_name
+    password
+  ].freeze
 
-  attr_accessor *ATTRIBUTES
+  attr_accessor(*ATTRIBUTES)
   attr_reader :errors
 
-  def initialize(attrs={})
+  def initialize(attrs = {})
     set_attributes(attrs)
     @errors = ActiveModel::Errors.new(self)
   end
@@ -39,40 +41,36 @@ class User
     update_attributes('private_key' => true)
   end
 
-  def set_attributes(attrs={})
+  def set_attributes(attrs = {})
     attrs.symbolize_keys!
     ATTRIBUTES.each { |a| instance_variable_set("@#{a}", attrs[a]) unless attrs[a].nil? }
   end
 
   def update_password(params)
-    [:current_password, :new_password, :password_confirmation].each do |f|
-      if params[f].blank?
-        errors.add(f, I18n.t("errors.passwords.blank", :label => f.to_s.titleize))
-      end
+    %i[current_password new_password password_confirmation].each do |f|
+      errors.add(f, I18n.t('errors.passwords.blank', label: f.to_s.titleize)) if params[f].blank?
     end
 
     unless User.authenticate(username, params[:current_password])
-      errors.add(:current_password, I18n.t("errors.passwords.current_password_is_wrong"))
+      errors.add(:current_password, I18n.t('errors.passwords.current_password_is_wrong'))
     end
 
-    if params[:new_password] != params[:password_confirmation]
-      errors.add(:base, I18n.t("errors.passwords.dont_match"))
-    end
+    errors.add(:base, I18n.t('errors.passwords.dont_match')) if params[:new_password] != params[:password_confirmation]
 
-    if errors.empty?
-      begin
-        update_attributes('password' => params[:new_password])
-      rescue Net::HTTPServerException => e
-        raise
-      end
+    return unless errors.empty?
+
+    begin
+      update_attributes('password' => params[:new_password])
+    rescue Net::HTTPServerException => e
+      raise
     end
   end
 
   def public
     {
-      username: username,
-      first_name: first_name,
-      last_name: last_name
+      username:,
+      first_name:,
+      last_name:
     }
   end
 
@@ -85,14 +83,12 @@ class User
       organizations['organization']
     end
   rescue Net::HTTPServerException
-
   end
 
-  def update_attributes(attrs={})
-    current_attrs = ATTRIBUTES.reduce({}) do |res, key|
+  def update_attributes(attrs = {})
+    current_attrs = ATTRIBUTES.each_with_object({}) do |key, res|
       val = instance_variable_get("@#{key}".to_sym)
       res[key.to_s] = val unless val.nil?
-      res
     end
 
     new_attrs = current_attrs.merge(attrs)
@@ -100,7 +96,7 @@ class User
     begin
       result = chef.put_rest(url, new_attrs)
       set_attributes(new_attrs.merge('private_key' => result['private_key']))
-    rescue => e
+    rescue StandardError => e
       false
     end
   end
@@ -110,11 +106,11 @@ class User
     send(attr)
   end
 
-  def User.human_attribute_name(attr, options={})
+  def self.human_attribute_name(attr, _options = {})
     attr.to_s.titleize
   end
 
-  def User.lookup_ancestors
+  def self.lookup_ancestors
     [self]
   end
   # ActiveModel::Errors finished
@@ -125,27 +121,19 @@ class User
     end
 
     def find(username)
-      begin
-        if (username != nil && username.include?('@'))
-          users = self.new.chef.get(
-            "users?#{{ email: username }.to_query}"
-          )
-          if (users.length > 0)
-            username = users.first[0]
-          end
-        end
-        new(username: username).get unless username.nil?
-      rescue Net::HTTPServerException
-
+      if !username.nil? && username.include?('@')
+        users = new.chef.get(
+          "users?#{{ email: username }.to_query}"
+        )
+        username = users.first[0] if users.length.positive?
       end
+      new(username:).get unless username.nil?
+    rescue Net::HTTPServerException
     end
 
     def authenticate(username, password)
-      begin
-        self.find(username) if self.new.chef.post_rest('authenticate_user', { username: username, password: password })
-      rescue Net::HTTPServerException
-
-      end
+      find(username) if new.chef.post_rest('authenticate_user', { username:, password: })
+    rescue Net::HTTPServerException
     end
 
     # Take a request object and verify the user is valid based on the signed
@@ -154,17 +142,13 @@ class User
     # Returns the user if it is valid, or nil if not.
     def from_signed_request(request)
       user = User.find(request.headers['x-ops-userid'])
-      if user
-        verifier = Mixlib::Authentication::SignatureVerification.new(request)
-        public_key = OpenSSL::PKey::RSA.new user.public_key
-        if verifier.authenticate_request(public_key)
-          user
-        else
-          nil
-        end
-      else
-        nil
-      end
+      return unless user
+
+      verifier = Mixlib::Authentication::SignatureVerification.new(request)
+      public_key = OpenSSL::PKey::RSA.new user.public_key
+      return unless verifier.authenticate_request(public_key)
+
+      user
     end
   end
 end
