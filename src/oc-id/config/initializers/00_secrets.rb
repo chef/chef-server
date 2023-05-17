@@ -19,7 +19,7 @@ class Secrets
                else
                  raise 'No CHEF_SECRETS initialization data in the environment.'
                end
-    @veil = Veil::CredentialCollection.from_config(provider:)
+    @veil = Veil::CredentialCollection.from_config(provider: provider)
   end
 
   def get(group, name)
