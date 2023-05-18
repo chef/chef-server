@@ -5,7 +5,7 @@ require 'jwt'
 require 'securerandom'
 require 'uri'
 
-class ZendeskSSOURL
+class ZendeskSsoUrl
   attr_reader :user, :return_to, :settings
 
   def initialize(user, return_to, settings)
