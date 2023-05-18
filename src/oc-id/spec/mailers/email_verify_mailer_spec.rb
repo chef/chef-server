@@ -38,9 +38,7 @@ describe EmailVerifyMailer, type: :mailer do
     end
 
     it 'includes the link' do
-      expect(mail.body.encoded).to include("http://example.com/id/profile/email?expires=86400&signature=#{signature}&user=#{CGI.escape(Base64.urlsafe_encode64(JSON.generate({
-                                                                                                                                                                               username: user.username, email:
-                                                                                                                                                                             })))}")
+      expect(mail.body.encoded).to include("http://example.com/id/profile/email?expires=86400&signature=#{signature}&user=#{CGI.escape(Base64.urlsafe_encode64(JSON.generate({username: user.username, email: email})))}")
     end
   end
 end
