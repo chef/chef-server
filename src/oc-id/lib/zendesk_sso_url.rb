@@ -5,7 +5,7 @@ require 'jwt'
 require 'securerandom'
 require 'uri'
 
-class ZendeskSsoUrl
+class ZendeskSSOURL
   attr_reader :user, :return_to, :settings
 
   def initialize(user, return_to, settings)
@@ -16,9 +16,9 @@ class ZendeskSsoUrl
 
   def to_s
     URI::HTTPS.build(
-      host:,
-      path:,
-      query: query_hash.to_query
+      host: host,
+      path: path,
+      query: query_hash.to_query,
     ).to_s
   end
 
@@ -38,11 +38,11 @@ class ZendeskSsoUrl
     jti = "#{iat}/#{SecureRandom.hex(18)}"
 
     JWT.encode({
-                 iat:,
-                 jti:,
-                 name: [user.first_name, user.last_name].compact.join(' '),
-                 email: user.email
-               }, settings.shared_secret)
+      iat: iat,
+      jti: jti,
+      name: [user.first_name, user.last_name].compact.join(' '),
+      email: user.email,
+    }, settings.shared_secret)
   end
 
   def query_hash

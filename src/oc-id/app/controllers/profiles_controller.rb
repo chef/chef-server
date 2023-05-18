@@ -96,12 +96,15 @@ class ProfilesController < ApplicationController
 
   private
 
-  def goto_forbidden(message, *args)
+  def goto_forbidden(message, **args)
     if signed_in?
-      flash.now[:alert] = I18n.t(message, *args)
+    # The I18n.t method uses keyword arguments.
+    # There is a breaking change in ruby that produces warning with ruby 2.7 and won't work as expected with ruby 3.0
+    # The "hash" parameter must be passed as keyword argument.
+      flash.now[:alert] = I18n.t(message, **args) 
       render 'show', status: :forbidden
     else
-      redirect_to signin_path, notice: I18n.t(message, *args)
+      redirect_to signin_path, notice: I18n.t(message, **args)
     end
   end
 

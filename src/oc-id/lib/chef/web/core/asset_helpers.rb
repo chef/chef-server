@@ -21,12 +21,12 @@ class Chef
           if opts[:data][:'tag-line']
             opts[:svg].css('#chef-logo-tag-line text').first.content = opts[:data][:'tag-line']
           end
-
-          attrs = opts[:attributes].map { |k, v| %(#{k}="#{v}") }
-          attrs << opts[:data].map { |k, v| %(data-#{k}="#{v}") }
+          
+          attrs = opts[:attributes].map { |k, v| %Q(#{k}="#{v}") }
+          attrs << opts[:data].map { |k, v| %Q(data-#{k}="#{v}") }
           opts[:attributes] = attrs.join(' ')
 
-          Chef::Web::Core::Component.new(opts.merge!(element:, type: 'logo')).render
+          Chef::Web::Core::Component.new(opts.merge!(:element => element, :type => 'logo')).render
         end
       end
     end

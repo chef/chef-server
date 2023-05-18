@@ -3,13 +3,13 @@
 class HealthCheck
   include ChefResource
 
-  OK = 'ok'
-  NOT_OK = 'not ok'
-  REACHABLE = 'reachable'
-  TIMEOUT = 'timeout'
-  UNREACHABLE = 'unreachable'
-  ERRORING = 'erroring'
-  AUTHERROR = 'authentication error'
+  OK = 'ok'.freeze
+  NOT_OK = 'not ok'.freeze
+  REACHABLE = 'reachable'.freeze
+  TIMEOUT = 'timeout'.freeze
+  UNREACHABLE = 'unreachable'.freeze
+  ERRORING = 'erroring'.freeze
+  AUTHERROR = 'authentication error'.freeze
 
   attr_reader :status, :erchef, :postgres
 
