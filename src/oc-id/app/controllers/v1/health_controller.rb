@@ -17,7 +17,7 @@ module V1
 
       status = @health.ok? ? :ok : :service_unavailable
 
-      respond_with @health, status:
+      respond_with @health, status: status
     end
   end
 end
