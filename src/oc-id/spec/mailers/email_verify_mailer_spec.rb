@@ -7,7 +7,7 @@ describe EmailVerifyMailer, type: :mailer do
     let(:username) { 'jimmy' }
     let(:email) { 'jim.kirk@federation-captains.org' }
     let(:user) do
-      User.new({ username:, email: })
+      User.new({ username: username, email: email})
     end
 
     let(:email) { 'user@something.com' }
