@@ -2,12 +2,10 @@
 
 require 'chef-utils/dist'
 
-ENV['RAILS_ENV'] ||= 'test'
-ENV['CHEF_SECRETS_DATA'] ||= File.read(File.expand_path(
-                                         "../../config/private-#{ChefUtils::Dist::Infra::SHORT}-secrets.json", __FILE__
-                                       ))
+ENV["RAILS_ENV"] ||= 'test'
+ENV["CHEF_SECRETS_DATA"] ||= File.read(File.expand_path("../../config/private-#{ChefUtils::Dist::Infra::SHORT}-secrets.json", __FILE__))
 
-require File.expand_path('../config/environment', __dir__)
+require File.expand_path("../../config/environment", __FILE__)
 require 'rspec/rails'
 
 Dir[Rails.root.join('spec/support/**/*.rb')].each { |f| require f }

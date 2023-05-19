@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require File.expand_path('boot', __dir__)
+require File.expand_path('../boot', __FILE__)
 
 # Pick the frameworks you want:
 require 'active_record/railtie'
