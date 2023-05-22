@@ -3,7 +3,7 @@ require 'chef/web/core/url_helpers'
 
 module ApplicationHelper
   include Chef::Web::Core::AssetHelpers
-  include Chef::Web::Core::URLHelpers
+  include Chef::Web::Core::UrlHelpers
 
   def error_message_for(model, attr)
     msgs = model.errors[attr]
