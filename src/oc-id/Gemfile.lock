@@ -106,12 +106,12 @@ GEM
       rack-test (>= 0.6.3)
       regexp_parser (>= 1.5, < 3.0)
       xpath (~> 3.2)
-    chef (17.10.68)
+    chef (17.10.0)
       addressable
       aws-sdk-s3 (~> 1.91)
       aws-sdk-secretsmanager (~> 1.46)
-      chef-config (= 17.10.68)
-      chef-utils (= 17.10.68)
+      chef-config (= 17.10.0)
+      chef-utils (= 17.10.0)
       chef-vault
       chef-zero (>= 14.0.11)
       corefoundation (~> 0.3.4)
@@ -137,9 +137,9 @@ GEM
       train-winrm (>= 0.2.5)
       uuidtools (>= 2.1.5, < 3.0)
       vault (~> 0.16)
-    chef-config (17.10.68)
+    chef-config (17.10.0)
       addressable
-      chef-utils (= 17.10.68)
+      chef-utils (= 17.10.0)
       fuzzyurl
       mixlib-config (>= 2.2.12, < 4.0)
       mixlib-shellout (>= 2.0, < 4.0)
@@ -147,7 +147,7 @@ GEM
     chef-telemetry (1.1.1)
       chef-config
       concurrent-ruby (~> 1.0)
-    chef-utils (17.10.68)
+    chef-utils (17.10.0)
       concurrent-ruby
     chef-vault (4.1.11)
     chef-zero (15.0.11)
