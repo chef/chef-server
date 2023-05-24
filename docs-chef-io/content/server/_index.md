@@ -153,7 +153,7 @@ Service (S3) set the following configuration settings in the
 </tr>
 <tr class="even">
 <td><code>bookshelf['external_url']</code></td>
-<td>The S3 URL.  Do not include the bucket name in the URL.</td>
+<td>The S3 URL, formatted as <code>https://s3.<i>region-code</i>.amazonaws.com</code>, e.g. <code>https://s3.us-west-2.amazonaws.com</code>.</td>
 </tr>
 <tr class="odd">
 <td><code>bookshelf['secret_access_key']</code></td>
@@ -165,7 +165,7 @@ Service (S3) set the following configuration settings in the
 </tr>
 <tr class="odd">
 <td><code>bookshelf['vip']</code></td>
-<td>The virtual IP address or host name of the Amazon Simple Service (S3) API.  Do not include the bucket name in the URL.  Default value: <code>127.0.0.1</code>.</td>
+<td>The virtual IP address or host name of the Amazon Simple Service (S3) API, formatted as <code>s3.<i>region-code</i>.amazonaws.com</code>, e.g. <code>s3.us-west-2.amazonaws.com</code>.  Default value: <code>127.0.0.1</code>.</td>
 </tr>
 <tr class="even">
 <td><code>bookshelf['enable']</code></td>
@@ -180,9 +180,9 @@ An example `chef-server.rb` configuration:
 bookshelf['enable'] = false
 bookshelf['vip'] = 's3.us-west-2.amazonaws.com'
 bookshelf['external_url'] = 'https://s3.us-west-2.amazonaws.com'
-bookshelf['access_key_id'] = '<ACCESS_ID>'
-bookshelf['secret_access_key'] = '<ACCESS_KEY>'
-opscode_erchef['s3_bucket'] = '<BUCKET_NAME>'
+bookshelf['access_key_id'] = 'MY_ACCESS_KEY_ID'
+bookshelf['secret_access_key'] = 'MY_SECRET_ACCESS_KEY'
+opscode_erchef['s3_bucket'] = 'MY_BUCKET'
 ```
 
 #### Optional Settings
