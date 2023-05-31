@@ -1117,7 +1117,7 @@ describe "Policies API endpoint", :policies do
 
               let(:invalid_policy_name) { "invalid" + invalid_char + "invalid" }
 
-              let(:encoded_invalid_name) { Addressable::URI.encode_www_form_component(invalid_policy_name) }
+              let(:encoded_invalid_name) { URI.encode_www_form_component(invalid_policy_name) }
 
               # Have to override the URL or else we might only hit validation that
               # name in document matches the one in URL
