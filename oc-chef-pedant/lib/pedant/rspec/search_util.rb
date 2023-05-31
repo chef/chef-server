@@ -798,7 +798,7 @@ module Pedant
       end
 
       def search_result(index, query)
-        search_url = api_url(Addressable::CGI.escape("/search/#{index}?q=#{query}"))
+        search_url = api_url(Addressable::URI.encode("/search/#{index}?q=#{query}"))
         get(search_url, admin_user)
       end
 
