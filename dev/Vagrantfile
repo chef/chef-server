@@ -65,7 +65,7 @@ Vagrant.configure("2") do |config|
   config.vm.network "forwarded_port", guest: 443, host: 8443
   config.vm.box = "bento/ubuntu-20.04"
   config.ssh.forward_agent = true
-  config.omnibus.chef_version = :latest
+  #config.omnibus.chef_version = :latest
 
   if start_external_service?("postgresql" , attributes)
     config.vm.define("database") do |c|
@@ -537,7 +537,7 @@ def customize_vm(config, opts)
                   "--cpus", opts[:cpus] || 2,
                   "--usb", "off",
                   "--usbehci", "off",
-                  "--audio", "none"]
+                  "--audio-driver", "none"]
 
     # This loses some assurances around data integrity in case of an unexpected shutdown,
     # but is much more performant - loading code from the host is painfully slow without it.
