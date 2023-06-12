@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.6.12 -->
-## [15.6.12](https://github.com/chef/chef-server/tree/15.6.12) (2023-06-02)
+<!-- latest_release 15.7.0 -->
+## [15.7.0](https://github.com/chef/chef-server/tree/15.7.0) (2023-06-12)
 
 #### Merged Pull Requests
-- Updated license scout issues [#3666](https://github.com/chef/chef-server/pull/3666) ([jashaik](https://github.com/jashaik))
+- Setting file and template backup to false for the config files [#3659](https://github.com/chef/chef-server/pull/3659) ([vinay-satish](https://github.com/vinay-satish))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.6.2 -->
 ### Changes since 15.6.2 release
 
 #### Merged Pull Requests
+- Setting file and template backup to false for the config files [#3659](https://github.com/chef/chef-server/pull/3659) ([vinay-satish](https://github.com/vinay-satish)) <!-- 15.7.0 -->
 - Updated license scout issues [#3666](https://github.com/chef/chef-server/pull/3666) ([jashaik](https://github.com/jashaik)) <!-- 15.6.12 -->
 - Add el-9 builder and tester to the pipelines [#3661](https://github.com/chef/chef-server/pull/3661) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 15.6.11 -->
 - Bump omnibus-software from `6a1c889` to `67a1705` in /omnibus [#3660](https://github.com/chef/chef-server/pull/3660) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.6.10 -->
