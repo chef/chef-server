@@ -32,6 +32,10 @@ In order to release, you will need the following accounts/permissions:
 Upgrade Erlang dependencies via automated script.  
 See https://github.com/chef/chef-server/blob/main/dev-docs/FrequentTasks.md#updating-erlang-dependencies-using-rebar3 .
 
+### Update documentation
+
+Ensure documentation in [docs-site](https://docs.chef.io/) is updated for changes that would be included in the release.
+
 ### Update Release Notes
 
 #### Pending Release Notes In Wiki

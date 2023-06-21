@@ -31,7 +31,7 @@ end
 # To stop taking the backup, we need to explicitly mention the property backup as 'false' in all the
 # usage of file and template resource in the server-ctl cookbook.
 # We can secure the backups by changing the permission of /var/opt/opscode/local-mode-cache/backup
-# to root user read only. (CVE-2023-28864)
+# to read and write only for the root user. (CVE-2023-28864)
 
 directory "/var/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/local-mode-cache/backup" do
   owner 'root'
