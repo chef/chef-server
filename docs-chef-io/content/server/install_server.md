@@ -70,7 +70,7 @@ loop.
 
 To install Chef Infra Server:
 
-1.  Download the package from <https://www.chef.io/downloads/tools/infra-server/>.
+1.  Download the package from [Chef Downloads](https://www.chef.io/downloads).
 
 2.  Upload the package to the machine that will run the Chef Infra
     Server, and then record its location on the file system. The rest of
