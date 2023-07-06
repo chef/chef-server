@@ -128,7 +128,7 @@ following:
 
 Use the following steps to set up the backend Chef Infra Server:
 
-1.  Download the packages from <https://www.chef.io/downloads/tools/infra-server>.
+1.  Download the packages from [Chef Downloads](https://www.chef.io/downloads).
     For Red Hat and CentOS 6:
 
     ```bash

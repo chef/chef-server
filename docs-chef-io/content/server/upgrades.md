@@ -88,7 +88,7 @@ See the [Release-Specific Steps](#release-specific-steps) for information about 
 
    After performing the stepped upgrade to 12.17.15, continue with the next step.
 
-1. Download the desired Chef Infra Server version from the [Chef Infra Server Downloads](https://www.chef.io/downloads/tools/infra-server).
+1. Download the desired Chef Infra Server version from the [Chef Infra Server Downloads](https://www.chef.io/downloads).
 
 1. Stop the Chef Infra Server:
 
@@ -248,7 +248,7 @@ The following External PostgreSQL upgrade steps are provided as a courtesy only.
 
    After performing the stepped upgrade, return here and continue with the next step below.
 
-1. [Download](https://www.chef.io/downloads/tools/infra-server) the desired version of Chef Infra Server.
+1. [Download](https://www.chef.io/downloads) the desired version of Chef Infra Server.
 
 1. Stop the Chef Infra Server:
 
@@ -480,7 +480,7 @@ To upgrade to Chef Infra Server on a tiered Chef Infra Server configuration, do 
     chef-server-ctl reconfigure
     ```
 
-3. Download the desired Chef Infra Server version from the [Chef Infra Server Downloads](https://www.chef.io/downloads/tools/infra-server) page, then copy it to each server.
+3. Download the desired Chef Infra Server version from [Chef Downloads](https://www.chef.io/downloads), then copy it to each server.
 
 4. Stop all front end servers:
 
