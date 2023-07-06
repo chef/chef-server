@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.7.2 -->
-## [15.7.2](https://github.com/chef/chef-server/tree/15.7.2) (2023-06-21)
+<!-- latest_release 15.7.3 -->
+## [15.7.3](https://github.com/chef/chef-server/tree/15.7.3) (2023-07-06)
 
 #### Merged Pull Requests
-- Docs update [#3676](https://github.com/chef/chef-server/pull/3676) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- CHEF-3465 Replace download links [#3683](https://github.com/chef/chef-server/pull/3683) ([IanMadd](https://github.com/IanMadd))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.7.0 -->
 ### Changes since 15.7.0 release
 
 #### Merged Pull Requests
+- CHEF-3465 Replace download links [#3683](https://github.com/chef/chef-server/pull/3683) ([IanMadd](https://github.com/IanMadd)) <!-- 15.7.3 -->
 - Docs update [#3676](https://github.com/chef/chef-server/pull/3676) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 15.7.2 -->
 - Update supported platforms page [#3675](https://github.com/chef/chef-server/pull/3675) ([IanMadd](https://github.com/IanMadd)) <!-- 15.7.1 -->
 <!-- release_rollup -->
