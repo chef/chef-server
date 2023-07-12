@@ -281,7 +281,7 @@ GEM
     json (2.6.3)
     jwt (2.7.0)
     kgio (2.11.4)
-    libv8-node (16.10.0.0)
+    libv8 (3.16.14.19)
     libyajl2 (2.1.0)
     license-acceptance (2.1.13)
       pastel (~> 0.7)
@@ -314,8 +314,6 @@ GEM
     matrix (0.4.2)
     method_source (1.0.0)
     mini_mime (1.1.2)
-    mini_racer (0.6.4)
-      libv8-node (~> 16.19.0.0)
     minitest (5.18.0)
     mixlib-archive (1.1.7)
       mixlib-log
@@ -385,6 +383,7 @@ GEM
     psych (5.1.0)
       stringio
     public_suffix (5.0.1)
+      nio4r (~> 2.0)
     racc (1.6.2)
     rack (2.2.7)
     rack-protection (3.0.6)
@@ -426,6 +425,7 @@ GEM
     rb-readline (0.5.5)
     rdoc (6.5.0)
       psych (>= 4.0.0)
+    ref (2.0.0)
     regexp_parser (2.8.0)
     responders (3.1.0)
       actionpack (>= 5.2)
@@ -505,6 +505,9 @@ GEM
     strings-ansi (0.2.0)
     syslog-logger (1.6.8)
     temple (0.10.0)
+    therubyracer (0.12.3)
+      libv8 (~> 3.16.14.15)
+      ref
     thin (1.8.2)
       daemons (~> 1.0, >= 1.0.9)
       eventmachine (~> 1.0, >= 1.0.4)
@@ -612,7 +615,6 @@ DEPENDENCIES
   jquery-rails
   jwt
   mailcatcher
-  mini_racer (~> 0.6.2)
   mixlib-authentication (>= 2.1, < 4)
   nokogiri (= 1.14.3)
   omniauth-chef (~> 0.4)
@@ -629,6 +631,7 @@ DEPENDENCIES
   spring
   spring-commands-rspec
   sprockets-rails (>= 3.4.2)
+  therubyracer (~> 0.12.3)
   thor (~> 1.2)
   timecop
   turbolinks (~> 5)
