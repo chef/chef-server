@@ -609,7 +609,7 @@ DEPENDENCIES
   chef (= 17.10.0)
   coffee-rails (~> 5.0)
   config (~> 4.1)
-  doorkeeper (~> 5.5)
+  doorkeeper (~> 5.0)
   factory_girl_rails (~> 4.9.0)
   jbuilder (~> 2.11)
   jquery-rails
