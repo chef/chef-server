@@ -57,52 +57,52 @@ The following authentication headers are required:
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>Accept</code></td>
 <td>The format in which response data from the Chef Infra Server is provided. This header must be set to <code>application/json</code>.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>Content-Type</code></td>
 <td>The format in which data is sent to the Chef Infra Server. This header is required for <code>PUT</code> and <code>POST</code> requests and must be set to <code>application/json</code>.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>Host</code></td>
 <td>The host name (and port number) to which a request is sent. (Port number <code>80</code> does not need to be specified.) For example: <code>api.chef.io</code> (which is the same as <code>api.chef.io:80</code>) or <code>api.chef.io:443</code>.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>Method</code></td>
 <td>The method from the request.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>Path</code></td>
 <td>Omit for Authentication Version 1. Specify for Authentication Version 1.3</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>X-Chef-Version</code></td>
 <td>The version of the Chef Infra Client executable from which a request is made. This header ensures that responses are in the correct format. For example: <code>12.0.2</code> or <code>11.16.x</code>.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>X-Ops-Authorization-N</code></td>
 <td>One (or more) 60 character segments that comprise the canonical header. A canonical header is signed with the private key used by the client machine from which the request is sent, and is also encoded using Base64. If more than one segment is required, each should be named sequentially, e.g. <code>X-Ops-Authorization-1</code>, <code>X-Ops-Authorization-2</code>, <code>X-Ops-Authorization-N</code>, where <code>N</code> represents the integer used by the last header that is part of the request.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>X-Ops-Content-Hash</code></td>
 <td>For API Version 1. The result of the SHA-1 hash of the request body encoded using Base64. Base64 encoding should have line breaks every 60 characters.</br>
 For API Version 1.3. The result of the SHA-256 hash of the request body encoded using Base64. Base64 encoding should have line breaks every 60 characters.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>X-Ops-Server-API-Version</code></td>
 <td>Use <code>X-Ops-Server-API-Version</code> to specify the version of the Chef Infra Server API. For example: <code>X-Ops-Server-API-Version: 1</code>. <code>X-Ops-Server-API-Version: 0</code> is supported for use with Chef Infra Server version 12, but will be deprecated as part of the next major release.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>X-Ops-Sign</code></td>
 <td>Set this header to the following value: <code>algorithm=sha1,version=1.0</code> or <code>version=1.3</code>.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>X-Ops-Timestamp</code></td>
 <td>The timestamp, in ISO-8601 format and with UTC indicated by a trailing <code>Z</code> and separated by the character <code>T</code>. For example: <code>2013-03-10T14:14:44Z</code>.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>X-Ops-UserId</code></td>
 <td>The name of the API client whose private key will be used to create the authorization header.</td>
 </tr>
@@ -226,9 +226,9 @@ GET /organizations/NAME/nodes HTTP/1.1
 
 ### Knife API Requests
 
-{{% plugin_knife_summary %}}
+{{< readfile file="content/reusable/md/plugin_knife_summary.md" >}}
 
-{{% chef-server/plugin_knife_using_authenticated_requests %}}
+{{< readfile file="content/server/reusable/md/plugin_knife_using_authenticated_requests.md" >}}
 
 ## Global Endpoints
 
@@ -275,11 +275,11 @@ This method has no response body.
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>200</code></td>
 <td>OK. The request was successful.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>401</code></td>
 <td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name, password, and that the correct key was used to sign the request.</td>
 </tr>
@@ -337,11 +337,11 @@ The chef-server.rb file contains settings that can be used to edit the number of
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>license['nodes']</code></td>
 <td>The number of licensed nodes. Default value: <code>25</code>.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>license['upgrade_url']</code></td>
 <td>The URL to visit for more information about how to update the number of nodes licensed for an organization. Default value: <code>"https://www.chef.io/pricing"</code>.</td>
 </tr>
@@ -362,15 +362,15 @@ The chef-server.rb file contains settings that can be used to edit the number of
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>200</code></td>
 <td>OK. The request was successful.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>401</code></td>
 <td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name, and that the correct key was used to sign the request.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>403</code></td>
 <td>Forbidden. The user who made the request is not authorized to perform the action.</td>
 </tr>
@@ -423,11 +423,11 @@ The response is similar to:
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>200</code></td>
 <td>OK. The request was successful.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>403</code></td>
 <td>Forbidden. The user who made the request is not authorized to perform the action.</td>
 </tr>
@@ -491,19 +491,19 @@ The response is similar to:
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>201</code></td>
 <td>Created. The request was successful. The organization was created.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>400</code></td>
 <td>Bad request. The contents of the request are not formatted correctly.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>403</code></td>
 <td>Forbidden. The user who made the request is not authorized to perform the action.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>409</code></td>
 <td>Conflict. The organization already exists.</td>
 </tr>
@@ -553,11 +553,11 @@ The response is similar to:
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>200</code></td>
 <td>OK. The request was successful.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>403</code></td>
 <td>Forbidden. The user who made the request is not authorized to perform the action.</td>
 </tr>
@@ -601,11 +601,11 @@ The response is similar to:
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>200</code></td>
 <td>OK. The request was successful.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>403</code></td>
 <td>Forbidden. The user who made the request is not authorized to perform the action.</td>
 </tr>
@@ -657,19 +657,19 @@ The response is similar to:
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>200</code></td>
 <td>OK. The request was successful.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>400</code></td>
 <td>Bad request. The contents of the request are not formatted correctly.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>403</code></td>
 <td>Forbidden. The user who made the request is not authorized to perform the action.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>410</code></td>
 <td>Gone. Unable to update private key.</td>
 </tr>
@@ -698,11 +698,11 @@ The `GET` method is used to get the statistics. This method has the following pa
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>format=json</code></td>
 <td>Return results as JSON.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>format=text</code></td>
 <td>Return results as text.</td>
 </tr>
@@ -773,15 +773,15 @@ The response body is similar to:
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>200</code></td>
 <td>OK.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>401</code></td>
 <td>Unauthorized. The user or password is not valid.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>406</code></td>
 <td>Not Acceptable. An invalid format was requested.</td>
 </tr>
@@ -840,11 +840,11 @@ The response will return something like the following:
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>200</code></td>
 <td>All communications are OK.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><p><code>500</code></p></td>
 <td><p>One (or more) services are down. For example:</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb1-1"><a href="#cb1-1"></a><span class="op">{</span></span>
@@ -899,15 +899,15 @@ This method has the following parameters:
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>email=jane@chef.com</code></td>
 <td>Filter the users returned based on their email id.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>external_authentication_uid=jane@chef.com</code></td>
 <td>Filter the users returned based on their external login id.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>verbose=true</code></td>
 <td>Returns a user list with "email", "first_name", "last_name" fields. If this flag is set the email and external_authentication_uid parameters are ignored.</td>
 </tr>
@@ -954,19 +954,19 @@ The verbose response is similar to:
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>200</code></td>
 <td>OK. The request was successful.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>401</code></td>
 <td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name, and that the correct key was used to sign the request.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>403</code></td>
 <td>Forbidden. The user who made the request is not authorized to perform the action.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>404</code></td>
 <td>Not found. The requested object does not exist.</td>
 </tr>
@@ -1052,27 +1052,27 @@ The response is similar to:
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>201</code></td>
 <td>OK. The user was created.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>400</code></td>
 <td>Bad request. The contents of the request are not formatted correctly.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>401</code></td>
 <td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name, and that the correct key was used to sign the request.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>403</code></td>
 <td>Forbidden. The user who made the request is not authorized to perform the action.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>409</code></td>
 <td>Conflict. The object already exists.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>413</code></td>
 <td>Request entity too large. A request may not be larger than 1000000 bytes.</td>
 </tr>
@@ -1122,19 +1122,19 @@ The response is similar to:
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>200</code></td>
 <td>OK. The request was successful.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>401</code></td>
 <td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name, and that the correct key was used to sign the request.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>403</code></td>
 <td>Forbidden. The user who made the request is not authorized to perform the action.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>404</code></td>
 <td>Not found. The requested object does not exist.</td>
 </tr>
@@ -1181,19 +1181,19 @@ The response is similar to:
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>200</code></td>
 <td>OK. The request was successful.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>401</code></td>
 <td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name, and that the correct key was used to sign the request.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>403</code></td>
 <td>Forbidden. The user who made the request is not authorized to perform the action.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>404</code></td>
 <td>Not found. The requested object does not exist.</td>
 </tr>
@@ -1272,35 +1272,35 @@ If a new private key was generated, both the private and public keys are returne
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>200</code></td>
 <td>OK. The request was successful.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>201</code></td>
 <td>Created. The object was created. (This response code is only returned when the user is renamed.)</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>400</code></td>
 <td>Invalid. Invalid or missing values. Otherwise malformed request.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>401</code></td>
 <td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name, and that the correct key was used to sign the request.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>403</code></td>
 <td>Forbidden. The user who made the request is not authorized to perform the action.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>404</code></td>
 <td>Not found. The requested object does not exist.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>409</code></td>
 <td>Conflict. This response code is only returned when a user is renamed, but a user already exists with that name.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>413</code></td>
 <td>Request entity too large. A request may not be larger than 1000000 bytes.</td>
 </tr>
@@ -1355,19 +1355,19 @@ The response is similar to:
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>200</code></td>
 <td>OK. The request was successful.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>401</code></td>
 <td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name, and that the correct key was used to sign the request.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>403</code></td>
 <td>Forbidden. The user who made the request is not authorized to perform the action.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>404</code></td>
 <td>Not found. The requested object does not exist.</td>
 </tr>
@@ -1420,19 +1420,19 @@ The response is similar to:
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>201</code></td>
 <td>Created. The object was created.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>401</code></td>
 <td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name, and that the correct key was used to sign the request.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>403</code></td>
 <td>Forbidden. The user who made the request is not authorized to perform the action.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>404</code></td>
 <td>Not found. The requested object does not exist.</td>
 </tr>
@@ -1479,19 +1479,19 @@ The response returns the information about the deleted key and is similar to:
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>200</code></td>
 <td>OK. The request was successful.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>401</code></td>
 <td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name, and that the correct key was used to sign the request.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>403</code></td>
 <td>Forbidden. The user who made the request is not authorized to perform the action.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>404</code></td>
 <td>Not found. The requested object does not exist.</td>
 </tr>
@@ -1534,19 +1534,19 @@ The response is similar to:
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>200</code></td>
 <td>OK. The request was successful.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>401</code></td>
 <td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name, and that the correct key was used to sign the request.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>403</code></td>
 <td>Forbidden. The user who made the request is not authorized to perform the action.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>404</code></td>
 <td>Not found. The requested object does not exist.</td>
 </tr>
@@ -1599,23 +1599,23 @@ The response contains the updated information for the key, and is similar to:
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>200</code></td>
 <td>OK. The request was successful.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>201</code></td>
 <td>Created. The object was created.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>401</code></td>
 <td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name, and that the correct key was used to sign the request.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>403</code></td>
 <td>Forbidden. The user who made the request is not authorized to perform the action.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>404</code></td>
 <td>Not found. The requested object does not exist.</td>
 </tr>
@@ -1677,19 +1677,19 @@ The response is similar to:
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>200</code></td>
 <td>OK. The request was successful.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>401</code></td>
 <td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name, and that the correct key was used to sign the request.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>403</code></td>
 <td>Forbidden. The user who made the request is not authorized to perform the action.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>404</code></td>
 <td>Not found. The requested object does not exist.</td>
 </tr>
@@ -1739,15 +1739,15 @@ The response returns a dictionary similar to:
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>200</code></td>
 <td>OK. The request was successful.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>401</code></td>
 <td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name, and that the correct key was used to sign the request.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>403</code></td>
 <td>Forbidden. The user who made the request is not authorized to perform the action.</td>
 </tr>
@@ -1802,27 +1802,27 @@ The response is similar to:
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>201</code></td>
 <td>OK. An invitation was created.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>400</code></td>
 <td>Bad request. The contents of the request are not formatted correctly.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>401</code></td>
 <td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name, and that the correct key was used to sign the request.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>403</code></td>
 <td>Forbidden. The user who made the request is not authorized to perform the action.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>404</code></td>
 <td>Not found. The invited user does not exist.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>409</code></td>
 <td>Conflict. The object already exists.</td>
 </tr>
@@ -1876,15 +1876,15 @@ The response is similar to:
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>200</code></td>
 <td>OK. The request was successful.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>401</code></td>
 <td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name, and that the correct key was used to sign the request.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>403</code></td>
 <td>Forbidden. The user who made the request is not authorized to perform the action.</td>
 </tr>
@@ -1955,27 +1955,27 @@ Store the private key in a safe place. It will be required later (along with the
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>201</code></td>
 <td>Created. The client was created.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>400</code></td>
 <td>Bad request. The contents of the request are not formatted correctly.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>401</code></td>
 <td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name, and that the correct key was used to sign the request.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>403</code></td>
 <td>Forbidden. The user who made the request is not authorized to perform the action.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>409</code></td>
 <td>Conflict. The object already exists.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>413</code></td>
 <td>Request entity too large. A request may not be larger than 1000000 bytes.</td>
 </tr>
@@ -2016,19 +2016,19 @@ The response has no body.
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>200</code></td>
 <td>OK. The request was successful.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>401</code></td>
 <td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name, and that the correct key was used to sign the request.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>403</code></td>
 <td>Forbidden. The user who made the request is not authorized to perform the action.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>404</code></td>
 <td>Not found. The requested object does not exist.</td>
 </tr>
@@ -2076,19 +2076,19 @@ The response is similar to:
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>200</code></td>
 <td>OK. The request was successful.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>401</code></td>
 <td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name, and that the correct key was used to sign the request.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>403</code></td>
 <td>Forbidden. The user who made the request is not authorized to perform the action.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>404</code></td>
 <td>Not found. The requested object does not exist.</td>
 </tr>
@@ -2170,31 +2170,31 @@ The response is similar to:
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>200</code></td>
 <td>OK. The request was successful.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>201</code></td>
 <td>Created. The client was updated. (This response code is only returned when the client is renamed.)</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>401</code></td>
 <td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name, and that the correct key was used to sign the request.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>403</code></td>
 <td>Forbidden. The user who made the request is not authorized to perform the action.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>404</code></td>
 <td>Not found. The requested object does not exist.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>409</code></td>
 <td>Conflict. This response code is only returned when a client is renamed, but a client already exists with the new name.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>413</code></td>
 <td>Request entity too large. A request may not be larger than 1000000 bytes.</td>
 </tr>
@@ -2250,19 +2250,19 @@ The response is similar to:
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>200</code></td>
 <td>OK. The request was successful.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>401</code></td>
 <td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name, and that the correct key was used to sign the request.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>403</code></td>
 <td>Forbidden. The user who made the request is not authorized to perform the action.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>404</code></td>
 <td>Not found. The requested object does not exist.</td>
 </tr>
@@ -2315,19 +2315,19 @@ The response is similar to:
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>201</code></td>
 <td>Created. The object was created.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>401</code></td>
 <td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name, and that the correct key was used to sign the request.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>403</code></td>
 <td>Forbidden. The user who made the request is not authorized to perform the action.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>404</code></td>
 <td>Not found. The requested object does not exist.</td>
 </tr>
@@ -2376,19 +2376,19 @@ The response returns the information about the deleted key and is similar to:
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>200</code></td>
 <td>OK. The request was successful.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>401</code></td>
 <td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name, and that the correct key was used to sign the request.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>403</code></td>
 <td>Forbidden. The user who made the request is not authorized to perform the action.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>404</code></td>
 <td>Not found. The requested object does not exist.</td>
 </tr>
@@ -2433,19 +2433,19 @@ The response is similar to:
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>200</code></td>
 <td>OK. The request was successful.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>401</code></td>
 <td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name, and that the correct key was used to sign the request.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>403</code></td>
 <td>Forbidden. The user who made the request is not authorized to perform the action.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>404</code></td>
 <td>Not found. The requested object does not exist.</td>
 </tr>
@@ -2498,23 +2498,23 @@ The response contains the updated information for the key and is similar to:
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>200</code></td>
 <td>OK. The request was successful.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>201</code></td>
 <td>Created. The object was created.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>401</code></td>
 <td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name, and that the correct key was used to sign the request.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>403</code></td>
 <td>Forbidden. The user who made the request is not authorized to perform the action.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>404</code></td>
 <td>Not found. The requested object does not exist.</td>
 </tr>
@@ -2575,19 +2575,19 @@ The response is similar to:
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>200</code></td>
 <td>OK. The request was successful.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>401</code></td>
 <td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name, and that the correct key was used to sign the request.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>403</code></td>
 <td>Forbidden. The user who made the request is not authorized to perform the action.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>404</code></td>
 <td>Not found. The requested object does not exist.</td>
 </tr>
@@ -2637,19 +2637,19 @@ The response is similar to:
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>201</code></td>
 <td>OK. The request was successful.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>401</code></td>
 <td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name, and that the correct key was used to sign the request.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>403</code></td>
 <td>Forbidden. The user who made the request is not authorized to perform the action.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>404</code></td>
 <td>Not found. The requested object does not exist.</td>
 </tr>
@@ -2696,19 +2696,19 @@ The response does not return response body.
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>200</code></td>
 <td>OK. The request was successful.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>401</code></td>
 <td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name, and that the correct key was used to sign the request.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>403</code></td>
 <td>Forbidden. The user who made the request is not authorized to perform the action.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>404</code></td>
 <td>Not found. The requested object does not exist.</td>
 </tr>
@@ -2752,19 +2752,19 @@ The response is similar to:
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>200</code></td>
 <td>OK. The request was successful.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>401</code></td>
 <td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name, and that the correct key was used to sign the request.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>403</code></td>
 <td>Forbidden. The user who made the request is not authorized to perform the action.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>404</code></td>
 <td>Not found. The requested object does not exist.</td>
 </tr>
@@ -2838,15 +2838,15 @@ The response is similar to:
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>200</code></td>
 <td>OK. The request was successful.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>401</code></td>
 <td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name, and that the correct key was used to sign the request.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>403</code></td>
 <td>Forbidden. The user who made the request is not authorized to perform the action.</td>
 </tr>
@@ -2907,19 +2907,19 @@ The response is similar to:
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>200</code></td>
 <td>OK. The request was successful.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>401</code></td>
 <td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name, and that the correct key was used to sign the request.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>403</code></td>
 <td>Forbidden. The user who made the request is not authorized to perform the action.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>404</code></td>
 <td>Not found. The requested object does not exist.</td>
 </tr>
@@ -3153,19 +3153,19 @@ The response contains the record of the deleted resource and is similar to:
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>200</code></td>
 <td>OK. The request was successful.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>401</code></td>
 <td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name, and that the correct key was used to sign the request.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>403</code></td>
 <td>Forbidden. The user who made the request is not authorized to perform the action.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>404</code></td>
 <td>Not found. The requested object does not exist.</td>
 </tr>
@@ -3395,19 +3395,19 @@ The response is similar to:
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>200</code></td>
 <td>OK. The request was successful.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>401</code></td>
 <td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name, and that the correct key was used to sign the request.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>403</code></td>
 <td>Forbidden. The user who made the request is not authorized to perform the action.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>404</code></td>
 <td>Not found. The requested object does not exist.</td>
 </tr>
@@ -3524,19 +3524,19 @@ This method has no response body.
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>200</code></td>
 <td>OK. The request was successful.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>401</code></td>
 <td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name, and that the correct key was used to sign the request.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>403</code></td>
 <td>Forbidden. The user who made the request is not authorized to perform the action.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>413</code></td>
 <td>Request entity too large. A request may not be larger than 1000000 bytes.</td>
 </tr>
@@ -3545,7 +3545,7 @@ This method has no response body.
 
 ### /cookbooks
 
-{{% cookbooks_summary %}}
+{{< readfile file="content/reusable/md/cookbooks_summary.md" >}}
 
 When a cookbook is uploaded, only files that are new or updated is included. This approach minimizes the amount of storage and time that is required during the modify-upload-test cycle. Chef Infra Client uses a checksum and assigns a checksum to each file to keep track of which files have already been uploaded. These checksums are used in the cookbook version manifest, alongside the same records that store the file description (name, specificity, and so on), as well as the checksum and the URL from which the file's contents can be retrieved.
 
@@ -3567,7 +3567,7 @@ The `GET` method is used to return a hash of all cookbooks and cookbook versions
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>num_versions=n</code></td>
 <td>The number of cookbook versions to include in the response, where <code>n</code> is the number of cookbook versions. For example: <code>num_versions=3</code> returns the three latest versions, in descending order (newest to oldest). Use <code>num_versions=all</code> to return all cookbook versions. If <code>num_versions</code> is not specified, a single cookbook version is returned. <code>0</code> is an invalid input (an empty array for the versions of each cookbook is returned).</td>
 </tr>
@@ -3621,15 +3621,15 @@ The response is similar to:
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>200</code></td>
 <td>OK. The request was successful.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>401</code></td>
 <td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name, and that the correct key was used to sign the request.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>403</code></td>
 <td>Forbidden. The user who made the request is not authorized to perform the action.</td>
 </tr>
@@ -3677,19 +3677,19 @@ For example, if cookbooks `foo` and `bar` both exist on the Chef Infra Server an
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>200</code></td>
 <td>OK. The request was successful.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>401</code></td>
 <td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name, and that the correct key was used to sign the request.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>403</code></td>
 <td>Forbidden. The user who made the request is not authorized to perform the action.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>404</code></td>
 <td>Not found. The requested object does not exist.</td>
 </tr>
@@ -3736,19 +3736,19 @@ The response is similar to:
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>200</code></td>
 <td>OK. The request was successful.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>401</code></td>
 <td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name, and that the correct key was used to sign the request.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>403</code></td>
 <td>Forbidden. The user who made the request is not authorized to perform the action.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>404</code></td>
 <td>Not found. The requested object does not exist.</td>
 </tr>
@@ -3801,19 +3801,19 @@ The response is similar to:
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>200</code></td>
 <td>OK. The request was successful.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>401</code></td>
 <td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name, and that the correct key was used to sign the request.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>403</code></td>
 <td>Forbidden. The user who made the request is not authorized to perform the action.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>404</code></td>
 <td>Not found. The requested object does not exist.</td>
 </tr>
@@ -3822,7 +3822,7 @@ The response is similar to:
 
 ### /cookbooks/NAME/version
 
-{{% cookbooks_version %}}
+{{< readfile file="content/reusable/md/cookbooks_version.md" >}}
 
 The `/cookbooks/NAME/VERSION` endpoint has the following methods: `DELETE`, `GET`, and `PUT`.
 
@@ -3854,19 +3854,19 @@ This method has no response body. Unused `checksum` values will be garbage colle
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>200</code></td>
 <td>OK. The request was successful.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>401</code></td>
 <td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name, and that the correct key was used to sign the request.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>403</code></td>
 <td>Forbidden. The user who made the request is not authorized to perform the action.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>404</code></td>
 <td>Not found. The requested object does not exist.</td>
 </tr>
@@ -4005,19 +4005,19 @@ The response is similar to:
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>200</code></td>
 <td>OK. The request was successful.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>401</code></td>
 <td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name, and that the correct key was used to sign the request.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>403</code></td>
 <td>Forbidden. The user who made the request is not authorized to perform the action.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>404</code></td>
 <td>Not found. The requested object does not exist.</td>
 </tr>
@@ -4134,19 +4134,19 @@ This method has no response body.
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>200</code></td>
 <td>OK. The request was successful.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>401</code></td>
 <td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name, and that the correct key was used to sign the request.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>403</code></td>
 <td>Forbidden. The user who made the request is not authorized to perform the action.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>413</code></td>
 <td>Request entity too large. A request may not be larger than 1000000 bytes.</td>
 </tr>
@@ -4155,7 +4155,7 @@ This method has no response body.
 
 ### /data
 
-{{% data_bag %}}
+{{< readfile file="content/reusable/md/data_bag.md" >}}
 
 The `/data` endpoint has the following methods: `GET` and `POST`.
 
@@ -4200,15 +4200,15 @@ and `applications` are the names of data bags and
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>200</code></td>
 <td>OK. The request was successful.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>401</code></td>
 <td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name, and that the correct key was used to sign the request.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>403</code></td>
 <td>Forbidden. The user who made the request is not authorized to perform the action.</td>
 </tr>
@@ -4260,27 +4260,27 @@ The response is similar to:
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>201</code></td>
 <td>Created. The object was created.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>400</code></td>
 <td>Bad request. The contents of the request are not formatted correctly.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>401</code></td>
 <td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name, and that the correct key was used to sign the request.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>403</code></td>
 <td>Forbidden. The user who made the request is not authorized to perform the action.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>409</code></td>
 <td>Conflict. A databag with that name already exists.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>413</code></td>
 <td>Request entity too large. A request may not be larger than 1000000 bytes.</td>
 </tr>
@@ -4331,19 +4331,19 @@ where the key-value pairs represent the last state of the data bag item.
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>200</code></td>
 <td>OK. The request was successful.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>401</code></td>
 <td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name, and that the correct key was used to sign the request.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>403</code></td>
 <td>Forbidden. The user who made the request is not authorized to perform the action.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>404</code></td>
 <td>Not found. The requested object does not exist.</td>
 </tr>
@@ -4384,19 +4384,19 @@ The response is similar to:
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>200</code></td>
 <td>OK. The request was successful.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>401</code></td>
 <td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name, and that the correct key was used to sign the request.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>403</code></td>
 <td>Forbidden. The user who made the request is not authorized to perform the action.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>404</code></td>
 <td>Not found. The requested object does not exist.</td>
 </tr>
@@ -4442,31 +4442,31 @@ This method has no response body.
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>201</code></td>
 <td>OK. The item was created.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>400</code></td>
 <td>Bad request. The contents of the request are not formatted correctly.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>401</code></td>
 <td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name, and that the correct key was used to sign the request.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>403</code></td>
 <td>Forbidden. The user who made the request is not authorized to perform the action.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>404</code></td>
 <td>Not found. The requested object does not exist.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>409</code></td>
 <td>Conflict. The object already exists.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>413</code></td>
 <td>Request entity too large. A request may not be larger than 1000000 bytes.</td>
 </tr>
@@ -4475,7 +4475,7 @@ This method has no response body.
 
 ### /data/NAME/ITEM
 
-{{% data_bag_item %}}
+{{< readfile file="content/reusable/md/data_bag_item.md" >}}
 
 The `/data/NAME/ITEM` endpoint allows the key-value pairs within a data bag item to be viewed and managed. This endpoint has the following methods: `DELETE`, `GET`, and `PUT`.
 
@@ -4512,19 +4512,19 @@ The response is similar to:
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>200</code></td>
 <td>OK. The request was successful.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>401</code></td>
 <td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name, and that the correct key was used to sign the request.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>403</code></td>
 <td>Forbidden. The user who made the request is not authorized to perform the action.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>404</code></td>
 <td>Not found. The requested object does not exist.</td>
 </tr>
@@ -4566,19 +4566,19 @@ The response is similar to:
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>200</code></td>
 <td>OK. The request was successful.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>401</code></td>
 <td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name, and that the correct key was used to sign the request.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>403</code></td>
 <td>Forbidden. The user who made the request is not authorized to perform the action.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>404</code></td>
 <td>Not found. The requested object does not exist.</td>
 </tr>
@@ -4629,23 +4629,23 @@ The response is similar to:
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>200</code></td>
 <td>OK. The request was successful.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>401</code></td>
 <td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name, and that the correct key was used to sign the request.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>403</code></td>
 <td>Forbidden. The user who made the request is not authorized to perform the action.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>404</code></td>
 <td>Not found. The requested object does not exist.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>413</code></td>
 <td>Request entity too large. A request may not be larger than 1000000 bytes.</td>
 </tr>
@@ -4654,7 +4654,7 @@ The response is similar to:
 
 ### /environments
 
-{{% environment %}}
+{{< readfile file="content/reusable/md/environment.md" >}}
 
 The `/environments` endpoint has the following methods: `GET` and `POST`.
 
@@ -4693,15 +4693,15 @@ The response is similar to:
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>200</code></td>
 <td>OK. The request was successful.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>401</code></td>
 <td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name, and that the correct key was used to sign the request.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>403</code></td>
 <td>Forbidden. The user who made the request is not authorized to perform the action.</td>
 </tr>
@@ -4753,27 +4753,27 @@ The response is similar to:
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>201</code></td>
 <td>Created. The object was created.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>400</code></td>
 <td>Bad request. The contents of the request are not formatted correctly.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>401</code></td>
 <td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name, and that the correct key was used to sign the request.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>403</code></td>
 <td>Forbidden. The user who made the request is not authorized to perform the action.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>409</code></td>
 <td>Conflict. The object already exists.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>413</code></td>
 <td>Request entity too large. A request may not be larger than 1000000 bytes.</td>
 </tr>
@@ -4830,19 +4830,19 @@ The response is similar to:
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>200</code></td>
 <td>OK. The request was successful.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>401</code></td>
 <td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name, and that the correct key was used to sign the request.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>403</code></td>
 <td>Forbidden. The user who made the request is not authorized to perform the action.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>404</code></td>
 <td>Not found. The requested object does not exist.</td>
 </tr>
@@ -4893,19 +4893,19 @@ The response will return the JSON for the environment that was deleted, similar 
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>200</code></td>
 <td>OK. The request was successful.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>401</code></td>
 <td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name, and that the correct key was used to sign the request.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>403</code></td>
 <td>Forbidden. The user who made the request is not authorized to perform the action.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>404</code></td>
 <td>Not found. The requested object does not exist.</td>
 </tr>
@@ -4952,19 +4952,19 @@ The response is similar to:
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>200</code></td>
 <td>OK. The request was successful.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>401</code></td>
 <td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name, and that the correct key was used to sign the request.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>403</code></td>
 <td>Forbidden. The user who made the request is not authorized to perform the action.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>404</code></td>
 <td>Not found. The requested object does not exist.</td>
 </tr>
@@ -5012,23 +5012,23 @@ The response will return the updated environment.
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>200</code></td>
 <td>OK. The request was successful.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>401</code></td>
 <td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name, and that the correct key was used to sign the request.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>403</code></td>
 <td>Forbidden. The user who made the request is not authorized to perform the action.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>404</code></td>
 <td>Not found. The requested object does not exist.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>413</code></td>
 <td>Request entity too large. A request may not be larger than 1000000 bytes.</td>
 </tr>
@@ -5057,7 +5057,7 @@ This method has the following parameters:
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>num_versions=n</code></td>
 <td>The number of cookbook versions to include in the response, where <code>n</code> is the number of cookbook versions. For example: <code>num_versions=3</code> returns the three latest versions, in descending order (newest to oldest). Use <code>num_versions=all</code> to return all cookbook versions. If <code>num_versions</code> is not specified, a single cookbook version is returned. <code>0</code> is an invalid input (an empty array for the versions of each cookbook is returned).</td>
 </tr>
@@ -5104,19 +5104,19 @@ The response is similar to:
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>200</code></td>
 <td>OK. The request was successful.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>401</code></td>
 <td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name, and that the correct key was used to sign the request.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>403</code></td>
 <td>Forbidden. The user who made the request is not authorized to perform the action.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>404</code></td>
 <td>Not found. The requested object does not exist.</td>
 </tr>
@@ -5431,31 +5431,31 @@ The response is similar to:
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>200</code></td>
 <td>OK. The request was successful.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>400</code></td>
 <td>Bad request. The contents of the request are not formatted correctly.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>401</code></td>
 <td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name, and that the correct key was used to sign the request.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>403</code></td>
 <td>Forbidden. The user who made the request is not authorized to perform the action.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>404</code></td>
 <td>Not found. The requested object does not exist.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>412</code></td>
 <td>Not allowed. A set of cookbooks and/or cookbook versions could not be found that met all of the requirements of the run-list. A cookbook in the run-list may not exist. A dependency may be present for a cookbook that does not exist. A constraint on a cookbook made by a run-list, environment, or cookbook version, may not match an available cookbook version.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>413</code></td>
 <td>Request entity too large. A request may not be larger than 1000000 bytes.</td>
 </tr>
@@ -5485,7 +5485,7 @@ This method has the following parameters:
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>num_versions=n</code></td>
 <td>The number of cookbook versions to include in the response, where <code>n</code> is the number of cookbook versions. For example: <code>num_versions=3</code> returns the three latest versions, in descending order (newest to oldest). Use <code>num_versions=all</code> to return all cookbook versions. If <code>num_versions</code> is not specified, a single cookbook version is returned. <code>0</code> is an invalid input (an empty array for the versions of each cookbook is returned).</td>
 </tr>
@@ -5539,19 +5539,19 @@ The response is similar to:
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>200</code></td>
 <td>OK. The request was successful.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>401</code></td>
 <td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name, and that the correct key was used to sign the request.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>403</code></td>
 <td>Forbidden. The user who made the request is not authorized to perform the action.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>404</code></td>
 <td>Not found. The requested object does not exist.</td>
 </tr>
@@ -5598,19 +5598,19 @@ The response is similar to:
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>200</code></td>
 <td>OK. The request was successful.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>401</code></td>
 <td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name, and that the correct key was used to sign the request.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>403</code></td>
 <td>Forbidden. The user who made the request is not authorized to perform the action.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>404</code></td>
 <td>Not found. The requested object does not exist.</td>
 </tr>
@@ -5670,19 +5670,19 @@ The list of recipes will be the default recipes for a given cookbook. If an envi
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>200</code></td>
 <td>OK. The request was successful.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>401</code></td>
 <td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name, and that the correct key was used to sign the request.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>403</code></td>
 <td>Forbidden. The user who made the request is not authorized to perform the action.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>404</code></td>
 <td>Not found. The requested object does not exist.</td>
 </tr>
@@ -5748,19 +5748,19 @@ Chef Infra Client will pick up the `_default` run-list if `env_run_list[environm
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>200</code></td>
 <td>OK. The request was successful.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>401</code></td>
 <td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name, and that the correct key was used to sign the request.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>403</code></td>
 <td>Forbidden. The user who made the request is not authorized to perform the action.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>404</code></td>
 <td>Not found. The requested object does not exist.</td>
 </tr>
@@ -5810,19 +5810,19 @@ The response is similar to:
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>200</code></td>
 <td>OK. The request was successful.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>401</code></td>
 <td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name, and that the correct key was used to sign the request.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>403</code></td>
 <td>Forbidden. The user who made the request is not authorized to perform the action.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>404</code></td>
 <td>Not found. The requested object does not exist.</td>
 </tr>
@@ -5877,23 +5877,23 @@ The response is similar to:
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>201</code></td>
 <td>OK. The group was created.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>401</code></td>
 <td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name, and that the correct key was used to sign the request.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>403</code></td>
 <td>Forbidden. The user who made the request is not authorized to perform the action.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>404</code></td>
 <td>Not found. The requested object does not exist.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>409</code></td>
 <td>Conflict. The requested group already exists.</td>
 </tr>
@@ -5939,19 +5939,19 @@ The response is similar to:
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>200</code></td>
 <td>OK. The group was deleted.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>401</code></td>
 <td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name, and that the correct key was used to sign the request.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>403</code></td>
 <td>Forbidden. The user who made the request is not authorized to perform the action.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>404</code></td>
 <td>Not found. The requested object does not exist.</td>
 </tr>
@@ -6008,19 +6008,19 @@ The response is similar to:
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>200</code></td>
 <td>OK. The request was successful.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>401</code></td>
 <td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name, and that the correct key was used to sign the request.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>403</code></td>
 <td>Forbidden. The user who made the request is not authorized to perform the action.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>404</code></td>
 <td>Not found. The requested object does not exist.</td>
 </tr>
@@ -6082,19 +6082,19 @@ The response is similar to:
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>201</code></td>
 <td>OK. The group was updated.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>401</code></td>
 <td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name, and that the correct key was used to sign the request.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>403</code></td>
 <td>Forbidden. The user who made the request is not authorized to perform the action.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>404</code></td>
 <td>Not found. The requested object does not exist.</td>
 </tr>
@@ -6103,7 +6103,7 @@ The response is similar to:
 
 ### /nodes
 
-{{% node %}}
+{{< readfile file="content/reusable/md/node.md" >}}
 
 The `/nodes` endpoint has the following methods: `GET` and `POST`.
 
@@ -6141,15 +6141,15 @@ The response is similar to:
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>200</code></td>
 <td>OK. The request was successful.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>401</code></td>
 <td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name, and that the correct key was used to sign the request.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>403</code></td>
 <td>Forbidden. The user who made the request is not authorized to perform the action.</td>
 </tr>
@@ -6206,27 +6206,27 @@ The response is similar to:
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>201</code></td>
 <td>Created. The object was created.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>400</code></td>
 <td>Bad request. The contents of the request are not formatted correctly.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>401</code></td>
 <td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name, and that the correct key was used to sign the request.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>403</code></td>
 <td>Forbidden. The user who made the request is not authorized to perform the action.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>409</code></td>
 <td>Conflict. The object already exists.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>413</code></td>
 <td>Request entity too large. A request may not be larger than 1000000 bytes.</td>
 </tr>
@@ -6281,19 +6281,19 @@ The response will return the last known state of the node, similar to:
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>200</code></td>
 <td>OK. The request was successful.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>401</code></td>
 <td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name, and that the correct key was used to sign the request.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>403</code></td>
 <td>Forbidden. The user who made the request is not authorized to perform the action.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>404</code></td>
 <td>Not found. The requested object does not exist.</td>
 </tr>
@@ -6344,19 +6344,19 @@ The response is similar to:
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>200</code></td>
 <td>OK. The request was successful.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>401</code></td>
 <td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name, and that the correct key was used to sign the request.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>403</code></td>
 <td>Forbidden. The user who made the request is not authorized to perform the action.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>404</code></td>
 <td>Not found. The requested object does not exist.</td>
 </tr>
@@ -6391,19 +6391,19 @@ The method does not return a body.
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>200</code></td>
 <td>OK. The request was successful.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>401</code></td>
 <td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name, and that the correct key was used to sign the request.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>403</code></td>
 <td>Forbidden. The user who made the request is not authorized to perform the action.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>404</code></td>
 <td>Not found. The requested object does not exist.</td>
 </tr>
@@ -6457,23 +6457,23 @@ The response returns the updated node.
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>200</code></td>
 <td>OK. The request was successful.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>401</code></td>
 <td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name, and that the correct key was used to sign the request.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>403</code></td>
 <td>Forbidden. The user who made the request is not authorized to perform the action.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>404</code></td>
 <td>Not found. The requested object does not exist.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>413</code></td>
 <td>Request entity too large. A request may not be larger than 1000000 bytes.</td>
 </tr>
@@ -6539,11 +6539,11 @@ The response groups policies by name and revision and is similar to:
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>200</code></td>
 <td>OK. The request was successful.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>403</code></td>
 <td>Forbidden. The user who made the request is not authorized to perform the action.</td>
 </tr>
@@ -6607,11 +6607,11 @@ same name as a user. The response for a user or client is similar to:
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>200</code></td>
 <td>OK. The request was successful.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>404</code></td>
 <td>Not found. The requested object does not exist.</td>
 </tr>
@@ -6662,19 +6662,19 @@ The response is returned in plain text, not in JSON format. The response is simi
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>200</code></td>
 <td>OK. The request was successful. Required recipe is enabled, a path to a recipe is defined, and a recipe exists at the path location.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>401</code></td>
 <td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name, and that the correct key was used to sign the request.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>403</code></td>
 <td>Forbidden. The user who made the request is not authorized to perform the action.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>404</code></td>
 <td>Not Found. The required recipe function is not enabled.</td>
 </tr>
@@ -6683,7 +6683,7 @@ The response is returned in plain text, not in JSON format. The response is simi
 
 ### /roles
 
-{{% role %}}
+{{< readfile file="content/reusable/md/role.md" >}}
 
 The `/roles` endpoint has the following methods: `GET` and `POST`.
 
@@ -6721,15 +6721,15 @@ The response is similar to:
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>200</code></td>
 <td>OK. The request was successful.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>401</code></td>
 <td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name, and that the correct key was used to sign the request.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>403</code></td>
 <td>Forbidden. The user who made the request is not authorized to perform the action.</td>
 </tr>
@@ -6788,27 +6788,27 @@ The response is similar to:
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>201</code></td>
 <td>OK. The request was successful.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>400</code></td>
 <td>Bad request. The contents of the request are not formatted correctly.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>401</code></td>
 <td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name, and that the correct key was used to sign the request.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>403</code></td>
 <td>Forbidden. The user who made the request is not authorized to perform the action.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>409</code></td>
 <td>Conflict. The object already exists.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>413</code></td>
 <td>Request entity too large. A request may not be larger than 1000000 bytes.</td>
 </tr>
@@ -6867,19 +6867,19 @@ The response is similar to:
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>200</code></td>
 <td>OK. The request was successful.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>401</code></td>
 <td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name, and that the correct key was used to sign the request.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>403</code></td>
 <td>Forbidden. The user who made the request is not authorized to perform the action.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>404</code></td>
 <td>Not found. The requested object does not exist.</td>
 </tr>
@@ -6930,19 +6930,19 @@ The response is similar to:
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>200</code></td>
 <td>OK. The request was successful.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>401</code></td>
 <td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name, and that the correct key was used to sign the request.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>403</code></td>
 <td>Forbidden. The user who made the request is not authorized to perform the action.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>404</code></td>
 <td>Not found. The requested object does not exist.</td>
 </tr>
@@ -6993,23 +6993,23 @@ The response will return the JSON for the updated role.
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>200</code></td>
 <td>OK. The request was successful.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>401</code></td>
 <td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name, and that the correct key was used to sign the request.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>403</code></td>
 <td>Forbidden. The user who made the request is not authorized to perform the action.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>404</code></td>
 <td>Not found. The requested object does not exist.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>413</code></td>
 <td>Request entity too large. A request may not be larger than 1000000 bytes.</td>
 </tr>
@@ -7052,19 +7052,19 @@ The response is similar to:
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>200</code></td>
 <td>OK. The request was successful.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>401</code></td>
 <td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name, and that the correct key was used to sign the request.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>403</code></td>
 <td>Forbidden. The user who made the request is not authorized to perform the action.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>404</code></td>
 <td>Not found. The requested object does not exist.</td>
 </tr>
@@ -7109,19 +7109,19 @@ The response is similar to:
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>200</code></td>
 <td>OK. The request was successful.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>401</code></td>
 <td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name, and that the correct key was used to sign the request.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>403</code></td>
 <td>Forbidden. The user who made the request is not authorized to perform the action.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>404</code></td>
 <td>Not found. The requested object does not exist.</td>
 </tr>
@@ -7192,23 +7192,23 @@ The response is similar to:
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>200</code></td>
 <td>OK. The request was successful. A hash that maps each checksum to a hash that contains a boolean <code>needs_upload</code> field and a URL if <code>needs_upload</code> is set to <code>true</code>.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>400</code></td>
 <td>Bad request. The object has already been committed or one (or more) of the objects were not properly uploaded. The payload does not contain a well-formed <code>checksums</code> parameter that is a hash containing a key for each checksum.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>401</code></td>
 <td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name, and that the correct key was used to sign the request.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>403</code></td>
 <td>Forbidden. The user who made the request is not authorized to perform the action.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>413</code></td>
 <td>Request entity too large. A request may not be larger than 1000000 bytes.</td>
 </tr>
@@ -7269,27 +7269,27 @@ The response is similar to:
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>200</code></td>
 <td>OK. The request was successful.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>400</code></td>
 <td>Bad request. The contents of the request are not formatted correctly.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>401</code></td>
 <td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name, and that the correct key was used to sign the request.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>403</code></td>
 <td>Forbidden. The user who made the request is not authorized to perform the action.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>404</code></td>
 <td>Not found. The requested object does not exist.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>413</code></td>
 <td>Request entity too large. A request may not be larger than 1000000 bytes.</td>
 </tr>
@@ -7298,7 +7298,7 @@ The response is similar to:
 
 ### /search
 
-{{% search %}}
+{{< readfile file="content/reusable/md/search.md" >}}
 
 The `/search` endpoint allows nodes, roles, data bags, environments to be searched. This endpoint has the following methods: `GET`.
 
@@ -7356,15 +7356,15 @@ The response is similar to:
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>200</code></td>
 <td>OK. The request was successful.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>401</code></td>
 <td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name, and that the correct key was used to sign the request.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>403</code></td>
 <td>Forbidden. The user who made the request is not authorized to perform the action.</td>
 </tr>
@@ -7376,7 +7376,7 @@ The response is similar to:
 Use the `/search/INDEX` endpoint to access the search indexes on the Chef Infra Server. The `/search/INDEX` endpoint has the following
 methods: `GET` and `POST`.
 
-{{% search_query_syntax %}}
+{{< readfile file="content/reusable/md/search_query_syntax.md" >}}
 
 #### GET
 
@@ -7396,15 +7396,15 @@ This method has the following parameters:
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>q</code></td>
 <td>The search query used to identify a list of items on a Chef Infra Server. This option uses the same syntax as the <code>knife search</code> subcommand.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>rows</code></td>
 <td>The number of rows to be returned.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>start</code></td>
 <td>The row at which return results begin.</td>
 </tr>
@@ -7455,19 +7455,19 @@ The response contains the total number of rows that match the request and for a 
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>200</code></td>
 <td>OK. The request was successful.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>401</code></td>
 <td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name, and that the correct key was used to sign the request.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>403</code></td>
 <td>Forbidden. The user who made the request is not authorized to perform the action.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>404</code></td>
 <td>Not found. The requested object does not exist.</td>
 </tr>
@@ -7492,15 +7492,15 @@ This method has the following parameters:
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>q</code></td>
 <td>The search query used to identify a list of items on a Chef Infra Server. This option uses the same syntax as the <code>search</code> subcommand.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>rows</code></td>
 <td>The number of rows to be returned.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>start</code></td>
 <td>The row at which return results begin.</td>
 </tr>
@@ -7558,19 +7558,19 @@ The response is similar to:
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>200</code></td>
 <td>OK. The request was successful.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>401</code></td>
 <td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name, and that the correct key was used to sign the request.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>403</code></td>
 <td>Forbidden. The user who made the request is not authorized to perform the action.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>413</code></td>
 <td>Request entity too large. A request may not be larger than 1000000 bytes.</td>
 </tr>
@@ -7643,7 +7643,7 @@ The response will return a json hash, with the name of each cookbook as a top-le
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>200</code></td>
 <td>OK. The request was successful. One (or more) cookbooks and associated cookbook version information was returned.</td>
 </tr>
@@ -7715,19 +7715,19 @@ The response will return an array of paths for objects that have been created, u
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>200</code></td>
 <td>OK. The request was successful.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>401</code></td>
 <td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name, and that the correct key was used to sign the request.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>403</code></td>
 <td>Forbidden. The user who made the request is not authorized to perform the action.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>404</code></td>
 <td>Not found. The requested object does not exist or the function is not implemented.</td>
 </tr>
@@ -7774,15 +7774,15 @@ The response is similar to:
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>200</code></td>
 <td>OK. The request was successful.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>401</code></td>
 <td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name and that the correct key was used to sign the request.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>403</code></td>
 <td>Forbidden. The user who made the request is not authorized to perform the action.</td>
 </tr>
@@ -7827,23 +7827,23 @@ No response block is returned.
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>201</code></td>
 <td>Created. The user was associated with the organization.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>400</code></td>
 <td>Bad request. The contents of the request are not formatted correctly.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>401</code></td>
 <td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name and that the correct key was used to sign the request.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>403</code></td>
 <td>Forbidden. The user who made the request is not authorized to perform the action.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>409</code></td>
 <td>Conflict. The user is already associated.</td>
 </tr>
@@ -7893,19 +7893,19 @@ The response will return the end state of the user, similar to:
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>200</code></td>
 <td>OK. The request was successful. The user association was removed.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>401</code></td>
 <td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name and that the correct key was used to sign the request.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>403</code></td>
 <td>Forbidden. The user who made the request is not authorized to perform the action.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>404</code></td>
 <td>Not found. The requested object does not exist.</td>
 </tr>
@@ -7951,19 +7951,19 @@ The response is similar to:
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>200</code></td>
 <td>OK. The request was successful.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>401</code></td>
 <td>Unauthorized. The user or client who made the request could not be authenticated. Verify the user/client name and that the correct key was used to sign the request.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>403</code></td>
 <td>Forbidden. The user who made the request is not authorized to perform the action.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>404</code></td>
 <td>Not found. The requested object does not exist.</td>
 </tr>

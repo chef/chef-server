@@ -1027,7 +1027,7 @@ This configuration file has the following settings for `oc-id`:
 :   A Hash that contains OAuth 2 application information. Default value:
     `{ }`.
 
-    {{< readfile file="layouts/shortcodes/chef-server/config_ocid_application_hash_supermarket.md" >}}
+    {{< readfile file="content/server/reusable/md/config_ocid_application_hash_supermarket.md" >}}
 
 `oc_id['db_pool_size']`
 

@@ -8,12 +8,9 @@ This subcommand has the following syntax:
 chef-server-ctl uninstall
 ```
 
-<div class="admonition-note">
-<p class="admonition-note-title">Note</p>
-<div class="admonition-note-text">
+{{< note >}}
 
 To revert the `uninstall` subcommand, run the `reconfigure` subcommand
 (because the `start` subcommand is disabled by the `uninstall` command).
 
-</div>
-</div>
+{{< /note >}}

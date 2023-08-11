@@ -40,11 +40,11 @@ adding the following settings to the server configuration file:
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>nginx['ssl_certificate']</code></td>
 <td>The SSL certificate used to verify communication over HTTPS.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>nginx['ssl_certificate_key']</code></td>
 <td>The certificate key used for SSL communication.</td>
 </tr>
@@ -110,7 +110,7 @@ than 64 characters.
 
 ### SSL Protocols
 
-{{% chef-server/server_tuning_nginx %}}
+{{< readfile file="content/server/reusable/md/server_tuning_nginx.md" >}}
 
 **Example: Configure SSL Keys for Nginx**
 
@@ -169,7 +169,7 @@ end
 
 ### Knife, Chef Infra Client
 
-{{% chef-server/server_security_ssl_cert_client %}}
+{{< readfile file="content/server/reusable/md/server_security_ssl_cert_client.md" >}}
 
 See [Chef Infra Client SSL
 Certificates]({{< relref "chef_client_security#ssl-certificates" >}}) for more
@@ -334,11 +334,11 @@ These versions **require** Chef Server 12.14.0 or greater:
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td>Chef Backend</td>
 <td><em>all</em></td>
 </tr>
-<tr class="even">
+<tr>
 <td>Chef Manage</td>
 <td>2.5.0</td>
 </tr>

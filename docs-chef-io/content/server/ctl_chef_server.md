@@ -14,7 +14,7 @@ aliases = ["/ctl_chef_server.html", "/ctl_chef_server/"]
     weight = 10
 +++
 
-{{% chef-server/ctl_chef_server_summary %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_summary.md" >}}
 
 ## Backup / Restore
 
@@ -23,27 +23,27 @@ and then to restore those backups.
 
 ### backup
 
-{{% chef-server/ctl_chef_server_backup %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_backup.md" >}}
 
 **Options**
 
-{{% chef-server/ctl_chef_server_backup_options %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_backup_options.md" >}}
 
 **Syntax**
 
-{{% chef-server/ctl_chef_server_backup_syntax %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_backup_syntax.md" >}}
 
 ### restore
 
-{{% chef-server/ctl_chef_server_restore %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_restore.md" >}}
 
 **Options**
 
-{{% chef-server/ctl_chef_server_restore_options %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_restore_options.md" >}}
 
 **Syntax**
 
-{{% chef-server/ctl_chef_server_restore_syntax %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_restore_syntax.md" >}}
 
 **Examples**
 
@@ -138,11 +138,11 @@ This subcommand has the following options:
 
 ### Use Downloads
 
-{{% chef-server/ctl_chef_server_install_features_download %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_install_features_download.md" >}}
 
 ### Use Local Packages
 
-{{% chef-server/ctl_chef_server_install_features_manual %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_install_features_manual.md" >}}
 
 ## Key Rotation
 
@@ -707,19 +707,19 @@ This subcommand has the following options:
 
 ## Manage Organizations
 
-{{% chef-server/ctl_chef_server_org %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_org.md" >}}
 
 ### org-create
 
-{{% chef-server/ctl_chef_server_org_create %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_org_create.md" >}}
 
 **Syntax**
 
-{{% chef-server/ctl_chef_server_org_create_syntax %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_org_create_syntax.md" >}}
 
 **Options**
 
-{{% chef-server/ctl_chef_server_org_create_options %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_org_create_options.md" >}}
 
 **Examples**
 
@@ -741,11 +741,11 @@ chef-server-ctl org-create dev Development --association_user grantmc
 
 ### org-delete
 
-{{% chef-server/ctl_chef_server_org_delete %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_org_delete.md" >}}
 
 **Syntax**
 
-{{% chef-server/ctl_chef_server_org_delete_syntax %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_org_delete_syntax.md" >}}
 
 **Examples**
 
@@ -759,35 +759,35 @@ chef-server-ctl org-delete pedant-testing-org
 
 ### org-list
 
-{{% chef-server/ctl_chef_server_org_list %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_org_list.md" >}}
 
 **Syntax**
 
-{{% chef-server/ctl_chef_server_org_list_syntax %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_org_list_syntax.md" >}}
 
 **Options**
 
-{{% chef-server/ctl_chef_server_org_list_options %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_org_list_options.md" >}}
 
 ### org-show
 
-{{% chef-server/ctl_chef_server_org_show %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_org_show.md" >}}
 
 **Syntax**
 
-{{% chef-server/ctl_chef_server_org_show_syntax %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_org_show_syntax.md" >}}
 
 ### org-user-add
 
-{{% chef-server/ctl_chef_server_org_user_add %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_org_user_add.md" >}}
 
 **Syntax**
 
-{{% chef-server/ctl_chef_server_org_user_add_syntax %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_org_user_add_syntax.md" >}}
 
 **Options**
 
-{{% chef-server/ctl_chef_server_org_user_add_options %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_org_user_add_options.md" >}}
 
 **Examples**
 
@@ -805,17 +805,17 @@ chef-server-ctl org-user-add dev grantmc --admin
 
 ### org-user-remove
 
-{{% chef-server/ctl_chef_server_org_user_remove %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_org_user_remove.md" >}}
 
 {{< warning >}}
 
-{{% knife_edit_admin_users %}}
+{{< readfile file="content/reusable/md/knife_edit_admin_users.md" >}}
 
 {{< /warning >}}
 
 **Syntax**
 
-{{% chef-server/ctl_chef_server_org_user_remove_syntax %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_org_user_remove_syntax.md" >}}
 
 **Options**
 
@@ -991,31 +991,31 @@ curl -XPUT -H "Content-Type: application/json" http://127.0.0.1:9200/_all/_setti
 
 ## Server Admins
 
-{{% chef-server/server_rbac_server_admins %}}
+{{< readfile file="content/server/reusable/md/server_rbac_server_admins.md" >}}
 
 ### Scenario
 
-{{% chef-server/server_rbac_server_admins_scenario %}}
+{{< readfile file="content/server/reusable/md/server_rbac_server_admins_scenario.md" >}}
 
 #### Superuser Accounts
 
-{{% chef-server/server_rbac_server_admins_superusers %}}
+{{< readfile file="content/server/reusable/md/server_rbac_server_admins_superusers.md" >}}
 
 ### Manage server-admins Group
 
-{{% chef-server/ctl_chef_server_server_admin %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_server_admin.md" >}}
 
 #### Add Members
 
-{{% chef-server/ctl_chef_server_server_admin_grant_user %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_server_admin_grant_user.md" >}}
 
 #### Remove Members
 
-{{% chef-server/ctl_chef_server_server_admin_remove_user %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_server_admin_remove_user.md" >}}
 
 #### List Membership
 
-{{% chef-server/ctl_chef_server_server_admin_list %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_server_admin_list.md" >}}
 
 ## show-config
 
@@ -1032,7 +1032,7 @@ chef-server-ctl show-config
 
 ## uninstall
 
-{{% chef-server/ctl_chef_server_uninstall %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_uninstall.md" >}}
 
 ## upgrade
 
@@ -1124,19 +1124,19 @@ chef-server-ctl rebuild-migration-state
 
 ## User Management
 
-{{% chef-server/ctl_chef_server_user %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_user.md" >}}
 
 ### user-create
 
-{{% chef-server/ctl_chef_server_user_create %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_user_create.md" >}}
 
 **Syntax**
 
-{{% chef-server/ctl_chef_server_user_create_syntax %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_user_create_syntax.md" >}}
 
 **Options**
 
-{{% chef-server/ctl_chef_server_user_create_options %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_user_create_options.md" >}}
 
 **Examples**
 
@@ -1154,11 +1154,11 @@ chef-server-ctl user-create waldendude Henry David Thoreau waldendude@example.co
 
 ### user-delete
 
-{{% chef-server/ctl_chef_server_user_delete %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_user_delete.md" >}}
 
 **Syntax**
 
-{{% chef-server/ctl_chef_server_user_delete_syntax %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_user_delete_syntax.md" >}}
 
 **Examples**
 
@@ -1181,11 +1181,11 @@ This subcommand has the following options:
 
 ### user-edit
 
-{{% chef-server/ctl_chef_server_user_edit %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_user_edit.md" >}}
 
 **Syntax**
 
-{{% chef-server/ctl_chef_server_user_edit_syntax %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_user_edit_syntax.md" >}}
 
 **Examples**
 
@@ -1199,31 +1199,31 @@ chef-server-ctl user-edit jane_doe
 
 ### user-list
 
-{{% chef-server/ctl_chef_server_user_list %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_user_list.md" >}}
 
 **Syntax**
 
-{{% chef-server/ctl_chef_server_user_list_syntax %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_user_list_syntax.md" >}}
 
 **Options**
 
-{{% chef-server/ctl_chef_server_user_list_options %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_user_list_options.md" >}}
 
 ### user-show
 
-{{% chef-server/ctl_chef_server_user_show %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_user_show.md" >}}
 
 **Syntax**
 
-{{% chef-server/ctl_chef_server_user_show_syntax %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_user_show_syntax.md" >}}
 
 **Options**
 
-{{% chef-server/ctl_chef_server_user_show_options %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_user_show_options.md" >}}
 
 ## Service Subcommands
 
-{{% chef-server/ctl_common_service_subcommands %}}
+{{< readfile file="content/server/reusable/md/ctl_common_service_subcommands.md" >}}
 
 {{< warning >}}
 
@@ -1235,48 +1235,48 @@ is configured for the Chef Infra Server: `hup`, `int`, `kill`, `once`,
 
 ### hup
 
-{{% chef-server/ctl_chef_server_hup %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_hup.md" >}}
 
 ### int
 
-{{% chef-server/ctl_chef_server_int %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_int.md" >}}
 
 ### kill
 
-{{% chef-server/ctl_chef_server_kill %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_kill.md" >}}
 
 ### once
 
-{{% chef-server/ctl_chef_server_once %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_once.md" >}}
 
 ### restart
 
-{{% chef-server/ctl_chef_server_restart %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_restart.md" >}}
 
 ### service-list
 
-{{% chef-server/ctl_chef_server_service_list %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_service_list.md" >}}
 
 ### start
 
-{{% chef-server/ctl_chef_server_start %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_start.md" >}}
 
 ### status
 
-{{% chef-server/ctl_chef_server_status %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_status.md" >}}
 
 #### Log Files
 
-{{% chef-server/ctl_chef_server_status_logs %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_status_logs.md" >}}
 
 ### stop
 
-{{% chef-server/ctl_chef_server_stop %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_stop.md" >}}
 
 ### tail
 
-{{% chef-server/ctl_chef_server_tail %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_tail.md" >}}
 
 ### term
 
-{{% chef-server/ctl_chef_server_term %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_term.md" >}}

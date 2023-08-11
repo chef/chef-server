@@ -26,118 +26,118 @@ Server:
 
 ## chef-server-ctl
 
-{{% chef-server/ctl_chef_server_summary %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_summary.md" >}}
 
-{{% chef-server/ctl_chef_server_user %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_user.md" >}}
 
 ### org-create
 
-{{% chef-server/ctl_chef_server_org_create %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_org_create.md" >}}
 
 **Syntax**
 
-{{% chef-server/ctl_chef_server_org_create_syntax %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_org_create_syntax.md" >}}
 
 **Options**
 
-{{% chef-server/ctl_chef_server_org_create_options %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_org_create_options.md" >}}
 
 ### org-delete
 
-{{% chef-server/ctl_chef_server_org_delete %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_org_delete.md" >}}
 
 **Syntax**
 
-{{% chef-server/ctl_chef_server_org_delete_syntax %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_org_delete_syntax.md" >}}
 
 ### org-list
 
-{{% chef-server/ctl_chef_server_org_list %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_org_list.md" >}}
 
 **Syntax**
 
-{{% chef-server/ctl_chef_server_org_list_syntax %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_org_list_syntax.md" >}}
 
 **Options**
 
-{{% chef-server/ctl_chef_server_org_list_options %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_org_list_options.md" >}}
 
 ### org-show
 
-{{% chef-server/ctl_chef_server_org_show %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_org_show.md" >}}
 
 **Syntax**
 
-{{% chef-server/ctl_chef_server_org_show_syntax %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_org_show_syntax.md" >}}
 
 ### org-user-add
 
-{{% chef-server/ctl_chef_server_org_user_add %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_org_user_add.md" >}}
 
 **Syntax**
 
-{{% chef-server/ctl_chef_server_org_user_add_syntax %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_org_user_add_syntax.md" >}}
 
 **Options**
 
-{{% chef-server/ctl_chef_server_org_user_add_options %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_org_user_add_options.md" >}}
 
 ### org-user-remove
 
-{{% chef-server/ctl_chef_server_org_user_remove %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_org_user_remove.md" >}}
 
 **Syntax**
 
-{{% chef-server/ctl_chef_server_org_user_remove_syntax %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_org_user_remove_syntax.md" >}}
 
 ### user-create
 
-{{% chef-server/ctl_chef_server_user_create %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_user_create.md" >}}
 
 **Syntax**
 
-{{% chef-server/ctl_chef_server_user_create_syntax %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_user_create_syntax.md" >}}
 
 **Options**
 
-{{% chef-server/ctl_chef_server_user_create_options %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_user_create_options.md" >}}
 
 ### user-delete
 
-{{% chef-server/ctl_chef_server_user_delete %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_user_delete.md" >}}
 
 **Syntax**
 
-{{% chef-server/ctl_chef_server_user_delete_syntax %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_user_delete_syntax.md" >}}
 
 ### user-edit
 
-{{% chef-server/ctl_chef_server_user_edit %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_user_edit.md" >}}
 
 **Syntax**
 
-{{% chef-server/ctl_chef_server_user_edit_syntax %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_user_edit_syntax.md" >}}
 
 ### user-list
 
-{{% chef-server/ctl_chef_server_user_list %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_user_list.md" >}}
 
 **Syntax**
 
-{{% chef-server/ctl_chef_server_user_list_syntax %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_user_list_syntax.md" >}}
 
 **Options**
 
-{{% chef-server/ctl_chef_server_user_list_options %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_user_list_options.md" >}}
 
 ### user-show
 
-{{% chef-server/ctl_chef_server_user_show %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_user_show.md" >}}
 
 **Syntax**
 
-{{% chef-server/ctl_chef_server_user_show_syntax %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_user_show_syntax.md" >}}
 
 **Options**
 
-{{% chef-server/ctl_chef_server_user_show_options %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_user_show_options.md" >}}

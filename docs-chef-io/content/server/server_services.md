@@ -20,55 +20,55 @@ given time. The supervisor starts two processes per service.
 
 ## Service Subcommands
 
-{{% chef-server/ctl_common_service_subcommands %}}
+{{< readfile file="content/server/reusable/md/ctl_common_service_subcommands.md" >}}
 
 ### hup
 
-{{% chef-server/ctl_chef_server_hup %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_hup.md" >}}
 
 ### int
 
-{{% chef-server/ctl_chef_server_int %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_int.md" >}}
 
 ### kill
 
-{{% chef-server/ctl_chef_server_kill %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_kill.md" >}}
 
 ### once
 
-{{% chef-server/ctl_chef_server_once %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_once.md" >}}
 
 ### restart
 
-{{% chef-server/ctl_chef_server_restart %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_restart.md" >}}
 
 ### service-list
 
-{{% chef-server/ctl_chef_server_service_list %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_service_list.md" >}}
 
 ### start
 
-{{% chef-server/ctl_chef_server_start %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_start.md" >}}
 
 ### status
 
-{{% chef-server/ctl_chef_server_status %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_status.md" >}}
 
 #### Log Files
 
-{{% chef-server/ctl_chef_server_status_logs %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_status_logs.md" >}}
 
 ### stop
 
-{{% chef-server/ctl_chef_server_stop %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_stop.md" >}}
 
 ### tail
 
-{{% chef-server/ctl_chef_server_tail %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_tail.md" >}}
 
 ### term
 
-{{% chef-server/ctl_chef_server_term %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_term.md" >}}
 
 ## List of Services
 
@@ -84,7 +84,7 @@ The following services are part of the Chef Infra Server:
 
 ### bifrost
 
-{{% chef-server/server_services_bifrost %}}
+{{< readfile file="content/server/reusable/md/server_services_bifrost.md" >}}
 
 #### status
 
@@ -156,7 +156,7 @@ chef-server-ctl tail bifrost
 
 ### bookshelf
 
-{{% chef-server/server_services_bookshelf %}}
+{{< readfile file="content/server/reusable/md/server_services_bookshelf.md" >}}
 
 #### status
 
@@ -308,7 +308,7 @@ chef-server-ctl tail elasticsearch
 
 ### nginx
 
-{{% chef-server/server_services_nginx %}}
+{{< readfile file="content/server/reusable/md/server_services_nginx.md" >}}
 
 #### status
 
@@ -372,11 +372,11 @@ chef-server-ctl once nginx
 
 #### tail
 
-{{% chef-server/server_services_nginx_tail %}}
+{{< readfile file="content/server/reusable/md/server_services_nginx_tail.md" >}}
 
 ### opscode-erchef
 
-{{% chef-server/server_services_erchef %}}
+{{< readfile file="content/server/reusable/md/server_services_erchef.md" >}}
 
 #### status
 
@@ -448,7 +448,7 @@ chef-server-ctl tail opscode-erchef
 
 ### postgresql
 
-{{% chef-server/server_services_postgresql %}}
+{{< readfile file="content/server/reusable/md/server_services_postgresql.md" >}}
 
 #### status
 
@@ -520,7 +520,7 @@ chef-server-ctl tail postgresql
 
 ### redis
 
-{{% chef-server/server_services_redis %}}
+{{< readfile file="content/server/reusable/md/server_services_redis.md" >}}
 
 #### status
 
