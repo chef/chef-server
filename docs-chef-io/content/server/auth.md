@@ -12,21 +12,21 @@ gh_repo = "chef-server"
     weight = 10
 +++
 
-{{% chef-server/chef_auth %}}
+{{< readfile file="content/server/reusable/md/chef_auth.md" >}}
 
-{{% chef-server/chef_auth_authentication %}}
+{{< readfile file="content/server/reusable/md/chef_auth_authentication.md" >}}
 
 ## Public and Private Keys
 
-{{% security_chef_validator %}}
+{{< readfile file="content/reusable/md/security_chef_validator.md" >}}
 
 ### Chef Infra Server Key Use
 
-{{% chef-server/chef_auth_authentication %}}
+{{< readfile file="content/server/reusable/md/chef_auth_authentication.md" >}}
 
 #### Chef Infra Client
 
-{{% security_key_pairs_chef_client %}}
+{{< readfile file="content/reusable/md/security_key_pairs_chef_client.md" >}}
 
 #### Knife
 
@@ -42,7 +42,7 @@ make authenticated requests to the Chef Infra Server by leveraging the
 
 #### chef-validator
 
-{{% security_chef_validator_context %}}
+{{< readfile file="content/reusable/md/security_chef_validator_context.md" >}}
 
 ### Chef Infra Server Key Storage
 
@@ -66,7 +66,7 @@ from the server and copied to the `~/.chef` directory manually. If you
 require a new private key, generate it with the Chef Infra Server and
 copy it to the `~/.chef` directory again.
 
-{{% chef_repo_description %}}
+{{< readfile file="content/reusable/md/chef_repo_description.md" >}}
 
 The .chef directory is a hidden directory that is used to store
 validation key files and optionally a [config.rb]({{< relref "workstation/config_rb" >}}) file.
@@ -75,9 +75,9 @@ validation key files and optionally a [config.rb]({{< relref "workstation/config
 
 #### API Requests
 
-{{% plugin_knife_summary %}}
+{{< readfile file="content/reusable/md/plugin_knife_summary.md" >}}
 
-{{% chef-server/plugin_knife_using_authenticated_requests %}}
+{{< readfile file="content/server/reusable/md/plugin_knife_using_authenticated_requests.md" >}}
 
 #### From the Web Interface
 

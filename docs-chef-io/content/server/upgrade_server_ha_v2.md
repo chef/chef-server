@@ -15,11 +15,15 @@ aliases = ["/upgrade_server_ha_v2.html", "/upgrade_server_ha_v2/"]
     weight = 70
 +++
 
-{{% chef-server/EOL_backend %}}
+{{< warning >}}
+
+{{< readfile file="content/server/reusable/md/EOL_backend.md" >}}
+
+{{< /warning >}}
 
 This documentation describes the process for upgrading a high availability Chef Infra Server cluster.
 
-{{% chef-server/server_upgrade_duration %}}
+{{< readfile file="content/server/reusable/md/server_upgrade_duration.md" >}}
 
 ## Overview
 

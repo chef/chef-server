@@ -218,7 +218,7 @@ Add the following settings to the chef-server.rb file:
     address, which should be equal to the FQDN for the service URI that
     is used by the Chef Infra Server. FQDNs must always be in lowercase. 
 
-6.  {{% chef-server/install_chef_server_reconfigure %}}
+6.  {{< readfile file="content/server/reusable/md/install_chef_server_reconfigure.md" >}}
 
 ## Frontend
 
@@ -243,7 +243,7 @@ Infra Server:
     contents of the `/etc/opscode` directory from the primary backend
     server, including all certificates and the chef-server.rb file.
 
-3.  {{% chef-server/install_chef_server_reconfigure %}}
+3.  {{< readfile file="content/server/reusable/md/install_chef_server_reconfigure.md" >}}
 
 4.  Start the Chef Infra Server:
 
@@ -254,8 +254,8 @@ Infra Server:
 On a single frontend server, create an administrator and an
 organization:
 
-1.  {{% chef-server/ctl_chef_server_user_create_admin %}}
-2.  {{% chef-server/ctl_chef_server_org_create_summary %}}
+1.  {{< readfile file="content/server/reusable/md/ctl_chef_server_user_create_admin.md" >}}
+2.  {{< readfile file="content/server/reusable/md/ctl_chef_server_org_create_summary.md" >}}
 
 ## Enable Features
 
@@ -311,7 +311,7 @@ Chef Manage
 
 **Use Local Packages**
 
-{{% chef-server/ctl_chef_server_install_features_manual %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_install_features_manual.md" >}}
 
 ## Reference
 
@@ -337,32 +337,32 @@ Chef Infra Server configuration, consisting of:
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td>be1.example.com</td>
 <td>192.0.2.0</td>
 <td>backend</td>
 </tr>
-<tr class="even">
+<tr>
 <td>fe1.example.com</td>
 <td>192.168.4.2</td>
 <td>frontend</td>
 </tr>
-<tr class="odd">
+<tr>
 <td>fe2.example.com</td>
 <td>192.168.4.3</td>
 <td>frontend</td>
 </tr>
-<tr class="even">
+<tr>
 <td>fe3.example.com</td>
 <td>192.168.4.4</td>
 <td>frontend</td>
 </tr>
-<tr class="odd">
+<tr>
 <td>chef.example.com</td>
 <td></td>
 <td>load balanced frontend VIP</td>
 </tr>
-<tr class="even">
+<tr>
 <td>be.example.com</td>
 <td>192.168.4.7</td>
 <td>load balanced backend VIP</td>
@@ -401,16 +401,16 @@ api_fqdn "chef.example.com"
 
 ### Firewalls
 
-{{% chef-server/server_firewalls_and_ports_summary %}}
+{{< readfile file="content/server/reusable/md/server_firewalls_and_ports_summary.md" >}}
 
-{{% chef-server/server_firewalls_and_ports_listening %}}
+{{< readfile file="content/server/reusable/md/server_firewalls_and_ports_listening.md" >}}
 
-{{% chef-server/server_firewalls_and_ports_loopback %}}
+{{< readfile file="content/server/reusable/md/server_firewalls_and_ports_loopback.md" >}}
 
 #### Backend
 
-{{% chef-server/server_firewalls_and_ports_tiered %}}
+{{< readfile file="content/server/reusable/md/server_firewalls_and_ports_tiered.md" >}}
 
 #### Frontend
 
-{{% chef-server/server_firewalls_and_ports_fe %}}
+{{< readfile file="content/server/reusable/md/server_firewalls_and_ports_fe.md" >}}

@@ -48,7 +48,7 @@ See the [Release-Specific Steps](#release-specific-steps) for information about 
 
 {{< /note >}}
 
-{{% chef-server/server_upgrade_duration %}}
+{{< readfile file="content/server/reusable/md/server_upgrade_duration.md" >}}
 
 1. Run `vacuumdb` before starting the upgrade:
 
@@ -158,7 +158,7 @@ See the [Release-Specific Steps](#release-specific-steps) for information about 
    reindexdb: reindexing database "template1"
    ```
 
-{{% chef-server/server_analyze_postgresql_db %}}
+{{< readfile file="content/server/reusable/md/server_analyze_postgresql_db.md" >}}
 
 You are now finished with the upgrade.
 
@@ -407,7 +407,7 @@ The following External PostgreSQL upgrade steps are provided as a courtesy only.
    reindexdb: reindexing database "template1"
    ```
 
-{{% chef-server/server_analyze_postgresql_db %}}
+{{< readfile file="content/server/reusable/md/server_analyze_postgresql_db.md" >}}
 
 1. Log into the Chef Infra Server machine.
 
@@ -451,7 +451,11 @@ The following External PostgreSQL upgrade steps are provided as a courtesy only.
 
 ### Chef Backend Install
 
-{{% chef-server/EOL_backend %}}
+{{< warning >}}
+
+{{< readfile file="content/server/reusable/md/EOL_backend.md" >}}
+
+{{< /warning >}}
 
 The Chef Infra Server can operate in a high availability configuration that provides automated load balancing and failover for stateful components in the system architecture.
 
@@ -559,7 +563,7 @@ chef-server-ctl cleanup
 ### Upgrading to 15.5 or later (tiered installations only)
 
 The Chef Infra Server 15.5 upgrade from 15.0.X or later does not automatically reindex for  Tiered installations.
-{{% chef-server/server_upgrade_duration %}}
+{{< readfile file="content/server/reusable/md/server_upgrade_duration.md" >}}
 
 #### steps for reindex
 1. Run the below command on frontend server's
@@ -579,7 +583,7 @@ Chef Infra Server 15.5 is the minimum recommended version for upgrade from older
 
 Chef Infra Server 15.0 moved from Elasticsearch to OpenSearch as its search index.
 
-{{% chef-server/server_upgrade_duration %}}
+{{< readfile file="content/server/reusable/md/server_upgrade_duration.md" >}}
 
 The Chef Infra Server 15 will automatically transfer search data from Elasticsearch to OpenSearch without the need for a reindex. The Chef Infra Server 15 upgrade will need to manually reindex existing external Elasticsearch installations.
 
@@ -588,7 +592,7 @@ The upgrade duration might take more time if you are upgrading from Chef Infra S
 ### Upgrading to 14.x
 
 Chef Infra Server 14.0 moved from Solr to Elasticsearch as its search index.
-{{% chef-server/server_upgrade_duration %}}
+{{< readfile file="content/server/reusable/md/server_upgrade_duration.md" >}}
 
 The Chef Infra Server 14 upgrade does not automatically reindex existing external Elasticsearch installations.
 
@@ -695,7 +699,7 @@ chef-server-ctl cleanup-bifrost
        vacuumdb: vacuuming database "template1"
     ```
 
-{{% chef-server/server_analyze_postgresql_db %}}
+{{< readfile file="content/server/reusable/md/server_analyze_postgresql_db.md" >}}
 
 1. Back up the PostgreSQL database before upgrading so you can restore the full database to a previous release in the event of a failure. See [Backup and Restore]({{< relref "server_backup_restore" >}}) for more information.
 

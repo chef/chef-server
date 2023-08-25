@@ -2,18 +2,12 @@ The `restart` subcommand is used to restart all services enabled on the
 Chef Infra Server or to restart an individual service by specifying the
 name of that service in the command.
 
-<div class="admonition-warning">
-
-<p class="admonition-warning-title">Warning</p>
-
-<div class="admonition-warning-text">
+{{< warning >}}
 
 When running the Chef Infra Server in a high availability configuration,
 restarting all services may trigger failover.
 
-</div>
-
-</div>
+{{< /warning >}}
 
 This subcommand has the following syntax:
 
