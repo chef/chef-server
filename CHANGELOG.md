@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.7.3 -->
-## [15.7.3](https://github.com/chef/chef-server/tree/15.7.3) (2023-07-06)
+<!-- latest_release 15.7.4 -->
+## [15.7.4](https://github.com/chef/chef-server/tree/15.7.4) (2023-08-25)
 
 #### Merged Pull Requests
-- CHEF-3465 Replace download links [#3683](https://github.com/chef/chef-server/pull/3683) ([IanMadd](https://github.com/IanMadd))
+- CHEF-4514 Reorganize reusable text files in docs [#3692](https://github.com/chef/chef-server/pull/3692) ([IanMadd](https://github.com/IanMadd))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.7.0 -->
 ### Changes since 15.7.0 release
 
 #### Merged Pull Requests
+- CHEF-4514 Reorganize reusable text files in docs [#3692](https://github.com/chef/chef-server/pull/3692) ([IanMadd](https://github.com/IanMadd)) <!-- 15.7.4 -->
 - CHEF-3465 Replace download links [#3683](https://github.com/chef/chef-server/pull/3683) ([IanMadd](https://github.com/IanMadd)) <!-- 15.7.3 -->
 - Docs update [#3676](https://github.com/chef/chef-server/pull/3676) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 15.7.2 -->
 - Update supported platforms page [#3675](https://github.com/chef/chef-server/pull/3675) ([IanMadd](https://github.com/IanMadd)) <!-- 15.7.1 -->
