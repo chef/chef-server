@@ -14,7 +14,11 @@ aliases = ["/install_server_ha.html"]
     weight = 20
 +++
 
-{{% chef-server/EOL_backend %}}
+{{< warning >}}
+
+{{< readfile file="content/server/reusable/md/EOL_backend.md" >}}
+
+{{< /warning >}}
 
 This topic introduces the underlying concepts behind the architecture of
 the high availability Chef Infra Server cluster. The topic then
@@ -83,7 +87,7 @@ later if/when your node count grows.
 
 -   64-bit architecture
 
-{{% chef-server/system_requirements_ha %}}
+{{< readfile file="content/server/reusable/md/system_requirements_ha.md" >}}
 
 ### Network Services
 
@@ -120,8 +124,7 @@ These instructions assume you are using the minimum versions:
 -   Chef Server : 12.5.0
 -   Chef Backend : 0.8.0
 
-Download [Chef Infra Server](https://www.chef.io/downloads/tools/infra-server) and
-[Chef Backend (chef-backend)](https://www.chef.io/downloads/tools/backend)
+Download Chef Infra Server and Chef Backend from [Chef Downloads](https://www.chef.io/downloads)
 if you do not have them already.
 
 Before creating the backend HA cluster and building at least one Chef
@@ -149,7 +152,7 @@ different from any other back-end node.
 1.  Install the Chef Backend package on the first backend node **as root**.
 
     -   Download [Chef Backend
-        (chef-backend)](https://www.chef.io/downloads/tools/backend)
+        (chef-backend)](https://www.chef.io/downloads)
     -   In Red Hat/CentOS: `yum install PATH_TO_RPM`
     -   In Debian/Ubuntu: `dpkg -i PATH_TO_DEB`
 
@@ -200,7 +203,7 @@ join nodes in parallel the cluster may fail to become available):
 1.  Install the Chef Backend package on the node.
 
     -   Download [Chef Backend
-        (chef-backend)](https://www.chef.io/downloads/tools/backend)
+        (chef-backend)](https://www.chef.io/downloads)
     -   In Red Hat/CentOS: `yum install PATH_TO_RPM`
     -   In Debian/Ubuntu: `dpkg -i PATH_TO_DEB`
 
@@ -346,9 +349,9 @@ To restore a backup to this system, follow the [chef-server-ctl]({{< relref "ser
 
 {{< /note >}}
 
-1.  {{< readfile file="layouts/shortcodes/chef-server/ctl_chef_server_user_create_admin.md" >}}
+1.  {{< readfile file="content/server/reusable/md/ctl_chef_server_user_create_admin.md" >}}
 
-1.  {{< readfile file="layouts/shortcodes/chef-server/ctl_chef_server_org_create_summary.md" >}}
+1.  {{< readfile file="content/server/reusable/md/ctl_chef_server_org_create_summary.md" >}}
 
 
 ### Upgrading Chef Infra Server on the Frontend Machines
@@ -479,15 +482,15 @@ By service role, access requirements are as follows:
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td>PostgreSQL</td>
 <td>All backend cluster members and all Chef Infra Server frontend group nodes.</td>
 </tr>
-<tr class="even">
+<tr>
 <td>Elasticsearch</td>
 <td>All backend cluster members and all Chef Infra Server frontend group nodes.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td>etcd</td>
 <td>All backend cluster members and all Chef Infra Server frontend group nodes.</td>
 </tr>
@@ -517,19 +520,19 @@ files on disk:
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>/etc/chef-backend/secrets.json</code></td>
 <td><code>root</code></td>
 <td><code>chef_pgsql</code></td>
 <td><code>0640</code></td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>/var/opt/chef-backend/leaderl/data/sys.config</code></td>
 <td><code>chef_pgsql</code></td>
 <td><code>chef_pgsql</code></td>
 <td><code>0600</code></td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>/var/opt/chef-backend/PostgreSQL/9.5/recovery.conf</code></td>
 <td><code>chef_pgsql</code></td>
 <td><code>chef_pgsql</code></td>
@@ -553,23 +556,23 @@ account under which the service runs as listed the second column:
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>postgresql</code></td>
 <td><code>chef_pgsql</code></td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>elasticsearch</code></td>
 <td><code>chef-backend</code></td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>etcd</code></td>
 <td><code>chef-backend</code></td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>leaderl</code></td>
 <td><code>chef_pgsql</code></td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>epmd</code></td>
 <td><code>chef_pgsql</code> (or first user launching an erlang process)</td>
 </tr>
@@ -599,7 +602,7 @@ ticket with <support@chef.io>.
 
 ## chef-backend.rb Options
 
-{{% chef-server/config_rb_backend_summary %}}
+{{< readfile file="content/server/reusable/md/config_rb_backend_summary.md" >}}
 
 For information on all the available settings, see the
 [chef-backend.rb documentation]({{< relref "config_rb_backend" >}}).

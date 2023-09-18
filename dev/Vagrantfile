@@ -61,6 +61,8 @@ end
 
 Vagrant.configure("2") do |config|
   config.vm.network 'public_network' if USE_AZURE
+  config.vm.network "forwarded_port", guest: 80,  host: 8080
+  config.vm.network "forwarded_port", guest: 443, host: 8443
   config.vm.box = "bento/ubuntu-20.04"
   config.ssh.forward_agent = true
   config.omnibus.chef_version = :latest

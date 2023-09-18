@@ -5,7 +5,7 @@ the following installed and configured properly:
     hostnames. The hostname for the Chef Infra Server must be a FQDN,
     have fewer than 64 characters including the domain suffix, be
     lowercase, and resolvable. See [Hostnames,
-    FQDNs](/install_server_pre.html#hostnames) for more information
+    FQDNs](/server/install_server_pre/#hostnames) for more information
 - **FQDNs** --- Ensure that all systems have a resolvable FQDN
 - **NTP** --- Ensure that every server is connected to NTP; the Chef
     Infra Server is sensitive to clock drift

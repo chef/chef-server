@@ -32,6 +32,10 @@ In order to release, you will need the following accounts/permissions:
 Upgrade Erlang dependencies via automated script.  
 See https://github.com/chef/chef-server/blob/main/dev-docs/FrequentTasks.md#updating-erlang-dependencies-using-rebar3 .
 
+### Update documentation
+
+Ensure documentation in [docs-site](https://docs.chef.io/) is updated for changes that would be included in the release.
+
 ### Update Release Notes
 
 #### Pending Release Notes In Wiki
@@ -171,6 +175,18 @@ https://buildkite.com/chef/chef-chef-server-main-habitat-build
 Follow the below document for testing the chef-server version in Automate environment.
 https://github.com/chef/automate/blob/main/dev-docs/DEV_ENVIRONMENT.md
 
+#### Software Versions Check
+
+If any software was bumped or updated (including any CVEs addressed), load up a dev VM and verify that the software is the correct version.
+
+For example, after an OpenJRE bump:
+```
+# /opt/opscode/embedded/open-jre/bin/java --version
+openjdk 11.0.18 2023-01-17
+OpenJDK Runtime Environment Temurin-11.0.18+10 (build 11.0.18+10)
+OpenJDK 64-Bit Server VM Temurin-11.0.18+10 (build 11.0.18+10, mixed mode)
+```
+
 #### Special Testing
 
 Do any special testing specific to the particular release you are doing, as applicable.
@@ -224,18 +240,20 @@ https://discourse.chef.io/c/chef-release/9
 1. Confirm that the release notes from Pending Release Notes are automatically posted on discourse.  Sample post:
 https://discourse.chef.io/t/chef-infra-server-14-10-23-released/20438
 1. Confirm that the data for the Pending Release Notes at https://github.com/chef/chef-server/wiki/Pending-Release-Notes is automatically deleted by expeditor, and only the titles remain.  Notify releng at https://github.com/chef/release-engineering/issues if this does not automatically happen on promote.
-1. Confirm that the release notes appear at https://docs.chef.io/release_notes_server/ .  This should happen automatically via expeditor, but if it does not you need to perform the steps manually and create an issue with releng at https://github.com/chef/release-engineering/issues.
+1. Confirm that the release notes appear at https://docs.chef.io/release_notes_server/ .  This should happen automatically via expeditor, but if it does not you need to perform the steps manually and create an issue with releng at https://github.com/chef/release-engineering/issues.  For instructions on how to proceed with a manual edit, contact docs-support.
 
 In case of release failure, consult appropriate documentation to assist with troubleshooting and correcting the issue.
 https://expeditor.chef.io/dashboard/?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE2NDYxODMwMTgsImlhdCI6MTY0NjE2ODYxOCwiaXNzIjoiaHR0cHM6Ly9leHBlZGl0b3IuY2hlZi5pbyIsInVzZXJfbG9naW4iOiJQcmFqYWt0YVB1cm9oaXQiLCJ1c2VyX25hbWUiOm51bGwsImFjY2Vzc190b2tlbiI6ImdodV95R3o4MkE5dWg5TzdnVXhOMHhEbXQ5bHU1YXM0YUE0TVZuVjYiLCJhZG1pbiI6dHJ1ZX0.5EZ1GvD_ufWmXPzfosGbs11RXYnHNm7gABgc-TpLgkQ#/
 
 ### Automate
 
-1. Create issues in the chef-server repo and in the automate repo to update the version of Chef Infra Server in Automate. Make sure to link the issues to each other.
-1. Bump the version of Automate [placeholder - instructions forthcoming].
+Notify the Automate team that chef server has been released, and give them the version.  Confirm that the hab packages are available for them to consume:
 
-   https://github.com/chef/chef-server/blob/main/dev-docs/AUTOMATE_DEV_ENV.md
-   https://github.com/chef/automate/pull/5269
+   https://bldr.habitat.sh/#/pkgs/chef/oc_erchef/latest  
+   https://bldr.habitat.sh/#/pkgs/chef/oc_bifrost/latest  
+   https://bldr.habitat.sh/#/pkgs/chef/bookshelf/latest  
+   https://bldr.habitat.sh/#/pkgs/chef/chef-server-nginx/latest  
+   https://bldr.habitat.sh/#/pkgs/chef/chef-server-ctl/latest
 
 Chef Infra Server is now released.
 
@@ -265,5 +283,5 @@ https://buildkite.com/chef/chef-umbrella-main-chef-server-full/builds/97#20ad56a
 - verify that manifest contains correct     PASSED
   release number
 - build and release the release             PENDING
-- Create automate issues                    PENDING
+- notify automate                           PENDING
 ```

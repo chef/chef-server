@@ -31,7 +31,7 @@ particular setting.
 
 ## Customize the Config File
 
-{{% chef-server/config_rb_server_summary %}}
+{{< readfile file="content/server/reusable/md/config_rb_server_summary.md" >}}
 
 ### Use Conditions
 
@@ -59,7 +59,8 @@ file (no equal sign is necessary to set the value):
 :   The FQDN for the Chef Infra Server. This setting is not in the
     server configuration file by default. When added, its value should
     be equal to the FQDN for the service URI used by the Chef Infra
-    Server. For example: `api_fqdn "chef.example.com"`.
+    Server. FQDNs must always be in lowercase.
+    For example: `api_fqdn "chef.example.com"`.
 
 `bootstrap`
 
@@ -80,7 +81,7 @@ file (no equal sign is necessary to set the value):
 
 ### SSL Protocols
 
-{{% chef-server/server_tuning_nginx %}}
+{{< readfile file="content/server/reusable/md/server_tuning_nginx.md" >}}
 
 ## Optional Services Tuning
 
@@ -88,7 +89,7 @@ The following settings are often used to for performance tuning of the
 Chef Infra Server in larger installations.
 
 {{< note >}}
-{{% chef-server/notes_config_rb_server_must_reconfigure %}}
+{{< readfile file="content/server/reusable/md/notes_config_rb_server_must_reconfigure.md" >}}
 {{< /note >}}
 
 ### bookshelf

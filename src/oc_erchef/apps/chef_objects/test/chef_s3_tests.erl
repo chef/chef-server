@@ -140,7 +140,7 @@ generate_presigned_url_uses_configured_s3_url_test_() ->
        fun() ->
                application:set_env(chef_objects, s3_url_expiry_window_size, {15, minutes}),
                ExpectedExpiry = {3600, 900},
-               InternalS3Url = "https://FAKE_S3.com",
+               InternalS3Url = "https://fake_s3.com",
                ExternalS3Url = host_header,
                setup_s3(InternalS3Url, ExternalS3Url),
                {InternalS3Url, ExternalS3Url, ExpectedExpiry}
@@ -178,7 +178,7 @@ generate_presigned_url_uses_configured_s3_url_test_() ->
        fun() ->
                application:set_env(chef_objects, s3_url_expiry_window_size, {15, percent}),
                ExpectedExpiry = {3600, 540},
-               InternalS3Url = "https://FAKE_S3.com",
+               InternalS3Url = "https://fake_s3.com",
                ExternalS3Url = InternalS3Url,
                setup_s3(InternalS3Url, ExternalS3Url),
                {InternalS3Url, ExternalS3Url, ExpectedExpiry}
@@ -215,7 +215,7 @@ generate_presigned_url_uses_configured_s3_url_test_() ->
        fun() ->
                application:set_env(chef_objects, s3_url_expiry_window_size, off),
                ExpectedExpiry = 3600,
-               InternalS3Url = "https://FAKE_S3.com",
+               InternalS3Url = "https://fake_s3.com",
                ExternalS3Url = "https://external-s3.com",
                setup_s3(InternalS3Url, ExternalS3Url),
                {InternalS3Url, ExternalS3Url, ExpectedExpiry}

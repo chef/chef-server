@@ -1,12 +1,64 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release -->
+<!-- latest_release 15.7.5 -->
+## [15.7.5](https://github.com/chef/chef-server/tree/15.7.5) (2023-08-28)
+
+#### Merged Pull Requests
+- fix link in docs [#3506](https://github.com/chef/chef-server/pull/3506) ([IanMadd](https://github.com/IanMadd))
 <!-- latest_release -->
 
-<!-- release_rollup -->
+<!-- release_rollup since=15.7.0 -->
+### Changes since 15.7.0 release
+
+#### Merged Pull Requests
+- fix link in docs [#3506](https://github.com/chef/chef-server/pull/3506) ([IanMadd](https://github.com/IanMadd)) <!-- 15.7.5 -->
+- CHEF-4514 Reorganize reusable text files in docs [#3692](https://github.com/chef/chef-server/pull/3692) ([IanMadd](https://github.com/IanMadd)) <!-- 15.7.4 -->
+- CHEF-3465 Replace download links [#3683](https://github.com/chef/chef-server/pull/3683) ([IanMadd](https://github.com/IanMadd)) <!-- 15.7.3 -->
+- Docs update [#3676](https://github.com/chef/chef-server/pull/3676) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 15.7.2 -->
+- Update supported platforms page [#3675](https://github.com/chef/chef-server/pull/3675) ([IanMadd](https://github.com/IanMadd)) <!-- 15.7.1 -->
 <!-- release_rollup -->
 
 <!-- latest_stable_release -->
+## [15.7.0](https://github.com/chef/chef-server/tree/15.7.0) (2023-06-14)
+
+#### Merged Pull Requests
+- Integrating with sonarcubes [#3628](https://github.com/chef/chef-server/pull/3628) ([vinay-satish](https://github.com/vinay-satish))
+- Bump activesupport from 7.0.4.1 to 7.0.4.2 in /oc-chef-pedant [#3588](https://github.com/chef/chef-server/pull/3588) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump mixlib-install from 3.12.24 to 3.12.27 in /src/chef-server-ctl [#3591](https://github.com/chef/chef-server/pull/3591) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump nokogiri from 1.14.0 to 1.14.2 in /src/oc-id [#3602](https://github.com/chef/chef-server/pull/3602) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump pg from 1.4.5 to 1.4.6 in /src/chef-server-ctl [#3612](https://github.com/chef/chef-server/pull/3612) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Update release process docs [#3631](https://github.com/chef/chef-server/pull/3631) ([lbakerchef](https://github.com/lbakerchef))
+- Bump nokogiri from 1.14.2 to 1.14.3 in /src/oc-id [#3643](https://github.com/chef/chef-server/pull/3643) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump omnibus-software from `6a1c889` to `67a1705` in /omnibus [#3660](https://github.com/chef/chef-server/pull/3660) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Add el-9 builder and tester to the pipelines [#3661](https://github.com/chef/chef-server/pull/3661) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- Updated license scout issues [#3666](https://github.com/chef/chef-server/pull/3666) ([jashaik](https://github.com/jashaik))
+- Setting file and template backup to false for the config files [#3659](https://github.com/chef/chef-server/pull/3659) ([vinay-satish](https://github.com/vinay-satish))
+<!-- latest_stable_release -->
+
+## [15.6.2](https://github.com/chef/chef-server/tree/15.6.2) (2023-03-17)
+
+#### Merged Pull Requests
+- Update default OpenJRE to 11.0.18+10 [#3623](https://github.com/chef/chef-server/pull/3623) ([lbakerchef](https://github.com/lbakerchef))
+
+## [15.6.1](https://github.com/chef/chef-server/tree/15.6.1) (2023-03-07)
+
+#### Merged Pull Requests
+- Disable caching on SSL pages [#3570](https://github.com/chef/chef-server/pull/3570) ([lbakerchef](https://github.com/lbakerchef))
+- Normalize host header case [#3587](https://github.com/chef/chef-server/pull/3587) ([lbakerchef](https://github.com/lbakerchef))
+- Bump omnibus-software to pull in the OpenJRE update [#3609](https://github.com/chef/chef-server/pull/3609) ([lbakerchef](https://github.com/lbakerchef))
+- Update Erlang dependencies [#3611](https://github.com/chef/chef-server/pull/3611) ([lbakerchef](https://github.com/lbakerchef))
+- Bump spring from 4.1.0 to 4.1.1 in /src/oc-id [#3572](https://github.com/chef/chef-server/pull/3572) ([dependabot[bot]](https://github.com/dependabot[bot]))
+
+## [15.5.1](https://github.com/chef/chef-server/tree/15.5.1) (2023-02-08)
+
+#### Merged Pull Requests
+- Update release process documentation [#3567](https://github.com/chef/chef-server/pull/3567) ([lbakerchef](https://github.com/lbakerchef))
+- Updated license_scout to 1.3.4 [#3595](https://github.com/chef/chef-server/pull/3595) ([jashaik](https://github.com/jashaik))
+- Update opensearch version to 1.3.7 in chef-server. [#3573](https://github.com/chef/chef-server/pull/3573) ([sreepuramsudheer](https://github.com/sreepuramsudheer))
+- Adding opensearch config to gen_frontend/backend [#3596](https://github.com/chef/chef-server/pull/3596) ([jashaik](https://github.com/jashaik))
+- Forward ports from dev vm to host [#3594](https://github.com/chef/chef-server/pull/3594) ([lbakerchef](https://github.com/lbakerchef))
+- Updated upgrade docs with a note [#3600](https://github.com/chef/chef-server/pull/3600) ([jashaik](https://github.com/jashaik))
+
 ## [15.4.0](https://github.com/chef/chef-server/tree/15.4.0) (2023-01-05)
 
 #### Merged Pull Requests
@@ -36,7 +88,6 @@
 - Upgrade rebar3 3.6.2 -&gt; 3.20.0 [#3551](https://github.com/chef/chef-server/pull/3551) ([lbakerchef](https://github.com/lbakerchef))
 - Changed erlang version to 24. [#3560](https://github.com/chef/chef-server/pull/3560) ([sreepuramsudheer](https://github.com/sreepuramsudheer))
 - Bump omnibus-software from `ab655a5` to `2be3816` in /omnibus [#3558](https://github.com/chef/chef-server/pull/3558) ([dependabot[bot]](https://github.com/dependabot[bot]))
-<!-- latest_stable_release -->
 
 ## [15.3.2](https://github.com/chef/chef-server/tree/15.3.2) (2022-11-09)
 

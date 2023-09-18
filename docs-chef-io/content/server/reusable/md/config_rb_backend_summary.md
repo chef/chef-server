@@ -7,7 +7,7 @@ you have been advised to do so.
 
 The following settings are the only settings you should modify without guidance:
 `fqdn`
-: Host name of this node.
+: Host name of this node. FQDNs must always be in lowercase. 
 
 `hide_sensitive`
 : Set to `false` if you wish to print deltas of

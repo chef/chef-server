@@ -14,7 +14,11 @@ aliases = ["/ctl_chef_backend.html"]
     weight = 20
 +++
 
-{{% chef-server/EOL_backend %}}
+{{< warning >}}
+
+{{< readfile file="content/server/reusable/md/EOL_backend.md" >}}
+
+{{< /warning >}}
 
 The Chef Infra Server backend HA cluster includes a command-line utility
 named chef-backend-ctl. This command-line tool is used to manage the
@@ -39,7 +43,7 @@ chef-backend-ctl backup (options)
 
 ### Options
 
-{{% chef-server/ctl_chef_backend_cleanse_options %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_backend_cleanse_options.md" >}}
 
 ### Examples
 
@@ -118,7 +122,7 @@ chef-backend-ctl cleanse
 
 ### Options
 
-{{% chef-server/ctl_chef_backend_cleanse_options %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_backend_cleanse_options.md" >}}
 
 ### Examples
 
@@ -806,7 +810,7 @@ To revert the `uninstall` subcommand, run the `reconfigure` subcommand
 
 ## Service Subcommands
 
-{{% chef-server/ctl_common_service_subcommands %}}
+{{< readfile file="content/server/reusable/md/ctl_common_service_subcommands.md" >}}
 
 {{< warning >}}
 
