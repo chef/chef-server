@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.7.5 -->
-## [15.7.5](https://github.com/chef/chef-server/tree/15.7.5) (2023-08-28)
+<!-- latest_release 15.7.6 -->
+## [15.7.6](https://github.com/chef/chef-server/tree/15.7.6) (2023-09-19)
 
 #### Merged Pull Requests
-- fix link in docs [#3506](https://github.com/chef/chef-server/pull/3506) ([IanMadd](https://github.com/IanMadd))
+- Bump loofah from 2.19.0 to 2.19.1 in /src/oc-id [#3553](https://github.com/chef/chef-server/pull/3553) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.7.0 -->
 ### Changes since 15.7.0 release
 
 #### Merged Pull Requests
+- Bump loofah from 2.19.0 to 2.19.1 in /src/oc-id [#3553](https://github.com/chef/chef-server/pull/3553) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.7.6 -->
 - fix link in docs [#3506](https://github.com/chef/chef-server/pull/3506) ([IanMadd](https://github.com/IanMadd)) <!-- 15.7.5 -->
 - CHEF-4514 Reorganize reusable text files in docs [#3692](https://github.com/chef/chef-server/pull/3692) ([IanMadd](https://github.com/IanMadd)) <!-- 15.7.4 -->
 - CHEF-3465 Replace download links [#3683](https://github.com/chef/chef-server/pull/3683) ([IanMadd](https://github.com/IanMadd)) <!-- 15.7.3 -->
