@@ -46,7 +46,7 @@ GEM
       activesupport (= 6.1.4.6)
     activerecord (6.1.4.7)
       activemodel (= 6.1.4.7)
-      activesupport (= 6.1.4.6)
+      activesupport (= 6.1.4.7)
     activestorage (6.1.4.7)
       actionpack (= 6.1.4.7)
       activejob (= 6.1.4.7)
