@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.7.7 -->
-## [15.7.7](https://github.com/chef/chef-server/tree/15.7.7) (2023-09-22)
+<!-- latest_release 15.7.8 -->
+## [15.7.8](https://github.com/chef/chef-server/tree/15.7.8) (2023-09-22)
 
 #### Merged Pull Requests
-- Bump omnibus-software from `67a1705` to `c44dea9` in /omnibus [#3710](https://github.com/chef/chef-server/pull/3710) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump rack from 2.2.6.2 to 2.2.6.4 in /omnibus [#3627](https://github.com/chef/chef-server/pull/3627) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.7.0 -->
 ### Changes since 15.7.0 release
 
 #### Merged Pull Requests
+- Bump rack from 2.2.6.2 to 2.2.6.4 in /omnibus [#3627](https://github.com/chef/chef-server/pull/3627) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.7.8 -->
 - Bump omnibus-software from `67a1705` to `c44dea9` in /omnibus [#3710](https://github.com/chef/chef-server/pull/3710) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.7.7 -->
 - Bump loofah from 2.19.0 to 2.19.1 in /src/oc-id [#3553](https://github.com/chef/chef-server/pull/3553) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.7.6 -->
 - fix link in docs [#3506](https://github.com/chef/chef-server/pull/3506) ([IanMadd](https://github.com/IanMadd)) <!-- 15.7.5 -->
