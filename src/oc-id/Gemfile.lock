@@ -375,6 +375,8 @@ GEM
     psych (4.0.3)
       stringio
     public_suffix (5.0.0)
+    puma (6.2.1)
+      nio4r (~> 2.0)
     racc (1.6.2)
     rack (2.2.6.2)
     rack-protection (3.0.4)
@@ -541,6 +543,8 @@ GEM
     turbolinks-source (5.2.0)
     tzinfo (2.0.5)
       concurrent-ruby (~> 1.0)
+    tzinfo-data (1.2023.2)
+      tzinfo (>= 1.0.0)
     uglifier (4.2.0)
       execjs (>= 0.3.0, < 3)
     unicode-display_width (2.1.0)
@@ -608,6 +612,7 @@ DEPENDENCIES
   omniauth-chef (~> 0.4)
   pg (>= 0.18, < 2.0)
   pry-byebug
+  puma
   rails (~> 6.1.4)
   rails-controller-testing
   rb-readline (~> 0.5.2)
@@ -623,6 +628,7 @@ DEPENDENCIES
   thor (~> 1.2)
   timecop
   turbolinks (~> 5)
+  tzinfo-data
   uglifier (~> 4.2)
   unicorn-rails (~> 2.2, >= 2.2.1)
   veil (~> 0.3.11)

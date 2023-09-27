@@ -13,10 +13,10 @@ PASS="{{member.cfg.superuser_password}}"
     {{/if}}
   {{/eachAlive}}
 {{else}}
-HOST="{{cfg.postgresql.vip}}"
-PORT="{{cfg.postgresql.port}}"
-USER="{{cfg.sql_user}}"
-PASS="{{cfg.sql_password}}"
+HOST="{{cfg.db.host}}"
+PORT="{{cfg.db.port}}"
+USER="{{cfg.db.user}}"
+PASS="{{cfg.db.password}}"
 {{/if}}
 DB="{{cfg.db.name}}"
 

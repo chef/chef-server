@@ -3,8 +3,8 @@ secret_key_base="_will_get_updated_dynamically_"
 rails_env="production"
 
 [db]
-host="localhost"
+host="192.168.0.105"
 port=5432
-user="oc_id"
-password=""
+user="rpaul"
+password="123456"
 name="oc_id"
