@@ -10,7 +10,7 @@ add_command_under_category "oc-id-show-app", "Secrets Management", "Show configu
 
   rails_script = <<EOF
 app = Doorkeeper::Application.find_by(:name => "#{app_name}");
-puts app.to_json
+puts app.attributes.to_json
 EOF
 
   env_helper = "veil-env-helper --use-file -f /etc/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/private-#{ChefUtils::Dist::Infra::SHORT}-secrets.json -s chef-server.webui_key -s oc_id.sql_password -s oc_id.secret_key_base"
