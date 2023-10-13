@@ -14,8 +14,8 @@ builder-to-testers-map:
     - el-8-x86_64
   el-9-x86_64:
     - el-9-x86_64
-  rocky-8-x86_64:
-    - rocky-8-x86_64
+  rocky-8-x86_64_disableSE:
+    - rocky-8-x86_64_disableSE
   sles-12-x86_64:
     - sles-12-x86_64
     - sles-15-x86_64
