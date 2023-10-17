@@ -1,29 +1,27 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.8.0 -->
-## [15.8.0](https://github.com/chef/chef-server/tree/15.8.0) (2023-09-29)
-
-#### Merged Pull Requests
-- Uplift oc-id to use ruby 3.0.1 and rails 7.0.4  [#3674](https://github.com/chef/chef-server/pull/3674) ([RoyShravani](https://github.com/RoyShravani))
+<!-- latest_release -->
 <!-- latest_release -->
 
-<!-- release_rollup since=15.7.0 -->
-### Changes since 15.7.0 release
-
-#### Merged Pull Requests
-- Uplift oc-id to use ruby 3.0.1 and rails 7.0.4  [#3674](https://github.com/chef/chef-server/pull/3674) ([RoyShravani](https://github.com/RoyShravani)) <!-- 15.8.0 -->
-- upgraded activestorage version from  6.1.4.6 to  6.1.4.7 [#3709](https://github.com/chef/chef-server/pull/3709) ([talktovikas](https://github.com/talktovikas)) <!-- 15.7.9 -->
-- Bump rack from 2.2.6.2 to 2.2.6.4 in /omnibus [#3627](https://github.com/chef/chef-server/pull/3627) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.7.8 -->
-- Bump omnibus-software from `67a1705` to `c44dea9` in /omnibus [#3710](https://github.com/chef/chef-server/pull/3710) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.7.7 -->
-- Bump loofah from 2.19.0 to 2.19.1 in /src/oc-id [#3553](https://github.com/chef/chef-server/pull/3553) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.7.6 -->
-- fix link in docs [#3506](https://github.com/chef/chef-server/pull/3506) ([IanMadd](https://github.com/IanMadd)) <!-- 15.7.5 -->
-- CHEF-4514 Reorganize reusable text files in docs [#3692](https://github.com/chef/chef-server/pull/3692) ([IanMadd](https://github.com/IanMadd)) <!-- 15.7.4 -->
-- CHEF-3465 Replace download links [#3683](https://github.com/chef/chef-server/pull/3683) ([IanMadd](https://github.com/IanMadd)) <!-- 15.7.3 -->
-- Docs update [#3676](https://github.com/chef/chef-server/pull/3676) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit)) <!-- 15.7.2 -->
-- Update supported platforms page [#3675](https://github.com/chef/chef-server/pull/3675) ([IanMadd](https://github.com/IanMadd)) <!-- 15.7.1 -->
+<!-- release_rollup -->
 <!-- release_rollup -->
 
 <!-- latest_stable_release -->
+## [15.8.0](https://github.com/chef/chef-server/tree/15.8.0) (2023-10-05)
+
+#### Merged Pull Requests
+- Update supported platforms page [#3675](https://github.com/chef/chef-server/pull/3675) ([IanMadd](https://github.com/IanMadd))
+- Docs update [#3676](https://github.com/chef/chef-server/pull/3676) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
+- CHEF-3465 Replace download links [#3683](https://github.com/chef/chef-server/pull/3683) ([IanMadd](https://github.com/IanMadd))
+- CHEF-4514 Reorganize reusable text files in docs [#3692](https://github.com/chef/chef-server/pull/3692) ([IanMadd](https://github.com/IanMadd))
+- fix link in docs [#3506](https://github.com/chef/chef-server/pull/3506) ([IanMadd](https://github.com/IanMadd))
+- Bump loofah from 2.19.0 to 2.19.1 in /src/oc-id [#3553](https://github.com/chef/chef-server/pull/3553) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump omnibus-software from `67a1705` to `c44dea9` in /omnibus [#3710](https://github.com/chef/chef-server/pull/3710) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump rack from 2.2.6.2 to 2.2.6.4 in /omnibus [#3627](https://github.com/chef/chef-server/pull/3627) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- upgraded activestorage version from  6.1.4.6 to  6.1.4.7 [#3709](https://github.com/chef/chef-server/pull/3709) ([talktovikas](https://github.com/talktovikas))
+- Uplift oc-id to use ruby 3.0.1 and rails 7.0.4  [#3674](https://github.com/chef/chef-server/pull/3674) ([RoyShravani](https://github.com/RoyShravani))
+<!-- latest_stable_release -->
+
 ## [15.7.0](https://github.com/chef/chef-server/tree/15.7.0) (2023-06-14)
 
 #### Merged Pull Requests
@@ -38,7 +36,6 @@
 - Add el-9 builder and tester to the pipelines [#3661](https://github.com/chef/chef-server/pull/3661) ([PrajaktaPurohit](https://github.com/PrajaktaPurohit))
 - Updated license scout issues [#3666](https://github.com/chef/chef-server/pull/3666) ([jashaik](https://github.com/jashaik))
 - Setting file and template backup to false for the config files [#3659](https://github.com/chef/chef-server/pull/3659) ([vinay-satish](https://github.com/vinay-satish))
-<!-- latest_stable_release -->
 
 ## [15.6.2](https://github.com/chef/chef-server/tree/15.6.2) (2023-03-17)
 
