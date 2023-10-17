@@ -93,7 +93,10 @@ template "/etc/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/logrotate.d/redis_lb" do
   owner 'root'
   group 'root'
   mode '0644'
-  variables(redis.to_hash)
+  variables(redis.to_hash.merge(
+    'owner' => OmnibusHelper.new(node).ownership['owner'],
+    'group' => OmnibusHelper.new(node).ownership['group']
+  ))
 end
 
 #
