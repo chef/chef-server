@@ -1108,6 +1108,18 @@ This configuration file has the following settings for `oc-id`:
 
 :   The virtual IP address. Default value: `'127.0.0.1'`.
 
+`oc_id['gtm_id']`
+
+:   The Google Tag Manager's container ID. Default value: `nil`.
+
+`oc_id['enable_gtm']`
+
+:   The Google Tag Manager's feature flag. Default value: `false`. Set to `true` to enable Google tag manager.
+
+`oc_id['enable_onetrust']`
+
+:   The Onetrust's feature flag. Default value: `false`. Set to `true` to enable Onetrust cookie consent verification.
+
 ### opscode-chef-mover
 
 This configuration file has the following settings for
