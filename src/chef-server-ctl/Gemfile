@@ -3,4 +3,5 @@ source "https://rubygems.org"
 gemspec
 
 gem "chef", "~> 17.10"
+gem "knife", "~> 17.10.0"
 gem "toml" # for habitat-land
