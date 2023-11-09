@@ -1,0 +1,41 @@
+<% if ENV['GTM_ID'] %>
+  <!-- Google Tag Manager conditional -->
+  <%= javascript_tag nonce: content_security_policy_nonce do %>
+    var oneTrustHelper = (function () {
+      function evalGTMScript() {
+          var gtmScript = document.getElementById("GTMScript");
+          gtmScript.type = "text/javascript";
+          gtmScript.classList.remove("optanon-category-1");
+          eval(gtmScript.innerHTML);
+      };
+
+      return {
+        gtmFallback: function () {
+          console.warn('OneTrust not loaded.');
+          if (document.readyState !== 'loading') {
+            evalGTMScript();
+          } else {
+            document.addEventListener('readystatechange', function () {
+              if (document.readyState === 'interactive') {
+                evalGTMScript();
+                }
+            });
+          };
+        }
+      };
+    })();
+  <% end %>
+
+  <!-- Onetrust Script -->
+  <script async src="https://cdn.cookielaw.org/consent/e231efa5-3ed9-4b92-96bc-f4c0872ca486/otSDKStub.js"  type="text/javascript" charset="UTF-8" data-domain-script="e231efa5-3ed9-4b92-96bc-f4c0872ca486" onerror="oneTrustHelper.gtmFallback()"></script>
+
+  <!-- Google Tag Manager Script -->
+  <%= javascript_tag nonce: content_security_policy_nonce, id: "GTMScript", class: "optanon-category-1" do %>
+    (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','<%= ENV['GTM_ID'] %>');
+  <% end %>
+  <!-- End Google Tag Manager -->
+<% end %>
