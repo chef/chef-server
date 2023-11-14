@@ -7,12 +7,10 @@
   <%= stylesheet_link_tag "application", media: "all" %>
   <%= javascript_include_tag '//cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.min.js' %>
   <%= csrf_meta_tags %>
-  <% if enable_gtm_and_onetrust? %>
-    <%= render 'application/analytics' %>
-  <% end %>
+  <%= render 'application/analytics' %>
 </head>
 <body>
-  <% if enable_gtm_and_onetrust? && ENV['GTM_ID'] %>
+  <% if gtm_enabled? && ENV['GTM_ID'] %>
     <!-- Google Tag Manager (noscript) -->
     <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-WLLWWV53" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <!-- End Google Tag Manager (noscript) -->
