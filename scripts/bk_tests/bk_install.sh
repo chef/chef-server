@@ -26,7 +26,7 @@ echo "Removing packages.microsoft.com"
 rm /etc/apt/sources.list.d/microsoft-prod.list
 
 echo  "Installing test dependencies"
-apt-get update -y
+#apt-get update -y
 apt-get install -y lua5.1 luarocks postgresql-13 libsqlite3-dev
 
 echo "Configuring postgresql"
