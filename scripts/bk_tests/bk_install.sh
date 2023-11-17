@@ -27,8 +27,9 @@ rm /etc/apt/sources.list.d/microsoft-prod.list
 
 echo  "Installing test dependencies"
 # echo "deb https://apt-archive.postgresql.org/pub/repos/apt bionic-pgdg main" | sudo tee -a /etc/apt/sources.list
-apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 8881B2A8210976F2
+#apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 8881B2A8210976F2
 add-apt-repository "deb https://apt-archive.postgresql.org/pub/repos/apt $(lsb_release -s -c) main"
+apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 8881B2A8210976F2
 apt-get update -y
 apt-get install -y lua5.1 luarocks postgresql-13 libsqlite3-dev
 
