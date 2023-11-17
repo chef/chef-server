@@ -31,10 +31,10 @@ build do
     env = with_standard_compiler_flags(with_embedded_path)
 
     # The --without groups here MUST match groups in https://github.com/chef/chef/blob/main/Gemfile
-    excluded_groups = %w{docgen chefstyle}
-    excluded_groups << "ruby_prof" if aix?
-    excluded_groups << "ruby_shadow" if aix?
-    excluded_groups << "ed25519" if solaris2?
+    # excluded_groups = %w{docgen chefstyle}
+    # excluded_groups << "ruby_prof" if aix?
+    # excluded_groups << "ruby_shadow" if aix?
+    # excluded_groups << "ed25519" if solaris2?
 
     v_opts = "--version '#{version}'" unless version.nil?
     gem [
@@ -45,5 +45,5 @@ build do
   
     # confirm the install was successful
     command "knife --version", env: env
-    appbundle "knife", lockdir: project_dir, gem: "knife", without: excluded_groups, env: env
+    appbundle "knife", lockdir: project_dir, gem: "knife", env: env
 end
