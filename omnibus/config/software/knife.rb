@@ -33,7 +33,7 @@ build do
     gem [
       "install knife",
       v_opts,
-      " --bindir '#{install_dir}/bin'"
+      " --bindir '#{install_dir}/bin'",
       "--force",
     ].compact.join(" "), env: env
   
