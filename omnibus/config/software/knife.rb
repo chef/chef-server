@@ -33,10 +33,9 @@ build do
     gem [
       "install knife",
       v_opts,
-      " --bindir '#{install_dir}/bin'",
-      "--force",
     ].compact.join(" "), env: env
   
     # confirm the install was successful
     command "knife --version", env: env
+    copy "#{install_dir}/embedded/bin/knife" "#{install_dir}/bin"
 end
