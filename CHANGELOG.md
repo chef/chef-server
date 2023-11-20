@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.8.1 -->
-## [15.8.1](https://github.com/chef/chef-server/tree/15.8.1) (2023-10-17)
+<!-- latest_release 15.8.2 -->
+## [15.8.2](https://github.com/chef/chef-server/tree/15.8.2) (2023-11-20)
 
 #### Merged Pull Requests
-- Fixes redis-lb logrotate file creation ownership [#3697](https://github.com/chef/chef-server/pull/3697) ([fretb](https://github.com/fretb))
+- Fix verify pipeline: The repository... does not have a Release file. [#3740](https://github.com/chef/chef-server/pull/3740) ([lbakerchef](https://github.com/lbakerchef))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.8.0 -->
 ### Changes since 15.8.0 release
 
 #### Merged Pull Requests
+- Fix verify pipeline: The repository... does not have a Release file. [#3740](https://github.com/chef/chef-server/pull/3740) ([lbakerchef](https://github.com/lbakerchef)) <!-- 15.8.2 -->
 - Fixes redis-lb logrotate file creation ownership [#3697](https://github.com/chef/chef-server/pull/3697) ([fretb](https://github.com/fretb)) <!-- 15.8.1 -->
 <!-- release_rollup -->
 
