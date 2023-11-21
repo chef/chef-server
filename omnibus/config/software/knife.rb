@@ -33,6 +33,7 @@ build do
     gem [
       "install knife",
       v_opts,
+      "--no-document",
     ].compact.join(" "), env: env
   
     # confirm the install was successful
