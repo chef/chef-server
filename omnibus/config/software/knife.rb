@@ -38,5 +38,5 @@ build do
   
     # confirm the install was successful
     command "knife --version", env: env
-    copy "#{install_dir}/embedded/bin/knife" "#{install_dir}/bin"
+    copy "#{install_dir}/embedded/bin/knife", "#{install_dir}/bin"
 end
