@@ -10,6 +10,12 @@ builder-to-testers-map:
   el-7-x86_64:
     - el-7-x86_64
     - amazon-2-x86_64
+  el-8-x86_64:
+    - el-8-x86_64
+  el-9-x86_64:
+    - el-9-x86_64
+  rocky-8-x86_64_disableSE:
+    - rocky-8-x86_64_disableSE
   sles-12-x86_64:
     - sles-12-x86_64
     - sles-15-x86_64
@@ -18,7 +24,3 @@ builder-to-testers-map:
     - ubuntu-18.04-x86_64
     - ubuntu-20.04-x86_64
     - ubuntu-22.04-x86_64
-  el-8-x86_64:
-    - el-8-x86_64
-  el-9-x86_64:
-    - el-9-x86_64
