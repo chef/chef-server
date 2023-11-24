@@ -7,6 +7,6 @@ module ZendesksHelper
   end
 
   def zendesk_sso_url(user, return_to = nil)
-    ZendeskSSOURL.new(user, return_to, Settings.zendesk).to_s
+    ZendeskSsoUrl.new(user, return_to, Settings.zendesk).to_s
   end
 end
