@@ -6,7 +6,7 @@ pkg_deps=(
   core/sqitch_pg
   core/curl
   core/node
-  core/ruby27
+  core/ruby30
   core/rsync
   core/sed
   core/libffi
