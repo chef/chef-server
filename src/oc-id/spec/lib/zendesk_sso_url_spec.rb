@@ -2,7 +2,7 @@ require 'cgi'
 require 'uri'
 require 'spec_helper'
 
-describe ZendeskSSOURL do
+describe ZendeskSsoUrl do
   subject(:zendesk_sso_url) { described_class.new(user, return_to, settings) }
   let(:user) { double(email: 'test@test.com', first_name: 'Testy', last_name: 'Tester') }
   let(:return_to) { 'test/return/to' }
