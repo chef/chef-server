@@ -49,7 +49,7 @@ action_class do
                       rails_script = <<~EOF
                               app = Doorkeeper::Application.find_or_create_by(:name => "#{new_resource.name}");
                               app.update(:redirect_uri => "#{new_resource.redirect_uri}");
-                              puts app.to_json
+                              puts app.attributes.to_json
                             EOF
                       # in order to account for rails logging, we take only the last line of output
                       # from the rails runner script. if the logging is parsed as json, we end up

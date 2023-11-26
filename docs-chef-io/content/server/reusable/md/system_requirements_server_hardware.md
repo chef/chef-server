@@ -26,4 +26,4 @@ For a high availability deployment:
 - Three backend servers; as many frontend servers as required
 - 1 x GigE NIC interface (if on premises)
 
-{{ readFile "layouts/shortcodes/chef-server/system_requirements_ha.md" | markdownify }}
+{{< readfile file="content/server/reusable/md/system_requirements_ha.md" >}}

@@ -19,7 +19,7 @@ column) are open and accessible using any firewalls that are in use:
 <tr>
 <td><p>80, 443, 9683</p></td>
 <td><p><strong>nginx</strong></p>
-<p>{{ readFile "layouts/shortcodes/chef-server/server_services_nginx.md" | markdownify }}</p>
+<p>{{< readfile file="content/server/reusable/md/server_services_nginx.md" >}}</p>
 <div class="admonition-note">
 <p class="admonition-note-title">Note</p>
 <div class="admonition-note-text"><p>Port 9683 is used to internally load balance the <strong>oc_bifrost</strong> service.</p>
@@ -31,37 +31,37 @@ column) are open and accessible using any firewalls that are in use:
 <tr>
 <td><p>9463</p></td>
 <td><p><strong>oc_bifrost</strong></p>
-<p>{{ readFile "layouts/shortcodes/chef-server/server_services_bifrost.md" | markdownify }}</p></td>
+<p>{{< readfile file="content/server/reusable/md/server_services_bifrost.md" >}}</p></td>
 <td></td>
 </tr>
 <tr>
 <td><p>9200</p></td>
 <td><p><strong>elasticsearch</strong></p>
-<p>{{ readFile "layouts/shortcodes/chef-server/server_services_elasticsearch.md" | markdownify }}</p></td>
+<p>{{< readfile file="content/server/reusable/md/server_services_elasticsearch.md" >}}</p></td>
 <td></td>
 </tr>
 <tr>
 <td><p>5432</p></td>
 <td><p><strong>postgresql</strong></p>
-<p>{{ readFile "layouts/shortcodes/chef-server/server_services_postgresql.md" | markdownify }}</p></td>
+<p>{{< readfile file="content/server/reusable/md/server_services_postgresql.md" >}}</p></td>
 <td></td>
 </tr>
 <tr>
 <td><p>16379</p></td>
 <td><p><strong>redis_lb</strong></p>
-<p>{{ readFile "layouts/shortcodes/chef-server/server_services_redis.md" | markdownify }}</p></td>
+<p>{{< readfile file="content/server/reusable/md/server_services_redis.md" >}}</p></td>
 <td></td>
 </tr>
 <tr>
 <td><p>4321</p></td>
 <td><p><strong>bookshelf</strong></p>
-<p>{{ readFile "layouts/shortcodes/chef-server/server_services_bookshelf.md" | markdownify }}</p></td>
+<p>{{< readfile file="content/server/reusable/md/server_services_bookshelf.md" >}}</p></td>
 <td></td>
 </tr>
 <tr>
 <td><p>8000</p></td>
 <td><p><strong>opscode-erchef</strong></p>
-<p>{{ readFile "layouts/shortcodes/chef-server/server_services_erchef.md" | markdownify }}</p></td>
+<p>{{< readfile file="content/server/reusable/md/server_services_erchef.md" >}}</p></td>
 <td></td>
 </tr>
 </tbody>

@@ -20,7 +20,7 @@ for installation instructions.
 
 ## Platforms
 
-{{% chef-server/adopted_platforms_server %}}
+{{< readfile file="content/server/reusable/md/adopted_platforms_server.md" >}}
 
 ### Untested Platforms
 
@@ -38,11 +38,11 @@ how to choose the right topology for the Chef Infra Server.
 
 ## Hardware Requirements
 
-{{% chef-server/system_requirements_server_hardware %}}
+{{< readfile file="content/server/reusable/md/system_requirements_server_hardware.md" >}}
 
 ## Software Requirements
 
-{{% chef-server/system_requirements_server_software %}}
+{{< readfile file="content/server/reusable/md/system_requirements_server_software.md" >}}
 
 ### UIDs and GIDs
 
@@ -497,7 +497,7 @@ The following group accounts are required:
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>opscode</code></td>
 <td>The group name under which services will run.</td>
 </tr>
@@ -520,11 +520,11 @@ The following user accounts are required:
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>opscode</code></td>
 <td>The user name under which services will run.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>opscode-pgsql</code></td>
 <td>The user name for PostgreSQL. (This is only required on the back end servers in a high availability setup.)</td>
 </tr>

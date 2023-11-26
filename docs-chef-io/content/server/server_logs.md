@@ -40,7 +40,7 @@ which log files will be viewed.
 
 ### tail Log Files
 
-{{% chef-server/ctl_chef_server_tail %}}
+{{< readfile file="content/server/reusable/md/ctl_chef_server_tail.md" >}}
 
 Another common approach to tailing the log files for a service is to use
 the system utility `tail`. For example:
@@ -159,54 +159,54 @@ require external log rotation.
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>/var/log/opscode/nginx/access.log</code></td>
 <td>The Web UI and API HTTP access logs.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>/var/log/opscode/nginx/error.log</code></td>
 <td>The Web UI and API HTTP error logs.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>/var/log/opscode/nginx/internal-account.access.log</code></td>
 <td>The <code>opscode-account</code> internal load-balancer access logs.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>/var/log/opscode/nginx/internal-account.error.log</code></td>
 <td>The <code>opscode-account</code> internal load-balancer error logs.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>/var/log/opscode/nginx/internal-authz.access.log</code></td>
 <td>The <code>opscode-authz</code> internal load-balancer access logs.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>/var/log/opscode/nginx/internal-authz.error.log</code></td>
 <td>The <code>opscode-authz</code> internal load-balancer error logs.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>/var/log/opscode/nginx/internal-chef.access.log</code></td>
 <td>The <code>opscode-chef</code> and <code>opscode-erchef</code> internal load-balancer access logs.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>/var/log/opscode/nginx/internal-chef.error.log</code></td>
 <td>The <code>opscode-chef</code> and <code>opscode-erchef</code> internal load-balancer error logs.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>/var/log/opscode/nginx/nagios.access.log</code></td>
 <td>The <code>nagios</code> access logs.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>/var/log/opscode/nginx/nagios.error.log</code></td>
 <td>The <code>nagios</code> error logs.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>/var/log/opscode/nginx/rewrite-port-80.log</code></td>
 <td>The rewrite logs for traffic that uses HTTP instead of HTTPS.</td>
 </tr>
 </tbody>
 </table>
 
-{{% chef-server/server_services_nginx_tail %}}
+{{< readfile file="content/server/reusable/md/server_services_nginx_tail.md" >}}
 
 #### Read Log Files
 
@@ -251,75 +251,75 @@ Field descriptions:
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>$remote_addr</code></td>
 <td>The IP address of the client who made this request.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>$remote_user</code></td>
 <td>The HTTP basic auth user name of this request.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>$time_local</code></td>
 <td>The local time of the request.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>$request</code></td>
 <td>The HTTP request.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>$status</code></td>
 <td>The HTTP status code.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>$request_time</code></td>
 <td>The time it took to service the request.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>$body_bytes_sent</code></td>
 <td>The number of bytes in the HTTP response body.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>$http_referrer</code></td>
 <td>The HTTP referrer.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>$http_user_agent</code></td>
 <td>The user agent of the requesting client.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>$upstream_addr</code></td>
 <td>The upstream reverse proxy used to service this request.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>$upstream_status</code></td>
 <td>The upstream reverse proxy response status code.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>$upstream_response_time</code></td>
 <td>The upstream reverse proxy response time.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>$http_x_chef_version</code></td>
 <td>The version of Chef used to make this request.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>$http_x_ops_sign</code></td>
 <td>The version of the authentication protocol.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>$http_x_ops_userid</code></td>
 <td>The client name that was used to sign this request.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>$http_x_ops_timestamp</code></td>
 <td>The timestamp from when this request was signed.</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>$http_x_ops_content_hash</code></td>
 <td>The hash of the contents of this request.</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>$request_length</code></td>
 <td>The length of this request.</td>
 </tr>
