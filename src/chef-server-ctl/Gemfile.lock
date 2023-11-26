@@ -297,7 +297,7 @@ GEM
     public_suffix (5.0.0)
     rack (2.2.6.4)
     rainbow (3.1.1)
-    rake (13.0.6)
+    rake (13.1.0)
     redis (4.7.1)
     regexp_parser (2.2.1)
     rest-client (2.1.0)
