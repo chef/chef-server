@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 16.0.0 -->
-## [16.0.0](https://github.com/chef/chef-server/tree/16.0.0) (2023-11-26)
+<!-- latest_release 15.9.10 -->
+## [15.9.10](https://github.com/chef/chef-server/tree/15.9.10) (2023-11-27)
 
 #### Merged Pull Requests
-- Bump capybara from 3.38.0 to 3.39.2 in /src/oc-id [#3711](https://github.com/chef/chef-server/pull/3711) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump selenium-webdriver from 4.7.1 to 4.12.0 in /src/oc-id [#3700](https://github.com/chef/chef-server/pull/3700) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.8.0 -->
 ### Changes since 15.8.0 release
 
 #### Merged Pull Requests
+- Bump selenium-webdriver from 4.7.1 to 4.12.0 in /src/oc-id [#3700](https://github.com/chef/chef-server/pull/3700) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.9.10 -->
 - Bump capybara from 3.38.0 to 3.39.2 in /src/oc-id [#3711](https://github.com/chef/chef-server/pull/3711) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 16.0.0 -->
 - Bump activesupport from 7.0.4.2 to 7.0.8 in /oc-chef-pedant [#3702](https://github.com/chef/chef-server/pull/3702) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.9.9 -->
 - Bump mixlib-install from 3.12.27 to 3.12.28 in /src/chef-server-ctl [#3723](https://github.com/chef/chef-server/pull/3723) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.9.8 -->
