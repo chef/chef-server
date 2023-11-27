@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.9.10 -->
-## [15.9.10](https://github.com/chef/chef-server/tree/15.9.10) (2023-11-27)
+<!-- latest_release 15.9.11 -->
+## [15.9.11](https://github.com/chef/chef-server/tree/15.9.11) (2023-11-27)
 
 #### Merged Pull Requests
-- Bump selenium-webdriver from 4.7.1 to 4.12.0 in /src/oc-id [#3700](https://github.com/chef/chef-server/pull/3700) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump activesupport from 7.0.4.1 to 7.0.8 in /src/oc_bifrost/oc-bifrost-pedant [#3699](https://github.com/chef/chef-server/pull/3699) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.8.0 -->
 ### Changes since 15.8.0 release
 
 #### Merged Pull Requests
+- Bump activesupport from 7.0.4.1 to 7.0.8 in /src/oc_bifrost/oc-bifrost-pedant [#3699](https://github.com/chef/chef-server/pull/3699) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.9.11 -->
 - Bump selenium-webdriver from 4.7.1 to 4.12.0 in /src/oc-id [#3700](https://github.com/chef/chef-server/pull/3700) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.9.10 -->
 - Bump capybara from 3.38.0 to 3.39.2 in /src/oc-id [#3711](https://github.com/chef/chef-server/pull/3711) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 16.0.0 -->
 - Bump activesupport from 7.0.4.2 to 7.0.8 in /oc-chef-pedant [#3702](https://github.com/chef/chef-server/pull/3702) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.9.9 -->
