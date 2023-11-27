@@ -19,10 +19,15 @@ PATH
 GEM
   remote: https://rubygems.org/
   specs:
-    activesupport (7.0.8)
+    activesupport (7.1.2)
+      base64
+      bigdecimal
       concurrent-ruby (~> 1.0, >= 1.0.2)
+      connection_pool (>= 2.2.5)
+      drb
       i18n (>= 1.6, < 2)
       minitest (>= 5.1)
+      mutex_m
       tzinfo (~> 2.0)
     addressable (2.8.1)
       public_suffix (>= 2.0.2, < 6.0)
@@ -45,6 +50,8 @@ GEM
       aws-sigv4 (~> 1.1)
     aws-sigv4 (1.4.0)
       aws-eventstream (~> 1, >= 1.0.2)
+    base64 (0.2.0)
+    bigdecimal (3.1.4)
     binding_of_caller (1.0.0)
       debug_inspector (>= 0.0.1)
     builder (3.2.4)
@@ -102,12 +109,15 @@ GEM
       webrick
     coderay (1.1.3)
     concurrent-ruby (1.2.2)
+    connection_pool (2.4.1)
     corefoundation (0.3.13)
       ffi (>= 1.15.0)
     debug_inspector (1.1.0)
     diff-lcs (1.5.0)
     domain_name (0.5.20190701)
       unf (>= 0.0.5, < 1.0.0)
+    drb (2.2.0)
+      ruby2_keywords
     erubi (1.10.0)
     erubis (2.7.0)
     faraday (1.4.3)
@@ -195,6 +205,7 @@ GEM
       chef-utils
     multi_json (1.15.0)
     multipart-post (2.1.1)
+    mutex_m (0.2.0)
     net-http-spy (0.2.1)
     net-scp (3.0.0)
       net-ssh (>= 2.6.5, < 7.0.0)
