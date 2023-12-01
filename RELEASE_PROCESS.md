@@ -29,7 +29,7 @@ In order to release, you will need the following accounts/permissions:
 
 ### Upgrade Erlang Dependencies
 
-Upgrade Erlang dependencies via automated script.  
+Upgrade Erlang dependencies via automated script.
 See https://github.com/chef/chef-server/blob/main/dev-docs/FrequentTasks.md#updating-erlang-dependencies-using-rebar3 .
 
 ### Update documentation
@@ -66,7 +66,7 @@ https://www.chef.io/downloads/tools/infra-server/current
 
 #### Integration Testing
 
-Every merge to chef-server main must be built, and the various upgrade paths for the build must be tested with the full Umbrella automated integration test pipeline at https://buildkite.com/chef/chef-umbrella-main-chef-server-full (use https://buildkite.com/chef/chef-umbrella-main-chef-server for testing the 12.17.15 -> YOUR-RELEASE upgrade path).  [NOTE: Every merge to main automatically runs through adhoc, and umbrella is run nightly for all changes made that day].  The integration test run for the tag being shipped must be successful.
+Every merge to chef-server main must be built, and the various upgrade paths for the build must be tested with the full Umbrella automated integration test pipeline at https://buildkite.com/chef/chef-umbrella-main-chef-server-full (use https://buildkite.com/chef/chef-umbrella-main-chef-server for testing the 12.17.15 -> YOUR-RELEASE upgrade path). [NOTE: Every merge to main automatically runs through adhoc, and umbrella is run nightly for all changes made that day].  The integration test run for the tag being shipped must be successful.
 
 Any Chef Infra Server release 12.17.15 or later should be able to upgrade directly to the latest release of 14. The nightly builds test upgrades to the latest current artifact from 12.17.15 and 13.2.0.  Releases prior to 12.17.15 must perform a stepped upgrade.  See: https://docs.chef.io/server/upgrades/#upgrade-matrix
 
@@ -249,10 +249,10 @@ https://expeditor.chef.io/dashboard/?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.
 
 Notify the Automate team that chef server has been released, and give them the version.  Confirm that the hab packages are available for them to consume:
 
-   https://bldr.habitat.sh/#/pkgs/chef/oc_erchef/latest  
-   https://bldr.habitat.sh/#/pkgs/chef/oc_bifrost/latest  
-   https://bldr.habitat.sh/#/pkgs/chef/bookshelf/latest  
-   https://bldr.habitat.sh/#/pkgs/chef/chef-server-nginx/latest  
+   https://bldr.habitat.sh/#/pkgs/chef/oc_erchef/latest
+   https://bldr.habitat.sh/#/pkgs/chef/oc_bifrost/latest
+   https://bldr.habitat.sh/#/pkgs/chef/bookshelf/latest
+   https://bldr.habitat.sh/#/pkgs/chef/chef-server-nginx/latest
    https://bldr.habitat.sh/#/pkgs/chef/chef-server-ctl/latest
 
 Chef Infra Server is now released.
