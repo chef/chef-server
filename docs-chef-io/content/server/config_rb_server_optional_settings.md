@@ -53,6 +53,8 @@ This configuration file has the following general settings:
 
 :   Default value: `'cs'`.
 
+    Setting new in Chef Infra Server 14.
+
 `fips`
 
 :   Set to `true` to run the server in FIPS compliance mode. Set to
@@ -469,13 +471,36 @@ This configuration file has the following settings for `estatsd`:
 
     Default value: `'127.0.0.1'`.
 
+### jetty
+
+This configuration file has the following settings for `jetty`:
+
+`jetty['enable']`
+
+:   **Setting EOL in Chef Infra Server 14.**
+
+    Enable a service. This value should not be modified.
+
+    Default value: `'false'`
+
+`jetty['log_directory']`
+
+:   **Setting EOL in Chef Infra Server 14.**
+
+    The directory in which log data is stored. The default value is the
+    recommended value.
+
+    Default value: `'/var/opt/opscode/opscode-solr4/jetty/logs'`
+
 ### lb / lb_internal
 
 This configuration file has the following settings for `lb`:
 
 `lb['api_fqdn']`
 
-:   The FQDN for the Chef Infra Server. FQDNs must always be in lowercase.  Default value: `node['fqdn']`.
+:   The FQDN for the Chef Infra Server. FQDNs must always be in lowercase.
+
+    Default value: `node['fqdn']`.
 
 `lb['ban_refresh_interval']`
 
@@ -645,7 +670,188 @@ And for the internal load balancers:
 
 ### ldap
 
-{{< readfile file="content/server/reusable/md/config_rb_server_settings_ldap.md" >}}
+{{< warning >}}
+
+The following settings **MUST** be in the config file for LDAP
+authentication to Active Directory to work:
+
+- `base_dn`
+- `bind_dn`
+- `group_dn`
+- `host`
+
+If those settings are missing, you will get authentication errors and be
+unable to proceed.
+
+{{< /warning >}}
+
+This configuration file has the following settings for `ldap`:
+
+`ldap['base_dn']`
+
+:   The root LDAP node under which all other nodes exist in the
+    directory structure. For Active Directory, this is typically
+    `cn=users` and then the domain. For example:
+
+    ```ruby
+    'OU=Employees,OU=Domain users,DC=example,DC=com'
+    ```
+
+    Default value: `nil`.
+
+`ldap['bind_dn']`
+
+:   The distinguished name used to bind to the LDAP server. The user the
+    Chef Infra Server will use to perform LDAP searches. This is often
+    the administrator or manager user. This user needs to have read
+    access to all LDAP users that require authentication. The Chef Infra
+    Server must do an LDAP search before any user can log in. Many
+    Active Directory and LDAP systems do not allow an anonymous bind. If
+    anonymous bind is allowed, leave the `bind_dn` and `bind_password`
+    settings blank. If anonymous bind is not allowed, a user with `READ`
+    access to the directory is required. This user must be specified as
+    an LDAP distinguished name similar to:
+
+    ```ruby
+    'CN=user,OU=Employees,OU=Domainuser,DC=example,DC=com'
+    ```
+
+    {{< note >}}
+
+    If you need to escape characters in a distinguished name, such as
+    when using Active Directory, they must be [escaped with a backslash
+    escape character](https://social.technet.microsoft.com/wiki/contents/articles/5312.active-directory-characters-to-escape.aspx).
+
+    ```ruby
+    'CN=example\\user,OU=Employees,OU=Domainuser,DC=example,DC=com'
+    ```
+
+    {{< /note >}}
+
+    Default value: `nil`.
+
+`ldap['bind_password']`
+
+:   Deprecated. Use `chef-server-ctl set-secret ldap bind_password` from the
+    [Secrets Management](/ctl_chef_server.html#ctl-chef-server-secrets-management)
+    commands.
+
+    Legacy configuration for the password of the binding user. The
+    password for the user specified by `ldap['bind_dn']`. Leave this
+    value and `ldap['bind_dn']` unset if anonymous bind is sufficient.
+
+    Default value: `nil`.
+
+    ```bash
+    chef-server-ctl set-secret ldap bind_password
+    Enter ldap bind_password:    (no terminal output)
+    Re-enter ldap bind_password: (no terminal output)
+    ```
+
+    Remove a set password via
+
+    ```bash
+    chef-server-ctl remove-secret ldap bind_password
+    ```
+
+`ldap['group_dn']`
+
+:   The distinguished name for a group. When set to the distinguished
+    name of a group, only members of that group can log in. This feature
+    filters based on the `memberOf` attribute and only works with LDAP
+    servers that provide such an attribute. In OpenLDAP, the `memberOf`
+    overlay provides this attribute. For example, if the value of the
+    `memberOf` attribute is `CN=abcxyz,OU=users,DC=company,DC=com`, then
+    use:
+
+    ```ruby
+    ldap['group_dn'] = 'CN=abcxyz,OU=users,DC=company,DC=com'
+    ```
+
+`ldap['host']`
+
+:   The name (or IP address) of the LDAP server. The hostname of the
+    LDAP or Active Directory server. Be sure the Chef Infra Server is
+    able to resolve any host names.
+
+    Default value: `ldap-server-host`.
+
+`ldap['login_attribute']`
+
+:   The LDAP attribute that holds the user's login name. Use to specify
+    the Chef Infra Server user name for an LDAP user.
+
+    Default value: `sAMAccountName`.
+
+`ldap['port']`
+
+:   An integer that specifies the port on which the LDAP server listens.
+    The default value is an appropriate value for most configurations.
+
+    Default value: `389` or `636` when `ldap['encryption']` is set to
+    `:simple_tls`.
+
+`ldap['ssl_enabled']`
+
+:   Cause the Chef Infra Server to connect to the LDAP server using SSL.
+    Must be `false` when `ldap['tls_enabled']` is `true`.
+
+    Default value: `false`.
+
+    {{< note >}}
+
+    Enable SSL for Active Directory.
+
+    {{< /note >}}
+
+    {{< note >}}
+
+    Previous versions of Chef Infra Server used the
+    `ldap['ssl_enabled']` setting to first enable SSL, and then the
+    `ldap['encryption']` setting to specify the encryption type. These
+    settings are deprecated.
+
+    {{< /note >}}
+
+`ldap['system_adjective']`
+
+:   A descriptive name for the login system that is displayed to users
+    in the Chef Infra Server management console. If a value like
+    "corporate" is used, then the Chef management console user interface
+    will display strings like "the corporate login server", "corporate
+    login", or "corporate password."
+
+    Default value: `AD/LDAP`.
+
+    {{< warning >}}
+
+    This setting is **not** used by the Chef Infra Server. It is used
+    only by the Chef management console.
+
+    {{< /warning >}}
+
+`ldap['timeout']`
+
+:   The amount of time (in seconds) to wait before timing out.
+
+    Default value: `60000`.
+
+`ldap['tls_enabled']`
+
+:   Enable TLS. When enabled, communication with the LDAP server is done
+    via a secure SSL connection on a dedicated port. When `true`,
+    `ldap['port']` is also set to `636`. Must be `false` when `ldap['ssl_enabled']` is `true`.
+
+    Default value: `false`.
+
+    {{< note >}}
+
+    Previous versions of Chef Infra Server used the
+    `ldap['ssl_enabled']` setting to first enable SSL, and then the
+    `ldap['encryption']` setting to specify the encryption type. These
+    settings are deprecated.
+
+    {{< /note >}}
 
 ### nginx
 
@@ -748,6 +954,16 @@ Chef Infra Server versions earlier than 14.5 configured with `nginx['enable_non_
       ]
     ```
 
+`nginx['hsts_max_age']`
+
+:   Time duration in seconds till which the browser caches the `HSTS` information.
+
+    Possible values: greater than or equal to `31536000` and less than or equal to `63072000`.
+
+    Default value: `31536000` (1 year).
+
+    **New in Chef Infra Server 14.3**
+
 `nginx['keepalive_timeout']`
 
 :   The amount of time (in seconds) to wait for requests on a HTTP
@@ -776,6 +992,20 @@ Chef Infra Server versions earlier than 14.5 configured with `nginx['enable_non_
     \$remote_addr if `true`.
 
     Default value `false`.
+
+`nginx['nginx_no_root']`
+
+:   Whether the `nginx` processes, including the `master` process, should not
+    run as the `root` user on a system and will instead run as `user['username']` (defaults to `opscode`).
+    **REQUIRES** that `nginx['ssl_port']` and `nginx['non_ssl_port']` options are configured to non-privileged
+    ports greater than `1024` or that the local system is otherwise allowed to bind to privileged ports
+    with the user `user['username']`.
+
+    Possible values: `true`, `false`.
+
+    Default value: `false`.
+
+    **New in Chef Infra Server 14.10**
 
 `nginx['non_ssl_port']`
 
@@ -928,14 +1158,14 @@ Chef Infra Server versions earlier than 14.5 configured with `nginx['enable_non_
 
 :   The time format of nginx `access.log`.
 
+    **New in Chef Infra Server 14.1**
+
     Possible values:
 
     - `"time_iso8601"` (ex: [2020-10-21T07:22:00+00:00])
     - `"time_local"` (ex: [07/Jun/2018:01:05:11 +0900]).
 
     Default value: `"time_iso8601"`.
-
-    **New in Chef Infra Server 14.1**
 
 `nginx['url']`
 
@@ -978,28 +1208,6 @@ Chef Infra Server versions earlier than 14.5 configured with `nginx['enable_non_
     Possible values: `http`, `https`.
 
     Default value: `'https'`.
-
-`nginx['hsts_max_age']`
-
-:   Time duration in seconds till which the browser caches the `HSTS` information.
-
-    Possible values: greater than or equal to `31536000` and less than or equal to `63072000`.
-
-    Default value: `31536000` (1 year).
-
-`nginx['nginx_no_root']`
-
-:   Whether the `nginx` processes, including the `master` process, should not
-    run as the `root` user on a system and will instead run as `user['username']` (defaults to `opscode`).
-    **REQUIRES** that `nginx['ssl_port']` and `nginx['non_ssl_port']` options are configured to non-privileged
-    ports greater than `1024` or that the local system is otherwise allowed to bind to privileged ports
-    with the user `user['username']`.
-
-    Possible values: `true`, `false`.
-
-    Default value: `false`.
-
-    **New in Chef Infra Server 14.10*
 
 ### oc_bifrost
 
@@ -1159,6 +1367,8 @@ This configuration file has the following settings for `oc_chef_authz`:
 
     Default value: `100`.
 
+    **New in Chef Infra Client 14.11**
+
 ### oc-chef-pedant
 
 This configuration file has the following settings for `oc-chef-pedant`:
@@ -1216,7 +1426,14 @@ This configuration file has the following settings for `oc-id`:
 
     Default value: `{ }`.
 
-    {{< readfile file="content/server/reusable/md/config_ocid_application_hash_supermarket.md" >}}
+    To define OAuth 2 information for Chef Supermarket, create a Hash similar to:
+
+    ```ruby
+    oc_id['applications'] ||= {}
+    oc_id['applications']['supermarket'] = {
+    'redirect_uri' => 'https://supermarket.mycompany.com/auth/chef_oauth2/callback',
+    }
+    ```
 
 `oc_id['db_pool_size']`
 
@@ -1318,6 +1535,136 @@ This configuration file has the following settings for `oc-id`:
 
     Default value: `'127.0.0.1'`.
 
+### opscode-chef-mover
+
+This configuration file has the following settings for
+`opscode-chef-mover`:
+
+`opscode_chef_mover['bulk_fetch_batch_size']`
+
+:   **Setting EOL in Chef Infra Server 14.**
+
+    Default value: `'5'`.
+
+`opscode_chef_mover['cache_ttl']`
+
+:   **Setting EOL in Chef Infra Server 14.**
+
+    Default value: `'3600'`.
+
+`opscode_chef_mover['db_pool_size']`
+
+:   **Setting EOL in Chef Infra Server 14.**
+
+    The number of open connections to PostgreSQL that are maintained by
+    the service.
+
+    Default value: `'5'`.
+
+`opscode_chef_mover['data_dir']`
+
+:   **Setting EOL in Chef Infra Server 14.**
+
+    The directory in which on-disk data is stored. The default value is
+    the recommended value.
+
+    Default value: `'/var/opt/opscode/opscode-chef-mover/data'`
+
+`opscode_chef_mover['dir']`
+
+:   **Setting EOL in Chef Infra Server 14.**
+
+    The working directory. The default value is the recommended value.
+
+    Default value: `'/var/opt/opscode/opscode-chef-mover'`.
+
+`opscode_chef_mover['enable']`
+
+:   **Setting EOL in Chef Infra Server 14.**
+
+    Enable a service.
+
+    Default value: `true`.
+
+`opscode_chef_mover['ibrowse_max_pipeline_size']`
+
+:   **Setting EOL in Chef Infra Server 14.**
+
+    Default value: `1`.
+
+`opscode_chef_mover['ibrowse_max_sessions']`
+
+:   **Setting EOL in Chef Infra Server 14.**
+
+    Default value: `256`.
+
+`opscode_chef_mover['log_directory']`
+
+:   The directory in which log data is stored. The default value is the
+    recommended value. Default value:
+
+    ```ruby
+    '/var/log/opscode/opscode-chef-mover'
+    ```
+
+`opscode_chef_mover['log_rotation']`
+
+:   The log rotation policy for this service. Log files are rotated when
+    they exceed `file_maxbytes`. The maximum number of log files in the
+    rotation is defined by `num_to_keep`. Default value:
+
+    ```ruby
+    { 'file_maxbytes' => 104857600, 'num_to_keep' => 10 }
+    ```
+
+`opscode_chef_mover['max_cache_size']`
+
+:   **Setting EOL in Chef Infra Server 14.**
+
+    Default value: `'10000'`.
+
+`opscode_chef_mover['solr_http_cull_interval']`
+
+:   **Setting EOL in Chef Infra Server 14.**
+
+    Default value: `'{1, min}'`.
+
+`opscode_chef_mover['solr_http_init_count']`
+
+:   **Setting EOL in Chef Infra Server 14.**
+
+    Default value: `25`.
+
+`opscode_chef_mover['solr_http_max_age']`
+
+:   **Setting EOL in Chef Infra Server 14.**
+
+    Default value: `'{70, sec}'`.
+
+`opscode_chef_mover['solr_http_max_connection_duration']`
+
+:   **Setting EOL in Chef Infra Server 14.**
+
+    Default value: `'{70, sec}'`.
+
+`opscode_chef_mover['solr_http_max_count']`
+
+:   **Setting EOL in Chef Infra Server 14.**
+
+    Default value: `100`.
+
+`opscode_chef_mover['solr_ibrowse_options']`
+
+:   **Setting EOL in Chef Infra Server 14.**
+
+    Default value: `'[{connect_timeout, 10000}]'`.
+
+`opscode_chef_mover['solr_timeout']`
+
+:   **Setting EOL in Chef Infra Server 14.**
+
+    Default value: `30000`.
+
 ### opscode-erchef
 
 {{< readfile file="content/server/reusable/md/server_services_erchef.md" >}}
@@ -1367,6 +1714,32 @@ This configuration file has the following settings for `opscode-erchef`:
 `opscode_erchef['cache_ttl']`
 
 :   Default value: `3600`.
+
+`opscode_erchef['cbv_cache_enabled']`
+
+:   Whether to enable cookbook version response caching. If you frequently see
+    very long response times from `cookbook_versions` when under load, this is worth enabling.
+    Enabling this makes it possible for a client to receive stale results. When a cookbook is updated
+    in place (without incrementing the version), and the old response has not expired from the cache,
+    the Infra Server will give the old response to the client. Subsequent client runs will receive the
+    updated response.
+
+    Possible values: `true`, `false`.
+
+    Default value: `false`.
+
+    **New in Chef Infra Server 14.11**
+
+`opscode_erchef['cbv_cache_item_ttl']`
+
+:   The maximum time in milliseconds that Chef Infra Server will keep any given cookbook version response in the cache when when `cbv_cache_enabled` is enabled.
+
+    Default value: `30000`.
+
+    {{< note >}}
+    Be careful if increasing this number - requests for a given set of cookbook versions will be stale if the resolved cookbook versions are updated before the cache entry times out. This will
+    not occur if you increment the version of a cookbook with every cookbook update, which is the recommended approach to updating cookbooks.
+    {{< /note >}}
 
 `opscode_erchef['cleanup_batch_size']`
 
@@ -1437,6 +1810,8 @@ This configuration file has the following settings for `opscode-erchef`:
 :   Use to configure ibrowse logging for the `opscode_erchef` service.
 
     Default value: `false`.
+
+    **New in Chef Infra Server 14.11**
 
 `opscode_erchef["include_version_in_status"]`
 
@@ -1569,6 +1944,40 @@ This configuration file has the following settings for `opscode-erchef`:
 
     Default value: `vhost`.
 
+    **New in Chef Infra Server 15.3**
+
+`opscode_erchef['search_auth_password']`
+
+: The OpenSearch password.
+
+    Default value: `nil`.
+
+    **New in Chef Infra Server 14.14.**
+
+`opscode_erchef['search_auth_username']`
+
+: The OpenSearch username.
+
+    Default value: `opensearch_user`.
+
+    **New in Chef Infra Server 14.14.**
+
+`opscode_erchef['search_provider']`
+
+: The search index provider.
+
+    Default value: `elasticsearch`.
+
+    **New in Chef Infra Server 14.14.**
+
+`opscode_erchef['search_queue_mode']`
+
+: The search index queue mode.
+
+    Default value: `batch`.
+
+    **New in Chef Infra Server 14.14.**
+
 `opscode_erchef['sql_connection_user']`
 
 :   The PostgreSQL user name in `'username@hostname'` format (e.g.
@@ -1579,7 +1988,9 @@ This configuration file has the following settings for `opscode-erchef`:
     database-as-a-service configuration. If set to `nil`, Chef Infra
     Server assumes that the database is not on Azure and the PostgreSQL
     connection will be made using the value specified in
-    `opscode_erchef['sql_user']`.Default value: `nil`.
+    `opscode_erchef['sql_user']`.
+
+    Default value: `nil`.
 
 `opscode_erchef['strict_search_result_acls']`
 
@@ -1603,135 +2014,319 @@ This configuration file has the following settings for `opscode-erchef`:
 
     Default value: `127.0.0.1`.
 
-`opscode_erchef['cbv_cache_enabled']`
 
-:   Whether to enable cookbook version response caching. If you frequently see
-    very long response times from `cookbook_versions` when under load, this is worth enabling.
-    Enabling this makes it possible for a client to receive stale results. When a cookbook is updated
-    in place (without incrementing the version), and the old response has not expired from the cache,
-    the Infra Server will give the old response to the client. Subsequent client runs will receive the
-    updated response.
+### opscode-expander
 
-    Possible values: `true`, `false`.
+{{< readfile file="content/server/reusable/md/server_services_expander.md" >}}
 
-    Default value: `false`.
+{{< note >}}
 
-`opscode_erchef['cbv_cache_item_ttl']`
+opscode-expander settings are EOL in Chef Infra Server 14.
 
-:   The maximum time in milliseconds that Chef Infra Server will keep any given cookbook version response in the cache when when `cbv_cache_enabled` is enabled.
+{{< /note >}}
 
-    Default value: `30000`.
+This configuration file has the following settings for
+`opscode-expander`:
 
-    {{< note >}}
-    Be careful if increasing this number - requests for a given set of cookbook versions will be stale if the resolved cookbook versions are updated before the cache entry times out. This will
-    not occur if you increment the version of a cookbook with every cookbook update, which is the recommended approach to updating cookbooks.
-    {{< /note >}}
+`opscode_expander['consumer_id']`
 
-`opscode_erchef['search_queue_mode']`
+:   **Setting EOL in Chef Infra Server 14.**
 
-: The search index queue mode .
+    The identity of the consumer to which messages are published.
+    Default value: `default`.
 
-    Default value: `batch`.
+`opscode_expander['dir']`
 
-`opscode_erchef['search_provider']`
+:   **Setting EOL in Chef Infra Server 14.**
 
-: The search index provider.
+    The working directory. The default value is the recommended value.
+    Default value:
 
-    Default value: `elasticsearch`.
+    ```ruby
+    /var/opt/opscode/opscode-expander
+    ```
 
-`opscode_erchef['search_auth_username']`
+`opscode_expander['enable']`
 
-: The OpenSearch username.
+:   **Setting EOL in Chef Infra Server 14.**
 
-    Default value: `opensearch_user`.
+    Enable a service. Default value: `true`.
 
-`opscode_erchef['search_auth_password']`
+`opscode_expander['log_directory']`
 
-: The OpenSearch password.
+:   **Setting EOL in Chef Infra Server 14.**
 
+    The directory in which log data is stored. The default value is the
+    recommended value. Default value:
+
+    ```ruby
+    /var/log/opscode/opscode-expander
+    ```
+
+`opscode_expander['log_rotation']`
+
+:   **Setting EOL in Chef Infra Server 14.**
+
+    The log rotation policy for this service. Log files are rotated when
+    they exceed `file_maxbytes`. The maximum number of log files in the
+    rotation is defined by `num_to_keep`. Default value:
+
+    ```ruby
+    { 'file_maxbytes' => 104857600, 'num_to_keep' => 10 }
+    ```
+
+`opscode_expander['nodes']`
+
+:   **Setting EOL in Chef Infra Server 14.**
+
+    The number of allowed worker processes. Default value: `2`.
+
+`opscode_expander['reindexer_log_directory']`
+
+:   **Setting EOL in Chef Infra Server 14.**
+
+    The directory in which `opscode-expander-reindexer` logs files are
+    located. Default value:
+
+    ```ruby
+    /var/log/opscode/opscode-expander-reindexer
+    ```
+
+### opscode-solr4
+
+{{< readfile file="content/server/reusable/md/server_services_solr4.md" >}}
+
+{{< note >}}
+
+opscode-solr4 settings are EOL in Chef Infra Server 14.
+
+{{< /note >}}
+
+This configuration file has the following settings for `opscode-solr4`:
+
+`opscode_solr4['auto_soft_commit']`
+
+:   **Setting EOL in Chef Infra Server 14.**
+
+    The maximum number of documents before a soft commit is triggered.
+    Default value: `1000`.
+
+`opscode_solr4['commit_interval']`
+
+:   **Setting EOL in Chef Infra Server 14.**
+
+    The frequency (in seconds) at which node objects are added to the
+    Apache Solr search index. This value should be tuned carefully. When
+    data is committed to the Apache Solr index, all incoming updates are
+    blocked. If the duration between updates is too short, it is
+    possible for the rate at which updates are asked to occur to be
+    faster than the rate at which objects can be actually committed.
+    Default value: `60000` (every 60 seconds).
+
+`opscode_solr4['data_dir']`
+
+:   **Setting EOL in Chef Infra Server 14.**
+
+    The directory in which on-disk data is stored. The default value is
+    the recommended value. Default value:
+
+    ```ruby
+    /var/opt/opscode/opscode-solr4/data
+    ```
+
+`opscode_solr4['dir']`
+
+:   **Setting EOL in Chef Infra Server 14.**
+
+    The working directory. The default value is the recommended value.
+    Default value:
+
+    ```ruby
+    /var/opt/opscode/opscode-solr4
+    ```
+
+`opscode_solr4['enable']`
+
+:   **Setting EOL in Chef Infra Server 14.**
+
+    Enable a service. Default value: `true`.
+
+`opscode_solr4['heap_size']`
+
+:   **Setting EOL in Chef Infra Server 14.**
+
+    The amount of memory (in MBs) available to Apache Solr. If there is
+    not enough memory available, search queries made by nodes to Apache
+    Solr may fail. The amount of memory that must be available also
+    depends on the number of nodes in the organization, the frequency of
+    search queries, and other characteristics that are unique to each
+    organization. In general, as the number of nodes increases, so does
+    the amount of memory. The default value should work for many
+    organizations with fewer than 25 nodes. For an organization with
+    several hundred nodes, the amount of memory that is required often
+    exceeds 3GB. Default value: `nil`, which is equivalent to 25% of the
+    system memory or 1024 (MB, but this setting is specified as an
+    integer number of MB in EC11), whichever is smaller.
+
+`opscode_solr4['ip_address']`
+
+:   **Setting EOL in Chef Infra Server 14.**
+
+    The IP address for the machine on which Apache Solr is running.
+    Default value: `127.0.0.1`.
+
+`opscode_solr4['java_opts']`
+
+:   **Setting EOL in Chef Infra Server 14.**
+
+    A Hash of `JAVA_OPTS` environment variables to be set.
+    (`-XX:NewSize` is configured using the `new_size` setting.) Default
+    value: `' '` (empty).
+
+`opscode_solr4['log_directory']`
+
+:   **Setting EOL in Chef Infra Server 14.**
+
+    The directory in which log data is stored. The default value is the
+    recommended value. Default value:
+
+    ```ruby
+    /var/log/opscode/opscode-solr4
+    ```
+
+`opscode_solr4['log_gc']`
+
+:  Enable or disable GC logging. Default is `true`.
+
+`opscode_solr4['log_rotation']`
+
+:   **Setting EOL in Chef Infra Server 14.**
+
+    The log rotation policy for this service. Log files are rotated when
+    they exceed `file_maxbytes`. The maximum number of log files in the
+    rotation is defined by `num_to_keep`. Default value:
+
+    ```ruby
+    { 'file_maxbytes' => 104857600, 'num_to_keep' => 10 }
+    ```
+
+`opscode_solr4['max_commit_docs']`
+
+:   **Setting EOL in Chef Infra Server 14.**
+
+    The frequency (in documents) at which node objects are added to the
+    Apache Solr search index. This value should be tuned carefully. When
+    data is committed to the Apache Solr index, all incoming updates are
+    blocked. If the duration between updates is too short, it is
+    possible for the rate at which updates are asked to occur to be
+    faster than the rate at which objects can be actually committed.
+    Default value: `1000` (every 1000 documents).
+
+`opscode_solr4['max_field_length']`
+
+:   **Setting EOL in Chef Infra Server 14.**
+
+    The maximum field length (in number of tokens/terms). If a field
+    length exceeds this value, Apache Solr may not be able to complete
+    building the index. Default value: `100000` (increased from the
+    Apache Solr default value of `10000`).
+
+`opscode_solr4['max_merge_docs']`
+
+:   **Setting EOL in Chef Infra Server 14.**
+
+    The maximum number of index segments allowed before they are merged
+    into a single index. Default value: `2147483647`.
+
+`opscode_solr4['merge_factor']`
+
+:   **Setting EOL in Chef Infra Server 14.**
+
+    The maximum number of document updates that can be stored in memory
+    before being flushed and added to the current index segment. Default
+    value: `15`.
+
+`opscode_solr4['new_size']`
+
+:   **Setting EOL in Chef Infra Server 14.**
+
+    Configure the `-XX:NewSize` `JAVA_OPTS` environment variable.
     Default value: `nil`.
+
+`opscode_solr4['poll_seconds']`
+
+:   **Setting EOL in Chef Infra Server 14.**
+
+    The frequency (in seconds) at which the secondary machine polls the
+    primary. Default value: `20`.
+
+`opscode_solr4['port']`
+
+:   **Setting EOL in Chef Infra Server 14.**
+
+    The port on which the service is to listen. Default value: `8983`.
+
+`opscode_solr4['ram_buffer_size']`
+
+:   **Setting EOL in Chef Infra Server 14.**
+
+    The size (in megabytes) of the RAM buffer. When document updates
+    exceed this amout, pending updates are flushed. Default value:
+    `100`.
+
+`opscode_solr4['url']`
+
+:   **Setting EOL in Chef Infra Server 14.**
+
+    Default value: `'http://localhost:8983/solr'`.
+
+`opscode_solr4['vip']`
+
+:   **Setting EOL in Chef Infra Server 14.**
+
+    The virtual IP address. Default value: `127.0.0.1`.
 
 ### OpenSearch
 
-This configuration file has the following settings for `opensearch`:
+You can configure external OpenSearch starting in Chef Infra Server 14.14.
+
+The `chef-server.rb` file has the following settings for OpenSearch:
 
 `opensearch['enable']`
 
 : Enable the service.
 
-    Default value: `true`.
+  Default value: `true`.
 
 `opensearch['dir']`
 
 : The working directory.  The default value is the recommended value.
 
-    Default value: `/var/opt/opscode/opensearch`
+  Default value: `/var/opt/opscode/opensearch`
 
 `opensearch['data_dir']`
 
 : The paths used to store data.
 
-    Default value: `/var/opt/opscode/elasticsearch/data`
-
-`opensearch['plugins_directory']`
-
-: The default location of the plugins directory depends on which package you install.
-
-    Default value: `/var/opt/opscode/opensearch/plugins`
-
-`opensearch['scripts_directory']`
-
-: The default location of the scripts directory depends on which package you install.
-
-    Default value: `/var/opt/opscode/opensearch/scripts`
-
-`opensearch['temp_directory']`
-
-: By default, OpenSearch uses a private temporary directory that the startup script creates immediately below the system temporary directory.
-
-    Default value: `/var/opt/opscode/opensearch/tmp`
-
-`opensearch['log_directory']`
-
-: The directory in which log data is stored. The default value is the recommended value.
-
-    Default value: `/var/log/opscode/opensearch`
-
-`opensearch['log_rotation']['file_maxbytes']`
-
-: The log rotation policy for this service. Log files are rotated when they exceed `file_maxbytes`.
-
-    Default value: `104857600`.
-
-`opensearch['log_rotation']['num_to_keep']`
-
-: The log rotation policy for this service. `num_to_keep` specifies the maximum number of log files in the rotation.
-
-    Default value: `10`.
-
-`opensearch['vip']`
-
-: The virtual IP address for the machine on which Apache Solr is running.
-
-    Default value: `127.0.0.1`
-
-`opensearch['listen']`
-
-: The IP address for the machine on which Apache Solr is running.
-
-    Default value: `127.0.0.1`
-
-`opensearch['port']`
-
-: The port on which the service is listening.
-
-    Default value: `9200`
+  Default value: `/var/opt/opscode/elasticsearch/data`
 
 `opensearch['enable_gc_log']`
 
 : Enable or disable GC logging.
 
-    Default value: `false`
+  Default value: `false`
+
+`opensearch['heap_size']`
+
+: The amount of memory (in MBs) available to OpenSearch. If there is not enough memory available, search queries made by nodes to OpenSearch may fail. The amount of memory that must be available also depends on the number of nodes in the organization, the frequency of search queries, and other characteristics that are unique to each organization. In general, as the number of nodes increases, so does the amount of memory. The default value should work for many organizations with fewer than 25 nodes. For an organization with several hundred nodes, the amount of memory that is required often exceeds 3GB.
+
+  Default value is 25% of the system memory or 1024 MB, whichever is greater.
+
+  {{< note >}}
+
+  If `heap_size` is also specified directly in `java_opts`, it will be ignored in favor of the chef-server.rb values or the defaults as calculated here. Only use chef-server.rb to set `heap_size`. It will raise an error if the system memory is less than 4 GB. This value is bounded between 1 GB - 28 GB.
+
+  {{< /note >}}
 
 `opensearch['initial_cluster_join_timeout']`
 
@@ -1741,42 +2336,85 @@ This configuration file has the following settings for `opensearch`:
 
 : Default values are set based on [JVM configuration options](https://github.com/elastic/elasticsearch/blob/6.8/distribution/src/config/jvm.options).
 
-    {{< note spaces=4 >}}
+  {{< note >}}
 
-    Each item in this list will be placed as is into the `java_opts` config file. Entries are set in chef-server.rb as:
+  Each item in this list will be placed as is into the `java_opts` config file. Entries are set in chef-server.rb as:
 
-    ```ruby
-    opensearch.jvm_opts = [
-    "-xoption1",
-    "-xoption2",
-    ...
-    "optionN"
-    ]
-    ```
+  ```ruby
+  opensearch.jvm_opts = [
+  "-xoption1",
+  "-xoption2",
+  ...
+  "optionN"
+  ]
+  ```
 
-    {{< /note >}}
+  {{< /note >}}
 
-`opensearch['heap_size']`
+`opensearch['listen']`
 
-: The amount of memory (in MBs) available to OpenSearch. If there is not enough memory available, search queries made by nodes to OpenSearch may fail. The amount of memory that must be available also depends on the number of nodes in the organization, the frequency of search queries, and other characteristics that are unique to each organization. In general, as the number of nodes increases, so does the amount of memory. The default value should work for many organizations with fewer than 25 nodes. For an organization with several hundred nodes, the amount of memory that is required often exceeds 3GB.
+: The IP address for the machine on which Apache Solr is running.
 
-    Default value is is equivalent to 25% of the system memory or 1024 MB, whichever is greater.
+  Default value: `127.0.0.1`
 
-    {{< note spaces=4 >}}
+`opensearch['log_directory']`
 
-    If `heap_size` is also specified directly in `java_opts`, it will be ignored in favor of the chef-server.rb values or the defaults as calculated here. Only use chef-server.rb to set `heap_size`. It will raise an error if the system memory is less than 4 GB. This value is bounded between 1 GB - 28 GB.
+: The directory in which log data is stored. The default value is the recommended value.
 
-    {{< /note >}}
+  Default value: `/var/log/opscode/opensearch`
+
+`opensearch['log_rotation']['file_maxbytes']`
+
+: The log rotation policy for this service. Log files are rotated when they exceed `file_maxbytes`.
+
+  Default value: `104857600`.
+
+`opensearch['log_rotation']['num_to_keep']`
+
+: The log rotation policy for this service. `num_to_keep` specifies the maximum number of log files in the rotation.
+
+  Default value: `10`.
 
 `opensearch['new_size']`
 
 : Defaults to the larger of 1/16th of the `heap_size` or 32 MB.
 
-    {{< note spaces=4 >}}
+  {{< note >}}
 
-    If `new_size` is also specified directly in `java_opts`, it will be ignored in favor of the chef-server.rb values or the defaults calculated here. Only use chef-server.rb to set `new_size`.
+  If `new_size` is also specified directly in `java_opts`, it will be ignored in favor of the chef-server.rb values or the defaults calculated here. Only use chef-server.rb to set `new_size`.
 
-    {{< /note >}}
+  {{< /note >}}
+
+`opensearch['plugins_directory']`
+
+: The default location of the plugins directory depends on which package you install.
+
+  Default value: `/var/opt/opscode/opensearch/plugins`
+
+`opensearch['port']`
+
+: The port on which the service is listening.
+
+  Default value: `9200`
+
+`opensearch['scripts_directory']`
+
+: The default location of the scripts directory depends on which package you install.
+
+  Default value: `/var/opt/opscode/opensearch/scripts`
+
+`opensearch['temp_directory']`
+
+: By default, OpenSearch uses a private temporary directory that the startup script creates immediately below the system temporary directory.
+
+  Default value: `/var/opt/opscode/opensearch/tmp`
+
+
+`opensearch['vip']`
+
+: The virtual IP address for the machine on which Apache Solr is running.
+
+  Default value: `127.0.0.1`
 
 ### External OpenSearch
 
@@ -1784,13 +2422,13 @@ This configuration file has the following settings for `opensearch`:
 
 : Enable external `opensearch` service by setting to `true`.
 
-    Default value: `false`.
+  Default value: `false`.
 
 `opensearch['external_url']`
 
 : The external OpenSearch URL. Example: `http://127.0.0.1:9200`.
 
-    Default value: `nil`
+  Default value: `nil`
 
 {{< note >}}
 Chef Infra Server supports OpenSearch only as an external indexing provider. You must provide values for `external` and `external_url` under this configuration.
@@ -1804,49 +2442,49 @@ This configuration file has the following settings for `elasticsearch`:
 
 : Enable a service.
 
-    Default value: `true`.
+  Default value: `true`.
 
 `elasticsearch['dir']`
 
 : The working directory. The default value is the recommended value.
 
-    Default value: `/var/opt/opscode/elasticsearch`
+  Default value: `/var/opt/opscode/elasticsearch`
 
 `elasticsearch['data_dir']`
 
 : The paths used to store data.
 
-    Default value: `/var/opt/opscode/elasticsearch/data`
+  Default value: `/var/opt/opscode/elasticsearch/data`
 
 `elasticsearch['plugins_directory']`
 
 : The default location of the plugins directory depends on which package you install.
 
-    Default value: `/var/opt/opscode/elasticsearch/plugins`
+  Default value: `/var/opt/opscode/elasticsearch/plugins`
 
 `elasticsearch['scripts_directory']`
 
 : The default location of the scripts directory depends on which package you install.
 
-    Default value: `/var/opt/opscode/elasticsearch/scripts`
+  Default value: `/var/opt/opscode/elasticsearch/scripts`
 
 `elasticsearch['temp_directory']`
 
 : By default, Elasticsearch uses a private temporary directory that the startup script creates immediately below the system temporary directory.
 
-    Default value: `/var/opt/opscode/elasticsearch/tmp`
+  Default value: `/var/opt/opscode/elasticsearch/tmp`
 
 `elasticsearch['log_directory']`
 
 : The directory in which log data is stored. The default value is the recommended value.
 
-    Default value: `/var/log/opscode/elasticsearch`
+  Default value: `/var/log/opscode/elasticsearch`
 
 `elasticsearch['log_rotation']['file_maxbytes']`
 
 : The log rotation policy for this service. Log files are rotated when they exceed file_maxbytes.
 
-    Default value for 'file_maxbytes': `104857600`
+  Default value for 'file_maxbytes': `104857600`
 
 `elasticsearch['log_rotation']['num_to_keep']`
 
@@ -1856,25 +2494,25 @@ This configuration file has the following settings for `elasticsearch`:
 
 : The virtual IP address for the machine on which Apache Solr is running.
 
-    Default value: `127.0.0.1`
+  Default value: `127.0.0.1`
 
 `elasticsearch['listen']`
 
 : The IP address for the machine on which Apache Solr is running.
 
-    Default value: `127.0.0.1`
+  Default value: `127.0.0.1`
 
 `elasticsearch['port']`
 
 : The port on which the service is to listen.
 
-    Default value: `9200`
+  Default value: `9200`
 
 `elasticsearch['enable_gc_log']`
 
 : Enable or disable GC logging.
 
-    Default value: `false`
+  Default value: `false`
 
 `elasticsearch['initial_cluster_join_timeout']`
 
@@ -1903,7 +2541,7 @@ Each item in this list will be placed as is into the java_opts config file. Entr
 
 : The amount of memory (in MBs) available to Elasticsearch. If there is not enough memory available, search queries made by nodes to Elasticsearch may fail. The amount of memory that must be available also depends on the number of nodes in the organization, the frequency of search queries, and other characteristics that are unique to each organization. In general, as the number of nodes increases, so does the amount of memory. The default value should work for many organizations with fewer than 25 nodes. For an organization with several hundred nodes, the amount of memory that is required often exceeds 3GB.
 
-    Default value is is equivalent to 25% of the system memory or 1024 MB, whichever is greater.
+  Default value is is equivalent to 25% of the system memory or 1024 MB, whichever is greater.
 
 {{< note >}}
 
@@ -2134,6 +2772,12 @@ This configuration file has the following settings for `postgresql`:
 
     Default value: `'127.0.0.1/32', '::1/128'`.
 
+`postgresql['pg_upgrade_timeout']`
+
+:   The timeout value (in seconds) for PostgreSQL upgrade.
+
+    Default value: `7200`.
+
 `postgresql['user_path']`
 
 :   Default value: `/opt/opscode/embedded/bin:/opt/opscode/bin:$PATH`.
@@ -2163,11 +2807,228 @@ This configuration file has the following settings for `postgresql`:
 
     Default value: `8MB`.
 
-`postgresql['pg_upgrade_timeout']`
+### rabbitmq
 
-:   The timeout value (in seconds) for PostgreSQL upgrade.
+The **rabbitmq** service is used to provide the message queue that is
+used by the Chef Infra Server to get search data to Apache Solr so that
+it can be indexed for search.
 
-    Default value: `7200`.
+{{< note >}}
+
+rabbitmq settings are EOL in Chef Infra Server 14.
+
+{{< /note >}}
+
+This configuration file has the following settings for `rabbitmq`:
+
+`rabbitmq['actions_exchange']`
+
+:   The name of the exchange to which Chef actions publishes actions
+    data. Default value: `'actions'`.
+
+`rabbitmq['actions_password']`
+
+:   Legacy configuration setting for the password of the `actions_user`.
+    Default value: **generated**.
+
+    To override the default value, use the [Secrets
+    Management]({{< relref "/server/ctl_chef_server#secrets-management" >}})
+    command: `chef-server-ctl set-actions-password`.
+
+`rabbitmq['actions_user']`
+
+:   The user with permission to publish actions data. Default value:
+    `'actions'`.
+
+`rabbitmq['actions_vhost']`
+
+:   The virtual host to which Chef actions publishes actions data.
+    Default value: `'/analytics'`.
+
+`rabbitmq['analytics_max_length']`
+
+:   The maximum number of messages that can be queued before RabbitMQ
+    automatically drops messages from the front of the queue to make
+    room for new messages. Default value: `10000`.
+
+`rabbitmq['consumer_id']`
+
+:   The identity of the consumer to which messages are published.
+    Default value: `'hotsauce'`.
+
+`rabbitmq['data_dir']`
+
+:   The directory in which on-disk data is stored. The default value is
+    the recommended value. Default value:
+    `'/var/opt/opscode/rabbitmq/db'`.
+
+`rabbitmq['dir']`
+
+:   The working directory. The default value is the recommended value.
+    Default value: `'/var/opt/opscode/rabbitmq'`.
+
+`rabbitmq['drop_on_full_capacity']`
+
+:   Specify if messages will stop being sent to the RabbitMQ queue when
+    it is at capacity. Default value: `true`.
+
+`rabbitmq['enable']`
+
+:   Enable a service. Default value: `true`.
+
+`rabbitmq['log_directory']`
+
+:   The directory in which log data is stored. The default value is the
+    recommended value. Default value: `'/var/log/opscode/rabbitmq'`.
+
+`rabbitmq['log_rotation']`
+
+:   The log rotation policy for this service. Log files are rotated when
+    they exceed `file_maxbytes`. The maximum number of log files in the
+    rotation is defined by `num_to_keep`. Default value:
+
+    ```ruby
+    { 'file_maxbytes' => 104857600, 'num_to_keep' => 10 }
+    ```
+
+`rabbitmq['management_enabled']`
+
+:   Specify if the rabbitmq-management plugin is enabled. Default value:
+    `true`.
+
+`rabbitmq['management_password']`
+
+:   Legacy configuration setting for rabbitmq-management plugin
+    password. Default value: **generated**.
+
+    To override the default value, use the [Secrets
+    Management]({{< relref "/server/ctl_chef_server#secrets-management" >}})
+    command: `chef-server-ctl set-secret rabbitmq management_password`.
+
+`rabbitmq['management_port']`
+
+:   The rabbitmq-management plugin port. Default value: `15672`.
+
+`rabbitmq['management_user']`
+
+:   The rabbitmq-management plugin user. Default value: `'rabbitmgmt'`.
+
+`rabbitmq['node_ip_address']`
+
+:   The bind IP address for RabbitMQ. Default value: `'127.0.0.1'`.
+
+`rabbitmq['node_port']`
+
+:   The port on which the service is to listen. Default value: `'5672'`.
+
+`rabbitmq['nodename']`
+
+:   The unique identifier of the node. Default value: `'rabbit@localhost'`.
+
+`rabbitmq['password']`
+
+:   Legacy configuration setting for the password for the RabbitMQ user.
+    Default value: **generated**.
+
+    To override the default value, use the [Secrets
+    Management]({{< relref "/server/ctl_chef_server#secrets-management" >}})
+    command: `chef-server-ctl set-secret rabbitmq password`.
+
+`rabbitmq['prevent_erchef_startup_on_full_capacity']`
+
+:   Specify if the Chef Infra Server will start when the monitored
+    RabbitMQ queue is full. Default value: `false`.
+
+`rabbitmq['queue_at_capacity_affects_overall_status']`
+
+:   Specify if the `_status` endpoint in the Chef Infra Server API will
+    fail if the monitored queue is at capacity. Default value: `false`.
+
+`rabbitmq['queue_length_monitor_enabled']`
+
+:   Specify if the queue length monitor is enabled. Default value:
+    `true`.
+
+`rabbitmq['queue_length_monitor_millis']`
+
+:   The frequency (in milliseconds) at which the length of the RabbitMQ
+    queue is checked. Default value: `30000`.
+
+`rabbitmq['queue_length_monitor_timeout_millis']`
+
+:   The timeout (in milliseconds) at which calls to the queue length
+    monitor will stop if the Chef Infra Server is overloaded. Default
+    value: `5000`.
+
+`rabbitmq['queue_length_monitor_queue']`
+
+:   The RabbitMQ queue that is observed by queue length monitor. Default
+    value: `'alaska'`.
+
+`rabbitmq['queue_length_monitor_vhost']`
+
+:   The virtual host for the RabbitMQ queue that is observed by queue
+    length monitor. Default value: `'/analytics'`.
+
+`rabbitmq['rabbit_mgmt_http_cull_interval']`
+
+:   The maximum cull interval (in seconds) for the HTTP connection pool
+    that is used by the rabbitmq-management plugin. Default value: `60`.
+
+`rabbitmq['rabbit_mgmt_http_init_count']`
+
+:   The initial worker count for the HTTP connection pool that is used
+    by the rabbitmq-management plugin. Default value: `25`.
+
+`rabbitmq['rabbit_mgmt_http_max_age']`
+
+:   The maximum connection worker age (in seconds) for the HTTP
+    connection pool that is used by the rabbitmq-management plugin.
+    Default value: `70`.
+
+`rabbitmq['rabbit_mgmt_http_max_connection_duration']`
+
+:   The maximum connection duration (in seconds) for the HTTP connection
+    pool that is used by the rabbitmq-management plugin. Default value:
+    `70`.
+
+`rabbitmq['rabbit_mgmt_http_max_count']`
+
+:   The maximum worker count for the HTTP connection pool that is used
+    by the rabbitmq-management plugin. Default value: `100`.
+
+`rabbitmq['rabbit_mgmt_ibrowse_options']`
+
+:   An array of comma-separated key-value pairs of ibrowse options for
+    the HTTP connection pool that is used by the rabbitmq-management
+    plugin. Default value: `'{connect_timeout, 10000}'`.
+
+`rabbitmq['rabbit_mgmt_timeout']`
+
+:   The timeout for the HTTP connection pool that is used by the
+    rabbitmq-management plugin. Default value: `30000`.
+
+`rabbitmq['reindexer_vhost']`
+
+:   Default value: `'/reindexer'`.
+
+`rabbitmq['ssl_versions']`
+
+:   The SSL versions used by the rabbitmq-management plugin. (See
+    [RabbitMQ TLS support](https://www.rabbitmq.com/ssl.html) for more
+    information.) Default value: `['tlsv1.2', 'tlsv1.1']`.
+
+`rabbitmq['user']`
+
+:   Default value: `'chef'`.
+
+`rabbitmq['vhost']`
+
+:   Default value: `'/chef'`.
+
+`rabbitmq['vip']`
+
+:   The virtual IP address. Default value: `'127.0.0.1'`.
 
 ### redis_lb
 

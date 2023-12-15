@@ -1,6 +1,27 @@
 The following settings are often modified from the default as part of
 the tuning effort for the **nginx** service and to configure the Chef
-Infra Server to use SSL certificates:
+Infra Server to use SSL certificates.
+
+{{< note >}}
+
+See <https://www.openssl.org/docs/man1.0.2/man1/ciphers.html> for more
+information about the values used with the `nginx['ssl_ciphers']` and
+`nginx['ssl_protocols']` settings.
+
+{{< /note >}}
+
+After copying SSL certificate files to the Chef Infra Server,
+update the `nginx['ssl_certificate']` and `nginx['ssl_certificate_key']`
+settings to specify the paths to those files, and then (optionally) update the `nginx['ssl_ciphers']` and
+`nginx['ssl_protocols']` settings to reflect the desired level of
+hardness for the Chef Infra Server. For example:
+
+```ruby
+nginx['ssl_certificate'] = '/etc/pki/tls/private/name.of.pem'
+nginx['ssl_certificate_key'] = '/etc/pki/tls/private/name.of.key'
+nginx['ssl_ciphers'] = 'HIGH:MEDIUM:!LOW:!kEDH:!aNULL:!ADH:!eNULL:!EXP:!SSLv2:!SEED:!CAMELLIA:!PSK'
+nginx['ssl_protocols'] = 'TLSv1.2'
+```
 
 `nginx['ssl_certificate']`
 
@@ -37,29 +58,3 @@ Infra Server to use SSL certificates:
     Chef Infra Client 10.16.4 and later on Linux, Unix, and macOS, and on Chef
     Infra Client 12.8 and later on Windows. If it is necessary to support these
     older end-of-life Chef Infra Client releases, set this value to `'TLSv1.1 TLSv1.2'`.
-
-    ```ruby
-    nginx['ssl_protocols'] = 'TLSv1.2'
-    ```
-
-    {{< note >}}
-
-    See <https://www.openssl.org/docs/man1.0.2/man1/ciphers.html> for more
-    information about the values used with the `nginx['ssl_ciphers']` and
-    `nginx['ssl_protocols']` settings.
-
-    {{< /note >}}
-
-    For example, after copying the SSL certificate files to the Chef Infra
-    Server, update the `nginx['ssl_certificate']` and
-    `nginx['ssl_certificate_key']` settings to specify the paths to those
-    files, and then (optionally) update the `nginx['ssl_ciphers']` and
-    `nginx['ssl_protocols']` settings to reflect the desired level of
-    hardness for the Chef Infra Server:
-
-    ```ruby
-    nginx['ssl_certificate'] = '/etc/pki/tls/private/name.of.pem'
-    nginx['ssl_certificate_key'] = '/etc/pki/tls/private/name.of.key'
-    nginx['ssl_ciphers'] = 'HIGH:MEDIUM:!LOW:!kEDH:!aNULL:!ADH:!eNULL:!EXP:!SSLv2:!SEED:!CAMELLIA:!PSK'
-    nginx['ssl_protocols'] = 'TLSv1.2'
-    ```
