@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.9.15 -->
-## [15.9.15](https://github.com/chef/chef-server/tree/15.9.15) (2023-12-14)
+<!-- latest_release 15.9.16 -->
+## [15.9.16](https://github.com/chef/chef-server/tree/15.9.16) (2023-12-15)
 
 #### Merged Pull Requests
-- [CHEF-6088 CHEF-6094 CHEF-6107] Cookie policy, Privacy policy, logo and favicon changes [#3737](https://github.com/chef/chef-server/pull/3737) ([ayush-billore](https://github.com/ayush-billore))
+- Update release announcement to use chef download page [#3754](https://github.com/chef/chef-server/pull/3754) ([kalroy](https://github.com/kalroy))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.9.12 -->
 ### Changes since 15.9.12 release
 
 #### Merged Pull Requests
+- Update release announcement to use chef download page [#3754](https://github.com/chef/chef-server/pull/3754) ([kalroy](https://github.com/kalroy)) <!-- 15.9.16 -->
 - [CHEF-6088 CHEF-6094 CHEF-6107] Cookie policy, Privacy policy, logo and favicon changes [#3737](https://github.com/chef/chef-server/pull/3737) ([ayush-billore](https://github.com/ayush-billore)) <!-- 15.9.15 -->
 - Upgrade restclient gem version in erchef [#3721](https://github.com/chef/chef-server/pull/3721) ([RajeshPaul38](https://github.com/RajeshPaul38)) <!-- 15.9.14 -->
 - Whitespace change to bump release version [#3752](https://github.com/chef/chef-server/pull/3752) ([marcparadise](https://github.com/marcparadise)) <!-- 15.9.13 -->
