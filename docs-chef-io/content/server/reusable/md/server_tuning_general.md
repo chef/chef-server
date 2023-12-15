@@ -20,7 +20,9 @@ file (no equal sign is necessary to set the value):
     services communicate via IPv6 when a high availability configuration
     is used. When configuring for IPv6 in a high availability
     configuration, be sure to set the netmask on the IPv6 `backend_vip`
-    attribute. Default value: `"ipv4"`.
+    attribute.
+
+    Default value: `"ipv4"`.
 
 `notification_email`
 
