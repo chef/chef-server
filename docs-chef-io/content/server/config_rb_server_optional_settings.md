@@ -1426,14 +1426,7 @@ This configuration file has the following settings for `oc-id`:
 
     Default value: `{ }`.
 
-    To define OAuth 2 information for Chef Supermarket, create a Hash similar to:
-
-    ```ruby
-    oc_id['applications'] ||= {}
-    oc_id['applications']['supermarket'] = {
-    'redirect_uri' => 'https://supermarket.mycompany.com/auth/chef_oauth2/callback',
-    }
-    ```
+    {{< readfile file="content/server/reusable/md/config_ocid_application_hash_supermarket.md" >}}
 
 `oc_id['db_pool_size']`
 
