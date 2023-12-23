@@ -20,5 +20,7 @@ builder-to-testers-map:
     - ubuntu-22.04-x86_64
   el-8-x86_64:
     - el-8-x86_64
+    - almalinux-8
   el-9-x86_64:
     - el-9-x86_64
+    - almalinux-9
