@@ -222,7 +222,7 @@ GEM
       tty-color (~> 0.5)
     plist (3.6.0)
     proxifier (1.0.3)
-    pry (0.14.1)
+    pry (0.14.2)
       coderay (~> 1.1)
       method_source (~> 1.0)
     pry-byebug (3.10.1)
