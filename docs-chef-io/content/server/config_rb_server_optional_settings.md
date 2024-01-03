@@ -1459,7 +1459,7 @@ This configuration file has the following settings for `oc-id`:
 
     Default value: `false`.
 
-    **New in Chef Infra Server 15.9**
+    **New in Chef Infra Server 15.9.18**
 
 `oc_id['enable_onetrust']`
 
@@ -1467,7 +1467,7 @@ This configuration file has the following settings for `oc-id`:
 
     Default value: `false`.
 
-    **New in Chef Infra Server 15.9**
+    **New in Chef Infra Server 15.9.18**
 
 `oc_id['gtm_id']`
 
@@ -1475,7 +1475,7 @@ This configuration file has the following settings for `oc-id`:
 
     Default value: `nil`.
 
-    **New in Chef Infra Server 15.9**
+    **New in Chef Infra Server 15.9.18**
 
 `oc_id['log_directory']`
 
