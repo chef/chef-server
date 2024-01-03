@@ -1,16 +1,18 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.9.16 -->
-## [15.9.16](https://github.com/chef/chef-server/tree/15.9.16) (2023-12-15)
+<!-- latest_release 15.9.18 -->
+## [15.9.18](https://github.com/chef/chef-server/tree/15.9.18) (2024-01-02)
 
 #### Merged Pull Requests
-- Update release announcement to use chef download page [#3754](https://github.com/chef/chef-server/pull/3754) ([kalroy](https://github.com/kalroy))
+- [CHEF-6100 CHEF-6112] GTM and OneTrust changes [#3738](https://github.com/chef/chef-server/pull/3738) ([ayush-billore](https://github.com/ayush-billore))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.9.12 -->
 ### Changes since 15.9.12 release
 
 #### Merged Pull Requests
+- [CHEF-6100 CHEF-6112] GTM and OneTrust changes [#3738](https://github.com/chef/chef-server/pull/3738) ([ayush-billore](https://github.com/ayush-billore)) <!-- 15.9.18 -->
+- Correct some text in docs [#3698](https://github.com/chef/chef-server/pull/3698) ([IanMadd](https://github.com/IanMadd)) <!-- 15.9.17 -->
 - Update release announcement to use chef download page [#3754](https://github.com/chef/chef-server/pull/3754) ([kalroy](https://github.com/kalroy)) <!-- 15.9.16 -->
 - [CHEF-6088 CHEF-6094 CHEF-6107] Cookie policy, Privacy policy, logo and favicon changes [#3737](https://github.com/chef/chef-server/pull/3737) ([ayush-billore](https://github.com/ayush-billore)) <!-- 15.9.15 -->
 - Upgrade restclient gem version in erchef [#3721](https://github.com/chef/chef-server/pull/3721) ([RajeshPaul38](https://github.com/RajeshPaul38)) <!-- 15.9.14 -->
