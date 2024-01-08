@@ -11,11 +11,6 @@
   <%= render 'application/analytics' %>
 </head>
 <body>
-  <% if gtm_enabled? && Settings.gtm_id.present? %>
-    <!-- Google Tag Manager (noscript) -->
-    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=<%= Settings.gtm_id %>" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
-    <!-- End Google Tag Manager (noscript) -->
-  <% end %>
   <div class="contain-to-grid">
     <nav class="top-bar" data-topbar role="navigation">
       <ul class="title-area">

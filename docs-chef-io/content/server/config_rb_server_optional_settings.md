@@ -1453,27 +1453,11 @@ This configuration file has the following settings for `oc-id`:
 
     Defaults to the `'from_email'` value.
 
-`oc_id['enable_gtm']`
-
-:   Whether to enable Google Tag Manager. Set the Google Tag Manager ID with `oc_id['gtm_id']`.
-
-    Default value: `false`.
-
-    **New in Chef Infra Server 15.9.18**
-
 `oc_id['enable_onetrust']`
 
 :   Whether to enable OneTrust cookie consent verification.
 
     Default value: `false`.
-
-    **New in Chef Infra Server 15.9.18**
-
-`oc_id['gtm_id']`
-
-:   The Google Tag Manager's container ID. You must also set `oc_id['enable_gtm']` to `true`.
-
-    Default value: `nil`.
 
     **New in Chef Infra Server 15.9.18**
 
