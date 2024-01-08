@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.9.18 -->
-## [15.9.18](https://github.com/chef/chef-server/tree/15.9.18) (2024-01-02)
+<!-- latest_release 15.9.19 -->
+## [15.9.19](https://github.com/chef/chef-server/tree/15.9.19) (2024-01-08)
 
 #### Merged Pull Requests
-- [CHEF-6100 CHEF-6112] GTM and OneTrust changes [#3738](https://github.com/chef/chef-server/pull/3738) ([ayush-billore](https://github.com/ayush-billore))
+- remove GTM scripts [#3759](https://github.com/chef/chef-server/pull/3759) ([ayush-billore](https://github.com/ayush-billore))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.9.12 -->
 ### Changes since 15.9.12 release
 
 #### Merged Pull Requests
+- remove GTM scripts [#3759](https://github.com/chef/chef-server/pull/3759) ([ayush-billore](https://github.com/ayush-billore)) <!-- 15.9.19 -->
 - [CHEF-6100 CHEF-6112] GTM and OneTrust changes [#3738](https://github.com/chef/chef-server/pull/3738) ([ayush-billore](https://github.com/ayush-billore)) <!-- 15.9.18 -->
 - Correct some text in docs [#3698](https://github.com/chef/chef-server/pull/3698) ([IanMadd](https://github.com/IanMadd)) <!-- 15.9.17 -->
 - Update release announcement to use chef download page [#3754](https://github.com/chef/chef-server/pull/3754) ([kalroy](https://github.com/kalroy)) <!-- 15.9.16 -->
