@@ -1,27 +1,25 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.9.20 -->
-## [15.9.20](https://github.com/chef/chef-server/tree/15.9.20) (2024-01-10)
-
-#### Merged Pull Requests
-- workaround to suppress expired certificate error. [#3761](https://github.com/chef/chef-server/pull/3761) ([sreepuramsudheer](https://github.com/sreepuramsudheer))
+<!-- latest_release -->
 <!-- latest_release -->
 
-<!-- release_rollup since=15.9.12 -->
-### Changes since 15.9.12 release
-
-#### Merged Pull Requests
-- workaround to suppress expired certificate error. [#3761](https://github.com/chef/chef-server/pull/3761) ([sreepuramsudheer](https://github.com/sreepuramsudheer)) <!-- 15.9.20 -->
-- remove GTM scripts [#3759](https://github.com/chef/chef-server/pull/3759) ([ayush-billore](https://github.com/ayush-billore)) <!-- 15.9.19 -->
-- [CHEF-6100 CHEF-6112] GTM and OneTrust changes [#3738](https://github.com/chef/chef-server/pull/3738) ([ayush-billore](https://github.com/ayush-billore)) <!-- 15.9.18 -->
-- Correct some text in docs [#3698](https://github.com/chef/chef-server/pull/3698) ([IanMadd](https://github.com/IanMadd)) <!-- 15.9.17 -->
-- Update release announcement to use chef download page [#3754](https://github.com/chef/chef-server/pull/3754) ([kalroy](https://github.com/kalroy)) <!-- 15.9.16 -->
-- [CHEF-6088 CHEF-6094 CHEF-6107] Cookie policy, Privacy policy, logo and favicon changes [#3737](https://github.com/chef/chef-server/pull/3737) ([ayush-billore](https://github.com/ayush-billore)) <!-- 15.9.15 -->
-- Upgrade restclient gem version in erchef [#3721](https://github.com/chef/chef-server/pull/3721) ([RajeshPaul38](https://github.com/RajeshPaul38)) <!-- 15.9.14 -->
-- Whitespace change to bump release version [#3752](https://github.com/chef/chef-server/pull/3752) ([marcparadise](https://github.com/marcparadise)) <!-- 15.9.13 -->
+<!-- release_rollup -->
 <!-- release_rollup -->
 
 <!-- latest_stable_release -->
+## [15.9.20](https://github.com/chef/chef-server/tree/15.9.20) (2024-01-10)
+
+#### Merged Pull Requests
+- Whitespace change to bump release version [#3752](https://github.com/chef/chef-server/pull/3752) ([marcparadise](https://github.com/marcparadise))
+- Upgrade restclient gem version in erchef [#3721](https://github.com/chef/chef-server/pull/3721) ([RajeshPaul38](https://github.com/RajeshPaul38))
+- [CHEF-6088 CHEF-6094 CHEF-6107] Cookie policy, Privacy policy, logo and favicon changes [#3737](https://github.com/chef/chef-server/pull/3737) ([ayush-billore](https://github.com/ayush-billore))
+- Update release announcement to use chef download page [#3754](https://github.com/chef/chef-server/pull/3754) ([kalroy](https://github.com/kalroy))
+- Correct some text in docs [#3698](https://github.com/chef/chef-server/pull/3698) ([IanMadd](https://github.com/IanMadd))
+- [CHEF-6100 CHEF-6112] GTM and OneTrust changes [#3738](https://github.com/chef/chef-server/pull/3738) ([ayush-billore](https://github.com/ayush-billore))
+- remove GTM scripts [#3759](https://github.com/chef/chef-server/pull/3759) ([ayush-billore](https://github.com/ayush-billore))
+- workaround to suppress expired certificate error. [#3761](https://github.com/chef/chef-server/pull/3761) ([sreepuramsudheer](https://github.com/sreepuramsudheer))
+<!-- latest_stable_release -->
+
 ## [15.9.12](https://github.com/chef/chef-server/tree/15.9.12) (2023-11-28)
 
 #### Merged Pull Requests
@@ -40,7 +38,6 @@
 - Bump selenium-webdriver from 4.7.1 to 4.12.0 in /src/oc-id [#3700](https://github.com/chef/chef-server/pull/3700) ([dependabot[bot]](https://github.com/dependabot[bot]))
 - Bump activesupport from 7.0.4.1 to 7.0.8 in /src/oc_bifrost/oc-bifrost-pedant [#3699](https://github.com/chef/chef-server/pull/3699) ([dependabot[bot]](https://github.com/dependabot[bot]))
 - Revert selenium-webdriver from 4.12.0 to 4.7.1 in /src/oc-id [#3742](https://github.com/chef/chef-server/pull/3742) ([sreepuramsudheer](https://github.com/sreepuramsudheer))
-<!-- latest_stable_release -->
 
 ## [15.8.0](https://github.com/chef/chef-server/tree/15.8.0) (2023-10-05)
 
