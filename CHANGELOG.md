@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.9.19 -->
-## [15.9.19](https://github.com/chef/chef-server/tree/15.9.19) (2024-01-08)
+<!-- latest_release 15.9.20 -->
+## [15.9.20](https://github.com/chef/chef-server/tree/15.9.20) (2024-01-10)
 
 #### Merged Pull Requests
-- remove GTM scripts [#3759](https://github.com/chef/chef-server/pull/3759) ([ayush-billore](https://github.com/ayush-billore))
+- workaround to suppress expired certificate error. [#3761](https://github.com/chef/chef-server/pull/3761) ([sreepuramsudheer](https://github.com/sreepuramsudheer))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.9.12 -->
 ### Changes since 15.9.12 release
 
 #### Merged Pull Requests
+- workaround to suppress expired certificate error. [#3761](https://github.com/chef/chef-server/pull/3761) ([sreepuramsudheer](https://github.com/sreepuramsudheer)) <!-- 15.9.20 -->
 - remove GTM scripts [#3759](https://github.com/chef/chef-server/pull/3759) ([ayush-billore](https://github.com/ayush-billore)) <!-- 15.9.19 -->
 - [CHEF-6100 CHEF-6112] GTM and OneTrust changes [#3738](https://github.com/chef/chef-server/pull/3738) ([ayush-billore](https://github.com/ayush-billore)) <!-- 15.9.18 -->
 - Correct some text in docs [#3698](https://github.com/chef/chef-server/pull/3698) ([IanMadd](https://github.com/IanMadd)) <!-- 15.9.17 -->
