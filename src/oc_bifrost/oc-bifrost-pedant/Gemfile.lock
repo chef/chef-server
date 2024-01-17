@@ -2,7 +2,7 @@ PATH
   remote: .
   specs:
     oc-bifrost-pedant (0.0.1)
-      activesupport (>= 3.2.8, < 7.1.0)
+      activesupport (>= 3.2.8, < 7.2.0)
       mixlib-config (>= 1.1.2, < 3.1.0)
       net-http-spy (~> 0.2.1)
       rest-client (>= 1.8, < 2.2)
@@ -13,16 +13,26 @@ PATH
 GEM
   remote: https://rubygems.org/
   specs:
-    activesupport (7.0.8)
+    activesupport (7.1.3)
+      base64
+      bigdecimal
       concurrent-ruby (~> 1.0, >= 1.0.2)
+      connection_pool (>= 2.2.5)
+      drb
       i18n (>= 1.6, < 2)
       minitest (>= 5.1)
+      mutex_m
       tzinfo (~> 2.0)
+    base64 (0.2.0)
     bcrypt (3.1.18)
-    concurrent-ruby (1.2.2)
+    bigdecimal (3.1.5)
+    concurrent-ruby (1.2.3)
+    connection_pool (2.4.1)
     diff-lcs (1.1.3)
     domain_name (0.5.20190701)
       unf (>= 0.0.5, < 1.0.0)
+    drb (2.2.0)
+      ruby2_keywords
     http-accept (1.7.0)
     http-cookie (1.0.4)
       domain_name (~> 0.5)
@@ -31,9 +41,10 @@ GEM
     mime-types (3.4.1)
       mime-types-data (~> 3.2015)
     mime-types-data (3.2022.0105)
-    minitest (5.20.0)
+    minitest (5.21.1)
     mixlib-config (3.0.27)
       tomlrb
+    mutex_m (0.2.0)
     net-http-spy (0.2.1)
     netrc (0.11.0)
     pbkdf2 (0.1.0)
@@ -54,6 +65,7 @@ GEM
       rspec
     rspec_junit_formatter (0.6.0)
       rspec-core (>= 2, < 4, != 2.12.0)
+    ruby2_keywords (0.0.5)
     tomlrb (2.0.3)
     tzinfo (2.0.6)
       concurrent-ruby (~> 1.0)
