@@ -347,6 +347,7 @@ GEM
     nio4r (2.5.9)
     nokogiri (1.14.3)
       racc (~> 1.4)
+      mini_portile2 (~> 2.8.0)
     nori (2.6.0)
     ohai (17.9.1)
       chef-config (>= 14.12, < 18)
