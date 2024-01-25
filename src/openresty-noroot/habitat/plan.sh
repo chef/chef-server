@@ -92,7 +92,7 @@ do_install() {
   fix_interpreter "$pkg_prefix/bin/*" core/coreutils bin/env
 
   cd $HAB_CACHE_SRC_PATH
-  wget $lpeg_source
+  wget $lpeg_source --no-check-certificate
   tar --no-same-owner -xzf lpeg-${lpeg_version}.tar.gz
   cd lpeg-${lpeg_version}
   make "LUADIR=$pkg_prefix/luajit/include/luajit-2.1" || attach
