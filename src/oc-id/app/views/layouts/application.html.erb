@@ -7,6 +7,8 @@
   <%= stylesheet_link_tag "application", media: "all" %>
   <%= javascript_include_tag '//cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.min.js' %>
   <%= csrf_meta_tags %>
+  <%= favicon_link_tag asset_path('favicon.ico') %>
+  <%= render 'application/analytics' %>
 </head>
 <body>
   <div class="contain-to-grid">
@@ -47,7 +49,11 @@
     <%= yield %>
   </div>
   <footer>
-    &copy; <%= Time.now.year %> Chef Software, Inc.
+    <center>
+      <a href="https://www.progress.com/legal/privacy-policy">Privacy Policy</a> | <a href="https://www.progress.com/legal/cookie-policy">Cookie Policy</a>
+      <br>
+      &copy; <%= Time.now.year %> Chef Software, Inc.
+    </center>
   </footer>
   <%= javascript_include_tag "application" %>
   <script>

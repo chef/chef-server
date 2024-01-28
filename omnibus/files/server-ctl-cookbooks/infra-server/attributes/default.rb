@@ -748,6 +748,7 @@ default['private_chef']['oc_id']['sentry_dsn'] = nil
 default['private_chef']['oc_id']['sign_up_url'] = nil
 default['private_chef']['oc_id']['email_from_address'] = node['private_chef']['from_email']
 default['private_chef']['oc_id']['origin'] = node['private_chef']['api_fqdn']
+default['private_chef']['oc_id']['enable_onetrust'] = false
 
 default['private_chef']['oc_id']['administrators'] = []
 

@@ -57,6 +57,7 @@ app_settings = {
   'sign_up_url' => sign_up_url,
   'email_from_address' => node['private_chef']['oc_id']['email_from_address'],
   'origin' => node['private_chef']['oc_id']['origin'],
+  'enable_onetrust' => node['private_chef']['oc_id']['enable_onetrust'],
 }
 
 oc_id_dir = node['private_chef']['oc_id']['dir']
