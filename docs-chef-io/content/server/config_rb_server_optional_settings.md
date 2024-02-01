@@ -1461,6 +1461,12 @@ This configuration file has the following settings for `oc-id`:
 
     **New in Chef Infra Server 15.9.20**
 
+`oc_id['onetrust_id']`
+
+: The Onetrust ID for Chef Infra. You must also set `oc_id['enable_onetrust']` to `true`.
+
+  Default value: `nil`.
+
 `oc_id['log_directory']`
 
 :   The directory in which log data is stored. The default value is the
