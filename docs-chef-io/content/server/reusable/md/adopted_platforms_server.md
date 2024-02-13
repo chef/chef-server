@@ -1,8 +1,8 @@
-The following table lists the commercially-supported platforms for Chef Infra Server:
+The following table lists the commercially supported platforms for Chef Infra Server:
 
 | Platform                     | Architecture | Version                             |
 |------------------------------|--------------|-------------------------------------|
-| Amazon Linux 2               | `x86_64`     | `2.x`                               |
+| Amazon Linux                 | `x86_64`     | `2.x`, `2023`                       |
 | CentOS                       | `x86_64`     | `7.x`, `8.x`                        |
 | Oracle Enterprise Linux      | `x86_64`     | `7.x`, `8.x`                        |
 | Red Hat Enterprise Linux     | `x86_64`     | `7.x`, `8.x`, `9.x`                 |
