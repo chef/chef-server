@@ -38,6 +38,7 @@ rm /etc/apt/sources.list.d/microsoft-prod.list
 echo  "Installing test dependencies"
 apt-get update -y
 apt-get install -y lua5.1 luarocks postgresql-13 libsqlite3-dev
+sudo apt install postgresql-13 postgresql-client-13
 
 echo "Configuring postgresql"
 cp /workdir/scripts/bk_tests/pb_hba.conf /etc/postgresql/13/main/pg_hba.conf
