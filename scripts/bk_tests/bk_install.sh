@@ -10,7 +10,6 @@ set -e
 # 1. Add `deb https://apt-archive.postgresql.org/pub/repos/apt bionic-pgdg main` to sources.list
 # 2. Remove /etc/apt/sources.list.d/pgdg.list
 sudo echo "deb http://apt.postgresql.org/pub/repos/apt/ focal-pgdg main 13">>/etc/apt/sources.list
-sudo apt update
 sudo apt install postgresql-13 postgresql-client-13
 rm /etc/apt/sources.list.d/pgdg.list
 
@@ -40,7 +39,6 @@ rm /etc/apt/sources.list.d/microsoft-prod.list
 echo  "Installing test dependencies"
 apt-get update -y
 apt-get install -y lua5.1 luarocks postgresql-13 libsqlite3-dev
-sudo apt install postgresql-13 postgresql-client-13
 
 echo "Configuring postgresql"
 cp /workdir/scripts/bk_tests/pb_hba.conf /etc/postgresql/13/main/pg_hba.conf
