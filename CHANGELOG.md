@@ -1,9 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release -->
+<!-- latest_release 15.9.21 -->
+## [15.9.21](https://github.com/chef/chef-server/tree/15.9.21) (2024-02-22)
+
+#### Merged Pull Requests
+- testing adding this gpg key [#3778](https://github.com/chef/chef-server/pull/3778) ([sean-simmons-progress](https://github.com/sean-simmons-progress))
 <!-- latest_release -->
 
-<!-- release_rollup -->
+<!-- release_rollup since=15.9.20 -->
+### Changes since 15.9.20 release
+
+#### Merged Pull Requests
+- testing adding this gpg key [#3778](https://github.com/chef/chef-server/pull/3778) ([sean-simmons-progress](https://github.com/sean-simmons-progress)) <!-- 15.9.21 -->
 <!-- release_rollup -->
 
 <!-- latest_stable_release -->
