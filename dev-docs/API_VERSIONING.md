@@ -17,7 +17,7 @@
 
 #### Current Status
 
-- Currently, phase1 is in rollout.
+- Currently, phase1 is in rollout. 
 - knife uses v0.
 
 ### v1
