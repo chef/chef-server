@@ -25,7 +25,7 @@ if [[ "${BUILDKITE:-false}" == "true" ]]; then
   apt-get clean
   apt-get autoremove 
   apt-get update
-  apt-get install -y libpq-dev libsqlite3-dev
+  apt-get install -y libpq-dev libsqlite3-dev libyaml-dev
 fi
 
 bundle_install_dirs=(
