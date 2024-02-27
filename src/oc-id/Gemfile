@@ -41,7 +41,7 @@ group :development, :test do
   gem 'rails-controller-testing'
   gem 'pry-byebug'
   gem 'mailcatcher'
-  gem 'mini_racer'
+  
 end
 
 group :development do
@@ -50,6 +50,7 @@ group :development do
   gem 'spring' # App preloading
   gem 'spring-commands-rspec'
   gem 'thor', '~> 1.2'
+  gem 'mini_racer'
 end
 
 group :doc do
