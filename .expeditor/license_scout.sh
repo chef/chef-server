@@ -21,6 +21,7 @@ if [[ "${BUILDKITE:-false}" == "true" ]]; then
   # Since we don't use any software from this repository in our tests,
   # we can temporarily remove it from our sources.
   rm /etc/apt/sources.list.d/microsoft-prod.list
+  wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
   apt-get clean
   apt-get autoremove 
   apt-get update
