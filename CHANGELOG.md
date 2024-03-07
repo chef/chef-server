@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.9.22 -->
-## [15.9.22](https://github.com/chef/chef-server/tree/15.9.22) (2024-03-04)
+<!-- latest_release 15.9.23 -->
+## [15.9.23](https://github.com/chef/chef-server/tree/15.9.23) (2024-03-07)
 
 #### Merged Pull Requests
-- updating license scout to fix readme.md it gist [#3776](https://github.com/chef/chef-server/pull/3776) ([sean-simmons-progress](https://github.com/sean-simmons-progress))
+- Rubyracer fixing for verify pipeline. [#3787](https://github.com/chef/chef-server/pull/3787) ([sreepuramsudheer](https://github.com/sreepuramsudheer))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.9.20 -->
 ### Changes since 15.9.20 release
 
 #### Merged Pull Requests
+- Rubyracer fixing for verify pipeline. [#3787](https://github.com/chef/chef-server/pull/3787) ([sreepuramsudheer](https://github.com/sreepuramsudheer)) <!-- 15.9.23 -->
 - updating license scout to fix readme.md it gist [#3776](https://github.com/chef/chef-server/pull/3776) ([sean-simmons-progress](https://github.com/sean-simmons-progress)) <!-- 15.9.22 -->
 - testing adding this gpg key [#3778](https://github.com/chef/chef-server/pull/3778) ([sean-simmons-progress](https://github.com/sean-simmons-progress)) <!-- 15.9.21 -->
 <!-- release_rollup -->
