@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.9.24 -->
-## [15.9.24](https://github.com/chef/chef-server/tree/15.9.24) (2024-03-11)
+<!-- latest_release 15.9.25 -->
+## [15.9.25](https://github.com/chef/chef-server/tree/15.9.25) (2024-03-11)
 
 #### Merged Pull Requests
-- Bump open search version to 1.3.14 [#3785](https://github.com/chef/chef-server/pull/3785) ([sreepuramsudheer](https://github.com/sreepuramsudheer))
+- Added rocky9 to infra-server with latest omnibus version [#3720](https://github.com/chef/chef-server/pull/3720) ([muthuja](https://github.com/muthuja))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.9.20 -->
 ### Changes since 15.9.20 release
 
 #### Merged Pull Requests
+- Added rocky9 to infra-server with latest omnibus version [#3720](https://github.com/chef/chef-server/pull/3720) ([muthuja](https://github.com/muthuja)) <!-- 15.9.25 -->
 - Bump open search version to 1.3.14 [#3785](https://github.com/chef/chef-server/pull/3785) ([sreepuramsudheer](https://github.com/sreepuramsudheer)) <!-- 15.9.24 -->
 - Rubyracer fixing for verify pipeline. [#3787](https://github.com/chef/chef-server/pull/3787) ([sreepuramsudheer](https://github.com/sreepuramsudheer)) <!-- 15.9.23 -->
 - updating license scout to fix readme.md it gist [#3776](https://github.com/chef/chef-server/pull/3776) ([sean-simmons-progress](https://github.com/sean-simmons-progress)) <!-- 15.9.22 -->
