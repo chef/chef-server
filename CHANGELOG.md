@@ -1,26 +1,24 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.9.27 -->
-## [15.9.27](https://github.com/chef/chef-server/tree/15.9.27) (2024-03-11)
-
-#### Merged Pull Requests
-- Make onetrust key configurable [#3771](https://github.com/chef/chef-server/pull/3771) ([ayush-billore](https://github.com/ayush-billore))
+<!-- latest_release -->
 <!-- latest_release -->
 
-<!-- release_rollup since=15.9.20 -->
-### Changes since 15.9.20 release
-
-#### Merged Pull Requests
-- Make onetrust key configurable [#3771](https://github.com/chef/chef-server/pull/3771) ([ayush-billore](https://github.com/ayush-billore)) <!-- 15.9.27 -->
-- Infra server release for Amazon Linux 2023 [#3732](https://github.com/chef/chef-server/pull/3732) ([talktovikas](https://github.com/talktovikas)) <!-- 15.9.26 -->
-- Added rocky9 to infra-server with latest omnibus version [#3720](https://github.com/chef/chef-server/pull/3720) ([muthuja](https://github.com/muthuja)) <!-- 15.9.25 -->
-- Bump open search version to 1.3.14 [#3785](https://github.com/chef/chef-server/pull/3785) ([sreepuramsudheer](https://github.com/sreepuramsudheer)) <!-- 15.9.24 -->
-- Rubyracer fixing for verify pipeline. [#3787](https://github.com/chef/chef-server/pull/3787) ([sreepuramsudheer](https://github.com/sreepuramsudheer)) <!-- 15.9.23 -->
-- updating license scout to fix readme.md it gist [#3776](https://github.com/chef/chef-server/pull/3776) ([sean-simmons-progress](https://github.com/sean-simmons-progress)) <!-- 15.9.22 -->
-- testing adding this gpg key [#3778](https://github.com/chef/chef-server/pull/3778) ([sean-simmons-progress](https://github.com/sean-simmons-progress)) <!-- 15.9.21 -->
+<!-- release_rollup -->
 <!-- release_rollup -->
 
 <!-- latest_stable_release -->
+## [15.9.27](https://github.com/chef/chef-server/tree/15.9.27) (2024-03-20)
+
+#### Merged Pull Requests
+- testing adding this gpg key [#3778](https://github.com/chef/chef-server/pull/3778) ([sean-simmons-progress](https://github.com/sean-simmons-progress))
+- updating license scout to fix readme.md it gist [#3776](https://github.com/chef/chef-server/pull/3776) ([sean-simmons-progress](https://github.com/sean-simmons-progress))
+- Rubyracer fixing for verify pipeline. [#3787](https://github.com/chef/chef-server/pull/3787) ([sreepuramsudheer](https://github.com/sreepuramsudheer))
+- Bump open search version to 1.3.14 [#3785](https://github.com/chef/chef-server/pull/3785) ([sreepuramsudheer](https://github.com/sreepuramsudheer))
+- Added rocky9 to infra-server with latest omnibus version [#3720](https://github.com/chef/chef-server/pull/3720) ([muthuja](https://github.com/muthuja))
+- Infra server release for Amazon Linux 2023 [#3732](https://github.com/chef/chef-server/pull/3732) ([talktovikas](https://github.com/talktovikas))
+- Make onetrust key configurable [#3771](https://github.com/chef/chef-server/pull/3771) ([ayush-billore](https://github.com/ayush-billore))
+<!-- latest_stable_release -->
+
 ## [15.9.20](https://github.com/chef/chef-server/tree/15.9.20) (2024-01-10)
 
 #### Merged Pull Requests
@@ -32,7 +30,6 @@
 - [CHEF-6100 CHEF-6112] GTM and OneTrust changes [#3738](https://github.com/chef/chef-server/pull/3738) ([ayush-billore](https://github.com/ayush-billore))
 - remove GTM scripts [#3759](https://github.com/chef/chef-server/pull/3759) ([ayush-billore](https://github.com/ayush-billore))
 - workaround to suppress expired certificate error. [#3761](https://github.com/chef/chef-server/pull/3761) ([sreepuramsudheer](https://github.com/sreepuramsudheer))
-<!-- latest_stable_release -->
 
 ## [15.9.12](https://github.com/chef/chef-server/tree/15.9.12) (2023-11-28)
 
