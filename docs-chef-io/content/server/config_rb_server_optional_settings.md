@@ -1467,7 +1467,7 @@ This configuration file has the following settings for `oc-id`:
 
     Default value: `nil`.
 
-    **New in Chef Infra Server 15.9.22**
+    **New in Chef Infra Server 15.9.27**
 
 `oc_id['log_directory']`
 
