@@ -294,6 +294,7 @@ module PrivateChef
       PrivateChef['bookshelf']['listen'] ||= PrivateChef['default_listen_address']
       PrivateChef['redis_lb']['listen'] ||= PrivateChef['default_listen_address']
       PrivateChef['elasticsearch']['listen'] ||= PrivateChef['default_listen_address']
+      PrivateChef['opensearch']['listen'] ||= PrivateChef['default_listen_address']
       PrivateChef['postgresql']['listen_address'] ||= '*' # PrivateChef["default_listen_address"]
 
       authaddr = []
@@ -312,6 +313,10 @@ module PrivateChef
       PrivateChef['redis_lb']['vip'] ||= PrivateChef['backend_vips']['ipaddress']
       PrivateChef['elasticsearch']['enable'] ||= false
       PrivateChef['elasticsearch']['vip'] ||= PrivateChef['backend_vips']['ipaddress']
+
+      PrivateChef['opensearch']['enable'] ||= false
+      PrivateChef['opensearch']['vip'] ||= PrivateChef['backend_vips']['ipaddress']
+
       PrivateChef['postgresql']['enable'] ||= false
       PrivateChef['postgresql']['vip'] ||= PrivateChef['backend_vips']['ipaddress']
       PrivateChef['lb']['upstream'] ||= Mash.new

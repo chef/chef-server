@@ -48,7 +48,7 @@ See the [Release-Specific Steps](#release-specific-steps) for information about 
 
 {{< /note >}}
 
-{{% chef-server/server_upgrade_duration %}}
+{{< readfile file="content/server/reusable/md/server_upgrade_duration.md" >}}
 
 1. Run `vacuumdb` before starting the upgrade:
 
@@ -88,7 +88,7 @@ See the [Release-Specific Steps](#release-specific-steps) for information about 
 
    After performing the stepped upgrade to 12.17.15, continue with the next step.
 
-1. Download the desired Chef Infra Server version from the [Chef Infra Server Downloads](https://www.chef.io/downloads/tools/infra-server).
+1. Download the desired Chef Infra Server version from the [Chef Infra Server Downloads](https://www.chef.io/downloads).
 
 1. Stop the Chef Infra Server:
 
@@ -158,7 +158,7 @@ See the [Release-Specific Steps](#release-specific-steps) for information about 
    reindexdb: reindexing database "template1"
    ```
 
-{{% chef-server/server_analyze_postgresql_db %}}
+{{< readfile file="content/server/reusable/md/server_analyze_postgresql_db.md" >}}
 
 You are now finished with the upgrade.
 
@@ -248,7 +248,7 @@ The following External PostgreSQL upgrade steps are provided as a courtesy only.
 
    After performing the stepped upgrade, return here and continue with the next step below.
 
-1. [Download](https://www.chef.io/downloads/tools/infra-server) the desired version of Chef Infra Server.
+1. [Download](https://www.chef.io/downloads) the desired version of Chef Infra Server.
 
 1. Stop the Chef Infra Server:
 
@@ -407,7 +407,7 @@ The following External PostgreSQL upgrade steps are provided as a courtesy only.
    reindexdb: reindexing database "template1"
    ```
 
-{{% chef-server/server_analyze_postgresql_db %}}
+{{< readfile file="content/server/reusable/md/server_analyze_postgresql_db.md" >}}
 
 1. Log into the Chef Infra Server machine.
 
@@ -451,7 +451,11 @@ The following External PostgreSQL upgrade steps are provided as a courtesy only.
 
 ### Chef Backend Install
 
-{{% chef-server/EOL_backend %}}
+{{< warning >}}
+
+{{< readfile file="content/server/reusable/md/EOL_backend.md" >}}
+
+{{< /warning >}}
 
 The Chef Infra Server can operate in a high availability configuration that provides automated load balancing and failover for stateful components in the system architecture.
 
@@ -480,7 +484,7 @@ To upgrade to Chef Infra Server on a tiered Chef Infra Server configuration, do 
     chef-server-ctl reconfigure
     ```
 
-3. Download the desired Chef Infra Server version from the [Chef Infra Server Downloads](https://www.chef.io/downloads/tools/infra-server) page, then copy it to each server.
+3. Download the desired Chef Infra Server version from [Chef Downloads](https://www.chef.io/downloads), then copy it to each server.
 
 4. Stop all front end servers:
 
@@ -525,24 +529,30 @@ To upgrade to Chef Infra Server on a tiered Chef Infra Server configuration, do 
     ```bash
     scp -r /etc/opscode <each server's IP>:/etc
     ```
-
-9. Upgrade each of the front end servers:
-
-    ```bash
-    chef-server-ctl upgrade
-    ```
-
-10. Run the following command on both the front end, and back end servers:
+   
+9. Run the following command on the back end servers:
 
     ```bash
     chef-server-ctl start
     ```
 
-11. [Upgrade]({{< relref "#upgrading-manage-add-on" >}}) any Chef Infra Server add-ons.
+10. Upgrade each of the front end servers:
 
-12. After the upgrade process is complete, test and verify that the server works.
+    ```bash
+    chef-server-ctl upgrade
+    ```
 
-13. Clean up the server by removing the old data:
+11. Run the following command on both the front end:
+
+    ```bash
+    chef-server-ctl start
+    ```
+
+12. [Upgrade]({{< relref "#upgrading-manage-add-on" >}}) any Chef Infra Server add-ons.
+
+13. After the upgrade process is complete, test and verify that the server works.
+
+14. Clean up the server by removing the old data:
 
 ```bash
 chef-server-ctl cleanup
@@ -550,20 +560,39 @@ chef-server-ctl cleanup
 
 ## Release-Specific Steps
 
+### Upgrading to 15.5 or later (tiered installations only)
+
+The Chef Infra Server 15.5 upgrade from 15.0.X or later does not automatically reindex for  Tiered installations.
+{{< readfile file="content/server/reusable/md/server_upgrade_duration.md" >}}
+
+#### steps for reindex
+1. Run the below command on frontend server's
+```bash
+chef-server-ctl reindex
+```
+
+{{< note >}}
+
+`chef-server-ctl reindex` is a downtime operation.
+
+{{</note >}}
+
+Chef Infra Server 15.5 is the minimum recommended version for upgrade from older versions lessthan 15 for tiered installations.
+
 ### Upgrading to 15.x
 
 Chef Infra Server 15.0 moved from Elasticsearch to OpenSearch as its search index.
 
-{{% chef-server/server_upgrade_duration %}}
+{{< readfile file="content/server/reusable/md/server_upgrade_duration.md" >}}
 
-The Chef Infra Server 15 upgrade does not automatically reindex existing external Elasticsearch installations.
+The Chef Infra Server 15 will automatically transfer search data from Elasticsearch to OpenSearch without the need for a reindex. The Chef Infra Server 15 upgrade will need to manually reindex existing external Elasticsearch installations.
 
 The upgrade duration might take more time if you are upgrading from Chef Infra Server 12.x/13.x, as it automatically reindexes your database.
 
 ### Upgrading to 14.x
 
 Chef Infra Server 14.0 moved from Solr to Elasticsearch as its search index.
-{{% chef-server/server_upgrade_duration %}}
+{{< readfile file="content/server/reusable/md/server_upgrade_duration.md" >}}
 
 The Chef Infra Server 14 upgrade does not automatically reindex existing external Elasticsearch installations.
 
@@ -670,7 +699,7 @@ chef-server-ctl cleanup-bifrost
        vacuumdb: vacuuming database "template1"
     ```
 
-{{% chef-server/server_analyze_postgresql_db %}}
+{{< readfile file="content/server/reusable/md/server_analyze_postgresql_db.md" >}}
 
 1. Back up the PostgreSQL database before upgrading so you can restore the full database to a previous release in the event of a failure. See [Backup and Restore]({{< relref "server_backup_restore" >}}) for more information.
 

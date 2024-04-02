@@ -83,7 +83,7 @@ class PasswordResetsController < ApplicationController
   end
 
   def escaped_username
-    URI.escape(params[:username])
+    URI.encode_www_form_component(params[:username])
   end
 
   def valid_signature?

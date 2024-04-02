@@ -29,8 +29,12 @@ In order to release, you will need the following accounts/permissions:
 
 ### Upgrade Erlang Dependencies
 
-Upgrade Erlang dependencies via automated script.  
+Upgrade Erlang dependencies via automated script.
 See https://github.com/chef/chef-server/blob/main/dev-docs/FrequentTasks.md#updating-erlang-dependencies-using-rebar3 .
+
+### Update documentation
+
+Ensure documentation in [docs-site](https://docs.chef.io/) is updated for changes that would be included in the release.
 
 ### Update Release Notes
 
@@ -62,7 +66,7 @@ https://www.chef.io/downloads/tools/infra-server/current
 
 #### Integration Testing
 
-Every merge to chef-server main must be built, and the various upgrade paths for the build must be tested with the full Umbrella automated integration test pipeline at https://buildkite.com/chef/chef-umbrella-main-chef-server-full (use https://buildkite.com/chef/chef-umbrella-main-chef-server for testing the 12.17.15 -> YOUR-RELEASE upgrade path).  [NOTE: Every merge to main automatically runs through adhoc, and umbrella is run nightly for all changes made that day].  The integration test run for the tag being shipped must be successful.
+Every merge to chef-server main must be built, and the various upgrade paths for the build must be tested with the full Umbrella automated integration test pipeline at https://buildkite.com/chef/chef-umbrella-main-chef-server-full (use https://buildkite.com/chef/chef-umbrella-main-chef-server for testing the 12.17.15 -> YOUR-RELEASE upgrade path). [NOTE: Every merge to main automatically runs through adhoc, and umbrella is run nightly for all changes made that day].  The integration test run for the tag being shipped must be successful.
 
 Any Chef Infra Server release 12.17.15 or later should be able to upgrade directly to the latest release of 14. The nightly builds test upgrades to the latest current artifact from 12.17.15 and 13.2.0.  Releases prior to 12.17.15 must perform a stepped upgrade.  See: https://docs.chef.io/server/upgrades/#upgrade-matrix
 
@@ -171,6 +175,18 @@ https://buildkite.com/chef/chef-chef-server-main-habitat-build
 Follow the below document for testing the chef-server version in Automate environment.
 https://github.com/chef/automate/blob/main/dev-docs/DEV_ENVIRONMENT.md
 
+#### Software Versions Check
+
+If any software was bumped or updated (including any CVEs addressed), load up a dev VM and verify that the software is the correct version.
+
+For example, after an OpenJRE bump:
+```
+# /opt/opscode/embedded/open-jre/bin/java --version
+openjdk 11.0.18 2023-01-17
+OpenJDK Runtime Environment Temurin-11.0.18+10 (build 11.0.18+10)
+OpenJDK 64-Bit Server VM Temurin-11.0.18+10 (build 11.0.18+10, mixed mode)
+```
+
 #### Special Testing
 
 Do any special testing specific to the particular release you are doing, as applicable.
@@ -233,10 +249,10 @@ https://expeditor.chef.io/dashboard/?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.
 
 Notify the Automate team that chef server has been released, and give them the version.  Confirm that the hab packages are available for them to consume:
 
-   https://bldr.habitat.sh/#/pkgs/chef/oc_erchef/latest  
-   https://bldr.habitat.sh/#/pkgs/chef/oc_bifrost/latest  
-   https://bldr.habitat.sh/#/pkgs/chef/bookshelf/latest  
-   https://bldr.habitat.sh/#/pkgs/chef/chef-server-nginx/latest  
+   https://bldr.habitat.sh/#/pkgs/chef/oc_erchef/latest
+   https://bldr.habitat.sh/#/pkgs/chef/oc_bifrost/latest
+   https://bldr.habitat.sh/#/pkgs/chef/bookshelf/latest
+   https://bldr.habitat.sh/#/pkgs/chef/chef-server-nginx/latest
    https://bldr.habitat.sh/#/pkgs/chef/chef-server-ctl/latest
 
 Chef Infra Server is now released.
