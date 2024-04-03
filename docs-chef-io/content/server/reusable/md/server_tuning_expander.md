@@ -9,4 +9,6 @@ tuning effort for the **opscode-expander** service:
     Infra Server. Additional memory may be required by these worker
     processes depending on the frequency and volume of Chef Infra Client
     runs across the organization, but only if the back-end machines have
-    available CPU and RAM. Default value: `2`.
+    available CPU and RAM.
+
+    Default value: `2`.

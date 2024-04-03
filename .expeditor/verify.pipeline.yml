@@ -156,7 +156,8 @@ steps:
 - label: With ChefFS=1
   command:
     - /workdir/scripts/bk_tests/bk_install.sh
-    - gem uninstall bundler -v '>= 2.0.1' -a
+    - gem install bundler -v 2.2.4
+    - gem uninstall bundler -v '> 2.2.4' -a
     - cp scripts/bk_tests/chef_zero-Gemfile oc-chef-pedant/Gemfile
     - bundle install --jobs=3 --retry=3 --path=/workdir/vendor/bundle
     - cd /workdir/oc-chef-pedant

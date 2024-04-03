@@ -15,7 +15,7 @@ class Chef
           classnames = (opts[:attributes][:class] || '').split(' ') 
           opts[:attributes][:class] = classnames.reject { |c| c == logo_classname }.push(logo_classname).join(' ')
 
-          opts[:svg] = Nokogiri::XML(open(File.join(File.dirname(__FILE__), '../../../assets/images/chef-logo.svg')))
+          opts[:svg] = Nokogiri::XML(open(File.join(File.dirname(__FILE__), '../../../assets/images/progress-chef-logo.svg')))
 
           if opts[:data][:'tag-line']
             opts[:svg].css('#chef-logo-tag-line text').first.content = opts[:data][:'tag-line']

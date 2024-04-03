@@ -9,8 +9,8 @@ set -e
 # The fix:
 # 1. Add `deb https://apt-archive.postgresql.org/pub/repos/apt bionic-pgdg main` to sources.list
 # 2. Remove /etc/apt/sources.list.d/pgdg.list
-sudo echo "deb https://apt-archive.postgresql.org/pub/repos/apt bionic-pgdg main">>/etc/apt/sources.list
-rm /etc/apt/sources.list.d/pgdg.list
+sudo echo "deb https://apt.postgresql.org/pub/repos/apt/ focal-pgdg main 13">>/etc/apt/sources.list
+rm -f /etc/apt/sources.list.d/pgdg.list
 
 echo "Removing postgresql-9.3"
 apt-get --purge remove -y postgresql-9.3

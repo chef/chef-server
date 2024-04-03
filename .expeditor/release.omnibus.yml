@@ -10,6 +10,8 @@ builder-to-testers-map:
   el-7-x86_64:
     - el-7-x86_64
     - amazon-2-x86_64
+  rocky-9-x86_64:
+    - rocky-9-x86_64
   sles-12-x86_64:
     - sles-12-x86_64
     - sles-15-x86_64
@@ -22,3 +24,5 @@ builder-to-testers-map:
     - el-8-x86_64
   el-9-x86_64:
     - el-9-x86_64
+  amazon-2023-x86_64:
+    - amazon-2023-x86_64

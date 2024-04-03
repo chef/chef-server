@@ -1,5 +1,4 @@
-To define OAuth 2 information for Chef Supermarket, create a Hash
-similar to:
+To define OAuth 2 information for Chef Supermarket, create a Hash similar to:
 
 ```ruby
 oc_id['applications'] ||= {}
