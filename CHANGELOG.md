@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.9.28 -->
-## [15.9.28](https://github.com/chef/chef-server/tree/15.9.28) (2024-04-02)
+<!-- latest_release 15.9.29 -->
+## [15.9.29](https://github.com/chef/chef-server/tree/15.9.29) (2024-04-03)
 
 #### Merged Pull Requests
-- Added postgres version 13.14. [#3790](https://github.com/chef/chef-server/pull/3790) ([sreepuramsudheer](https://github.com/sreepuramsudheer))
+- Bump omnibus-software from `b48e542` to `40ca2a9` in /omnibus [#3779](https://github.com/chef/chef-server/pull/3779) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.9.27 -->
 ### Changes since 15.9.27 release
 
 #### Merged Pull Requests
+- Bump omnibus-software from `b48e542` to `40ca2a9` in /omnibus [#3779](https://github.com/chef/chef-server/pull/3779) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.9.29 -->
 - Added postgres version 13.14. [#3790](https://github.com/chef/chef-server/pull/3790) ([sreepuramsudheer](https://github.com/sreepuramsudheer)) <!-- 15.9.28 -->
 <!-- release_rollup -->
 
