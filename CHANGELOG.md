@@ -1,9 +1,26 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release -->
+<!-- latest_release 15.9.37 -->
+## [15.9.37](https://github.com/chef/chef-server/tree/15.9.37) (2024-05-15)
+
+#### Merged Pull Requests
+- Bump rake from 13.2.0 to 13.2.1 in /oc-chef-pedant [#3805](https://github.com/chef/chef-server/pull/3805) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
-<!-- release_rollup -->
+<!-- release_rollup since=15.9.27 -->
+### Changes since 15.9.27 release
+
+#### Merged Pull Requests
+- Bump rake from 13.2.0 to 13.2.1 in /oc-chef-pedant [#3805](https://github.com/chef/chef-server/pull/3805) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.9.37 -->
+- unpin openresty and update plan.sh [#3781](https://github.com/chef/chef-server/pull/3781) ([poorndm](https://github.com/poorndm)) <!-- 15.9.36 -->
+- Bump omnibus-software from `4ea194c` to `e4e5868` in /omnibus [#3809](https://github.com/chef/chef-server/pull/3809) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.9.35 -->
+- Bump mixlib-install from 3.12.28 to 3.12.30 in /src/chef-server-ctl [#3798](https://github.com/chef/chef-server/pull/3798) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.9.34 -->
+- Bump rake from 13.1.0 to 13.2.0 in /oc-chef-pedant [#3797](https://github.com/chef/chef-server/pull/3797) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.9.33 -->
+- Bump rake from 13.1.0 to 13.2.0 in /src/chef-server-ctl [#3800](https://github.com/chef/chef-server/pull/3800) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.9.32 -->
+- Bump omnibus-software from `40ca2a9` to `4ea194c` in /omnibus [#3794](https://github.com/chef/chef-server/pull/3794) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.9.31 -->
+- Bump activesupport from 7.0.8 to 7.1.3.2 in /oc-chef-pedant [#3783](https://github.com/chef/chef-server/pull/3783) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.9.30 -->
+- Bump omnibus-software from `b48e542` to `40ca2a9` in /omnibus [#3779](https://github.com/chef/chef-server/pull/3779) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.9.29 -->
+- Added postgres version 13.14. [#3790](https://github.com/chef/chef-server/pull/3790) ([sreepuramsudheer](https://github.com/sreepuramsudheer)) <!-- 15.9.28 -->
 <!-- release_rollup -->
 
 <!-- latest_stable_release -->
