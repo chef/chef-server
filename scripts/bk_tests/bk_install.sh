@@ -2,6 +2,16 @@
 
 set -e
 
+# Error:
+# `The repository 'http://apt.postgresql.org/pub/repos/apt bionic-pgdg Release' does not have a Release file.`
+# The cause:
+# https://www.postgresql.org/message-id/ZN4OigxPJA236qlg%40msg.df7cb.de
+# The fix:
+# 1. Add `deb https://apt-archive.postgresql.org/pub/repos/apt bionic-pgdg main` to sources.list
+# 2. Remove /etc/apt/sources.list.d/pgdg.list
+sudo echo "deb https://apt.postgresql.org/pub/repos/apt/ focal-pgdg main 13">>/etc/apt/sources.list
+rm -f /etc/apt/sources.list.d/pgdg.list
+
 echo "Removing postgresql-9.3"
 apt-get --purge remove -y postgresql-9.3
 

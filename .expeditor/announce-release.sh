@@ -13,7 +13,7 @@ $(cat release-notes.md)
 ---
 ## Get the Build
 
-You can download binaries directly from [downloads.chef.io](https://downloads.chef.io/tools/infra-server/stable?v=$EXPEDITOR_VERSION).
+You can download binaries from https://www.chef.io/downloads
 EOH
 )
 
