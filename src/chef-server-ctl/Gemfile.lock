@@ -133,7 +133,7 @@ GEM
       rubocop (= 1.25.1)
     cleanroom (1.0.0)
     coderay (1.1.3)
-    concurrent-ruby (1.2.2)
+    concurrent-ruby (1.2.3)
     corefoundation (0.3.13)
       ffi (>= 1.15.0)
     diff-lcs (1.5.0)
@@ -240,7 +240,7 @@ GEM
     mixlib-cli (2.1.8)
     mixlib-config (3.0.27)
       tomlrb
-    mixlib-install (3.12.28)
+    mixlib-install (3.12.30)
       mixlib-shellout
       mixlib-versioning
       thor
@@ -299,7 +299,7 @@ GEM
     racc (1.7.3)
     rack (2.2.6.4)
     rainbow (3.1.1)
-    rake (13.1.0)
+    rake (13.2.0)
     redis (4.7.1)
     regexp_parser (2.8.2)
     rest-client (2.1.0)
@@ -355,7 +355,7 @@ GEM
       unicode_utils (~> 1.4)
     strings-ansi (0.2.0)
     syslog-logger (1.6.8)
-    thor (1.2.2)
+    thor (1.3.1)
     toml (0.3.0)
       parslet (>= 1.8.0, < 3.0.0)
     tomlrb (1.3.0)
