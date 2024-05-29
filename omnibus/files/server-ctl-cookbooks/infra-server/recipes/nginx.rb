@@ -270,7 +270,7 @@ end
   "#{node['private_chef']['nginx']['dir']}",
   "#{node['private_chef']['nginx']['log_directory']}",
 ].each do |nginx_no_root_perms_fix_path|
-  execute "find #{nginx_no_root_perms_fix_path} -user 'root' -exec chown #{node['private_chef']['user']['username']} {} \\;" do
+  execute "find #{nginx_no_root_perms_fix_path} -user 'root' -exec chown #{node['private_chef']['user']['username']} {} \\+" do
     user 'root'
     only_if do
       node['private_chef']['nginx']['nginx_no_root'] &&
