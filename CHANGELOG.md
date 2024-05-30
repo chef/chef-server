@@ -1,30 +1,28 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.9.38 -->
-## [15.9.38](https://github.com/chef/chef-server/tree/15.9.38) (2024-05-21)
-
-#### Merged Pull Requests
-- Bump rack from 2.2.3.1 to 2.2.6.2 in /oc-chef-pedant [#3579](https://github.com/chef/chef-server/pull/3579) ([dependabot[bot]](https://github.com/dependabot[bot]))
+<!-- latest_release -->
 <!-- latest_release -->
 
-<!-- release_rollup since=15.9.27 -->
-### Changes since 15.9.27 release
-
-#### Merged Pull Requests
-- Bump rack from 2.2.3.1 to 2.2.6.2 in /oc-chef-pedant [#3579](https://github.com/chef/chef-server/pull/3579) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.9.38 -->
-- Bump rake from 13.2.0 to 13.2.1 in /oc-chef-pedant [#3805](https://github.com/chef/chef-server/pull/3805) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.9.37 -->
-- unpin openresty and update plan.sh [#3781](https://github.com/chef/chef-server/pull/3781) ([poorndm](https://github.com/poorndm)) <!-- 15.9.36 -->
-- Bump omnibus-software from `4ea194c` to `e4e5868` in /omnibus [#3809](https://github.com/chef/chef-server/pull/3809) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.9.35 -->
-- Bump mixlib-install from 3.12.28 to 3.12.30 in /src/chef-server-ctl [#3798](https://github.com/chef/chef-server/pull/3798) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.9.34 -->
-- Bump rake from 13.1.0 to 13.2.0 in /oc-chef-pedant [#3797](https://github.com/chef/chef-server/pull/3797) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.9.33 -->
-- Bump rake from 13.1.0 to 13.2.0 in /src/chef-server-ctl [#3800](https://github.com/chef/chef-server/pull/3800) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.9.32 -->
-- Bump omnibus-software from `40ca2a9` to `4ea194c` in /omnibus [#3794](https://github.com/chef/chef-server/pull/3794) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.9.31 -->
-- Bump activesupport from 7.0.8 to 7.1.3.2 in /oc-chef-pedant [#3783](https://github.com/chef/chef-server/pull/3783) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.9.30 -->
-- Bump omnibus-software from `b48e542` to `40ca2a9` in /omnibus [#3779](https://github.com/chef/chef-server/pull/3779) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.9.29 -->
-- Added postgres version 13.14. [#3790](https://github.com/chef/chef-server/pull/3790) ([sreepuramsudheer](https://github.com/sreepuramsudheer)) <!-- 15.9.28 -->
+<!-- release_rollup -->
 <!-- release_rollup -->
 
 <!-- latest_stable_release -->
+## [15.9.38](https://github.com/chef/chef-server/tree/15.9.38) (2024-05-30)
+
+#### Merged Pull Requests
+- Added postgres version 13.14. [#3790](https://github.com/chef/chef-server/pull/3790) ([sreepuramsudheer](https://github.com/sreepuramsudheer))
+- Bump omnibus-software from `b48e542` to `40ca2a9` in /omnibus [#3779](https://github.com/chef/chef-server/pull/3779) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump activesupport from 7.0.8 to 7.1.3.2 in /oc-chef-pedant [#3783](https://github.com/chef/chef-server/pull/3783) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump omnibus-software from `40ca2a9` to `4ea194c` in /omnibus [#3794](https://github.com/chef/chef-server/pull/3794) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump rake from 13.1.0 to 13.2.0 in /src/chef-server-ctl [#3800](https://github.com/chef/chef-server/pull/3800) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump rake from 13.1.0 to 13.2.0 in /oc-chef-pedant [#3797](https://github.com/chef/chef-server/pull/3797) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump mixlib-install from 3.12.28 to 3.12.30 in /src/chef-server-ctl [#3798](https://github.com/chef/chef-server/pull/3798) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump omnibus-software from `4ea194c` to `e4e5868` in /omnibus [#3809](https://github.com/chef/chef-server/pull/3809) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- unpin openresty and update plan.sh [#3781](https://github.com/chef/chef-server/pull/3781) ([poorndm](https://github.com/poorndm))
+- Bump rake from 13.2.0 to 13.2.1 in /oc-chef-pedant [#3805](https://github.com/chef/chef-server/pull/3805) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump rack from 2.2.3.1 to 2.2.6.2 in /oc-chef-pedant [#3579](https://github.com/chef/chef-server/pull/3579) ([dependabot[bot]](https://github.com/dependabot[bot]))
+<!-- latest_stable_release -->
+
 ## [15.9.27](https://github.com/chef/chef-server/tree/15.9.27) (2024-03-20)
 
 #### Merged Pull Requests
@@ -35,7 +33,6 @@
 - Added rocky9 to infra-server with latest omnibus version [#3720](https://github.com/chef/chef-server/pull/3720) ([muthuja](https://github.com/muthuja))
 - Infra server release for Amazon Linux 2023 [#3732](https://github.com/chef/chef-server/pull/3732) ([talktovikas](https://github.com/talktovikas))
 - Make onetrust key configurable [#3771](https://github.com/chef/chef-server/pull/3771) ([ayush-billore](https://github.com/ayush-billore))
-<!-- latest_stable_release -->
 
 ## [15.9.20](https://github.com/chef/chef-server/tree/15.9.20) (2024-01-10)
 
