@@ -1,8 +1,6 @@
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92 -*-
 %% ex: ts=4 sw=4 et
 %%
-%% @author Ryan Cragun <ryan@chef.io>
-%% @author John Keiser <jkeiser@chef.io.
 %%
 %% Copyright 2016 Chef Software, Inc. All Rights Reserved.
 %%
@@ -21,8 +19,8 @@
 %% under the License.
 %%
 
-{application, data_collector, [
-    {description, "Chef Server Data Collector"},
+{application, chef_telemetry, [
+    {description, "Chef Server Telemetry"},
     {vsn, {cmd,"cat ../../VERSION | awk '{print $0}'"}},
     {registered, []},
     {applications, [
@@ -32,5 +30,5 @@
         chef_secrets,
         opscoderl_httpc
     ]},
-    {mod, {data_collector_app, []}}
+    {mod, {chef_telemetry_app, []}}
 ]}.

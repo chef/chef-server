@@ -1,8 +1,6 @@
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92 -*-
 %% ex: ts=4 sw=4 et
 %%
-%% @author Ryan Cragun <ryan@chef.io>
-%% @author John Keiser <jkeiser@chef.io.
 %%
 %% Copyright 2016 Chef Software, Inc. All Rights Reserved.
 %%
@@ -21,16 +19,19 @@
 %% under the License.
 %%
 
-{application, data_collector, [
-    {description, "Chef Server Data Collector"},
-    {vsn, {cmd,"cat ../../VERSION | awk '{print $0}'"}},
-    {registered, []},
-    {applications, [
-        kernel,
-        stdlib,
-        lager,
-        chef_secrets,
-        opscoderl_httpc
-    ]},
-    {mod, {data_collector_app, []}}
-]}.
+-module(chef_telemetry_sup).
+
+-behaviour(supervisor).
+
+-export([init/1,
+         start_link/0
+        ]).
+
+start_link() ->
+    supervisor:start_link({local, ?MODULE}, ?MODULE, []).
+
+init([]) ->
+    Worker = {chef_telemetry_worker,
+             {chef_telemetry_worker, start_link, []},
+             permanent, 5000, supervisor, [chef_telemetry_worker]},
+    {ok, {{one_for_one, 10, 10}, [Worker]}}.
