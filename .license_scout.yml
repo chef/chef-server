@@ -145,6 +145,9 @@ fallbacks:
     - name: syslog-logger
       license_id: MIT
       license_content: https://raw.githubusercontent.com/ngmoco/syslog_logger/master/README.rdoc
+    - name: timeout
+      license_id: Ruby
+      license_content: https://raw.githubusercontent.com/ngmoco/syslog_logger/master/BSDL
     - name: unicorn-rails
       license_id: MIT
       license_content: https://raw.githubusercontent.com/samuelkadolph/unicorn-rails/master/LICENSE
