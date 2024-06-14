@@ -20,6 +20,9 @@ opensearch_plugins_dir      = opensearch['plugins_directory']     # /var/opt/ops
 opensearch_scripts_dir      = opensearch['scripts_directory']     # /var/opt/opscode/opensearch/scripts
 opensearch_temp_dir         = opensearch['temp_directory']        # /var/log/opscode/opensearch/tmp
 opensearch_log_dir          = opensearch['log_directory']         # /var/log/opscode/opensearch
+opensearch_env_dir          = opensearch['env_directory']         # /opt/opscode/service/opensearch/env
+opensearch_opt_conf_dir     = opensearch['opt_conf_directory']    # /opt/opscode/embedded/opensearch/config
+opensearch_opt_plugins_dir  = opensearch['opt_plugins_directory'] # /opt/opscode/embedded/opensearch/plugins
 
 config_file = File.join(opensearch_conf_dir, 'opensearch.yml')
 logging_config_file = File.join(opensearch_conf_dir, 'logging.yml')
@@ -78,12 +81,12 @@ sysctl 'vm.max_map_count' do
   notifies :run, 'execute[sysctl-reload]', :immediately
 end
 
-# Remove the old env config to ensre it's not left over after an upgrade.
-os_env_dir = '/opt/opscode/service/opensearch/env'
-directory os_env_dir do
+# Remove the old env config to ensure it's not left over after an upgrade.
+directory opensearch_env_dir do
   action :delete
   recursive true
 end
+
 template config_file do
   source 'opensearch.yml.erb'
   owner OmnibusHelper.new(node).ownership['owner']
@@ -144,11 +147,10 @@ execute 'generate ssl certificates' do
   command "sh #{ssl_script}"
   cwd opensearch_conf_dir
   user OmnibusHelper.new(node).ownership['owner']
-  not_if { ::File.exist?('/var/opt/opscode/opensearch/config/admin.pem') }
+  not_if { ::File.exist?("#{opensearch_conf_dir}/admin.pem") }
 end
 
-security_config_file = File.join('/opt/opscode/embedded/opensearch/plugins/opensearch-security/securityconfig/', 'internal_users.yml')
-template security_config_file do
+template "#{opensearch_opt_plugins_dir}/opensearch-security/securityconfig/internal_users.yml" do
   source 'opensearch_internal_users.yml.erb'
   owner OmnibusHelper.new(node).ownership['owner']
   group OmnibusHelper.new(node).ownership['group']
@@ -169,7 +171,7 @@ end
 #
 # TODO - what happens on upgrade? Will the config disappear until reconfigure?
 #
-link '/opt/opscode/embedded/opensearch/config' do
+link opensearch_opt_conf_dir do
   to opensearch_conf_dir
 end
 
@@ -185,8 +187,14 @@ end
 chef_sleep 10
 
 execute 'add internal user to opensearch security plugin' do
-  command 'export JAVA_HOME="/opt/opscode/embedded/open-jre/"; ./securityadmin.sh   -f ../securityconfig/internal_users.yml   -icl -nhnv -cert /opt/opscode/embedded/opensearch/config/admin.pem   -cacert /opt/opscode/embedded/opensearch/config/root-ca.pem   -key /opt/opscode/embedded/opensearch/config/admin-key.pem'
-  cwd '/opt/opscode/embedded/opensearch/plugins/opensearch-security/tools/'
+  command <<~EOF
+    export JAVA_HOME="/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/embedded/open-jre/";
+    ./securityadmin.sh -f ../securityconfig/internal_users.yml -icl -nhnv \
+    -cert #{opensearch_opt_conf_dir}/admin.pem \
+    -cacert #{opensearch_opt_conf_dir}/root-ca.pem \
+    -key #{opensearch_opt_conf_dir}/admin-key.pem
+  EOF
+  cwd "#{opensearch_opt_plugins_dir}/opensearch-security/tools/"
   user OmnibusHelper.new(node).ownership['owner']
   retries 10
   retry_delay 1
