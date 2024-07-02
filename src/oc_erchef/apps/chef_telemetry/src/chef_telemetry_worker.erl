@@ -17,11 +17,23 @@
     terminate/2
 ]).
 
+-record(current_scan, {
+    scan_start_time,
+    scan_end_time,
+    total_nodes,
+    active_nodes,
+    company_name
+}).
+
 -record(state, {
     timer_ref,
     report_time,
     reporting_url,
-    http_client
+    http_client,
+    db_context,
+    req_id,
+    scan_time,
+    current_scan
 }).
 
 -record(oc_chef_organization, {
@@ -58,7 +70,7 @@ init(_Config) ->
           end, 
     ReportingTime = envy:get(chef_telemetry, reporting_time, ?DEFAULT_REPORTING_TIME, Fun),
     Options = envy:get(chef_telemetry, ibrowse_options, ?DEFAULT_IBROWSE_OPTIONS, list),
-    HttpClient = oc_httpc_worker:start_link(ReportingUrl, Options, []),
+    {ok, HttpClient} = oc_httpc_worker:start_link(ReportingUrl, Options, []),
     State = #state{
         report_time = ReportingTime,
         reporting_url = ReportingUrl,
@@ -70,23 +82,29 @@ handle_call(_Message, _From, State) ->
     {noreply, State}.
 
 handle_cast(send_data, State) ->
+    State1 = init_req(State),
     % code to get chef_server version.
-    [{_Server, ServerVersion, _, _}] = release_handler:which_releases(permanent),
-    ReqId = base64:encode(term_to_binary(make_ref())),
-    {TotalNodes, _EndTime, _StartTime, ActiveNodes} = get_nodes(ReqId),
-    ScanTime = erlang:system_time(seconds),
-    CompanyName = get_company_name(),
-    Req = generate_request(CompanyName, list_to_binary(ServerVersion), TotalNodes, ActiveNodes, ScanTime),
-    send_data(Req, State),
+    ShouldSend = check_send(State1),
+    case ShouldSend of
+        true -> 
+            [{_Server, ServerVersion, _, _}] = release_handler:which_releases(permanent),
+            State2 = get_nodes(State1),
+            State3 = get_company_name(State2),
+            Req = generate_request(list_to_binary(ServerVersion), State3),
+            send_data(Req, State3),
+            State3;
+        _   ->
+            State1
+    end,
     gen_server:cast(self(), init_timer),
-    {noreply, State};
+    {noreply, State1};
 
 handle_cast(init_timer, State) ->
-    {_Date, {Hour, Min, _Sec}} = erlang:universaltime(),
+    {_Date, {Hour, Min, _Sec}} = erlang:now_to_universal_time(State#state.scan_time),
     {RHour, RMin} = State#state.report_time,
     CurrentDaySeconds = Hour * 3600 + Min * 60,
     ReportingSeconds = RHour * 3600 + RMin * 60,
-    DelaySeconds = rand:normal() * ?WINDOW_SECONDS,
+    DelaySeconds = floor(rand:uniform() * ?WINDOW_SECONDS),
     Diff = ReportingSeconds - CurrentDaySeconds,
     if 
         Diff == 0 -> 
@@ -109,6 +127,21 @@ code_change(_OldVsn, State) ->
 
 terminate(_Reason, _State) ->
     ok.
+
+init_req(State) ->
+    ReqId = base64:encode(term_to_binary(make_ref())),
+    DbContext = chef_db:make_context("1.0", ReqId, false),
+    CurrentTime = erlang:system_time(seconds),
+    StartTime = CurrentTime - (?DEFAULT_DAYS * 86400),
+    State#state{
+        req_id = ReqId,
+        db_context = DbContext,
+        scan_time = CurrentTime,
+        current_scan = 
+            #current_scan{
+                scan_start_time = StartTime,
+                scan_end_time = CurrentTime}
+    }.
 
 get_org_nodes(OrgName, Query1, ReqId, DbContext) ->
     {Guid1, _AuthzId1} = 
@@ -140,7 +173,8 @@ solr_search(Query) ->
             {Error, Reason}
     end.
 
-get_company_name() ->
+get_company_name(State) ->
+    CompanyName = 
     case sqerl:adhoc_select([email], users, all, []) of
         {ok, Ids1} ->
             Ids = [Id || [{_, Id}] <- Ids1],
@@ -154,14 +188,17 @@ get_company_name() ->
                     end
                 end,
             CompanyNames = lists:filtermap(Fun, Ids),
-            if length(CompanyNames) ->
+            if length(CompanyNames) == 0 ->
                 throw("no valid Email Ids.");
             true -> 
                 get_most_occuring(CompanyNames)
             end;
         Error -> 
             throw(Error)
-    end.
+    end,
+    CurrentScan = State#state.current_scan,
+    State#state{
+        current_scan = CurrentScan#current_scan{company_name = CompanyName}}.
 
 get_most_occuring(List) ->
     FirstElement = lists:nth(1, List),
@@ -183,13 +220,12 @@ get_most_occuring(List) ->
     Res1 = maps:fold(Fun1, {FirstElement, 0}, Map1),
     element(1, Res1).
 
-get_nodes(ReqId) ->
-    EpochNow = erlang:system_time(seconds), 
-    TimeDuration = ?DEFAULT_DAYS * 86400,
-    Epoch30DaysOld = EpochNow - TimeDuration,
-    QueryString = lists:flatten(io_lib:format("ohai_time:{~p TO ~p}", [Epoch30DaysOld, EpochNow])),
+get_nodes(#state{req_id = ReqId, db_context = DbContext} = State) ->
+    CurrentScan = State#state.current_scan,
+    ScanStartTime = CurrentScan#current_scan.scan_start_time,
+    ScanEndTime = CurrentScan#current_scan.scan_end_time,
+    QueryString = lists:flatten(io_lib:format("ohai_time:{~p TO ~p}", [ScanStartTime, ScanEndTime])),
     Query1 = chef_index:query_from_params("node", QueryString, undefined, undefined),
-    DbContext = chef_db:make_context("1.0", ReqId, false),
     Count = 
         case chef_db:count_nodes(DbContext) of
             Count1 when is_integer(Count1) -> Count1;
@@ -205,26 +241,30 @@ get_nodes(ReqId) ->
               Sum + Nodes
           end,
     ActiveNodes = lists:foldl(Fun, 0, Stats),
-    {Count, calendar:system_time_to_rfc3339(EpochNow,[{offset, "Z"}]), calendar:system_time_to_rfc3339(Epoch30DaysOld,[{offset, "Z"}]), ActiveNodes}.
+    State#state{
+        current_scan = CurrentScan#current_scan{
+            total_nodes = Count,
+            active_nodes = ActiveNodes}}.
 
-generate_request(CompanyName, ServerVersion, TotalNodes, ActiveNodes, ScanTime) ->
+generate_request(ServerVersion, State) ->
+    CurrentScan = State#state.current_scan,
     jiffy:encode({[
     {<<"licenseId">>, <<"Infra-Server-license-Id">>},
     %%{<<"customerId">>, <<"">>},
     %%{<<"expiration">>, <<"2023-11-30T00:00:00Z">>},
-    {<<"customerName">>, to_binary(CompanyName)},
+    {<<"customerName">>, to_binary(State#state.current_scan#current_scan.company_name)},
     {<<"periods">>, [
         {[
             {<<"version">>, to_binary(ServerVersion)},
-            {<<"date">>, to_binary(epoch_to_string(ScanTime))},
+            {<<"date">>, to_binary(epoch_to_string(CurrentScan#current_scan.scan_end_time))},
             {<<"period">>, {[
-                {<<"start">>, to_binary(epoch_to_string(ScanTime))},
-                {<<"end">>, to_binary(epoch_to_string(ScanTime))}
+                {<<"start">>, to_binary(epoch_to_string(CurrentScan#current_scan.scan_start_time))},
+                {<<"end">>, to_binary(epoch_to_string(CurrentScan#current_scan.scan_end_time))}
             ]}},
             {<<"summary">>, {[
                 {<<"nodes">>, {[
-                    {<<"total">>, TotalNodes},
-                    {<<"active">>, ActiveNodes}
+                    {<<"total">>, CurrentScan#current_scan.total_nodes},
+                    {<<"active">>, CurrentScan#current_scan.active_nodes}
                 ]}},
                 {<<"scans">>, {[
                     {<<"total">>, 0},
@@ -252,7 +292,7 @@ generate_request(CompanyName, ServerVersion, TotalNodes, ActiveNodes, ScanTime) 
     ]}},
     {<<"source">>, <<"Infra Server">>},
     {<<"scannerVersion">>, <<"0.1.0">>},
-    {<<"scannedOn">>, to_binary(epoch_to_string(ScanTime))}
+    {<<"scannedOn">>, to_binary(epoch_to_string(State#state.scan_time))}
             ]}).
 
 to_binary(String) when is_list(String) ->
@@ -268,7 +308,45 @@ epoch_to_string(Epoch) ->
     calendar:system_time_to_rfc3339(Epoch, [{offset, "Z"}]).
 
 send_data(Req, State) ->
-    case oc_httpc_worker:request(State#state.http_client,"", [], post, Req, 5000) of
+    case catch ibrowse:send_req(State#state.reporting_url, [], post, Req, [], 5000) of
         {ok, _Status, _ResponseHeaders, _ResponseBody} -> ok;
-        {error, Reason}                             -> throw({failed_sending_request, Reason})
+        Error                                          -> throw({failed_sending_request, Error})
     end.
+
+check_send(State) ->
+    Node = erlang:atom_to_binary(node()),
+    Now = calendar:system_time_to_universal_time(State#state.scan_time, second),
+    case sqerl:adhoc_select([timestamp1], telemetry, {property, equals, "last_send"}, []) of
+        {ok, Rows} when is_list(Rows) ->
+            LastSend = to_system_time(Rows),
+            case should_send(LastSend, State) of
+                true ->
+                    sqerl:adhoc_delete(telemetry, {<<"property">>, equals, <<"last_send">>}),
+                    sqerl:adhoc_insert(telemetry, [[{<<"property">>, <<"last_send">>}, {<<"valuestring">>, Node}, {<<"timestamp1">>, Now}]]),
+                    true;
+                false ->
+                    false
+            end;
+        {ok, Rows} when is_list(Rows) andalso length(Rows) == 0 ->
+            sqerl:adhoc_insert(telemetry, [[{<<"property">>, <<"last_send">>}, {<<"valuestring">>, Node}, {<<"timestamp1">>, Now}]]),
+            true;
+        Error -> 
+            throw({not_able_to_gead_from_db, Error})
+    end.
+
+to_system_time(Rows) ->
+    TimeStamps1 = [ proplists:get_value(<<"timestamp1">>, Row) || Row <- Rows, not (proplists:get_value(<<"timestamp1">>, Row) == undefined) ],
+    SystemTimes = [calendar:datetime_to_gregorian_seconds({Date, {H, M, floor(S1)}}) - 62167219200 || {Date, {H, M, S1}} <- TimeStamps1],
+    MaxFun = 
+        fun(Time, Max) ->
+            case Time > Max of
+                true ->
+                    Time;
+                _   ->
+                    Max
+            end
+        end,
+    lists:foldl( MaxFun, 0, SystemTimes).
+
+should_send(LastSend, State) ->
+    LastSend < State#state.scan_time.
