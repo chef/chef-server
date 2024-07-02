@@ -58,7 +58,7 @@ init(_Config) ->
           end, 
     ReportingTime = envy:get(chef_telemetry, reporting_time, ?DEFAULT_REPORTING_TIME, Fun),
     Options = envy:get(chef_telemetry, ibrowse_options, ?DEFAULT_IBROWSE_OPTIONS, list),
-    HttpClient = oc_httpc_worker:start_link(ReportingUrl, Options, []),
+    {ok, HttpClient} = oc_httpc_worker:start_link(ReportingUrl, Options, []),
     State = #state{
         report_time = ReportingTime,
         reporting_url = ReportingUrl,
@@ -86,7 +86,7 @@ handle_cast(init_timer, State) ->
     {RHour, RMin} = State#state.report_time,
     CurrentDaySeconds = Hour * 3600 + Min * 60,
     ReportingSeconds = RHour * 3600 + RMin * 60,
-    DelaySeconds = rand:normal() * ?WINDOW_SECONDS,
+    DelaySeconds = floor(rand:uniform() * ?WINDOW_SECONDS),
     Diff = ReportingSeconds - CurrentDaySeconds,
     if 
         Diff == 0 -> 
@@ -268,7 +268,7 @@ epoch_to_string(Epoch) ->
     calendar:system_time_to_rfc3339(Epoch, [{offset, "Z"}]).
 
 send_data(Req, State) ->
-    case oc_httpc_worker:request(State#state.http_client,"", [], post, Req, 5000) of
+    case catch ibrowse:send_req(State#state.reporting_url, [], post, Req, [], 5000) of
         {ok, _Status, _ResponseHeaders, _ResponseBody} -> ok;
-        {error, Reason}                             -> throw({failed_sending_request, Reason})
+        Error                                          -> throw({failed_sending_request, Error})
     end.
