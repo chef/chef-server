@@ -23,7 +23,7 @@ skip_transitive_dependency_licensing true
 dependency "config_guess"
 default_version "6.3.4"
 
-version("6.3.4") { source sha256: "6aea5ddbfe4f2137c6ea933b42592862bed6ae424a130885aff82273fe9641d0" }
+version("6.3.4") { source sha256: "ba16b8ddf1872305f76a2f7a1a03f2e0abfc63689878197b120795192ff6640d" }
 
 source url: "https://download.keydb.dev/pkg/open_source/deb/ubuntu18.04_bionic/amd64/keydb_all_versions/keydb-6.3.4/keydb-server_6.3.4-1~bionic1_amd64.deb"
 
