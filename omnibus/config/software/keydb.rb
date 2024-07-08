@@ -25,7 +25,7 @@ default_version "6.3.4"
 
 version("6.3.4") { source sha256: "6aea5ddbfe4f2137c6ea933b42592862bed6ae424a130885aff82273fe9641d0" }
 
-source url: "https://download.keydb.dev/pkg/open_source/deb/ubuntu18.04_bionic/amd64/keydb_all_versions/keydb-6.3.4/keydb_6.3.4-1~bionic1_amd64.deb"
+source url: "https://download.keydb.dev/pkg/open_source/deb/ubuntu18.04_bionic/amd64/keydb_all_versions/keydb-6.3.4/keydb-server_6.3.4-1~bionic1_amd64.deb"
 
 relative_path "keydb-#{version}"
 
@@ -43,15 +43,3 @@ build do
   make "-j #{workers}", env: env
   make "install", env: env
 end
-
-
-
-
-
-
-
-
-
-
-
-https://download.keydb.dev/pkg/open_source/deb/ubuntu18.04_bionic/amd64/keydb_all_versions/keydb-6.3.4/keydb-server_6.3.4-1~bionic1_amd64.deb
