@@ -43,6 +43,6 @@ build do
     patch source: "password-from-environment.patch", plevel: 1, env: env
   end
 
-  make "-j #{workers}", env: env
-  make "install", env: env
+  command "make" , env: env
+  command "make install", env: env
 end
