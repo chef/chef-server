@@ -27,7 +27,7 @@ version("6.3.4") { source sha256: "ba16b8ddf1872305f76a2f7a1a03f2e0abfc636898781
 
 source url: "https://download.keydb.dev/pkg/open_source/deb/ubuntu18.04_bionic/amd64/keydb_all_versions/keydb-6.3.4/keydb-server_6.3.4-1~bionic1_amd64.deb"
 
-source url: "https://github.com/Snapchat/KeyDB/archive/refs/tags/v6.3.4.tar.gz"
+source url: "https://github.com/Snapchat/KeyDB/archive/refs/tags/v6.3.4.zip"
 
 
 relative_path "keydb-#{version}"
