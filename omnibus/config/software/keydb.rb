@@ -30,7 +30,7 @@ version("6.3.4") { source sha256: "a58fc0f1bbdea9b692a50e808671f7ef81343c93cefe5
 source url: "https://github.com/Snapchat/KeyDB/archive/refs/tags/v6.3.4.zip"
 
 
-relative_path "keydb-#{version}"
+relative_path "KeyDB-#{version}"
 
 build do
   env = with_standard_compiler_flags(with_embedded_path).merge(
