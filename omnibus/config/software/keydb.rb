@@ -21,13 +21,13 @@ license_file "COPYING"
 skip_transitive_dependency_licensing true
 
 dependency "config_guess"
-default_version "6.3.4"
+default_version "6.2.2"
 
-version("6.3.4") { source sha256: "a58fc0f1bbdea9b692a50e808671f7ef81343c93cefe5cf15ce030afd5bed78a" }
+version("6.2.2") { source sha256: "368da41404b414a5baea78ad0110ecee5fda779758c7b0762ac788549ac24db9" }
 
 # source url: "https://download.keydb.dev/pkg/open_source/deb/ubuntu18.04_bionic/amd64/keydb_all_versions/keydb-6.3.4/keydb-server_6.3.4-1~bionic1_amd64.deb"
 
-source url: "https://github.com/Snapchat/KeyDB/archive/refs/tags/v6.3.4.zip"
+source url: "https://github.com/Snapchat/KeyDB/archive/refs/tags/v6.2.2.zip"
 
 
 relative_path "KeyDB-#{version}"
