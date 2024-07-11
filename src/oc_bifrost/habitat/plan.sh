@@ -6,7 +6,7 @@ pkg_deps=(
   core/erlang24
   core/cacerts
   core/coreutils
-  core/curl
+  core/curl/8.7.1/20240614090648
   core/gcc-libs
   core/sqitch_pg
 )
