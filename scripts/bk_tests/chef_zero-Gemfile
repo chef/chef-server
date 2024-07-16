@@ -9,6 +9,10 @@ gem 'rake'
 
 gem 'chef',  "17.10.0"
 # For "rake chef_zero_spec"
+if Gem::Version.new(RUBY_VERSION) <= Gem::Version.new("3.1.0")
+    gem "ffi", "< 1.17.0"
+    gem "train-core", "< 3.12.5"
+end
 gem 'chef-zero', github: 'chef/chef-zero', tag: 'v15.0.11'
 
 # If you want to load debugging tools into the bundle exec sandbox,
