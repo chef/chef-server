@@ -28,9 +28,9 @@
 -include_lib("eunit/include/eunit.hrl").
 -endif.
 
-hex2dec(X) when (X>=$0) andalso (X=<$9) -> X-$0;
-hex2dec(X) when (X>=$A) andalso (X=<$F) -> X-$A+10;
-hex2dec(X) when (X>=$a) andalso (X=<$f) -> X-$a+10.
+hex2dec(X) when (X>=$0) andalso (X=<$9) -> X - $0;
+hex2dec(X) when (X>=$A) andalso (X=<$F) -> X - $A + 10;
+hex2dec(X) when (X>=$a) andalso (X=<$f) -> X - $a + 10.
 
 -type uri() :: string() | binary().
 -type hex_uri() :: string() | binary(). %% Hexadecimal encoded URI.
@@ -40,10 +40,10 @@ hex2dec(X) when (X>=$a) andalso (X=<$f) -> X-$a+10.
 http_uri_decode(String) when is_list(String) ->
     do_decode(String).
 
-do_decode([$%,Hex1,Hex2|Rest]) ->
-    [hex2dec(Hex1)*16+hex2dec(Hex2)|do_decode(Rest)];
-do_decode([First|Rest]) ->
-    [First|do_decode(Rest)];
+do_decode([$%, Hex1, Hex2 | Rest]) ->
+    [hex2dec(Hex1) * 16 + hex2dec(Hex2) | do_decode(Rest)];
+do_decode([First | Rest]) ->
+    [First | do_decode(Rest)];
 do_decode([]) ->
     [].
 

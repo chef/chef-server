@@ -33,7 +33,7 @@ all_test_() ->
   {foreach,
    fun() ->
            error_logger:delete_report_handler(error_logger_tty_h),
-           [ ok = application:start(App) || App <- ?NEEDED_APPS ],
+           [ ok = application:ensure_started(App) || App <- ?NEEDED_APPS ],
            PoolConfig = [{name, chef_depsolver},
                          {max_count, 1},
                          {init_count, 1},
@@ -320,15 +320,15 @@ depsolver_first() ->
                            {<<"0.2">>, []},
                            {<<"0.3">>, []}]},
              {<<"app2">>, [{<<"0.1">>, []},
-                           {<<"0.2.33">>,[{<<"app3">>, <<"0.3">>}]},
+                           {<<"0.2.33">>, [{<<"app3">>, <<"0.3">>}]},
                            {<<"0.3">>, []}]},
              {<<"app3">>, [{<<"0.1">>, []},
                            {<<"0.2">>, []},
                            {<<"0.3">>, []}]}],
     RunList = [{<<"app1">>, <<"0.1">>}],
-    Expected = {ok,[{<<"app1">>,{0,1,0}},
-                    {<<"app2">>,{0,2,33}},
-                    {<<"app3">>,{0,3,0}}]},
+    Expected = {ok,[{<<"app1">>, {0,1,0}},
+                    {<<"app2">>, {0,2,33}},
+                    {<<"app3">>, {0,3,0}}]},
     Result = chef_depsolver:solve_dependencies(World, [], RunList),
     ?assertEqual(Expected, Result).
 
@@ -350,10 +350,10 @@ depsolver_second() ->
                            {<<"0.3">>, []}]}],
     RunList = [{<<"app1">>, <<"0.1">>},
                {<<"app2">>, <<"0.3">>}],
-    Expected = {ok, [{<<"app1">>,{0,1,0}},
-                     {<<"app2">>,{0,3,0}},
-                     {<<"app3">>,{0,3,0}},
-                     {<<"app4">>,{0,2,0}}]},
+    Expected = {ok, [{<<"app1">>, {0,1,0}},
+                     {<<"app2">>, {0,3,0}},
+                     {<<"app3">>, {0,3,0}},
+                     {<<"app4">>, {0,2,0}}]},
     Result = chef_depsolver:solve_dependencies(World, [], RunList),
     ?assertEqual(Expected, Result).
 
@@ -385,18 +385,18 @@ depsolver_third() ->
                            {<<"2.0.0">>, []},
                            {<<"6.0.0">>, []}]}],
 
-    ?assertEqual({ok, [{<<"app1">>,{3,0,0}},
-                       {<<"app2">>,{3,0,0}},
-                       {<<"app4">>,{6,0,0}},
-                       {<<"app5">>,{6,0,0}},
-                       {<<"app3">>,{0,1,3}}]},
+    ?assertEqual({ok, [{<<"app1">>, {3,0,0}},
+                       {<<"app2">>, {3,0,0}},
+                       {<<"app4">>, {6,0,0}},
+                       {<<"app5">>, {6,0,0}},
+                       {<<"app3">>, {0,1,3}}]},
                  chef_depsolver:solve_dependencies(World, [], [{<<"app1">>, <<"3.0">>}])),
 
-    ?assertEqual({ok, [{<<"app1">>,{3,0,0}},
-                       {<<"app2">>,{3,0,0}},
-                       {<<"app4">>,{6,0,0}},
-                       {<<"app5">>,{6,0,0}},
-                       {<<"app3">>,{0,1,3}}]},
+    ?assertEqual({ok, [{<<"app1">>, {3,0,0}},
+                       {<<"app2">>, {3,0,0}},
+                       {<<"app4">>, {6,0,0}},
+                       {<<"app5">>, {6,0,0}},
+                       {<<"app3">>, {0,1,3}}]},
                  chef_depsolver:solve_dependencies(World, [], [<<"app1">>])).
 
 depsolver_fail() ->
@@ -405,7 +405,7 @@ depsolver_fail() ->
                            {<<"0.2">>, []},
                            {<<"0.3">>, []}]},
              {<<"app2">>, [{<<"0.1">>, []},
-                           {<<"0.2">>,[{<<"app3">>, <<"0.1">>}]},
+                           {<<"0.2">>, [{<<"app3">>, <<"0.1">>}]},
                            {<<"0.3">>, []}]},
              {<<"app3">>, [{<<"0.1">>, []},
                            {<<"0.2">>, []},
@@ -445,20 +445,20 @@ depsolver_conflicting_passing() ->
                            {<<"2.0.0">>, []},
                            {<<"6.0.0">>, []}]}],
 
-    ?assertEqual({ok, [{<<"app1">>,{3,0,0}},
-                       {<<"app2">>,{3,0,0}},
-                       {<<"app4">>,{5,0,0}},
-                       {<<"app5">>,{2,0,0}},
-                       {<<"app3">>,{0,1,3}}]},
+    ?assertEqual({ok, [{<<"app1">>, {3,0,0}},
+                       {<<"app2">>, {3,0,0}},
+                       {<<"app4">>, {5,0,0}},
+                       {<<"app5">>, {2,0,0}},
+                       {<<"app3">>, {0,1,3}}]},
                  chef_depsolver:solve_dependencies(World,
                                                    [],
                                                    [{<<"app1">>, <<"3.0">>}])),
 
-    ?assertEqual({ok, [{<<"app1">>,{3,0,0}},
-                       {<<"app2">>,{3,0,0}},
-                       {<<"app4">>,{5,0,0}},
-                       {<<"app5">>,{2,0,0}},
-                       {<<"app3">>,{0,1,3}}]},
+    ?assertEqual({ok, [{<<"app1">>, {3,0,0}},
+                       {<<"app2">>, {3,0,0}},
+                       {<<"app4">>, {5,0,0}},
+                       {<<"app5">>, {2,0,0}},
+                       {<<"app3">>, {0,1,3}}]},
                  chef_depsolver:solve_dependencies(World,
                                                    [],
 %%                                                   [<<"app5">>, <<"app2">>, <<"app1">>])).
@@ -468,8 +468,8 @@ depsolver_circular_dependencies() ->
     World = [{<<"app1">>, [{<<"0.1.0">>, [<<"app2">>]}]},
              {<<"app2">>, [{<<"0.0.1">>, [<<"app1">>]}]}],
 
-    ?assertEqual({ok, [{<<"app1">>,{0,1,0}},
-                       {<<"app2">>,{0,0,1}}]},
+    ?assertEqual({ok, [{<<"app1">>, {0,1,0}},
+                       {<<"app2">>, {0,0,1}}]},
                  chef_depsolver:solve_dependencies(World,
                                                    [],
                                                    [{<<"app1">>, <<"0.1.0">>}])).
@@ -524,11 +524,11 @@ depsolver_pessimistic_major_minor_patch() ->
                            {<<"0.3.0">>, []},
                            {<<"2.0.0">>, []},
                            {<<"6.0.0">>, []}]}],
-    ?assertEqual({ok, [{<<"app1">>,{3,0,0}},
-                       {<<"app2">>,{2,1,5}},
-                       {<<"app4">>,{6,0,0}},
-                       {<<"app5">>,{6,0,0}},
-                       {<<"app3">>,{0,1,3}}]},
+    ?assertEqual({ok, [{<<"app1">>, {3,0,0}},
+                       {<<"app2">>, {2,1,5}},
+                       {<<"app4">>, {6,0,0}},
+                       {<<"app5">>, {6,0,0}},
+                       {<<"app3">>, {0,1,3}}]},
                  chef_depsolver:solve_dependencies(World, [], [{<<"app1">>, <<"3.0">>}])).
 
 depsolver_pessimistic_major_minor() ->
@@ -562,11 +562,11 @@ depsolver_pessimistic_major_minor() ->
                            {<<"0.3.0">>, []},
                            {<<"2.0.0">>, []},
                            {<<"6.0.0">>, []}]}],
-    ?assertEqual({ok, [{<<"app1">>,{3,0,0}},
-                       {<<"app2">>,{2,2,0}},
-                       {<<"app4">>,{6,0,0}},
-                       {<<"app5">>,{6,0,0}},
-                       {<<"app3">>,{0,1,3}}]},
+    ?assertEqual({ok, [{<<"app1">>, {3,0,0}},
+                       {<<"app2">>, {2,2,0}},
+                       {<<"app4">>, {6,0,0}},
+                       {<<"app5">>, {6,0,0}},
+                       {<<"app3">>, {0,1,3}}]},
                  chef_depsolver:solve_dependencies(World, [], [{<<"app1">>, <<"3.0">>}])).
 
 depsolver_missing() ->
@@ -576,7 +576,7 @@ depsolver_missing() ->
                            {<<"0.2">>, [{<<"app4">>, <<"0.2">>}]},
                            {<<"0.3">>, [{<<"app4">>, <<"0.2">>, '='}]}]},
              {<<"app2">>, [{<<"0.1">>, []},
-                           {<<"0.2">>,[{<<"app3">>, <<"0.3">>}]},
+                           {<<"0.2">>, [{<<"app3">>, <<"0.3">>}]},
                            {<<"0.3">>, []}]},
              {<<"app3">>, [{<<"0.1">>, []},
                            {<<"0.2">>, []},
@@ -590,14 +590,14 @@ depsolver_missing() ->
                    {constraints_not_met,[]}]}, Ret1),
 
     Ret2 = chef_depsolver:solve_dependencies(World, [], [{<<"app1">>, <<"0.1">>}]),
-    ?assertMatch({error,no_solution,_},Ret2).
+    ?assertMatch({error,no_solution, _}, Ret2).
 
 
 depsolver_missing_via_culprit_search() ->
-    World = [{<<"app1">>,[{<<"1.1.0">>,[]}]},
-             {<<"app2">>,[{<<"0.0.1">>,[{<<"app1::oops">>,<<"0.0.0">>,'>='}]} ]} ],
-    Result = chef_depsolver:solve_dependencies(World, [], [<<"app1">>,<<"app2">>]),
-    ?assertMatch({error,no_solution,_}, Result).
+    World = [{<<"app1">>, [{<<"1.1.0">>, []}]},
+             {<<"app2">>, [{<<"0.0.1">>, [{<<"app1::oops">>, <<"0.0.0">>,'>='}]} ]} ],
+    Result = chef_depsolver:solve_dependencies(World, [], [<<"app1">>, <<"app2">>]),
+    ?assertMatch({error,no_solution, _}, Result).
 
 %% This test from the depsolver library may no longer be necessary. It seems to be
 %% testing that you can pass binary data to depsolver and it performs the same.

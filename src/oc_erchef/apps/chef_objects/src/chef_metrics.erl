@@ -39,7 +39,7 @@
 %% function under measurement that implements some aspect of that
 %% functionality.
 -spec label(Upstream :: atom(),
-            {Mod :: atom(), Fun :: atom()}) -> Label :: <<_:16,_:_*8>>.
+            {Mod :: atom(), Fun :: atom()}) -> Label :: <<_:16, _:_*8>>.
 label(s3=Upstream, {Mod, Fun}) when is_atom(Mod),
                                     is_atom(Fun) ->
     %% S3-related labels are special snowflakes because we want to

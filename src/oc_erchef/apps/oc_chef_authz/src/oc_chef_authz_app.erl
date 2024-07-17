@@ -7,10 +7,10 @@
 %% Application callbacks
 -export([start/2, stop/1]).
 
-start()->
-  start(type,args).
+start() ->
+  start(type, args).
 
-stop()->
+stop() ->
   stop(state).
 
 start(_StartType, _StartArgs) ->

@@ -67,7 +67,7 @@ validate(Sandbox) ->
 -spec valid_checksum_hash(Input :: any()) -> ok | error.
 valid_checksum_hash({[]}) ->
     error;
-valid_checksum_hash({[{Checksum, Value}|Rest]}) ->
+valid_checksum_hash({[{Checksum, Value} | Rest]}) ->
     case {is_md5_hex(Checksum), Value} of
         {true, null} ->
             case Rest of
@@ -148,19 +148,19 @@ fetch(#chef_sandbox{org_id = OrgId, id = SandboxID}, CallbackFun) ->
 %% See the 'find_sandbox_by_id' prepared query for the row "shape".
 sandbox_join_rows_to_record(Rows) ->
     sandbox_join_rows_to_record(Rows, []).
-sandbox_join_rows_to_record([LastRow|[]], Checksums) ->
+sandbox_join_rows_to_record([LastRow | []], Checksums) ->
     C = proplist_to_checksum(LastRow),
     #chef_sandbox{id = safe_get(<<"sandbox_id">>, LastRow),
                   org_id = safe_get(<<"org_id">>, LastRow),
                   created_at = safe_get(<<"created_at">>, LastRow),
-                  checksums = lists:reverse([C|Checksums])};
-sandbox_join_rows_to_record([Row|Rest], Checksums ) ->
+                  checksums = lists:reverse([C | Checksums])};
+sandbox_join_rows_to_record([Row | Rest], Checksums ) ->
     C = proplist_to_checksum(Row),
-    sandbox_join_rows_to_record(Rest, [C|Checksums]).
+    sandbox_join_rows_to_record(Rest, [C | Checksums]).
 
 %% @doc Safely retrieves a value from a proplist.  Throws an error if the specified key does
 %% not exist in the list.
--spec safe_get(Key::binary(), Proplist::[{binary(), term()}]) -> term().
+-spec safe_get(Key :: binary(), Proplist :: [{binary(), term()}]) -> term().
 safe_get(Key, Proplist) ->
     {Key, Value} = lists:keyfind(Key, 1, Proplist),
     Value.
