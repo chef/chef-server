@@ -2,7 +2,7 @@
 # When updating this, check doc/FrequentTasks.md for checklists to ensure all
 # the various usages are updated in lockstep
 #
-override :erlang, version: "24.3.2"
+override :erlang, version: "26.2.2"
 override :'omnibus-ctl', version: "main"
 override :chef, version: "v17.10.0"
 override :ohai, version: "v16.17.0"
