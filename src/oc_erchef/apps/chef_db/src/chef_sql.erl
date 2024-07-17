@@ -155,7 +155,7 @@ fetch_org_metadata(OrgName) ->
         {ok, none} ->
             not_found;
         {ok, L} when is_list(L) ->
-            Guid = proplists:get_value(<<"id">>,L),
+            Guid = proplists:get_value(<<"id">>, L),
             AuthzId = proplists:get_value(<<"authz_id">>, L),
             {Guid, AuthzId};
         {error, Error} ->
@@ -242,7 +242,7 @@ bulk_get_clients(ApiVersion, Ids) ->
             {error, Error}
     end.
 
--spec fetch_cookbook_versions(OrgId::object_id()) ->
+-spec fetch_cookbook_versions(OrgId :: object_id()) ->
     {ok, [versioned_cookbook()]} | {error, term()}.
 %% @doc Return list of [cookbook name, version()] for a given organization.  The list is returned sort
 %% by name, major, minor, patch fields.
@@ -250,7 +250,7 @@ fetch_cookbook_versions(OrgId) ->
     QueryName = list_cookbook_versions_by_orgid,
     cookbook_versions_from_db(QueryName, [OrgId]).
 
--spec fetch_cookbook_versions(OrgId::object_id(), CookbookName::binary()) ->
+-spec fetch_cookbook_versions(OrgId :: object_id(), CookbookName :: binary()) ->
     {ok, [versioned_cookbook()]} | {error, term()}.
 %% @doc Return list of [cookbook name, version()] for a given organization and cookbook.
 %% The list is returned sorted by name, major, minor, patch fields.
@@ -317,7 +317,7 @@ fetch_latest_cookbook_versions(OrgId, CookbookName, NumberOfVersions) ->
             Raw = lists:foldl(fun(Row, Acc) ->
                                       N = proplists:get_value(<<"name">>, Row),
                                       V = proplists:get_value(<<"version">>, Row),
-                                      [{N,V}|Acc]
+                                      [{N, V} | Acc]
                               end,
                               [],
                               CookbookVersions),
@@ -331,8 +331,8 @@ fetch_latest_cookbook_versions(OrgId, CookbookName, NumberOfVersions) ->
 %% recipes within the opaque blob that is the serialized_object; this
 %% is a GZipped JSON string, which will need to be decompressed and
 %% decoded from JSON before the actual recipes can be extracted.
--spec fetch_latest_cookbook_recipes(OrgId::object_id()) -> {ok, [{CookbookName::binary(),
-                                                                  SerializedObject::binary()}]} |
+-spec fetch_latest_cookbook_recipes(OrgId :: object_id()) -> {ok, [{CookbookName   :: binary(),
+                                                                  SerializedObject :: binary()}]} |
                                                            {error, term()}.
 fetch_latest_cookbook_recipes(OrgId) ->
     case sqerl:select(fetch_latest_cookbook_recipes_by_orgid, [OrgId]) of
@@ -521,7 +521,7 @@ fetch_environment_filtered_recipes(OrgId, Environment) ->
     end.
 
 %% cookbook version ops
--spec bulk_fetch_minimal_cookbook_versions(OrgId::object_id(), [versioned_cookbook()]) ->
+-spec bulk_fetch_minimal_cookbook_versions(OrgId :: object_id(), [versioned_cookbook()]) ->
                                           [#chef_cookbook_version{}].
 bulk_fetch_minimal_cookbook_versions(OrgId, CookbookVersions) ->
     QueryParam = cookbook_versions_array_to_binary(CookbookVersions),
@@ -539,7 +539,7 @@ cookbook_versions_array_to_binary(CookbookVersions) ->
     cookbook_versions_array_to_binary(CookbookVersions, <<"{">>, <<"}">>, <<"">>).
 
 -spec cookbook_versions_array_to_binary([versioned_cookbook()], binary(), binary(), binary()) -> binary().
-cookbook_versions_array_to_binary([CkbVer|CookbookVersions], Acc, EndBin, Sep) ->
+cookbook_versions_array_to_binary([CkbVer | CookbookVersions], Acc, EndBin, Sep) ->
     CkbBin = cookbook_version_to_binary(CkbVer),
     cookbook_versions_array_to_binary(CookbookVersions,
                                       <<Acc/binary, Sep/binary, CkbBin/binary>>,
@@ -567,7 +567,7 @@ cookbook_version_to_binary({Name, {MajorInt, MinorInt, PatchInt}}) ->
                       integer_to_binary(MinorInt), <<",">>,
                       integer_to_binary(PatchInt), <<")\"">>]).
 
--spec fetch_cookbook_version(OrgId::object_id(),
+-spec fetch_cookbook_version(OrgId :: object_id(),
                              versioned_cookbook()) -> #chef_cookbook_version{} |
                                                       {cookbook_exists, object_id()} |
                                                       not_found |
@@ -582,7 +582,7 @@ fetch_cookbook_version(OrgId, {Name, {Major, Minor, Patch}}) ->
                 Checksums when is_list(Checksums) ->
                     CBVersion#chef_cookbook_version{checksums = Checksums};
                 {error, Error} ->
-                    {error,Error}
+                    {error, Error}
             end;
         {ok, none} ->
             %% check if we have a cookbook entry
@@ -600,8 +600,8 @@ fetch_cookbook_version(OrgId, {Name, {Major, Minor, Patch}}) ->
 
 %% TODO: Refactor this to use num_versions
 
--spec fetch_latest_cookbook_version(OrgId::object_id(),
-                             CookbookName::binary()) ->
+-spec fetch_latest_cookbook_version(OrgId :: object_id(),
+                             CookbookName :: binary()) ->
      #chef_cookbook_version{} | not_found | {error, term()}.
 %% @doc Return the latest version of the requested cookbook
 fetch_latest_cookbook_version(OrgId, CookbookName) ->
@@ -646,7 +646,7 @@ update_cookbook_version(#chef_cookbook_version{ id                = Id,
         {ok, Additions, Deletions} ->
             UpdatedFields = [Frozen, MetaAttributes, MetaDeps, MetaLongDesc, Metadata, SerializeObject, LastUpdatedBy, UpdatedAt, Id],
             case do_update(update_cookbook_version, UpdatedFields) of
-                {ok, _} -> #chef_db_cb_version_update{added_checksums=Additions,deleted_checksums=Deletions};
+                {ok, _} -> #chef_db_cb_version_update{added_checksums=Additions, deleted_checksums=Deletions};
                 Error -> Error
             end;
         {error, Reason} ->
@@ -788,7 +788,7 @@ select_rows({Query, BindParameters}) ->
 select_rows({Query, BindParameters, Transform}) when is_tuple(Transform);
                                                      Transform == rows ->
     match_result(sqerl:select(Query, BindParameters, Transform));
-select_rows({Query, BindParameters, Fields = [_|_]}) ->
+select_rows({Query, BindParameters, Fields = [_ | _]}) ->
     match_result(sqerl:select(Query, BindParameters, rows_as_scalars, Fields)).
 
 -spec match_result(Input) -> NormalizedResult when
@@ -830,7 +830,7 @@ delete_sandbox(SandboxId) when is_binary(SandboxId) ->
                                         {'ok', 'none' | number()}.
 mark_checksums_as_uploaded(_OrgId, []) ->
     ok;
-mark_checksums_as_uploaded(OrgId, [Checksum|Rest]) ->
+mark_checksums_as_uploaded(OrgId, [Checksum | Rest]) ->
     case sqerl:statement(insert_checksum, [OrgId, Checksum], count) of
         {ok, 1} ->
             mark_checksums_as_uploaded(OrgId, Rest);
@@ -887,7 +887,7 @@ fetch_object_names(StubRec) ->
             L;
         not_found ->
             [];
-        {error, _} = Error->
+        {error, _} = Error ->
             Error
     end.
 
@@ -993,7 +993,7 @@ create_object(#chef_sandbox{id=SandboxId,
             Error
     end.
 -spec create_object(atom(), tuple() | list()) -> {ok, non_neg_integer()} |
-                                                 {ok,[[{binary(),<<>>}]]} |
+                                                 {ok, [[{binary(), <<>>}]]} |
                                                  {error, term()} |
                                                  {conflict, term()}.
 %% okay, that's pretty ugly, but no more so than all the hacks in here and
@@ -1027,12 +1027,12 @@ create_object(QueryName, Record) when is_atom(QueryName) ->
 %% Returns 'ok' if all the records were inserted. Returns an error tuple
 %% on the first error it detects.  Further processing of the list is
 %% abandoned at that point.
--spec insert_cookbook_checksums(Checksums:: list(), bin_or_string(), bin_or_string(),
+-spec insert_cookbook_checksums(Checksums :: list(), bin_or_string(), bin_or_string(),
                                 non_neg_integer(), non_neg_integer(),
                                 non_neg_integer()) -> ok | {error, term()}.
 insert_cookbook_checksums([], _OrgId, _Name, _Major, _Minor, _Patch) ->
     ok;
-insert_cookbook_checksums([Checksum|Rest], OrgId, Name, Major, Minor, Patch) ->
+insert_cookbook_checksums([Checksum | Rest], OrgId, Name, Major, Minor, Patch) ->
     case sqerl:statement(insert_cookbook_version_checksum, [Checksum, OrgId, Name, OrgId, Major, Minor, Patch], count) of
         {ok, 1} ->
             insert_cookbook_checksums(Rest, OrgId, Name, Major, Minor, Patch);
@@ -1047,7 +1047,7 @@ insert_cookbook_checksums([Checksum|Rest], OrgId, Name, Major, Minor, Patch) ->
 %% version (for that, see `unlink_all_checksums_from_cbv/2').
 unlink_checksums_from_cbv([], _OrgId, _CookbookVersionId) ->
     ok;
-unlink_checksums_from_cbv([Checksum|Rest], OrgId, CookbookVersionId) ->
+unlink_checksums_from_cbv([Checksum | Rest], OrgId, CookbookVersionId) ->
     case sqerl:statement(delete_cookbook_version_checksum, [Checksum, OrgId, CookbookVersionId], count) of
         {ok, _Count} ->
             unlink_checksums_from_cbv(Rest, OrgId, CookbookVersionId);
@@ -1123,7 +1123,7 @@ do_update(QueryName, UpdateFields) ->
 %% processing of the list is abandoned at that point.
 insert_sandboxed_checksums([], _OrgId, _SandboxId, _CreatedAt) ->
     ok;
-insert_sandboxed_checksums([Checksum|Rest], OrgId, SandboxId, CreatedAt) ->
+insert_sandboxed_checksums([Checksum | Rest], OrgId, SandboxId, CreatedAt) ->
     case sqerl:statement(insert_sandboxed_checksum, [OrgId, SandboxId, Checksum, CreatedAt], count) of
         {ok, 1} ->
             insert_sandboxed_checksums(Rest, OrgId, SandboxId, CreatedAt);
@@ -1146,19 +1146,19 @@ cookbook_exists(OrgId, CookbookName) ->
             {error, Reason}
     end.
 
--spec create_cookbook_if_needed(CookbookVersion::#chef_cookbook_version{}) ->
+-spec create_cookbook_if_needed(CookbookVersion :: #chef_cookbook_version{}) ->
     ok | {error, term()}.
 %% @doc Helper function which creates a row in the cookbook table if it
 %% not already there
 create_cookbook_if_needed(#chef_cookbook_version{org_id = OrgId, name = Name}=CookbookVersion) ->
     create_cookbook_if_needed(cookbook_exists(OrgId, Name), CookbookVersion).
 
--spec create_cookbook_if_needed(Exists::boolean(),
-                                CookbookVersion::#chef_cookbook_version{}) ->
+-spec create_cookbook_if_needed(Exists :: boolean(),
+                                CookbookVersion :: #chef_cookbook_version{}) ->
     ok | {error, term()}.
 create_cookbook_if_needed(false, #chef_cookbook_version{authz_id = AuthzId,
-                                                        org_id = OrgId,
-                                                        name = Name}) ->
+                                                        org_id   = OrgId,
+                                                        name     = Name}) ->
     case sqerl:statement(insert_cookbook, [AuthzId, OrgId, Name], count) of
         {ok, N} when is_integer(N) ->
             ok;
@@ -1177,8 +1177,8 @@ create_cookbook_if_needed({error, Reason}, _CookbookVersion) ->
 %%
 %% TODO: We could extract out the case sqerl:select statement and logic for all the methods
 %% that use rows_as_scalars transform
--spec fetch_cookbook_version_checksums(OrgId::object_id(),
-                                       CookbookVersionId::object_id()) ->
+-spec fetch_cookbook_version_checksums(OrgId :: object_id(),
+                                       CookbookVersionId :: object_id()) ->
                                            [binary()] | {error, term()}.
 fetch_cookbook_version_checksums(OrgId, CookbookVersionId) when is_binary(OrgId),
                                                                 is_binary(CookbookVersionId) ->
@@ -1192,7 +1192,7 @@ fetch_cookbook_version_checksums(OrgId, CookbookVersionId) when is_binary(OrgId)
             {error, Reason}
     end.
 
--spec fetch_cookbook_authz(OrgId::object_id(), CookbookName::bin_or_string()) ->
+-spec fetch_cookbook_authz(OrgId :: object_id(), CookbookName :: bin_or_string()) ->
                            object_id() | not_found | {error, term()}.
 %% @doc helper function to return the AuthzId for a cookbook.
 fetch_cookbook_authz(OrgId, CookbookName) ->
@@ -1212,8 +1212,8 @@ fetch_cookbook_authz(OrgId, CookbookName) ->
 %% from the database (because removing them from this cookbook version
 %% made them orphans); the corresponding files can now be safely
 %% removed from S3.
--spec unlink_all_checksums_from_cbv(OrgId::object_id(),
-                                    CookbookVersionId::object_id()) ->
+-spec unlink_all_checksums_from_cbv(OrgId :: object_id(),
+                                    CookbookVersionId :: object_id()) ->
                                            {ok, [binary()]} | {error, term()}.
 unlink_all_checksums_from_cbv(OrgId, CookbookVersionId) ->
     % retrieve a list of checksums before we delete the
@@ -1232,8 +1232,8 @@ unlink_all_checksums_from_cbv(OrgId, CookbookVersionId) ->
 %%
 %% Returns a list of deleted checksums (a subset of `Checksums')
 %% for further upstream processing (i.e., deletion from S3).
--spec delete_orphaned_checksums(OrgId::binary(),
-                                Checksums::[binary()]) -> [binary()].
+-spec delete_orphaned_checksums(OrgId :: binary(),
+                                Checksums :: [binary()]) -> [binary()].
 delete_orphaned_checksums(OrgId, Checksums) ->
     %% we don't want to delete checksums associated with
     %% cookbook artifact versions
@@ -1241,14 +1241,14 @@ delete_orphaned_checksums(OrgId, Checksums) ->
     lists:foldl(fun(Checksum, Acc) ->
             case sqerl:statement(delete_checksum_by_id, [OrgId, Checksum]) of
                 {ok, N} when is_integer(N) -> %% pretend there is 1
-                    [Checksum|Acc];
+                    [Checksum | Acc];
                 {foreign_key, _} ->
                     %% The checksum may still be associated with
                     %% another cookbook version record which is OK!
                     Acc;
                 {error, Reason} ->
                     error_logger:error_msg("Checksum deletion error: ~p~n"
-                                           "{~p,delete_orphaned_checksums,2,[{file,~p},{line,~p}]}~n",
+                                           "{~p,delete_orphaned_checksums,2,[{file,~p}, {line,~p}]}~n",
                                            [Reason, ?MODULE, ?FILE, ?LINE]),
                     Acc
             end
@@ -1294,9 +1294,9 @@ cookbook_versions_from_db(QueryName, Args) ->
 
 %% @doc helper function to convert from the three fields stored in the DB
 %% and convert it into a version() type as returned by the API
--spec triple_to_version_tuple(Major::non_neg_integer(),
-                              Minor::non_neg_integer(),
-                              Patch::non_neg_integer()) -> version().
+-spec triple_to_version_tuple(Major :: non_neg_integer(),
+                              Minor :: non_neg_integer(),
+                              Patch :: non_neg_integer()) -> version().
 triple_to_version_tuple(Major, Minor, Patch) ->
     {Major, Minor, Patch}.
 
@@ -1316,11 +1316,11 @@ process_dependency_resultset(Rows) ->
                                    WorkingDependencySet :: [depsolver:dependency_set()]) ->
                                           FinalDependencySet :: [depsolver:dependency_set()].
 %% This clause starts things off
-process_dependency_resultset([CurrentRow|Rows], []) ->
+process_dependency_resultset([CurrentRow | Rows], []) ->
     DependencySet = row_to_dependency_set(CurrentRow),
     process_dependency_resultset(Rows, [DependencySet]);
 %% This clause handles the "middle"
-process_dependency_resultset([CurrentRow|Rows], [{LastCookbook, Versions} | DependencySet]) ->
+process_dependency_resultset([CurrentRow | Rows], [{LastCookbook, Versions} | DependencySet]) ->
 
     {CurrentCookbook, [{Version, Dependencies}]} = row_to_dependency_set(CurrentRow),
 
@@ -1401,7 +1401,7 @@ row_to_dependency_set(Row) ->
 -spec condense_depsolver_results([{CookbookName :: binary(), Version :: binary()}],
                                  NumVersions :: num_versions()) ->
                                         [{CookbookBin :: binary(), [ VersionBin :: binary()]}].
-condense_depsolver_results([First|Rest], NumVersions) ->
+condense_depsolver_results([First | Rest], NumVersions) ->
     NumTaken = case NumVersions of
                    0 -> 0;
                    _ -> 1
@@ -1418,8 +1418,8 @@ condense_depsolver_results(NumVersions, NumTaken,
             condense_depsolver_results(NumVersions, NumTaken, Rest, Processed);
         {CurrentCookbook, _} ->
             %% We haven't yet taken as many versions of this cookbook as we need yet
-            condense_depsolver_results(NumVersions, NumTaken+1, Rest, [{LastCookbook, [Version | Versions]}
-                                                                       | RestProcessed]);
+            condense_depsolver_results(NumVersions, NumTaken + 1, Rest, [{LastCookbook, [Version | Versions]}
+                                                                        | RestProcessed]);
         {_, _} ->
             %% We've switched to a "new" cookbook, and we may or may not need to keep some versions
             Num = case NumVersions of
@@ -1545,7 +1545,7 @@ fetch_cookbook_version_serialized_objects(UnprocessedIds, BatchSize, AllResults)
 -spec fetch_cookbook_version_serialized_objects_batch([Ids :: integer()]) -> {ok, [{CookbookName :: binary(),
                                                                                     SerializedObject :: binary()}]} |
                                                                              {error, term()}.
-fetch_cookbook_version_serialized_objects_batch(Ids) when is_list(Ids)->
+fetch_cookbook_version_serialized_objects_batch(Ids) when is_list(Ids) ->
     case sqerl:select(bulk_get_cbv_serialized_object, [Ids]) of
         {ok, none} ->
             {ok, []};
@@ -1611,12 +1611,12 @@ list_policy_groups_for_policy_revision(RevisionID) ->
             {error, Reason}
     end.
 
-policy_rev_by_group_rows_to_tuple([Row|Rest], Processed) ->
+policy_rev_by_group_rows_to_tuple([Row | Rest], Processed) ->
     PolicyGroupName = proplists:get_value(<<"policy_group_name">>, Row),
     PolicyName = proplists:get_value(<<"policy_revision_name">>, Row),
     RevisionID = proplists:get_value(<<"policy_revision_revision_id">>, Row),
     ProcessedRow = {PolicyGroupName, PolicyName, RevisionID},
-    policy_rev_by_group_rows_to_tuple(Rest, [ProcessedRow|Processed]);
+    policy_rev_by_group_rows_to_tuple(Rest, [ProcessedRow | Processed]);
 policy_rev_by_group_rows_to_tuple([], Processed) ->
     Processed.
 
@@ -1624,7 +1624,7 @@ policy_rev_by_group_rows_to_tuple([], Processed) ->
 %% versions, presented as `{CookbookName, SerializedObject}' pairs.
 %%
 %% Recipe names are returned sorted alphabetically.
--spec extract_recipe_names_from_serialized_objects([{CookbookName :: binary(),
+-spec extract_recipe_names_from_serialized_objects([{CookbookName     :: binary(),
                                                      SerializedObject :: binary()}]) ->
                                                           [ QualifiedRecipeName :: binary() ].
 extract_recipe_names_from_serialized_objects(Pairs) ->
@@ -1711,7 +1711,7 @@ dict_key_value_for_index(Index) when Index =:= node;
 %% This spec brought to you by -Wunderspecs
 -spec create_dict(Query :: dict_queries(),
                   Args :: list(),
-                  {Key :: <<_:32,_:_*40>>, %% <<"name">> | <<"item_name">>
+                  {Key :: <<_:32, _:_*40>>, %% <<"name">> | <<"item_name">>
                    Value :: <<_:16>>}) %% <<"id">>
                  -> {ok, dict()} | {error, term()}.
 create_dict(Query, Args, {Key, Value}) ->
@@ -1746,7 +1746,7 @@ proplist_results(Query, Args) ->
 %%
 %% This spec brought to you by -Wunderspecs
 -spec proplists_to_dict(ResultSetProplist :: [[tuple()]],
-                        Key :: <<_:32,_:_*40>>, %% <<"name">> | <<"item_name">>
+                        Key :: <<_:32, _:_*40>>, %% <<"name">> | <<"item_name">>
                         Value :: <<_:16>>) -> dict(). %% <<"id">>
 proplists_to_dict(ResultSetProplist, Key, Value) ->
     lists:foldl(fun(Row, Dict) ->

@@ -16,8 +16,8 @@ make_data_bag(Prefix) ->
                    authz_id = AzId, org_id = OrgId,
                    name = Name,
                    last_updated_by = chef_test_suite_helper:actor_id(),
-                   created_at = {datetime, {{2011,10,1},{16,47,46}}},
-                   updated_at = {datetime, {{2011,10,1},{16,47,46}}} }.
+                   created_at = {datetime, {{2011, 10, 1}, {16, 47, 46}}},
+                   updated_at = {datetime, {{2011, 10, 1}, {16, 47, 46}}} }.
 
 data_bags() ->
     [make_data_bag(<<"01">>),

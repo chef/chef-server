@@ -50,8 +50,8 @@ force_upload_cleanup() ->
 
 init(_Args) ->
     UploadInterval = envy:get(bookshelf, abandoned_upload_cleanup_interval, 19 * ?MIN_IN_MS, positive_integer),
-    CleanupInterval = envy:get(bookshelf,deleted_data_cleanup_interval, 7 * ?MIN_IN_MS, positive_integer),
-    State =  #state{upload_cleanup_interval = UploadInterval, deleted_cleanup_interval = CleanupInterval} ,
+    CleanupInterval = envy:get(bookshelf, deleted_data_cleanup_interval, 7 * ?MIN_IN_MS, positive_integer),
+    State =  #state{upload_cleanup_interval = UploadInterval, deleted_cleanup_interval = CleanupInterval},
     spawn_timers(State),
     {ok, State}.
 

@@ -187,7 +187,7 @@ handle_sync_event(_Event, _From, StateName, State) ->
 %% message other than a synchronous or asynchronous event
 %% (or a system message).
 %%
-%% @spec handle_info(Info,StateName,State)->
+%% @spec handle_info(Info,StateName,State) ->
 %%                   {next_state, NextStateName, NextState} |
 %%                   {next_state, NextStateName, NextState, Timeout} |
 %%                   {stop, Reason, NewState}
@@ -236,7 +236,7 @@ process_batch(State = #state{authz_ids = {ActorSet, GroupSet}}) ->
       length(GroupAuthzIdsToRemove),
       length(RemainingGroups)
      } of
-        {0,_,0,_} ->
+        {0, _, 0, _} ->
             ok;
         {LengthActors, LengthRemainingActors, LengthGroups, LengthRemainingGroups} ->
             error_logger:info_msg(
