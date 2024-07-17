@@ -224,5 +224,5 @@ deprovision_user(Req, #base_state{organization_name = OrgName,
             {{halt, 500}, Req, State#base_state{log_msg = {error_in_deprovision, Error}}}
      end.
 
-malformed_request_message(Any, _Req, _state) ->
+malformed_request_message(Any, _Req, _State) ->
     error({unexpected_malformed_request_message, Any}).

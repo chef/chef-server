@@ -65,8 +65,8 @@ chef_user_record(AzId, _Admin) ->
        salt = <<"kosher">>,
        hash_type = <<"bcrypt">>,
        last_updated_by = chef_test_suite_helper:actor_id(),
-       created_at = {datetime,{{2011,10,1},{16,47,46}}},
-       updated_at = {datetime,{{2011,10,1},{16,47,46}}},
+       created_at = {datetime, {{2011, 10, 1}, {16, 47, 46}}},
+       updated_at = {datetime, {{2011, 10, 1}, {16, 47, 46}}},
        external_authentication_uid = <<"an open id of some kind">>,
        recovery_authentication_enabled = false,
        serialized_object = <<"{}">>

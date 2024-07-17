@@ -93,7 +93,7 @@ start_link() ->
 %%  These changes only make sense if we hit new usage patterns that overwhelm the
 %%  cbv_cache message queue on a regular basis.
 %%
--spec get(any()) -> {error, retry|busy} | undefined | term().
+-spec get(any()) -> {error, retry | busy} | undefined | term().
 get(Key) ->
     send_if_available({get, Key}).
 
@@ -104,7 +104,7 @@ get(Key) ->
 %% If it returns '{error, busy}' the process is not available to service the request, and
 %% the caller should fail without retrying.
 %% Returns undefined if the cache is disabled.
--spec claim(any()) -> ok | {error, retry|busy} | undefined.
+-spec claim(any()) -> ok | {error, retry | busy} | undefined.
 claim(Key) ->
     send_if_available({claim, Key}).
 

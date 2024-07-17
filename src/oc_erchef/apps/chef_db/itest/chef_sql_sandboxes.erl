@@ -10,7 +10,7 @@
 make_sandbox(Prefix) ->
     #chef_sandbox{id=chef_test_suite_helper:make_id(Prefix),
                   org_id=chef_test_suite_helper:the_org_id(),
-                  created_at = {datetime,{{2011,10,1},{16,47,46}}},
+                  created_at = {datetime, {{2011, 10, 1}, {16, 47, 46}}},
                   checksums=[{<<"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa">>, false},
                              {<<"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb">>, false},
                              {<<"cccccccccccccccccccccccccccccccc">>, false},
@@ -42,7 +42,7 @@ fetch_sandbox() ->
                                                      id = chef_test_suite_helper:make_id(<<"abcd">>)}),
     ?assertEqual(#chef_sandbox{id=chef_test_suite_helper:make_id(<<"abcd">>),
                                org_id=chef_test_suite_helper:the_org_id(),
-                               created_at={datetime,{{2011,10,1},{16,47,46}}},
+                               created_at={datetime, {{2011, 10, 1}, {16, 47, 46}}},
                                checksums=[{<<"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa">>, true},
                                           {<<"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb">>, true},
                                           {<<"cccccccccccccccccccccccccccccccc">>, true},

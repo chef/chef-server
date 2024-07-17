@@ -134,11 +134,11 @@ create_path(Req, #base_state{resource_state = #data_state{
     {binary_to_list(ItemName), Req, State}.
 
 
--spec from_json(#wm_reqdata{}, #base_state{}) -> {boolean()|{halt,409|500}, #wm_reqdata{}, #base_state{}}.
+-spec from_json(#wm_reqdata{}, #base_state{}) -> {boolean() | {halt, 409 | 500}, #wm_reqdata{}, #base_state{}}.
 from_json(Req, #base_state{resource_state = #data_state{data_bag_name = DataBagName,
                                                         data_bag_item_ejson = ItemData} } = State) ->
     oc_chef_wm_base:create_from_json(Req, State, chef_data_bag_item,
-                                     {authz_id,undefined}, {DataBagName, ItemData}).
+                                     {authz_id, undefined}, {DataBagName, ItemData}).
 
 % Callback from create_from_json, which allows us to customize our body response.
 finalize_create_body(_Req, #base_state{ resource_state = #data_state{data_bag_name = DataBagName,

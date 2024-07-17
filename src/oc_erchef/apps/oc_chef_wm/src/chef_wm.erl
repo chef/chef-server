@@ -23,7 +23,7 @@
 -type http_verb() :: 'GET' | 'PUT' | 'POST' | 'DELETE' | 'HEAD' | 'OPTIONS'.
 -type base_state() :: #base_state{}.
 
--export_type([http_verb/0, base_state/0, auth_info_return/0,container_name/0]).
+-export_type([http_verb/0, base_state/0, auth_info_return/0, container_name/0]).
 
 
 -callback init(list()) ->
