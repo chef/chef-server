@@ -28,12 +28,12 @@
 
 -export([check_acl_constraints/5]).
 
--spec check_acl_constraints(binary(), binary(), atom(), binary(), tuple()) -> ok | [atom(),...].
+-spec check_acl_constraints(binary(), binary(), atom(), binary(), tuple()) -> ok | [atom(), ...].
 check_acl_constraints(OrgId, AuthzId, Type, AclPerm, Ace) ->
   check_acl_constraints(OrgId, AuthzId, Type, AclPerm, Ace, acl_checks()).
 
 
--spec check_acl_constraints(binary(), binary(), atom(), binary(), tuple(), [fun()]) -> ok | [atom(),...].
+-spec check_acl_constraints(binary(), binary(), atom(), binary(), tuple(), [fun()]) -> ok | [atom(), ...].
 check_acl_constraints(OrgId, AuthzId, Type, AclPerm, Ace, AclChecks) ->
   case lists:filtermap(fun(Check) -> Check(OrgId, AuthzId, Type, AclPerm, Ace) end, AclChecks) of
     [] ->

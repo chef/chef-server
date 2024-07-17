@@ -138,12 +138,12 @@ process_post(Req, #base_state{reqid = ReqId,
 %% We expand the runlist to a set of cookbooks with dups removed.  If
 %% a versioned recipe is provided in the runlist we return it as tuple
 %% of {cookbook_name, version}
--spec cookbooks_for_runlist(Runlist::[binary()]) ->  [cookbook_with_version()].
+-spec cookbooks_for_runlist(Runlist :: [binary()]) ->  [cookbook_with_version()].
 cookbooks_for_runlist(Runlist) ->
     Cookbooks = [ cookbook_for_recipe(split_version(Item)) || Item <- Runlist ],
     remove_dups(Cookbooks).
 
--spec split_version(Recipe::binary()) -> cookbook_with_version().
+-spec split_version(Recipe :: binary()) -> cookbook_with_version().
 split_version(Recipe) when is_binary(Recipe) ->
     case re:split(Recipe, <<"@">>) of
         [Name] ->
@@ -184,7 +184,7 @@ remove_dups(L) ->
 %% better to loop over the list of Cookbooks instead
 -spec not_found_cookbooks(AllVersions :: [chef_depsolver:dependency_set()],
                           Cookbooks :: [cookbook_with_version()]) ->
-                                 ok | {not_found, [binary(),...]}.
+                                 ok | {not_found, [binary(), ...]}.
 not_found_cookbooks(AllVersions, Cookbooks) ->
     NotFound = [ cookbook_name(Cookbook) || Cookbook <- Cookbooks, cookbook_missing(Cookbook, AllVersions)],
     case NotFound of
@@ -207,8 +207,8 @@ cookbook_name({Name, _Version}) ->
 %% In order to work in the same manner as the ruby code it will only check for a
 %% cookbook name in the list of all cookbook version. This means if any version of a cookbook
 %% exists it returns false
--spec cookbook_missing(CB::cookbook_with_version(),
-                       AllVersions::[chef_depsolver:dependency_set()]) -> boolean().
+-spec cookbook_missing(CB :: cookbook_with_version(),
+                       AllVersions :: [chef_depsolver:dependency_set()]) -> boolean().
 cookbook_missing(CB, AllVersions) when is_binary(CB) ->
     not proplists:is_defined(CB, AllVersions);
 cookbook_missing({Name, _Version}, AllVersions) ->
@@ -217,7 +217,7 @@ cookbook_missing({Name, _Version}, AllVersions) ->
 %% @doc Given the output from not_found_cookbooks/2 and
 %% chef_depsolver:solve_dependencies/3, format an appropriate response
 %% document
-handle_depsolver_results({not_found, CookbookNames}, _Deps, Req, State) when is_list(CookbookNames)->
+handle_depsolver_results({not_found, CookbookNames}, _Deps, Req, State) when is_list(CookbookNames) ->
     precondition_failed(Req, State,
                         not_found_message(cookbook_version, CookbookNames),
                         cookbook_version_not_found);
@@ -315,7 +315,7 @@ make_json_list(CookbookVersions, URI, ApiVersion, Key, NumAttempts) ->
             % It is not in the cache and nobody is working on it. Stake our claim and
             % do the work.
             case chef_cbv_cache:claim(Key) of
-                Response when Response =:= undefined orelse Response =:= ok->
+                Response when Response =:= undefined orelse Response =:= ok ->
                     %% We iterate over the list again since we only want to construct the s3urls
                     %% if the authz check has succeeded (in caller).  We respond with a minimal version of the
                     %% cookbook which has just enough information for chef-client to run
@@ -401,12 +401,12 @@ not_reachable_message(CookbookName) ->
                                ", which does not exist."]),
     {[{<<"message">>, Reason},
       {<<"non_existent_cookbooks">>, [ CookbookName ]},
-      {<<"most_constrained_cookbooks">>,[]}]}.
+      {<<"most_constrained_cookbooks">>, []}]}.
 
 timeout_message() ->
     {[{<<"message">>, <<"unable to solve dependencies in alotted time">>},
       {<<"non_existent_cookbooks">>, []},
-      {<<"most_constrained_cookbooks">>,[]}]}.
+      {<<"most_constrained_cookbooks">>, []}]}.
 
 %%------------------------------------------------------------------------------
 %% Miscellaneous Utilities
@@ -414,17 +414,17 @@ timeout_message() ->
 
 %% Helpers to construct pieces of error messages from lists of
 %% cookbook names
--spec bin_str_join(Names::[binary()],
-                   Sep::<<_:8,_:_*8>>,
-                   Acc::[binary()]) -> [binary()].
+-spec bin_str_join(Names :: [binary()],
+                   Sep :: <<_:8, _:_*8>>,
+                   Acc :: [binary()]) -> [binary()].
 bin_str_join([], _Sep, Acc) ->
     Acc;
 bin_str_join([H], _Sep, Acc) ->
     [H | Acc];
-bin_str_join([Name| Rest], Sep, Acc) ->
+bin_str_join([Name | Rest], Sep, Acc) ->
     bin_str_join(Rest, Sep, [Sep , Name | Acc]).
 
--spec bin_str_join(Names::[binary()], Sep::<<_:8,_:_*8>>) -> binary().
+-spec bin_str_join(Names :: [binary()], Sep :: <<_:8, _:_*8>>) -> binary().
 bin_str_join(Names, Sep) ->
     Reverse = lists:reverse(Names),
     list_to_binary(bin_str_join(Reverse, Sep, [])).

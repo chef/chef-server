@@ -189,27 +189,27 @@ password_validator() ->
 user_spec(common) ->
     {[
         {<<"display_name">>, string}, %% FIXME as an always-required field this belongs in the schema
-        {{opt,<<"first_name">>},  string},  %% Note that remaining fields are serialized via serialized_object and
-        {{opt,<<"last_name">>},   string} , %% are/were used by other Chef components.
-        {{opt,<<"middle_name">>}, string},  %% FIXME these should be retained by the components that need them
-        {{opt,<<"twitter_account">>}, string},
-        {{opt,<<"city">>}, string},
-        {{opt,<<"country">>}, string},
-        {{opt,<<"external_authentication_uid">>}, string }
+        {{opt, <<"first_name">>},  string},  %% Note that remaining fields are serialized via serialized_object and
+        {{opt, <<"last_name">>},   string} , %% are/were used by other Chef components.
+        {{opt, <<"middle_name">>}, string},  %% FIXME these should be retained by the components that need them
+        {{opt, <<"twitter_account">>}, string},
+        {{opt, <<"city">>}, string},
+        {{opt, <<"country">>}, string},
+        {{opt, <<"external_authentication_uid">>}, string }
     ]};
 user_spec(create) ->
-    {[ {{opt,<<"password">>},  password_validator()} ]};
+    {[ {{opt, <<"password">>},  password_validator()} ]};
 user_spec(update) ->
-    {[ {{opt,<<"password">>},  password_validator()},
-       {{opt,<<"recovery_authentication_enabled">>}, boolean },
-       {{opt,<<"private_key">>}, boolean } ]}.
+    {[ {{opt, <<"password">>},  password_validator()},
+       {{opt, <<"recovery_authentication_enabled">>}, boolean },
+       {{opt, <<"private_key">>}, boolean } ]}.
 
 local_auth_user_spec(common) ->
     {[{<<"email">>,            {fun_match, {fun valid_email/1, string, <<"email must be valid">>}}}]};
 local_auth_user_spec(create) ->
     {[ {<<"password">>, password_validator()} ]};
 local_auth_user_spec(update) ->
-    {[ {{opt,<<"password">>},  password_validator()} ]}.
+    {[ {{opt, <<"password">>},  password_validator()} ]}.
 
 
 
@@ -432,7 +432,7 @@ update_from_ejson_common(User, UserEJson) ->
 
 merge_user_data(User, {ModData}) ->
     % If value in ModData is null, delete from user, otherwise replace or insert the value.
-    lists:foldl(fun({Key,null}, AccIn) ->
+    lists:foldl(fun({Key, null}, AccIn) ->
                         ej:delete({Key}, AccIn);
                    ({_Key, undefined}, AccIn) ->
                         % Shouldn't happen, but just in case - don't insert value 'undefined'

@@ -27,8 +27,8 @@ make_client(Prefix) ->
 	      "xwIDAQAB">>,
 	    pubkey_version = 1,
 	    last_updated_by = chef_test_suite_helper:actor_id(),
-	    created_at = {datetime, {{2011,10,1},{16,47,46}}},
-	    updated_at = {datetime, {{2011,10,1},{16,47,46}}}
+	    created_at = {datetime, {{2011, 10, 1}, {16, 47, 46}}},
+	    updated_at = {datetime, {{2011, 10, 1}, {16, 47, 46}}}
     }.
 
 insert_client_data() ->

@@ -272,12 +272,12 @@ filter_entries(Bucket, Entries) ->
 
 filter_entries(_Bucket, [], _Ex, Accum) ->
     lists:reverse(Accum);
-filter_entries(Bucket, [Entry|T], Ex, Accum) ->
+filter_entries(Bucket, [Entry | T], Ex, Accum) ->
     case re:run(Entry, Ex, [{capture, none}]) of
         nomatch ->
             case entry_md(Bucket, filename:basename(Entry)) of
                 {ok, Obj} ->
-                    filter_entries(Bucket, T, Ex, [Obj|Accum]);
+                    filter_entries(Bucket, T, Ex, [Obj | Accum]);
                 _Error ->
                     filter_entries(Bucket, T, Ex, Accum)
             end;
@@ -301,13 +301,13 @@ make_buckets(Root, BucketDirs) ->
 
 make_buckets(_Root, [], Buckets) ->
     lists:reverse(Buckets);
-make_buckets(Root, [BucketDir|T], Buckets) ->
+make_buckets(Root, [BucketDir | T], Buckets) ->
     Buckets1 = case file:read_file_info(filename:join([Root, BucketDir])) of
                    {ok, #file_info{mtime=Date}} ->
                        [UTC | _] = %% FIXME This is a hack until R15B
                            calendar:local_time_to_universal_time_dst(Date),
                        [#bucket{name=bksw_io_names:decode(BucketDir),
-                                date=UTC}|Buckets];
+                                date=UTC} | Buckets];
                    _Error ->
                        Buckets
                end,

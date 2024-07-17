@@ -13,8 +13,8 @@ make_data_bag_item(Prefix, BagName) ->
     #chef_data_bag_item{server_api_version = ?API_MIN_VER,
                         id= Id, org_id= chef_test_suite_helper:the_org_id(), item_name= Name, data_bag_name= BagName,
                         last_updated_by= chef_test_suite_helper:actor_id(),
-                        created_at= {datetime, {{2011,10,1},{16,47,46}}},
-                        updated_at= {datetime, {{2011,10,1},{16,47,46}}},
+                        created_at= {datetime, {{2011, 10, 1}, {16, 47, 46}}},
+                        updated_at= {datetime, {{2011, 10, 1}, {16, 47, 46}}},
                         serialized_object= Prefix }.
 
 data_bag_items() ->
@@ -37,7 +37,7 @@ fetch_data_bag_items() ->
     Results = itest_util:list_records(hd(DBS)),
     ?assertEqual(Expected, Results).
 
-fetch_data_bag_item()->
+fetch_data_bag_item() ->
     Item = hd(data_bag_items()),
 
     {ok, Got} = itest_util:fetch_record(Item),
@@ -52,9 +52,9 @@ fetch_data_bag_item_ids() ->
     {ok, Results} = chef_sql:fetch_data_bag_item_ids(chef_test_suite_helper:the_org_id(), <<"data_bag_02">>),
     ?assertEqual(Expected,Results).
 
-bulk_get_data_bag_items()-> ok.
+bulk_get_data_bag_items() -> ok.
 
-update_data_bag_item()->
+update_data_bag_item() ->
     [Old | _T] = [ Db ||
                      Db <- data_bag_items(),
                      Db#chef_data_bag_item.org_id =:= chef_test_suite_helper:the_org_id(),
@@ -68,7 +68,7 @@ update_data_bag_item()->
                  (FResults#chef_data_bag_item.serialized_object)).
 
 
-delete_data_bag_item()->
+delete_data_bag_item() ->
     Item = hd(data_bag_items()),
     {ok, DResults} = itest_util:delete_record(Item),
     ?assertEqual(1, DResults),

@@ -147,7 +147,7 @@ delete_resource(Req, #base_state{
     Ejson = oc_chef_cookbook_artifact_version:to_json(CAVRec, ExternalUrl),
     {true, chef_wm_util:set_json_body(Req, Ejson), State}.
 
-malformed_request_message(Any, _Req, _state) ->
+malformed_request_message(Any, _Req, _State) ->
     error({unexpected_malformed_request_message, Any}).
 
 conflict_message(_Name) ->

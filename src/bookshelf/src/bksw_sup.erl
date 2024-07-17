@@ -56,7 +56,7 @@ maybe_with_cleanup_task(ChildSpecs) ->
                    permanent, brutal_kill, worker, [bksw_cleanup_task]},
     case bksw_conf:storage_type() of
         sql ->
-            [CleanupTask| ChildSpecs];
+            [CleanupTask | ChildSpecs];
         _ ->
             ChildSpecs
     end.
