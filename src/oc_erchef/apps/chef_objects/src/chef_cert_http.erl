@@ -29,8 +29,8 @@
          gen_cert/2
         ]).
 
--spec gen_cert(Guid::binary(), RequestId::binary()) -> {Cert::binary(),
-                                                        Keypair::binary()}.
+-spec gen_cert(Guid :: binary(), RequestId :: binary()) -> {Cert :: binary(),
+                                                            Keypair :: binary()}.
 %% @doc Handle HTTP interaction with remote certificate server.
 %% This posts a common name (CN) to the server which is then used to generate
 %% a certificate remotely.  We map common error cases to specific error messages
@@ -51,13 +51,13 @@ gen_cert(Guid, RequestId) ->
             throw({error, Reason})
     end.
 
--spec body_for_post(Guid::binary()) -> <<_:64,_:_*8>>.
+-spec body_for_post(Guid :: binary()) -> <<_:64, _:_*8>>.
 %% @doc construct a body which can be posted to the certificate server
 body_for_post(Guid) ->
     <<"common_name=URI:http://chef.io/GUIDS/", Guid/binary>>.
 
--spec parse_json_response(Body::string()) -> {Cert::binary(),
-                                              Keypair::binary()}.
+-spec parse_json_response(Body :: string()) -> {Cert :: binary(),
+                                                Keypair :: binary()}.
 %% @doc extract the certificate and keypair from the json structure.
 %%
 %% We apply here a version for the Pubkey

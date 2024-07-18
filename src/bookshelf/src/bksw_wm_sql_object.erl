@@ -158,12 +158,12 @@ maybe_retry(#context{sql_retry_delay = Delay, sql_retry_count = Count} = Ctx, Re
 %% Return `{Obj, CtxNew}' where `Obj' is the entry meta data `#db_file{}' record or the atom
 %% `error'. The `CtxNew' may have been updated and should be kept. Accessing entry md
 %% through this function ensures we only ever read the md from the file system once.
--spec fetch_entry_md(#wm_reqdata{}, #context{}) -> {#db_file{}, #context{}}|{not_found, #context{}}|{error, #context{}}.
+-spec fetch_entry_md(#wm_reqdata{}, #context{}) -> {#db_file{}, #context{}} | {not_found, #context{}} | {error, #context{}}.
 fetch_entry_md(_Req, #context{entry_md = #db_file{} = Obj} = Ctx) ->
     {Obj, Ctx};
 fetch_entry_md(Req, #context{} = Ctx) ->
     {ok, Bucket, Path} = bksw_util:get_object_and_bucket(Req),
-    case bksw_sql:find_file(Bucket,Path) of
+    case bksw_sql:find_file(Bucket, Path) of
         {ok, #db_file{} = Object} ->
             {Object, Ctx#context{entry_md = Object}};
         {ok, not_found} ->

@@ -123,7 +123,7 @@ finish_request(Req, #base_state{reqid=ReqId,
     PerfStats1 = case envy:get(bifrost, enable_extended_perf_log, true, boolean) of
         true -> PerfStats;
         false ->
-            [ Element || {<<"req_time">>,_} = Element <- PerfStats ]
+            [ Element || {<<"req_time">>, _} = Element <- PerfStats ]
     end,
     %% Add additional notes for the logger
     Req0 = oc_wm_request:add_notes([{reqid, ReqId},

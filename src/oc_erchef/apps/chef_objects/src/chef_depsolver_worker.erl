@@ -68,8 +68,8 @@ start_link() ->
 %%--------------------------------------------------------------------
 -spec solve_dependencies(AllVersions :: [chef_depsolver:dependency_set()],
                          EnvConstraints :: [chef_depsolver:constraint()],
-                         Cookbooks :: [Name::binary() |
-                                             {Name::binary(), Version::binary()}],
+                         Cookbooks :: [Name :: binary() |
+                                             {Name :: binary(), Version :: binary()}],
                          Timeout :: integer()) ->
                                 {ok, [ versioned_cookbook()]} | {error, term()}.
 solve_dependencies(AllVersions, EnvConstraints, Cookbooks, Timeout) ->

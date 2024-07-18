@@ -213,7 +213,7 @@ validate(DataBagItem) ->
 %%
 %% Returns `DataBagItem` with `IdFromUrl` unambiguously set as its id, or throws if it was
 %% mismatched.
--spec normalized_data_bag_for_update(ej:json_object(), binary()) ->ej:json_object().
+-spec normalized_data_bag_for_update(ej:json_object(), binary()) -> ej:json_object().
 normalized_data_bag_for_update(DataBagItem, IdFromUrl) ->
     case ej:get({<<"id">>}, DataBagItem)of
         undefined ->
