@@ -183,4 +183,4 @@ ping_timeout() ->
     envy:get(oc_chef_wm, health_ping_timeout, pos_integer).
 
 ping_modules() ->
-    envy:get(oc_chef_wm, health_ping_modules,list).
+    envy:get(oc_chef_wm, health_ping_modules, list).
