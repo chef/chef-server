@@ -56,7 +56,7 @@
 -define(KEY_2_ENTRY, { ?KEY2NAME, true } ).
 
 init_per_suite(LastConfig) ->
-    Config = chef_test_db_helper:start_db([{app, oc_chef_wm}|LastConfig], "oc_chef_wm_itests"),
+    Config = chef_test_db_helper:start_db([{app, oc_chef_wm} | LastConfig], "oc_chef_wm_itests"),
     Config2 = setup_helper:start_server(Config),
     make_org(?ORG_NAME, ?ORG_AUTHZ_ID),
     {OrgId, _} = chef_db:fetch_org_metadata(context(), ?ORG_NAME),

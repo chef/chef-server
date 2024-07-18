@@ -143,13 +143,13 @@ stash_permissions_objects_authz_ids(Halt, State) when is_tuple(Halt) ->
     State;
 stash_permissions_objects_authz_ids([], State) ->
     State;
-stash_permissions_objects_authz_ids([{create_in_container, _C}|Rest], State) ->
+stash_permissions_objects_authz_ids([{create_in_container, _C} | Rest], State) ->
     stash_permissions_objects_authz_ids(Rest, State);
-stash_permissions_objects_authz_ids([{policy_group,AzID}|Rest], #base_state{resource_state = PolicyState} = State) ->
+stash_permissions_objects_authz_ids([{policy_group, AzID} | Rest], #base_state{resource_state = PolicyState} = State) ->
     UpdatedPolicyState = PolicyState#policy_state{policy_group_authz_id = AzID},
     UpdatedBaseState = State#base_state{resource_state = UpdatedPolicyState},
     stash_permissions_objects_authz_ids(Rest, UpdatedBaseState);
-stash_permissions_objects_authz_ids([{policy,AzID}|Rest], #base_state{resource_state = PolicyState} = State) ->
+stash_permissions_objects_authz_ids([{policy, AzID} | Rest], #base_state{resource_state = PolicyState} = State) ->
     UpdatedPolicyState = PolicyState#policy_state{policy_authz_id = AzID},
     UpdatedBaseState = State#base_state{resource_state = UpdatedPolicyState},
     stash_permissions_objects_authz_ids(Rest, UpdatedBaseState).
@@ -201,7 +201,7 @@ prereq_objects_to_permissions(PrereqObjects) ->
 
 prereq_objects_to_permissions([], PermissionsList) ->
     PermissionsList;
-prereq_objects_to_permissions([PrereqObject|Rest], PermissionsList) ->
+prereq_objects_to_permissions([PrereqObject | Rest], PermissionsList) ->
     RequiredPermission = prereq_object_permission(PrereqObject),
     UpdatedPermissionList = [RequiredPermission | PermissionsList ],
     prereq_objects_to_permissions(Rest, UpdatedPermissionList).

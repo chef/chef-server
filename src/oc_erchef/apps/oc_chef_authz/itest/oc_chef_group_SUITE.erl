@@ -35,7 +35,7 @@ suite() ->
     [{timetrap,{seconds,30}}].
 
 init_per_suite(LastConfig) ->
-    Config = chef_test_db_helper:start_db([{app, oc_chef_authz}|LastConfig], "oc_chef_authz_itests"),
+    Config = chef_test_db_helper:start_db([{app, oc_chef_authz} | LastConfig], "oc_chef_authz_itests"),
     [{tables, ["groups", "clients", "users"]} | suite_helper:start_server(Config)].
 
 end_per_suite(Config) ->
