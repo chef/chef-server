@@ -53,7 +53,7 @@ validate_data_bag_test_() ->
                 true},
                {"Data bag with extra fields succeeds",
                 {[{<<"name">>, <<"foo">>},
-                  {<<"blahblah">>,<<"blahblahblah">>}]},
+                  {<<"blahblah">>, <<"blahblahblah">>}]},
                 true}
               ]
 

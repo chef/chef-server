@@ -97,5 +97,5 @@ to_json(Req, #base_state{resource_state = #cookbook_artifacts_state{
     ),
     {jiffy:encode({ArtifactList}), Req, State}.
 
-malformed_request_message(Any, _Req, _state) ->
+malformed_request_message(Any, _Req, _State) ->
     error({unexpected_malformed_request_message, Any}).

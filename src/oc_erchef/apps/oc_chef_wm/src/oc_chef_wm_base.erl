@@ -91,7 +91,7 @@ service_available(Req, #base_state{reqid_header_name = HeaderName} = State) ->
 %% and reply with it as or reply with error if it's not valid.
 %%
 %% If X-Ops-Server-API-Version is not sent, the server assumes an API version of 0.
--spec server_api_version(undefined|string()) -> api_version() | {error, string()}.
+-spec server_api_version(undefined | string()) -> api_version() | {error, string()}.
 server_api_version(undefined) ->
     0;
 server_api_version(RequestedVersion) ->
@@ -242,7 +242,7 @@ multi_auth_check_to_wm_response({Error, {AuthzObjectType, AuthzId, Permission}, 
 multi_auth_check([], Req, State) ->
     %% Nothing left to check, must be OK
     {true, Req, State};
-multi_auth_check([CurrentTuple|Rest], Req, State) ->
+multi_auth_check([CurrentTuple | Rest], Req, State) ->
     case auth_check(CurrentTuple, Req, State) of
         {true, UpdatedReq, UpdatedState} ->
             %% That one checked out; check the rest
@@ -292,7 +292,7 @@ auth_check({actor, ObjectId, Permission}, Req, State) ->
 %% resource_state record using set_authz_id/3 (which knows how to deal
 %% with the different resource_state records).
 -spec create_in_container(container_name(), wm_req(), chef_wm:base_state()) ->
-                                 {true|false, wm_req(), chef_wm:base_state()}.
+                                 {true | false, wm_req(), chef_wm:base_state()}.
 create_in_container(client, Req, #base_state{chef_db_context = Ctx,
                                              organization_guid = OrgId,
                                              requestor = #chef_requestor{name = Name, type = <<"client">>}} = State) ->
@@ -356,7 +356,7 @@ create_in_container(Container, Req, #base_state{requestor_id = RequestorId} = St
                              wm_req(),
                              chef_wm:base_state(),
                              superuser |  object_id()) ->
-                                    {true|false,
+                                    {true | false,
                                      wm_req(),
                                      chef_wm:base_state()}.
 do_create_in_container(Container, Req,
@@ -433,7 +433,7 @@ is_authorized(Req, State) ->
 is_authorized(Req, State, Extractor) ->
     case verify_request_signature(Req, State, Extractor) of
         {true, Req1, State1} ->
-            case authorized_by_org_membership_check(Req1,State1) of
+            case authorized_by_org_membership_check(Req1, State1) of
                 {false, Req2, State2} ->
                     {{halt, 403}, Req2, State2};
                 {true, Req2, State2} ->
@@ -620,7 +620,7 @@ set_authz_id(Id, #user_state{} = U, user) ->
 -spec check_cookbook_authz(Cookbooks :: [#chef_cookbook_version{}],
                            Req :: wm_req(),
                            State :: #base_state{}) ->
-                                  ok | {error, {[any(),...]}}.
+                                  ok | {error, {[any(), ...]}}.
 check_cookbook_authz(Cookbooks, _Req, #base_state{reqid = ReqId,
                                                   requestor_id = RequestorId}) ->
     Resources = [{AuthzId, Name} || #chef_cookbook_version{name = Name, authz_id = AuthzId} <- Cookbooks],
@@ -661,7 +661,7 @@ is_user_in_org(Type, DbContext, Name, OrgName) ->
 %% @doc Given a `{Mod, Fun}' tuple, generate a stats hero metric with a prefix appropriate
 %% for stats_hero aggregation. An error is thrown if `Mod' is unknown. This is where we
 %% encode the mapping of module to upstream label.
--spec stats_hero_label({Mod::metric_module(), Fun::atom()}) -> <<_:16, _:_*8>>.
+-spec stats_hero_label({Mod :: metric_module(), Fun :: atom()}) -> <<_:16, _:_*8>>.
 stats_hero_label({chef_sql, Fun}) ->
     chef_metrics:label(rdbms, {chef_sql, Fun});
 stats_hero_label({oc_chef_authz, Fun}) ->
@@ -1023,8 +1023,8 @@ verify_request_signature(Req,
 
 -spec create_from_json(Req :: #wm_reqdata{},
                        State :: #base_state{},
-                       RecType :: chef_object_name()| chef_cookbook_version | oc_chef_cookbook_artifact_version,
-                       ContainerId :: object_id() | {authz_id, AuthzId::object_id() | undefined},
+                       RecType :: chef_object_name() | chef_cookbook_version | oc_chef_cookbook_artifact_version,
+                       ContainerId :: object_id() | {authz_id, AuthzId :: object_id() | undefined},
                        ObjectEjson :: ejson_term() |
                                 binary() |
                                 {binary(), ejson_term()} |
@@ -1140,7 +1140,7 @@ update_from_json(#wm_reqdata{} = Req, #base_state{reqid=ReqId,
                     {{halt, 404}, Req1, State1};
                 {conflict, _} ->
                     Name = chef_object:name(ObjectRec),
-                    RecType = erlang:element(1,ObjectRec),
+                    RecType = erlang:element(1, ObjectRec),
                     LogMsg = {RecType, name_conflict, Name},
                     ConflictMsg = ResourceMod:conflict_message(Name),
                     {{halt, 409}, chef_wm_util:set_json_body(Req, ConflictMsg),
@@ -1182,7 +1182,7 @@ verify_request_message(error_finding_user_or_client, User, _Org) ->
     {[{<<"error">>, [Msg]}]};
 verify_request_message(bad_sig, User, _Org) ->
     Msg = iolist_to_binary([<<"Invalid signature for user or client '">>,
-                            User,<<"'">>]),
+                            User, <<"'">>]),
     {[{<<"error">>, [Msg]}]};
 verify_request_message(ErrorType, User, Org)  when
       ErrorType =:= not_associated_with_org orelse
