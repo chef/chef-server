@@ -373,4 +373,4 @@ environment_name_from_prefix(Prefix) ->
 %% TODO: Other places use this same date... they should use this
 %% function, instead
 default_date() ->
-    {datetime, {{2011,10,1},{16,47,46}}}.
+    {datetime, {{2011, 10, 1}, {16, 47, 46}}}.

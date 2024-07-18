@@ -18,23 +18,23 @@
 -module(chef_index_tests).
 -include_lib("eunit/include/eunit.hrl").
 -define(EXPECTED_DOC, [<<"<doc>">>,
-                       [[<<"<field name=\"">>,<<"X_CHEF_id_CHEF_X">>,<<"\">">>,<<"a1">>,
+                       [[<<"<field name=\"">>, <<"X_CHEF_id_CHEF_X">>, <<"\">">>, <<"a1">>,
                          <<"</field>">>],
-                        [<<"<field name=\"">>,<<"X_CHEF_database_CHEF_X">>,<<"\">">>,<<"chef_db1">>,
+                        [<<"<field name=\"">>, <<"X_CHEF_database_CHEF_X">>, <<"\">">>, <<"chef_db1">>,
                          <<"</field>">>],
-                        [<<"<field name=\"">>,<<"X_CHEF_type_CHEF_X">>,<<"\">">>,<<"role">>,
+                        [<<"<field name=\"">>, <<"X_CHEF_type_CHEF_X">>, <<"\">">>, <<"role">>,
                          <<"</field>">>]],
                        [],
-                       [<<"<field name=\"">>,<<"content">>,<<"\">">>,
-                        [[<<"X_CHEF_database_CHEF_X">>,<<"__=__">>,<<"chef_db1">>,<<" ">>],
-                         [<<"X_CHEF_id_CHEF_X">>,<<"__=__">>,<<"a1">>,<<" ">>],
-                         [<<"X_CHEF_type_CHEF_X">>,<<"__=__">>,<<"role">>,<<" ">>],
-                         [<<"key1">>,<<"__=__">>,<<"value1">>,<<" ">>],
-                         [<<"key2">>,<<"__=__">>,<<"value2">>,<<" ">>]],
+                       [<<"<field name=\"">>, <<"content">>, <<"\">">>,
+                        [[<<"X_CHEF_database_CHEF_X">>, <<"__=__">>, <<"chef_db1">>, <<" ">>],
+                         [<<"X_CHEF_id_CHEF_X">>, <<"__=__">>, <<"a1">>, <<" ">>],
+                         [<<"X_CHEF_type_CHEF_X">>, <<"__=__">>, <<"role">>, <<" ">>],
+                         [<<"key1">>, <<"__=__">>, <<"value1">>, <<" ">>],
+                         [<<"key2">>, <<"__=__">>, <<"value2">>, <<" ">>]],
                         <<"</field>">>],
                        <<"</doc>">>]).
 
--define(EXPECTED_DELETE_DOC, [<<"<delete><id>">>,<<"a1">>,<<"</id></delete>">>]).
+-define(EXPECTED_DELETE_DOC, [<<"<delete><id>">>, <<"a1">>, <<"</id></delete>">>]).
 
 chef_index_test_() ->
     Item = {[{<<"key1">>, <<"value1">>},

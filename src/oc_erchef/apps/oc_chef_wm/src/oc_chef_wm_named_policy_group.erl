@@ -122,7 +122,7 @@ build_policy_revisions_json(Req, ReqId, DbContext, OrgId, PolicyGroupName) ->
 
         PolicyRevisionIDs ->
             URI = oc_chef_wm_routes:route(policy_group, Req, [{name, PolicyGroupName}]),
-            BaseEJSON = ej:set_p({"uri"}, {[{<<"policies">>,{[]}}]}, URI),
+            BaseEJSON = ej:set_p({"uri"}, {[{<<"policies">>, {[]}}]}, URI),
             EJSONWithPolicies = build_nested_list_data(PolicyRevisionIDs, BaseEJSON),
             chef_json:encode(EJSONWithPolicies)
     end.

@@ -1248,7 +1248,7 @@ delete_orphaned_checksums(OrgId, Checksums) ->
                     Acc;
                 {error, Reason} ->
                     error_logger:error_msg("Checksum deletion error: ~p~n"
-                                           "{~p,delete_orphaned_checksums,2,[{file,~p},{line,~p}]}~n",
+                                           "{~p,delete_orphaned_checksums,2,[{file,~p}, {line,~p}]}~n",
                                            [Reason, ?MODULE, ?FILE, ?LINE]),
                     Acc
             end

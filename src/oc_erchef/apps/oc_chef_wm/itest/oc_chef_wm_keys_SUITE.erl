@@ -45,10 +45,10 @@
 -define(ORG_KEYS_ACCESS_GROUP_AUTHZ_ID, <<"20000000000000000000000000000002">>).
 
 -define(KEY1NAME, <<"key1">>).
--define(KEY1EXPIRE, {datetime, {{2099,12,31},{00,00,00}}}).
+-define(KEY1EXPIRE, {datetime, {{2099,12,31}, {00,00,00}}}).
 -define(KEY1EXPIRESTRING, <<"2099-12-31T00:00:00Z">>).
 -define(KEY2NAME, <<"key2">>).
--define(KEY2EXPIRE, {datetime, {{2010,12,31},{00,00,00}}}).
+-define(KEY2EXPIRE, {datetime, {{2010,12,31}, {00,00,00}}}).
 -define(KEY2EXPIRESTRING, <<"2010-12-31T00:00:00Z">>).
 
 -define(DEFAULT_KEY_ENTRY, {<<"default">>, false}).
@@ -68,7 +68,7 @@ init_per_suite(LastConfig) ->
     {ok, AltPubKey} = file:read_file(AltPubKeyFile),
     {ok, PrivateKeyRE} = re:compile(".*BEGIN (RSA )?PRIVATE KEY.*"),
     {ok, PubKeyRE} = re:compile(".*BEGIN (RSA )?PUBLIC KEY.*"),
-    [{org_id, OrgId}, {pubkey, PubKey}, {alt_pubkey, AltPubKey},{pubkey_regex, PubKeyRE}, {privkey_regex, PrivateKeyRE}] ++ Config2.
+    [{org_id, OrgId}, {pubkey, PubKey}, {alt_pubkey, AltPubKey}, {pubkey_regex, PubKeyRE}, {privkey_regex, PrivateKeyRE}] ++ Config2.
 
 end_per_suite(Config) ->
     setup_helper:base_end_per_suite(Config).
