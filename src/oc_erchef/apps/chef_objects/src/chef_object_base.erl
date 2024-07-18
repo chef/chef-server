@@ -60,7 +60,7 @@ sql_date(now) ->
 sql_date(DateString) when is_binary(DateString) ->
     DateString;
 sql_date({_, _, _} = TS) ->
-    {{Year, Month, Day},{Hour, Minute, Second}} = calendar:now_to_universal_time(TS),
+    {{Year, Month, Day}, {Hour, Minute, Second}} = calendar:now_to_universal_time(TS),
     iolist_to_binary(io_lib:format("~4w-~2..0w-~2..0w ~2..0w:~2..0w:~2..0w",
                   [Year, Month, Day, Hour, Minute, Second])).
 

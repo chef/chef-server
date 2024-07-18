@@ -319,7 +319,7 @@ get_data_for_id([Id | _Ids] = OIds , [{RId, RData} | Resources], Denied, Permitt
 %
 -spec is_authorized_on_resource(requestor_id(), resource_type(), object_id(),
                                 'actor' | 'group', actor_id(), access_method())
-                               -> true | false | {error,any()}.
+                               -> true | false | {error, any()}.
 is_authorized_on_resource(RequestorId, ResourceType, ResourceId, ActorType, ActorId, AccessMethod)
   when is_atom(ResourceType) and is_atom(ActorType) and is_atom(AccessMethod) ->
     Url = make_url([pluralize_resource(ResourceType), ResourceId, <<"acl">>,
@@ -554,7 +554,7 @@ remove_actor_from_acl(ActorId, Acl) ->
                                    authz_acl().
 remove_actor_from_acl(_ActorId, [], Acc) ->
     lists:reverse(Acc);
-remove_actor_from_acl(ActorId, [{Permission, Ace}|Rest], Acc) ->
+remove_actor_from_acl(ActorId, [{Permission, Ace} | Rest], Acc) ->
     Filtered = remove_actor_from_ace(ActorId, Ace),
     remove_actor_from_acl(ActorId, Rest, [{Permission, Filtered} | Acc]).
 
@@ -565,7 +565,7 @@ remove_actor_from_ace(ActorId, #authz_ace{actors=Actors, groups=Groups}) ->
     #authz_ace{actors=[A || A <- Actors, A /= ActorId],
                groups=Groups}.
 
--spec pluralize_resource(resource_type()) -> <<_:48,_:_*8>>.
+-spec pluralize_resource(resource_type()) -> <<_:48, _:_*8>>.
 pluralize_resource(actor)     -> <<"actors">>;
 pluralize_resource(container) -> <<"containers">>;
 pluralize_resource(group)     -> <<"groups">>;
@@ -613,7 +613,7 @@ to_text(E) when is_atom(E) ->
 to_text(E) when is_list(E) ->
     E.
 
--spec make_url([string() | binary() |atom(), ...]) -> string().
+-spec make_url([string() | binary() | atom(), ...]) -> string().
 make_url(Components) ->
     string:join([to_text(E) || E <- Components], "/").
 

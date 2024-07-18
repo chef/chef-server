@@ -8,7 +8,7 @@
 -export([start/2, stop/1]).
 
 start() ->
-  start(type,args).
+  start(type, args).
 
 stop() ->
   stop(state).
