@@ -145,8 +145,8 @@ get_container_aid_for_object(Context, OrgId, ObjectType) ->
 %% with the ACL for `ContainerAId' will be merged into the ACL for the new object.
 %%
 %% @end TODO: consider error cases in more detail
--spec create_entity_with_container_acl(RequestorId::requestor_id(),
-                                       ContainerAId::object_id(),
+-spec create_entity_with_container_acl(RequestorId :: requestor_id(),
+                                       ContainerAId :: object_id(),
                                        ObjectType :: chef_wm:container_name()
                                                      %'client' | 'container' |
                                                      %'cookbook' | 'data' | 'environment' |
@@ -226,10 +226,10 @@ merge_acl_from_container(RequestorId, ContainerId, AuthzType, ObjectId) ->
               NewAcl :: authz_acl()) -> ok | {error, any()}.
 set_acl(_RequestorId, _AuthzType, _ObjectId, []) ->
     ok;
-set_acl(RequestorId, AuthzType, ObjectId, [{Method, ACE}|Rest]) when AuthzType =:= 'actor';
-                                                                     AuthzType =:= 'object';
-                                                                     AuthzType =:= 'container';
-                                                                     AuthzType =:= 'group' ->
+set_acl(RequestorId, AuthzType, ObjectId, [{Method, ACE} | Rest]) when AuthzType =:= 'actor';
+                                                                      AuthzType =:= 'object';
+                                                                      AuthzType =:= 'container';
+                                                                      AuthzType =:= 'group' ->
     case set_ace_for_entity(RequestorId, AuthzType, ObjectId, Method, ACE) of
         ok ->
             set_acl(RequestorId, AuthzType, ObjectId, Rest);
@@ -318,8 +318,8 @@ get_data_for_id([Id | _Ids] = OIds , [{RId, RData} | Resources], Denied, Permitt
 % Corresponds to GET /{actors|containers|groups|objects}/:id/acl/{actors|groups}/:member_id
 %
 -spec is_authorized_on_resource(requestor_id(), resource_type(), object_id(),
-                                'actor'|'group', actor_id(), access_method())
-                               -> true|false|{error,any()}.
+                                'actor' | 'group', actor_id(), access_method())
+                               -> true | false | {error,any()}.
 is_authorized_on_resource(RequestorId, ResourceType, ResourceId, ActorType, ActorId, AccessMethod)
   when is_atom(ResourceType) and is_atom(ActorType) and is_atom(AccessMethod) ->
     Url = make_url([pluralize_resource(ResourceType), ResourceId, <<"acl">>,
@@ -337,7 +337,7 @@ is_authorized_on_resource(RequestorId, ResourceType, ResourceId, ActorType, Acto
 % Corresponds to GET /groups/:id/transitive_member/:member_id
 %
 -spec is_actor_transitive_member_of_group(requestor_id(), object_id(), actor_id())
-                                         -> true|false|{error, not_found}|{error,server_error}.
+                                         -> true | false | {error, not_found} | {error, server_error}.
 is_actor_transitive_member_of_group(RequestorId, ActorId, GroupId) ->
     Url = make_url([groups, GroupId, transitive_member, actors, ActorId]),
     case oc_chef_authz_http:request(Url, get, [], [], RequestorId) of
@@ -352,7 +352,7 @@ is_actor_transitive_member_of_group(RequestorId, ActorId, GroupId) ->
 %
 % This succeeds unless authz is truly foobared. It doesn't seem to care what the requestor-id is.
 %
--spec create_resource(requestor_id(), actor|container|group|object) -> {ok, object_id()} |
+-spec create_resource(requestor_id(), actor | container | group | object) -> {ok, object_id()} |
                                                                        {error, server_error}.
 create_resource(RequestorId, ResourceType) ->
     %% authz can return 500, and we'll throw. I think that is correct
@@ -367,8 +367,8 @@ create_resource(RequestorId, ResourceType) ->
 % Delete entity in authz
 % Corresponds to DELETE /{actors|groups|objects}/:id
 % No delete for containers...
--spec delete_resource(requestor_id(), 'actor'|'group'|'object', object_id())
-                     ->  ok | {error, forbidden|not_found|server_error}.
+-spec delete_resource(requestor_id(), 'actor' | 'group' | 'object', object_id())
+                     ->  ok | {error, forbidden | not_found | server_error}.
 delete_resource(RequestorId, ResourceType, Id) ->
     EffectiveRequestorId = requestor_or_superuser(RequestorId),
     Url = make_url([pluralize_resource(ResourceType), Id]),
@@ -380,9 +380,9 @@ delete_resource(RequestorId, ResourceType, Id) ->
 
 %% Give a resource access to an entity by adding the resource
 %% to the entity's ACE
--spec add_ace_for_entity(requestor_id(), group|actor, object_id(),
+-spec add_ace_for_entity(requestor_id(), group | actor, object_id(),
                          resource_type(), object_id(), access_method()) ->
-    ok | {error, forbidden|not_found|server_error}.
+    ok | {error, forbidden | not_found | server_error}.
 
 add_ace_for_entity(RequestorId, ResourceType, ResourceId,
                    EntityType, EntityId, Method) ->
@@ -393,9 +393,9 @@ add_ace_for_entity(RequestorId, ResourceType, ResourceId,
 %% Deny a resource access to an entity by adding the resource
 %% to the entity's ACE. Note that if the resource has the access to the
 %% same entity via another means, this will not change
--spec remove_ace_for_entity(requestor_id(), group|actor, object_id(),
+-spec remove_ace_for_entity(requestor_id(), group | actor, object_id(),
                          resource_type(), object_id(), access_method()) ->
-    ok | {error, forbidden|not_found|server_error}.
+    ok | {error, forbidden | not_found | server_error}.
 remove_ace_for_entity(RequestorId, ResourceType, ResourceId,
                       EntityType, EntityId, Method) ->
     update_ace_for_entity(RequestorId, ResourceType, ResourceId,
@@ -437,7 +437,7 @@ add_if_missing(Item, List) ->
 % GET {objects|groups|actors|containers}/:id/acl
 %
 -spec get_acl_for_resource(requestor_id(), resource_type(), binary()) ->
-    {ok, authz_acl()}|{error, any()}.
+    {ok, authz_acl()} | {error, any()}.
 get_acl_for_resource(RequestorId, ResourceType, Id) ->
     Url = make_url([pluralize_resource(ResourceType), Id, acl]),
     case oc_chef_authz_http:request(Url, get, [], [], RequestorId) of
@@ -532,8 +532,8 @@ add_to_group(GroupAuthzId, Type, AuthzId, RequestorId) ->
 %% Both `TargetActorId' and `ActorIdToRemove' are assumed here to be the AuthzId of actors,
 %% not any other kind of Authz object (group, container, or object).  This should be
 %% verified by callers of this function.
--spec remove_actor_from_actor_acl(ActorIdToRemove::object_id(),
-                                  TargetActorId::object_id()) -> ok | {error, any()}.
+-spec remove_actor_from_actor_acl(ActorIdToRemove :: object_id(),
+                                  TargetActorId ::   object_id()) -> ok | {error, any()}.
 remove_actor_from_actor_acl(ActorIdToRemove, TargetActorId) ->
     %% Target actor fetches its own ACL
     {ok, Acl} = get_acl_for_resource(TargetActorId, actor, TargetActorId),
@@ -543,14 +543,14 @@ remove_actor_from_actor_acl(ActorIdToRemove, TargetActorId) ->
     set_acl(TargetActorId, actor, TargetActorId, FilteredAcl).
 
 %% @doc Front-end to recursive implementation in `remove_actor_from_acl/3`.
--spec remove_actor_from_acl(ActorId::object_id(), Acl::authz_acl()) -> authz_acl().
+-spec remove_actor_from_acl(ActorId :: object_id(), Acl :: authz_acl()) -> authz_acl().
 remove_actor_from_acl(ActorId, Acl) ->
     remove_actor_from_acl(ActorId, Acl, []).
 
 %% @doc Removes `ActorId` from all `actors` lists in the given ACL.
--spec remove_actor_from_acl(ActorId::object_id(),
-                            AclToProcess:: [] | authz_acl(),
-                            FilteredAcl::[] | authz_acl()) ->
+-spec remove_actor_from_acl(ActorId :: object_id(),
+                            AclToProcess :: [] | authz_acl(),
+                            FilteredAcl  :: [] | authz_acl()) ->
                                    authz_acl().
 remove_actor_from_acl(_ActorId, [], Acc) ->
     lists:reverse(Acc);
@@ -560,7 +560,7 @@ remove_actor_from_acl(ActorId, [{Permission, Ace}|Rest], Acc) ->
 
 %% @doc Returns the given authz_ace with `ActorId' filtered out of the `actors' list.  The
 %% `groups' list is untouched.
--spec remove_actor_from_ace(ActorId::object_id(), Ace::#authz_ace{}) -> #authz_ace{}.
+-spec remove_actor_from_ace(ActorId :: object_id(), Ace :: #authz_ace{}) -> #authz_ace{}.
 remove_actor_from_ace(ActorId, #authz_ace{actors=Actors, groups=Groups}) ->
     #authz_ace{actors=[A || A <- Actors, A /= ActorId],
                groups=Groups}.
@@ -571,7 +571,7 @@ pluralize_resource(container) -> <<"containers">>;
 pluralize_resource(group)     -> <<"groups">>;
 pluralize_resource(object)    -> <<"objects">>.
 
--spec object_type_to_container_name(chef_wm:container_name()) -> <<_:32,_:_*8>>.
+-spec object_type_to_container_name(chef_wm:container_name()) -> <<_:32, _:_*8>>.
 object_type_to_container_name(client)            -> <<"clients">>;
 object_type_to_container_name(container)         -> <<"containers">>;
 object_type_to_container_name(cookbook)          -> <<"cookbooks">>;
@@ -613,9 +613,9 @@ to_text(E) when is_atom(E) ->
 to_text(E) when is_list(E) ->
     E.
 
--spec make_url([string()|binary()|atom(),...]) -> string().
+-spec make_url([string() | binary() |atom(), ...]) -> string().
 make_url(Components) ->
-    string:join([to_text(E) || E <- Components],"/").
+    string:join([to_text(E) || E <- Components], "/").
 
 % Extract actors and groups from the
 % TODO refine spec
@@ -639,7 +639,7 @@ extract_ace(JsonBlob) ->
 
 -spec extract_acl(jiffy:json_value()) -> authz_acl().
 extract_acl(JsonBlob) ->
-    [ {PAtom, extract_ace(ej:get({PBin},JsonBlob))} || {PAtom, PBin} <- ?ATOM_BIN_PERMS ].
+    [ {PAtom, extract_ace(ej:get({PBin}, JsonBlob))} || {PAtom, PBin} <- ?ATOM_BIN_PERMS ].
 
 %
 % This is needed by the container permission inheritance
@@ -654,7 +654,7 @@ merge_ace(#authz_ace{actors=Ace1Actors, groups=Ace1Groups},
 
 -spec merge_acl(authz_acl(), authz_acl()) -> authz_acl().
 merge_acl(Acl1, Acl2) ->
-    [{K, merge_ace(A,B)} || {{K, A}, {K, B}} <- lists:zip(Acl1, Acl2)].
+    [{K, merge_ace(A, B)} || {{K, A}, {K, B}} <- lists:zip(Acl1, Acl2)].
 
 
 %% unit tests for internal functions

@@ -147,7 +147,7 @@ parse_version(Vsn)
 %% return every member of that list that matches all constraints.
 -spec filter_packages([{pkg_name(), raw_vsn()}], [raw_constraint()]) ->
                              {ok, [{pkg_name(), raw_vsn()}]}
-                                 | {error, Reason::term()}.
+                                 | {error, Reason :: term()}.
 filter_packages(PVPairs, RawConstraints) ->
     Constraints = [fix_con(Constraint) || Constraint <- RawConstraints],
     case check_constraints(Constraints) of
@@ -254,8 +254,8 @@ is_valid_constraint({_Pkg, _LVsn1, _LVsn2, between}) ->
 is_valid_constraint(_InvalidConstraint) ->
     false.
 
--spec is_version_within_constraint(vsn(),constraint()) -> boolean().
-is_version_within_constraint({missing}, _Pkg)->
+-spec is_version_within_constraint(vsn(), constraint()) -> boolean().
+is_version_within_constraint({missing}, _Pkg) ->
     false;
 is_version_within_constraint(_Vsn, Pkg) when is_atom(Pkg) orelse is_binary(Pkg) ->
     true;
