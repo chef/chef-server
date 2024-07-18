@@ -21,7 +21,7 @@
                   reqid :: binary(),
                   darklaunch = undefined}).
 
--type delete_type() ::chef_object() |
+-type delete_type() :: chef_object() |
                     #oc_chef_container{} |
                     #oc_chef_group{} |
                     #chef_cookbook_version{} |
@@ -190,6 +190,6 @@ bulk_delete_from_solr(Type, Ids, OrgId, ReqId) ->
     [ chef_index:delete(Type, Id, OrgId, ReqId) || Id <- Ids ],
     ok.
 
--spec dbname(binary()) -> <<_:40,_:_*8>>.
+-spec dbname(binary()) -> <<_:40, _:_*8>>.
 dbname(OrgId) ->
     <<"chef_", OrgId/binary>>.

@@ -21,12 +21,12 @@
                               error_removing_from_org_user_group.
 -type deprovision_warning() :: usag_record_delete_failed | org_admin_group_fetch_failed |
                               org_admin_ace_removal_failed.
--type deprovision_error_tuple() :: {error, { deprovision_error(),term()}}.
+-type deprovision_error_tuple() :: {error, { deprovision_error(), term()}}.
 -type deprovision_warning_msg() ::  { deprovision_warning(), term() }.
 -type deprovision_warning_tuple() :: {warning, [ deprovision_warning_msg(), ... ] }.
 -type deprovision_response() ::  ok | deprovision_warning_tuple() | deprovision_error_tuple().
 
--type provision_error() :: usag_authz_creation_failed | usag_creation_failed |fetch_org_users_group_failed |
+-type provision_error() :: usag_authz_creation_failed | usag_creation_failed | fetch_org_users_group_failed |
                            usag_update_failed | add_usag_to_org_users_group_failed | fetch_org_users_group_by_name_failed.
 -type provision_warning() :: fetch_org_admins_failed | add_read_ace_for_admins_failed.
 -type provision_error_tuple() :: {error, { provision_error(), term()}}.
@@ -56,7 +56,7 @@ wm_associate_user(Req, #base_state{organization_guid = OrgId,
                                                                                          username = UserName},
                                                                        data = ReqData}} = State,
                   RequestorId) ->
-    Data = ej:set({<<"user">>},ReqData,UserId),
+    Data = ej:set({<<"user">>}, ReqData,UserId),
     ObjectRec = chef_object:new_record(oc_chef_org_user_association, ApiVersion, OrgId, unset, Data),
     case chef_db:create(ObjectRec, DbContext, RequestorId) of
         {conflict, _} ->
@@ -130,7 +130,7 @@ deprovision_fetch_users_group(#oc_chef_group{} = USAG, #context{ db_context = Db
                                           for_requestor_id = RequestorAuthzId }, DbContext),
     deprovision_remove_usag_from_users(Result, Context#context{usag = USAG});
 deprovision_fetch_users_group(Error, _Context) ->
-    {error, {error_fetching_usag,Error}}.
+    {error, {error_fetching_usag, Error}}.
 
 deprovision_remove_usag_from_users(#oc_chef_group{} = OrgUsersGroup,
                                    #context{usag = USAG,
