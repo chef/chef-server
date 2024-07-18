@@ -199,7 +199,7 @@ invitation_response(Req, #base_state{ organization_name = OrgName,
     Req2 = chef_wm_util:set_json_body(Req1, {[{<<"uri">>, Uri}, OrgUser, Org, UserOut]}),
     {true, Req2, State#base_state{log_msg = LogMsg}}.
 
-malformed_request_message(Any, _Req, _state) ->
+malformed_request_message(Any, _Req, _State) ->
     error({unexpected_malformed_request_message, Any}).
 
 org_name_mismatch_message(OrgName, BadOrgName) ->
