@@ -661,7 +661,7 @@ is_user_in_org(Type, DbContext, Name, OrgName) ->
 %% @doc Given a `{Mod, Fun}' tuple, generate a stats hero metric with a prefix appropriate
 %% for stats_hero aggregation. An error is thrown if `Mod' is unknown. This is where we
 %% encode the mapping of module to upstream label.
--spec stats_hero_label({Mod::metric_module(), Fun::atom()}) -> <<_:16,_:_*8>>.
+-spec stats_hero_label({Mod::metric_module(), Fun::atom()}) -> <<_:16, _:_*8>>.
 stats_hero_label({chef_sql, Fun}) ->
     chef_metrics:label(rdbms, {chef_sql, Fun});
 stats_hero_label({oc_chef_authz, Fun}) ->
@@ -1331,7 +1331,7 @@ call_if_exported(Mod, FunName, Args, DefaultFun) ->
 
 %% Default route_args consist of {TypeName, [{name, ObjectName}]
 % %unless overridden by a resource module.
-route_args(ObjectRec,_State) ->
+route_args(ObjectRec, _State) ->
     TypeName = chef_object:type_name(ObjectRec),
     {TypeName, [{name, chef_object:name(ObjectRec)}]}.
 

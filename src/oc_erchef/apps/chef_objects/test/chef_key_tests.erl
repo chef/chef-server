@@ -115,7 +115,7 @@ new_record_test_() ->
       fun() ->
 	      KeyData = example_key(<<"not-a-date">>, undefined),
 	      ID = <<"testid">>,
-	      ?assertThrow({ec_date,{bad_date,_}}, chef_key:new_record(?API_MIN_VER, unused, unused, {ID, KeyData}))
+	      ?assertThrow({ec_date,{bad_date, _}}, chef_key:new_record(?API_MIN_VER, unused, unused, {ID, KeyData}))
       end
      },
      {"check that KeyData with an invalid public_key throws invalid_public_key",
