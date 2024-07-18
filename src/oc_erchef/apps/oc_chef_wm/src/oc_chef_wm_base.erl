@@ -187,7 +187,7 @@ forbidden(Req, #base_state{resource_mod = Mod} = State) ->
                     {Req2, State2} = set_forbidden_msg(Req1, State1),
                     {true, Req2, State2}
             end;
-        {AuthTuples, Req1, State1} when is_list(AuthTuples)->
+        {AuthTuples, Req1, State1} when is_list(AuthTuples) ->
             MultiAuthResult = multi_auth_check(AuthTuples, Req1, State1),
             multi_auth_check_to_wm_response(MultiAuthResult);
         {authorized, Req1, State1} ->
@@ -480,7 +480,7 @@ authorized_by_org_membership_check(Req, #base_state{organization_name = OrgName,
 
 -spec set_forbidden_msg(atom(), wm_req(), chef_wm:base_state()) ->
                                {wm_req(), chef_wm:base_state()}.
-set_forbidden_msg(Perm, Req, State) when is_atom(Perm)->
+set_forbidden_msg(Perm, Req, State) when is_atom(Perm) ->
     Msg = iolist_to_binary(["missing ", atom_to_binary(Perm, utf8), " permission"]),
     set_custom_forbidden_msg(Msg, Req, State).
 

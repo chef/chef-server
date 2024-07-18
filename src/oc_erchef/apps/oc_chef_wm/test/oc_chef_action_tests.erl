@@ -210,7 +210,7 @@ hostname_test_() ->
   HostFQDN = <<"hostname.example.com">>,
   ok = application:set_env(oc_chef_wm, actions_fqdn, HostFQDN),
   [{"gets fqdn correctly",
-    fun()-> Ret = oc_chef_action:hostname(),
+    fun() -> Ret = oc_chef_action:hostname(),
           ?assertEqual(<<"hostname.example.com">>, Ret)
       end
    }

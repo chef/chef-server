@@ -120,7 +120,7 @@ create_path(Req, State) ->
 
 to_json(Req, #base_state{ organization_guid = OrgId, chef_db_context = DbContext } = State) ->
     case chef_db:list(#oc_chef_org_user_invite{org_id = OrgId}, DbContext) of
-        Invitations when is_list(Invitations)->
+        Invitations when is_list(Invitations) ->
             EJson = oc_chef_org_user_invite:ejson_from_list(Invitations, <<"username">>),
             {chef_json:encode(EJson), Req, State};
         Error ->
