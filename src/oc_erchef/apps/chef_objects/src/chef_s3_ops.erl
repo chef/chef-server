@@ -103,13 +103,13 @@ delete_file(OrgId, AwsConfig, Bucket, Checksum) ->
         _Response ->
             {ok, Checksum}
     catch
-        error:{aws_error, {http_error,404,_}} ->
+        error:{aws_error, {http_error, 404, _}} ->
             %% We got a 404.  Since this *may* be indicative of weirdness, we'll log it, but
             %% we don't need to crash or raise an exception.
             error_logger:warning_msg("Deletion of file (checksum: ~p) for org ~p from bucket ~p (key: ~p) failed because the file was not found~n",
                                      [Checksum, OrgId, Bucket, Key]),
             {missing, Checksum};
-        ExceptionClass:Reason->
+        ExceptionClass:Reason ->
             %% Something unanticipated happened.  We should log the specific reason for
             %% later analysis, but as far as the overall deletion operation is concerned,
             %% this is "just an error", and we can continue along.
@@ -136,13 +136,13 @@ check_file(OrgId, AwsConfig, Bucket, Checksum, AttemptsLeft) ->
                      %% an error.
                      {ok, Checksum}
              catch
-                 error:{aws_error, {http_error,404,_}} ->
+                 error:{aws_error, {http_error, 404, _}} ->
                      %% The file wasn't found. Log it and move on.
                      error_logger:error_msg("Checking presence of file (checksum: ~p) for org ~p from bucket ~p (key: ~p) failed because the file was not found~n",
                                             [Checksum, OrgId, Bucket, Key]),
                      {missing, Checksum};
                  %% TODO(ssd) 2020-09-03: should likely remove this case when we move to erlcloud
-                 error:{aws_error, {socket_error,retry_later}} ->
+                 error:{aws_error, {socket_error, retry_later}} ->
                      error_logger:error_msg("Checking presence of file (checksum: ~p) for org ~p from bucket ~p (key: ~p) returned retry_later (retries left: ~p)~n",
                                             [Checksum, OrgId, Bucket, Key, AttemptsLeft - 1]),
                      check_file(OrgId, AwsConfig, Bucket, Checksum, AttemptsLeft - 1);
@@ -196,7 +196,7 @@ s3_checksum_op(OrgId, Checksums, Fun, TimeoutMsgTemplate) ->
                             case Result of
                                 {ok, Checksum} -> {[Checksum | Ok], Missing, Timeouts, Errors};
                                 {missing, Checksum} -> {Ok, [Checksum | Missing], Timeouts, Errors};
-                                {timeout, Checksum} -> {Ok, Missing, [Checksum |Timeouts], Errors};
+                                {timeout, Checksum} -> {Ok, Missing, [Checksum | Timeouts], Errors};
                                 {error, Checksum} -> {Ok, Missing, Timeouts, [Checksum | Errors]}
                             end
                     end,

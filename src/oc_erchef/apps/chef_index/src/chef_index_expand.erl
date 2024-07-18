@@ -70,7 +70,7 @@ declare_metrics() ->
 doc_for_index(Index, Id, OrgId, Ejson) ->
     Start = erlang:monotonic_time(),
     Ret = make_doc_for_add(make_record(Index, Id, OrgId, Ejson)),
-    TimeTakenMS = erlang:convert_time_unit(erlang:monotonic_time() - Start, native, microsecond)/1000.0,
+    TimeTakenMS = erlang:convert_time_unit(erlang:monotonic_time() - Start, native, microsecond) / 1000.0,
     prometheus_histogram:observe(chef_index_expand_make_doc_for_index_duration_ms, TimeTakenMS),
     Ret.
 
@@ -183,7 +183,7 @@ get_object_type(ObjectType) ->
 %% @doc If we have a `data_bag_item' object, return a Solr field
 %% `data_bag', otherwise empty list.
 maybe_data_bag_field(Provider, DataBagName, ExistingFields) when is_binary(DataBagName) ->
-    [{<<"data_bag">>, chef_index:transform_data(Provider, DataBagName)}| ExistingFields];
+    [{<<"data_bag">>, chef_index:transform_data(Provider, DataBagName)} | ExistingFields];
 maybe_data_bag_field(_Provider, _DataBagName, ExistingFields) ->
     ExistingFields.
 
@@ -250,14 +250,14 @@ expand_list(Mod, Keys, List, Acc) ->
 expand_obj(Mod, Keys, {PL}, Acc) ->
     lists:foldl(fun({K, V}, MyAcc) ->
                         MyAcc1 = expand(Mod, Keys, K, MyAcc),
-                        expand(Mod, [K|Keys], V, MyAcc1)
+                        expand(Mod, [K | Keys], V, MyAcc1)
                 end, Acc, PL).
 
 add_kv_pair(_Mod, [], _Value, Acc) ->
     Acc;
 add_kv_pair(Mod, [K], Value, Acc) ->
     [encode_pair(Mod, K, Value) | Acc];
-add_kv_pair(Mod, [K|_]=Keys, Value, Acc) ->
+add_kv_pair(Mod, [K | _] = Keys, Value, Acc) ->
     [encode_pair(Mod, join_keys(Keys, ?SEP), Value),
      encode_pair(Mod, K, Value) | Acc].
 

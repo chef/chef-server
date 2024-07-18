@@ -60,8 +60,8 @@ start_link(Fun, Config) ->
     %% Use start_link/3 here as the caller
     gen_server:start_link(?MODULE, [Fun, Config], []).
 
--spec add(pid(), term(), list()|term()) -> ok | {error, wait_called}.
-add(Pid, JobName, JobArgs) when is_list(JobArgs)->
+-spec add(pid(), term(), list() | term()) -> ok | {error, wait_called}.
+add(Pid, JobName, JobArgs) when is_list(JobArgs) ->
     gen_server:call(Pid, {add_job, JobName, JobArgs});
 add(Pid, JobName, JobArgs) ->
     add(Pid, JobName, [JobArgs]).
@@ -149,7 +149,7 @@ spawn_worker(JobName, JobArgs, State = #chef_wait_group_state{job_fun = Fun,
                                                               waiting_workers = Workers}) ->
     Parent = self(),
     Pid = spawn_link(fun() -> run_user_callback(Fun, JobArgs, Parent) end),
-    {ok, State#chef_wait_group_state{waiting_workers = [{Pid, JobName}|Workers]}}.
+    {ok, State#chef_wait_group_state{waiting_workers = [{Pid, JobName} | Workers]}}.
 
 run_user_callback(Fun, JobArgs, Parent) ->
     try apply(Fun, JobArgs) of
@@ -176,7 +176,7 @@ mark_job_done(Pid, Result, State = #chef_wait_group_state{
                                       waiting_workers = Workers,
                                       done_jobs = DoneList}) ->
     {ok, {_Pid, JobName}, WaitingWorkers} = worker_from_list(Pid, Workers),
-    State#chef_wait_group_state{done_jobs = [{JobName, Result}|DoneList],
+    State#chef_wait_group_state{done_jobs = [{JobName, Result} | DoneList],
                                 waiting_workers = WaitingWorkers}.
 
 -spec mark_job_failed(pid(), term(), #chef_wait_group_state{}) -> #chef_wait_group_state{}.
@@ -184,7 +184,7 @@ mark_job_failed(Pid, Result, State = #chef_wait_group_state{
                                         waiting_workers = Workers,
                                         failed_jobs = FailedList}) ->
     {ok, {_Pid, JobName}, WaitingWorkers} = worker_from_list(Pid, Workers),
-    State#chef_wait_group_state{failed_jobs = [{JobName, Result}|FailedList],
+    State#chef_wait_group_state{failed_jobs = [{JobName, Result} | FailedList],
                                 waiting_workers = WaitingWorkers}.
 
 -spec worker_from_list(pid(), [{pid(), term()}]) -> {ok, {pid(), term()}, [{pid(), term()}]} | {error, no_worker}.
@@ -193,10 +193,10 @@ worker_from_list(Pid, Workers) ->
 
 worker_from_list(_Pid, [], _Acc) ->
     {error, no_worker};
-worker_from_list(Pid, [Found = {Pid, _JobName}|Rest], Acc) ->
+worker_from_list(Pid, [Found = {Pid, _JobName} | Rest], Acc) ->
     {ok, Found, lists:append(Acc, Rest)};
-worker_from_list(Pid, [NotFound|Rest], Acc)->
-    worker_from_list(Pid, Rest, [NotFound|Acc]).
+worker_from_list(Pid, [NotFound | Rest], Acc)->
+    worker_from_list(Pid, Rest, [NotFound | Acc]).
 
 -spec make_gather_reply(list(), list()) -> {ok, list()} | {error, list(), list()}.
 make_gather_reply(Done, []) ->
