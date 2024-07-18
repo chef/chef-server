@@ -37,7 +37,7 @@ fetch_data_bag_items() ->
     Results = itest_util:list_records(hd(DBS)),
     ?assertEqual(Expected, Results).
 
-fetch_data_bag_item()->
+fetch_data_bag_item() ->
     Item = hd(data_bag_items()),
 
     {ok, Got} = itest_util:fetch_record(Item),
@@ -52,9 +52,9 @@ fetch_data_bag_item_ids() ->
     {ok, Results} = chef_sql:fetch_data_bag_item_ids(chef_test_suite_helper:the_org_id(), <<"data_bag_02">>),
     ?assertEqual(Expected,Results).
 
-bulk_get_data_bag_items()-> ok.
+bulk_get_data_bag_items() -> ok.
 
-update_data_bag_item()->
+update_data_bag_item() ->
     [Old | _T] = [ Db ||
                      Db <- data_bag_items(),
                      Db#chef_data_bag_item.org_id =:= chef_test_suite_helper:the_org_id(),
@@ -68,7 +68,7 @@ update_data_bag_item()->
                  (FResults#chef_data_bag_item.serialized_object)).
 
 
-delete_data_bag_item()->
+delete_data_bag_item() ->
     Item = hd(data_bag_items()),
     {ok, DResults} = itest_util:delete_record(Item),
     ?assertEqual(1, DResults),
