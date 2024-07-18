@@ -289,8 +289,8 @@ make_cookbook_version(Prefix, Version, {AuthzId, OrgId, Name}, Properties) when 
                            meta_long_desc= <<"">>,
                            metadata=Prefix,
                            last_updated_by= chef_test_suite_helper:actor_id(),
-                           created_at= {datetime, {{2011,10,1},{16,47,46}}},
-                           updated_at= {datetime, {{2011,10,1},{16,47,46}}},
+                           created_at= {datetime, {{2011, 10, 1}, {16, 47, 46}}},
+                           updated_at= {datetime, {{2011, 10, 1}, {16, 47, 46}}},
                            serialized_object= process_property(serialized_object, Properties),
                            checksums = [] }.
 

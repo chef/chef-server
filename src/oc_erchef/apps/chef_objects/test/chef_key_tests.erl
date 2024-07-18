@@ -26,7 +26,7 @@
 -define(KEY_NAME, <<"test_key">>).
 -define(DEFAULT_EXPIRATION, <<"2099-10-24T22:49:08Z">>).
 %% The extra zero denotes UTC
--define(PARSED_DEFAULT_EXPIRATION, {{2099,10,24},{22,49,08}}).
+-define(PARSED_DEFAULT_EXPIRATION, {{2099, 10, 24}, {22, 49, 08}}).
 
 %% example post parse_binary_json
 example_key() ->

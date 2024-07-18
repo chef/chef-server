@@ -462,7 +462,7 @@ remove_couchdb_keys([{Key, _} | T], N) when Key =:= <<"_rev">>;
 remove_couchdb_keys(L, N) when N > 1 ->
     L;
 remove_couchdb_keys([H | T], N) ->
-    [H|remove_couchdb_keys(T, N)];
+    [H | remove_couchdb_keys(T, N)];
 remove_couchdb_keys([], _) ->
     [].
 

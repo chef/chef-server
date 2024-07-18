@@ -54,7 +54,7 @@ msg_with_payload(Task) ->
     {<<"task">>, Task},
     {<<"entity_type">>, <<"node">>},
     {<<"entity_name">>, <<"db">>},
-    {<<"data">>, {[{<<"name">>,<<"db">>}]}}
+    {<<"data">>, {[{<<"name">>, <<"db">>}]}}
    ]}.
 
 task_for_cookbooks_test_() ->
@@ -99,7 +99,7 @@ extract_entity_info_test_() ->
      fun() -> oc_chef_wm_test_utils:setup(MockedModules) end,
      fun(_) -> oc_chef_wm_test_utils:cleanup(MockedModules) end,
      [{"client entity info",
-       fun() -> State = #client_state{client_data = {[{<<"name">>,<<"node-foo">>}]} },
+       fun() -> State = #client_state{client_data = {[{<<"name">>, <<"node-foo">>}]} },
                 meck:expect(chef_wm_util,object_name, fun(client, req) -> undefined end),
                 Ret = oc_chef_action:extract_entity_info(req, State),
                 Expected = entity({[{<<"name">>, <<"node-foo">>}]}, <<"client">>, <<"node-foo">>),
@@ -138,49 +138,49 @@ extract_entity_info_test_() ->
                 ?assertEqual(Expected, Ret)
              end},
      {"environment entity info",
-      fun() -> State = #environment_state{environment_data = {[{<<"name">>,<<"production">> }]} },
+      fun() -> State = #environment_state{environment_data = {[{<<"name">>, <<"production">> }]} },
                meck:expect(chef_wm_util,object_name, fun(environment, req) -> undefined end),
                Ret = oc_chef_action:extract_entity_info(req, State),
                Expected = entity({[{<<"name">>, <<"production">>}]}, <<"environment">>, <<"production">>),
                ?assertEqual(Expected, Ret)
              end},
      {"group entity info",
-      fun() -> State = #group_state{group_data = {[{<<"name">>,<<"sysadmins">> }]} },
+      fun() -> State = #group_state{group_data = {[{<<"name">>, <<"sysadmins">> }]} },
                meck:expect(chef_wm_util,extract_from_path, fun(group_name, req) -> undefined end),
                Ret = oc_chef_action:extract_entity_info(req, State),
                Expected = entity({[{<<"name">>, <<"sysadmins">>}]}, <<"group">>, <<"sysadmins">>),
                ?assertEqual(Expected, Ret)
              end},
      {"node entity info",
-      fun() -> State = #node_state{node_data = {[{<<"name">>,<<"node-foo">> }]} },
+      fun() -> State = #node_state{node_data = {[{<<"name">>, <<"node-foo">> }]} },
                meck:expect(chef_wm_util,object_name, fun(node, req) -> undefined end),
                Ret = oc_chef_action:extract_entity_info(req, State),
                Expected = entity({[{<<"name">>, <<"node-foo">>}]}, <<"node">>, <<"node-foo">>),
                ?assertEqual(Expected, Ret)
              end},
      {"role entity info",
-      fun() -> State = #role_state{role_data = {[{<<"name">>,<<"webserver">> }]} },
+      fun() -> State = #role_state{role_data = {[{<<"name">>, <<"webserver">> }]} },
                meck:expect(chef_wm_util,object_name, fun(role, req) -> undefined end),
                Ret = oc_chef_action:extract_entity_info(req, State),
                Expected = entity({[{<<"name">>, <<"webserver">>}]}, <<"role">>, <<"webserver">>),
                ?assertEqual(Expected, Ret)
              end},
      {"user entity info",
-      fun() -> State = #user_state{user_data = {[{<<"name">>,<<"webserver">> }]} },
+      fun() -> State = #user_state{user_data = {[{<<"name">>, <<"webserver">> }]} },
                meck:expect(chef_wm_util,object_name, fun(user, req) -> undefined end),
                Ret = oc_chef_action:extract_entity_info(req, State),
                Expected = entity({[{<<"name">>, <<"webserver">>}]}, <<"user">>, <<"webserver">>),
                ?assertEqual(Expected, Ret)
              end},
      {"keys entity info",
-      fun() -> State = #key_state{key_data= {[{<<"name">>,<<"new-key">> }]}, parent_name = <<"bob">>, type = client},
+      fun() -> State = #key_state{key_data= {[{<<"name">>, <<"new-key">> }]}, parent_name = <<"bob">>, type = client},
                meck:expect(chef_wm_util,object_name, fun(key, req) -> undefined end),
                Ret = oc_chef_action:extract_entity_info(req, State),
                Expected = parent_entity({[{<<"name">>, <<"new-key">>}]}, <<"client">>, <<"bob">>, <<"key">>, <<"new-key">>),
                ?assertEqual(Expected, Ret)
       end},
      {"policy entity info",
-      fun() -> State = #policy_state{policy_data= {[{<<"name">>,<<"expected_policy_name">>}]}},
+      fun() -> State = #policy_state{policy_data= {[{<<"name">>, <<"expected_policy_name">>}]}},
                Stub = fun(policy, req) ->
                           <<"expected_policy_name">>;
                          (policy_group_asoc_name, req) ->
@@ -259,7 +259,7 @@ create_message_test_() ->
     State = #base_state{requestor = #chef_requestor{name = <<"rob">>, type = <<"user">>},
                         reqid = <<"Xfh5mCQvjRgWDdlevrdyGt8M4lecXmN3gpGXrKKiUYqKdeD3">>,
                         organization_name = <<"cmwest">>,
-                        resource_state=#node_state{node_data = {[{<<"name">>,<<"db">>}]} }},
+                        resource_state=#node_state{node_data = {[{<<"name">>, <<"db">>}]} }},
     ok = application:set_env(oc_chef_wm, actions_fqdn, HostFQDN),
     {foreach,
      fun() -> oc_chef_wm_test_utils:setup(MockedModules),

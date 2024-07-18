@@ -33,12 +33,12 @@ safe_fetch_ids_test_() ->
      fun(_) -> meck:unload(oc_chef_authz_db) end,
      [
       {"valid: the list of IDs are returned",
-       ?_assertEqual([<<"id1">>,<<"id2">>],
-                    Subject(client, Context, [<<"name1">>,<<"name2">>]))
+       ?_assertEqual([<<"id1">>, <<"id2">>],
+                    Subject(client, Context, [<<"name1">>, <<"name2">>]))
       },
       {"invalid: an error is raised because a name is missing from the response",
        ?_assertThrow({invalid, user, [<<"name3">>]},
-                    Subject(user, Context, [<<"name1">>,<<"name2">>, <<"name3">>]))
+                    Subject(user, Context, [<<"name1">>, <<"name2">>, <<"name3">>]))
       }
      ]
     }.
@@ -150,8 +150,8 @@ valid_actors_only_ej() ->
     {
      [{<<"read">>,
        {[
-         {<<"groups">>,[<<"x">>]},
-         {<<"actors">>,[<<"a">>, <<"b">>, <<"c">>]}
+         {<<"groups">>, [<<"x">>]},
+         {<<"actors">>, [<<"a">>, <<"b">>, <<"c">>]}
         ]}
       }]
     }.
@@ -160,10 +160,10 @@ valid_actors_users_clients_ej() ->
     {
      [{<<"read">>,
        {[
-         {<<"actors">>,[]},
-         {<<"groups">>,[<<"x">>]},
-         {<<"users">>,[<<"a">>,<<"b">>]},
-         {<<"clients">>,[<<"c">>]}
+         {<<"actors">>, []},
+         {<<"groups">>, [<<"x">>]},
+         {<<"users">>, [<<"a">>, <<"b">>]},
+         {<<"clients">>, [<<"c">>]}
         ]}
       }]
     }.
@@ -171,10 +171,10 @@ invalid_actors_users_clients_ej() ->
     {
      [{<<"read">>,
        {[
-         {<<"actors">>,[<<"a">>,<<"b">>, <<"c">>]},
-         {<<"groups">>,[<<"x">>]},
-         {<<"users">>,[<<"a">>,<<"b">>]},
-         {<<"clients">>,[<<"c">>]}
+         {<<"actors">>, [<<"a">>, <<"b">>, <<"c">>]},
+         {<<"groups">>, [<<"x">>]},
+         {<<"users">>, [<<"a">>, <<"b">>]},
+         {<<"clients">>, [<<"c">>]}
         ]}
       }]
     }.
@@ -183,9 +183,9 @@ invalid_clients_only_ej() ->
     {
      [{<<"read">>,
        {[
-         {<<"actors">>,[]},
-         {<<"groups">>,[<<"x">>]},
-         {<<"clients">>,[<<"c">>]}
+         {<<"actors">>, []},
+         {<<"groups">>, [<<"x">>]},
+         {<<"clients">>, [<<"c">>]}
         ]}
       }]
     }.
@@ -194,9 +194,9 @@ invalid_users_only_ej() ->
     {
      [{<<"read">>,
        {[
-         {<<"actors">>,[]},
-         {<<"groups">>,[<<"x">>]},
-         {<<"users">>,[<<"a">>,<<"b">>]}
+         {<<"actors">>, []},
+         {<<"groups">>, [<<"x">>]},
+         {<<"users">>, [<<"a">>, <<"b">>]}
         ]}
       }]
     }.
