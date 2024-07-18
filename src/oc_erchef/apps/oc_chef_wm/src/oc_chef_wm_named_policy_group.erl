@@ -127,7 +127,7 @@ build_policy_revisions_json(Req, ReqId, DbContext, OrgId, PolicyGroupName) ->
             chef_json:encode(EJSONWithPolicies)
     end.
 
-build_nested_list_data([Row|Rest], EJSON) ->
+build_nested_list_data([Row | Rest], EJSON) ->
     {_PolicyGroupName, PolicyName, RevisionID} = Row,
     NewEJSON = ej:set_p({"policies", PolicyName, "revision_id"}, EJSON, RevisionID),
     build_nested_list_data(Rest, NewEJSON);
