@@ -166,7 +166,7 @@ malformed_request_message(#ej_invalid{type=json_type,
 %% Entire run list is the wrong type
 malformed_request_message(#ej_invalid{type=json_type,
                                      key=Key}, _Req, _State) when Key =:= <<"run_list">> ->
-    error_envelope([<<"Field '", Key/binary,"' is not a valid run list">>]);
+    error_envelope([<<"Field '", Key/binary, "' is not a valid run list">>]);
 
 %% entire env_run_lists is the wrong type
 malformed_request_message(#ej_invalid{type=json_type,
@@ -215,7 +215,7 @@ bin_str_join(L, Sep) ->
     bin_str_join(L, Sep, []).
 
 bin_str_join([H], _Sep, Acc) ->
-    lists:reverse([<<"'">>, H, <<"'">>|Acc]);
+    lists:reverse([<<"'">>, H, <<"'">> | Acc]);
 bin_str_join([H | T], Sep, Acc) ->
     bin_str_join(T, Sep, [Sep, <<"'">>, H, <<"'">> | Acc]).
 

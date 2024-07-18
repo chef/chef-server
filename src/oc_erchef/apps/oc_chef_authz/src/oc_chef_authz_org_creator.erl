@@ -77,7 +77,7 @@
          {acls,
           [
            %% Billing admins is very restrictive.
-           {add_acl, [{group, 'billing-admins'}], [read, update], [{user, creator},{group, 'billing-admins'}]},
+           {add_acl, [{group, 'billing-admins'}], [read, update], [{user, creator}, {group, 'billing-admins'}]},
 
            %% Creator (superuser normally) goes everywhere
            {add_acl,
@@ -257,7 +257,7 @@ update_acl_step({add_acl, Objects, Actions, Members}, Acls) ->
                                  fun(M, {C, U, G}) ->
                                          case M of
                                              {user, N} ->
-                                                 {C, [N | U],G};
+                                                 {C, [N | U], G};
                                              {client, N} ->
                                                  {[N | C], U, G};
                                              {group, N} ->
@@ -339,7 +339,7 @@ add_cache(C, {Type}, AuthzId) ->
     set({Type}, {Resource, AuthzId}, C).
 
 objectlist_to_authz(C, Type, BareObjectList) ->
-    [find({Type, O},C) || O <- lists:flatten(BareObjectList)].
+    [find({Type, O}, C) || O <- lists:flatten(BareObjectList)].
 
 ace_to_authz(C, #hr_ace{clients=Clients, users=Users, groups=Groups}) ->
     {_, ClientIds} = lists:unzip(objectlist_to_authz(C, client, Clients)),
