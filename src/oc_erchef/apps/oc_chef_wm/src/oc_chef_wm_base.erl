@@ -1077,7 +1077,7 @@ create_from_json(#wm_reqdata{} = Req,
             Uri = oc_chef_wm_routes:route(TypeName, Req, Args),
             BodyEJ0 = {[{<<"uri">>, Uri}]},
             BodyEJ1 = call_if_exported(ResourceMod, finalize_create_body, [Req, State, ObjectRec, BodyEJ0],
-                                       fun(_,_,_,EJ) -> EJ end),
+                                       fun(_, _, _, EJ) -> EJ end),
             Req1 = chef_wm_util:set_json_body(Req, BodyEJ1),
             {true, chef_wm_util:set_location_of_created_resource(Uri, Req1), State#base_state{log_msg = LogMsg}};
         What ->
@@ -1118,7 +1118,7 @@ update_from_json(#wm_reqdata{} = Req, #base_state{reqid=ReqId,
         true ->
             State1 = State#base_state{log_msg = ignore_update_for_duplicate},
             Body = call_if_exported(ResourceMod, finalize_update_body, [Req, State, ObjectEjson],
-                                   fun(_,_,EJ) -> EJ end),
+                                   fun(_, _, EJ) -> EJ end),
             {true, chef_wm_util:set_json_body(Req, Body), State1};
         false ->
             case chef_db:update(ObjectRec, DbContext, ActorId) of
@@ -1126,7 +1126,7 @@ update_from_json(#wm_reqdata{} = Req, #base_state{reqid=ReqId,
                     IsRename = chef_object:name(OrigObjectRec) =/= chef_object:name(ObjectRec),
                     Req1 = handle_rename(ObjectRec, Req, State, IsRename),
                     Body = call_if_exported(ResourceMod, finalize_update_body, [Req, State, ObjectEjson],
-                                           fun(_,_,EJ) -> EJ end),
+                                           fun(_, _, EJ) -> EJ end),
                     {true, chef_wm_util:set_json_body(Req1, Body), State};
                 not_found ->
                     %% We will get this if no rows were affected by the query. This could
