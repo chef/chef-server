@@ -146,7 +146,7 @@ check_file(OrgId, AwsConfig, Bucket, Checksum, AttemptsLeft) ->
                      error_logger:error_msg("Checking presence of file (checksum: ~p) for org ~p from bucket ~p (key: ~p) returned retry_later (retries left: ~p)~n",
                                             [Checksum, OrgId, Bucket, Key, AttemptsLeft - 1]),
                      check_file(OrgId, AwsConfig, Bucket, Checksum, AttemptsLeft - 1);
-                 ExceptionClass:Reason->
+                 ExceptionClass:Reason ->
                      %% Something unanticipated happened.  We should log the specific reason
                      %% for later analysis, but as far as the overall checking operation is
                      %% concerned, this is "just an error", and we can continue along.

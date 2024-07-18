@@ -152,7 +152,7 @@ make_doc_for_add(Command = #chef_idx_expand_doc{id = Id, type=Type, search_provi
         {_, 7} ->
             IndexEjson;
         _ ->
-            [{<<"_type">>, <<"object">>}| IndexEjson]
+            [{<<"_type">>, <<"object">>} | IndexEjson]
     end,
     [jiffy:encode({[{<<"index">>, {IndexEjson1}}]}),
      <<"\n">>,
