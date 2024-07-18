@@ -293,5 +293,5 @@ delete_resource(Req, #base_state{chef_db_context = DbContext,
             {{halt, 500}, Req, State#base_state{log_msg = ERROR}}
     end.
 
-malformed_request_message(Any, _Req, _state) ->
+malformed_request_message(Any, _Req, _State) ->
     error({unexpected_malformed_request_message, Any}).
