@@ -392,7 +392,7 @@ basic_node_index_with_policy_info() ->
 merge({L1}, {L2}) ->
     D1 = dict:from_list(L1),
     D2 = dict:from_list(L2),
-    Merged = dict:merge(fun(_K,_V1,V2) -> V2 end, D1,D2),
+    Merged = dict:merge(fun(_K, _V1, V2) -> V2 end, D1, D2),
     {dict:to_list(Merged)}.
 
 to_sorted_list({L}) ->

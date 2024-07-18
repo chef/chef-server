@@ -590,14 +590,14 @@ depsolver_missing() ->
                    {constraints_not_met,[]}]}, Ret1),
 
     Ret2 = chef_depsolver:solve_dependencies(World, [], [{<<"app1">>, <<"0.1">>}]),
-    ?assertMatch({error,no_solution,_},Ret2).
+    ?assertMatch({error,no_solution, _, Ret2).
 
 
 depsolver_missing_via_culprit_search() ->
     World = [{<<"app1">>,[{<<"1.1.0">>,[]}]},
              {<<"app2">>,[{<<"0.0.1">>,[{<<"app1::oops">>,<<"0.0.0">>,'>='}]} ]} ],
     Result = chef_depsolver:solve_dependencies(World, [], [<<"app1">>,<<"app2">>]),
-    ?assertMatch({error,no_solution,_}, Result).
+    ?assertMatch({error,no_solution, _}, Result).
 
 %% This test from the depsolver library may no longer be necessary. It seems to be
 %% testing that you can pass binary data to depsolver and it performs the same.

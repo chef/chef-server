@@ -179,7 +179,7 @@ normalize_run_list(RunList) ->
 %% It is assumed that only legal run list items will be input to this function (i.e., the
 %% run lists they are part of have already been validated).
 %%
-%% NOTE: About the spec here, `<<_:40,_:_*8>>` is the notation for a binary string that is
+%% NOTE: About the spec here, `<<_:40, _:_*8>>` is the notation for a binary string that is
 %% at least 5 bytes long (8 bits * 5 = 40).  This comes from Dialyzer inferring that the
 %% smallest possible return value for this function would be <<"role[">>, which (while true)
 %% is rather unhelpful.  We can't specify a return value of `binary()`, however, because
