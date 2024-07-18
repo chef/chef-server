@@ -78,7 +78,7 @@ malformed_request_message(Any, _Req, _State) ->
     error({unexpected_malformed_request_message, Any}).
 
 -spec to_json(#wm_reqdata{}, #base_state{}) -> {binary(), #wm_reqdata{}, #base_state{}}.
-to_json(Req, #base_state{chef_db_context = DbContext,organization_guid = OrgId, reqid = ReqId, resource_state = StubRec} = State) ->
+to_json(Req, #base_state{chef_db_context = DbContext, organization_guid = OrgId, reqid = ReqId, resource_state = StubRec} = State) ->
     %% we query for just the names first so we get groups that are empty,
     %% then we get the list of all policy revisions associated to a group and
     %% fill this in to the data structure from the first step.
@@ -99,13 +99,13 @@ make_base_ejson(Names, Req) ->
     UriMap= [{Name, RouteFun(Name)} || Name <- Names],
     build_nested_base_ejson(UriMap, {[]}).
 
-build_nested_base_ejson([{[PolicyGroupName], URI}|Rest], EJSON) ->
+build_nested_base_ejson([{[PolicyGroupName], URI} | Rest], EJSON) ->
     NewEJSON = ej:set_p({PolicyGroupName, "uri"}, EJSON, URI),
     build_nested_base_ejson(Rest, NewEJSON);
 build_nested_base_ejson([], EJSON) ->
     EJSON.
 
-build_nested_list_data([Row|Rest], EJSON) ->
+build_nested_list_data([Row | Rest], EJSON) ->
     {PolicyGroupName, PolicyName, RevisionID} = Row,
     NewEJSON = ej:set_p({PolicyGroupName, "policies", PolicyName, "revision_id"}, EJSON, RevisionID),
     build_nested_list_data(Rest, NewEJSON);
