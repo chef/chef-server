@@ -223,9 +223,9 @@ bin_str_join([H | T], Sep, Acc) ->
 -spec to_binary( any() ) -> binary().
 to_binary(A) when is_atom(A) ->
     atom_to_binary(A, utf8);
-to_binary(I) when is_integer(I)->
+to_binary(I) when is_integer(I) ->
     list_to_binary(integer_to_list(I));
-to_binary(B) when is_binary(B)->
+to_binary(B) when is_binary(B) ->
     B;
 to_binary(O) ->
     %% Catch-all case

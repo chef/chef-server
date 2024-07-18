@@ -260,7 +260,7 @@ task(Req, #base_state{resource_state=#association_state{}, log_msg = LogMsg}) ->
                 invite_deleted -> <<"reject">>
             end
     end;
-task(Req, _State)->
+task(Req, _State) ->
     key_for_method(wrq:method(Req)).
 
 -spec key_for_method('POST'|'PUT'|'DELETE') -> <<_:48>>.

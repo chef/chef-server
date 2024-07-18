@@ -195,7 +195,7 @@ worker_from_list(_Pid, [], _Acc) ->
     {error, no_worker};
 worker_from_list(Pid, [Found = {Pid, _JobName} | Rest], Acc) ->
     {ok, Found, lists:append(Acc, Rest)};
-worker_from_list(Pid, [NotFound | Rest], Acc)->
+worker_from_list(Pid, [NotFound | Rest], Acc) ->
     worker_from_list(Pid, Rest, [NotFound | Acc]).
 
 -spec make_gather_reply(list(), list()) -> {ok, list()} | {error, list(), list()}.

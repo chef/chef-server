@@ -217,7 +217,7 @@ cookbook_missing({Name, _Version}, AllVersions) ->
 %% @doc Given the output from not_found_cookbooks/2 and
 %% chef_depsolver:solve_dependencies/3, format an appropriate response
 %% document
-handle_depsolver_results({not_found, CookbookNames}, _Deps, Req, State) when is_list(CookbookNames)->
+handle_depsolver_results({not_found, CookbookNames}, _Deps, Req, State) when is_list(CookbookNames) ->
     precondition_failed(Req, State,
                         not_found_message(cookbook_version, CookbookNames),
                         cookbook_version_not_found);
