@@ -353,8 +353,8 @@ convert_to_path(BasePath, Elements) ->
 
 insert_user(Username) ->
     UserRecord = chef_user_record(Username, chef_test_suite_helper:make_az_id(Username) ),
-    [_,_| Values] = tuple_to_list(UserRecord),
-    [_|FieldNames] = record_info(fields, chef_user),
+    [_, _ | Values] = tuple_to_list(UserRecord),
+    [_ | FieldNames] = record_info(fields, chef_user),
     Input = lists:zip(FieldNames, Values),
     ?assertEqual({ok, 1}, sqerl:adhoc_insert(users, [Input])).
 

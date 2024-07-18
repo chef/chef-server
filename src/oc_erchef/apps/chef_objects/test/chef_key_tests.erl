@@ -158,8 +158,8 @@ parse_binary_json_update_test_() ->
           BadNameField = {[{<<"name">>, <<"bob^was^here">>}]},
           BadDateField = {[{<<"expiration_date">>, <<"tomorrow">>}]},
 
-          ?assertThrow({ej_invalid,fun_match,_,_,_,_,_}, chef_key:parse_binary_json(chef_json:encode(BadKeyField), update)),
-          ?assertThrow({ej_invalid, string_match,_,_,_,_,_}, chef_key:parse_binary_json(chef_json:encode(BadNameField), update)),
+          ?assertThrow({ej_invalid, fun_match, _, _, _, _, _}, chef_key:parse_binary_json(chef_json:encode(BadKeyField), update)),
+          ?assertThrow({ej_invalid, string_match, _, _, _, _, _}, chef_key:parse_binary_json(chef_json:encode(BadNameField), update)),
           ?assertThrow({bad_date, <<"expiration_date">>}, chef_key:parse_binary_json(chef_json:encode(BadDateField), update))
       end
      },
@@ -174,7 +174,7 @@ parse_binary_json_update_test_() ->
 	      OriginalKey = example_key(<<"infinity">>, undefined),
 	      Key = ej:set({<<"name">>}, OriginalKey, <<"invalid^name">>),
 	      EncodedKey = chef_json:encode(Key),
-	      ?assertThrow({ej_invalid,string_match,_,_,_,_,_}, chef_key:parse_binary_json(EncodedKey, update))
+	      ?assertThrow({ej_invalid, string_match, _, _, _, _, _}, chef_key:parse_binary_json(EncodedKey, update))
       end},
      {"check that complete update key with an invalid date is rejected",
       fun() ->
@@ -186,7 +186,7 @@ parse_binary_json_update_test_() ->
       fun() ->
 	      Key = example_key(<<"infinity">>, <<"-----BEGIN PUBLIC KEY-----\ninvalid_key\n-----END PUBLIC KEY-----">>),
 	      EncodedKey = chef_json:encode(Key),
-	      ?assertThrow({ej_invalid,fun_match,_,_,_,_,_}, chef_key:parse_binary_json(EncodedKey, update))
+	      ?assertThrow({ej_invalid, fun_match, _, _, _, _, _}, chef_key:parse_binary_json(EncodedKey, update))
       end}
     ].
 
@@ -208,7 +208,7 @@ parse_binary_json_create_test_() ->
 	      OriginalKey = example_key(<<"infinity">>, undefined),
 	      Key = ej:set({<<"name">>}, OriginalKey, <<"invalid^name">>),
 	      EncodedKey = chef_json:encode(Key),
-	      ?assertThrow({ej_invalid,string_match,_,_,_,_,_}, chef_key:parse_binary_json(EncodedKey, create))
+	      ?assertThrow({ej_invalid, string_match, _, _, _, _, _}, chef_key:parse_binary_json(EncodedKey, create))
       end},
      {"check that key with an invalid date is rejected",
       fun() ->
@@ -220,7 +220,7 @@ parse_binary_json_create_test_() ->
       fun() ->
 	      Key = example_key(<<"infinity">>, <<"-----BEGIN PUBLIC KEY-----\ninvalid_key\n-----END PUBLIC KEY-----">>),
 	      EncodedKey = chef_json:encode(Key),
-	      ?assertThrow({ej_invalid,fun_match,_,_,_,_,_}, chef_key:parse_binary_json(EncodedKey, create))
+	      ?assertThrow({ej_invalid, fun_match, _, _, _, _, _}, chef_key:parse_binary_json(EncodedKey, create))
       end}
     ].
 
