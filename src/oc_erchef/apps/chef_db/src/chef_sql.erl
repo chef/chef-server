@@ -317,7 +317,7 @@ fetch_latest_cookbook_versions(OrgId, CookbookName, NumberOfVersions) ->
             Raw = lists:foldl(fun(Row, Acc) ->
                                       N = proplists:get_value(<<"name">>, Row),
                                       V = proplists:get_value(<<"version">>, Row),
-                                      [{N,V} | Acc]
+                                      [{N, V} | Acc]
                               end,
                               [],
                               CookbookVersions),

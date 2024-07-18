@@ -388,9 +388,9 @@ is_valid_version(Version) ->
 %% than one dot or more than two dots is an error.
 %%
 %% @end
--spec parse_version(Version::binary()) -> {Major :: non_neg_integer(),
-                                           Minor :: non_neg_integer(),
-                                           Patch :: non_neg_integer()}.
+-spec parse_version(Version :: binary()) -> {Major :: non_neg_integer(),
+                                             Minor :: non_neg_integer(),
+                                             Patch :: non_neg_integer()}.
 parse_version(Version) when is_binary(Version) ->
     Parts = [list_to_integer(binary_to_list(V))
              || V <- binary:split(Version, <<".">>, [global])],

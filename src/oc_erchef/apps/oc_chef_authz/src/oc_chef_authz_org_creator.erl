@@ -77,7 +77,7 @@
          {acls,
           [
            %% Billing admins is very restrictive.
-           {add_acl, [{group, 'billing-admins'}], [read,update], [{user, creator},{group, 'billing-admins'}]},
+           {add_acl, [{group, 'billing-admins'}], [read, update], [{user, creator},{group, 'billing-admins'}]},
 
            %% Creator (superuser normally) goes everywhere
            {add_acl,
@@ -135,11 +135,11 @@ process_policy(#oc_chef_organization{} = Org,
 process_policy([], _, _, _Cache) ->
     %% This is where we might extract some stuff from cache to descibe the created org
     ok;
-process_policy([PolicyEntry|Policy], Org, User, Cache) ->
+process_policy([PolicyEntry | Policy], Org, User, Cache) ->
     case process_policy_step(PolicyEntry, Org, User, Cache) of
         {error, _} = Error -> Error;
         {Cache1, Steps} ->
-            process_policy(Steps++Policy, Org, User, Cache1)
+            process_policy(Steps ++ Policy, Org, User, Cache1)
     end.
 
 %% Returns a tuple of updated cache, and expanded steps to process
@@ -167,7 +167,7 @@ process_policy_step({add_to_groups, ActorType, Members, Groups},
     %% TODO capture error return
     [oc_chef_authz:add_to_group(GroupId, Type, MemberId, superuser) ||
         {_, GroupId} <- GroupIds,
-        {Type,MemberId} <- MemberIds],
+        {Type, MemberId} <- MemberIds],
     {Cache, []};
 process_policy_step({create_org_read_access_group},
                     #oc_chef_organization{name=OrgName, server_api_version=ApiVersion},
@@ -189,10 +189,10 @@ process_policy_step({acls, Steps}, _Org, _User, Cache) ->
 %%
 create_object(_, _, _, _, [], Cache) ->
     Cache;
-create_object(ApiVersion, OrgId, RequestorId, Type, [Name|Remaining], Cache) ->
+create_object(ApiVersion, OrgId, RequestorId, Type, [Name | Remaining], Cache) ->
     case create_helper(ApiVersion, OrgId, RequestorId, Type, Name) of
         AuthzId when is_binary(AuthzId) ->
-            NewCache = add_cache(Cache,{Type, Name}, AuthzId),
+            NewCache = add_cache(Cache, {Type, Name}, AuthzId),
             create_object(ApiVersion, OrgId, RequestorId, Type, Remaining, NewCache);
         Error ->
             %% Do we clean up created authz stuff here, or save it for
@@ -257,11 +257,11 @@ update_acl_step({add_acl, Objects, Actions, Members}, Acls) ->
                                  fun(M, {C, U, G}) ->
                                          case M of
                                              {user, N} ->
-                                                 {C, [N|U],G};
+                                                 {C, [N | U],G};
                                              {client, N} ->
-                                                 {[N|C], U, G};
+                                                 {[N | C], U, G};
                                              {group, N} ->
-                                                 {C, U, [N|G]}
+                                                 {C, U, [N | G]}
                                          end
                                  end, {[], [], []}, lists:flatten(Members)),
     AceToAdd = #hr_ace{clients=Clients, users=Users, groups=Groups},
@@ -323,7 +323,7 @@ init_cache(#oc_chef_organization{authz_id=OrgAuthzId},
     %% Notes: we assume the creator is a superuser;
     Elements = [ { {user, creator}, CreatorAuthzId },
                  { {organization}, OrgAuthzId } ],
-    InsertFun = fun({Item,AuthzId}, Acc) ->
+    InsertFun = fun({Item, AuthzId}, Acc) ->
                         add_cache(Acc, Item, AuthzId)
                 end,
     lists:foldl(InsertFun, dict:new(), Elements).
@@ -339,20 +339,20 @@ add_cache(C, {Type}, AuthzId) ->
     set({Type}, {Resource, AuthzId}, C).
 
 objectlist_to_authz(C, Type, BareObjectList) ->
-    [find({Type,O},C) || O <- lists:flatten(BareObjectList)].
+    [find({Type, O},C) || O <- lists:flatten(BareObjectList)].
 
 ace_to_authz(C, #hr_ace{clients=Clients, users=Users, groups=Groups}) ->
     {_, ClientIds} = lists:unzip(objectlist_to_authz(C, client, Clients)),
     {_, UserIds} = lists:unzip(objectlist_to_authz(C, user, Users)),
     {_, GroupIds} = lists:unzip(objectlist_to_authz(C, group, Groups)),
     ActorIds = lists:flatten([ClientIds, UserIds]),
-    #authz_ace{actors=ActorIds,groups=GroupIds}.
+    #authz_ace{actors=ActorIds, groups=GroupIds}.
 
 set(Key, Value, C) ->
-    dict:store(Key,Value, C).
+    dict:store(Key, Value, C).
 
 find(Key, C) ->
-    case dict:find(Key,C) of
+    case dict:find(Key, C) of
         {ok, Value} -> Value;
         error ->
             lager:error("Error processing org creation policy, no definition found for ~p", [Key]),

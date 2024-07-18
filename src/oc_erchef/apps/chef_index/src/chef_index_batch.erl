@@ -261,7 +261,7 @@ collect_process_info() ->
     end.
 
 
-handle_cast({stats_update, TotalDocs, {AvgQueueLatency,AvgSuccessLatency}, Resp},
+handle_cast({stats_update, TotalDocs, {AvgQueueLatency, AvgSuccessLatency}, Resp},
             State = #chef_idx_batch_state{avg_queue_latency = OQL,
                                           avg_success_latency = OSL,
                                           total_docs_queued = TQ,
@@ -269,7 +269,7 @@ handle_cast({stats_update, TotalDocs, {AvgQueueLatency,AvgSuccessLatency}, Resp}
                                          }) ->
     collect_process_info(),
     TotalDocsQueuedUpdated = TQ + TotalDocs,
-    AvgQueueLatencyUpdated = ((AvgQueueLatency*TotalDocs)+(OQL * TQ))/(TQ + TotalDocs),
+    AvgQueueLatencyUpdated = ((AvgQueueLatency * TotalDocs) + (OQL * TQ)) / (TQ + TotalDocs),
     State1 = State#chef_idx_batch_state{total_docs_queued = TotalDocsQueuedUpdated,
                                         avg_queue_latency = AvgQueueLatencyUpdated},
     case Resp of
