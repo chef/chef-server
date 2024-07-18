@@ -97,7 +97,7 @@ initialize_context(OrgId, DbContext, CallBackFun) ->
 %% Output:
 %% { [{Name, AuthzId}, [{Name, ErrorType}] }
 %%
--spec names_to_authz_id(lookup_type() ,[binary()], #context{}) -> { [binary()], [{atom(), binary()}] }.
+-spec names_to_authz_id(lookup_type() , [binary()], #context{}) -> { [binary()], [{atom(), binary()}] }.
 names_to_authz_id(Type, Names, MapperContext) ->
     %% Lower to fully qualified orgname, name
     ScopedNames = parse_scoped_names(Names, is_scoped_type(Type), MapperContext),
