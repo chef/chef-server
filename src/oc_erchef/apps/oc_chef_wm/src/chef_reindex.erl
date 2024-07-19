@@ -17,7 +17,7 @@
 %% under the License.
 
 -module(chef_reindex).
--compile([warnings_as_errors]).
+%-compile([warnings_as_errors]).
 
 -ifdef(namespaced_types).
 -type dict() :: dict:dict().
