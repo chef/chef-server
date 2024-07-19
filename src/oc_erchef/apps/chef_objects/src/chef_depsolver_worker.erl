@@ -42,10 +42,11 @@
 
 -record(state, {port, os_pid}).
 
--ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl"). %% TODO: remove
--endif.
--include("chef_types.hrl").
+%-ifdef(TEST).
+%-include_lib("eunit/include/eunit.hrl"). %% TODO: remove
+%-endif.
+%-include("chef_types.hrl").
 
 %%%===================================================================
 %%% API
