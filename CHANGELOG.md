@@ -1,9 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release -->
+<!-- latest_release 15.9.39 -->
+## [15.9.39](https://github.com/chef/chef-server/tree/15.9.39) (2024-07-19)
+
+#### Merged Pull Requests
+- Bump omnibus-software from `e4e5868` to `ca4f96b` in /omnibus [#3839](https://github.com/chef/chef-server/pull/3839) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
-<!-- release_rollup -->
+<!-- release_rollup since=15.9.38 -->
+### Changes since 15.9.38 release
+
+#### Merged Pull Requests
+- Bump omnibus-software from `e4e5868` to `ca4f96b` in /omnibus [#3839](https://github.com/chef/chef-server/pull/3839) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.9.39 -->
 <!-- release_rollup -->
 
 <!-- latest_stable_release -->
