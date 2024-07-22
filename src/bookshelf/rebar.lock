@@ -88,7 +88,7 @@
   0},
  {<<"opscoderl_wm">>,
   {git,"https://github.com/chef/opscoderl_wm",
-       {ref,"f9b6c8ad590222df813f73b1b1b31c6e85145726"}},
+       {branch,"CHEF-11677/CHEF-12498/lbaker"}},
   0},
  {<<"pooler">>,
   {git,"https://github.com/chef/pooler.git",
@@ -108,5 +108,5 @@
   0},
  {<<"webmachine">>,
   {git,"https://github.com/chef/webmachine",
-       {ref,"0b51a03cc962724c2e17af7832c44b7e347ba3df"}},
+       {branch,"CHEF-11677/CHEF-12498/lbaker"}},
   1}].
