@@ -590,7 +590,7 @@ depsolver_missing() ->
                    {constraints_not_met,[]}]}, Ret1),
 
     Ret2 = chef_depsolver:solve_dependencies(World, [], [{<<"app1">>, <<"0.1">>}]),
-    ?assertMatch({error,no_solution, _, Ret2).
+    ?assertMatch({error,no_solution, _}, Ret2).
 
 
 depsolver_missing_via_culprit_search() ->

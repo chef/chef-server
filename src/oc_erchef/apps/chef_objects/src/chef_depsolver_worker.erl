@@ -66,12 +66,12 @@ start_link() ->
 %% Solve dependencies with the given state and constraints
 %% @end
 %%--------------------------------------------------------------------
--spec solve_dependencies(AllVersions :: [chef_depsolver:dependency_set()],
-                         EnvConstraints :: [chef_depsolver:constraint()],
-                         Cookbooks :: [Name :: binary() |
-                                             {Name :: binary(), Version :: binary()}],
-                         Timeout :: integer()) ->
-                                {ok, [ versioned_cookbook()]} | {error, term()}.
+%-spec solve_dependencies(AllVersions :: [chef_depsolver:dependency_set()],
+%                         EnvConstraints :: [chef_depsolver:constraint()],
+%                         Cookbooks :: [Name :: binary() |
+%                                             {Name :: binary(), Version :: binary()}],
+%                         Timeout :: integer()) ->
+%                                {ok, [ versioned_cookbook()]} | {error, term()}.
 solve_dependencies(AllVersions, EnvConstraints, Cookbooks, Timeout) ->
     case pooler:take_member(chef_depsolver, pooler_timeout()) of
         error_no_members ->
