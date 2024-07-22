@@ -4,7 +4,7 @@
   1},
  {<<"bcrypt">>,
   {git,"https://github.com/erlangpack/bcrypt",
-       {ref,"826291ebd232ebfc4fb69f1c27d35706eecb8fc2"}},
+       {ref,"564b39e2f86a0e3d8ca08dcd1aae924acffe1408"}},
   0},
  {<<"bear">>,
   {git,"https://github.com/boundary/bear.git",
