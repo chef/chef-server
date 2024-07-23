@@ -52,7 +52,7 @@
   1},
  {<<"erlcloud">>,
   {git,"https://github.com/chef/erlcloud",
-       {ref,"27724cc615bb71595e88665ffd3ea083bf51ecb3"}},
+       {branch,"CHEF-11677/CHEF-12498/lbaker"}},
   0},
  {<<"erlware_commons">>,
   {git,"https://github.com/chef/erlware_commons",
