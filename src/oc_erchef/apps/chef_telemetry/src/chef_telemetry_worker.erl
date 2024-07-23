@@ -33,7 +33,10 @@
     db_context,
     req_id,
     scan_time,
-    current_scan
+    current_scan,
+    running_file,
+    ctl_command,
+    fqdns
 }).
 
 -record(oc_chef_organization, {
@@ -70,11 +73,17 @@ init(_Config) ->
           end, 
     ReportingTime = envy:get(chef_telemetry, reporting_time, ?DEFAULT_REPORTING_TIME, Fun),
     Options = envy:get(chef_telemetry, ibrowse_options, ?DEFAULT_IBROWSE_OPTIONS, list),
+    ConfigFile= envy:get(chef_telemetry, config_file, "", string),
+    Ctl = envy:get(chef_telemetry, ctl_command, "", string),
+    Cmd = "which " ++ Ctl,
+    CtlLocation = os:cmd(Cmd),
     {ok, HttpClient} = oc_httpc_worker:start_link(ReportingUrl, Options, []),
     State = #state{
         report_time = ReportingTime,
         reporting_url = ReportingUrl,
-        http_client = HttpClient},
+        http_client = HttpClient,
+        running_file = ConfigFile,
+        ctl_command = CtlLocation},
     gen_server:cast(self(), init_timer),
     {ok, State}.
 
@@ -83,14 +92,14 @@ handle_call(_Message, _From, State) ->
 
 handle_cast(send_data, State) ->
     State1 = init_req(State),
-    % code to get chef_server version.
-    ShouldSend = check_send(State1),
-    case ShouldSend of
+    insert_fqdn(State1),
+    case check_send(State1) of
         true -> 
             [{_Server, ServerVersion, _, _}] = release_handler:which_releases(permanent),
             State2 = get_nodes(State1),
             State3 = get_company_name(State2),
-            Req = generate_request(list_to_binary(ServerVersion), State3),
+            State4 = get_api_fqdn(State3),
+            Req = generate_request(list_to_binary(ServerVersion), State4),
             send_data(Req, State3),
             State3;
         _   ->
@@ -143,6 +152,15 @@ init_req(State) ->
                 scan_end_time = CurrentTime}
     }.
 
+get_api_fqdn(State) ->
+    case sqerl:execute(<<"select property from telemetry where property like 'FQDN:%'">>) of
+        {ok, Rows} when is_list(Rows) ->
+            FQDNs = [binary:part(FQDN, 5, size(FQDN) -5) || [{<<"property">>, FQDN}] <- Rows],
+            State#state{fqdns = FQDNs};
+        _ ->
+            State
+    end.
+            
 get_org_nodes(OrgName, Query1, ReqId, DbContext) ->
     {Guid1, _AuthzId1} = 
         case chef_db:fetch_org_metadata(DbContext, OrgName) of
@@ -285,9 +303,9 @@ generate_request(ServerVersion, State) ->
         {<<"Infra Server">>, {[
             {<<"deploymentType">>, <<"">>},
             {<<"instanceId">>, <<"">>},
-            {<<"fqdn">>, <<"">>},
-            {<<"config_location">>, <<"">>},
-            {<<"binary_location">>, <<"">>}
+            {<<"fqdn">>, State#state.fqdns},
+            {<<"config_location">>, to_binary(State#state.running_file)},
+            {<<"binary_location">>, to_binary(State#state.ctl_command)}
         ]}}
     ]}},
     {<<"source">>, <<"Infra Server">>},
@@ -350,3 +368,11 @@ to_system_time(Rows) ->
 
 should_send(LastSend, State) ->
     LastSend < State#state.scan_time.
+
+insert_fqdn(State) ->
+    {ok, HostName} = inet:gethostname(),
+    Now = calendar:system_time_to_universal_time(State#state.scan_time, second),
+    %%Hostname = os:cmd('hostname -f'),
+    HostName1 = "FQDN:" ++ HostName,
+    sqerl:adhoc_delete(telemetry, {property, equals, HostName1}),
+    sqerl:adhoc_insert(telemetry, [[{<<"property">>, to_binary(HostName1)}, {<<"timestamp1">>, Now}]]).
