@@ -453,6 +453,36 @@ default['private_chef']['redis_lb']['save_frequency'] = {
 }
 
 ###
+# keydb_lb
+###
+default['private_chef']['keydb_lb']['enable'] = true
+default['private_chef']['keydb_lb']['dir'] = "#{var_base}/keydb_lb"
+default['private_chef']['keydb_lb']['data_dir'] = "#{var_base}/keydb_lb/data"
+default['private_chef']['keydb_lb']['log_directory'] = "#{log_base}/keydb_lb"
+default['private_chef']['keydb_lb']['log_rotation']['file_maxbytes'] = 1000000
+default['private_chef']['keydb_lb']['log_rotation']['num_to_keep'] = 10
+default['private_chef']['keydb_lb']['port'] = '16379'
+default['private_chef']['keydb_lb']['bind'] = '127.0.0.1'
+default['private_chef']['keydb_lb']['vip'] = '127.0.0.1'
+default['private_chef']['keydb_lb']['keepalive'] = '60'
+default['private_chef']['keydb_lb']['timeout'] = '300'
+default['private_chef']['keydb_lb']['loglevel'] = 'notice'
+default['private_chef']['keydb_lb']['databases'] = '16'
+default['private_chef']['keydb_lb']['appendonly'] = 'no'
+default['private_chef']['keydb_lb']['appendfsync'] = 'always'
+default['private_chef']['keydb_lb']['activerehashing'] = 'no'
+default['private_chef']['keydb_lb']['aof_rewrite_percent'] = '50'
+default['private_chef']['keydb_lb']['aof_rewrite_min_size'] = '16mb'
+default['private_chef']['keydb_lb']['maxmemory'] = '8m'
+default['private_chef']['keydb_lb']['maxmemory_policy'] = 'noeviction'
+
+default['private_chef']['keydb_lb']['save_frequency'] = {
+  '900' => '1',
+  '300' => '10',
+  '60' => '1000',
+}
+
+###
 # Load Balancer
 ###
 default['private_chef']['lb']['enable'] = true

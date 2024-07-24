@@ -131,7 +131,7 @@ include_recipe 'infra-server::fix_permissions'
   opscode-erchef
   nginx
   bootstrap
-  redis_lb
+  keydb_lb
 ).each do |service|
   if node['private_chef'][service]['external']
     begin
