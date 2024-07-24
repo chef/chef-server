@@ -385,7 +385,7 @@ GEM
     public_suffix (5.0.3)
       nio4r (~> 2.0)
     racc (1.7.1)
-    rack (2.2.8)
+    rack (2.2.8.1)
     rack-protection (3.0.6)
       rack
     rack-test (2.1.0)
