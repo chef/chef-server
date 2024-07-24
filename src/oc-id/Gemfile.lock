@@ -612,7 +612,7 @@ DEPENDENCIES
   jwt
   mailcatcher
   mixlib-authentication (>= 2.1, < 4)
-  nokogiri (= 1.14.3)
+  nokogiri (= 1.15.6)
   omniauth-chef (~> 0.4)
   pg (>= 0.18, < 2.0)
   pry-byebug
