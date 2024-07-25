@@ -111,8 +111,8 @@ ruby_block 'set_lb_keydb_values' do
   retry_delay 1
   only_if { is_data_master? }
   block do
-    require 'keydb'
-    keydb = Keydb.new(host: keydb_data['vip'],
+    require 'redis'
+    keydb = Redis.new(host: keydb_data['vip'],
                       port: keydb_data['port'],
                       username: 'default',
                       password: PrivateChef.credentials.get('keydb_lb', 'password'))
