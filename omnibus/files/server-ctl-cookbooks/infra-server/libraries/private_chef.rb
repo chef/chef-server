@@ -204,7 +204,7 @@ module PrivateChef
       default_keys = [
         'opscode_chef',
         'redis_lb',
-        'keydb_lb'
+        'keydb_lb',
         'addons',
         # ospcode_solr4 required to continue to support old-style
         # external Elasticsearch configuration using the opscode_solr4
