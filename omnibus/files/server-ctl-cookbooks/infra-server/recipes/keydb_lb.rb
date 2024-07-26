@@ -115,7 +115,7 @@ ruby_block 'set_lb_keydb_values' do
     keydb = Redis.new(host: keydb_data['vip'],
                       port: keydb_data['port'],
                       username: 'default',
-                      password: PrivateChef.credentials.get('redis_lb', 'password'))
+                      password: PrivateChef.credentials.get('keydb_lb', 'password'))
     xdl = node['private_chef']['lb']['xdl_defaults']
     xmaint_allowed_ips_list = node['private_chef']['lb']['xmaint_allowed_ips_list']
     banned_ips = PrivateChef['banned_ips']

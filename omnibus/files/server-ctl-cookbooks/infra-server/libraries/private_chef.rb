@@ -56,6 +56,8 @@ module PrivateChef
   postgresql['log_rotation'] ||= Mash.new
   redis_lb Mash.new
   redis_lb['log_rotation'] ||= Mash.new
+  keydb_lb Mash.new
+  keydb_lb['log_rotation'] ||= Mash.new
   oc_bifrost Mash.new
   oc_bifrost['log_rotation'] ||= Mash.new
   oc_id Mash.new
@@ -202,6 +204,7 @@ module PrivateChef
       default_keys = [
         'opscode_chef',
         'redis_lb',
+        'keydb_lb'
         'addons',
         # ospcode_solr4 required to continue to support old-style
         # external Elasticsearch configuration using the opscode_solr4
@@ -241,6 +244,7 @@ module PrivateChef
         # consistently
         rkey = if key =~ /^oc_/ || %w(
           redis_lb
+          keydb_lb
           use_chef_backend
           chef_backend_members
           data_collector
@@ -292,7 +296,7 @@ module PrivateChef
     def gen_backend(bootstrap)
       PrivateChef[:role] = 'backend' # mixlib-config wants a symbol :(
       PrivateChef['bookshelf']['listen'] ||= PrivateChef['default_listen_address']
-      PrivateChef['redis_lb']['listen'] ||= PrivateChef['default_listen_address']
+      PrivateChef['keydb_lb']['listen'] ||= PrivateChef['default_listen_address']
       PrivateChef['elasticsearch']['listen'] ||= PrivateChef['default_listen_address']
       PrivateChef['opensearch']['listen'] ||= PrivateChef['default_listen_address']
       PrivateChef['postgresql']['listen_address'] ||= '*' # PrivateChef["default_listen_address"]
@@ -309,8 +313,8 @@ module PrivateChef
       PrivateChef[:role] = 'frontend'
       PrivateChef['bookshelf']['enable'] ||= false
       PrivateChef['bookshelf']['vip'] ||= PrivateChef['backend_vips']['ipaddress']
-      PrivateChef['redis_lb']['enable'] ||= false
-      PrivateChef['redis_lb']['vip'] ||= PrivateChef['backend_vips']['ipaddress']
+      PrivateChef['keydb_lb']['enable'] ||= false
+      PrivateChef['keydb_lb']['vip'] ||= PrivateChef['backend_vips']['ipaddress']
       PrivateChef['elasticsearch']['enable'] ||= false
       PrivateChef['elasticsearch']['vip'] ||= PrivateChef['backend_vips']['ipaddress']
 
@@ -358,7 +362,7 @@ module PrivateChef
       required_secrets = [
         { group: 'postgresql', name: 'db_superuser_password', length: 100, set_command: 'set-db-superuser-password' },
         { group: 'redis_lb', name: 'password', length: 100 },
-        #{ group: 'keydb_lb', name: 'password', length: 100 },
+        { group: 'keydb_lb', name: 'password', length: 100 },
         { group: 'opscode_erchef', name: 'sql_password', length: 60 },
         { group: 'opscode_erchef', name: 'sql_ro_password', length: 60 },
         { group: 'opscode_erchef', name: 'stats_password', length: 100 },
