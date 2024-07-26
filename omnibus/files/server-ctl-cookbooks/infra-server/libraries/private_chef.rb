@@ -358,7 +358,7 @@ module PrivateChef
       required_secrets = [
         { group: 'postgresql', name: 'db_superuser_password', length: 100, set_command: 'set-db-superuser-password' },
         { group: 'redis_lb', name: 'password', length: 100 },
-        { group: 'keydb_lb', name: 'password', length: 100 },
+        #{ group: 'keydb_lb', name: 'password', length: 100 },
         { group: 'opscode_erchef', name: 'sql_password', length: 60 },
         { group: 'opscode_erchef', name: 'sql_ro_password', length: 60 },
         { group: 'opscode_erchef', name: 'stats_password', length: 100 },
