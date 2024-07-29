@@ -61,4 +61,16 @@ end
     recursive true
     action :delete
   end
+
+# Cleaning redis_lb
+[
+  '/opt/opscode/sv/redis_lb',
+  '/opt/opscode/embedded/redis_lb',
+  '/opt/opscode/service/redis_lb',
+  '/var/log/opscode/redis_lb/',
+].each do |dir_name|
+  directory dir_name do
+    recursive true
+    action :delete
+  end
 end
