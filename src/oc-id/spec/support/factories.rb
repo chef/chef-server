@@ -1,4 +1,4 @@
-require 'factory_girl'
+require 'factory_bot'
 
 FactoryGirl.define do
   factory :user do
