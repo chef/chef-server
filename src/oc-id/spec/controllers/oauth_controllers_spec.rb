@@ -16,7 +16,7 @@ describe Doorkeeper::ApplicationsController do
     end
 
     context 'as a signed-in non-administrator' do
-      let(:user) { FactoryGirl.build(:user) }
+      let(:user) { FactoryBot.build(:user) }
 
       it 'should respond with a 404' do
         expect(response.status).to be(404)
@@ -24,7 +24,7 @@ describe Doorkeeper::ApplicationsController do
     end
 
     context 'as a signed-in administrator' do
-      let(:user) { FactoryGirl.build(:administrator) }
+      let(:user) { FactoryBot.build(:administrator) }
 
       it 'should respond with a 200' do
         expect(response.status).to be(200)

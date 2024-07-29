@@ -1,6 +1,6 @@
 require 'factory_bot'
 
-FactoryGirl.define do
+FactoryBot.define do
   factory :user do
     username 'applejack'
     password 'password'
