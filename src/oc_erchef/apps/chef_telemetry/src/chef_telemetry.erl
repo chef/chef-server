@@ -21,32 +21,14 @@
 
 -module(chef_telemetry).
 -export([
-         ping/0,
-         is_enabled/0,
-         token/0
+         is_enabled/0
         ]).
-
--spec ping() -> pong | pang.
-ping() ->
-    case chef_telemetry_http:get("/") of
-        ok -> pong;
-        _ -> pang
-    end.
 
 -spec is_enabled() -> boolean().
 is_enabled() ->
-    case application:get_env(chef_telemetry, root_url) of
-        {ok, _Value} ->
+    case envy:get(chef_telemetry, is_enabled, true, boolean) of
+        true ->
             true;
-        undefined ->
+        _ ->
             false
-    end.
-
--spec token() -> string() | atom().
-token() ->
-    case chef_secrets:get(<<"data_collector">>, <<"token">>) of
-        {ok, Token} ->
-            erlang:binary_to_list(Token);
-        {error, not_found} ->
-            undefined
     end.
