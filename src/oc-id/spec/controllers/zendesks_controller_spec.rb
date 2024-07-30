@@ -1,6 +1,8 @@
 require 'spec_helper'
 
 describe ZendesksController do
+  render_views
+
   describe '#show' do
     context 'when zendesk is enabled' do
       before :each do

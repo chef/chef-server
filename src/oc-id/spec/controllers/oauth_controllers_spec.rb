@@ -2,6 +2,7 @@ require 'factory_bot'
 require 'spec_helper'
 
 describe Doorkeeper::ApplicationsController do
+  render_views
   describe '#index' do
     before do
       allow(Settings).to receive_message_chain(:doorkeeper, :administrators).and_return(['rainbowdash'])

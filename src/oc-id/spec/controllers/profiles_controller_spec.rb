@@ -1,6 +1,8 @@
 require 'spec_helper'
 
 describe ProfilesController do
+  render_views
+
   let(:username) { 'jimmy' }
   let(:email) { 'jim.kirk@federation-captains.org' }
   let(:user1) do
