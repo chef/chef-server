@@ -2,6 +2,8 @@ require 'spec_helper'
 require 'timecop'
 
 describe PasswordResetsController do
+  render_views
+
   describe 'GET #new' do
     before { get :new }
 
