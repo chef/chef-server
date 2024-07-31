@@ -5,7 +5,7 @@ module("config", package.seeall)
 -- NOTE: assumption that the following is defined globally:
 -- redis = require("resty/redis")
 
-local redis_password = os.getenv("REDIS_PASSWORD")
+local redis_password = os.getenv("KEYDB_PASSWORD")
 
 local failsafe_config = {}
 failsafe_config["dl_default"] = {}
