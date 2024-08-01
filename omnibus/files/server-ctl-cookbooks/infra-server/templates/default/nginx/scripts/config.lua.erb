@@ -58,7 +58,7 @@ local function connect_redis()
       ngx.log(ngx.ERR, "REDIS_PASSWORD not found in the environment")
       ok = false
    else
-      local ok, err = red:auth(redis_password)
+      local ok, err = red:auth('default',redis_password)
       if not ok then
          if auth_not_required(err) then
             ok = true
