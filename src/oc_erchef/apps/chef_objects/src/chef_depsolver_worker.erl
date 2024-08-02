@@ -125,7 +125,7 @@ init([]) ->
     %% handles the failure case where the Ruby process gets hung and can no longer respond to
     %% STDOUT closing, which would typically cause the process to exit.
     Payload = term_to_binary({get_pid}),
-    gen_tcp:send(Port, Payload),
+    erlang:port_command(Port, Payload),
     Pid = receive
               {Port, {data, Data}} ->
                   binary_to_term(Data)
@@ -154,7 +154,7 @@ handle_call({solve, AllVersions, EnvConstraints, Cookbooks, Timeout},
                                       {all_versions, AllVersions},
                                       {run_list, Cookbooks},
                                       {timeout_ms, Timeout}]}),
-    gen_tcp:send(Port, Payload),
+    erlang:port_command(Port, Payload),
 
     %% The underlying ruby code has the potential to reach nearly 2x the
     %% timeout value passed in. The timeout value is applied first on the
