@@ -194,7 +194,7 @@ The following External PostgreSQL upgrade steps are provided as a courtesy only.
 
 1. Log into the Chef Infra Server machine.
 
-1. Consult the documentation on [`knife-ec-backup`](https://blog.chef.io/migrating-chef-server-knife-ec-backup-knife-tidy).
+1. Consult the documentation on [`knife-ec-backup`](https://blog.chef.io/migrating-chef-server-knife-ec-backup-knife-tidy). {{< note >}} Please follow steps mentioned in this documentation [Chef Software Install Script](/install_omnibus/). Enter your license id in place of `<YOUR LICENSE ID>`{{< /note >}}
 
    Install `knife-ec-backup`, if it not already installed. A sample session follows
    (note that your steps could differ, depending on the versions of your software,
@@ -207,7 +207,7 @@ The following External PostgreSQL upgrade steps are provided as a courtesy only.
    apt install ruby
    apt install make
    curl -L https://chefdownload-commerical.chef.io/install.sh?license_id=<YOUR LICENSE ID> | sudo bash -s -- -P chef-workstation
-   export PATH=$PATH:/root/chef-workstation/gem/ruby/2.6.0/bin
+   export PATH=$PATH:/root/.chef-workstation/gem/ruby/2.6.0/bin
    apt-get -y install gcc postgresql libpq-dev
    /opt/chef-workstation/embedded/bin/gem install knife-ec-backup -- --with-pg-config=/opt/opscode/embedded/postgresql/9.6/bin/pg_config
    ```
