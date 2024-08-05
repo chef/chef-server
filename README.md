@@ -94,6 +94,17 @@ Running chef-server-ctl:
 docker-compose exec chef-server-ctl chef-server-ctl command (subcommands)
 ```
 
+## Telemetry
+Chef Infra Server captures telemetry data of users in the background.
+Chef Infra Server will collect the following information from your environment:
+* 30 days average usage on the number of nodes check in on daily basis
+* FQDN of the load balancer Chef Server is installed on
+* Email domain of the users registered to Chef Server
+* Binary file name and location of Chef Infra Server command
+* Configuration file location of Chef Infra Server
+
+This feature cannot be disabled by any configuration.
+
 ## Dependencies contained in other repositories
 
 * [knife-ec-backup](https://www.github.com/chef/knife-ec-backup), used to backup your Chef Infra Server for disaster recovery or migrations.
