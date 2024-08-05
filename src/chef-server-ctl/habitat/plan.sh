@@ -4,7 +4,7 @@ pkg_maintainer="The Chef Server Maintainers <support@chef.io>"
 pkg_license=('Apache-2.0')
 pkg_deps=(
   core/coreutils
-  core/curl
+  core/curl/8.7.1/20240614090648
   core/jq-static
   core/ruby30
   core/libffi

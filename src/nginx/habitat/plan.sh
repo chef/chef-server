@@ -3,7 +3,7 @@ pkg_origin=chef
 pkg_maintainer="The Chef Server Maintainers <support@chef.io>"
 pkg_license=('Apache-2.0')
 pkg_deps=(
-  core/curl
+  core/curl/8.7.1/20240614090648
   core/libossp-uuid
   ${HAB_ORIGIN:-chef}/openresty-noroot
 )
