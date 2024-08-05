@@ -73,6 +73,7 @@ start_link() ->
                          Timeout :: integer()) ->
                                 {ok, [ versioned_cookbook()]} | {error, term()}.
 solve_dependencies(AllVersions, EnvConstraints, Cookbooks, Timeout) ->
+?debugMsg("solve_dependencies calling pooler:take_member"),
     case pooler:take_member(chef_depsolver, pooler_timeout()) of
         error_no_members ->
             {error, no_depsolver_workers};
