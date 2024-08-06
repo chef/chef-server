@@ -33,7 +33,8 @@ all_test_() ->
   {foreach,
    fun() ->
            error_logger:delete_report_handler(error_logger_tty_h),
-           [ ok = application:start(App) || App <- ?NEEDED_APPS ],
+           %[ ok = application:start(App) || App <- ?NEEDED_APPS ],
+           [ ok = application:ensure_started(App) || App <- ?NEEDED_APPS ],
            PoolConfig = [{name, chef_depsolver},
                          {max_count, 1},
                          {init_count, 1},
