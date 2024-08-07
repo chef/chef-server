@@ -98,7 +98,7 @@ handle_cast(send_data, State) ->
                         State2 = get_nodes(State1),
                         State3 = get_company_name(State2),
                         State4 = get_api_fqdn(State3),
-                        Req = generate_request(list_to_binary(ServerVersion), State4),
+                        Req = generate_request(ServerVersion, State4),
                         send_data(Req, State3),
                         State3;
                      _   ->
@@ -269,9 +269,9 @@ get_nodes(#state{req_id = ReqId, db_context = DbContext} = State) ->
 
 generate_request(ServerVersion, State) ->
     CurrentScan = State#state.current_scan,
-    jiffy:encode({[
+    Res = jiffy:encode({[
     {<<"licenseId">>, <<"Infra-Server-license-Id">>},
-    {<<"customerName">>, to_binary(State#state.current_scan#current_scan.company_name)},
+    {<<"customerName">>, State#state.current_scan#current_scan.company_name},
     {<<"periods">>, [
         {[
             {<<"version">>, to_binary(ServerVersion)},
@@ -312,7 +312,8 @@ generate_request(ServerVersion, State) ->
     {<<"source">>, <<"Infra Server">>},
     {<<"scannerVersion">>, <<"0.1.0">>},
     {<<"scannedOn">>, to_binary(epoch_to_string(State#state.scan_time))}
-            ]}).
+            ]}),
+    Res.
 
 to_binary(String) when is_list(String) ->
     list_to_binary(String);
@@ -332,7 +333,7 @@ send_data(Req, State) ->
 check_send(State) ->
     Node = erlang:atom_to_binary(node()),
     Now = calendar:system_time_to_universal_time(State#state.scan_time, second),
-    case sqerl:adhoc_select([<<"event_timestamp">>], <<"telemetry">>, {<<"property">>, equals, <<"last_send">>}, []) of
+    case sqerl:adhoc_select([<<"event_timestamp">>], <<"telemetry">>, {<<"property">>, equals, <<"last_send">>}) of
         {ok, Rows} when is_list(Rows) andalso length(Rows) > 0 ->
             LastSend = to_system_time(Rows),
             case should_send(LastSend, State) of
@@ -365,7 +366,8 @@ to_system_time(Rows) ->
     lists:foldl( MaxFun, 0, SystemTimes).
 
 should_send(LastSend, State) ->
-    LastSend < State#state.scan_time.
+    LastSend < calendar:datetime_to_gregorian_seconds(
+        calendar:system_time_to_universal_time(State#state.scan_time, seconds)) - 62167219200.
 
 insert_fqdn(State) ->
     {ok, HostName} = inet:gethostname(),
