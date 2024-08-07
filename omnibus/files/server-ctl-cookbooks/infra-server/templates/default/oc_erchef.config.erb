@@ -210,8 +210,9 @@
         %%
         %% This is the reason that the only supported configuration for the fips
         %% package is standalone. We will allow http over localhost so that the
-        %% chef server can talk to bookshelf.
-        {s3_url, "http://<%= node['private_chef']['bookshelf']['listen'] %>:<%= node['private_chef']['bookshelf']['port'] %>"},
+        %% chef server can talk to bookshelf. We can give provide bookshelf['url'] = 'http://127.0.0.1:4321' for naking it work for FIPS enabled
+       %% {s3_url, "http://<%= node['private_chef']['bookshelf']['listen'] %>:<%= node['private_chef']['bookshelf']['port'] %>"},
+         {s3_url, "<%= @helper.bookshelf_s3_url %>"},
         <% else -%>
         {s3_url, "<%= @helper.bookshelf_s3_url %>"},
         <% end %>
