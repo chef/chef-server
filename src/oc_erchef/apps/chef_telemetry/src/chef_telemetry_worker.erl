@@ -246,7 +246,7 @@ get_nodes(#state{req_id = ReqId, db_context = DbContext} = State) ->
     ScanStartTime = CurrentScan#current_scan.scan_start_time,
     ScanEndTime = CurrentScan#current_scan.scan_end_time,
     QueryString = lists:flatten(io_lib:format("ohai_time:{~p TO ~p}", [ScanStartTime, ScanEndTime])),
-    Query1 = chef_index:query_from_params("node", QueryString, undefined, undefined),
+    Query1 = chef_index:query_from_params("node", QueryString, "0", "100000"),
     Count =
         case chef_db:count_nodes(DbContext) of
             Count1 when is_integer(Count1) -> Count1;
@@ -317,9 +317,6 @@ generate_request(ServerVersion, State) ->
 to_binary(String) when is_list(String) ->
     list_to_binary(String);
 
-to_binary(Bin) when is_binary(Bin) ->
-    Bin;
-
 to_binary(Element) ->
     throw({not_a_binary_or_string, Element}).
 
@@ -336,7 +333,7 @@ check_send(State) ->
     Node = erlang:atom_to_binary(node()),
     Now = calendar:system_time_to_universal_time(State#state.scan_time, second),
     case sqerl:adhoc_select([<<"event_timestamp">>], <<"telemetry">>, {<<"property">>, equals, <<"last_send">>}, []) of
-        {ok, Rows} when is_list(Rows) ->
+        {ok, Rows} when is_list(Rows) andalso length(Rows) > 0 ->
             LastSend = to_system_time(Rows),
             case should_send(LastSend, State) of
                 true ->
@@ -346,7 +343,7 @@ check_send(State) ->
                 false ->
                     false
             end;
-        {ok, Rows} when is_list(Rows) andalso length(Rows) == 0 ->
+        {ok, Rows} when is_list(Rows) ->
             sqerl:adhoc_insert(<<"telemetry">>, [[{<<"property">>, <<"last_send">>}, {<<"value_string">>, Node}, {<<"event_timestamp">>, Now}]]),
             true;
         Error ->
