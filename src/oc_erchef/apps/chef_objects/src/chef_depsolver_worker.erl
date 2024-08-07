@@ -132,8 +132,16 @@ init([]) ->
     Payload = term_to_binary({get_pid}),
 ?debugFmt("~nPayload = ~p", [Payload]),
     %erlang:port_command(Port, Payload),
-X = erlang:port_command(Port, Payload),
-?debugFmt("port_command finished, returned ~p", [X]),
+%X = erlang:port_command(Port, Payload),
+case gen_tcp:send(Port, Payload) of
+    ok ->
+        ?debugMsg("gen_tcp:send successful, returned ok");
+    X ->
+        ?debugFmt("~ngen_tcp:send FAILED, returned ~p", [X])
+end,
+%?debugFmt("port_command finished, returned ~p", [X]),
+?debugMsg("attempting receive..."),
+
     Pid = receive % <=== CRASH HAPPENS HERE?
               {Port, {data, Data}} ->
                   binary_to_term(Data)
