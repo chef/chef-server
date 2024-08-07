@@ -18,6 +18,6 @@
        {ref,"3cdc661e55a48af321b7097941b9a03e8d7b113f"}},
   0},
  {<<"pooler">>,
-  {git,"https://github.com/chef/pooler",
-       {branch,"CHEF-11677/CHEF-12498/lbaker"}},
+  {git,"https://github.com/epgsql/pooler",
+       {branch,"master"}},
   0}].
