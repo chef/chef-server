@@ -130,16 +130,16 @@ init([]) ->
     %% handles the failure case where the Ruby process gets hung and can no longer respond to
     %% STDOUT closing, which would typically cause the process to exit.
     Payload = term_to_binary({get_pid}),
-?debugFmt("~nPayload = ~p", [Payload]),
+?debugFmt("~nPayload = ~s", [Payload]),
     %erlang:port_command(Port, Payload),
-%X = erlang:port_command(Port, Payload),
-case gen_tcp:send(Port, Payload) of
-    ok ->
-        ?debugMsg("gen_tcp:send successful, returned ok");
-    X ->
-        ?debugFmt("~ngen_tcp:send FAILED, returned ~p", [X])
-end,
-%?debugFmt("port_command finished, returned ~p", [X]),
+X = erlang:port_command(Port, Payload),
+%case gen_tcp:send(Port, Payload) of
+%    ok ->
+%        ?debugMsg("gen_tcp:send successful, returned ok");
+%    X ->
+%        ?debugFmt("~ngen_tcp:send FAILED, returned ~p", [X])
+%end,
+?debugFmt("port_command finished, returned ~p", [X]),
 ?debugMsg("attempting receive..."),
 
     Pid = receive % <=== CRASH HAPPENS HERE?
@@ -151,7 +151,8 @@ end,
 ?debugMsg("************************"),
 ?debugMsg("************************"),
 ?debugMsg("************************"),
-?debugFmt("~nreceive finished, Pid = ~p", [Pid]),
+
+?debugFmt("~n~nreceive finished, Pid = ~p", [Pid]),
 ?debugMsg("leaving init"),
     {ok, #state{port=Port, os_pid=Pid}}.
 
