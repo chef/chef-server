@@ -134,10 +134,15 @@ init([]) ->
     %erlang:port_command(Port, Payload),
 X = erlang:port_command(Port, Payload),
 ?debugFmt("port_command finished, returned ~p", [X]),
-    Pid = receive
+    Pid = receive % <=== CRASH HAPPENS HERE?
               {Port, {data, Data}} ->
                   binary_to_term(Data)
           end,
+?debugMsg("************************"),
+?debugMsg("************************"),
+?debugMsg("************************"),
+?debugMsg("************************"),
+?debugMsg("************************"),
 ?debugFmt("~nreceive finished, Pid = ~p", [Pid]),
 ?debugMsg("leaving init"),
     {ok, #state{port=Port, os_pid=Pid}}.
