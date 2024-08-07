@@ -111,6 +111,7 @@ pooler_timeout() ->
 %% @end
 %%--------------------------------------------------------------------
 init([]) ->
+?debugMsg("entered init"),
     RubyExecutable = filename:join([code:priv_dir(chef_objects), "depselector_rb", "depselector.rb"]),
     %% - redirect stderr to /dev/null -
     %% The C-level implementation of the ruby depsolver prints out statistics to stderr.
@@ -132,7 +133,8 @@ init([]) ->
               {Port, {data, Data}} ->
                   binary_to_term(Data)
           end,
-
+?debugFmt("~nPid = ~p", [Pid]),
+?debugMsg("leaving init"),
     {ok, #state{port=Port, os_pid=Pid}}.
 
 %%--------------------------------------------------------------------
