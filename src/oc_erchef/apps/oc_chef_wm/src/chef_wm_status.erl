@@ -23,7 +23,8 @@
 %%
 
 -module(chef_wm_status).
-
+-define(NODEBUG, true).
+-include_lib("eunit/include/eunit.hrl").
 -ifdef(TEST).
 -compile(export_all).
 -compile(nowarn_export_all).
@@ -117,6 +118,7 @@ spawn_health_checks() ->
 -spec check_health_worker(atom(), pid(), non_neg_integer()) -> {pid(), atom(), term()}.
 check_health_worker(Mod, Parent, Timeout) ->
     Self = self(),
+?debugMsg("***** hit proc_lib:spawn_link..."),
     proc_lib:spawn_link(fun() ->
                                 Result = Mod:ping(),
                                 Self ! {ok, Result}
