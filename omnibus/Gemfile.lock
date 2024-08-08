@@ -262,7 +262,7 @@ GEM
     public_suffix (6.0.1)
     rack (2.2.6.4)
     rainbow (3.1.1)
-    rake (13.1.0)
+    rake (13.2.1)
     retryable (3.0.5)
     rexml (3.3.4)
       strscan
