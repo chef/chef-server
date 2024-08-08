@@ -320,7 +320,13 @@
     },
 
     {metrics_module, folsom_metrics}
-]}
+    ]},
+
+    {chef_telemetry, [
+        {running_filepath, "<%= node['private_chef']['running_filepath'] %>"},
+        {ctl_command, "<%= node['private_chef']['ctl_command'] %>"}
+                ]
+    }
 
 <% if !node['private_chef']['opscode-erchef']['ssl_session_caching']['enabled'] -%>
     ,
