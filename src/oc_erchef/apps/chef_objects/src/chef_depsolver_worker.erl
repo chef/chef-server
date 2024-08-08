@@ -129,7 +129,7 @@ init([]) ->
     %% info on startup so that we can use it in the event of a timeout. Hard-killing the process
     %% handles the failure case where the Ruby process gets hung and can no longer respond to
     %% STDOUT closing, which would typically cause the process to exit.
-    Payload = term_to_binary({get_pid}),
+    Payload = term_to_binary({get_pid}, [{minor_version, 1}]),
 ?debugFmt("~nPayload = ~s", [Payload]),
     %erlang:port_command(Port, Payload),
 X = erlang:port_command(Port, Payload),
@@ -176,7 +176,7 @@ handle_call({solve, AllVersions, EnvConstraints, Cookbooks, Timeout},
     Payload = term_to_binary({solve, [{environment_constraints, EnvConstraints},
                                       {all_versions, AllVersions},
                                       {run_list, Cookbooks},
-                                      {timeout_ms, Timeout}]}),
+                                      {timeout_ms, Timeout}]}, [{minor_version, 1}]),
     erlang:port_command(Port, Payload),
 
     %% The underlying ruby code has the potential to reach nearly 2x the
