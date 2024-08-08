@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.9.42 -->
-## [15.9.42](https://github.com/chef/chef-server/tree/15.9.42) (2024-07-29)
+<!-- latest_release 15.9.43 -->
+## [15.9.43](https://github.com/chef/chef-server/tree/15.9.43) (2024-08-08)
 
 #### Merged Pull Requests
-- update rack in oc-chef-pedant [#3849](https://github.com/chef/chef-server/pull/3849) ([talktovikas](https://github.com/talktovikas))
+- Bump omnibus-software from `ca4f96b` to `1659822` in /omnibus [#3873](https://github.com/chef/chef-server/pull/3873) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.9.38 -->
 ### Changes since 15.9.38 release
 
 #### Merged Pull Requests
+- Bump omnibus-software from `ca4f96b` to `1659822` in /omnibus [#3873](https://github.com/chef/chef-server/pull/3873) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.9.43 -->
 - update rack in oc-chef-pedant [#3849](https://github.com/chef/chef-server/pull/3849) ([talktovikas](https://github.com/talktovikas)) <!-- 15.9.42 -->
 - Dependency download using unencrypted communication channel. [#3851](https://github.com/chef/chef-server/pull/3851) ([talktovikas](https://github.com/talktovikas)) <!-- 15.9.41 -->
 - upgrade openssl to 1.0.2zi [#3842](https://github.com/chef/chef-server/pull/3842) ([talktovikas](https://github.com/talktovikas)) <!-- 15.9.40 -->
