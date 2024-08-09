@@ -7,6 +7,8 @@ fips-platforms:
   - el-*-x86_64
   - ubuntu-*-x86_64
 builder-to-testers-map:
+  el-6-x86_64:
+    - el-6-x86_64
   el-7-x86_64:
     - el-7-x86_64
     - amazon-2-x86_64
