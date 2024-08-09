@@ -206,11 +206,15 @@ The following External PostgreSQL upgrade steps are provided as a courtesy only.
    apt-get update
    apt install ruby
    apt install make
-   curl -L https://chef.io/chef/install.sh | sudo bash -s -- -P chefdk
-   export PATH=$PATH:/root/.chefdk/gem/ruby/2.6.0/bin
+   curl -L https://chefdownload-commerical.chef.io/install.sh?license_id=<LICENSE_ID> | sudo bash -s -- -P chef
+   export PATH=$PATH:/root/.chef/gem/ruby/2.6.0/bin
    apt-get -y install gcc postgresql libpq-dev
-   /opt/chefdk/embedded/bin/gem install knife-ec-backup -- --with-pg-config=/opt/opscode/embedded/postgresql/9.6/bin/pg_config
+   /opt/chef/embedded/bin/gem install knife-ec-backup -- --with-pg-config=/opt/opscode/embedded/postgresql/9.6/bin/pg_config
    ```
+
+   Replace `<LICENSE_ID>` with your license ID.
+
+   For more information on the `install.sh` script, see the [Chef Install Script documentation](/chef_install_script/).
 
 1. Configure `knife` if it is not already configured. A sample session follows (again, note that your steps could differ, depending on a range of factors).
 
@@ -236,7 +240,7 @@ The following External PostgreSQL upgrade steps are provided as a courtesy only.
 
    ```bash
    mkdir /backup
-   /opt/chefdk/embedded/bin/knife ec backup /backup
+   /opt/chef/embedded/bin/knife ec backup /backup
    ```
 
 1. If you are running Chef Infra Server version 12.17.15 or greater, proceed to the next step below. Otherwise consult the [upgrade matrix](#upgrade-matrix) and perform a stepped upgrade.
@@ -529,7 +533,7 @@ To upgrade to Chef Infra Server on a tiered Chef Infra Server configuration, do 
     ```bash
     scp -r /etc/opscode <each server's IP>:/etc
     ```
-   
+
 9. Run the following command on the back end servers:
 
     ```bash
@@ -624,7 +628,7 @@ opscode_erchef['search_auth_password'] = "OPEN_SEARCH_PWD"
 
 {{< note >}}
 
-The OpenSearch user should have full access to the cluster, including access to all cluster-wide operations and the ability to write to all indices. We recommend that the user has the admin backend role. 
+The OpenSearch user should have full access to the cluster, including access to all cluster-wide operations and the ability to write to all indices. We recommend that the user has the admin backend role.
 
 Please refer to OpenSearch's documentation on [predefined roles](https://opensearch.org/docs/latest/security-plugin/access-control/users-roles/#predefined-roles) and [role mapping configuration](https://opensearch.org/docs/latest/security-plugin/configuration/yaml#roles_mappingyml).
 
@@ -639,11 +643,11 @@ We recommend migrating your data over reindexing and reconfiguring.
 
 **Migrate Data**
 
-Copy or move your Elasticsearch OSS data and logs directories to the newly installed OpenSearch paths. See OpenSearch's [documentation on upgrading to OpenSearch](https://opensearch.org/docs/latest/upgrade-to/upgrade-to/#upgrade-to-opensearch). 
+Copy or move your Elasticsearch OSS data and logs directories to the newly installed OpenSearch paths. See OpenSearch's [documentation on upgrading to OpenSearch](https://opensearch.org/docs/latest/upgrade-to/upgrade-to/#upgrade-to-opensearch).
 
 **Reindex and Reconfigure**
 
-Reindex and reconfigure your database after upgrading to Chef Infra Server 14.13. The duration of this operation will vary depending on your server hardware and the number of node objects on your Chef Infra Server. 
+Reindex and reconfigure your database after upgrading to Chef Infra Server 14.13. The duration of this operation will vary depending on your server hardware and the number of node objects on your Chef Infra Server.
 
 Use the Chef Infra Server command-line tool to reindex and reconfigure your database:
 
