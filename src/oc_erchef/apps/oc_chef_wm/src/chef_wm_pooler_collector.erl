@@ -14,7 +14,7 @@
 
 -behaviour(prometheus_collector).
 
--include("pooler.hrl").
+-include_lib("pooler/src/pooler.hrl").
 
 -define(POOLER_IN_USE, erchef_pooler_members_in_use).
 -define(POOLER_FREE, erchef_pooler_members_free).
