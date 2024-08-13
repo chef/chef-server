@@ -373,6 +373,8 @@ run: opscode-erchef: (pid 18897) 404s; run: log: (pid 18601) 419s
 run: postgresql: (pid 18722) 407s; run: log: (pid 17655) 492s
 run: redis_lb: (pid 2278) 239s; run: log: (pid 18948) 404s
 ```
+Note: Now, underneath we are using keydb in place of redis. All the functions are suppose to work same because keydb is fork of redis.
+
 Note that the umbrella scenario automatically creates a `user1` account [ldap? chef-server?] with password `password`.
 
 If you are using the manage web GUI along with CLI, for a quick knife setup click on the Administration tab, and click on 'Generate Knife Config' on the left.  Copy the 'config.rb' file to your current directory on the chef-server box, and issue the following:
