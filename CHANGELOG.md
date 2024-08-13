@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.9.44 -->
-## [15.9.44](https://github.com/chef/chef-server/tree/15.9.44) (2024-08-13)
+<!-- latest_release 15.9.45 -->
+## [15.9.45](https://github.com/chef/chef-server/tree/15.9.45) (2024-08-13)
 
 #### Merged Pull Requests
-- Upgrading to node.js 14.21.3 in oc-id [#3831](https://github.com/chef/chef-server/pull/3831) ([RoyShravani](https://github.com/RoyShravani))
+- CVE fixes for oc-id [#3861](https://github.com/chef/chef-server/pull/3861) ([RoyShravani](https://github.com/RoyShravani))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.9.38 -->
 ### Changes since 15.9.38 release
 
 #### Merged Pull Requests
+- CVE fixes for oc-id [#3861](https://github.com/chef/chef-server/pull/3861) ([RoyShravani](https://github.com/RoyShravani)) <!-- 15.9.45 -->
 - Upgrading to node.js 14.21.3 in oc-id [#3831](https://github.com/chef/chef-server/pull/3831) ([RoyShravani](https://github.com/RoyShravani)) <!-- 15.9.44 -->
 - Bump omnibus-software from `ca4f96b` to `1659822` in /omnibus [#3873](https://github.com/chef/chef-server/pull/3873) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.9.43 -->
 - update rack in oc-chef-pedant [#3849](https://github.com/chef/chef-server/pull/3849) ([talktovikas](https://github.com/talktovikas)) <!-- 15.9.42 -->
