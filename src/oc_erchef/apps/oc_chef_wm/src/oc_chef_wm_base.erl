@@ -529,7 +529,7 @@ delete_object(DbContext, Object, RequestorId) ->
 read_req_id(ReqHeaderName, Req) ->
     case wrq:get_req_header(ReqHeaderName, Req) of
         undefined ->
-            base64:encode(term_to_binary(make_ref()));
+            base64:encode(term_to_binary(make_ref(), [{minor_version, 1}]));
         HV ->
             iolist_to_binary(HV)
     end.
