@@ -1013,7 +1013,7 @@ create_object(QueryName, Args) when QueryName =:= insert_user;
                                     is_list(Args)  ->
    case sqerl:select(QueryName, Args, first_as_scalar, [add_user]) of
         {ok, 1} -> {ok, 1};
-        {ok, 0} -> {error, <<"Record not created '", (term_to_binary(QueryName))/binary, "'.">>};
+        {ok, 0} -> {error, <<"Record not created '", (term_to_binary(QueryName, [{minor_version, 1}]))/binary, "'.">>};
         Error -> Error
     end;
 create_object(QueryName, Args) when is_atom(QueryName), is_list(Args) ->
@@ -1099,7 +1099,7 @@ do_update(QueryName, UpdateFields) when QueryName =:= update_user_by_id;
                                         is_list(UpdateFields)  ->
     case sqerl:select(QueryName, UpdateFields, first_as_scalar, [update_user]) of
         {ok, 1} -> {ok, 1};
-        {ok, 0} -> {error, <<"Record not updated '", (term_to_binary(QueryName))/binary, "'.">>};
+        {ok, 0} -> {error, <<"Record not updated '", (term_to_binary(QueryName, [{minor_version, 1}]))/binary, "'.">>};
         {ok, none} -> {ok, not_found};
         Error ->
             Error
