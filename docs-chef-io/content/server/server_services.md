@@ -80,7 +80,12 @@ The following services are part of the Chef Infra Server:
 - nginx
 - opscode-erchef
 - postgresql
-- redis-lb
+- redis_lb 
+
+Note: 
+From Chef Infra Server 15.10.x onwards, KeyDB service replaces Redis.
+Know more about KeyDB here https://docs.keydb.dev/docs/about.   
+The configuration name and service name will continue to be redis_lb.
 
 ### bifrost
 

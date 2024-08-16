@@ -223,6 +223,10 @@ by Chef support services.
 
 ### Redis
 
+Note: From Chef Infra Server 15.10.x onwards, KeyDB service replaces Redis.
+Know more about KeyDB here https://docs.keydb.dev/docs/about.   
+The configuration name and service name will continue to be redis_lb.  
+
 The **redis_lb** service located on the back end machine handles
 requests that are made from the Nginx service that is located on all
 front end machines in a Chef Infra Server cluster.
