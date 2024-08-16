@@ -65,11 +65,14 @@ to_json(Req, #base_state{otp_info = {_, ServerVersion}} = State) ->
 -spec check_health(ServerVersion :: binary()) -> {pong | fail, binary()}.
 check_health(ServerVersion) ->
     Pings = spawn_health_checks(),
+    debug_log(spawn_health_checks,Pings),
     Status = overall_status(Pings),
 
     log_failure(Status, Pings),
     KeyGen = chef_keygen_cache:status_for_json(),
     Indexing = chef_index:status(),
+    debug_log(chef_keygen_cache,KeyGen),
+    debug_log(chef_index,Indexing),
 
     StatList1 = [{<<"status">>, ?A2B(Status)},
                 {<<"upstreams">>, {Pings}},
@@ -77,6 +80,7 @@ check_health(ServerVersion) ->
                 {<<"indexing">>, {Indexing}}],
 
     StatList2 = maybe_include_version(StatList1, ServerVersion),
+    debug_log(maybe_include_version,StatList2),
 
     {Status, chef_json:encode({StatList2})}.
 
@@ -95,6 +99,14 @@ log_failure(fail, Pings) ->
     ok;
 log_failure(_,_) ->
     ok.
+
+% debug method
+-spec debug_log(Name :: term(), SomthingtoDebug :: term()) -> ok.
+debug_log(Name,SomthingtoDebug)->
+    Log = {Name,SomthingtoDebug},
+    lager:debug("/status~n~p~n",[Log]),
+    ok.
+
 
 %% Execute health checks in parallel such that no check will exceed `ping_timeout()'
 %% milliseconds. This call does not return until all health checks have been executed (or
