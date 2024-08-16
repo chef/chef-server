@@ -104,7 +104,7 @@ log_failure(_,_) ->
 -spec debug_log(Name :: term(), SomthingtoDebug :: term()) -> ok.
 debug_log(Name,SomthingtoDebug)->
     Log = {Name,SomthingtoDebug},
-    lager:debug("/status~n~p~n",[Log]),
+    lager:debug("/_status~n~p~n",[Log]),
     ok.
 
 
