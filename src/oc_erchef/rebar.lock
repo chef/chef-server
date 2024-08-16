@@ -52,7 +52,7 @@
   1},
  {<<"erlcloud">>,
   {git,"https://github.com/chef/erlcloud",
-       {branch,"CHEF-11677/CHEF-12498/lbaker"}},
+       {branch,"rebase-w-upstream"}},
   0},
  {<<"erlware_commons">>,
   {git,"https://github.com/chef/erlware_commons",
