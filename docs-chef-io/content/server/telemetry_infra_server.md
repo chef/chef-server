@@ -27,4 +27,4 @@ Chef Infra Server will collect the following information from your environment:
 * **Binary file name and location of Chef Server Ctl command:** This is the Chef Server Ctl command file name, which is used to manage and maintain the Chef Server.
 * **Location of Chef Infra Server's configuration file:** This file holds the running configuration of Chef Server.
 
-{{< note >}} Any configuration cannot disable the telemetry feature. {{< note/ >}}
+{{< note >}} Any configuration cannot disable the telemetry feature. {{< /note >}}
