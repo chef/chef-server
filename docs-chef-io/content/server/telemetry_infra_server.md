@@ -1,5 +1,5 @@
 +++
-title = "Server Services"
+title = "Infra Server Telemetry"
 draft = false
 
 gh_repo = "chef-server"
@@ -8,10 +8,10 @@ aliases = ["/server_services.html", "/runbook/telemetry_infra_server/"]
 
 [menu]
   [menu.server]
-    title = "Services"
-    identifier = "server/Telemetry in Chef Infra Server"
-    parent = "server"
-    weight = 100
+    title = "Infra Server Telemetry"
+    identifier = "server/installation/Infra Server Telemetry"
+    parent = "server/installation"
+    weight = 80
 +++
 
 Chef Infra Server, in accordance with the license agreement, diligently captures license usage data. This process, crucial for the smooth operation of the system, does not require user approval or intervention and runs seamlessly in the background.  
