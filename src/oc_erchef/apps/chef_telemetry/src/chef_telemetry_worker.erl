@@ -88,6 +88,9 @@ handle_cast(send_data, State) ->
         catch
             _:_ ->
                 State
+        catch
+            _:_ ->
+                State
         end,
     gen_server:cast(self(), init_timer),
     {noreply, State2};
@@ -163,7 +166,8 @@ get_api_fqdn(State) ->
     case sqerl:execute(<<"select property from telemetry where property like 'FQDN:%'">>) of
         {ok, Rows} when is_list(Rows) ->
             FQDNs = [binary:part(FQDN, 5, size(FQDN) -5) || [{<<"property">>, FQDN}] <- Rows],
-            State#state{fqdns = FQDNs};
+            FQDNs1 = mask(FQDNs),
+            State#state{fqdns = FQDNs1};
         _ ->
             State
     end.
@@ -324,7 +328,7 @@ to_binary(String) when is_list(String) ->
     list_to_binary(String);
 
 to_binary(Element) ->
-    throw({not_a_binary_or_string, Element}).
+    throw({not_a_string, Element}).
 
 epoch_to_string(Epoch) ->
     calendar:system_time_to_rfc3339(Epoch, [{offset, "Z"}]).
@@ -381,3 +385,35 @@ insert_fqdn(State) ->
     HostName2 = to_binary("FQDN:" ++ HostName1),
     sqerl:adhoc_delete(<<"telemetry">>, {<<"property">>, equals, HostName2}),
     sqerl:adhoc_insert(<<"telemetry">>, [[{<<"property">>, HostName2}, {<<"event_timestamp">>, Now}, {<<"value_string">>, <<"">>}]]).
+
+mask(FQDNs) ->
+    Fun = fun(FQDN) ->
+        case re:run(FQDN,
+                    <<"(?:(.*?):\/\/?)?\/?(?:[^\/\.]+\.)*?([^\/\.]+)\.?([^\/:]*)(?::([^?\/]*)?)?(.*)?">>,
+                    [{capture, all_but_first, binary}]) of
+            {match, Parts} ->
+                [Protocall, SubDomain, Domain, Rest1, Rest2] = Parts,
+                Hash = crypto:hash(md5, SubDomain),
+                Hash1 = base64:encode(Hash),
+                Len = binary:longest_common_suffix([Hash1, <<"===">>]),
+                Hash2 = binary:part(Hash1, {0, size(Hash1) - Len}),
+                Res1 =
+                    case Protocall /= <<"">> of
+                        true ->
+                            <<Protocall/binary, "://", Hash2/binary, ".", Domain/binary>>;
+                        false ->
+                            <<Hash2/binary, ".", Domain/binary>>
+                    end,
+                Res2 =
+                    case Rest1 /= <<"">> of
+                        true ->
+                            <<Res1/binary, ":", Rest1/binary, Rest2/binary>>;
+                        _ ->
+                            <<Res1/binary, Rest2/binary>>
+                    end,
+                Res2;
+            _ ->
+                <<"">>
+        end
+    end,
+    lists:map(Fun, FQDNs).
