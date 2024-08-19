@@ -167,6 +167,7 @@ steps:
       docker:
         image: "chefes/a1-buildkite"
         environment:
+          - git config --global advice.detachedHead false
           - LUALIB=~/.luarocks/lib/lua/5.2
           - USE_OMNIBUS_FILES=0
           - PEDANT_OPTS="--skip-oc_id"
