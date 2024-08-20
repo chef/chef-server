@@ -95,17 +95,15 @@ docker-compose exec chef-server-ctl chef-server-ctl command (subcommands)
 ```
 
 ## License Usage
-Chef Infra Server captures license usage data as per the license agreement. This does not require user approval or intervention and runs in the background.  
+Chef Infra Server captures license usage data under the Progress Chef license agreement. This process runs in the background, it doesn't require user approval or intervention, and it can't be disabled.  
 
-Chef Infra Server will collect the following information from your environment:
-* Version of Infra Server - The version Chef Server is running on.
-* FQDN of the load balancer Chef Server is installed: The Chef Server has to be behind an API FQDN. This will help us to determine if multiple instances of Chef Server are installed.
-* Customer Name - This is captured by scanning through the user emails in Chef Server and processing the email domain.
-* The count of nodes who have checked in to the Server in the last 30 days
-* Binary file name and location of Chef Server Ctl command - The Chef Server Ctl command file name which is used to manage and maintain Chef Server
-* Configuration file location of Chef Infra Server - The configuration file that holds the running configuration of Chef Server.
-
-This feature cannot be disabled by any configuration.
+Chef Infra Server collects the following information from your environment:
+* The Chef Infra Server version.
+* The FQDN of the load balancer that Chef Infra Server is installed on. This information determines if multiple instances of the Chef Infra Server are in use.
+* The customer name. Chef Infra Server captures this by scanning email addresses stored on Infra Server and processing the email domain.
+* The number of nodes checked into the server in the last 30 days.
+* The chef-server-ctl binary filename and location.
+* The Chef Infra Server's configuration file location.
 
 ## Dependencies contained in other repositories
 
