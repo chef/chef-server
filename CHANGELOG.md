@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.9.47 -->
-## [15.9.47](https://github.com/chef/chef-server/tree/15.9.47) (2024-08-20)
+<!-- latest_release 15.9.48 -->
+## [15.9.48](https://github.com/chef/chef-server/tree/15.9.48) (2024-08-20)
 
 #### Merged Pull Requests
-- Update github labeler so it works [#3886](https://github.com/chef/chef-server/pull/3886) ([IanMadd](https://github.com/IanMadd))
+- Added updated according to omnitruck url changes [#3869](https://github.com/chef/chef-server/pull/3869) ([vviveksharma](https://github.com/vviveksharma))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.9.38 -->
 ### Changes since 15.9.38 release
 
 #### Merged Pull Requests
+- Added updated according to omnitruck url changes [#3869](https://github.com/chef/chef-server/pull/3869) ([vviveksharma](https://github.com/vviveksharma)) <!-- 15.9.48 -->
 - Update github labeler so it works [#3886](https://github.com/chef/chef-server/pull/3886) ([IanMadd](https://github.com/IanMadd)) <!-- 15.9.47 -->
 - Update Netlify deploy command [#3791](https://github.com/chef/chef-server/pull/3791) ([IanMadd](https://github.com/IanMadd)) <!-- 15.9.46 -->
 - CVE fixes for oc-id [#3861](https://github.com/chef/chef-server/pull/3861) ([RoyShravani](https://github.com/RoyShravani)) <!-- 15.9.45 -->
