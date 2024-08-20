@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.9.46 -->
-## [15.9.46](https://github.com/chef/chef-server/tree/15.9.46) (2024-08-20)
+<!-- latest_release 15.9.47 -->
+## [15.9.47](https://github.com/chef/chef-server/tree/15.9.47) (2024-08-20)
 
 #### Merged Pull Requests
-- Update Netlify deploy command [#3791](https://github.com/chef/chef-server/pull/3791) ([IanMadd](https://github.com/IanMadd))
+- Update github labeler so it works [#3886](https://github.com/chef/chef-server/pull/3886) ([IanMadd](https://github.com/IanMadd))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.9.38 -->
 ### Changes since 15.9.38 release
 
 #### Merged Pull Requests
+- Update github labeler so it works [#3886](https://github.com/chef/chef-server/pull/3886) ([IanMadd](https://github.com/IanMadd)) <!-- 15.9.47 -->
 - Update Netlify deploy command [#3791](https://github.com/chef/chef-server/pull/3791) ([IanMadd](https://github.com/IanMadd)) <!-- 15.9.46 -->
 - CVE fixes for oc-id [#3861](https://github.com/chef/chef-server/pull/3861) ([RoyShravani](https://github.com/RoyShravani)) <!-- 15.9.45 -->
 - Upgrading to node.js 14.21.3 in oc-id [#3831](https://github.com/chef/chef-server/pull/3831) ([RoyShravani](https://github.com/RoyShravani)) <!-- 15.9.44 -->
