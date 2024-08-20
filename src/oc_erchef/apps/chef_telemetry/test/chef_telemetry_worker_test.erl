@@ -40,14 +40,19 @@
     fqdn = []}).
 
 feild_value_test() ->
-    State = #state{fqdn_select = {ok, []},
+    State = #state{fqdn_select = {ok, [{<<"property">>, <<"FQDN:node1.domain1.com">>},
+                                       {<<"property">>, <<"FQDN:node2.subdomain2.domain2.com">>},
+                                       {<<"property">>, <<"FQDN:node3.subdomain3.domain3.co.uk">>}]},
         last_send_timestamp = {{2024, 8, 7}, {0, 0, 1}},
         user_emails = [[{<<"email">>, <<"test@testorg.com">>}]],
         nodes_count = 10
     },
     Expected = #expected{company_name = <<"testorg">>,
         nodes_count = 10,
-        active_nodes = 4},
+        active_nodes = 4,
+        fqdn = [<<".*\.domain1.com$">>,
+            <<".*\.subdomain2\.domain2\.com$">>,
+            <<".*\.subdomain3\.domain3\.co\.uk$">>]},
     execute(State, Expected, []).
 
 enable_flag_test() ->
@@ -145,10 +150,22 @@ validate(Req, Expected) ->
     Licence = ej:get({<<"licenseId">>}, Req),
     TotalNodes = ej:get({<<"periods">>, 1, <<"summary">>, <<"nodes">>, <<"total">>}, Req),
     ActiveNodes = ej:get({<<"periods">>, 1, <<"summary">>, <<"nodes">>, <<"active">>}, Req),
-    ?assertEqual(<<"Infra-Server-license-Id">>, Licence),
+    FQDNs = ej:get({<<"metadata">>, <<"Infra Server">>, <<"fqdn">>}, Req),
+    ?assertEqual(<<"Infra-Server-license-Id">>, Licence),   
     ?assertEqual(Expected#expected.nodes_count, TotalNodes),
-    ?assertEqual(Expected#expected.active_nodes, ActiveNodes).
+    ?assertEqual(Expected#expected.active_nodes, ActiveNodes),
+    ?assertEqual(true, check_fqdn(FQDNs, Expected#expected.fqdn)).
 
 set_env(ConfigList) ->
     ConfigList1 = ?DEFAULT_CONFIG ++ ConfigList,
     [ application:set_env(App, Parameter, Value) || {App, Parameter, Value} <- ConfigList1 ].
+
+check_fqdn(ReqFQDNs, Expected) ->
+    MatchFun = 
+        fun(FQDN) ->
+            lists:any(
+                fun(Pattern) ->
+                    match == re:run(FQDN, Pattern, [{capture, none}])
+                end, Expected)
+        end,
+    lists:all(MatchFun, ReqFQDNs).

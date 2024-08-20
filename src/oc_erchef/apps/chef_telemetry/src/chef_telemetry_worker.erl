@@ -56,8 +56,8 @@
 %% 1) I don't have the server URL.
 %% 2) easy for testing.
 %% should be changed to actual server URL ASAP.
--define(DEFAULT_REPORTING_URL, "http://127.0.0.1:9001").
--define(DEFAULT_REPORTING_TIME, {12, 00}).
+-define(DEFAULT_REPORTING_URL, "https://services.chef.io/usage/v1/payload").
+-define(DEFAULT_REPORTING_TIME, {4, 00}).
 -define(DEFAULT_IBROWSE_OPTIONS, []).
 
 -define(WINDOW_SECONDS, 300).
@@ -66,7 +66,7 @@ start_link() ->
     gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
 
 init(_Config) ->
-    ReportingUrl = envy:get(chef_telemetry, reporting_url, ?DEFAULT_REPORTING_URL, string),
+    ReportingUrl = envy:get(chef_telemetry, reporting_time, ?DEFAULT_REPORTING_TIME, Fun),
     Fun = fun({Hour, Min}) ->
             Hour >= 0 andalso Hour < 24 andalso Min >= 0 andalso Min < 60
           end,
@@ -88,7 +88,7 @@ handle_call(_Message, _From, State) ->
 
 handle_cast(send_data, State) ->
     State6 =
-        case chef_telemetry:is_enabled() of
+        try chef_telemetry:is_enabled() of
             true ->
                 State1 = init_req(State),
                 insert_fqdn(State1),
@@ -105,6 +105,9 @@ handle_cast(send_data, State) ->
                         State1
                 end;
             _ ->
+                State
+        catch 
+            _:_ ->
                 State
         end,
     gen_server:cast(self(), init_timer),
@@ -158,7 +161,8 @@ get_api_fqdn(State) ->
     case sqerl:execute(<<"select property from telemetry where property like 'FQDN:%'">>) of
         {ok, Rows} when is_list(Rows) ->
             FQDNs = [binary:part(FQDN, 5, size(FQDN) -5) || [{<<"property">>, FQDN}] <- Rows],
-            State#state{fqdns = FQDNs};
+            FQDNs1 = mask(FQDNs),
+            State#state{fqdns = FQDNs1};
         _ ->
             State
     end.
@@ -319,7 +323,7 @@ to_binary(String) when is_list(String) ->
     list_to_binary(String);
 
 to_binary(Element) ->
-    throw({not_a_binary_or_string, Element}).
+    throw({not_a_string, Element}).
 
 epoch_to_string(Epoch) ->
     calendar:system_time_to_rfc3339(Epoch, [{offset, "Z"}]).
@@ -377,3 +381,35 @@ insert_fqdn(State) ->
     HostName2 = to_binary("FQDN:" ++ HostName1),
     sqerl:adhoc_delete(<<"telemetry">>, {<<"property">>, equals, HostName2}),
     sqerl:adhoc_insert(<<"telemetry">>, [[{<<"property">>, HostName2}, {<<"event_timestamp">>, Now}, {<<"value_string">>, <<"">>}]]).
+
+mask(FQDNs) ->
+    Fun = fun(FQDN) ->
+        case re:run(FQDN, 
+                    <<"(?:(.*?):\/\/?)?\/?(?:[^\/\.]+\.)*?([^\/\.]+)\.?([^\/:]*)(?::([^?\/]*)?)?(.*)?">>, 
+                    [{capture, all_but_first, binary}]) of
+            {match, Parts} ->
+                [Protocall, SubDomain, Domain, Rest1, Rest2] = Parts,
+                Hash = crypto:hash(md5, SubDomain),
+                Hash1 = base64:encode(Hash),
+                Len = binary:longest_common_suffix([Hash1, <<"===">>]),
+                Hash2 = binary:part(Hash1, {0, size(Hash1) - Len}),
+                Res1 = 
+                    case Protocall /= <<"">> of
+                        true ->
+                            <<Protocall/binary, "://", Hash2/binary, ".", Domain/binary>>;
+                        false ->
+                            <<Hash2/binary, ".", Domain/binary>>
+                    end,
+                Res2 = 
+                    case Rest1 /= <<"">> of
+                        true ->
+                            <<Res1/binary, ":", Rest1/binary, Rest2/binary>>;
+                        _ ->
+                            <<Res1/binary, Rest2/binary>>
+                    end,
+                Res2;
+            _ ->
+                <<"">>
+        end
+    end,
+    lists:map(Fun, FQDNs).
