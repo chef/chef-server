@@ -373,7 +373,7 @@ run: opscode-erchef: (pid 18897) 404s; run: log: (pid 18601) 419s
 run: postgresql: (pid 18722) 407s; run: log: (pid 17655) 492s
 run: redis_lb: (pid 2278) 239s; run: log: (pid 18948) 404s
 ```
-Note: From chef-server version 15.10.x onwards, underneath we are using keydb in place of redis. All the functions are suppose to work same because keydb is fork of redis.
+{{< note >}} From Chef Infra Server version 15.10.x onwards, we are using keydb instead of redis underneath. All the functions are supposed to work the same because keydb is a fork of redis. The configuration name and service name will continue to be redis_lb.{{< /note >}}
 
 Note that the umbrella scenario automatically creates a `user1` account [ldap? chef-server?] with password `password`.
 
