@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.10.2 -->
-## [15.10.2](https://github.com/chef/chef-server/tree/15.10.2) (2024-08-21)
+<!-- latest_release 15.10.3 -->
+## [15.10.3](https://github.com/chef/chef-server/tree/15.10.3) (2024-08-21)
 
 #### Merged Pull Requests
-- Bump omnibus from `82dae89` to `11057b3` in /omnibus [#3876](https://github.com/chef/chef-server/pull/3876) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Removed ubuntu-16.04 and el-7 from builder [#3888](https://github.com/chef/chef-server/pull/3888) ([jashaik](https://github.com/jashaik))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.9.38 -->
 ### Changes since 15.9.38 release
 
 #### Merged Pull Requests
+- Removed ubuntu-16.04 and el-7 from builder [#3888](https://github.com/chef/chef-server/pull/3888) ([jashaik](https://github.com/jashaik)) <!-- 15.10.3 -->
 - Bump omnibus from `82dae89` to `11057b3` in /omnibus [#3876](https://github.com/chef/chef-server/pull/3876) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.10.2 -->
 - Bump omnibus-software from `1659822` to `cd0dbdf` in /omnibus [#3879](https://github.com/chef/chef-server/pull/3879) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.10.1 -->
 - Enable licence usage data for Infra Server. [#3828](https://github.com/chef/chef-server/pull/3828) ([sreepuramsudheer](https://github.com/sreepuramsudheer)) <!-- 15.10.0 -->
