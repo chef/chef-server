@@ -298,7 +298,7 @@ Cleansing data in a remote Opensearch instance is not currently supported.
 
   # Overrideing the service_list command to add the keyDB message.
   def service_list(*args)
-    super(name)
+    super(*args)
     log "We are using keydb instead of redis underneath. All the functions are supposed to work the same because keydb is a fork of redis."
   end
   # Overrideing the status command to add the keyDB message.
