@@ -1,16 +1,18 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.9.48 -->
-## [15.9.48](https://github.com/chef/chef-server/tree/15.9.48) (2024-08-20)
+<!-- latest_release 15.10.1 -->
+## [15.10.1](https://github.com/chef/chef-server/tree/15.10.1) (2024-08-21)
 
 #### Merged Pull Requests
-- Added updated according to omnitruck url changes [#3869](https://github.com/chef/chef-server/pull/3869) ([vviveksharma](https://github.com/vviveksharma))
+- Bump omnibus-software from `1659822` to `cd0dbdf` in /omnibus [#3879](https://github.com/chef/chef-server/pull/3879) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.9.38 -->
 ### Changes since 15.9.38 release
 
 #### Merged Pull Requests
+- Bump omnibus-software from `1659822` to `cd0dbdf` in /omnibus [#3879](https://github.com/chef/chef-server/pull/3879) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.10.1 -->
+- Enable licence usage data for Infra Server. [#3828](https://github.com/chef/chef-server/pull/3828) ([sreepuramsudheer](https://github.com/sreepuramsudheer)) <!-- 15.10.0 -->
 - Added updated according to omnitruck url changes [#3869](https://github.com/chef/chef-server/pull/3869) ([vviveksharma](https://github.com/vviveksharma)) <!-- 15.9.48 -->
 - Update github labeler so it works [#3886](https://github.com/chef/chef-server/pull/3886) ([IanMadd](https://github.com/IanMadd)) <!-- 15.9.47 -->
 - Update Netlify deploy command [#3791](https://github.com/chef/chef-server/pull/3791) ([IanMadd](https://github.com/IanMadd)) <!-- 15.9.46 -->

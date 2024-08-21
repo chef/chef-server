@@ -1,9 +1,6 @@
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92 -*-
 %% ex: ts=4 sw=4 et
 %%
-%% @author Ryan Cragun <ryan@chef.io>
-%% @author John Keiser <jkeiser@chef.io.
-%%
 %% Copyright 2016 Chef Software, Inc. All Rights Reserved.
 %%
 %% This file is provided to you under the Apache License,
@@ -21,16 +18,17 @@
 %% under the License.
 %%
 
-{application, data_collector, [
-    {description, "Chef Server Data Collector"},
-    {vsn, {cmd,"cat ../../VERSION | awk '{print $0}'"}},
-    {registered, []},
-    {applications, [
-        kernel,
-        stdlib,
-        lager,
-        chef_secrets,
-        opscoderl_httpc
-    ]},
-    {mod, {data_collector_app, []}}
-]}.
+-module(chef_telemetry_app).
+
+-behaviour(application).
+
+%% API
+-export([start/2,
+         stop/1
+        ]).
+
+start(_StartType, _StartArgs) ->
+    chef_telemetry_sup:start_link().
+
+stop(_State) ->
+    ok.
