@@ -22,7 +22,7 @@ start(_StartType, _StartArgs) ->
     %% See comment in app.src for details.
     { ok, AppList } =  application:get_key(oc_erchef, included_applications),
     [ application:ensure_all_started(App, permanent) || App <- AppList ],
-
+    {error,{already_started,_}} = application:start(chef_telemetry),
     %% If we're in a dev vm environment, start the code sync & compile tools
     case os:getenv("DEVVM") of
         "1" ->
