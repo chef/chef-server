@@ -296,6 +296,19 @@ Cleansing data in a remote Opensearch instance is not currently supported.
       # opscode-solr4 status is seen as elasticsearch status"
     end
 
+  # Overrideing the service_list command to add the keyDB message.
+  def service_list(*args)
+    super(name)
+    log "We are using keydb instead of redis underneath. All the functions are supposed to work the same because keydb is a fork of redis."
+  end
+  # Overrideing the status command to add the keyDB message.
+  def run_sv_command(sv_cmd, service = nil)
+    super(sv_cmd, service)
+    if sv_cmd == "status" && (service.nil? || service == "redis_lb")
+      log "We are using keydb instead of redis underneath. All the functions are supposed to work the same because keydb is a fork of redis."
+    end
+  end
+
     # Override reconfigure to skip license checking
     def reconfigure(*args)
       puts ::ChefServerCtl::Config::DOC_PATENT_MSG
