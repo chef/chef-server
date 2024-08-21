@@ -893,6 +893,8 @@ default['private_chef']['data_collector']['ibrowse_options'] = '[{connect_timeou
 # Select whether data_collector affects overall status in _status endpoint
 default['private_chef']['data_collector']['health_check'] = true
 
+default['private_chef']['ctl_command'] = "#{ChefUtils::Dist::Server::SERVER_CTL}"
+default['private_chef']['running_filepath'] = "/etc/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/#{ChefUtils::Dist::Server::SERVER}-running.json"
 ##
 # Compliance Profiles
 ##
