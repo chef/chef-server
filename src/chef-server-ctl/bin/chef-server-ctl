@@ -316,6 +316,7 @@ Cleansing data in a remote Opensearch instance is not currently supported.
       mtls_enabled ? run_command(command) : :ok
 
       if status.success?
+        log "We are using keydb instead of redis underneath. All the functions are supposed to work the same because keydb is a fork of redis."
         log "#{display_name} Reconfigured!"
         exit! 0
       else
