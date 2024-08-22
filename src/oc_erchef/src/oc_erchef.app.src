@@ -31,8 +31,7 @@
                            opscoderl_httpc,
                            oc_chef_authz,
                            oc_chef_wm,
-                           data_collector,
-                           chef_telemetry
+                           data_collector
                           ]},
   {applications, [lager,
                   chef_secrets,
