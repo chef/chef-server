@@ -2,8 +2,8 @@ The following table lists the commercially supported platforms for Chef Infra Se
 
 | Platform                     | Architecture | Version                             |
 |------------------------------|--------------|-------------------------------------|
-| Amazon Linux                 | `x86_64`     | `2023`                              |
-| Red Hat Enterprise Linux/CentOS     | `x86_64`     | `8.x`, `9.x`                 |
+| Amazon Linux                 | `x86_64`     | `2`, `2023`                              |
+| Red Hat Enterprise Linux/CentOS     | `x86_64`     | `7.x (till 15.9.38)`, `8.x`, `9.x`                 |
 | Rocky Linux                  | `x86_64`     | `9.x`                               |
 | SUSE Linux Enterprise Server | `x86_64`     | `12.x`, `15.x`                      |
 | Ubuntu                       | `x86_64`     | `20.04`, `22.04`                    |
