@@ -18,6 +18,8 @@ name "server-ctl-cookbooks"
 
 source path: "#{project.files_path}/#{name}"
 
+skip_transitive_dependency_licensing true
+
 license :project_license
 
 skip_transitive_dependency_licensing true
