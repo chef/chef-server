@@ -88,9 +88,6 @@ handle_cast(send_data, State) ->
         catch
             _:_ ->
                 State
-        catch
-            _:_ ->
-                State
         end,
     gen_server:cast(self(), init_timer),
     {noreply, State2};
