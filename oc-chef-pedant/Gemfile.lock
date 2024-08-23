@@ -2,7 +2,7 @@ PATH
   remote: .
   specs:
     oc-chef-pedant (2.2.0)
-      activesupport (>= 4.2.7.1, < 8.0)
+      activesupport (>= 4.2.7.1, <= 7.1.3.2)
       addressable
       chef-utils (>= 16.17.51)
       erubis (~> 2.7)
