@@ -13,7 +13,6 @@ override :runit, version: "2.1.1" #standalone upgrade is failing, Needs to be re
 override :sqitch, version: "0.973"
 
 override :logrotate, version: "3.19.0"
-override :gcc, version: "7.5.0"
 
 # update `src/openresty-noroot/habitat/plan.sh` when updating this version.
 override :openresty, version: "1.25.3.1"
