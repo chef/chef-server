@@ -5,7 +5,7 @@ port <%= @port %>
 <% if (@listen != "0.0.0.0") && (@listen != "::") %>
 bind <%= @bind %> <%= @listen == @bind ? "" : @listen %>
 <%elsif (@listen == "::") %>
-bind 0.0.0.0
+bind <%= @listen%> 0.0.0.0
 <%else %>
 bind <%= @listen%>
 <% end %>
