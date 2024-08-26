@@ -15,7 +15,7 @@
 
 -record(state, {
     fqdn_select,
-    last_send_timestamp,
+    should_send,
     user_emails = [],
     nodes_count = 0,
     organizations = ["org1", "org2"],
@@ -29,10 +29,10 @@
     fqdn = []}).
 
 feild_value_test() ->
-    State = #state{fqdn_select = {ok, [{<<"property">>, <<"FQDN:node1.domain1.com">>},
-                                       {<<"property">>, <<"FQDN:node2.subdomain2.domain2.com">>},
-                                       {<<"property">>, <<"FQDN:node3.subdomain3.domain3.co.uk">>}]},
-        last_send_timestamp = {{2024, 8, 7}, {0, 0, 1}},
+    State = #state{fqdn_select = {ok, [[{<<"property">>, <<"FQDN:node1.domain1.com">>}],
+                                       [{<<"property">>, <<"FQDN:node2.subdomain2.domain2.com">>}],
+                                       [{<<"property">>, <<"FQDN:node3.subdomain3.domain3.co.uk">>}]]},
+        should_send = true,
         user_emails = [[{<<"email">>, <<"test@testorg.com">>}]],
         nodes_count = 10
     },
@@ -46,7 +46,7 @@ feild_value_test() ->
 
 enable_flag_test() ->
     State = #state{fqdn_select = {ok, []},
-        last_send_timestamp = {{2024, 8, 7}, {0, 0, 1}},
+        should_send = false,
         user_emails = [[{<<"email">>, <<"test@testorg.com">>}]],
         nodes_count = 10
     },
@@ -85,20 +85,20 @@ setup() ->
     meck:expect(release_handler, which_releases, fun(_) -> [{"chef_server", "15.9.38", [], []}] end),
     meck:expect(stats_hero, ctime, fun(_, _, Fun) -> Fun() end).
 
-get_execute(<<"select property from telemetry where property like 'FQDN:%'">>) ->
+get_execute(<<"select trim(property) as property from telemetry where property like 'FQDN:%'">>) ->
     State = get(state),
     State#state.fqdn_select;
+
+get_execute(<<"select telemetry_check_send('", _/binary>>) ->
+    State = get(state),
+    State#state.should_send;
 
 get_execute(_) ->
     ok.
 
 adhoc_select([<<"email">>], <<"users">>, all) ->
     State = get(state),
-    {ok, State#state.user_emails};
-
-adhoc_select([<<"event_timestamp">>], <<"telemetry">>, {<<"property">>, equals, <<"last_send">>}) ->
-    State = get(state),
-    {ok, [[{<<"event_timestamp">>, State#state.last_send_timestamp}]]}.
+    {ok, State#state.user_emails}.
 
 count_nodes(_Context) ->
     State = get(state),
@@ -151,10 +151,10 @@ set_env(ConfigList) ->
 
 check_fqdn(ReqFQDNs, Expected) ->
     MatchFun =
-        fun(FQDN) ->
+        fun(Pattern) ->
             lists:any(
-                fun(Pattern) ->
+                fun(FQDN) ->
                     match == re:run(FQDN, Pattern, [{capture, none}])
-                end, Expected)
+                end, ReqFQDNs)
         end,
-    lists:all(MatchFun, ReqFQDNs).
+    lists:all(MatchFun, Expected).
