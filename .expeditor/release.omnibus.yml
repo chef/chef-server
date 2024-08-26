@@ -18,8 +18,6 @@ builder-to-testers-map:
     - ubuntu-22.04-x86_64
   el-8-x86_64:
     - el-8-x86_64
-  amazon-2-x86_64:
-    - amazon-2-x86_64
   el-9-x86_64:
     - el-9-x86_64
   amazon-2023-x86_64:
