@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.10.6 -->
-## [15.10.6](https://github.com/chef/chef-server/tree/15.10.6) (2024-08-27)
+<!-- latest_release 15.10.7 -->
+## [15.10.7](https://github.com/chef/chef-server/tree/15.10.7) (2024-08-27)
 
 #### Merged Pull Requests
-- Bump omnibus-software from `cd0dbdf` to `f9e2df6` in /omnibus [#3899](https://github.com/chef/chef-server/pull/3899) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Using keydb for caching dynamic routings [#3864](https://github.com/chef/chef-server/pull/3864) ([jashaik](https://github.com/jashaik))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.9.38 -->
 ### Changes since 15.9.38 release
 
 #### Merged Pull Requests
+- Using keydb for caching dynamic routings [#3864](https://github.com/chef/chef-server/pull/3864) ([jashaik](https://github.com/jashaik)) <!-- 15.10.7 -->
 - Bump omnibus-software from `cd0dbdf` to `f9e2df6` in /omnibus [#3899](https://github.com/chef/chef-server/pull/3899) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.10.6 -->
 - Bump omnibus from `11057b3` to `0633d00` in /omnibus [#3898](https://github.com/chef/chef-server/pull/3898) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.10.5 -->
 - activesupport &lt;= 7.1.3.2 [#3894](https://github.com/chef/chef-server/pull/3894) ([lbakerchef](https://github.com/lbakerchef)) <!-- 15.10.4 -->
