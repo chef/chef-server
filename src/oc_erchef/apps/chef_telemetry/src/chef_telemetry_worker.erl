@@ -343,7 +343,7 @@ check_send(Hostname) ->
         {ok,[[{_, false}]]}  ->
             false;
         Error ->
-            throw({not_able_to_read_from_db, Error})
+            Error
     end.
 
 get_fqdn() ->
