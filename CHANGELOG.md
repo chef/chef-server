@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.10.8 -->
-## [15.10.8](https://github.com/chef/chef-server/tree/15.10.8) (2024-08-27)
+<!-- latest_release 15.10.9 -->
+## [15.10.9](https://github.com/chef/chef-server/tree/15.10.9) (2024-08-28)
 
 #### Merged Pull Requests
-- Adding information about Key-DB in Chef-server CLI subcommands [#3889](https://github.com/chef/chef-server/pull/3889) ([talktovikas](https://github.com/talktovikas))
+- KeyDB Documentation draft.  [#3874](https://github.com/chef/chef-server/pull/3874) ([talktovikas](https://github.com/talktovikas))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.9.38 -->
 ### Changes since 15.9.38 release
 
 #### Merged Pull Requests
+- KeyDB Documentation draft.  [#3874](https://github.com/chef/chef-server/pull/3874) ([talktovikas](https://github.com/talktovikas)) <!-- 15.10.9 -->
 - Adding information about Key-DB in Chef-server CLI subcommands [#3889](https://github.com/chef/chef-server/pull/3889) ([talktovikas](https://github.com/talktovikas)) <!-- 15.10.8 -->
 - Using keydb for caching dynamic routings [#3864](https://github.com/chef/chef-server/pull/3864) ([jashaik](https://github.com/jashaik)) <!-- 15.10.7 -->
 - Bump omnibus-software from `cd0dbdf` to `f9e2df6` in /omnibus [#3899](https://github.com/chef/chef-server/pull/3899) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.10.6 -->
