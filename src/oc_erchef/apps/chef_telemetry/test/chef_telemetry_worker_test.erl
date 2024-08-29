@@ -40,8 +40,8 @@ feild_value_test() ->
         nodes_count = 10,
         active_nodes = 4,
         fqdn = [<<".*\.domain1.com$">>,
-            <<".*\.subdomain2\.domain2\.com$">>,
-            <<".*\.subdomain3\.domain3\.co\.uk$">>]},
+            <<".*\.domain2\.com$">>,
+            <<".*\.domain3\.co\.uk$">>]},
     execute(State, Expected, []).
 
 enable_flag_test() ->
