@@ -347,35 +347,66 @@ check_send(Hostname) ->
     end.
 
 get_fqdn() ->
-    HostName = string:trim(os:cmd('hostname -f')),
+    HostName = binary:bin_to_list(envy:get(oc_chef_wm, actions_fqdn, <<"">>, binary)),
     to_binary("FQDN:" ++ HostName).
 
 mask(FQDNs) ->
+    Join = fun(Elements, Separator) ->
+        [H | T] = Elements,
+        lists:foldl(fun (Value, Acc) -> <<Acc/binary, Separator/binary, Value/binary>> end, H, T)
+    end,
     Fun = fun(FQDN) ->
         case re:run(FQDN,
                     <<"(?:(.*?):\/\/?)?\/?(?:[^\/\.]+\.)*?([^\/\.]+)\.?([^\/:]*)(?::([^?\/]*)?)?(.*)?">>,
                     [{capture, all_but_first, binary}]) of
             {match, Parts} ->
                 [Protocall, SubDomain, Domain, Rest1, Rest2] = Parts,
-                Hash = crypto:hash(md5, SubDomain),
+                FQDN1 = <<SubDomain/binary, ".", Domain/binary>>,
+                case re:run(FQDN1, <<"^[0-9a-fA-F\.:]*$">>) of
+                    {match, _} -> 
+                        Hash = crypto:hash(md5, FQDN1),
+                        Domain2 = <<"">>;
+                    _ ->
+                        FQDN_parts = binary:split(FQDN1, <<"\.">>, [global]),
+                        case size(lists:last(FQDN_parts)) =:= 2 of
+                            true ->
+                                {SubDomain1, Domain1} = lists:split(erlang:length(FQDN_parts) - 3, FQDN_parts),
+                                SubDomain2 = Join(SubDomain1, <<".">>),
+                                Domain2 = Join(Domain1, <<".">>);
+                            _    ->
+
+                                {SubDomain1, Domain1} = lists:split(erlang:length(FQDN_parts) - 2, FQDN_parts),
+                                SubDomain2 = Join(SubDomain1, <<".">>),
+                                Domain2 = Join(Domain1, <<".">>)
+                        end,
+                        Hash = crypto:hash(md5, SubDomain2)
+                end,
+
                 Hash1 = base64:encode(Hash),
                 Len = binary:longest_common_suffix([Hash1, <<"===">>]),
                 Hash2 = binary:part(Hash1, {0, size(Hash1) - Len}),
                 Res1 =
                     case Protocall /= <<"">> of
                         true ->
-                            <<Protocall/binary, "://", Hash2/binary, ".", Domain/binary>>;
+                            <<Protocall/binary, "://", Hash2/binary>>;
                         false ->
-                            <<Hash2/binary, ".", Domain/binary>>
+                            <<Hash2/binary>>
                     end,
-                Res2 =
+                Res2 = 
+                case Domain2 =:= <<"">> of
+                    true ->
+                        <<Res1/binary>>;
+                    false ->
+                        <<Res1/binary, ".", Domain2/binary>>
+                end,
+                Res3 =
                     case Rest1 /= <<"">> of
                         true ->
-                            <<Res1/binary, ":", Rest1/binary, Rest2/binary>>;
+                            <<Res2/binary, ":", Rest1/binary, Rest2/binary>>;
                         _ ->
-                            <<Res1/binary, Rest2/binary>>
+                            <<Res2/binary, Rest2/binary>>
                     end,
-                Res2;
+                Res3;
             _ ->
                 <<"">>
         end
