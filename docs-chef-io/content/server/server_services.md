@@ -82,7 +82,7 @@ The following services are part of the Chef Infra Server:
 - postgresql
 - redis_lb 
 
-{{< note >}} From Chef Infra Server version 15.10.x onwards, we are using keydb instead of redis underneath. All the functions are supposed to work the same because keydb is a fork of redis. The configuration name and service name will continue to be redis_lb.{{< /note >}}
+{{< note >}} From Chef Infra Server version 15.10.12 onwards, we are using keydb instead of redis underneath. All the functions are supposed to work the same because keydb is a fork of redis. The configuration name and service name will continue to be redis_lb.{{< /note >}}
 
 ### bifrost
 
