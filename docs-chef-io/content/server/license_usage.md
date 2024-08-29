@@ -19,8 +19,9 @@ Chef Infra Server captures license usage data under the Progress Chef license ag
 Chef Infra Server collects the following information from your environment:
 
 - The Chef Infra Server version.
-- The hashed FQDN of the Chef Infra Server is captured by hashing the subdomain of the internal load balancer of the installed Chef Infra Server. This will determine if multiple instances of the Chef Infra Server are in use.
-- The customer domain name. Chef Infra Server captures this by scanning all email addresses stored on Infra Server, identifying the most common email domain name, truncating the username, and capturing the email domain.
+- The domain name of the Chef Infra Server installation and the number of installations by collecting the following parameters:
+  - Scanning all email addresses stored on Infra Server, identifying the most common email domain name, truncating the username, and capturing only the email domain.
+  - Hashing subdomain details and combining them with the internal load balancer's domain name to prevent transmitting FQDN in its identifiable form but only essential fields to identify unique installations of the Infra Server.
 - The number of nodes checked into the server in the last 30 days.
 - The `chef-server-ctl` binary filename and location.
 - The Chef Infra Server's configuration file location.
