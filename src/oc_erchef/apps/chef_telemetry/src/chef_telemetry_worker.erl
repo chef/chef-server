@@ -347,7 +347,7 @@ check_send(Hostname) ->
     end.
 
 get_fqdn() ->
-    HostName = string:trim(os:cmd('hostname -f')),
+    HostName = binary:bin_to_list(envy:get(oc_chef_wm, actions_fqdn, <<"">>, binary)),
     to_binary("FQDN:" ++ HostName).
 
 mask(FQDNs) ->
