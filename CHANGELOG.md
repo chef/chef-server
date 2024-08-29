@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.10.10 -->
-## [15.10.10](https://github.com/chef/chef-server/tree/15.10.10) (2024-08-28)
+<!-- latest_release 15.10.11 -->
+## [15.10.11](https://github.com/chef/chef-server/tree/15.10.11) (2024-08-29)
 
 #### Merged Pull Requests
-- Update the supported platforms [#3890](https://github.com/chef/chef-server/pull/3890) ([kalroy](https://github.com/kalroy))
+- Fix for 12.17.15 -&gt; 15.10.X upgrade [#3902](https://github.com/chef/chef-server/pull/3902) ([jashaik](https://github.com/jashaik))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.9.38 -->
 ### Changes since 15.9.38 release
 
 #### Merged Pull Requests
+- Fix for 12.17.15 -&gt; 15.10.X upgrade [#3902](https://github.com/chef/chef-server/pull/3902) ([jashaik](https://github.com/jashaik)) <!-- 15.10.11 -->
 - Update the supported platforms [#3890](https://github.com/chef/chef-server/pull/3890) ([kalroy](https://github.com/kalroy)) <!-- 15.10.10 -->
 - KeyDB Documentation draft.  [#3874](https://github.com/chef/chef-server/pull/3874) ([talktovikas](https://github.com/talktovikas)) <!-- 15.10.9 -->
 - Adding information about Key-DB in Chef-server CLI subcommands [#3889](https://github.com/chef/chef-server/pull/3889) ([talktovikas](https://github.com/talktovikas)) <!-- 15.10.8 -->
