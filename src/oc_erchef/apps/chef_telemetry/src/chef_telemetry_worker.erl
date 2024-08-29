@@ -363,7 +363,7 @@ mask(FQDNs) ->
                 [Protocall, SubDomain, Domain, Rest1, Rest2] = Parts,
                 FQDN1 = <<SubDomain/binary, ".", Domain/binary>>,
                 case re:run(FQDN1, <<"^[0-9a-fA-F\.:]*$">>) of
-                    {match, _} -> 
+                    {match, _} ->
                         Hash = crypto:hash(md5, FQDN1),
                         Domain2 = <<"">>;
                     _ ->
@@ -392,7 +392,7 @@ mask(FQDNs) ->
                         false ->
                             <<Hash2/binary>>
                     end,
-                Res2 = 
+                Res2 =
                 case Domain2 =:= <<"">> of
                     true ->
                         <<Res1/binary>>;
