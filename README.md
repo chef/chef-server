@@ -94,6 +94,19 @@ Running chef-server-ctl:
 docker-compose exec chef-server-ctl chef-server-ctl command (subcommands)
 ```
 
+## License Usage
+
+The Chef products may include automated license tracking, management and/or enforcement solutions which collect information to verify your license usage.  All information is collected and utilized pursuant to the Progress [Privacy Policy](https://www.progress.com/legal/privacy-policy) which is available and through the Progress [Privacy Center](https://www.progress.com/legal/privacy-center).  
+  
+Chef Infra Server collects the following aggregated, anonymized information:
+* The Chef Infra Server version.
+* Domain name of chef server installation and number of installations by collecting following parameters:  
+    - scanning all email addresses stored on Infra Server, identifying the most common email domain name, truncating the username, and capturing only the email domain.
+    - hashing subdomain details and combining with domain name of the internal load balancer to prevent from transmitting FQDN in its identifiable form but only essential fields to identify unique installations of chef server.
+* The number of nodes checked into the server in the last 30 days.
+* The chef-server-ctl binary filename and location.
+* The Chef Infra Server's configuration file location.
+
 ## Dependencies contained in other repositories
 
 * [knife-ec-backup](https://www.github.com/chef/knife-ec-backup), used to backup your Chef Infra Server for disaster recovery or migrations.
