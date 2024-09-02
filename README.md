@@ -101,7 +101,7 @@ The Chef products may include automated license tracking, management and/or enfo
 Chef Infra Server collects the following aggregated, anonymized information:
 * The Chef Infra Server version.
 * Domain name of chef server installation and number of installations by collecting following parameters:  
-    - scanning all email addresses stored on Infra Server, identifying the most common email domain name, truncating the username, and capturing only the email domain.
+    - reports the domain name associated with the most common number of logins registered with Infra Server. Examples are progress.com , my-charity.org, a-service-provider.net.
     - hashing subdomain details and combining with domain name of the internal load balancer to prevent from transmitting FQDN in its identifiable form but only essential fields to identify unique installations of chef server.
 * The number of nodes checked into the server in the last 30 days.
 * The chef-server-ctl binary filename and location.
