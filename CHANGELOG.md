@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.10.13 -->
-## [15.10.13](https://github.com/chef/chef-server/tree/15.10.13) (2024-08-30)
+<!-- latest_release 15.10.14 -->
+## [15.10.14](https://github.com/chef/chef-server/tree/15.10.14) (2024-09-02)
 
 #### Merged Pull Requests
-- Added telemetry section in README [#3870](https://github.com/chef/chef-server/pull/3870) ([kalroy](https://github.com/kalroy))
+- Update README file [#3905](https://github.com/chef/chef-server/pull/3905) ([kalroy](https://github.com/kalroy))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.10.12 -->
 ### Changes since 15.10.12 release
 
 #### Merged Pull Requests
+- Update README file [#3905](https://github.com/chef/chef-server/pull/3905) ([kalroy](https://github.com/kalroy)) <!-- 15.10.14 -->
 - Added telemetry section in README [#3870](https://github.com/chef/chef-server/pull/3870) ([kalroy](https://github.com/kalroy)) <!-- 15.10.13 -->
 <!-- release_rollup -->
 
