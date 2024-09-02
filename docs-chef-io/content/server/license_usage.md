@@ -20,7 +20,7 @@ Chef Infra Server collects the following information from your environment:
 
 - The Chef Infra Server version.
 - The domain name of the Chef Infra Server installation and the number of installations by collecting the following parameters:
-  - Reports the domain name associated with the most common number of logins registered with Infra Server. Examples are progress.com, my-charity.org, and a-service-provider.net.
+  - Reports the domain name associated with the most common number of logins registered with Infra Server. Examples are `progress.com`, `my-charity.org`, and `a-service-provider.net`.
   - Hashing subdomain details and combining them with the internal load balancer's domain name to prevent transmitting FQDN in its identifiable form but only essential fields to identify unique installations of the Infra Server.
 - The number of nodes checked into the server in the last 30 days.
 - The `chef-server-ctl` binary filename and location.
