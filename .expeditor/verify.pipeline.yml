@@ -153,6 +153,15 @@ steps:
           - PEDANT_OPTS="--skip-oc_id"
           - BUNDLE_GEMFILE=/workdir/oc-chef-pedant/Gemfile
 
+- label: vikas-habitat
+  command:
+      - .expeditor/habitat.sh
+  expeditor:
+      executor:
+        docker:
+          environment:
+            - OCTOKIT_ACCESS_TOKEN
+
 - label: With ChefFS=1
   command:
     - /workdir/scripts/bk_tests/bk_install.sh
