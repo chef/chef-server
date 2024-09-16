@@ -162,6 +162,10 @@ steps:
           image: "habitat/default-studio-x86_64-linux:1.6.826"
           environment:
             - OCTOKIT_ACCESS_TOKEN
+            - HAB_LICENSE="accept-no-persist"
+            - CI="true"
+            - HAB_FEAT_IGNORE_LOCAL="true"
+            - HAB_STUDIO_SECRET_HAB_FEAT_IGNORE_LOCAL="true"
 
 - label: With ChefFS=1
   command:
