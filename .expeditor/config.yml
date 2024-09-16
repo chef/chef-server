@@ -36,7 +36,9 @@ pipelines:
   - verify
   - verify:
       public: true
-  - habitat/build
+  - habitat
+  - habitat:
+     public: true
   - habitat/test:
       definition: .expeditor/habitat-test.pipeline.yml
       trigger: default
