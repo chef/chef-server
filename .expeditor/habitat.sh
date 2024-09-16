@@ -2,7 +2,7 @@
 
 # this script builds all the essential habitat packages for running Chef Server
 # additionaly, it exports them as a local docker image
-hab studio enter<<EOF
+hab studio enter -D <<EOF
 export CHEF_SERVER_SRC='/workdir/src'
 export ORIGIN=chefservertesting
 
