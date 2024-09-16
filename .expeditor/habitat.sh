@@ -2,7 +2,7 @@
 
 # this script builds all the essential habitat packages for running Chef Server
 # additionaly, it exports them as a local docker image
-
+hab studio enter<<EOF
 export CHEF_SERVER_SRC='/workdir/src'
 export ORIGIN=chefservertesting
 
@@ -21,3 +21,4 @@ for dir in oc-id openresty-noroot nginx bookshelf chef-server-ctl oc_bifrost oc_
     --tag-custom "localdev" \
     $(ls -1t results/*.hart | head -1)
 done
+EOF
