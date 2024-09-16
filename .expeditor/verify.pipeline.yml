@@ -159,7 +159,7 @@ steps:
   expeditor:
       executor:
         docker:
-        environment:
+          environment:
             - OCTOKIT_ACCESS_TOKEN
 
 - label: With ChefFS=1
