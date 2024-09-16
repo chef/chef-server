@@ -159,7 +159,8 @@ steps:
   expeditor:
       executor:
         docker:
-          environment:
+        image: "habitat/default-studio-x86_64-linux"
+        environment:
             - OCTOKIT_ACCESS_TOKEN
 
 - label: With ChefFS=1
