@@ -1,4 +1,4 @@
 ---
 
 origin: chef
-smart_build: false
+smart_build: true
