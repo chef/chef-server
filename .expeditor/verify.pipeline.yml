@@ -159,7 +159,7 @@ steps:
   expeditor:
       executor:
         docker:
-        image: "habitat/default-studio-x86_64-linux"
+        image: "chefes/a1-buildkite"
         environment:
             - OCTOKIT_ACCESS_TOKEN
 
