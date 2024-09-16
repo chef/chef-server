@@ -14,6 +14,10 @@ expeditor:
 
 steps:
 
+  - habitat/test:
+      definition: .expeditor/habitat-test.pipeline.yml
+      trigger: default
+
 # steps:
 
 # #########################################################################
