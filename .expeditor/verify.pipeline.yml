@@ -162,7 +162,7 @@ steps:
           image: "habitat/default-studio-x86_64-linux:1.6.826"
           environment:
             - OCTOKIT_ACCESS_TOKEN
-            - HAB_LICENSE="accept"
+            - HAB_LICENSE=accept
             - CHEF_LICENSE="accept-no-persist"
             - CI="true"
             - HAB_FEAT_IGNORE_LOCAL="true"
