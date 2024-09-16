@@ -4,6 +4,7 @@
 # additionaly, it exports them as a local docker image
 export CHEF_SERVER_SRC='/src/src'
 export ORIGIN=chefservertesting
+export HAB_LICENSE=accept-no-persist
 
 for dir in oc-id openresty-noroot nginx bookshelf chef-server-ctl oc_bifrost oc_erchef; do
   cd $CHEF_SERVER_SRC/$dir

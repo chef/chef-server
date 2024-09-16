@@ -163,6 +163,7 @@ steps:
           environment:
             - OCTOKIT_ACCESS_TOKEN
             - HAB_LICENSE="accept-no-persist"
+            - CHEF_LICENSE=accept-no-persist
             - CI="true"
             - HAB_FEAT_IGNORE_LOCAL="true"
             - HAB_STUDIO_SECRET_HAB_FEAT_IGNORE_LOCAL="true"
