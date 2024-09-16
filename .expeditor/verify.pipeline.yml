@@ -155,7 +155,7 @@ steps:
 
 - label: vikas-habitat
   command:
-      - .expeditor/habitat.sh
+      - /workdir/.expeditor/habitat.sh
   expeditor:
       executor:
         docker:
