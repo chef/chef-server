@@ -8,6 +8,7 @@ export ORIGIN=chefservertesting
 
 for dir in oc-id openresty-noroot nginx bookshelf chef-server-ctl oc_bifrost oc_erchef; do
   cd $CHEF_SERVER_SRC/$dir
+  echo "hab version is :" `hab --version`
   echo "[STATUS] building $dir"
   build > /var/log/build-${dir}-$(date +%s).log
   if [[ $dir =~ dbdpg|openresty-noroot ]]; then continue; fi
