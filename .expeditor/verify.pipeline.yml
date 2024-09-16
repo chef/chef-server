@@ -159,7 +159,6 @@ steps:
   expeditor:
       executor:
         docker:
-        # image: "chefes/a1-buildkite"
         environment:
             - OCTOKIT_ACCESS_TOKEN
 
