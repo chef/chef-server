@@ -165,6 +165,7 @@ steps:
             - HAB_LICENSE=accept
             - CHEF_LICENSE="accept-no-persist"
             - CI="true"
+            - HAB_ORIGIN="chef"
             - HAB_FEAT_IGNORE_LOCAL="true"
 
 - label: With ChefFS=1
