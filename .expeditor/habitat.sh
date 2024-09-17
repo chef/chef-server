@@ -18,6 +18,8 @@ hab origin key generate
 # cd /workdir/src/bookshelf
 echo "generating package for $PACKAGE_NAME"
 hab pkg build "src/$PACKAGE_NAME"
+echo "which pushd " $(which pushd)
+
 pushd results
 pkg_name=$(ls -1t *.hart | head -1)
 popd
