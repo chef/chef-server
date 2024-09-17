@@ -16,7 +16,9 @@ HAB_CACHE_KEY_PATH="$JOB_TEMP_ROOT/keys"
 echo "--- :key: Generating fake origin key"
 hab license accept
 hab origin key generate
-cd src/bookshelf
+echo "The directory:" `pwd`
+echo "ls -l:" `ls -l`
+cd /src/src/bookshelf
 hab pkg build
 
 
