@@ -21,6 +21,15 @@ echo "ls -l:" `ls -l`
 echo "whoami:" `whoami`
 # cd /workdir/src/bookshelf
 hab pkg build src/bookshelf
+pkg_name=$(ls -1t results/*.hart | head -1)
+echo pkg_name is $pkg_name
+hab pkg export docker -i "$ORIGIN/bookshelf" \
+  --no-push-image \
+  --no-tag-latest \
+  --no-tag-version \
+  --no-tag-version-release \
+  --tag-custom "localdev" \
+  $pkg_name
 
 
 # for dir in oc-id openresty-noroot nginx bookshelf chef-server-ctl oc_bifrost oc_erchef; do
