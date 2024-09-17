@@ -155,6 +155,7 @@ steps:
 
 - label: vikas-habitat
   command:
+      - hab origin key generate chef
       - /workdir/.expeditor/habitat.sh
   expeditor:
       executor:
