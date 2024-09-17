@@ -160,6 +160,7 @@ steps:
   expeditor:
       executor:
         docker:
+          privileged: true
           environment:
             - OCTOKIT_ACCESS_TOKEN
             - HAB_LICENSE=accept
