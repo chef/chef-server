@@ -21,10 +21,12 @@ echo "ls -l:" `ls -l`
 echo "whoami:" `whoami`
 # cd /workdir/src/bookshelf
 hab pkg build src/bookshelf
-pkg_name=$(ls -1t results/*.hart | head -1)
+pushd results
+pkg_name=$(ls -1t *.hart | head -1)
+popd
 echo pkg_name is $pkg_name
 buildkite-agent artifact upload $pkg_name
-hab origin create $ORIGIN
+hab pkg upload $pkg_name
 hab pkg export docker -i "$ORIGIN/bookshelf" \
   --no-push-image \
   --no-tag-latest \
