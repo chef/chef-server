@@ -155,12 +155,11 @@ steps:
 
 - label: vikas-habitat
   command:
-      - hab origin key generate chef
+      - hab origin key generate
       - /workdir/.expeditor/habitat.sh
   expeditor:
       executor:
         docker:
-          image: "habitat/default-studio-x86_64-linux:1.6.826"
           environment:
             - OCTOKIT_ACCESS_TOKEN
             - HAB_LICENSE=accept
