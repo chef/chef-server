@@ -19,8 +19,8 @@ hab origin key generate
 echo "The directory:" `pwd`
 echo "ls -l:" `ls -l`
 echo "whoami:" `whoami`
-cd /workdir/src/bookshelf
-hab pkg build bookshelf
+# cd /workdir/src/bookshelf
+hab pkg build src/bookshelf
 
 
 # for dir in oc-id openresty-noroot nginx bookshelf chef-server-ctl oc_bifrost oc_erchef; do
