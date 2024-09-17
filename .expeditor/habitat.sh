@@ -23,6 +23,7 @@ echo "whoami:" `whoami`
 hab pkg build src/bookshelf
 pkg_name=$(ls -1t results/*.hart | head -1)
 echo pkg_name is $pkg_name
+hab origin create $ORIGIN
 hab pkg export docker -i "$ORIGIN/bookshelf" \
   --no-push-image \
   --no-tag-latest \
