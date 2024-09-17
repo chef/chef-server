@@ -1,7 +1,7 @@
 export CHEF_SERVER_SRC='/workdir/src'
 export ORIGIN=chef
 export HAB_LICENSE=accept-no-persist
-export PACKAGE_NAME=$1
+# export PACKAGE_NAME=$1
 
 
 curl https://raw.githubusercontent.com/habitat-sh/habitat/main/components/hab/install.sh | sudo bash
@@ -14,9 +14,7 @@ HAB_CACHE_KEY_PATH="$JOB_TEMP_ROOT/keys"
 echo "--- :key: Generating fake origin key"
 hab license accept
 hab origin key generate
-echo "The directory:" `pwd`
-echo "ls -l:" `ls -l`
-echo "whoami:" `whoami`
+
 # cd /workdir/src/bookshelf
 hab pkg build src/$PACKAGE_NAME
 pushd results

@@ -146,6 +146,72 @@ steps:
             - OCTOKIT_ACCESS_TOKEN
             - PACKAGE_NAME=bookshelf
 
+- label: cs-nginx-hab
+  command:
+      - /workdir/.expeditor/habitat.sh
+  expeditor:
+      executor:
+        docker:
+          privileged: true
+          environment:
+            - OCTOKIT_ACCESS_TOKEN
+            - PACKAGE_NAME=nginx
+
+- label: chef-server-ctl-hab
+  command:
+      - /workdir/.expeditor/habitat.sh
+  expeditor:
+      executor:
+        docker:
+          privileged: true
+          environment:
+            - OCTOKIT_ACCESS_TOKEN
+            - PACKAGE_NAME=chef-server-ctl
+
+- label: oc_bifrost-hab
+  command:
+      - /workdir/.expeditor/habitat.sh
+  expeditor:
+      executor:
+        docker:
+          privileged: true
+          environment:
+            - OCTOKIT_ACCESS_TOKEN
+            - PACKAGE_NAME=oc_bifrost
+
+- label: oc_erchef-hab
+  command:
+      - /workdir/.expeditor/habitat.sh
+  expeditor:
+      executor:
+        docker:
+          privileged: true
+          environment:
+            - OCTOKIT_ACCESS_TOKEN
+            - PACKAGE_NAME=oc_erchef
+
+- label: openresty-noroot-hab
+  command:
+      - /workdir/.expeditor/habitat.sh
+  expeditor:
+      executor:
+        docker:
+          privileged: true
+          environment:
+            - OCTOKIT_ACCESS_TOKEN
+            - PACKAGE_NAME=openresty-noroot
+
+- label: oc_id-hab
+  command:
+      - /workdir/.expeditor/habitat.sh
+  expeditor:
+      executor:
+        docker:
+          privileged: true
+          environment:
+            - OCTOKIT_ACCESS_TOKEN
+            - PACKAGE_NAME=oc-id
+
 
 # #########################################################################
 #   # Pedant Tests
