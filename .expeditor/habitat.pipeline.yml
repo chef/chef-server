@@ -1,0 +1,17 @@
+expeditor:
+  cached_folders:
+    - vendor
+  defaults:
+    buildkite:
+      timeout_in_minutes: 30
+
+steps:
+
+- label: habitat-packages
+  command:
+    - .expeditor/habitat.sh
+  expeditor:
+    executor:
+      docker:
+        environment:
+          - OCTOKIT_ACCESS_TOKEN
