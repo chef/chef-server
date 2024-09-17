@@ -2,7 +2,7 @@
 
 # this script builds all the essential habitat packages for running Chef Server
 # additionaly, it exports them as a local docker image
-export CHEF_SERVER_SRC='/src/src'
+export CHEF_SERVER_SRC='/workdir/src'
 export ORIGIN=chef
 export HAB_LICENSE=accept-no-persist
 
@@ -18,7 +18,7 @@ hab license accept
 hab origin key generate
 echo "The directory:" `pwd`
 echo "ls -l:" `ls -l`
-cd /src/src/bookshelf
+cd /workdir/src/bookshelf
 hab pkg build
 
 
