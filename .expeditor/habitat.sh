@@ -25,8 +25,8 @@ pushd results
 pkg_name=$(ls -1t *.hart | head -1)
 popd
 echo pkg_name is $pkg_name
-buildkite-agent artifact upload $CHEF_SERVER_SRC/bookshelf/results/$pkg_name
-hab pkg upload $CHEF_SERVER_SRC/bookshelf/results/$pkg_name
+buildkite-agent artifact upload results/$pkg_name
+hab pkg upload results/$pkg_name
 # hab pkg export docker -i "$ORIGIN/bookshelf" \
 #   --no-push-image \
 #   --no-tag-latest \
