@@ -1,3 +1,8 @@
+#!/bin/bash -e
+
+# this script builds all the essential habitat packages for running Chef Server
+# additionaly, it exports them as a local docker image
+
 export CHEF_SERVER_SRC='/workdir/src'
 export ORIGIN=chef
 export HAB_LICENSE=accept-no-persist
