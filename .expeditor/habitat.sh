@@ -25,15 +25,15 @@ pushd results
 pkg_name=$(ls -1t *.hart | head -1)
 popd
 echo pkg_name is $pkg_name
-buildkite-agent artifact upload $pkg_name
-hab pkg upload $pkg_name
-hab pkg export docker -i "$ORIGIN/bookshelf" \
-  --no-push-image \
-  --no-tag-latest \
-  --no-tag-version \
-  --no-tag-version-release \
-  --tag-custom "localdev" \
-  $pkg_name
+buildkite-agent artifact upload $CHEF_SERVER_SRC/bookshelf/results/$pkg_name
+hab pkg upload $CHEF_SERVER_SRC/bookshelf/results/$pkg_name
+# hab pkg export docker -i "$ORIGIN/bookshelf" \
+#   --no-push-image \
+#   --no-tag-latest \
+#   --no-tag-version \
+#   --no-tag-version-release \
+#   --tag-custom "localdev" \
+#   $pkg_name
 
 
 # for dir in oc-id openresty-noroot nginx bookshelf chef-server-ctl oc_bifrost oc_erchef; do
