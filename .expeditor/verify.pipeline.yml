@@ -132,6 +132,22 @@ steps:
           - COMPONENT=src/bookshelf
 
 # #########################################################################
+#   # Habitat Packages of Infra Server
+# #########################################################################
+
+- label: bookshelf-hab
+  command:
+      - /workdir/.expeditor/habitat.sh
+  expeditor:
+      executor:
+        docker:
+          privileged: true
+          environment:
+            - OCTOKIT_ACCESS_TOKEN
+            - PACKAGE_NAME=bookshelf
+
+
+# #########################################################################
 #   # Pedant Tests
 # #########################################################################
 
