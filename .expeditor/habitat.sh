@@ -2,7 +2,7 @@
 
 # this script builds all the essential habitat packages for running Chef Server
 # additionaly, it exports them as a local docker image
-# export CHEF_SERVER_SRC='/src/src'
+export CHEF_SERVER_SRC='/src/src'
 export ORIGIN=chef
 export HAB_LICENSE=accept-no-persist
 
@@ -16,7 +16,8 @@ HAB_CACHE_KEY_PATH="$JOB_TEMP_ROOT/keys"
 echo "--- :key: Generating fake origin key"
 hab license accept
 hab origin key generate
-hab pkg build src/bookshelf
+cd src/bookshelf
+hab pkg build
 
 
 # for dir in oc-id openresty-noroot nginx bookshelf chef-server-ctl oc_bifrost oc_erchef; do
