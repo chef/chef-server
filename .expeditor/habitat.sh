@@ -18,6 +18,7 @@ hab license accept
 hab origin key generate
 echo "The directory:" `pwd`
 echo "ls -l:" `ls -l`
+echo "whoami:" `whoami`
 cd /workdir/src/bookshelf
 hab pkg build bookshelf
 
