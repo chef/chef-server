@@ -168,6 +168,7 @@ steps:
             - CI="true"
             - HAB_ORIGIN=chef
             - HAB_ORIGIN_KEYS=chef
+            - HAB_STUDIO_SECRET_HAB_FEAT_IGNORE_LOCAL="true"
             - HAB_FEAT_IGNORE_LOCAL="true"
 
 # - label: With ChefFS=1
