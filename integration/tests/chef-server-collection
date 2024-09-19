@@ -1,0 +1,606 @@
+#!/bin/bash
+
+document "start_chef_server" <<DOC
+  Reconfigures deployment service to enable the chef server collection. Deployment service must be running to use it.
+DOC
+function start_chef_server() {
+  cat << EOH > /tmp/.enable_chef_server.toml
+[deployment.v1.svc]
+  products = ["automate-dev", "chef-server"]
+EOH
+  chef-automate config patch /tmp/.enable_chef_server.toml
+  rm /tmp/.enable_chef_server.toml
+}
+
+
+function set_up_chef_server_test_environment() {
+  chef_server_hostname=${CONTAINER_HOSTNAME:-a2-dev.test}
+  chef_server_url="https://${chef_server_hostname}/organizations/test"
+  chef_server_pivotal_key_path="/hab/svc/automate-cs-oc-erchef/data/pivotal.pem"
+  chef_server_pivotal_rb_path="/tmp/.pivotal.rb"
+  chef_server_client_rb_path="/tmp/.client.rb"
+  chef_server_policyfile_rb_path="/tmp/.policyfile.rb"
+  chef_server_test_admin_key_path_path="/tmp/.admin_key.pem"
+  chef_server_berksfile_path="/tmp/.Berksfile"
+  chef_server_berksfile_config_path="/tmp/.berks.config.json"
+  chef_server_test_validator_path="/tmp/.tests_validator.pem"
+  chef_server_first_boot_json_path="/tmp/.first_boot.json"
+  chef_server_compliance_profiles_test_path="/hab/svc/compliance-service/data/profiles/test"
+  chef_server_test_node_name="test-admin"
+  chef_server_test_admin_user_name="test-admin"
+  chef_server_test_admin_user_email="admin@test.com"
+  chef_server_test_user_name="test-user"
+  chef_server_test_user_email="test-user@test.com"
+  chef_server_test_user_password="S3cur3!"
+  chef_server_test_org_name="test"
+}
+
+function bootstrap_chef_user_data() {
+  set_up_chef_server_test_environment
+
+  # make sure we've deployed and can find a pivotal key to create our client
+  check_if_deployinate_started || return 1
+  if [ ! -f ${chef_server_pivotal_key_path} ]; then
+    error "Unable to locate chef server pivotal key"
+    return 1
+  fi
+
+  local previous_umask
+  previous_umask=$(umask)
+  umask 022
+  hab pkg install chef/chef-dk
+  hab pkg binlink -f chef/chef-dk chef-client
+  hab pkg binlink -f chef/chef-dk berks
+  umask "$previous_umask"
+
+  # create our configuration files
+  cat << EOH > ${chef_server_pivotal_rb_path}
+log_location     STDOUT
+node_name        'pivotal'
+chef_server_url  'https://${chef_server_hostname}'
+chef_server_root 'https://${chef_server_hostname}'
+ssl_verify_mode  :verify_none
+client_key       '${chef_server_pivotal_key_path}'
+EOH
+
+  cat << EOH > ${chef_server_client_rb_path}
+log_location           STDOUT
+chef_server_url        'https://${chef_server_hostname}/organizations/${chef_server_test_org_name}'
+node_name              '${chef_server_test_node_name}'
+ssl_verify_mode        :verify_none
+client_key             '${chef_server_test_admin_key_path_path}'
+validation_client_name 'test-validator'
+validation_key         '${chef_server_test_validator_path}'
+EOH
+
+  cat << EOH > ${chef_server_policyfile_rb_path}
+log_location           STDOUT
+chef_server_url        'https://${chef_server_hostname}/organizations/${chef_server_test_org_name}'
+node_name              '${chef_server_test_node_name}'
+ssl_verify_mode        :verify_none
+client_key             '${chef_server_test_admin_key_path_path}'
+validation_client_name 'test-validator'
+validation_key         '${chef_server_test_validator_path}'
+policy_group           'test_policy_group'
+policy_name            'examplecb'
+use_policyfile         true
+EOH
+
+  cat << EOH > ${chef_server_berksfile_config_path}
+{
+  "chef": {
+    "chef_server_url": "https://${chef_server_hostname}/organizations/${chef_server_test_org_name}",
+    "node_name":       "${chef_server_test_node_name}",
+    "client_key":      "${chef_server_test_admin_key_path_path}"
+  },
+  "ssl": {
+    "verify": false
+  }
+}
+EOH
+
+  cat << EOH > ${chef_server_berksfile_path}
+source "https://supermarket.chef.io"
+
+cookbook "audit"
+EOH
+
+  cat << EOH > $chef_server_first_boot_json_path
+{
+  "audit": {
+    "reporter": "chef-server-automate",
+    "fetcher": "chef-server",
+    "profiles": [{
+      "name": "ssl-baseline",
+      "compliance": "test/ssl-baseline"
+    }]
+  },
+  "run_list": [
+    "recipe[audit]"
+  ]
+}
+EOH
+
+  if ! hab pkg exec chef/chef-dk knife opc user list -c ${chef_server_pivotal_rb_path} | grep ${chef_server_test_node_name} &> /dev/null; then
+    knife opc user create ${chef_server_test_admin_user_name} \
+      ${chef_server_test_admin_user_name} \
+      ${chef_server_test_admin_user_name} \
+      ${chef_server_test_admin_user_email} \
+      ${chef_server_test_user_password} \
+        -c ${chef_server_pivotal_rb_path} \
+        -d \
+        -f ${chef_server_test_admin_key_path_path}
+  fi
+
+  if ! hab pkg exec chef/chef-dk knife opc org list -c ${chef_server_pivotal_rb_path} | grep ${chef_server_test_org_name} &> /dev/null; then
+    hab pkg exec chef/chef-dk knife opc org create ${chef_server_test_org_name} ${chef_server_test_org_name} \
+      -a ${chef_server_test_node_name} \
+      -c ${chef_server_pivotal_rb_path} \
+      -d \
+      -f ${chef_server_test_validator_path}
+  fi
+
+  hab pkg exec chef/chef-dk knife opc org user add ${chef_server_test_org_name} ${chef_server_test_admin_user_name} \
+    -a \
+    -c ${chef_server_pivotal_rb_path}
+
+  berks install -b ${chef_server_berksfile_path} -c ${chef_server_berksfile_config_path}
+  berks upload -b ${chef_server_berksfile_path} -c ${chef_server_berksfile_config_path}
+}
+
+document "push_example_policyfile" <<DOC
+  Pushes a policyfile update to chef server with a cookbook. This also creates a policyfile update 
+  in the event feed. 
+DOC
+function push_example_policyfile() {
+  bootstrap_chef_user_data || return 1
+
+  pushd /tmp &> /dev/null || exit
+
+  hab pkg install chef/chef-dk -bf
+  CHEF_LICENSE=accept-no-persist chef generate cookbook examplecb
+
+  cd examplecb || exit
+
+  CHEF_LICENSE=accept-no-persist chef install
+
+  CHEF_LICENSE=accept-no-persist chef push test_policy_group -c ${chef_server_policyfile_rb_path}
+
+  popd &> /dev/null || exit
+}
+
+document "converge_policyfile_chef_client" <<DOC
+  Converges a test chef-client with a policyfile
+DOC
+function converge_policyfile_chef_client() {
+  push_example_policyfile || return 1
+
+  CHEF_LICENSE=accept-no-persist chef-client -c ${chef_server_policyfile_rb_path}
+}
+
+document "converge_chef_client" <<DOC
+  Converges a test chef-client
+DOC
+function converge_chef_client() {
+  bootstrap_chef_user_data || return 1
+
+  local previous_umask
+  previous_umask=$(umask)
+  umask 022
+  [ -d ${chef_server_compliance_profiles_test_path} ] || mkdir -p ${chef_server_compliance_profiles_test_path}
+
+  if [ ! -f "${chef_server_compliance_profiles_test_path}/ssl-baseline-1.4.0.tar.gz" ]; then
+    if ! type curl > /dev/null 2>&1; then
+      local previous_umask
+      previous_umask=$(umask)
+      umask 022
+      hab pkg install -b core/curl
+      umask "$previous_umask"
+    fi
+    curl -L -o "${chef_server_compliance_profiles_test_path}/ssl-baseline-1.4.0.tar.gz" https://github.com/dev-sec/ssl-baseline/archive/1.4.0.tar.gz
+    # TODO: Upload the profile instead of relying on the migration
+    hab svc unload chef/compliance-service
+    sleep 10
+    chef-automate status -w -t 120 || return 1
+  fi
+  umask "$previous_umask"
+
+  local tmplog
+  tmplog=$(mktemp)
+  CHEF_LICENSE=accept-no-persist chef-client \
+    -j ${chef_server_first_boot_json_path} \
+    -c ${chef_server_client_rb_path} 2>&1 | tee "$tmplog"
+
+  if grep 'Report handler Chef::Handler::AuditReport raised' "$tmplog"; then
+    log_line "Error: chef-client log appears to have Audit report failure!"
+    return 1
+  else
+    log_line "Success: no Audit report failures were found in chef-client log"
+  fi
+
+  rm -f "$tmplog"
+}
+
+document "test_cookbook_caching" <<DOC
+  Uploads a cookbook and then tests that cookbook content is caches at the LB
+DOC
+function test_cookbook_caching() {
+    bootstrap_chef_user_data
+
+    local audit_version
+    local cookbook_file_url1
+    local cookbook_file_url2
+
+    bootstrap_chef_user_data || return 1
+    if ! type curl > /dev/null 2>&1; then
+      hab pkg install -b core/curl
+    fi
+
+    audit_version=$(CHEF_LICENSE=accept-no-persist hab pkg exec chef/chef-dk knife cookbook show audit -c ${chef_server_client_rb_path} | head -1 | awk '{print $2}')
+    cookbook_file_url1=$(CHEF_LICENSE=accept-no-persist hab pkg exec chef/chef-dk knife cookbook show audit "$audit_version" root_files -c ${chef_server_client_rb_path} | grep url | head -1 | awk '{print $2}')
+    cookbook_file_url2=$(CHEF_LICENSE=accept-no-persist hab pkg exec chef/chef-dk knife cookbook show audit "$audit_version" root_files -c ${chef_server_client_rb_path} | grep url | head -1 | awk '{print $2}')
+
+    if [[ "$cookbook_file_url1" = "$cookbook_file_url2" ]]; then
+      log_line "Success: erchef returned duplicate cache URLs"
+    else
+      log_line "Error: erchef returned different cache URLs"
+      return 1
+    fi
+
+    # Request the cookbook once to make sure it is cached
+    curl -k -v "$cookbook_file_url2" >/dev/null 2>&1
+    # Request it again and make sure the response came from the cache
+    curl_output=$(curl -k -v "$cookbook_file_url2" 2>&1 >/dev/null)
+    if echo "$curl_output" | grep -q 'X-Proxy-Cache: HIT'; then
+      log_line "Success: cookbook cache hit"
+    else
+      log_line "Error: cookbook cache miss"
+      echo "$curl_output"
+      return 1
+    fi
+}
+
+
+document "test_chef_server_ctl" <<DOC
+  Executes chef-server-ctl commands against the embedded Chef server
+DOC
+function test_chef_server_ctl() {
+  before_test_chef_server_ctl
+  do_test_chef_server_ctl
+}
+
+function before_test_chef_server_ctl() {
+  check_if_deployinate_started || return 1
+  # try HAB_ORIGIN first in case we are running in a context where we have a
+  # dev-built package, but fallback to chef origin in case we're running in a
+  # dev context but not using a dev-built package
+  hab pkg binlink -f "${HAB_ORIGIN}/automate-cs-nginx" chef-server-ctl ||
+    hab pkg binlink -f "chef/automate-cs-nginx" chef-server-ctl
+}
+
+document "do_test_chef_server_ctl" <<DOC
+  same as test_chef_server_ctl but doesn't binlink so you can test a local copy
+DOC
+function do_test_chef_server_ctl() {
+  local user="test-user"
+  local org="test-org"
+  local email="$user@$org.com"
+  local password='S3Cur3!'
+
+  function run_chef_server_ctl_cmd() {
+    local cmd="PATH=/hab/bin:/bin chef-server-ctl $1 > /dev/null 2>&1"
+    log_line "Running '${cmd}'..."
+    eval "$cmd"
+    local res=$?
+
+    if [ $res -ne 0 ]; then
+      log_line "Command '${cmd}' failed with exit code ${res}"
+
+      PATH=/hab/bin:/bin chef-server-ctl org-delete ${org} -y > /dev/null 2>&1
+      PATH=/hab/bin:/bin chef-server-ctl user-delete ${user} -y > /dev/null 2>&1
+      rm data_bag_items.json environments.json nodes.json orgs.json roles.json clients.json > /dev/null 2>&1
+    fi
+
+    return $res
+  }
+
+  declare -a cmds=(
+    "org-create $org $org"
+    "org-list | grep $org"
+    "org-show $org"
+    "user-create $user $user $user $email '$password'"
+    "user-list | grep $user"
+    "user-show $user"
+    "org-user-add $org $user"
+    "version"
+    "org-user-remove $org $user -y"
+    "add-user-key $user --key-name newkey"
+    "list-user-keys $user | grep newkey"
+    "delete-user-key $user newkey"
+    "grant-server-admin-permissions $user"
+    "list-server-admins | grep $user"
+    "remove-server-admin-permissions $user"
+    "cleanup-bifrost -w 1"
+    "filtered-dump"
+    "reindex -a"
+    # FIXME: User-edit is currently broken:
+    # ERROR: ArgumentError: Please pass in the object class to hydrate or use #edit_hash
+    # "user-edit -d $user --config-option middle_name=middle"
+    # TODO: Add a client to the test org to test client commands
+    # "add-client-key $org $client --key-name newkey"
+    # "list-client-keys $org client | grep newkey"
+    # "delete-client-key $org $client newkey"
+  )
+
+  for c in "${cmds[@]}"; do
+    run_chef_server_ctl_cmd "${c}" || return 1
+  done
+
+  local cmd="PATH=/hab/bin:/bin chef-server-ctl password ${user} > /dev/null 2>&1"
+  log_line "Running '${cmd}'..."
+  eval "printf 'newpass\nnewpass\n' | $cmd"
+  local res=$?
+  if [ $res -ne 0 ]; then
+    log_line "Command 'chef-server-ctl password' failed with exit code ${res}"
+    return $res
+  fi
+
+  # Delete the user and org after we've changed the password
+  cmds=(
+    "user-delete $user -y"
+    "org-delete $org -y"
+  )
+  for c in "${cmds[@]}"; do
+    run_chef_server_ctl_cmd "${c}" || return 1
+  done
+
+  # cleanup from filtered dump command
+  rm data_bag_items.json environments.json nodes.json orgs.json roles.json clients.json > /dev/null 2>&1
+}
+
+document "test_knife" <<DOC
+  Executes knife commands against the embedded Chef server
+DOC
+function test_knife() {
+  check_if_deployinate_started || return 1
+  bootstrap_chef_user_data || return 1
+
+  local knife_cmd_fmt
+  knife_cmd_fmt="CHEF_LICENSE=accept-no-persist $(hab pkg path chef/chef-dk)/bin/knife %s -c ${chef_server_pivotal_rb_path} > /dev/null 2>&1"
+
+  declare -a cmds=(
+    "user create ${chef_server_test_user_name} ${chef_server_test_user_name} ${chef_server_test_user_name} ${chef_server_test_user_name} ${chef_server_test_user_email} '${chef_server_test_user_password}' -d"
+    "user delete ${chef_server_test_user_name} -y"
+  )
+
+  for c in "${cmds[@]}"; do
+    local cmd
+    # shellcheck disable=SC2059
+    cmd=$(printf "${knife_cmd_fmt}" "${c}")
+
+    log_line "Running '${cmd}'..."
+    eval "$cmd"
+    local res=$?
+
+    if [ $res -ne 0 ]; then
+      log_line "Command '${cmd}' failed with exit code ${res}"
+
+      # shellcheck disable=SC2059
+      eval "$(printf "${knife_cmd_fmt}" "user delete ${chef_server_test_user_name} -y")"
+      return $res
+    fi
+  done
+}
+
+hab_curl() {
+  hab pkg exec core/curl curl "$@";
+}
+
+document "test_if_login_working_with_correct_credentials" <<DOC
+  login call returns 200 if creds are correct
+DOC
+test_if_login_working_with_correct_credentials() {
+  bootstrap_chef_user_data || return 1
+  local url="https://${chef_server_hostname}/id/auth/chef/callback"
+
+  res_code=$(hab_curl --insecure -H -s -o /dev/null -w "%{http_code}" "$url" \
+              --header 'x-requested-with: XMLHttpRequest' \
+              --header 'Content-Type: application/x-www-form-urlencoded' \
+              --data-urlencode 'utf8=✓' \
+              --data-urlencode "username=$chef_server_test_admin_user_email" \
+              --data-urlencode "password=$chef_server_test_user_password" \
+              --data-urlencode 'commit=Sign+In')
+
+  if [ "$res_code" == 200 ]; then
+    echo "User Logged In"
+  else
+    echo "Error Logging in with test admin user"
+    return 1
+  fi
+}
+
+document "test_if_login_failing_with_incorrect_credentials" <<DOC
+  login call returns 302 if creds are incorrect
+DOC
+test_if_login_failing_with_incorrect_credentials() {
+  bootstrap_chef_user_data || return 1
+  local url="https://${chef_server_hostname}/id/auth/chef/callback"
+  local incorrect_password='incorrect-password'
+
+  res_code=$(hab_curl --insecure -H -s -o /dev/null -w "%{http_code}" "$url" \
+            --header 'x-requested-with: XMLHttpRequest' \
+            --header 'Content-Type: application/x-www-form-urlencoded' \
+            --data-urlencode 'utf8=✓' \
+            --data-urlencode "username=$chef_server_test_admin_user_email" \
+            --data-urlencode "password=$incorrect_password" \
+            --data-urlencode 'commit=Sign+In')
+
+  if [ "$res_code" == 302 ]; then
+    echo "Login call returns HTTP STATUS 302 as expected for invalid credentials"
+  else
+    echo "Login call did not return HTTP STATUS 302 for invalid credentials"
+    return 1
+  fi
+}
+
+document "test_if_env_vars_are_configured" <<DOC
+  test if default ENV variables are configured for OCID
+DOC
+test_if_env_vars_are_configured() {
+  ocid_config_file_path="$(hab pkg path chef/oc_id)/oc_id/config/settings/production.yml"
+
+  # Get values from in settings/production.yml
+  endpoint=$(awk '/endpoint:/ {print $2}' "$ocid_config_file_path")
+  superuser=$(awk '/superuser:/ {print $2}' "$ocid_config_file_path")
+  ssl_verify_mode=$(awk '/ssl_verify_mode:/ {print $2}' "$ocid_config_file_path")
+
+  errors=()
+
+  if [ "$endpoint" != "https://127.0.0.1:443" ]; then
+    errors+=("Chef-Server endpoint is not configured properly.")
+  fi
+
+  if [ "$superuser" != "pivotal" ]; then
+    errors+=("Chef-Server superuser is not configured properly.")
+  fi
+
+  if [ "$ssl_verify_mode" != "verify_none" ]; then
+    errors+=("Chef-Server SSL certificate verification mode is not configured properly.")
+  fi
+
+  if [ ${#errors} -gt 0 ]; then
+    for (( i=0; i<${#errors[@]}; i++ )); do echo "${errors[$i]}" ; done
+    return 1
+  else
+    echo "ENV Vars configured correctly"
+  fi
+}
+
+# We are keeping a local copy of this method as the original from 01_base.sh is not accessible here
+install_if_missing() {
+  if [ "$#" -ne 2 ]; then
+    error "Wrong number of arguments to ${FUNCNAME[0]}"
+    describe "${FUNCNAME[0]}"
+    return 1
+  fi
+
+  # Install the package if it is not installed
+  if [[ ! -d "/hab/pkgs/$1" ]]; then
+    hab pkg install "$1" > /dev/null
+  fi
+
+  # Ensure we are binlinking to the same version `hab pkg exec` would run
+  hab pkg binlink --force "$1" "$2" > /dev/null
+}
+
+document "test_if_webui_key_is_patched" <<DOC
+  test if WEB UI key is patched for OCID
+DOC
+test_if_webui_key_is_patched() {
+  install_if_missing core/jq-static jq
+
+  # Extract webui_key from private-chef-secrets.json
+  ocid_secrets_file_path="$(hab pkg path chef/oc_id)/oc_id/config/private-chef-secrets.json"
+
+  # elem variable hold the value 'chef-server', we opted for this syntax becz chef-server needs to be
+  # to be treated as string as it contains `-`, which is not a valid JSON character
+  ocid_webui_key="$(jq --arg elem "chef-server" -r '.[$elem]."webui_key"' < "$ocid_secrets_file_path")"
+
+  # Create a temporary file with the ocid_webui_key content
+  echo "$ocid_webui_key" > temp_ocid_webui_key.pem
+
+  # Path for erchef webui_priv.pem file
+  erchef_webui_key_path="/hab/svc/automate-cs-oc-erchef/data/webui_priv.pem"
+
+  # Compare the temporary file with the erchef PEM file
+  output=$(diff "$erchef_webui_key_path" temp_ocid_webui_key.pem)
+
+  # Remove the temporary file
+  rm temp_ocid_webui_key.pem
+
+  # Check if the output is empty, indicating a match
+  if [ -z "$output" ]; then
+    echo "The content of the PEM file matches."
+  else
+    echo "The content of the PEM file does not match."
+    return 1
+  fi
+}
+
+document "ohai_time" <<DOC
+  Gets ohai_time for a converged node. Assumes converge_chef_client has already run.
+DOC
+function ohai_time() {
+  set_up_chef_server_test_environment
+
+  CHEF_LICENSE=accept-no-persist hab pkg exec chef/chef-dk knife node show test-admin \
+    --server-url "${chef_server_url}" \
+    --key        "${chef_server_test_admin_key_path_path}" \
+    -c           "${chef_server_pivotal_rb_path}" \
+    --user       test-admin \
+    -a           ohai_time \
+      | grep ohai_time | cut -f2 -d":" | xargs
+}
+
+document "test_if_env_vars_are_configured_after_patch" <<DOC
+  test if OCID ENV variables are configured after patch
+DOC
+test_if_env_vars_are_configured_after_patch() {
+  ocid_config_file_path="$(hab pkg path chef/oc_id)/oc_id/config/settings/production.yml"
+
+  # Get values from in settings/production.yml
+  endpoint=$(awk '/endpoint:/ {print $2}' "$ocid_config_file_path")
+  superuser=$(awk '/superuser:/ {print $2}' "$ocid_config_file_path")
+  ssl_verify_mode=$(awk '/ssl_verify_mode:/ {print $2}' "$ocid_config_file_path")
+
+  errors=()
+
+  if [ "$endpoint" != "https://test-url.com:443" ]; then
+    errors+=("Chef-Server endpoint is not configured properly.")
+  fi
+
+  if [ "$superuser" != "testuser" ]; then
+    errors+=("Chef-Server superuser is not configured properly.")
+  fi
+
+  if [ "$ssl_verify_mode" != "verify_peer" ]; then
+    errors+=("Chef-Server SSL certificate verification mode is not configured properly.")
+  fi
+
+  if [ ${#errors} -gt 0 ]; then
+    for (( i=0; i<${#errors[@]}; i++ )); do echo "${errors[$i]}" ; done
+    return 1
+  else
+    echo "ENV Vars configured correctly"
+  fi
+}
+
+document "test_if_oauthapps_are_patched_correctly" <<DOC
+  test if OAuth App values are patched correctly
+DOC
+test_if_oauthapps_are_patched_correctly() {
+  chef-automate config oc-id-show-app > registered_oauth_apps.yml
+
+  yaml_file="registered_oauth_apps.yml"
+
+  # Extract values of attributes
+  name=$(grep -oP "(?<=name: ).*" "$yaml_file")
+  redirect_uri=$(grep -oP "(?<=redirect_uri: ).*" "$yaml_file")
+
+  errors=()
+
+  if [ "$name" != "test-supermarket" ]; then
+    errors+=("Registered OAuth application's name is not patched correctly.")
+  fi
+
+  if [ "$redirect_uri" != "https://sampleurl.com/auth/chef_oauth2/callback" ]; then
+    errors+=("Registered OAuth application's redirect URI is not configured correctly.")
+  fi
+
+  if [ ${#errors} -gt 0 ]; then
+    for (( i=0; i<${#errors[@]}; i++ )); do echo "${errors[$i]}" ; done
+    return 1
+  else
+    echo "OAuth App values are patched correctly"
+  fi
+}

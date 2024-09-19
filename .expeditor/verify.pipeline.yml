@@ -261,6 +261,50 @@ steps:
             - HAB_FEAT_IGNORE_LOCAL="true"
             - PACKAGE_NAME=oc-id
 
+# #########################################################################
+#   # Tests for Chef-Automate
+# #########################################################################
+
+- label: "chef server"
+  command:
+      - /workdir/integration/run_test /workdir/integration/tests/chef_server.sh
+  timeout_in_minutes: 30 # longer timeout for chef-server
+  expeditor:
+      executor:
+        linux:
+          privileged: true
+      # secrets:
+      #   A2_LICENSE:
+      #     path: secret/a2/license
+      #     field: license
+
+# - label: "chef server only"
+#   command:
+#       - integration/run_test integration/tests/chef_server_only.sh
+#   timeout_in_minutes: 30
+#   expeditor:
+#       executor:
+#         linux:
+#           privileged: true
+#       secrets:
+#         A2_LICENSE:
+#           path: secret/a2/license
+#           field: license     
+
+# - label: "ha chef server"
+#   command:
+#       - integration/run_test integration/tests/ha_chef_server.sh
+#   timeout_in_minutes: 35
+#   expeditor:
+#       executor:
+#         linux:
+#           single-use: true
+#           privileged: true
+#       secrets:
+#         A2_LICENSE:
+#           path: secret/a2/license
+#           field: license
+
 
 # #########################################################################
 #   # Pedant Tests
