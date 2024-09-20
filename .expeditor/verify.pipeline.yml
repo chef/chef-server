@@ -352,7 +352,7 @@ steps:
 
 - label: automate_build
   command:
-      - /workdir/.expeditor/automate_build.sh
+      - .expeditor/automate_build.sh
   env:
       ALLOW_LOCAL_PACKAGES: true
       HAB_STUDIO_SUP: false
