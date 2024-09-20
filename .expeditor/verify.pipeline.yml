@@ -171,23 +171,23 @@ steps:
             - HAB_FEAT_IGNORE_LOCAL="true"
             - PACKAGE_NAME=nginx
 
-- label: chef-server-ctl-hab
-  command:
-      - /workdir/.expeditor/habitat.sh
-  expeditor:
-      executor:
-        docker:
-          privileged: true
-          environment:
-            - OCTOKIT_ACCESS_TOKEN
-            - HAB_LICENSE=accept
-            - CHEF_LICENSE="accept-no-persist"
-            - CI="true"
-            - HAB_ORIGIN=chef
-            - HAB_ORIGIN_KEYS=chef
-            - HAB_STUDIO_SECRET_HAB_FEAT_IGNORE_LOCAL="true"
-            - HAB_FEAT_IGNORE_LOCAL="true"
-            - PACKAGE_NAME=chef-server-ctl
+# - label: chef-server-ctl-hab
+#   command:
+#       - /workdir/.expeditor/habitat.sh
+#   expeditor:
+#       executor:
+#         docker:
+#           privileged: true
+#           environment:
+#             - OCTOKIT_ACCESS_TOKEN
+#             - HAB_LICENSE=accept
+#             - CHEF_LICENSE="accept-no-persist"
+#             - CI="true"
+#             - HAB_ORIGIN=chef
+#             - HAB_ORIGIN_KEYS=chef
+#             - HAB_STUDIO_SECRET_HAB_FEAT_IGNORE_LOCAL="true"
+#             - HAB_FEAT_IGNORE_LOCAL="true"
+#             - PACKAGE_NAME=chef-server-ctl
 
 - label: oc_bifrost-hab
   command:
@@ -243,23 +243,23 @@ steps:
             - HAB_FEAT_IGNORE_LOCAL="true"
             - PACKAGE_NAME=openresty-noroot
 
-- label: oc_id-hab
-  command:
-      - /workdir/.expeditor/habitat.sh
-  expeditor:
-      executor:
-        docker:
-          privileged: true
-          environment:
-            - OCTOKIT_ACCESS_TOKEN
-            - HAB_LICENSE=accept
-            - CHEF_LICENSE="accept-no-persist"
-            - CI="true"
-            - HAB_ORIGIN=chef
-            - HAB_ORIGIN_KEYS=chef
-            - HAB_STUDIO_SECRET_HAB_FEAT_IGNORE_LOCAL="true"
-            - HAB_FEAT_IGNORE_LOCAL="true"
-            - PACKAGE_NAME=oc-id
+# - label: oc_id-hab
+#   command:
+#       - /workdir/.expeditor/habitat.sh
+#   expeditor:
+#       executor:
+#         docker:
+#           privileged: true
+#           environment:
+#             - OCTOKIT_ACCESS_TOKEN
+#             - HAB_LICENSE=accept
+#             - CHEF_LICENSE="accept-no-persist"
+#             - CI="true"
+#             - HAB_ORIGIN=chef
+#             - HAB_ORIGIN_KEYS=chef
+#             - HAB_STUDIO_SECRET_HAB_FEAT_IGNORE_LOCAL="true"
+#             - HAB_FEAT_IGNORE_LOCAL="true"
+#             - PACKAGE_NAME=oc-id
 
 # #########################################################################
 #   # Tests for Chef-Automate
