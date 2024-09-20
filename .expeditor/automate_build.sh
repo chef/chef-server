@@ -1,5 +1,6 @@
 #!/bin/bash -e
 
+echo "inside script"
 git clone https://github.com/chef/automate.git
 cd automate
 git checkout vikas/cs-changes-for-pipeline
