@@ -24,6 +24,7 @@ HAB_CACHE_KEY_PATH="$JOB_TEMP_ROOT/keys"
 
 echo "--- :key: Generating fake origin key"
 hab license accept
+hab origin key generate
 
 hab studio run -D "source .studiorc; set -e; build components/automate-cs-bookshelf"
 
