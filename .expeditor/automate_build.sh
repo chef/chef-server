@@ -17,7 +17,7 @@ IFS='-' read -r name comp version timestamp os <<< "${base_name%.hart}"
 formatted_output="$comp/$version/$timestamp"
 
 plan_file="components/automate-cs-bookshelf/habitat/plan.sh"
-sed -i "s|\${vendor_origin}/bookshelf|cheftest/${formatted_output}|g" "$plan_file"
+sed -i "s|\${vendor_origin}/bookshelf|\${vendor_origin}/${formatted_output}|g" "$plan_file"
 echo "Replaced line in $plan_file"
 sed -i "s|pkg_origin=\"chef\"|pkg_origin=\"cheftest\"|g" "$plan_file"
 # sed -i "s|pkg_origin="chef"|pkg_origin="cheftest"|g" "$plan_file"
