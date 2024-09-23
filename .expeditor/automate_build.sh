@@ -19,8 +19,9 @@ formatted_output="$comp/$version/$timestamp"
 plan_file="components/automate-cs-bookshelf/habitat/plan.sh"
 sed -i "s|\${vendor_origin}/bookshelf|cheftest/${formatted_output}|g" "$plan_file"
 echo "Replaced line in $plan_file"
-sed -i "s|pkg_origin="chef"|pkg_origin="cheftest"|g" "$plan_file"
+sed -i "s|pkg_origin=\"chef\"|pkg_origin=\"cheftest\"|g" "$plan_file"
 # sed -i "s|pkg_origin="chef"|pkg_origin="cheftest"|g" "$plan_file"
+sed -i "s|vendor_origin=\"chef\"|vendor_origin=\"cheftest\"|g" "$plan_file"
 cat components/automate-cs-bookshelf/habitat/plan.sh
 ./scripts/verify_build.sh
 

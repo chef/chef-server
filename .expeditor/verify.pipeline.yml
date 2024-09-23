@@ -359,6 +359,7 @@ steps:
       HAB_NONINTERACTIVE: true
       HAB_STUDIO_SECRET_HAB_FEAT_IGNORE_LOCAL: true
       HAB_STUDIO_SECRET_HAB_FEAT_OFFLINE_INSTALL: true
+      HAB_BINLINK_DIR: /hab/bin
   expeditor:
     secrets:
         HAB_STUDIO_SECRET_GITHUB_TOKEN:
