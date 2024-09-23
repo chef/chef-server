@@ -7,7 +7,7 @@ git checkout vikas/cs-changes-for-pipeline
 pushd results
 buildkite-agent artifact download "*.hart" ./
 popd
-
+export HAB_STUDIO_HOST_ARCH=x86_64-linux
 echo "results directory contents" `ls -l results`
 
 Bookself_hart_file=$(ls results/*bookshelf*.hart)
