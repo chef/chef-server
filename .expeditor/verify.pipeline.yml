@@ -348,7 +348,7 @@ steps:
 #           - CHEF_FS=1
           # - BUNDLE_GEMFILE=/workdir/oc-chef-pedant/Gemfile
 
-# - wait
+- wait
 
 - label: automate_build
   command:
