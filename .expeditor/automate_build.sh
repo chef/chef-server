@@ -10,7 +10,7 @@ popd
 
 echo "results directory contents" `ls -l results`
 
-Bookself_hart_file=$(ls results/*bookchef*.hart)
+Bookself_hart_file=$(ls results/*bookshelf*.hart)
 echo "Found hart file: $Bookself_hart_file"
 
 base_name=$(basename "$Bookself_hart_file") # Get just the filename
