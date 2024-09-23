@@ -135,41 +135,41 @@ steps:
 #   # Habitat Packages of Infra Server
 # #########################################################################
 
-- label: bookshelf-hab
-  command:
-      - /workdir/.expeditor/habitat.sh
-  expeditor:
-      executor:
-        docker:
-          privileged: true
-          environment:
-            - OCTOKIT_ACCESS_TOKEN
-            - HAB_LICENSE=accept
-            - CHEF_LICENSE="accept-no-persist"
-            - CI="true"
-            - HAB_ORIGIN=cheftest
-            - HAB_ORIGIN_KEYS=cheftest
-            - HAB_STUDIO_SECRET_HAB_FEAT_IGNORE_LOCAL="true"
-            - HAB_FEAT_IGNORE_LOCAL="true"
-            - PACKAGE_NAME=bookshelf
+# - label: bookshelf-hab
+#   command:
+#       - /workdir/.expeditor/habitat.sh
+#   expeditor:
+#       executor:
+#         docker:
+#           privileged: true
+#           environment:
+#             - OCTOKIT_ACCESS_TOKEN
+#             - HAB_LICENSE=accept
+#             - CHEF_LICENSE="accept-no-persist"
+#             - CI="true"
+#             - HAB_ORIGIN=cheftest
+#             - HAB_ORIGIN_KEYS=cheftest
+#             - HAB_STUDIO_SECRET_HAB_FEAT_IGNORE_LOCAL="true"
+#             - HAB_FEAT_IGNORE_LOCAL="true"
+#             - PACKAGE_NAME=bookshelf
 
-- label: cs-nginx-hab
-  command:
-      - /workdir/.expeditor/habitat.sh
-  expeditor:
-      executor:
-        docker:
-          privileged: true
-          environment:
-            - OCTOKIT_ACCESS_TOKEN
-            - HAB_LICENSE=accept
-            - CHEF_LICENSE="accept-no-persist"
-            - CI="true"
-            - HAB_ORIGIN=chef
-            - HAB_ORIGIN_KEYS=chef
-            - HAB_STUDIO_SECRET_HAB_FEAT_IGNORE_LOCAL="true"
-            - HAB_FEAT_IGNORE_LOCAL="true"
-            - PACKAGE_NAME=nginx
+# - label: cs-nginx-hab
+#   command:
+#       - /workdir/.expeditor/habitat.sh
+#   expeditor:
+#       executor:
+#         docker:
+#           privileged: true
+#           environment:
+#             - OCTOKIT_ACCESS_TOKEN
+#             - HAB_LICENSE=accept
+#             - CHEF_LICENSE="accept-no-persist"
+#             - CI="true"
+#             - HAB_ORIGIN=chef
+#             - HAB_ORIGIN_KEYS=chef
+#             - HAB_STUDIO_SECRET_HAB_FEAT_IGNORE_LOCAL="true"
+#             - HAB_FEAT_IGNORE_LOCAL="true"
+#             - PACKAGE_NAME=nginx
 
 # - label: chef-server-ctl-hab
 #   command:
@@ -189,59 +189,59 @@ steps:
 #             - HAB_FEAT_IGNORE_LOCAL="true"
 #             - PACKAGE_NAME=chef-server-ctl
 
-- label: oc_bifrost-hab
-  command:
-      - /workdir/.expeditor/habitat.sh
-  expeditor:
-      executor:
-        docker:
-          privileged: true
-          environment:
-            - OCTOKIT_ACCESS_TOKEN
-            - HAB_LICENSE=accept
-            - CHEF_LICENSE="accept-no-persist"
-            - CI="true"
-            - HAB_ORIGIN=chef
-            - HAB_ORIGIN_KEYS=chef
-            - HAB_STUDIO_SECRET_HAB_FEAT_IGNORE_LOCAL="true"
-            - HAB_FEAT_IGNORE_LOCAL="true"
-            - PACKAGE_NAME=oc_bifrost
+# - label: oc_bifrost-hab
+#   command:
+#       - /workdir/.expeditor/habitat.sh
+#   expeditor:
+#       executor:
+#         docker:
+#           privileged: true
+#           environment:
+#             - OCTOKIT_ACCESS_TOKEN
+#             - HAB_LICENSE=accept
+#             - CHEF_LICENSE="accept-no-persist"
+#             - CI="true"
+#             - HAB_ORIGIN=chef
+#             - HAB_ORIGIN_KEYS=chef
+#             - HAB_STUDIO_SECRET_HAB_FEAT_IGNORE_LOCAL="true"
+#             - HAB_FEAT_IGNORE_LOCAL="true"
+#             - PACKAGE_NAME=oc_bifrost
 
-- label: oc_erchef-hab
-  command:
-      - /workdir/.expeditor/habitat.sh
-  expeditor:
-      executor:
-        docker:
-          privileged: true
-          environment:
-            - OCTOKIT_ACCESS_TOKEN
-            - HAB_LICENSE=accept
-            - CHEF_LICENSE="accept-no-persist"
-            - CI="true"
-            - HAB_ORIGIN=chef
-            - HAB_ORIGIN_KEYS=chef
-            - HAB_STUDIO_SECRET_HAB_FEAT_IGNORE_LOCAL="true"
-            - HAB_FEAT_IGNORE_LOCAL="true"
-            - PACKAGE_NAME=oc_erchef
+# - label: oc_erchef-hab
+#   command:
+#       - /workdir/.expeditor/habitat.sh
+#   expeditor:
+#       executor:
+#         docker:
+#           privileged: true
+#           environment:
+#             - OCTOKIT_ACCESS_TOKEN
+#             - HAB_LICENSE=accept
+#             - CHEF_LICENSE="accept-no-persist"
+#             - CI="true"
+#             - HAB_ORIGIN=chef
+#             - HAB_ORIGIN_KEYS=chef
+#             - HAB_STUDIO_SECRET_HAB_FEAT_IGNORE_LOCAL="true"
+#             - HAB_FEAT_IGNORE_LOCAL="true"
+#             - PACKAGE_NAME=oc_erchef
 
-- label: openresty-noroot-hab
-  command:
-      - /workdir/.expeditor/habitat.sh
-  expeditor:
-      executor:
-        docker:
-          privileged: true
-          environment:
-            - OCTOKIT_ACCESS_TOKEN
-            - HAB_LICENSE=accept
-            - CHEF_LICENSE="accept-no-persist"
-            - CI="true"
-            - HAB_ORIGIN=chef
-            - HAB_ORIGIN_KEYS=chef
-            - HAB_STUDIO_SECRET_HAB_FEAT_IGNORE_LOCAL="true"
-            - HAB_FEAT_IGNORE_LOCAL="true"
-            - PACKAGE_NAME=openresty-noroot
+# - label: openresty-noroot-hab
+#   command:
+#       - /workdir/.expeditor/habitat.sh
+#   expeditor:
+#       executor:
+#         docker:
+#           privileged: true
+#           environment:
+#             - OCTOKIT_ACCESS_TOKEN
+#             - HAB_LICENSE=accept
+#             - CHEF_LICENSE="accept-no-persist"
+#             - CI="true"
+#             - HAB_ORIGIN=chef
+#             - HAB_ORIGIN_KEYS=chef
+#             - HAB_STUDIO_SECRET_HAB_FEAT_IGNORE_LOCAL="true"
+#             - HAB_FEAT_IGNORE_LOCAL="true"
+#             - PACKAGE_NAME=openresty-noroot
 
 # - label: oc_id-hab
 #   command:
@@ -348,7 +348,7 @@ steps:
 #           - CHEF_FS=1
           # - BUNDLE_GEMFILE=/workdir/oc-chef-pedant/Gemfile
 
-- wait
+# - wait
 
 - label: automate_build
   command:
