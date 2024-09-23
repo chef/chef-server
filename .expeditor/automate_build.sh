@@ -20,7 +20,7 @@ formatted_output="${name#chef-}/$version/$timestamp"
 plan_file="components/automate-cs-bookshelf/habitat/plan.sh"
 sed -i "s|\${vendor_origin}/bookshelf|\${vendor_origin}/${formatted_output}|g" "$plan_file"
 echo "Replaced line in $plan_file"
-
+cat components/automate-cs-bookshelf/habitat/plan.sh
 ./scripts/verify_build.sh
 
 tar -cvf results.tar results
