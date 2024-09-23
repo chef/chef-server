@@ -12,7 +12,7 @@ echo "results directory contents" `ls -l results`
 ./scripts/verify_build.sh
 
 tar -cvf results.tar results
-
+echo "results.tar created"
 gzip results.tar
 
 buildkite-agent artifact upload results.tar.gz
