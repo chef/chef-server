@@ -357,6 +357,8 @@ steps:
       ALLOW_LOCAL_PACKAGES: true
       HAB_STUDIO_SUP: false
       HAB_NONINTERACTIVE: true
+      HAB_STUDIO_SECRET_HAB_FEAT_IGNORE_LOCAL: true
+      HAB_STUDIO_SECRET_HAB_FEAT_OFFLINE_INSTALL: true
   expeditor:
     secrets:
         HAB_STUDIO_SECRET_GITHUB_TOKEN:
