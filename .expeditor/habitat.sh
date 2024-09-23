@@ -4,7 +4,7 @@
 # additionaly, it exports them as a local docker image
 
 export CHEF_SERVER_SRC='/workdir/src'
-export ORIGIN=chef
+export ORIGIN=cheftest
 export HAB_LICENSE=accept-no-persist
 # export PACKAGE_NAME=$1
 

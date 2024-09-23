@@ -135,23 +135,23 @@ steps:
 #   # Habitat Packages of Infra Server
 # #########################################################################
 
-# - label: bookshelf-hab
-#   command:
-#       - /workdir/.expeditor/habitat.sh
-#   expeditor:
-#       executor:
-#         docker:
-#           privileged: true
-#           environment:
-#             - OCTOKIT_ACCESS_TOKEN
-#             - HAB_LICENSE=accept
-#             - CHEF_LICENSE="accept-no-persist"
-#             - CI="true"
-#             - HAB_ORIGIN=cheftest
-#             - HAB_ORIGIN_KEYS=cheftest
-#             - HAB_STUDIO_SECRET_HAB_FEAT_IGNORE_LOCAL="true"
-#             - HAB_FEAT_IGNORE_LOCAL="true"
-#             - PACKAGE_NAME=bookshelf
+- label: bookshelf-hab
+  command:
+      - /workdir/.expeditor/habitat.sh
+  expeditor:
+      executor:
+        docker:
+          privileged: true
+          environment:
+            - OCTOKIT_ACCESS_TOKEN
+            - HAB_LICENSE=accept
+            - CHEF_LICENSE="accept-no-persist"
+            - CI="true"
+            - HAB_ORIGIN=cheftest
+            - HAB_ORIGIN_KEYS=cheftest
+            - HAB_STUDIO_SECRET_HAB_FEAT_IGNORE_LOCAL="true"
+            - HAB_FEAT_IGNORE_LOCAL="true"
+            - PACKAGE_NAME=bookshelf
 
 # - label: cs-nginx-hab
 #   command:
