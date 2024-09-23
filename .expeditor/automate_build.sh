@@ -4,9 +4,9 @@ echo "inside script"
 git clone https://github.com/chef/automate.git
 cd automate
 git checkout vikas/cs-changes-for-pipeline
-pushd results
-buildkite-agent artifact download "*.hart" ./
-popd
+# pushd results
+# buildkite-agent artifact download "*.hart" ./
+# popd
 
 echo "results directory contents" `ls -l results`
 
@@ -17,7 +17,7 @@ IFS='-' read -r name comp version timestamp os <<< "${base_name%.hart}"
 formatted_output="$comp/$version/$timestamp"
 
 plan_file="components/automate-cs-bookshelf/habitat/plan.sh"
-sed -i "s|\${vendor_origin}/bookshelf|\${vendor_origin}/${formatted_output}|g" "$plan_file"
+sed -i "s|\${vendor_origin}/bookshelf|\$cheftest/${formatted_output}|g" "$plan_file"
 echo "Replaced line in $plan_file"
 cat components/automate-cs-bookshelf/habitat/plan.sh
 ./scripts/verify_build.sh
