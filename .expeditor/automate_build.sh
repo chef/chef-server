@@ -97,7 +97,7 @@ cp $HAB_CACHE_KEY_PATH/* results/
 RESOLVED_RESULTS_DIR=$(realpath results/)
 
 output_string_vikas=$(echo "$Bookself_hart_file" | sed 's|results/||')
-HAB_CACHE_KEY_PATH=$RESOLVED_RESULTS_DIR DO_CHECK=false hab pkg install results/$output_string_vikas
+HAB_CACHE_KEY_PATH=$RESOLVED_RESULTS_DIR DO_CHECK=true hab pkg install results/$output_string_vikas
 
 hab pkg build results/$output_string_vikas
 
