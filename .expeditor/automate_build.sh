@@ -1,7 +1,7 @@
 #!/bin/bash -e
 # =======================================================CS Things=======================================================
 export CHEF_SERVER_SRC='/workdir/src'
-export ORIGIN=cheftest
+export HAB_ORIGIN=cheftest
 export HAB_LICENSE=accept-no-persist
 # export pkg_name=bookshelf
 export PACKAGE_NAME=bookshelf
@@ -16,7 +16,7 @@ HAB_CACHE_KEY_PATH="$JOB_TEMP_ROOT/keys"
 
 echo "--- :key: Generating fake origin key"
 hab license accept
-hab origin key generate
+hab origin key generate cheftest
 
 # cd /workdir/src/bookshelf
 echo "generating package for $PACKAGE_NAME"
