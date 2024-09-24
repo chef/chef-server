@@ -50,12 +50,10 @@ echo "This is the current dir: " `pwd`
 
 echo "Building the package"
 
-hab pkg build $Bookself_hart_file
 
+output_string_vikas=$(echo "$Bookself_hart_file" | sed 's|results/||')
 
-pushd results
-pkg_names= `ls`
-popd
+hab pkg build results/$output_string_vikas
 
 # hab studio enter
 
