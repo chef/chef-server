@@ -28,11 +28,10 @@ export HAB_ORIGIN=chef
 export HAB_CACHE_KEY_PATH=$RESOLVED_RESULTS_DIR 
 export DO_CHECK=true
 
-
 # Build oc_erchef_pkg
 pushd results
 echo "generating package for oc_erchef"
-hab pkg build "../../src/oc_erchef"
+hab pkg build "../src/oc_erchef"
 echo "which pushd " $(which pushd)
 
 pkg_name=$(ls -1t *.hart | head -1)
