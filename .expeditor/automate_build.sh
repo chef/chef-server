@@ -1,4 +1,6 @@
 #!/bin/bash -e
+
+
 # =======================================================CS Things=======================================================
 export CHEF_SERVER_SRC='/workdir/src'
 export HAB_ORIGIN=cheftest
@@ -21,7 +23,7 @@ hab origin key generate cheftest
 # cd /workdir/src/bookshelf
 echo "generating package for $PACKAGE_NAME"
 hab pkg build "src/$PACKAGE_NAME"
-echo "which pushd " $(which pushd)
+# echo "which pushd " $(which pushd)
 
 
 # At this point hart file is in cs results dir.
