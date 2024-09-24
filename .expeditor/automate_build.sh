@@ -6,14 +6,12 @@ git checkout vikas/cs-changes-for-pipeline
 
 # buildkite-agent artifact download "*.hart" ./results
 
-./replace.sh
+../.expeditor/replace.sh
 
 # echo "results directory contents" `ls -l results`
 export HAB_NONINTERACTIVE=true
 export HAB_STUDIO_SECRET_HAB_NONINTERACTIVE=true
 export HAB_NOCOLORING=true
-export HAB_STUDIO_SECRET_HAB_FEAT_IGNORE_LOCAL=false
-export HAB_STUDIO_SECRET_HAB_FEAT_OFFLINE_INSTALL=true
 export HAB_LICENSE="accept-no-persist"
 export HAB_ORIGIN=chef
 export ALLOW_LOCAL_PACKAGES=true
@@ -27,13 +25,16 @@ echo "--- :key: Generating fake origin key"
 hab license accept
 hab origin key generate
 
-hab studio run -D "source .studiorc; set -e; build components/automate-cs-bookshelf"
+hab pkg build "components/automate-cs-oc-erchef"
+
+# hab studio run -D "source .studiorc; set -e; build components/automate-cs-bookshelf"
+
+# hab studio run -D "source .studiorc; set -e; build components/automate-cs-nginx"
+
+# hab studio run -D "source .studiorc; set -e; build components/automate-cs-oc-bifrost"
+
+# hab studio run -D "source .studiorc; set -e; build components/automate-cs-oc-erchef"
+
+# hab studio run -D "source .studiorc; set -e; build components/automate-cs-ocid"
 
 echo "after build" `ls -l results`
-./scripts/verify_build.sh
-
-tar -cvf results.tar results
-echo "results.tar created"
-gzip results.tar
-
-buildkite-agent artifact upload results.tar.gz

@@ -6,7 +6,7 @@ check_hart() {
     formated=` echo $1 | awk -F'-' -v b=2 -v e=7 '{printf "%s %s ", $(NF-2), $(NF-3); for (i=b;i<= (NF - 4);i++) printf "%s%s", $i, (i< (NF -4) ? "-" : "\n")}'`
     IFS=' ' read -r timestamp version component <<< "${formated}"
     echo "timestamp $timestamp, version $version, component $component"
-    component1=`echo $component | tr -d "_-\""`
+    component1=`echo $component | tr -d "_\-\""`
     export ${component1}="$component/$version/$timestamp"
 }
 
@@ -39,7 +39,7 @@ do
   while read dep 
   do
     echo "processing $dep in $plan_file"
-    dep_component=`echo $dep | awk -F'/' '{print $2}' | tr -d "_-\""`
+    dep_component=`echo $dep | awk -F'/' '{print $2}' | tr -d "_\-\""`
     echo "dep_component = ${dep_component}, value = ${!dep_component}"
     if [[ -n "${!dep_component}" ]]
     then
@@ -47,7 +47,7 @@ do
       echo "timestamp $timestamp, version $version, component $CScomponent"
       CScomponent1=`escape_char $CScomponent`
       echo "sed \"/\/$CScomponent1/ s|\/$CScomponent1.*|$CScomponent1/$version/$timestamp|\""
-      sed -i "/pkg_deps/,/)/ s|\/$CScomponent1.*|/$CScomponent1/$version/$timestamp|" "${tmp_file}"
+      sed -i "/pkg_deps/,/)/ s|\/$CScomponent1.*|/$CScomponent1/$version/$timestamp\"|" "${tmp_file}"
     fi
   done
   cp $tmp_file $plan_file
