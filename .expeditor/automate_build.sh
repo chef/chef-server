@@ -13,8 +13,8 @@ curl https://raw.githubusercontent.com/habitat-sh/habitat/main/components/hab/in
 
 export JOB_TEMP_ROOT
 JOB_TEMP_ROOT=$(mktemp -d /tmp/job-root-XXXXXX)
-export HAB_CACHE_KEY_PATH
-HAB_CACHE_KEY_PATH="$JOB_TEMP_ROOT/keys"
+# export HAB_CACHE_KEY_PATH
+# HAB_CACHE_KEY_PATH="$JOB_TEMP_ROOT/keys"
 
 echo "--- :key: Generating fake origin key"
 hab license accept
@@ -88,9 +88,9 @@ echo "This is the current dir: " `pwd`
 
 echo "Building the package"
 
-echo "contents of place where key should exist" `ls -l $HAB_CACHE_KEY_PATH`
+# echo "contents of place where key should exist" `ls -l $HAB_CACHE_KEY_PATH`
 
-cp -r $HAB_CACHE_KEY_PATH results/
+# cp -r $HAB_CACHE_KEY_PATH results/
 
 output_string_vikas=$(echo "$Bookself_hart_file" | sed 's|results/||')
 hab pkg install results/$output_string_vikas
