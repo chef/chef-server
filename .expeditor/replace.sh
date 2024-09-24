@@ -56,6 +56,9 @@ do
   echo "file content after replace"
   cat $plan_file
   echo "=================================="
+  echo "results dir content"
+  ls results/*.hart
+  echo "=================================="
 done
 
 exit 0
