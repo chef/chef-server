@@ -52,6 +52,7 @@ echo "Building the package"
 
 
 output_string_vikas=$(echo "$Bookself_hart_file" | sed 's|results/||')
+hab pkg install results/$output_string_vikas
 
 hab pkg build results/$output_string_vikas
 
