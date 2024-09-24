@@ -6,6 +6,7 @@ git checkout vikas/cs-changes-for-pipeline
 
 # buildkite-agent artifact download "*.hart" ./results
 
+./replace.sh
 
 # echo "results directory contents" `ls -l results`
 export HAB_NONINTERACTIVE=true
