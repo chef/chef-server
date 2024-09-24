@@ -95,9 +95,13 @@ echo "contents of place where key should exist" `ls -l $HAB_CACHE_KEY_PATH`
 cp $HAB_CACHE_KEY_PATH/* results/
 
 RESOLVED_RESULTS_DIR=$(realpath results/)
+HAB_CACHE_KEY_PATH=$RESOLVED_RESULTS_DIR 
+ls $HAB_CACHE_KEY_PATH
 
 output_string_vikas=$(echo "$Bookself_hart_file" | sed 's|results/||')
-HAB_CACHE_KEY_PATH=$RESOLVED_RESULTS_DIR DO_CHECK=true hab pkg install results/$output_string_vikas
+DO_CHECK=true
+echo "hab pkg install results/$output_string_vikas"
+hab pkg install results/$output_string_vikas
 
 hab pkg build results/$output_string_vikas
 
