@@ -92,10 +92,12 @@ echo "Building the package"
 
 echo "contents of place where key should exist" `ls -l $HAB_CACHE_KEY_PATH`
 
-cp  $HAB_CACHE_KEY_PATH/* /hab/cache/keys/
+cp $HAB_CACHE_KEY_PATH/* results/
+
+RESOLVED_RESULTS_DIR=$(realpath results/)
 
 output_string_vikas=$(echo "$Bookself_hart_file" | sed 's|results/||')
-hab pkg install results/$output_string_vikas
+HAB_CACHE_KEY_PATH=$RESOLVED_RESULTS_DIR DO_CHECK=false hab pkg install results/$output_string_vikas
 
 hab pkg build results/$output_string_vikas
 
