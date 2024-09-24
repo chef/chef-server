@@ -27,7 +27,7 @@ echo "--- :key: Generating fake origin key"
 hab license accept
 hab origin key generate
 
-hab pkg build "components/automate-cs-oc-erchef"
+hab studio run -D "source .studiorc; set -e; env; build components/automate-cs-oc-erchef"
 
 # hab studio run -D "source .studiorc; set -e; build components/automate-cs-bookshelf"
 
