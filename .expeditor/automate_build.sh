@@ -1,5 +1,15 @@
 #!/bin/bash -e
 
+export OCTOKIT_ACCESS_TOKEN
+export HAB_LICENSE=accept
+export CHEF_LICENSE="accept-no-persist"
+export CI="true"
+export HAB_ORIGIN=cheftest
+export HAB_ORIGIN_KEYS=cheftest
+export HAB_STUDIO_SECRET_HAB_FEAT_IGNORE_LOCAL="true"
+export HAB_FEAT_IGNORE_LOCAL="true"
+
+
 echo "inside script"
 git clone https://github.com/chef/automate.git
 cd automate
@@ -25,8 +35,20 @@ sed -i "s|vendor_origin=\"chef\"|vendor_origin=\"cheftest\"|g" "$plan_file"
 cat components/automate-cs-bookshelf/habitat/plan.sh
 # ./scripts/verify_build.sh
 
+curl https://raw.githubusercontent.com/habitat-sh/habitat/main/components/hab/install.sh | sudo bash
+
+export JOB_TEMP_ROOT
+JOB_TEMP_ROOT=$(mktemp -d /tmp/job-root-XXXXXX)
+export HAB_CACHE_KEY_PATH
+HAB_CACHE_KEY_PATH="$JOB_TEMP_ROOT/keys"
+
+
 hab license accept
 hab origin key generate cheftest
+
+echo "This is the current dir: " `pwd`
+
+echo "Building the package"
 
 hab pkg build $Bookself_hart_file
 
