@@ -40,8 +40,9 @@ curl https://raw.githubusercontent.com/habitat-sh/habitat/main/components/hab/in
 export JOB_TEMP_ROOT
 JOB_TEMP_ROOT=$(mktemp -d /tmp/job-root-XXXXXX)
 export HAB_CACHE_KEY_PATH
-HAB_CACHE_KEY_PATH="$JOB_TEMP_ROOT/keys"
+# HAB_CACHE_KEY_PATH="$JOB_TEMP_ROOT/keys"
 
+HAB_CACHE_KEY_PATH=$RESOLVED_RESULTS_DIR hab origin key generate cheftest
 
 hab license accept
 hab origin key generate cheftest
