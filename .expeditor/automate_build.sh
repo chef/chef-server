@@ -29,6 +29,7 @@ export HAB_CACHE_KEY_PATH=$RESOLVED_RESULTS_DIR
 export DO_CHECK=true
 
 pwd
+ls ..
 # Build oc_erchef_pkg
 pushd results
 echo "generating package for oc_erchef"
