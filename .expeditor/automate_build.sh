@@ -6,8 +6,6 @@ git checkout vikas/cs-changes-for-pipeline
 
 # buildkite-agent artifact download "*.hart" ./results
 
-../.expeditor/replace.sh
-
 # echo "results directory contents" `ls -l results`
 export HAB_NONINTERACTIVE=true
 export HAB_STUDIO_SECRET_HAB_NONINTERACTIVE=true
@@ -29,11 +27,20 @@ HAB_CACHE_KEY_PATH=$RESOLVED_RESULTS_DIR hab origin key generate chef
 export HAB_CACHE_KEY_PATH
 
 # Build oc_erchef_pkg
+pushd results
+echo "generating package for oc_erchef"
+hab pkg build "../../src/oc_erchef"
+echo "which pushd " $(which pushd)
 
-# hart_file_name=${find &oc_erchef*.hart ./resuts} ??
+pkg_name=$(ls -1t *.hart | head -1)
+popd
+
+echo $pkg_name
+pwd
+../../.expeditor/replace.sh
 
 # hab studio run -D "source .studiorc; set -e; env; hab pkg install results/<built hart file name of oc_erchef>; build components/automate-cs-oc-erchef"
-hab studio run -D "source .studiorc; set -e; env; hab pkg install results/chef-oc_erchef-15.10.15-20240923081220-x86_64-linux.hart; build components/automate-cs-oc-erchef"
+hab studio run -D "source .studiorc; set -e; env; hab pkg install $pkg_name; build components/automate-cs-oc-erchef"
 
 # hab studio run -D "source .studiorc; set -e; build components/automate-cs-bookshelf"
 
