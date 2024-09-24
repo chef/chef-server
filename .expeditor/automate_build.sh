@@ -1,4 +1,40 @@
 #!/bin/bash -e
+# =======================================================CS Things=======================================================
+export CHEF_SERVER_SRC='/workdir/src'
+export ORIGIN=cheftest
+export HAB_LICENSE=accept-no-persist
+# export pkg_name=bookshelf
+export PACKAGE_NAME=bookshelf
+
+
+curl https://raw.githubusercontent.com/habitat-sh/habitat/main/components/hab/install.sh | sudo bash
+
+export JOB_TEMP_ROOT
+JOB_TEMP_ROOT=$(mktemp -d /tmp/job-root-XXXXXX)
+export HAB_CACHE_KEY_PATH
+HAB_CACHE_KEY_PATH="$JOB_TEMP_ROOT/keys"
+
+echo "--- :key: Generating fake origin key"
+hab license accept
+hab origin key generate
+
+# cd /workdir/src/bookshelf
+echo "generating package for $PACKAGE_NAME"
+hab pkg build "src/$PACKAGE_NAME"
+echo "which pushd " $(which pushd)
+
+
+# At this point hart file is in cs results dir.
+#What about keys? Line :15
+# pushd results
+# pkg_name=$(ls -1t *.hart | head -1)
+# popd
+# echo pkg_name is $pkg_name
+# buildkite-agent artifact upload results/$pkg_name
+
+echo "pwd is " `pwd`
+
+# =======================================================Automate Things=======================================================
 
 export OCTOKIT_ACCESS_TOKEN
 export HAB_LICENSE=accept
@@ -10,15 +46,14 @@ export HAB_STUDIO_SECRET_HAB_FEAT_IGNORE_LOCAL="true"
 export HAB_FEAT_IGNORE_LOCAL="true"
 
 
-echo "inside script"
 git clone https://github.com/chef/automate.git
 cd automate
 git checkout vikas/cs-changes-for-pipeline
-pushd results
-buildkite-agent artifact download "*.hart" ./
-popd
+
+cp ../results/*bookshelf*.hart results/
+
 export HAB_STUDIO_HOST_ARCH=x86_64-linux
-echo "results directory contents" `ls -l results`
+echo "automate results directory contents" `ls -l results`
 
 Bookself_hart_file=$(ls results/*bookshelf*.hart)
 echo "Found hart file: $Bookself_hart_file"
@@ -35,17 +70,17 @@ sed -i "s|vendor_origin=\"chef\"|vendor_origin=\"cheftest\"|g" "$plan_file"
 cat components/automate-cs-bookshelf/habitat/plan.sh
 # ./scripts/verify_build.sh
 
-curl https://raw.githubusercontent.com/habitat-sh/habitat/main/components/hab/install.sh | sudo bash
+# curl https://raw.githubusercontent.com/habitat-sh/habitat/main/components/hab/install.sh | sudo bash
 
-export JOB_TEMP_ROOT
-JOB_TEMP_ROOT=$(mktemp -d /tmp/job-root-XXXXXX)
-export HAB_CACHE_KEY_PATH
-# HAB_CACHE_KEY_PATH="$JOB_TEMP_ROOT/keys"
+# export JOB_TEMP_ROOT
+# JOB_TEMP_ROOT=$(mktemp -d /tmp/job-root-XXXXXX)
+# export HAB_CACHE_KEY_PATH
+# # HAB_CACHE_KEY_PATH="$JOB_TEMP_ROOT/keys"
 
-HAB_CACHE_KEY_PATH=$RESOLVED_RESULTS_DIR hab origin key generate cheftest
+# HAB_CACHE_KEY_PATH=$RESOLVED_RESULTS_DIR hab origin key generate cheftest
 
-hab license accept
-hab origin key generate cheftest
+# hab license accept
+# hab origin key generate cheftest
 
 echo "This is the current dir: " `pwd`
 
