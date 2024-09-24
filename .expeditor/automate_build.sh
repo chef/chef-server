@@ -21,7 +21,7 @@ RESOLVED_RESULTS_DIR=$(realpath results/)
 JOB_TEMP_ROOT=$(mktemp -d /tmp/job-root-XXXXXX)
 export JOB_TEMP_ROOT
 
-log_section_start "generate ephemeral origin key"
+echo "generate ephemeral origin key"
 #HAB_CACHE_KEY_PATH="$JOB_TEMP_ROOT/keys"
 HAB_CACHE_KEY_PATH=$RESOLVED_RESULTS_DIR hab origin key generate chef
 export HAB_CACHE_KEY_PATH
