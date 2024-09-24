@@ -18,16 +18,17 @@ export HAB_STUDIO_SECRET_HAB_FEAT_IGNORE_LOCAL=true
 export HAB_STUDIO_SECRET_HAB_FEAT_OFFLINE_INSTALL=true
 export ALLOW_LOCAL_PACKAGES=true
 
-export JOB_TEMP_ROOT
 JOB_TEMP_ROOT=$(mktemp -d /tmp/job-root-XXXXXX)
-export HAB_CACHE_KEY_PATH
+export JOB_TEMP_ROOT
+
 HAB_CACHE_KEY_PATH="$JOB_TEMP_ROOT/keys"
+export HAB_CACHE_KEY_PATH
 
 echo "--- :key: Generating fake origin key"
 hab license accept
 hab origin key generate
 
-hab studio run -D "source .studiorc; set -e; env; build components/automate-cs-oc-erchef"
+hab studio run -D "source .studiorc; set -e; env; hab pkg install results/chef-oc_erchef-15.10.15-20240923081220-x86_64-linux.hart; build components/automate-cs-oc-erchef"
 
 # hab studio run -D "source .studiorc; set -e; build components/automate-cs-bookshelf"
 
