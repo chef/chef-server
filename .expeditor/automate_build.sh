@@ -11,6 +11,8 @@ export PACKAGE_NAME=bookshelf
 
 curl https://raw.githubusercontent.com/habitat-sh/habitat/main/components/hab/install.sh | sudo bash
 
+echo "Is there relevant keys" ` ls -l /var/lib/buildkite-agent/.hab/cache/keys/`
+
 export JOB_TEMP_ROOT
 JOB_TEMP_ROOT=$(mktemp -d /tmp/job-root-XXXXXX)
 # export HAB_CACHE_KEY_PATH
