@@ -24,7 +24,10 @@ export JOB_TEMP_ROOT
 echo "generate ephemeral origin key"
 #HAB_CACHE_KEY_PATH="$JOB_TEMP_ROOT/keys"
 HAB_CACHE_KEY_PATH=$RESOLVED_RESULTS_DIR hab origin key generate chef
-export HAB_CACHE_KEY_PATH
+export HAB_ORIGIN=chef 
+export HAB_CACHE_KEY_PATH=$RESOLVED_RESULTS_DIR 
+export DO_CHECK=true
+
 
 # Build oc_erchef_pkg
 pushd results
