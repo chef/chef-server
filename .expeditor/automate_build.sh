@@ -26,7 +26,7 @@ cat components/automate-cs-bookshelf/habitat/plan.sh
 # ./scripts/verify_build.sh
 
 hab license accept
-hab origin key generate
+hab origin key generate cheftest
 
 hab pkg build $Bookself_hart_file
 
