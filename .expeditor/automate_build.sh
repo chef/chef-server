@@ -25,11 +25,21 @@ sed -i "s|vendor_origin=\"chef\"|vendor_origin=\"cheftest\"|g" "$plan_file"
 cat components/automate-cs-bookshelf/habitat/plan.sh
 # ./scripts/verify_build.sh
 
-hab studio enter
+hab license accept
+hab origin key generate
 
-echo "Building the package"
-hab build  results/$Bookself_hart_file
-exit
+hab pkg build $Bookself_hart_file
+
+
+pushd results
+pkg_names= `ls`
+popd
+
+# hab studio enter
+
+# echo "Building the package"
+# hab build  results/$Bookself_hart_file
+# exit
 
 
 tar -cvf results.tar results
