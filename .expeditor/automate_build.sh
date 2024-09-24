@@ -88,6 +88,9 @@ echo "This is the current dir: " `pwd`
 
 echo "Building the package"
 
+echo "contents of place where key should exist" `ls -l $HAB_CACHE_KEY_PATH`
+
+cp -r $HAB_CACHE_KEY_PATH results/
 
 output_string_vikas=$(echo "$Bookself_hart_file" | sed 's|results/||')
 hab pkg install results/$output_string_vikas
