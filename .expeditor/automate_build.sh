@@ -69,7 +69,7 @@ ls $HAB_CACHE_KEY_PATH
 
 name_resolver() {
     local package_name="$1"
-    echo $(find components -name  "automte-cs*$package_name*" -type d)
+    echo $(find components -name  "automate-cs*$package_name*" -type d)
 }
 
 #bookshelf bifrost erchef id
