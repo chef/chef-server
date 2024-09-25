@@ -52,7 +52,8 @@ export HAB_FEAT_IGNORE_LOCAL=true
 
 git clone https://github.com/chef/automate.git
 cd automate
-git checkout vikas/cs-changes-for-pipeline
+# git checkout vikas/cs-changes-for-pipeline
+git checkout kalroy/cs_plan_changes
 
 cp ../results/*bookshelf*.hart results/
 
@@ -65,13 +66,13 @@ base_name=$(basename "$Bookself_hart_file") # Get just the filename
 IFS='-' read -r name comp version timestamp os <<< "${base_name%.hart}"
 formatted_output="$comp/$version/$timestamp"
 
-plan_file="components/automate-cs-bookshelf/habitat/plan.sh"
-sed -i "s|\${vendor_origin}/bookshelf|\${vendor_origin}/${formatted_output}|g" "$plan_file"
-echo "Replaced line in $plan_file"
-sed -i "s|pkg_origin=\"chef\"|pkg_origin=\"cheftest\"|g" "$plan_file"
-# sed -i "s|pkg_origin="chef"|pkg_origin="cheftest"|g" "$plan_file"
-sed -i "s|vendor_origin=\"chef\"|vendor_origin=\"cheftest\"|g" "$plan_file"
-cat components/automate-cs-bookshelf/habitat/plan.sh
+# plan_file="components/automate-cs-bookshelf/habitat/plan.sh"
+# sed -i "s|\${vendor_origin}/bookshelf|\${vendor_origin}/${formatted_output}|g" "$plan_file"
+# echo "Replaced line in $plan_file"
+# sed -i "s|pkg_origin=\"chef\"|pkg_origin=\"cheftest\"|g" "$plan_file"
+# # sed -i "s|pkg_origin="chef"|pkg_origin="cheftest"|g" "$plan_file"
+# sed -i "s|vendor_origin=\"chef\"|vendor_origin=\"cheftest\"|g" "$plan_file"
+# cat components/automate-cs-bookshelf/habitat/plan.sh
 # ./scripts/verify_build.sh
 
 # curl https://raw.githubusercontent.com/habitat-sh/habitat/main/components/hab/install.sh | sudo bash
