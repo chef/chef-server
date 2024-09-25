@@ -16,18 +16,20 @@ hab license accept
 hab origin key generate
 
 # cd /workdir/src/bookshelf
-for pkg_name in `echo "bookshelf chef-server-ctl oc-id oc_bifrost oc_erchef openresty-noroot"`
+for pkg_name in `echo "bookshelf openresty-noroot"`
 do
   echo "generating package for $pkg_name"
   hab pkg build "src/$pkg_name"
 done
 
-./replace.sh "nginx" "src"
+./.expeditor/replace.sh "nginx" "src"
 
 for pkg_name in `echo "nginx"`
 do
   echo "generating package for $pkg_name"
-  hab pkg build "src/$pkg_name"
+  openresty_hart=$(ls -1t results/chef-openresty*.hart | head -1)
+  hab pkg install $openresty_hart
+  hab studio run -D "hab pkg install $openresty_hart; build components/automate-cs-bookshelf" "src/$pkg_name"
 done
 
 cp $HAB_CACHE_KEY_PATH/* results
@@ -54,7 +56,7 @@ RESOLVED_RESULTS_DIR=$(realpath results/)
 export DO_CHECK=true
 
 cp ../results/* results
-../replace.sh
+../.expeditor/replace.sh
 bookshelf_hart=$(ls -1t results/chef-bookshelf*.hart | head -1)
 
 hab studio run -D "source .studiorc; set -e; env; hab pkg install $bookshelf_hart; build components/automate-cs-bookshelf"

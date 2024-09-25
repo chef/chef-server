@@ -63,7 +63,7 @@ do
       echo "timestamp $timestamp, version $version, component $CScomponent"
       CScomponent1=`escape_char $CScomponent`
       echo "sed \"/\/$CScomponent1/ s|\/$CScomponent1.*|$CScomponent1/$version/$timestamp|\""
-      sed -i "tmp" "/pkg_deps/,/)/ s|\/$CScomponent1.*|/$CScomponent1/$version/$timestamp\"|" "${tmp_file}"
+      sed -i "/pkg_deps/,/)/ s|\/$CScomponent1.*|/$CScomponent1/$version/$timestamp\"|" "${tmp_file}"
     fi
   done
   cp $tmp_file $plan_file
