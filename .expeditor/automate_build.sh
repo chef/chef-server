@@ -52,7 +52,7 @@ cp ../results/*.hart ../results/chef*.pub ../results/chef*.key results
 ../.expeditor/replace.sh
 bookshelf_hart=$(ls -1t results/chef-bookshelf*.hart | head -1)
 chef_server_ctl_hart=$(ls -1t results/chef-chef-server-ctl*.hart | head -1)
-nginx=$(ls -1t results/chef-server-nginx*.hart | head -1)
+nginx=$(ls -1t results/chef-chef-server-nginx*.hart | head -1)
 oc_id=$(ls -1t results/chef-oc_id*.hart | head -1)
 bifrost_hart=$(ls -1t results/chef-oc_bifrost*.hart | head -1)
 erchef_hart=$(ls -1t results/chef-oc_erchef*.hart | head -1)
@@ -67,8 +67,6 @@ HAB_FEAT_OFFLINE_INSTALL=true HAB_FEAT_IGNORE_LOCAL=false HAB_ORIGIN=chef HAB_CA
 HAB_FEAT_OFFLINE_INSTALL=true HAB_FEAT_IGNORE_LOCAL=false HAB_ORIGIN=chef HAB_CACHE_KEY_PATH="$JOB_TEMP_ROOT/keys" DO_CHECK=true HAB_BLDR_CHANNEL=dev hab studio run -D "set -e; hab pkg install $oc_id; hab pkg build components/automate-cs-ocid"
 
 HAB_FEAT_OFFLINE_INSTALL=true HAB_FEAT_IGNORE_LOCAL=false HAB_ORIGIN=chef HAB_CACHE_KEY_PATH="$JOB_TEMP_ROOT/keys" DO_CHECK=true HAB_BLDR_CHANNEL=dev hab studio run -D "set -e; hab pkg install $nginx; hab pkg build components/automate-cs-nginx"
-
-hab studio run -D "source .studiorc; set -e; env; hab pkg install $bookshelf_hart; build components/automate-cs-bookshelf"
 
 echo "after build" `ls -l results`
 
