@@ -82,7 +82,7 @@ if [[ "$PACKAGE_NAME" == "nginx" ]]; then
     echo "chef-server-ctl package hart file is this: $ctlFilehart"
     base_name=$(basename "$ctlFilehart")
     IFS='-' read -r some name ctl comp version timestamp os <<< "${base_name%.hart}"
-    formatted_output="openresty-noroot/$version/$timestamp"
+    formatted_output="chef-server-ctl/$version/$timestamp"
     sed -i "s|\${vendor_origin}/chef-server-ctl|cheftest/${formatted_output}|g" "$plan_sh_change"
     cat $plan_sh_change
     echo "generating package for $PACKAGE_NAME"
