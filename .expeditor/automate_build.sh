@@ -15,8 +15,8 @@ HAB_CACHE_KEY_PATH="$JOB_TEMP_ROOT/keys"
 
 echo "--- :key: Generating fake origin key"
 hab license accept
-hab origin key generate chef oc-id
-#bookshelf oc_bifrost oc_erchef
+hab origin key generate chef
+#bookshelf oc_bifrost oc_erchef oc-id
 for PACKAGE_NAME in  nginx ; do
 echo "generating package for $PACKAGE_NAME"
 HAB_FEAT_IGNORE_LOCAL=true HAB_ORIGIN=chef HAB_CACHE_KEY_PATH=$HAB_CACHE_KEY_PATH DO_CHECK=true hab studio run -D "hab pkg build src/$PACKAGE_NAME"
