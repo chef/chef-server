@@ -52,7 +52,7 @@ cp ../results/*.hart ../results/chef*.pub ../results/chef*.key results
 ../.expeditor/replace.sh
 bookshelf_hart=$(ls -1t results/chef-bookshelf*.hart | head -1)
 chef_server_ctl_hart=$(ls -1t results/chef-chef-server-ctl*.hart | head -1)
-nginx=$(ls -1t results/chef-nginx*.hart | head -1)
+nginx=$(ls -1t results/chef-server-nginx*.hart | head -1)
 oc_id=$(ls -1t results/chef-oc_id*.hart | head -1)
 bifrost_hart=$(ls -1t results/chef-oc_bifrost*.hart | head -1)
 erchef_hart=$(ls -1t results/chef-oc_erchef*.hart | head -1)
