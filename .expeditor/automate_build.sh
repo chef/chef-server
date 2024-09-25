@@ -20,7 +20,7 @@ hab origin key generate cheftest
 for PACKAGE_NAME in openresty-noroot nginx ; do
 
     if [[ "$PACKAGE_NAME" == "nginx" ]]; then
-        plan_sh_change="src/$Package_name/habitat/plan.sh"
+        plan_sh_change="src/$PACKAGE_NAME/habitat/plan.sh"
         pushd results
         openrestyFilehart=$(ls -1t *openresty*.hart | head -1)
         popd
