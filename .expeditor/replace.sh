@@ -32,6 +32,8 @@ for component in `echo "automate-cs-bookshelf automate-cs-nginx automate-cs-oc-b
 do
   plan_file="components/$component/habitat/plan.sh"
   echo "Processing $plan_file"
+  sed -i "s|pkg_origin=\"chef\"|pkg_origin=\"cheftest\"|g" "$plan_file"
+  sed -i "s|vendor_origin=\"chef\"|vendor_origin=\"cheftest\"|g" "$plan_file"
   make_tmp
   tmp_file=${tmp_file_name}
   cp $plan_file "$tmp_file"
