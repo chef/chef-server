@@ -47,9 +47,6 @@ start_link() ->
 get_license()->
     gen_server:call(?MODULE, get_license).
 
-refresh_license()->
-    erlang:send(?MODULE, check_license).
-
 %%% ======================================
 %%% Gen Server callbacks
 %%% ======================================
@@ -85,7 +82,7 @@ terminate(_Reason, _State) ->
 %%% Internal functions
 %%% =====================
 check_license(State) ->
-    JsonStr = 
+    JsonStr =
         case catch get_license_info() of
             Result when is_list(Result) -> Result;
             {'EXIT', _} -> <<"">>
