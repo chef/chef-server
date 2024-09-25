@@ -2,7 +2,7 @@
 
 # =======================================================building Chef-server components=======================================================
 export CHEF_SERVER_SRC='/workdir/src'
-export HAB_ORIGIN=chef
+export HAB_ORIGIN=cheftest
 export HAB_LICENSE=accept-no-persist
 
 
@@ -15,11 +15,12 @@ HAB_CACHE_KEY_PATH="$JOB_TEMP_ROOT/keys"
 
 echo "--- :key: Generating fake origin key"
 hab license accept
-hab origin key generate chef
+hab origin key generate cheftest
 #oc_bifrost oc_erchef oc-id  nginx
 for PACKAGE_NAME in bookshelf  ; do
 echo "generating package for $PACKAGE_NAME"
-HAB_FEAT_IGNORE_LOCAL=true HAB_ORIGIN=chef HAB_CACHE_KEY_PATH=$HAB_CACHE_KEY_PATH DO_CHECK=true hab studio run -D "hab pkg build src/$PACKAGE_NAME"
+HAB_FEAT_IGNORE_LOCAL=true HAB_ORIGIN=cheftest HAB_CACHE_KEY_PATH=$HAB_CACHE_KEY_PATH DO_CHECK=true hab studio run -D "hab pkg build src/$PACKAGE_NAME"
+# HAB_FEAT_IGNORE_LOCAL=true HAB_ORIGIN=cheftest HAB_CACHE_KEY_PATH=$HAB_CACHE_KEY_PATH DO_CHECK=true hab studio run -D "hab pkg build src/$PACKAGE_NAME"
 done
 
 # =======================================================building Chef-server components With Automate=======================================================
@@ -28,8 +29,8 @@ export OCTOKIT_ACCESS_TOKEN
 export HAB_LICENSE=accept
 export CHEF_LICENSE="accept-no-persist"
 export CI=true
-export HAB_ORIGIN=chef
-export HAB_ORIGIN_KEYS=chef
+export HAB_ORIGIN=cheftest
+export HAB_ORIGIN_KEYS=cheftest
 export HAB_STUDIO_SECRET_HAB_FEAT_IGNORE_LOCAL=true
 export HAB_FEAT_IGNORE_LOCAL=true
 export HAB_STUDIO_HOST_ARCH=x86_64-linux
@@ -60,8 +61,8 @@ for PACKAGE_NAME in bookshelf  ; do
 hart_file=$(ls results/*$PACKAGE_NAME*.hart)
 output_string_file=$(echo "$hart_file" | sed 's|results/||')
 echo "hab pkg install $hart_file"
-
-HAB_FEAT_OFFLINE_INSTALL=true HAB_FEAT_IGNORE_LOCAL=true HAB_ORIGIN=chef HAB_CACHE_KEY_PATH=$RESOLVED_RESULTS_DIR DO_CHECK=true HAB_BLDR_CHANNEL=dev hab studio run -D "source .studiorc; set -e; hab pkg install results/$output_string_file; hab pkg build components/$(name_resolver $PACKAGE_NAME)"
+HAB_FEAT_OFFLINE_INSTALL=true HAB_FEAT_IGNORE_LOCAL=true HAB_ORIGIN=cheftest HAB_CACHE_KEY_PATH=$RESOLVED_RESULTS_DIR DO_CHECK=true HAB_BLDR_CHANNEL=dev hab studio run -D "source .studiorc; set -e; hab pkg install results/$output_string_file; hab pkg build components/$(name_resolver $PACKAGE_NAME)"
+# HAB_FEAT_OFFLINE_INSTALL=true HAB_FEAT_IGNORE_LOCAL=true HAB_ORIGIN=chef HAB_CACHE_KEY_PATH=$RESOLVED_RESULTS_DIR DO_CHECK=true HAB_BLDR_CHANNEL=dev hab studio run -D "source .studiorc; set -e; hab pkg install results/$output_string_file; hab pkg build components/$(name_resolver $PACKAGE_NAME)"
 done
 
 tar -cvf results.tar results
