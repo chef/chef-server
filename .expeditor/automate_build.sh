@@ -7,9 +7,6 @@ export OCTOKIT_ACCESS_TOKEN
 export HAB_LICENSE=accept
 export CHEF_LICENSE="accept-no-persist"
 export CI=true
-#export HAB_ORIGIN=cheftest
-export HAB_ORIGIN=chef
-#export HAB_ORIGIN_KEYS=cheftest
 export HAB_ORIGIN_KEYS=chef
 export HAB_STUDIO_SECRET_HAB_FEAT_IGNORE_LOCAL=false
 export HAB_FEAT_IGNORE_LOCAL=false
@@ -51,7 +48,7 @@ git checkout vikas/cs-changes-for-pipeline
 RESOLVED_RESULTS_DIR=$(realpath results/)
 export DO_CHECK=true
 
-cp ../results/* results
+cp ../results/*.hart ../results/chef*.pub ../results/chef*.key results
 ../.expeditor/replace.sh
 bookshelf_hart=$(ls -1t results/chef-bookshelf*.hart | head -1)
 chef_server_ctl_hart=$(ls -1t results/chef-chef-server-ctl*.hart | head -1)
