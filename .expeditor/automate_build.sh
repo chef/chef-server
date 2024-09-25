@@ -24,7 +24,7 @@ hab origin key generate chef
 
 # cd /workdir/src/bookshelf
 echo "generating package for $PACKAGE_NAME"
-HAB_FEAT_IGNORE_LOCAL=true HAB_ORIGIN=chef HAB_CACHE_KEY_PATH=$HAB_CACHE_KEY_PATH DO_CHECK=true hab studio run -D "hab pkg build src/$PACKAGE_NAME"
+HAB_FEAT_IGNORE_LOCAL=false HAB_ORIGIN=chef HAB_CACHE_KEY_PATH=$HAB_CACHE_KEY_PATH DO_CHECK=true hab studio run -D "hab pkg build src/$PACKAGE_NAME"
 # echo "which pushd " $(which pushd)
 
 
@@ -48,8 +48,8 @@ export CI=true
 export HAB_ORIGIN=chef
 #export HAB_ORIGIN_KEYS=cheftest
 export HAB_ORIGIN_KEYS=chef
-export HAB_STUDIO_SECRET_HAB_FEAT_IGNORE_LOCAL=true
-export HAB_FEAT_IGNORE_LOCAL=true
+export HAB_STUDIO_SECRET_HAB_FEAT_IGNORE_LOCAL=false
+export HAB_FEAT_IGNORE_LOCAL=false
 
 
 git clone https://github.com/chef/automate.git
