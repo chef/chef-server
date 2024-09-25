@@ -24,7 +24,7 @@ hab origin key generate cheftest
 
 # cd /workdir/src/bookshelf
 echo "generating package for $PACKAGE_NAME"
-HAB_ORIGIN=cheftest HAB_CACHE_KEY_PATH=$HAB_CACHE_KEY_PATH DO_CHECK=true hab studio run -D "hab pkg build src/$PACKAGE_NAME"
+HAB_FEAT_IGNORE_LOCAL=true HAB_ORIGIN=cheftest HAB_CACHE_KEY_PATH=$HAB_CACHE_KEY_PATH DO_CHECK=true hab studio run -D "hab pkg build src/$PACKAGE_NAME"
 # echo "which pushd " $(which pushd)
 
 
@@ -43,11 +43,11 @@ echo "pwd is " `pwd`
 export OCTOKIT_ACCESS_TOKEN
 export HAB_LICENSE=accept
 export CHEF_LICENSE="accept-no-persist"
-export CI="true"
+export CI=true
 export HAB_ORIGIN=cheftest
 export HAB_ORIGIN_KEYS=cheftest
-export HAB_STUDIO_SECRET_HAB_FEAT_IGNORE_LOCAL="true"
-export HAB_FEAT_IGNORE_LOCAL="true"
+export HAB_STUDIO_SECRET_HAB_FEAT_IGNORE_LOCAL=true
+export HAB_FEAT_IGNORE_LOCAL=true
 
 
 git clone https://github.com/chef/automate.git
@@ -96,14 +96,15 @@ cp $HAB_CACHE_KEY_PATH/* results/
 
 RESOLVED_RESULTS_DIR=$(realpath results/)
 HAB_CACHE_KEY_PATH=$RESOLVED_RESULTS_DIR 
+HAB_FEAT_OFFLINE_INSTALL=true
 ls $HAB_CACHE_KEY_PATH
 
 output_string_vikas=$(echo "$Bookself_hart_file" | sed 's|results/||')
 DO_CHECK=true
 echo "hab pkg install results/$output_string_vikas"
-hab pkg install results/$output_string_vikas
+# hab pkg install results/$output_string_vikas
 
-hab pkg build results/$output_string_vikas
+HAB_FEAT_OFFLINE_INSTALL=true HAB_FEAT_IGNORE_LOCAL=true HAB_ORIGIN=cheftest HAB_CACHE_KEY_PATH=$RESOLVED_RESULTS_DIR DO_CHECK=true hab studio run -D "hab pkg install results/$output_string_vikas; hab pkg build results/$output_string_vikas"
 
 # hab studio enter
 
