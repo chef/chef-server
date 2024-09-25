@@ -17,7 +17,7 @@ echo "--- :key: Generating fake origin key"
 hab license accept
 hab origin key generate cheftest
 # chef-server-ctl openresty-noroot bookshelf oc_bifrost oc_erchef oc-id  nginx
-for PACKAGE_NAME in chef-server-ctl openresty-noroot nginx; do
+for PACKAGE_NAME in chef-server-ctl openresty-noroot bookshelf oc_bifrost oc_erchef oc-id nginx; do
 
     if [[ "$PACKAGE_NAME" == "nginx" ]]; then
         plan_sh_change="src/$PACKAGE_NAME/habitat/plan.sh"
@@ -86,13 +86,12 @@ if [[ "$PACKAGE_NAME" == "nginx" ]]; then
     sed -i "s|\${vendor_origin}/chef-server-ctl|cheftest/${formatted_output}|g" "$plan_sh_change"
     cat $plan_sh_change
     echo "generating package for $PACKAGE_NAME"
-    HAB_FEAT_OFFLINE_INSTALL=true HAB_FEAT_IGNORE_LOCAL=true HAB_ORIGIN=cheftest HAB_CACHE_KEY_PATH=$RESOLVED_RESULTS_DIR DO_CHECK=true HAB_BLDR_CHANNEL=dev hab studio run -D "source .studiorc; set -e; hab pkg install results/$openrestyFilehart; hab pkg build components/$(name_resolver $PACKAGE_NAME)"
+    HAB_FEAT_OFFLINE_INSTALL=true HAB_FEAT_IGNORE_LOCAL=true HAB_ORIGIN=cheftest HAB_CACHE_KEY_PATH=$RESOLVED_RESULTS_DIR DO_CHECK=true HAB_BLDR_CHANNEL=dev hab studio run -D "source .studiorc; set -e; hab pkg install results/$openrestyFilehart; hab pkg build $(name_resolver $PACKAGE_NAME)"
 else
 hart_file=$(ls results/*$PACKAGE_NAME*.hart)
 output_string_file=$(echo "$hart_file" | sed 's|results/||')
 echo "hab pkg install $hart_file"
 HAB_FEAT_OFFLINE_INSTALL=true HAB_FEAT_IGNORE_LOCAL=true HAB_ORIGIN=cheftest HAB_CACHE_KEY_PATH=$RESOLVED_RESULTS_DIR DO_CHECK=true HAB_BLDR_CHANNEL=dev hab studio run -D "source .studiorc; set -e; hab pkg install results/$output_string_file; hab pkg build $(name_resolver $PACKAGE_NAME)"
-# HAB_FEAT_OFFLINE_INSTALL=true HAB_FEAT_IGNORE_LOCAL=true HAB_ORIGIN=chef HAB_CACHE_KEY_PATH=$RESOLVED_RESULTS_DIR DO_CHECK=true HAB_BLDR_CHANNEL=dev hab studio run -D "source .studiorc; set -e; hab pkg install results/$output_string_file; hab pkg build components/$(name_resolver $PACKAGE_NAME)"
 fi
 done
 
