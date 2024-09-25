@@ -1,6 +1,22 @@
 #!/bin/bash
 
+DEFAULT_COMPONENTS="automate-cs-bookshelf automate-cs-nginx automate-cs-oc-bifrost automate-cs-oc-erchef automate-cs-ocid"
+DEFAULT_COMPONENTS_DIR="components"
 tmp_file_name=""
+
+if [[ $# -ge 1 ]]
+then
+  components=$1
+else
+  components=${DEFAULT_COMPONENTS}
+fi
+
+if [[ $# -ge 2 ]]
+then
+  components_dir="$2"
+else
+  components_dir="${DEFAULT_COMPONENTS_DIR}"
+fi
 
 check_hart() {
     formated=` echo $1 | awk -F'-' -v b=2 -v e=7 '{printf "%s %s ", $(NF-2), $(NF-3); for (i=b;i<= (NF - 4);i++) printf "%s%s", $i, (i< (NF -4) ? "-" : "\n")}'`
@@ -28,9 +44,9 @@ do
   check_hart $hart
 done
 
-for component in `echo "automate-cs-bookshelf automate-cs-nginx automate-cs-oc-bifrost automate-cs-oc-erchef automate-cs-ocid"`
+for component in `echo "$components"`
 do
-  plan_file="components/$component/habitat/plan.sh"
+  plan_file="${components_dir}/$component/habitat/plan.sh"
   echo "Processing $plan_file"
   make_tmp
   tmp_file=${tmp_file_name}
@@ -47,7 +63,7 @@ do
       echo "timestamp $timestamp, version $version, component $CScomponent"
       CScomponent1=`escape_char $CScomponent`
       echo "sed \"/\/$CScomponent1/ s|\/$CScomponent1.*|$CScomponent1/$version/$timestamp|\""
-      sed -i "/pkg_deps/,/)/ s|\/$CScomponent1.*|/$CScomponent1/$version/$timestamp\"|" "${tmp_file}"
+      sed -i "tmp" "/pkg_deps/,/)/ s|\/$CScomponent1.*|/$CScomponent1/$version/$timestamp\"|" "${tmp_file}"
     fi
   done
   cp $tmp_file $plan_file
