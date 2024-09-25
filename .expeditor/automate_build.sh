@@ -53,7 +53,7 @@ ls $HAB_CACHE_KEY_PATH
 
 name_resolver() {
     local package_name="$1"
-    echo $(ls components/*$package_name*)
+    echo $(find components -name  "*$package_name*")
 }
 
 #  bifrost erchef id nginx 
@@ -61,7 +61,7 @@ for PACKAGE_NAME in bookshelf  ; do
 hart_file=$(ls results/*$PACKAGE_NAME*.hart)
 output_string_file=$(echo "$hart_file" | sed 's|results/||')
 echo "hab pkg install $hart_file"
-HAB_FEAT_OFFLINE_INSTALL=true HAB_FEAT_IGNORE_LOCAL=true HAB_ORIGIN=cheftest HAB_CACHE_KEY_PATH=$RESOLVED_RESULTS_DIR DO_CHECK=true HAB_BLDR_CHANNEL=dev hab studio run -D "source .studiorc; set -e; hab pkg install results/$output_string_file; hab pkg build components/$(name_resolver $PACKAGE_NAME)"
+HAB_FEAT_OFFLINE_INSTALL=true HAB_FEAT_IGNORE_LOCAL=true HAB_ORIGIN=cheftest HAB_CACHE_KEY_PATH=$RESOLVED_RESULTS_DIR DO_CHECK=true HAB_BLDR_CHANNEL=dev hab studio run -D "source .studiorc; set -e; hab pkg install results/$output_string_file; hab pkg build $(name_resolver $PACKAGE_NAME)"
 # HAB_FEAT_OFFLINE_INSTALL=true HAB_FEAT_IGNORE_LOCAL=true HAB_ORIGIN=chef HAB_CACHE_KEY_PATH=$RESOLVED_RESULTS_DIR DO_CHECK=true HAB_BLDR_CHANNEL=dev hab studio run -D "source .studiorc; set -e; hab pkg install results/$output_string_file; hab pkg build components/$(name_resolver $PACKAGE_NAME)"
 done
 
