@@ -16,8 +16,8 @@ HAB_CACHE_KEY_PATH="$JOB_TEMP_ROOT/keys"
 echo "--- :key: Generating fake origin key"
 hab license accept
 hab origin key generate cheftest
-#bookshelf oc_bifrost chef-server-ctl openresty-noroot nginx
-for PACKAGE_NAME in  oc_erchef oc-id ; do
+# chef-server-ctl openresty-noroot bookshelf oc_bifrost oc_erchef oc-id  nginx
+for PACKAGE_NAME in chef-server-ctl openresty-noroot nginx; do
 
     if [[ "$PACKAGE_NAME" == "nginx" ]]; then
         plan_sh_change="src/$PACKAGE_NAME/habitat/plan.sh"
@@ -72,8 +72,8 @@ name_resolver() {
     echo $(find components -name  "automate-cs*$package_name*" -type d)
 }
 
-#bookshelf bifrost nginx
-for PACKAGE_NAME in  erchef id ; do
+#bookshelf bifrost erchef id nginx
+for PACKAGE_NAME in nginx ; do
 if [[ "$PACKAGE_NAME" == "nginx" ]]; then
     plan_sh_change="components/$(name_resolver $PACKAGE_NAME)/habitat/plan.sh"
     pushd results
