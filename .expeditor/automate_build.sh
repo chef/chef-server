@@ -75,13 +75,13 @@ name_resolver() {
 #bookshelf bifrost erchef id nginx
 for PACKAGE_NAME in nginx ; do
 if [[ "$PACKAGE_NAME" == "nginx" ]]; then
-    plan_sh_change="components/$(name_resolver $PACKAGE_NAME)/habitat/plan.sh"
+    plan_sh_change="$(name_resolver $PACKAGE_NAME)/habitat/plan.sh"
     pushd results
     ctlFilehart=$(ls -1t *chef-server-ctl*.hart | head -1)
     popd
     echo "chef-server-ctl package hart file is this: $ctlFilehart"
     base_name=$(basename "$ctlFilehart")
-    IFS='-' read -r some name comp version timestamp os <<< "${base_name%.hart}"
+    IFS='-' read -r some name ctl comp version timestamp os <<< "${base_name%.hart}"
     formatted_output="openresty-noroot/$version/$timestamp"
     sed -i "s|\${vendor_origin}/chef-server-ctl|cheftest/${formatted_output}|g" "$plan_sh_change"
     cat $plan_sh_change
