@@ -1,7 +1,7 @@
 #!/bin/bash -e
 
-export ORIGIN=chef
-export HAB_ORIGIN=chef
+export ORIGIN=cheftest
+export HAB_ORIGIN=cheftest
 export HAB_LICENSE=accept-no-persist
 
 curl https://raw.githubusercontent.com/habitat-sh/habitat/main/components/hab/install.sh | sudo bash
