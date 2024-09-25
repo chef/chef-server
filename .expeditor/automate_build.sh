@@ -16,11 +16,26 @@ HAB_CACHE_KEY_PATH="$JOB_TEMP_ROOT/keys"
 echo "--- :key: Generating fake origin key"
 hab license accept
 hab origin key generate cheftest
-#  openresty-noroot nginx
-for PACKAGE_NAME in bookshelf oc_bifrost oc_erchef oc-id  ; do
+#bookshelf oc_bifrost oc_erchef oc-id
+for PACKAGE_NAME in   openresty-noroot nginx ; do
+
+    if [[ "$PACKAGE_NAME" != "nginx" ]]; then
+        plan_sh_change="src/$Package_name/habitat/plan.sh"
+        pushd results
+        openrestyFilehart=$(ls -1t *openresty*.hart | head -1)
+        popd
+        echo "openresty-noroot package hart file is this: $openrestyFilehart"
+        base_name=$(basename "$openrestyFilehart")
+        IFS='-' read -r name comp version timestamp os <<< "${base_name%.hart}"
+        formatted_output="$comp/$version/$timestamp"
+        sed -i "s|\${HAB_ORIGIN:-chef}/openresty-noroot|cheftest/${formatted_output}|g" "$plan_file"
+        echo "generating package for $PACKAGE_NAME"
+        HAB_FEAT_IGNORE_LOCAL=true HAB_ORIGIN=cheftest HAB_CACHE_KEY_PATH=$HAB_CACHE_KEY_PATH DO_CHECK=true hab studio run -D "hab pkg build src/$PACKAGE_NAME"
+    else
+
 echo "generating package for $PACKAGE_NAME"
 HAB_FEAT_IGNORE_LOCAL=true HAB_ORIGIN=cheftest HAB_CACHE_KEY_PATH=$HAB_CACHE_KEY_PATH DO_CHECK=true hab studio run -D "hab pkg build src/$PACKAGE_NAME"
-# HAB_FEAT_IGNORE_LOCAL=true HAB_ORIGIN=cheftest HAB_CACHE_KEY_PATH=$HAB_CACHE_KEY_PATH DO_CHECK=true hab studio run -D "hab pkg build src/$PACKAGE_NAME"
+fi
 done
 
 # =======================================================building Chef-server components With Automate=======================================================
@@ -56,8 +71,8 @@ name_resolver() {
     echo $(find components -name  "automte-cs*$package_name*" -type d)
 }
 
-#
-for PACKAGE_NAME in bookshelf bifrost erchef id  ; do
+#bookshelf bifrost erchef id
+for PACKAGE_NAME in  nginx ; do
 hart_file=$(ls results/*$PACKAGE_NAME*.hart)
 output_string_file=$(echo "$hart_file" | sed 's|results/||')
 echo "hab pkg install $hart_file"
