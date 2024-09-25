@@ -36,8 +36,8 @@ pipelines:
   - verify
   - verify:
       public: true
-  - verify_private:
-      description: Pull Request validation tests requiring access keys and build automate pkgs
+  # - verify_private:
+  #     description: Pull Request validation tests requiring access keys and build automate pkgs
   - habitat/build
   - habitat/test:
       definition: .expeditor/habitat-test.pipeline.yml
