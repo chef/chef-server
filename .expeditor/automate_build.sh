@@ -16,8 +16,8 @@ HAB_CACHE_KEY_PATH="$JOB_TEMP_ROOT/keys"
 echo "--- :key: Generating fake origin key"
 hab license accept
 hab origin key generate cheftest
-#oc_bifrost oc_erchef oc-id  nginx
-for PACKAGE_NAME in bookshelf  ; do
+
+for PACKAGE_NAME in bookshelf oc_bifrost oc_erchef oc-id  nginx  ; do
 echo "generating package for $PACKAGE_NAME"
 HAB_FEAT_IGNORE_LOCAL=true HAB_ORIGIN=cheftest HAB_CACHE_KEY_PATH=$HAB_CACHE_KEY_PATH DO_CHECK=true hab studio run -D "hab pkg build src/$PACKAGE_NAME"
 # HAB_FEAT_IGNORE_LOCAL=true HAB_ORIGIN=cheftest HAB_CACHE_KEY_PATH=$HAB_CACHE_KEY_PATH DO_CHECK=true hab studio run -D "hab pkg build src/$PACKAGE_NAME"
@@ -56,8 +56,8 @@ name_resolver() {
     echo $(find components -name  "*$package_name*")
 }
 
-#  bifrost erchef id nginx 
-for PACKAGE_NAME in bookshelf  ; do
+
+for PACKAGE_NAME in bookshelf bifrost erchef id nginx  ; do
 hart_file=$(ls results/*$PACKAGE_NAME*.hart)
 output_string_file=$(echo "$hart_file" | sed 's|results/||')
 echo "hab pkg install $hart_file"
