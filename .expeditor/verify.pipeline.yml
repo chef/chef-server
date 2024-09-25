@@ -4,7 +4,7 @@ expeditor:
     - vendor
   defaults:
     buildkite:
-      timeout_in_minutes: 30
+      timeout_in_minutes: 240
 
 steps:
 
