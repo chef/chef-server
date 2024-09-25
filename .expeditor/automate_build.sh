@@ -53,7 +53,7 @@ ls $HAB_CACHE_KEY_PATH
 
 name_resolver() {
     local package_name="$1"
-    echo $(find components -name  "*$package_name*")
+    echo $(find components -name  "automte-cs*$package_name*" -type d)
 }
 
 #
