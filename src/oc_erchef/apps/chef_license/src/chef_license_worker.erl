@@ -10,10 +10,6 @@
     test_license/0
 ]).
 
--ifdef(TEST).
--export([refresh_license/0]).
--endif.
-
 -export([
     init/1,
     handle_call/3,
