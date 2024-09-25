@@ -74,11 +74,26 @@ name_resolver() {
 
 #bookshelf bifrost erchef id
 for PACKAGE_NAME in  nginx ; do
+if [[ "$PACKAGE_NAME" == "nginx" ]]; then
+    plan_sh_change="components/$(name_resolver $PACKAGE_NAME)/habitat/plan.sh"
+    pushd results
+    ctlFilehart=$(ls -1t *chef-server-ctl*.hart | head -1)
+    popd
+    echo "chef-server-ctl package hart file is this: $ctlFilehart"
+    base_name=$(basename "$ctlFilehart")
+    IFS='-' read -r some name comp version timestamp os <<< "${base_name%.hart}"
+    formatted_output="openresty-noroot/$version/$timestamp"
+    sed -i "s|\${vendor_origin}/chef-server-ctl|cheftest/${formatted_output}|g" "$plan_sh_change"
+    cat $plan_sh_change
+    echo "generating package for $PACKAGE_NAME"
+    HAB_FEAT_OFFLINE_INSTALL=true HAB_FEAT_IGNORE_LOCAL=true HAB_ORIGIN=cheftest HAB_CACHE_KEY_PATH=$RESOLVED_RESULTS_DIR DO_CHECK=true HAB_BLDR_CHANNEL=dev hab studio run -D "source .studiorc; set -e; hab pkg install results/$openrestyFilehart; hab pkg build components/$(name_resolver $PACKAGE_NAME)"
+else
 hart_file=$(ls results/*$PACKAGE_NAME*.hart)
 output_string_file=$(echo "$hart_file" | sed 's|results/||')
 echo "hab pkg install $hart_file"
 HAB_FEAT_OFFLINE_INSTALL=true HAB_FEAT_IGNORE_LOCAL=true HAB_ORIGIN=cheftest HAB_CACHE_KEY_PATH=$RESOLVED_RESULTS_DIR DO_CHECK=true HAB_BLDR_CHANNEL=dev hab studio run -D "source .studiorc; set -e; hab pkg install results/$output_string_file; hab pkg build $(name_resolver $PACKAGE_NAME)"
 # HAB_FEAT_OFFLINE_INSTALL=true HAB_FEAT_IGNORE_LOCAL=true HAB_ORIGIN=chef HAB_CACHE_KEY_PATH=$RESOLVED_RESULTS_DIR DO_CHECK=true HAB_BLDR_CHANNEL=dev hab studio run -D "source .studiorc; set -e; hab pkg install results/$output_string_file; hab pkg build components/$(name_resolver $PACKAGE_NAME)"
+fi
 done
 
 tar -cvf results.tar results
