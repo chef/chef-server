@@ -57,7 +57,7 @@ name_resolver() {
 }
 
 
-for PACKAGE_NAME in bookshelf bifrost erchef id nginx  ; do
+for PACKAGE_NAME in bookshelf bifrost erchef id openresty-noroot nginx  ; do
 hart_file=$(ls results/*$PACKAGE_NAME*.hart)
 output_string_file=$(echo "$hart_file" | sed 's|results/||')
 echo "hab pkg install $hart_file"
