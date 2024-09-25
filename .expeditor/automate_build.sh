@@ -24,7 +24,7 @@ hab origin key generate cheftest
 
 # cd /workdir/src/bookshelf
 echo "generating package for $PACKAGE_NAME"
-hab pkg build "src/$PACKAGE_NAME"
+HAB_ORIGIN=cheftest HAB_CACHE_KEY_PATH=$HAB_CACHE_KEY_PATH DO_CHECK=true hab studio run -D "hab pkg build src/$PACKAGE_NAME"
 # echo "which pushd " $(which pushd)
 
 
