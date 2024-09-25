@@ -29,7 +29,7 @@ for PACKAGE_NAME in openresty-noroot nginx ; do
         IFS='-' read -r name comp version timestamp os <<< "${base_name%.hart}"
         formatted_output="$comp/$version/$timestamp"
         sed -i "s|\${HAB_ORIGIN:-chef}/openresty-noroot|cheftest/${formatted_output}|g" "$plan_sh_change"
-        cat $openrestyFilehart
+        cat $plan_sh_change
         echo "generating package for $PACKAGE_NAME"
         HAB_FEAT_IGNORE_LOCAL=true HAB_ORIGIN=cheftest HAB_CACHE_KEY_PATH=$HAB_CACHE_KEY_PATH DO_CHECK=true hab studio run -D "hab pkg build src/$PACKAGE_NAME"
     else
@@ -85,4 +85,4 @@ tar -cvf results.tar results
 echo "results.tar created"
 gzip results.tar
 
-buildkite-agent artifact upload results.tar.gz
+# buildkite-agent artifact upload results.tar.gz
