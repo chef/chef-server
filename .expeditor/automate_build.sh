@@ -3,7 +3,7 @@
 
 # =======================================================CS Things=======================================================
 export CHEF_SERVER_SRC='/workdir/src'
-export HAB_ORIGIN=cheftest
+export HAB_ORIGIN=chef
 export HAB_LICENSE=accept-no-persist
 # export pkg_name=bookshelf
 export PACKAGE_NAME=bookshelf
@@ -20,11 +20,11 @@ HAB_CACHE_KEY_PATH="$JOB_TEMP_ROOT/keys"
 
 echo "--- :key: Generating fake origin key"
 hab license accept
-hab origin key generate cheftest
+hab origin key generate chef
 
 # cd /workdir/src/bookshelf
 echo "generating package for $PACKAGE_NAME"
-HAB_FEAT_IGNORE_LOCAL=true HAB_ORIGIN=cheftest HAB_CACHE_KEY_PATH=$HAB_CACHE_KEY_PATH DO_CHECK=true hab studio run -D "hab pkg build src/$PACKAGE_NAME"
+HAB_FEAT_IGNORE_LOCAL=true HAB_ORIGIN=chef HAB_CACHE_KEY_PATH=$HAB_CACHE_KEY_PATH DO_CHECK=true hab studio run -D "hab pkg build src/$PACKAGE_NAME"
 # echo "which pushd " $(which pushd)
 
 
@@ -44,8 +44,10 @@ export OCTOKIT_ACCESS_TOKEN
 export HAB_LICENSE=accept
 export CHEF_LICENSE="accept-no-persist"
 export CI=true
-export HAB_ORIGIN=cheftest
-export HAB_ORIGIN_KEYS=cheftest
+#export HAB_ORIGIN=cheftest
+export HAB_ORIGIN=chef
+#export HAB_ORIGIN_KEYS=cheftest
+export HAB_ORIGIN_KEYS=chef
 export HAB_STUDIO_SECRET_HAB_FEAT_IGNORE_LOCAL=true
 export HAB_FEAT_IGNORE_LOCAL=true
 
@@ -105,7 +107,7 @@ DO_CHECK=true
 echo "hab pkg install results/$output_string_vikas"
 # hab pkg install results/$output_string_vikas
 
-HAB_FEAT_OFFLINE_INSTALL=true HAB_FEAT_IGNORE_LOCAL=true HAB_ORIGIN=cheftest HAB_CACHE_KEY_PATH=$RESOLVED_RESULTS_DIR DO_CHECK=true HAB_BLDR_CHANNEL=dev hab studio run -D "source .studiorc; set -e; hab pkg install results/$output_string_vikas; hab pkg build components/automate-cs-bookshelf"
+HAB_FEAT_OFFLINE_INSTALL=true HAB_FEAT_IGNORE_LOCAL=true HAB_ORIGIN=chef HAB_CACHE_KEY_PATH=$RESOLVED_RESULTS_DIR DO_CHECK=true HAB_BLDR_CHANNEL=dev hab studio run -D "source .studiorc; set -e; hab pkg install results/$output_string_vikas; hab pkg build components/automate-cs-bookshelf"
 
 # hab studio enter
 
