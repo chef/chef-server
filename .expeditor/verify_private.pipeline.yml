@@ -1,0 +1,50 @@
+expeditor:
+  cached_folders:
+    - vendor
+  defaults:
+    buildkite:
+      timeout_in_minutes: 150
+
+steps:
+
+#########################################################################
+  # Automate Build
+#########################################################################
+
+- label: automate_build
+  command:
+      - .expeditor/automate_build.sh
+  env:
+      ALLOW_LOCAL_PACKAGES: true
+      HAB_STUDIO_SUP: false
+      HAB_NONINTERACTIVE: true
+      HAB_STUDIO_SECRET_HAB_FEAT_IGNORE_LOCAL: true
+      HAB_STUDIO_SECRET_HAB_FEAT_OFFLINE_INSTALL: true
+  expeditor:
+    secrets:
+        HAB_STUDIO_SECRET_GITHUB_TOKEN:
+          account: github/chef
+          field: token
+        OPENSEARCH_ROOT_CA_PEM:
+          path: secret/a2/a2ha/opensearch
+          field: root-ca.pem
+        OPENSEARCH_ADMIN_PEM:
+          path: secret/a2/a2ha/opensearch
+          field: admin.pem
+        OPENSEARCH_ADMIN_KEY_PEM:
+          path: secret/a2/a2ha/opensearch
+          field: admin-key.pem
+        OPENSEARCH_NODE1_PEM:
+          path: secret/a2/a2ha/opensearch
+          field: node1.pem
+        OPENSEARCH_NODE1_KEY_PEM:
+          path: secret/a2/a2ha/opensearch
+          field: node1-key.pem
+    executor:
+        linux:
+          privileged: true
+
+
+#########################################################################
+  # Automate Build
+#########################################################################

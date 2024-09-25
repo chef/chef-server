@@ -4,213 +4,172 @@ expeditor:
     - vendor
   defaults:
     buildkite:
-      timeout_in_minutes: 240
+      timeout_in_minutes: 30
 
 steps:
 
-# #########################################################################
-#   # Lint Tests
-# #########################################################################
-
-# - label: license-scout
-#   command:
-#     - .expeditor/license_scout.sh
-#   expeditor:
-#     executor:
-#       docker:
-#         environment:
-#           - OCTOKIT_ACCESS_TOKEN
-
-# #########################################################################
-#   # Component Tests
-# #########################################################################
-
-# - label: omnibus
-#   command:
-#     - /workdir/scripts/bk_tests/bk_install.sh
-#     - gem uninstall bundler -v '>= 2.0.1' -a
-#     - cd /workdir/omnibus; make install
-#     - make ci
-#   expeditor:
-#     executor:
-#       docker:
-#         image: "chefes/a1-buildkite"
-#         environment:
-#           - LUALIB=~/.luarocks/lib/lua/5.2
-#           - COMPONENT=omnibus
-
-# - label: chef-server-ctl
-#   command:
-#     - /workdir/scripts/bk_tests/bk_install.sh
-#     - cd /workdir/src/chef-server-ctl; make install
-#     - make ci
-#   expeditor:
-#     executor:
-#       docker:
-#         image: "chefes/a1-buildkite"
-#         environment:
-#           - COMPONENT=src/chef-server-ctl
-
-# - label: oc_erchef_unit
-#   command:
-#     - date
-#     - /workdir/scripts/bk_tests/bk_install.sh
-#     - date
-#     - cd /workdir/src/oc_erchef; make install
-#     - make ci_eunit
-#     - date
-#   expeditor:
-#     executor:
-#       docker:
-#         image: "chefes/a1-buildkite"
-#         environment:
-#           - PATH=/opt/asdf/shims:/opt/asdf/bin:/opt/ci-studio-common/bin:/go/bin:/go/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/opt/chefdk/bin
-#           - PERL5LIB=~/perl5/lib/perl5/x86_64-linux-gnu-thread-multi:~/perl5/lib/perl5:/etc/perl:/usr/local/lib/perl/5.14.2:/usr/local/share/perl/5.14.2:/usr/lib/perl5:/usr/share/perl5:/usr/lib/perl/5.14:/usr/share/perl/5.14:/usr/local/lib/site_perl
-#           - LUALIB=~/.luarocks/lib/lua/5.2
-#           - ELIXIR_VERSION=1.4
-#           - COMPONENT=src/oc_
-
-# - label: oc_erchef_ct
-#   command:
-#     - date
-#     - /workdir/scripts/bk_tests/bk_install.sh
-#     - date
-#     - cd /workdir/src/oc_erchef; make install
-#     - make ci_ct
-#     - date
-#   expeditor:
-#     executor:
-#       docker:
-#         image: "chefes/a1-buildkite"
-#         environment:
-#           - PATH=/opt/asdf/shims:/opt/asdf/bin:/opt/ci-studio-common/bin:/go/bin:/go/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/opt/chefdk/bin
-#           - PERL5LIB=~/perl5/lib/perl5/x86_64-linux-gnu-thread-multi:~/perl5/lib/perl5:/etc/perl:/usr/local/lib/perl/5.14.2:/usr/local/share/perl/5.14.2:/usr/lib/perl5:/usr/share/perl5:/usr/lib/perl/5.14:/usr/share/perl/5.14:/usr/local/lib/site_perl
-#           - LUALIB=~/.luarocks/lib/lua/5.2
-#           - ELIXIR_VERSION=1.4
-#           - COMPONENT=src/oc_erchef
-
-# - label: oc-id
-#   command:
-#     - /workdir/scripts/bk_tests/bk_install.sh
-#     - cd /workdir/src/oc-id
-#     - make install ci
-#   expeditor:
-#     executor:
-#       docker:
-#         image: "chefes/a1-buildkite"
-#         environment:
-#           - COMPONENT=src/oc-id
-
-# - label: oc_bifrost
-#   command:
-#     - /workdir/scripts/bk_tests/bk_install.sh
-#     - cd /workdir/src/oc_bifrost; make install
-#     - make ci
-#   expeditor:
-#     executor:
-#       docker:
-#         image: "chefes/a1-buildkite"
-#         environment:
-#           - PATH=/opt/asdf/shims:/opt/asdf/bin:/opt/ci-studio-common/bin:/go/bin:/go/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/opt/chefdk/bin
-#           - PERL5LIB=~/perl5/lib/perl5/x86_64-linux-gnu-thread-multi:~/perl5/lib/perl5:/etc/perl:/usr/local/lib/perl/5.14.2:/usr/local/share/perl/5.14.2:/usr/lib/perl5:/usr/share/perl5:/usr/lib/perl/5.14:/usr/share/perl/5.14:/usr/local/lib/site_perl
-#           - LUALIB=~/.luarocks/lib/lua/5.2
-#           - COMPONENT=src/oc_bifrost
-
-# - label: bookshelf
-#   command:
-#     - /workdir/scripts/bk_tests/bk_install.sh
-#     - cd /workdir/src/bookshelf; make install
-#     - make ci
-#   expeditor:
-#     executor:
-#       docker:
-#         image: "chefes/a1-buildkite"
-#         environment:
-#           - PATH=/opt/asdf/shims:/opt/asdf/bin:/opt/ci-studio-common/bin:/go/bin:/go/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/opt/chefdk/bin
-#           - PERL5LIB=~/perl5/lib/perl5/x86_64-linux-gnu-thread-multi:~/perl5/lib/perl5:/etc/perl:/usr/local/lib/perl/5.14.2:/usr/local/share/perl/5.14.2:/usr/lib/perl5:/usr/share/perl5:/usr/lib/perl/5.14:/usr/share/perl/5.14:/usr/local/lib/site_perl
-#           - LUALIB=~/.luarocks/lib/lua/5.2
-#           - COMPONENT=src/bookshelf
-
-# # #########################################################################
-# #   # Pedant Tests
-# # #########################################################################
-
-# - label: With chef-zero
-#   command:
-#     - /workdir/scripts/bk_tests/bk_install.sh
-#     - gem uninstall bundler -v '>= 2.0.1' -a
-#     - cp scripts/bk_tests/chef_zero-Gemfile oc-chef-pedant/Gemfile
-#     - bundle install --jobs=3 --retry=3 --path=/workdir/vendor/bundle
-#     - cd /workdir/oc-chef-pedant
-#     - bundle exec rake chef_zero_spec
-#   expeditor:
-#     executor:
-#       docker:
-#         image: "chefes/a1-buildkite"
-#         environment:
-#           - LUALIB=~/.luarocks/lib/lua/5.2
-#           - USE_OMNIBUS_FILES=0
-#           - PEDANT_OPTS="--skip-oc_id"
-#           - BUNDLE_GEMFILE=/workdir/oc-chef-pedant/Gemfile
-
-# - label: With ChefFS=1
-#   command:
-#     - /workdir/scripts/bk_tests/bk_install.sh
-#     - gem install bundler -v 2.2.4
-#     - gem uninstall bundler -v '> 2.2.4' -a
-#     - cp scripts/bk_tests/chef_zero-Gemfile oc-chef-pedant/Gemfile
-#     - bundle install --jobs=3 --retry=3 --path=/workdir/vendor/bundle
-#     - cd /workdir/oc-chef-pedant
-#     - bundle exec rake chef_zero_spec
-#   expeditor:
-#     executor:
-#       docker:
-#         image: "chefes/a1-buildkite"
-#         environment:
-#           - LUALIB=~/.luarocks/lib/lua/5.2
-#           - USE_OMNIBUS_FILES=0
-#           - PEDANT_OPTS="--skip-oc_id"
-#           - CHEF_FS=1
-#           - BUNDLE_GEMFILE=/workdir/oc-chef-pedant/Gemfile
-
 #########################################################################
-  # Automate Build
+  # Lint Tests
 #########################################################################
 
-- label: automate_build
+- label: license-scout
   command:
-      - .expeditor/automate_build.sh
-  env:
-      ALLOW_LOCAL_PACKAGES: true
-      HAB_STUDIO_SUP: false
-      HAB_NONINTERACTIVE: true
-      HAB_STUDIO_SECRET_HAB_FEAT_IGNORE_LOCAL: true
-      HAB_STUDIO_SECRET_HAB_FEAT_OFFLINE_INSTALL: true
+    - .expeditor/license_scout.sh
   expeditor:
-    secrets:
-        HAB_STUDIO_SECRET_GITHUB_TOKEN:
-          account: github/chef
-          field: token
-        OPENSEARCH_ROOT_CA_PEM:
-          path: secret/a2/a2ha/opensearch
-          field: root-ca.pem
-        OPENSEARCH_ADMIN_PEM:
-          path: secret/a2/a2ha/opensearch
-          field: admin.pem
-        OPENSEARCH_ADMIN_KEY_PEM:
-          path: secret/a2/a2ha/opensearch
-          field: admin-key.pem
-        OPENSEARCH_NODE1_PEM:
-          path: secret/a2/a2ha/opensearch
-          field: node1.pem
-        OPENSEARCH_NODE1_KEY_PEM:
-          path: secret/a2/a2ha/opensearch
-          field: node1-key.pem
     executor:
-        linux:
-          privileged: true
-
+      docker:
+        environment:
+          - OCTOKIT_ACCESS_TOKEN
 
 #########################################################################
-  # Automate Build
+  # Component Tests
 #########################################################################
+
+- label: omnibus
+  command:
+    - /workdir/scripts/bk_tests/bk_install.sh
+    - gem uninstall bundler -v '>= 2.0.1' -a
+    - cd /workdir/omnibus; make install
+    - make ci
+  expeditor:
+    executor:
+      docker:
+        image: "chefes/a1-buildkite"
+        environment:
+          - LUALIB=~/.luarocks/lib/lua/5.2
+          - COMPONENT=omnibus
+
+- label: chef-server-ctl
+  command:
+    - /workdir/scripts/bk_tests/bk_install.sh
+    - cd /workdir/src/chef-server-ctl; make install
+    - make ci
+  expeditor:
+    executor:
+      docker:
+        image: "chefes/a1-buildkite"
+        environment:
+          - COMPONENT=src/chef-server-ctl
+
+- label: oc_erchef_unit
+  command:
+    - date
+    - /workdir/scripts/bk_tests/bk_install.sh
+    - date
+    - cd /workdir/src/oc_erchef; make install
+    - make ci_eunit
+    - date
+  expeditor:
+    executor:
+      docker:
+        image: "chefes/a1-buildkite"
+        environment:
+          - PATH=/opt/asdf/shims:/opt/asdf/bin:/opt/ci-studio-common/bin:/go/bin:/go/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/opt/chefdk/bin
+          - PERL5LIB=~/perl5/lib/perl5/x86_64-linux-gnu-thread-multi:~/perl5/lib/perl5:/etc/perl:/usr/local/lib/perl/5.14.2:/usr/local/share/perl/5.14.2:/usr/lib/perl5:/usr/share/perl5:/usr/lib/perl/5.14:/usr/share/perl/5.14:/usr/local/lib/site_perl
+          - LUALIB=~/.luarocks/lib/lua/5.2
+          - ELIXIR_VERSION=1.4
+          - COMPONENT=src/oc_
+
+- label: oc_erchef_ct
+  command:
+    - date
+    - /workdir/scripts/bk_tests/bk_install.sh
+    - date
+    - cd /workdir/src/oc_erchef; make install
+    - make ci_ct
+    - date
+  expeditor:
+    executor:
+      docker:
+        image: "chefes/a1-buildkite"
+        environment:
+          - PATH=/opt/asdf/shims:/opt/asdf/bin:/opt/ci-studio-common/bin:/go/bin:/go/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/opt/chefdk/bin
+          - PERL5LIB=~/perl5/lib/perl5/x86_64-linux-gnu-thread-multi:~/perl5/lib/perl5:/etc/perl:/usr/local/lib/perl/5.14.2:/usr/local/share/perl/5.14.2:/usr/lib/perl5:/usr/share/perl5:/usr/lib/perl/5.14:/usr/share/perl/5.14:/usr/local/lib/site_perl
+          - LUALIB=~/.luarocks/lib/lua/5.2
+          - ELIXIR_VERSION=1.4
+          - COMPONENT=src/oc_erchef
+
+- label: oc-id
+  command:
+    - /workdir/scripts/bk_tests/bk_install.sh
+    - cd /workdir/src/oc-id
+    - make install ci
+  expeditor:
+    executor:
+      docker:
+        image: "chefes/a1-buildkite"
+        environment:
+          - COMPONENT=src/oc-id
+
+- label: oc_bifrost
+  command:
+    - /workdir/scripts/bk_tests/bk_install.sh
+    - cd /workdir/src/oc_bifrost; make install
+    - make ci
+  expeditor:
+    executor:
+      docker:
+        image: "chefes/a1-buildkite"
+        environment:
+          - PATH=/opt/asdf/shims:/opt/asdf/bin:/opt/ci-studio-common/bin:/go/bin:/go/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/opt/chefdk/bin
+          - PERL5LIB=~/perl5/lib/perl5/x86_64-linux-gnu-thread-multi:~/perl5/lib/perl5:/etc/perl:/usr/local/lib/perl/5.14.2:/usr/local/share/perl/5.14.2:/usr/lib/perl5:/usr/share/perl5:/usr/lib/perl/5.14:/usr/share/perl/5.14:/usr/local/lib/site_perl
+          - LUALIB=~/.luarocks/lib/lua/5.2
+          - COMPONENT=src/oc_bifrost
+
+- label: bookshelf
+  command:
+    - /workdir/scripts/bk_tests/bk_install.sh
+    - cd /workdir/src/bookshelf; make install
+    - make ci
+  expeditor:
+    executor:
+      docker:
+        image: "chefes/a1-buildkite"
+        environment:
+          - PATH=/opt/asdf/shims:/opt/asdf/bin:/opt/ci-studio-common/bin:/go/bin:/go/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/opt/chefdk/bin
+          - PERL5LIB=~/perl5/lib/perl5/x86_64-linux-gnu-thread-multi:~/perl5/lib/perl5:/etc/perl:/usr/local/lib/perl/5.14.2:/usr/local/share/perl/5.14.2:/usr/lib/perl5:/usr/share/perl5:/usr/lib/perl/5.14:/usr/share/perl/5.14:/usr/local/lib/site_perl
+          - LUALIB=~/.luarocks/lib/lua/5.2
+          - COMPONENT=src/bookshelf
+
+# #########################################################################
+#   # Pedant Tests
+# #########################################################################
+
+- label: With chef-zero
+  command:
+    - /workdir/scripts/bk_tests/bk_install.sh
+    - gem uninstall bundler -v '>= 2.0.1' -a
+    - cp scripts/bk_tests/chef_zero-Gemfile oc-chef-pedant/Gemfile
+    - bundle install --jobs=3 --retry=3 --path=/workdir/vendor/bundle
+    - cd /workdir/oc-chef-pedant
+    - bundle exec rake chef_zero_spec
+  expeditor:
+    executor:
+      docker:
+        image: "chefes/a1-buildkite"
+        environment:
+          - LUALIB=~/.luarocks/lib/lua/5.2
+          - USE_OMNIBUS_FILES=0
+          - PEDANT_OPTS="--skip-oc_id"
+          - BUNDLE_GEMFILE=/workdir/oc-chef-pedant/Gemfile
+
+- label: With ChefFS=1
+  command:
+    - /workdir/scripts/bk_tests/bk_install.sh
+    - gem install bundler -v 2.2.4
+    - gem uninstall bundler -v '> 2.2.4' -a
+    - cp scripts/bk_tests/chef_zero-Gemfile oc-chef-pedant/Gemfile
+    - bundle install --jobs=3 --retry=3 --path=/workdir/vendor/bundle
+    - cd /workdir/oc-chef-pedant
+    - bundle exec rake chef_zero_spec
+  expeditor:
+    executor:
+      docker:
+        image: "chefes/a1-buildkite"
+        environment:
+          - LUALIB=~/.luarocks/lib/lua/5.2
+          - USE_OMNIBUS_FILES=0
+          - PEDANT_OPTS="--skip-oc_id"
+          - CHEF_FS=1
+          - BUNDLE_GEMFILE=/workdir/oc-chef-pedant/Gemfile
+
