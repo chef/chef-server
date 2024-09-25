@@ -26,8 +26,8 @@ for PACKAGE_NAME in openresty-noroot nginx ; do
         popd
         echo "openresty-noroot package hart file is this: $openrestyFilehart"
         base_name=$(basename "$openrestyFilehart")
-        IFS='-' read -r name comp version timestamp os <<< "${base_name%.hart}"
-        formatted_output="$comp/$version/$timestamp"
+        IFS='-' read -r some name comp version timestamp os <<< "${base_name%.hart}"
+        formatted_output="openresty-noroot/$version/$timestamp"
         sed -i "s|\${HAB_ORIGIN:-chef}/openresty-noroot|cheftest/${formatted_output}|g" "$plan_sh_change"
         cat $plan_sh_change
         echo "generating package for $PACKAGE_NAME"
