@@ -104,7 +104,7 @@ DO_CHECK=true
 echo "hab pkg install results/$output_string_vikas"
 # hab pkg install results/$output_string_vikas
 
-HAB_FEAT_OFFLINE_INSTALL=true HAB_FEAT_IGNORE_LOCAL=true HAB_ORIGIN=cheftest HAB_CACHE_KEY_PATH=$RESOLVED_RESULTS_DIR DO_CHECK=true hab studio run -D "hab pkg install results/$output_string_vikas; hab pkg build results/$output_string_vikas"
+HAB_FEAT_OFFLINE_INSTALL=true HAB_FEAT_IGNORE_LOCAL=true HAB_ORIGIN=cheftest HAB_CACHE_KEY_PATH=$RESOLVED_RESULTS_DIR DO_CHECK=true hab studio run -D "hab pkg install results/$output_string_vikas; hab pkg build components/automate-cs-bookshelf"
 
 # hab studio enter
 
