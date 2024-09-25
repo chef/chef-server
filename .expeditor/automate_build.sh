@@ -17,7 +17,7 @@ echo "--- :key: Generating fake origin key"
 hab license accept
 hab origin key generate cheftest
 #bookshelf oc_bifrost oc_erchef oc-id
-for PACKAGE_NAME in openresty-noroot nginx ; do
+for PACKAGE_NAME in chef-server-ctl openresty-noroot nginx ; do
 
     if [[ "$PACKAGE_NAME" == "nginx" ]]; then
         plan_sh_change="src/$PACKAGE_NAME/habitat/plan.sh"
