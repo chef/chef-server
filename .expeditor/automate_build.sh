@@ -56,7 +56,7 @@ name_resolver() {
 }
 
 #bookshelf bifrost erchef
-for PACKAGE_NAME in  ocid nginx ; do
+for PACKAGE_NAME in  id nginx ; do
 hart_file=$(ls results/*$PACKAGE_NAME*.hart)
 echo "hab pkg install results/$hart_file"
 HAB_FEAT_OFFLINE_INSTALL=true HAB_FEAT_IGNORE_LOCAL=true HAB_ORIGIN=chef HAB_CACHE_KEY_PATH=$RESOLVED_RESULTS_DIR DO_CHECK=true HAB_BLDR_CHANNEL=dev hab studio run -D "source .studiorc; set -e; hab pkg install results/$hart_file; hab pkg build components/$(name_resolver $PACKAGE_NAME)"
