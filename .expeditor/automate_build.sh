@@ -17,7 +17,7 @@ echo "--- :key: Generating fake origin key"
 hab license accept
 hab origin key generate cheftest
 # chef-server-ctl openresty-noroot bookshelf oc_bifrost oc_erchef oc-id  nginx
-for PACKAGE_NAME in chef-server-ctl openresty-noroot bookshelf oc_bifrost oc_erchef oc-id nginx; do
+for PACKAGE_NAME in chef-server-ctl openresty-noroot nginx; do
 
     if [[ "$PACKAGE_NAME" == "nginx" ]]; then
         plan_sh_change="src/$PACKAGE_NAME/habitat/plan.sh"
@@ -73,7 +73,7 @@ name_resolver() {
 }
 
 #bookshelf bifrost erchef id nginx
-for PACKAGE_NAME in bookshelf bifrost erchef id nginx ; do
+for PACKAGE_NAME in nginx ; do
 # if [[ "$PACKAGE_NAME" == "nginx" ]]; then
 #     plan_sh_change="$(name_resolver $PACKAGE_NAME)/habitat/plan.sh"
 #     pushd results
@@ -91,6 +91,7 @@ for PACKAGE_NAME in bookshelf bifrost erchef id nginx ; do
 hart_file=$(ls results/*$PACKAGE_NAME*.hart)
 output_string_file=$(echo "$hart_file" | sed 's|results/||')
 echo "hab pkg install $hart_file"
+echo "hab pkg build $(name_resolver $PACKAGE_NAME)"
 HAB_FEAT_OFFLINE_INSTALL=true HAB_FEAT_IGNORE_LOCAL=true HAB_ORIGIN=cheftest HAB_CACHE_KEY_PATH=$RESOLVED_RESULTS_DIR DO_CHECK=true HAB_BLDR_CHANNEL=dev hab studio run -D "source .studiorc; set -e; hab pkg install results/$output_string_file; hab pkg build $(name_resolver $PACKAGE_NAME)"
 # fi
 done
