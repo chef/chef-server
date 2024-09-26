@@ -67,13 +67,10 @@ do
     fi
   done
   cp $tmp_file $plan_file
-  rm $tmp_file "${tmp_file}tmp"
+  rm $tmp_file
   echo "=================================="
   echo "file content after replace"
   cat $plan_file
-  echo "=================================="
-  echo "results dir content"
-  ls results/*.hart
   echo "=================================="
 done
 
