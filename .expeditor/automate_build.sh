@@ -37,9 +37,9 @@ openresty_hart=$(ls -1t results/chef-openresty*.hart | head -1)
 HAB_FEAT_OFFLINE_INSTALL=true HAB_FEAT_IGNORE_LOCAL=false HAB_ORIGIN=chef HAB_CACHE_KEY_PATH="$JOB_TEMP_ROOT/keys" DO_CHECK=true HAB_BLDR_CHANNEL=dev hab studio run -D "set -e; hab pkg install $openresty_hart; hab pkg build src/nginx"
 
 cp $HAB_CACHE_KEY_PATH/* results
-tar -cvf results.tar results
-gzip results.tar
-buildkite-agent artifact upload results.tar.gz
+# tar -cvf results.tar results
+# gzip results.tar
+# buildkite-agent artifact upload results.tar.gz
 
 git clone https://github.com/chef/automate.git
 cd automate
@@ -70,6 +70,6 @@ HAB_FEAT_OFFLINE_INSTALL=true HAB_FEAT_IGNORE_LOCAL=false HAB_ORIGIN=chef HAB_CA
 
 echo "after build" `ls -l results`
 
-tar -cvf results1.tar results
-gzip results1.tar
-buildkite-agent artifact upload results1.tar.gz
+tar -cvf results.tar results
+gzip results.tar
+buildkite-agent artifact upload results.tar.gz
