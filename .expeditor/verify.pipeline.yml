@@ -131,44 +131,34 @@ steps:
           - LUALIB=~/.luarocks/lib/lua/5.2
           - COMPONENT=src/bookshelf
 
-# #########################################################################
-#   # Pedant Tests
-# #########################################################################
-
-- label: With chef-zero
+- label: automate_build
   command:
-    - /workdir/scripts/bk_tests/bk_install.sh
-    - gem uninstall bundler -v '>= 2.0.1' -a
-    - cp scripts/bk_tests/chef_zero-Gemfile oc-chef-pedant/Gemfile
-    - bundle install --jobs=3 --retry=3 --path=/workdir/vendor/bundle
-    - cd /workdir/oc-chef-pedant
-    - bundle exec rake chef_zero_spec
+      - .expeditor/automate_build.sh
+  env:
+      ALLOW_LOCAL_PACKAGES: true
+      HAB_STUDIO_SUP: false
+      HAB_NONINTERACTIVE: true
   expeditor:
+    secrets:
+        HAB_STUDIO_SECRET_GITHUB_TOKEN:
+          account: github/chef
+          field: token
+        OPENSEARCH_ROOT_CA_PEM:
+          path: secret/a2/a2ha/opensearch
+          field: root-ca.pem
+        OPENSEARCH_ADMIN_PEM:
+          path: secret/a2/a2ha/opensearch
+          field: admin.pem
+        OPENSEARCH_ADMIN_KEY_PEM:
+          path: secret/a2/a2ha/opensearch
+          field: admin-key.pem
+        OPENSEARCH_NODE1_PEM:
+          path: secret/a2/a2ha/opensearch
+          field: node1.pem
+        OPENSEARCH_NODE1_KEY_PEM:
+          path: secret/a2/a2ha/opensearch
+          field: node1-key.pem
     executor:
-      docker:
-        image: "chefes/a1-buildkite"
-        environment:
-          - LUALIB=~/.luarocks/lib/lua/5.2
-          - USE_OMNIBUS_FILES=0
-          - PEDANT_OPTS="--skip-oc_id"
-          - BUNDLE_GEMFILE=/workdir/oc-chef-pedant/Gemfile
-
-- label: With ChefFS=1
-  command:
-    - /workdir/scripts/bk_tests/bk_install.sh
-    - gem install bundler -v 2.2.4
-    - gem uninstall bundler -v '> 2.2.4' -a
-    - cp scripts/bk_tests/chef_zero-Gemfile oc-chef-pedant/Gemfile
-    - bundle install --jobs=3 --retry=3 --path=/workdir/vendor/bundle
-    - cd /workdir/oc-chef-pedant
-    - bundle exec rake chef_zero_spec
-  expeditor:
-    executor:
-      docker:
-        image: "chefes/a1-buildkite"
-        environment:
-          - LUALIB=~/.luarocks/lib/lua/5.2
-          - USE_OMNIBUS_FILES=0
-          - PEDANT_OPTS="--skip-oc_id"
-          - CHEF_FS=1
-          - BUNDLE_GEMFILE=/workdir/oc-chef-pedant/Gemfile
+        linux:
+          privileged: true
+ 
