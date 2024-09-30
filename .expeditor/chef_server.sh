@@ -9,6 +9,6 @@ cd automate
 git checkout kalroy/cs_plan_changes
 
 #===============================================================================
-
+chmod +x ./integration/tests/chef_server.sh
 #running the chef_server.sh script from the automate repo
 ./integration/tests/chef_server.sh
