@@ -14,6 +14,11 @@ export HAB_FEAT_OFFLINE_INSTALL=true
 
 curl https://raw.githubusercontent.com/habitat-sh/habitat/main/components/hab/install.sh | sudo bash
 
+sudo -E hab pkg install core/ruby
+export PATH
+PATH="$(hab pkg path core/ruby)/bin:$PATH"
+sudo -E "$(hab pkg path core/ruby)"/bin/gem install toml
+
 export JOB_TEMP_ROOT
 JOB_TEMP_ROOT=$(mktemp -d /tmp/job-root-XXXXXX)
 export HAB_CACHE_KEY_PATH
