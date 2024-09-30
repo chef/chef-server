@@ -11,4 +11,4 @@ git checkout kalroy/cs_plan_changes
 #===============================================================================
 chmod +x ./integration/tests/chef_server_only.sh
 #running the chef_server_only.sh script from the automate repo
-./integration/tests/chef_server_only.sh
+integration/run_test integration/tests/chef_server_only.sh

@@ -66,7 +66,8 @@ HAB_FEAT_OFFLINE_INSTALL=true HAB_FEAT_IGNORE_LOCAL=false HAB_ORIGIN=chef HAB_CA
 
 echo "after build" `ls -l results`
 
-ls results/*.hart | grep -v automate | xargs rm
+# we require chef-server hart files also for for next steps.
+# ls results/*.hart | grep -v automate | xargs rm
 
 tar -cvf results.tar results
 gzip results.tar
