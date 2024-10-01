@@ -81,22 +81,24 @@ service_available(Req, #base_state{reqid_header_name = HeaderName} = State) ->
         {error, RequestedVersion} ->
             invalid_server_api_version_response(Req, State0, RequestedVersion);
         Version ->
-            State0 = 
-            
             State1 = State0#base_state{server_api_version = Version},
             State2 = set_req_contexts(Req, State1),
             State3 = maybe_with_default_org(Req, State2),
-            {true, Req, State3}
             case chef_license_worker:get_license() of
-                {valid_license, _, _} -> 
+                {valid_license, _, _, _, _} -> 
                     {true, Req, State3};
-                {commercial_grace_period, _, LicWarnMsg} -> 
-                    Req1 = wrq:set_resp_header("X-Ops-License", LicWarnMsg, Req),
+                {commercial_grace_period, _, _, ExpDate, LicWarnMsg} ->
+                    XOps = chef_json:encode([{<<"licenseType">>, <<"commercial">>},{<<"expirationDateTime">>, ExpDate},
+                        {<<"warningMessage">>, LicWarnMsg}]),
+                    Req1 = wrq:set_resp_header("X-Ops-License", XOps, Req),
                     {true, Req1, State3};
-                {_, _, LicWarnMsg} ->
-                    Req1 = wrq:set_resp_header("X-Ops-License", LicWarnMsg, Req),
-                    {true, Req1, State3}
-                    invalid_server_api_version_response(Req, State0, RequestedVersion);
+                {_, Type, _, ExpDate, LicWarnMsg} ->
+                    XOps = chef_json:encode([{<<"licenseType">>, Type},{<<"expirationDateTime">>, ExpDate},
+                        {<<"warningMessage">>, LicWarnMsg}]),
+                    Req1 = wrq:set_resp_header("X-Ops-License", XOps, Req),
+                    Req2 = chef_wm_util:set_json_body(Req1, {[{<<"error">>, <<"invalid-license">>},
+                                             {<<"message">>, LicWarnMsg}]}),
+                    {{halt, 402}, Req2, State#base_state{log_msg = invalid_license}};
                 _ ->
                     {true, Req, State3}
             end
@@ -120,23 +122,6 @@ server_api_version(RequestedVersion) ->
         error:badarg ->
             {error, RequestedVersion}
     end.
-invalid_server_license_response(Req, State, LicWarnMsg) ->
-    LogMsg = {invalid_license, LicWarnMsg},
-    Message = iolist_to_binary([ <<"Specified version ">>, RequestedVersion, <<" not supported">>]),
-    Req2 = chef_wm_util:set_json_body(Req, {[{<<"error">>, <<"invalid-x-ops-server-api-version">>},
-                                             {<<"message">>, Message},
-                                             {<<"min_version">>, ?API_MIN_VER},
-                                             {<<"max_version">>, ?API_MAX_VER}]}),
-    %% if the RequestedVersion was a valid integer, pass that along so we can parse it in the header response,
-    %% else, pass undefined so we know something invalid was passed.
-    ParsedRequestedVersion = try list_to_integer(RequestedVersion) of
-                                 IntegerRequestedVersion -> IntegerRequestedVersion
-                             catch
-                                 _:_ ->
-                                     bad_value_requested
-                             end,
-    {{halt, 406}, Req2, State#base_state{darklaunch = no_header, log_msg = LogMsg, server_api_version = ParsedRequestedVersion}}.
-
 
 invalid_server_api_version_response(Req, State, RequestedVersion) ->
     LogMsg = {invalid_server_api_version_requested, RequestedVersion},
