@@ -88,7 +88,7 @@ check_license(State) ->
         end,
     case process_license(JsonStr) of
         {ok, valid_license, ExpDate} -> 
-            State#state{license_cache=valid_license, grace_period=undefined, scanned_time = erlang:timestamp()};
+            State#state{license_cache=valid_license, grace_period=undefined, scanned_time = erlang:timestamp(), expiration_date=ExpDate};
         {ok, commercial_expired, ExpDate, Msg} -> 
             State#state{license_cache=commercial_expired, license_type = <<"commercial">>, grace_period=undefined, scanned_time = erlang:timestamp(), expiration_date=ExpDate, message=Msg};
         {ok, commercial_grace_period, ExpDate, Msg} -> 
