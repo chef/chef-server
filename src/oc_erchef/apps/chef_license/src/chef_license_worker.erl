@@ -87,13 +87,13 @@ check_license(State) ->
             {'EXIT', _} -> <<"">>
         end,
     case process_license(JsonStr) of
-        {ok, valid_license, ExpDate} -> 
+        {ok, valid_license, ExpDate} ->
             State#state{license_cache=valid_license, grace_period=undefined, scanned_time = erlang:timestamp(), expiration_date=ExpDate};
-        {ok, commercial_expired, ExpDate, Msg} -> 
+        {ok, commercial_expired, ExpDate, Msg} ->
             State#state{license_cache=commercial_expired, license_type = <<"commercial">>, grace_period=undefined, scanned_time = erlang:timestamp(), expiration_date=ExpDate, message=Msg};
-        {ok, commercial_grace_period, ExpDate, Msg} -> 
+        {ok, commercial_grace_period, ExpDate, Msg} ->
             State#state{license_cache=commercial_grace_period, grace_period=true, scanned_time = erlang:timestamp(), expiration_date=ExpDate, message=Msg};
-        {ok, trial_expired_expired, ExpDate, Msg} -> 
+        {ok, trial_expired, ExpDate, Msg} ->
             State#state{license_cache=trial_expired_expired, license_type = <<"trial">>, grace_period=undefined, scanned_time = erlang:timestamp(), expiration_date=ExpDate, message=Msg};
         {error, _} -> State
     end.
@@ -112,6 +112,7 @@ process_license(LicJson) ->
             case ej:get({<<"expiration_date">>}, LicDetails) of
                 {[{<<"seconds">>,ExpireInSeconds}]} ->
                     ExpDate = sec_to_date(ExpireInSeconds),
+                    io:format("The ExpDate:~p~n",[ExpDate]),
                     case os:system_time(second) < ExpireInSeconds of
                         true -> {ok, valid_license, ExpDate};
                         _ ->
@@ -124,10 +125,10 @@ process_license(LicJson) ->
                                                 get_alert_message(commercial_grace_period, ExpDate)};
                                         _ ->
                                             %% MSG
-                                            { ok, commercial_expired, ExpDate, get_alert_message(commercial_expired, ExpireInSeconds)}
+                                            { ok, commercial_expired, ExpDate, get_alert_message(commercial_expired, ExpDate)}
                                     end;
                                 _ ->
-                                    {ok, trial_expired, ExpDate, get_alert_message(trial_expired, ExpireInSeconds)}
+                                    {ok, trial_expired, ExpDate, get_alert_message(trial_expired, ExpDate)}
                             end
                     end;
                 _ ->
@@ -142,18 +143,18 @@ get_alert_message(Type, ExpDate)->
         trial_expired ->
             <<"Your Progress® Chef® InfraServer™ license has expired or does not exist! You no longer have access to Chef Automate. Please contact the Account Team to upgrade to an Enterprise License.">>;
         commercial_expired ->
-            <<"Your Progress® Chef® InfraServer™ license expired on">> ++ ExpDate ++ <<"and you no longer have access to Chef Automate! To get a new license, please contact the Account Team or email us at chef-account-team@progress.com">>;
+           << <<"Your Progress® Chef® InfraServer™ license expired on ">>/binary, ExpDate/binary, <<"and you no longer have access to Chef Automate! To get a new license, please contact the Account Team or email us at chef-account-team@progress.com">>/binary >>;
         commercial_grace_period ->
-            <<"Your Progress® Chef® InfraServer™ license expired on">> ++ ExpDate ++ <<"and you are currently on a limited extension period! To get a new license, please contact the Account Team or email us at chef-account-team@progress.com">>;
+            << <<"Your Progress® Chef® InfraServer™ license expired on ">>/binary, ExpDate/binary, <<"and you are currently on a limited extension period! To get a new license, please contact the Account Team or email us at chef-account-team@progress.com">>/binary >>;
         _ ->
             <<"">>
     end.
 
 sec_to_date(Seconds)->
     BaseDate      = calendar:datetime_to_gregorian_seconds({{1970,1,1},{0,0,0}}),
-    Seconds       = BaseDate + Seconds,
-    { Date,_Time} = calendar:gregorian_seconds_to_datetime(Seconds),
-    Date.
+    Seconds1       = BaseDate + Seconds,
+    { {Year,Month,Day},_Time} = calendar:gregorian_seconds_to_datetime(Seconds1),
+    erlang:list_to_binary(lists:flatten(io_lib:format("~4..0w-~2..0w-~2..0w",[Year,Month,Day]))).
 
 %%% =============================
 %%% Sample license response
