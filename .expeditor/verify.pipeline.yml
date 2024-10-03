@@ -131,6 +131,44 @@ steps:
           - LUALIB=~/.luarocks/lib/lua/5.2
           - COMPONENT=src/bookshelf
 
+- label: With chef-zero
+  command:
+    - /workdir/scripts/bk_tests/bk_install.sh
+    - gem uninstall bundler -v '>= 2.0.1' -a
+    - cp scripts/bk_tests/chef_zero-Gemfile oc-chef-pedant/Gemfile
+    - bundle install --jobs=3 --retry=3 --path=/workdir/vendor/bundle
+    - cd /workdir/oc-chef-pedant
+    - bundle exec rake chef_zero_spec
+  expeditor:
+    executor:
+      docker:
+        image: "chefes/a1-buildkite"
+        environment:
+          - LUALIB=~/.luarocks/lib/lua/5.2
+          - USE_OMNIBUS_FILES=0
+          - PEDANT_OPTS="--skip-oc_id"
+          - BUNDLE_GEMFILE=/workdir/oc-chef-pedant/Gemfile
+
+- label: With ChefFS=1
+  command:
+    - /workdir/scripts/bk_tests/bk_install.sh
+    - gem install bundler -v 2.2.4
+    - gem uninstall bundler -v '> 2.2.4' -a
+    - cp scripts/bk_tests/chef_zero-Gemfile oc-chef-pedant/Gemfile
+    - bundle install --jobs=3 --retry=3 --path=/workdir/vendor/bundle
+    - cd /workdir/oc-chef-pedant
+    - bundle exec rake chef_zero_spec
+  expeditor:
+    executor:
+      docker:
+        image: "chefes/a1-buildkite"
+        environment:
+          - LUALIB=~/.luarocks/lib/lua/5.2
+          - USE_OMNIBUS_FILES=0
+          - PEDANT_OPTS="--skip-oc_id"
+          - CHEF_FS=1
+          - BUNDLE_GEMFILE=/workdir/oc-chef-pedant/Gemfile
+
 - label: automate_build
   command:
       - .expeditor/automate_build.sh
