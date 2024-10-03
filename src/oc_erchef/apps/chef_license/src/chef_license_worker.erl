@@ -112,7 +112,6 @@ process_license(LicJson) ->
             case ej:get({<<"expiration_date">>}, LicDetails) of
                 {[{<<"seconds">>,ExpireInSeconds}]} ->
                     ExpDate = sec_to_date(ExpireInSeconds),
-                    io:format("The ExpDate:~p~n",[ExpDate]),
                     case os:system_time(second) < ExpireInSeconds of
                         true -> {ok, valid_license, ExpDate};
                         _ ->
@@ -145,9 +144,7 @@ get_alert_message(Type, ExpDate)->
         commercial_expired ->
            << <<"Your Progress® Chef® InfraServer™ license expired on ">>/binary, ExpDate/binary, <<"and you no longer have access to Chef Automate! To get a new license, please contact the Account Team or email us at chef-account-team@progress.com">>/binary >>;
         commercial_grace_period ->
-            << <<"Your Progress® Chef® InfraServer™ license expired on ">>/binary, ExpDate/binary, <<"and you are currently on a limited extension period! To get a new license, please contact the Account Team or email us at chef-account-team@progress.com">>/binary >>;
-        _ ->
-            <<"">>
+            << <<"Your Progress® Chef® InfraServer™ license expired on ">>/binary, ExpDate/binary, <<"and you are currently on a limited extension period! To get a new license, please contact the Account Team or email us at chef-account-team@progress.com">>/binary >>
     end.
 
 sec_to_date(Seconds)->
