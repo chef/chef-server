@@ -53,8 +53,8 @@ init(_Config) ->
     erlang:send_after(?DEFAULT_LICENSE_SCAN_INTERVAL, self(), check_license),
     {ok, State}.
 
-handle_call(get_license, _From, #state{license_cache = undefined}) ->
-    {reply, {valid, false, <<"">>}};
+handle_call(get_license, _From, #state{license_cache = undefined, license_type=Type, expiration_date=ExpDate, grace_period = GracePeriod, message = Msg}=State) ->
+    {reply, {valid_license, Type, GracePeriod, ExpDate, Msg}, State};
 handle_call(get_license, _From, #state{license_cache = Lic, license_type=Type, expiration_date=ExpDate, grace_period = GracePeriod, message = Msg} = State) ->
     {reply,{Lic, Type, GracePeriod, ExpDate, Msg}, State};
 handle_call(_Message, _From, State) ->
