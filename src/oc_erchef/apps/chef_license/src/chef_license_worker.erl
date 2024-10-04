@@ -140,18 +140,18 @@ process_license(LicJson) ->
 get_alert_message(Type, ExpDate)->
     case Type of
         trial_expired ->
-            <<"Your Progress® Chef® InfraServer™ license has expired or does not exist! You no longer have access to Chef Automate. Please contact the Account Team to upgrade to an Enterprise License.">>;
+            "Your Progress® Chef® InfraServer™ license has expired or does not exist! You no longer have access to Chef Automate. Please contact the Account Team to upgrade to an Enterprise License.";
         commercial_expired ->
-           << <<"Your Progress® Chef® InfraServer™ license expired on ">>/binary, ExpDate/binary, <<"and you no longer have access to Chef Automate! To get a new license, please contact the Account Team or email us at chef-account-team@progress.com">>/binary >>;
+           "Your Progress® Chef® InfraServer™ license expired on " ++ ExpDate ++ "and you no longer have access to Chef Automate! To get a new license, please contact the Account Team or email us at chef-account-team@progress.com";
         commercial_grace_period ->
-            << <<"Your Progress® Chef® InfraServer™ license expired on ">>/binary, ExpDate/binary, <<"and you are currently on a limited extension period! To get a new license, please contact the Account Team or email us at chef-account-team@progress.com">>/binary >>
+            "Your Progress® Chef® InfraServer™ license expired on " ++ ExpDate ++ "and you are currently on a limited extension period! To get a new license, please contact the Account Team or email us at chef-account-team@progress.com"
     end.
 
 sec_to_date(Seconds)->
     BaseDate      = calendar:datetime_to_gregorian_seconds({{1970,1,1},{0,0,0}}),
     Seconds1       = BaseDate + Seconds,
     { {Year,Month,Day},_Time} = calendar:gregorian_seconds_to_datetime(Seconds1),
-    erlang:list_to_binary(lists:flatten(io_lib:format("~4..0w-~2..0w-~2..0w",[Year,Month,Day]))).
+    lists:flatten(io_lib:format("~4..0w-~2..0w-~2..0w",[Year,Month,Day])).
 
 %%% =============================
 %%% Sample license response
