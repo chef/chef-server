@@ -294,10 +294,6 @@ The `admins` group is assigned the following:
 
 The `billing_admins` group is assigned the following:
 
-#### billing_admins
-
-The `billing_admins` group is assigned the following:
-
 <table>
 <colgroup>
 <col style="width: 28%" />
