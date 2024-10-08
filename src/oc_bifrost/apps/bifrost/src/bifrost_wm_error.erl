@@ -69,7 +69,7 @@ set_db_exception(Req, State, Error) ->
 
 find_non_existent(_, []) ->
     none;
-find_non_existent(Type, [Head|Tail]) ->
+find_non_existent(Type, [Head | Tail]) ->
     case bifrost_db:exists(Type, Head) of
         true ->
             find_non_existent(Type, Tail);

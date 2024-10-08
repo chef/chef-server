@@ -67,7 +67,7 @@ auth_info(Req, State) ->
 %% @doc Create a list of the various search indexes that the given organization has access
 %% to.  This includes the four standard indexes (client, environment, node, and role), as
 %% well as an index for each of the organization's data bags.
--spec generate_index_list(DBContext::tuple(), OrgId::binary()) -> IndexNames::list(binary()).
+-spec generate_index_list(DBContext :: tuple(), OrgId :: binary()) -> IndexNames :: list(binary()).
 generate_index_list(DBContext, OrgId) ->
     %% The order of these lists doesn't really matter, given that they are ultimately
     %% destined to be keys in a map structure.  In any event, the web UI currently orders
@@ -87,8 +87,8 @@ generate_index_list(DBContext, OrgId) ->
 %%     [{"nodes", "http://server.com/search/nodes"},
 %%      {"clients", "http://server.com/search/clients"}]
 %%
--spec index_map(SearchIndexes::list(binary()), Req::tuple()) ->
-                       list({IndexName::binary(), URL::binary()}).
+-spec index_map(SearchIndexes :: list(binary()), Req :: tuple()) ->
+                       list({IndexName :: binary(), URL :: binary()}).
 index_map(SearchIndexes, Req) ->
     [{Index, oc_chef_wm_routes:route(organization_search, Req, [{search_index, Index}])}
      || Index <- SearchIndexes].

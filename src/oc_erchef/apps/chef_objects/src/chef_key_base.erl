@@ -36,7 +36,7 @@
          key_owner_type/1]).
 
 -spec maybe_generate_key_pair(ej:json_object(),
-                              fun(( keygen_timeout | not_requested | {binary(),binary()}) -> term())) -> term().
+                              fun(( keygen_timeout | not_requested | {binary(), binary()}) -> term())) -> term().
 maybe_generate_key_pair(EJ, ContinuationFun) ->
     KeyPair = case ej:get({<<"create_key">>}, EJ) of
         true -> chef_keygen_cache:get_key_pair();
@@ -104,7 +104,7 @@ set_public_key(EJ, PublicKey) ->
 %% SPKI format are version 0. The PKCS1 format is deprecated, but
 %% supported for read. We will only generate certs or SPKI packaged
 %% keys.
--spec key_version(<<_:64,_:_*8>>) -> 0 | 1.
+-spec key_version(<<_:64, _:_*8>>) -> 0 | 1.
 key_version(null) ->
     null;
 key_version(<<"-----BEGIN CERTIFICATE", _Bin/binary>>) ->
@@ -141,7 +141,7 @@ has_public_key_header(_) ->
 
 -spec public_key_spec( req | opt ) -> term().
 public_key_spec(OptOrRequired) ->
-    {{OptOrRequired,<<"public_key">>}, {fun_match, {fun valid_public_key/1, string,
+    {{OptOrRequired, <<"public_key">>}, {fun_match, {fun valid_public_key/1, string,
                                             <<"Public Key must be a valid key.">>}}}.
 
 cert_or_key(Payload) ->
@@ -181,7 +181,7 @@ value_or_undefined(Key, Data) ->
 %% For clients
 % Will ensure that if required, only one of 'create_key' or 'public_key' is present,
 % and that the one present is valid.
--spec validate_public_key_fields(opt|req,  ej:json_object(), key|user|client, create|update) -> {ok, ej:json_object()}. % or throw
+-spec validate_public_key_fields(opt | req,  ej:json_object(), key | user | client, create | update) -> {ok, ej:json_object()}. % or throw
 % but we want USER and CLIENT to reject all key-related fields on UPDATE.
 
 

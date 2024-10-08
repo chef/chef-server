@@ -18,7 +18,8 @@
 
 %% @doc Utility functions for performing work in parallel.
 -module(chef_parallel).
-
+-define(NODEBUG, true).
+-include_lib("eunit/include/eunit.hrl").
 -export([
          parallelize_all_with_timeout/5
         ]).
@@ -78,6 +79,7 @@ parallelize_all_with_timeout(Items, Fun, Fanout, Timeout, TimeoutHandler) ->
                      %% Also, paranoia.
                      Token = erlang:make_ref(),
                      Worker = proc_lib:spawn_link(fun() ->
+?debugMsg("***** hit proc_lib:spawn_link..."),
                                                           Result = Fun(Item),
                                                           Me ! {Token, Result, self()}
                                                   end),

@@ -42,10 +42,11 @@
 
 -record(state, {port, os_pid}).
 
--ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl"). %% TODO: remove
--endif.
--include("chef_types.hrl").
+%-ifdef(TEST).
+%-include_lib("eunit/include/eunit.hrl"). %% TODO: remove
+%-endif.
+%-include("chef_types.hrl").
 
 %%%===================================================================
 %%% API
@@ -59,20 +60,21 @@
 %% @end
 %%--------------------------------------------------------------------
 start_link() ->
-    gen_server:start_link(?MODULE, [], []).
+    gen_server:start_link(?MODULE, [], [{debug, [trace]}]).
 
 %%--------------------------------------------------------------------
 %% @doc
 %% Solve dependencies with the given state and constraints
 %% @end
 %%--------------------------------------------------------------------
--spec solve_dependencies(AllVersions :: [chef_depsolver:dependency_set()],
-                         EnvConstraints :: [chef_depsolver:constraint()],
-                         Cookbooks :: [Name::binary() |
-                                             {Name::binary(), Version::binary()}],
-                         Timeout :: integer()) ->
-                                {ok, [ versioned_cookbook()]} | {error, term()}.
+%-spec solve_dependencies(AllVersions :: [chef_depsolver:dependency_set()],
+%                         EnvConstraints :: [chef_depsolver:constraint()],
+%                         Cookbooks :: [Name :: binary() |
+%                                             {Name :: binary(), Version :: binary()}],
+%                         Timeout :: integer()) ->
+%                                {ok, [ versioned_cookbook()]} | {error, term()}.
 solve_dependencies(AllVersions, EnvConstraints, Cookbooks, Timeout) ->
+?debugMsg("solve_dependencies calling pooler:take_member"),
     case pooler:take_member(chef_depsolver, pooler_timeout()) of
         error_no_members ->
             {error, no_depsolver_workers};
@@ -109,13 +111,16 @@ pooler_timeout() ->
 %% @end
 %%--------------------------------------------------------------------
 init([]) ->
+?debugMsg("entered init"),
     RubyExecutable = filename:join([code:priv_dir(chef_objects), "depselector_rb", "depselector.rb"]),
+?debugFmt("~nRubyExecutable = ~p", [RubyExecutable]),
     %% - redirect stderr to /dev/null -
     %% The C-level implementation of the ruby depsolver prints out statistics to stderr.
     %% These show up in the erchef console log, and the data we care about here is
     %% already captured in stats_hero and logs.
     Port = open_port({spawn, "ruby " ++ RubyExecutable ++ " 2> /dev/null"},
                      [{packet, 4}, nouse_stdio, exit_status, binary]),
+?debugFmt("~nPort = ~p", [Port]),
 
 
     %% In order to effectively kill the Ruby process if it hangs solving a really hard problem,
@@ -124,13 +129,31 @@ init([]) ->
     %% info on startup so that we can use it in the event of a timeout. Hard-killing the process
     %% handles the failure case where the Ruby process gets hung and can no longer respond to
     %% STDOUT closing, which would typically cause the process to exit.
-    Payload = term_to_binary({get_pid}),
-    erlang:port_command(Port, Payload),
-    Pid = receive
+    Payload = term_to_binary({get_pid}, [{minor_version, 1}]),
+?debugFmt("~nPayload = ~s", [Payload]),
+    %erlang:port_command(Port, Payload),
+X = erlang:port_command(Port, Payload),
+%case gen_tcp:send(Port, Payload) of
+%    ok ->
+%        ?debugMsg("gen_tcp:send successful, returned ok");
+%    X ->
+%        ?debugFmt("~ngen_tcp:send FAILED, returned ~p", [X])
+%end,
+?debugFmt("port_command finished, returned ~p", [X]),
+?debugMsg("attempting receive..."),
+
+    Pid = receive % <=== CRASH HAPPENS HERE?
               {Port, {data, Data}} ->
                   binary_to_term(Data)
           end,
+?debugMsg("************************"),
+?debugMsg("************************"),
+?debugMsg("************************"),
+?debugMsg("************************"),
+?debugMsg("************************"),
 
+?debugFmt("~n~nreceive finished, Pid = ~p", [Pid]),
+?debugMsg("leaving init"),
     {ok, #state{port=Port, os_pid=Pid}}.
 
 %%--------------------------------------------------------------------
@@ -153,7 +176,7 @@ handle_call({solve, AllVersions, EnvConstraints, Cookbooks, Timeout},
     Payload = term_to_binary({solve, [{environment_constraints, EnvConstraints},
                                       {all_versions, AllVersions},
                                       {run_list, Cookbooks},
-                                      {timeout_ms, Timeout}]}),
+                                      {timeout_ms, Timeout}]}, [{minor_version, 1}]),
     erlang:port_command(Port, Payload),
 
     %% The underlying ruby code has the potential to reach nearly 2x the
