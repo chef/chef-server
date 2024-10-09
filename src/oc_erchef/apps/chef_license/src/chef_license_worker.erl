@@ -21,8 +21,10 @@
 
 -record(state, {
     scanned_time,
-    grace_period,
+    license_type,
     license_cache,
+    grace_period,
+    expiration_date,
     message
 }).
 
@@ -51,9 +53,10 @@ init(_Config) ->
     erlang:send_after(?DEFAULT_LICENSE_SCAN_INTERVAL, self(), check_license),
     {ok, State}.
 
-handle_call(get_license, _From, #state{license_cache = Lic, grace_period = GracePeriod, message = Msg} = State) ->
-    {reply,{Lic, GracePeriod, Msg}, State};
-
+handle_call(get_license, _From, #state{license_cache = undefined, license_type=Type, expiration_date=ExpDate, grace_period = GracePeriod, message = Msg}=State) ->
+    {reply, {valid_license, Type, GracePeriod, ExpDate, Msg}, State};
+handle_call(get_license, _From, #state{license_cache = Lic, license_type=Type, expiration_date=ExpDate, grace_period = GracePeriod, message = Msg} = State) ->
+    {reply,{Lic, Type, GracePeriod, ExpDate, Msg}, State};
 handle_call(_Message, _From, State) ->
     {noreply, State}.
 
@@ -84,9 +87,14 @@ check_license(State) ->
             {'EXIT', _} -> <<"">>
         end,
     case process_license(JsonStr) of
-        {ok, valid_license} -> State#state{license_cache=valid, grace_period=undefined, scanned_time = erlang:timestamp()};
-        {ok, expired} -> State#state{license_cache=expired, grace_period=undefined, scanned_time = erlang:timestamp()};
-        {ok, valid_license, grace_period} -> State#state{license_cache=valid, grace_period=true, scanned_time = erlang:timestamp()};
+        {ok, valid_license, ExpDate} ->
+            State#state{license_cache=valid_license, grace_period=undefined, scanned_time = erlang:timestamp(), expiration_date=ExpDate};
+        {ok, commercial_expired, ExpDate, Msg} ->
+            State#state{license_cache=commercial_expired, license_type = <<"commercial">>, grace_period=undefined, scanned_time = erlang:timestamp(), expiration_date=ExpDate, message=Msg};
+        {ok, commercial_grace_period, ExpDate, Msg} ->
+            State#state{license_cache=commercial_grace_period, grace_period=true, scanned_time = erlang:timestamp(), expiration_date=ExpDate, message=Msg};
+        {ok, trial_expired, ExpDate, Msg} ->
+            State#state{license_cache=trial_expired_expired, license_type = <<"trial">>, grace_period=undefined, scanned_time = erlang:timestamp(), expiration_date=ExpDate, message=Msg};
         {error, _} -> State
     end.
 
@@ -103,21 +111,23 @@ process_license(LicJson) ->
         {LicDetails} ->
             case ej:get({<<"expiration_date">>}, LicDetails) of
                 {[{<<"seconds">>,ExpireInSeconds}]} ->
+                    ExpDate = sec_to_date(ExpireInSeconds),
                     case os:system_time(second) < ExpireInSeconds of
-                        true -> {ok, valid_license};
+                        true -> {ok, valid_license, ExpDate};
                         _ ->
                             case ej:get({<<"license_type">>}, LicDetails) of
                                 <<"commercial">> ->
                                     case ej:get({<<"grace_period">>}, LicDetails) of
                                         true ->
                                             %% WARNING
-                                            {ok, valid_license, grace_period};
+                                            {ok, commercial_grace_period, ExpDate,
+                                                get_alert_message(commercial_grace_period, ExpDate)};
                                         _ ->
                                             %% MSG
-                                            { ok, expired}
+                                            { ok, commercial_expired, ExpDate, get_alert_message(commercial_expired, ExpDate)}
                                     end;
                                 _ ->
-                                    {ok, expired}
+                                    {ok, trial_expired, ExpDate, get_alert_message(trial_expired, ExpDate)}
                             end
                     end;
                 _ ->
@@ -126,6 +136,22 @@ process_license(LicJson) ->
         _ ->
             {error, invalid_response}
     end.
+
+get_alert_message(Type, ExpDate)->
+    case Type of
+        trial_expired ->
+            "Your Progress Chef InfraServer license has expired or does not exist! You no longer have access to Chef Automate. Please contact the Account Team to upgrade to an Enterprise License.";
+        commercial_expired ->
+           "Your Progress Chef InfraServer license expired on " ++ ExpDate ++ " and you no longer have access to Chef Automate! To get a new license, please contact the Account Team or email us at chef-account-team@progress.com";
+        commercial_grace_period ->
+            "Your Progress Chef InfraServer license expired on " ++ ExpDate ++ " and you are currently on a limited extension period! To get a new license, please contact the Account Team or email us at chef-account-team@progress.com"
+    end.
+
+sec_to_date(Seconds)->
+    BaseDate      = calendar:datetime_to_gregorian_seconds({{1970,1,1},{0,0,0}}),
+    Seconds1       = BaseDate + Seconds,
+    { {Year,Month,Day},_Time} = calendar:gregorian_seconds_to_datetime(Seconds1),
+    lists:flatten(io_lib:format("~4..0w-~2..0w-~2..0w",[Year,Month,Day])).
 
 %%% =============================
 %%% Sample license response
