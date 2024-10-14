@@ -1,4 +1,10 @@
 ---
+env:
+  # Use the Go module mirror and checksum database by default.
+  # See https://proxy.golang.org for details.
+  GOPROXY: "https://proxy.golang.org,direct"
+  GOSUMDB: "sum.golang.org"
+
 expeditor:
   cached_folders:
     - vendor
@@ -176,6 +182,7 @@ steps:
       ALLOW_LOCAL_PACKAGES: true
       HAB_STUDIO_SUP: false
       HAB_NONINTERACTIVE: true
+      GOPROXY: "https://proxy.golang.org,direct"
   expeditor:
     secrets:
         HAB_STUDIO_SECRET_GITHUB_TOKEN:
