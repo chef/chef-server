@@ -30,7 +30,8 @@ echo "--- :key: Generating fake origin key"
 hab license accept
 hab origin key generate
 
-for pkg_name in `echo "bookshelf chef-server-ctl oc-id oc_bifrost oc_erchef openresty-noroot"`
+#for pkg_name in `echo "bookshelf chef-server-ctl oc-id oc_bifrost oc_erchef openresty-noroot"`
+for pkg_name in `echo "oc_erchef"`
 do
   echo "generating package for $pkg_name"
   hab pkg build "src/$pkg_name"
@@ -53,23 +54,23 @@ cp ../results/*.hart $HAB_CACHE_KEY_PATH/* results
 
 #cp ../results/*.hart ../results/chef*.pub ../results/chef*.key results
 ../.expeditor/replace.sh
-bookshelf_hart=$(ls -1t results/chef-bookshelf*.hart | head -1)
-chef_server_ctl_hart=$(ls -1t results/chef-chef-server-ctl*.hart | head -1)
-nginx=$(ls -1t results/chef-chef-server-nginx*.hart | head -1)
-oc_id=$(ls -1t results/chef-oc_id*.hart | head -1)
-bifrost_hart=$(ls -1t results/chef-oc_bifrost*.hart | head -1)
+#bookshelf_hart=$(ls -1t results/chef-bookshelf*.hart | head -1)
+#chef_server_ctl_hart=$(ls -1t results/chef-chef-server-ctl*.hart | head -1)
+#nginx=$(ls -1t results/chef-chef-server-nginx*.hart | head -1)
+#oc_id=$(ls -1t results/chef-oc_id*.hart | head -1)
+#bifrost_hart=$(ls -1t results/chef-oc_bifrost*.hart | head -1)
 erchef_hart=$(ls -1t results/chef-oc_erchef*.hart | head -1)
 
 
-HAB_FEAT_OFFLINE_INSTALL=true HAB_FEAT_IGNORE_LOCAL=false HAB_ORIGIN=chef HAB_CACHE_KEY_PATH="$JOB_TEMP_ROOT/keys" DO_CHECK=true HAB_BLDR_CHANNEL=dev hab studio run -D "set -e; hab pkg install $bookshelf_hart; hab pkg build components/automate-cs-bookshelf"
+#HAB_FEAT_OFFLINE_INSTALL=true HAB_FEAT_IGNORE_LOCAL=false HAB_ORIGIN=chef HAB_CACHE_KEY_PATH="$JOB_TEMP_ROOT/keys" DO_CHECK=true HAB_BLDR_CHANNEL=dev hab studio run -D "set -e; hab pkg install $bookshelf_hart; hab pkg build components/automate-cs-bookshelf"
 
-HAB_FEAT_OFFLINE_INSTALL=true HAB_FEAT_IGNORE_LOCAL=false HAB_ORIGIN=chef HAB_CACHE_KEY_PATH="$JOB_TEMP_ROOT/keys" DO_CHECK=true HAB_BLDR_CHANNEL=dev hab studio run -D "set -e; hab pkg install $bifrost_hart; hab pkg build components/automate-cs-oc-bifrost"
+#HAB_FEAT_OFFLINE_INSTALL=true HAB_FEAT_IGNORE_LOCAL=false HAB_ORIGIN=chef HAB_CACHE_KEY_PATH="$JOB_TEMP_ROOT/keys" DO_CHECK=true HAB_BLDR_CHANNEL=dev hab studio run -D "set -e; hab pkg install $bifrost_hart; hab pkg build components/automate-cs-oc-bifrost"
 
-HAB_FEAT_OFFLINE_INSTALL=true HAB_FEAT_IGNORE_LOCAL=false HAB_ORIGIN=chef HAB_CACHE_KEY_PATH="$JOB_TEMP_ROOT/keys" DO_CHECK=true HAB_BLDR_CHANNEL=dev GOPROXY="https://proxy.golang.org,direct " GOSUMDB="sum.golang.org" hab studio run -D "set -e; echo "GOPROXY:: $GOPROXY"; echo "GOSUMDB:: $GOSUMDB"; hab pkg install $erchef_hart; hab pkg build components/automate-cs-oc-erchef"
+HAB_FEAT_OFFLINE_INSTALL=true HAB_FEAT_IGNORE_LOCAL=false HAB_ORIGIN=chef HAB_CACHE_KEY_PATH="$JOB_TEMP_ROOT/keys" DO_CHECK=true HAB_BLDR_CHANNEL=dev GOPROXY="https://proxy.golang.org,direct " GOSUMDB="sum.golang.org" hab studio run -D "set -e; hab pkg install $erchef_hart; hab pkg build components/automate-cs-oc-erchef"
 
-HAB_FEAT_OFFLINE_INSTALL=true HAB_FEAT_IGNORE_LOCAL=false HAB_ORIGIN=chef HAB_CACHE_KEY_PATH="$JOB_TEMP_ROOT/keys" DO_CHECK=true HAB_BLDR_CHANNEL=dev hab studio run -D "set -e; hab pkg install $oc_id; hab pkg build components/automate-cs-ocid"
+#HAB_FEAT_OFFLINE_INSTALL=true HAB_FEAT_IGNORE_LOCAL=false HAB_ORIGIN=chef HAB_CACHE_KEY_PATH="$JOB_TEMP_ROOT/keys" DO_CHECK=true HAB_BLDR_CHANNEL=dev hab studio run -D "set -e; hab pkg install $oc_id; hab pkg build components/automate-cs-ocid"
 
-HAB_FEAT_OFFLINE_INSTALL=true HAB_FEAT_IGNORE_LOCAL=false HAB_ORIGIN=chef HAB_CACHE_KEY_PATH="$JOB_TEMP_ROOT/keys" DO_CHECK=true HAB_BLDR_CHANNEL=dev GOPROXY="https://proxy.golang.org,direct " GOSUMDB="sum.golang.org" hab studio run -D "set -e; echo "GOPROXY:: $GOPROXY"; echo "GOSUMDB:: $GOSUMDB"; hab pkg install $nginx; hab pkg build components/automate-cs-nginx"
+#HAB_FEAT_OFFLINE_INSTALL=true HAB_FEAT_IGNORE_LOCAL=false HAB_ORIGIN=chef HAB_CACHE_KEY_PATH="$JOB_TEMP_ROOT/keys" DO_CHECK=true HAB_BLDR_CHANNEL=dev GOPROXY="https://proxy.golang.org,direct " GOSUMDB="sum.golang.org" hab studio run -D "set -e; echo "GOPROXY:: $GOPROXY"; echo "GOSUMDB:: $GOSUMDB"; hab pkg install $nginx; hab pkg build components/automate-cs-nginx"
 
 .expeditor/create-manifest.rb
 mv manifest.json results/build.json
