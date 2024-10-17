@@ -140,9 +140,9 @@ process_license(LicJson) ->
 get_alert_message(Type, ExpDate)->
     case Type of
         trial_expired ->
-            "Your Progress Chef InfraServer license has expired or does not exist! You no longer have access to Chef Automate. Please contact the Account Team to upgrade to an Enterprise License.";
+            "Your Progress Chef InfraServer license has expired or does not exist! You no longer have access to Chef InfraServer. Please contact the Account Team to upgrade to an Enterprise License.";
         commercial_expired ->
-           "Your Progress Chef InfraServer license expired on " ++ ExpDate ++ " and you no longer have access to Chef Automate! To get a new license, please contact the Account Team or email us at chef-account-team@progress.com";
+           "Your Progress Chef InfraServer license expired on " ++ ExpDate ++ " and you no longer have access to Chef InfraServer! To get a new license, please contact the Account Team or email us at chef-account-team@progress.com";
         commercial_grace_period ->
             "Your Progress Chef InfraServer license expired on " ++ ExpDate ++ " and you are currently on a limited extension period! To get a new license, please contact the Account Team or email us at chef-account-team@progress.com"
     end.
