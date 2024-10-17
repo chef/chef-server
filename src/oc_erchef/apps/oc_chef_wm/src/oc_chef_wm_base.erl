@@ -29,6 +29,8 @@
          content_types_provided/2,
          finish_request/2,
          forbidden/2,
+         is_authorized_no_membership/2, %% verify request signature only
+         is_authorized_no_membership/3, %% verify request signature only with custom extractor
          is_authorized/2,     %% verify request signature and org membership if appropriate
          is_authorized/3,     %% verify request signature and org membership if appropriate, with custom extractor fun
          malformed_request/2, %% verify request headers and size requirements, call module verify_request
@@ -441,7 +443,23 @@ is_authorized(Req, State, Extractor) ->
             end;
         {false, ReqOther, StateOther} ->
             %% FIXME: the supported version is determined by the chef_authn application
-            %% also, see: https://wiki.corp.chef.io/display/CORP/RFC+Authentication+Version+Negotiation
+            {"X-Ops-Sign version=\"1.0\" version=\"1.1\"", ReqOther, StateOther};
+        {{halt, _Code}, _Req, _State} = Halt -> Halt
+    end.
+
+is_authorized_no_membership(Req, State) ->
+    is_authorized_no_membership(Req, State, fun authorization_data_extractor/3).
+
+%% Verify request signature but do not verify org membership.  Modules
+%% can invoke this directly instead of mixing in the default is_verified/2
+%% if they rely only on permissions for authorization and not org membership.
+-spec is_authorized_no_membership(wm_req(), #base_state{}, extractor()) -> any().
+is_authorized_no_membership(Req, State, Extractor) ->
+    case verify_request_signature(Req, State, Extractor) of
+        {true, _, _} = Result ->
+            Result;
+        {false, ReqOther, StateOther} ->
+            %% FIXME: the supported version is determined by the chef_authn application
             {"X-Ops-Sign version=\"1.0\" version=\"1.1\"", ReqOther, StateOther};
         {{halt, _Code}, _Req, _State} = Halt -> Halt
     end.
