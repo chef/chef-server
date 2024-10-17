@@ -28,7 +28,7 @@
     message
 }).
 
--define(DEFAULT_LICENSE_SCAN_INTERVAL, 30000). %milli seconds
+-define(DEFAULT_LICENSE_SCAN_INTERVAL, 6 * 60 * 60 * 1000). %milli seconds
 
 -define(DEFAULT_FILE_PATH, "/tmp/lic").
 
