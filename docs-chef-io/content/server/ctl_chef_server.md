@@ -134,7 +134,7 @@ This subcommand has the following options:
 
 :   Use to specify the location of a package. This option is not
     required when packages are downloaded from
-    <https://packages.chef.io/>.
+    <https://chefdownload-commercial.chef.io/>.
 
 ### Use Downloads
 
