@@ -28,7 +28,7 @@
     message
 }).
 
--define(DEFAULT_LICENSE_SCAN_INTERVAL, 6 * 60 * 60 * 1000). %milli seconds
+-define(DEFAULT_LICENSE_SCAN_INTERVAL, 30000). %milli seconds
 
 -define(DEFAULT_FILE_PATH, "/tmp/lic").
 
@@ -95,6 +95,8 @@ check_license(State) ->
             State#state{license_cache=commercial_grace_period, grace_period=true, scanned_time = erlang:timestamp(), expiration_date=ExpDate, message=Msg};
         {ok, trial_expired, ExpDate, Msg} ->
             State#state{license_cache=trial_expired_expired, license_type = <<"trial">>, grace_period=undefined, scanned_time = erlang:timestamp(), expiration_date=ExpDate, message=Msg};
+        {error, no_license} ->
+            State#state{license_cache=trial_expired_expired, license_type = <<"trial">>, grace_period=undefined, scanned_time = erlang:timestamp(), expiration_date="", message=get_alert_message(trial_expired, "")};
         {error, _} -> State
     end.
 
@@ -130,6 +132,13 @@ process_license(LicJson) ->
                                     {ok, trial_expired, ExpDate, get_alert_message(trial_expired, ExpDate)}
                             end
                     end;
+                _ ->
+                    {error, invalid_response}
+            end;
+        undefined ->
+            case ej:get({<<"status">>}, LicJson) of
+                <<"OK">> ->
+                    {error, no_license};
                 _ ->
                     {error, invalid_response}
             end;
