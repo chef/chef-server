@@ -95,6 +95,8 @@ check_license(State) ->
             State#state{license_cache=commercial_grace_period, grace_period=true, scanned_time = erlang:timestamp(), expiration_date=ExpDate, message=Msg};
         {ok, trial_expired, ExpDate, Msg} ->
             State#state{license_cache=trial_expired_expired, license_type = <<"trial">>, grace_period=undefined, scanned_time = erlang:timestamp(), expiration_date=ExpDate, message=Msg};
+        {error, no_license} ->
+            State#state{license_cache=trial_expired_expired, license_type = <<"trial">>, grace_period=undefined, scanned_time = erlang:timestamp(), expiration_date="", message=get_alert_message(trial_expired, "")};
         {error, _} -> State
     end.
 
@@ -133,6 +135,13 @@ process_license(LicJson) ->
                 _ ->
                     {error, invalid_response}
             end;
+        undefined ->
+            case ej:get({<<"status">>}, LicJson) of
+                <<"OK">> ->
+                    {error, no_license};
+                _ ->
+                    {error, invalid_response}
+            end;
         _ ->
             {error, invalid_response}
     end.
@@ -140,9 +149,9 @@ process_license(LicJson) ->
 get_alert_message(Type, ExpDate)->
     case Type of
         trial_expired ->
-            "Your Progress Chef InfraServer license has expired or does not exist! You no longer have access to Chef Automate. Please contact the Account Team to upgrade to an Enterprise License.";
+            "Your Progress Chef InfraServer license has expired or does not exist! You no longer have access to Chef InfraServer. Please contact the Account Team to upgrade to an Enterprise License.";
         commercial_expired ->
-           "Your Progress Chef InfraServer license expired on " ++ ExpDate ++ " and you no longer have access to Chef Automate! To get a new license, please contact the Account Team or email us at chef-account-team@progress.com";
+           "Your Progress Chef InfraServer license expired on " ++ ExpDate ++ " and you no longer have access to Chef InfraServer! To get a new license, please contact the Account Team or email us at chef-account-team@progress.com";
         commercial_grace_period ->
             "Your Progress Chef InfraServer license expired on " ++ ExpDate ++ " and you are currently on a limited extension period! To get a new license, please contact the Account Team or email us at chef-account-team@progress.com"
     end.
