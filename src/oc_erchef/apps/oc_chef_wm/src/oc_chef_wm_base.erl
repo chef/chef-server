@@ -100,9 +100,9 @@ service_available(Req, #base_state{reqid_header_name = HeaderName} = State) ->
                             XOps = binary_to_list(chef_json:encode({[{<<"licenseType">>, Type},{<<"expirationDateTime">>, list_to_binary(ExpDate)},
                                 {<<"warningMessage">>, list_to_binary(LicWarnMsg)}]})),
                             Req1 = wrq:set_resp_header("X-Ops-License", XOps, Req),
-                            Req2 = chef_wm_util:set_json_body(Req1, {[{<<"error">>, <<"invalid-license">>},
-                                                    {<<"message">>, list_to_binary(LicWarnMsg)}]}),
-                            {{halt, 402}, Req2, State#base_state{log_msg = invalid_license}};
+                            Req2 = chef_wm_util:set_json_body(Req1, {[{<<"error">>,  list_to_binary(LicWarnMsg)},
+                                                    {<<"message">>, <<"invalid-license">>}]}),
+                            {{halt, 403}, Req2, State#base_state{log_msg = invalid_license}};
                         _ ->
                             {true, Req, State3}
                     end
