@@ -24,7 +24,8 @@
                   goldrush,
                   lager,
                   eldap,
-                  data_collector
+                  data_collector,
+                  chef_license
                  ]},
   {mod, {oc_chef_wm_app, []}},
   {env, []}
