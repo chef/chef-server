@@ -32,7 +32,8 @@
                            oc_chef_authz,
                            oc_chef_wm,
                            data_collector,
-                           chef_telemetry
+                           chef_telemetry,
+                           chef_license
                           ]},
   {applications, [lager,
                   chef_secrets,

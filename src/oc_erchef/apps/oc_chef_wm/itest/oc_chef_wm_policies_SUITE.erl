@@ -86,6 +86,7 @@
     ">>).
 
 init_per_suite(Config) ->
+    application:start(chef_license),
     setup_helper:base_init_per_suite([{org_name, ?ORG_NAME},
                                    {org_authz_id, ?ORG_AUTHZ_ID},
                                    {authz_id, ?AUTHZ_ID},

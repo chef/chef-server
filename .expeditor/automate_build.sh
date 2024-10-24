@@ -42,6 +42,7 @@ HAB_FEAT_OFFLINE_INSTALL=true HAB_FEAT_IGNORE_LOCAL=false HAB_ORIGIN=chef HAB_CA
 
 git clone https://github.com/chef/automate.git
 cd automate
+git checkout ssudheer/cs_license_test
 
 RESOLVED_RESULTS_DIR=$(realpath results/)
 export DO_CHECK=true
