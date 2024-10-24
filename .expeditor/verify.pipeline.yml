@@ -223,6 +223,9 @@ steps:
       A2_LICENSE:
         path: secret/a2/license
         field: license
+      A2_EXPIRED_LICENSE:
+        path: secret/a2/license
+        field: expLicense
 
 - label: "chef server only"
   command:
@@ -236,6 +239,9 @@ steps:
       A2_LICENSE:
         path: secret/a2/license
         field: license
+      A2_EXPIRED_LICENSE:
+        path: secret/a2/license
+        field: expLicense
 
 - label: "ha chef server"
   command:
@@ -250,3 +256,6 @@ steps:
       A2_LICENSE:
         path: secret/a2/license
         field: license
+      A2_EXPIRED_LICENSE:
+        path: secret/a2/license
+        field: expLicense

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 require 'pedant/rspec/common'
 
-describe "server licence testing", :license do
+describe "server license testing", :license do
 
   # Pedant has configurable test users.
   # Selects Pedant users that are marked as associated
@@ -24,15 +24,15 @@ describe "server licence testing", :license do
       }
     end
 
-    context "when having valid licence" do
-      it "can get all users" do
+    context "when having valid license" do
+      it "can get all users", automate: true do
         get(request_url, platform.superuser).should look_like({
             :status => 200,
             :body => users_body
           })
       end
 
-      it "can get status" do
+      it "can get status", automate: true do
         get(status_url, platform.superuser).should look_like({
             :status => 200
           })
@@ -40,14 +40,23 @@ describe "server licence testing", :license do
     end
 
     # context "failure case", automate: true do
-    context "failure case" do
-      it "returns 403" do
+    context "when not having valid license" do
+      before(:all) do
+        system("chef-automate license apply \"$A2_EXPIRED_LICENSE\"")
+        system("sleep 30")
+      end
+      after(:all) do
+        system("chef-automate license apply \"$A2_LICENSE\"")
+        system("sleep 30")
+      end
+
+      it "returns 403", automate: true do
         puts get(request_url, platform.superuser)
         get(request_url, platform.superuser).should look_like({
             :status => 403
           })
       end
-      it "can get status" do
+      it "can get status", automate: true do
         get(status_url, platform.superuser).should look_like({
             :status => 200
           })
