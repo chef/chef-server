@@ -42,7 +42,9 @@ describe "server license testing", :license do
     # context "failure case", automate: true do
     context "when not having valid license" do
       before(:all) do
-        system("chef-automate license apply \"$A2_EXPIRED_LICENSE\"")
+        puts "applying expired license"
+        puts ENV['A2_EXPIRED_LICENSE']
+        system("chef-automate license apply -f \"$A2_EXPIRED_LICENSE\"")
         system("sleep 30")
       end
       after(:all) do
