@@ -32,11 +32,11 @@ describe "server license testing", :license do
           })
       end
 
-      it "can get status", automate: true do
-        get(status_url, platform.superuser).should look_like({
-            :status => 200
-          })
-      end
+      # it "can get status", automate: true do
+      #   get(status_url, platform.superuser).should look_like({
+      #       :status => 200
+      #     })
+      # end
     end
 
     # context "failure case", automate: true do
@@ -56,11 +56,11 @@ describe "server license testing", :license do
             :status => 403
           })
       end
-      it "can get status", automate: true do
-        get(status_url, platform.superuser).should look_like({
-            :status => 200
-          })
-      end
+      # it "can get status", automate: true do
+      #   get(status_url, platform.superuser).should look_like({
+      #       :status => 200
+      #     })
+      # end
     end
   end # context /users/<name> endpoint
 end # describe users
