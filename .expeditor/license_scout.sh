@@ -40,11 +40,15 @@ bundle_install_dirs=(
   chef-server-ctl
   oc-id
 )
+echo "+++ Using Ruby version: $(ruby -v)"
 
 for dir in "${bundle_install_dirs[@]}"; do
   echo "--- Installing gem dependencies for $dir"
   pushd "src/$dir"
-    bundle install --jobs=3 --retry=3 --path=/workdir/vendor/bundle
+    bundle config set jobs 3
+    bundle config set retry 3
+    bundle config set path "/workdir/vendor/bundle"
+    bundle install 
   popd
 done
 
