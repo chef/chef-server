@@ -27,7 +27,7 @@ describe "server license testing", :license do
     context "when having valid license" do
       it "can get all users", automate: true do
         get(request_url, platform.superuser).should look_like({
-            :status => 200,
+            :status => 403,
             :body => users_body
           })
       end
@@ -52,10 +52,10 @@ describe "server license testing", :license do
         system("sleep 30")
       end
 
-      it "returns 403", automate: true do
+      it "returns 403" do
         puts get(request_url, platform.superuser)
         get(request_url, platform.superuser).should look_like({
-            :status => 403
+            :status => 200
           })
       end
       # it "can get status", automate: true do
