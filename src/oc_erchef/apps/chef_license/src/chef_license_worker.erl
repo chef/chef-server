@@ -26,7 +26,8 @@
     grace_period,
     expiration_date,
     message,
-    customer_name
+    customer_name,
+    license_id
 }).
 
 -define(DEFAULT_LICENSE_SCAN_INTERVAL, 30000). %milli seconds
@@ -54,10 +55,10 @@ init(_Config) ->
     erlang:send_after(?DEFAULT_LICENSE_SCAN_INTERVAL, self(), check_license),
     {ok, State}.
 
-handle_call(get_license, _From, #state{license_cache = undefined, license_type=Type, expiration_date=ExpDate, grace_period = GracePeriod, message = Msg, customer_name=CN}=State) ->
-    {reply, {valid_license, Type, GracePeriod, ExpDate, Msg, CN}, State};
-handle_call(get_license, _From, #state{license_cache = Lic, license_type=Type, expiration_date=ExpDate, grace_period = GracePeriod, message = Msg, customer_name=CN} = State) ->
-    {reply,{Lic, Type, GracePeriod, ExpDate, Msg, CN}, State};
+handle_call(get_license, _From, #state{license_cache = undefined, license_type=Type, expiration_date=ExpDate, grace_period = GracePeriod, message = Msg, customer_name=CN,license_id = LicenseId}=State) ->
+    {reply, {valid_license, Type, GracePeriod, ExpDate, Msg, CN,LicenseId}, State};
+handle_call(get_license, _From, #state{license_cache = Lic, license_type=Type, expiration_date=ExpDate, grace_period = GracePeriod, message = Msg, customer_name=CN,license_id = LicenseId} = State) ->
+    {reply,{Lic, Type, GracePeriod, ExpDate, Msg, CN,LicenseId}, State};
 handle_call(_Message, _From, State) ->
     {noreply, State}.
 
@@ -88,14 +89,14 @@ check_license(State) ->
             {'EXIT', _} -> <<"">>
         end,
     case process_license(JsonStr) of
-        {ok, valid_license, ExpDate, CustomerName} ->
-            State#state{license_cache=valid_license, grace_period=undefined, scanned_time = erlang:timestamp(), expiration_date=ExpDate, customer_name=CustomerName};
-        {ok, commercial_expired, ExpDate, Msg, CustomerName} ->
-            State#state{license_cache=commercial_expired, license_type = <<"commercial">>, grace_period=undefined, scanned_time = erlang:timestamp(), expiration_date=ExpDate, message=Msg, customer_name=CustomerName};
-        {ok, commercial_grace_period, ExpDate, Msg, CustomerName} ->
-            State#state{license_cache=commercial_grace_period, grace_period=true, scanned_time = erlang:timestamp(), expiration_date=ExpDate, message=Msg, customer_name=CustomerName};
-        {ok, trial_expired, ExpDate, Msg, CustomerName} ->
-            State#state{license_cache=trial_expired_expired, license_type = <<"trial">>, grace_period=undefined, scanned_time = erlang:timestamp(), expiration_date=ExpDate, message=Msg, customer_name=CustomerName};
+        {ok, valid_license, ExpDate, CustomerName,LicenseId} ->
+            State#state{license_cache=valid_license, grace_period=undefined, scanned_time = erlang:timestamp(), expiration_date=ExpDate, customer_name=CustomerName,license_id = LicenseId};
+        {ok, commercial_expired, ExpDate, Msg, CustomerName,LicenseId} ->
+            State#state{license_cache=commercial_expired, license_type = <<"commercial">>, grace_period=undefined, scanned_time = erlang:timestamp(), expiration_date=ExpDate, message=Msg, customer_name=CustomerName,license_id = LicenseId};
+        {ok, commercial_grace_period, ExpDate, Msg, CustomerName,LicenseId} ->
+            State#state{license_cache=commercial_grace_period, grace_period=true, scanned_time = erlang:timestamp(), expiration_date=ExpDate, message=Msg, customer_name=CustomerName,license_id = LicenseId};
+        {ok, trial_expired, ExpDate, Msg, CustomerName,LicenseId} ->
+            State#state{license_cache=trial_expired_expired, license_type = <<"trial">>, grace_period=undefined, scanned_time = erlang:timestamp(), expiration_date=ExpDate, message=Msg, customer_name=CustomerName,license_id = LicenseId};
         {error, no_license} ->
             State#state{license_cache=trial_expired_expired, license_type = <<"trial">>, grace_period=undefined, scanned_time = erlang:timestamp(), expiration_date="", message=get_alert_message(trial_expired, "")};
         {error, _} -> State
@@ -113,23 +114,24 @@ process_license(LicJson) ->
     case ej:get({<<"result">>}, LicJson) of
         {LicDetails} ->
             CustomerName = ej:get({<<"customer_name">>}, LicDetails),
+            LicenseId = ej:get({<<"license_id">>}, LicDetails),
             case ej:get({<<"expiration_date">>}, LicDetails) of
                 {[{<<"seconds">>,ExpireInSeconds}]} ->
                     ExpDate = sec_to_date(ExpireInSeconds),
                     case os:system_time(second) < ExpireInSeconds of
-                        true -> {ok, valid_license, ExpDate, CustomerName};
+                        true -> {ok, valid_license, ExpDate, CustomerName,LicenseId};
                         _ ->
                             case ej:get({<<"license_type">>}, LicDetails) of
                                 <<"commercial">> ->
                                     case ej:get({<<"grace_period">>}, LicDetails) of
                                         true ->
                                             {ok, commercial_grace_period, ExpDate,
-                                                get_alert_message(commercial_grace_period, ExpDate), CustomerName};
+                                                get_alert_message(commercial_grace_period, ExpDate), CustomerName,LicenseId};
                                         _ ->
-                                            { ok, commercial_expired, ExpDate, get_alert_message(commercial_expired, ExpDate), CustomerName}
+                                            { ok, commercial_expired, ExpDate, get_alert_message(commercial_expired, ExpDate), CustomerName,LicenseId}
                                     end;
                                 _ ->
-                                    {ok, trial_expired, ExpDate, get_alert_message(trial_expired, ExpDate), CustomerName}
+                                    {ok, trial_expired, ExpDate, get_alert_message(trial_expired, ExpDate), CustomerName,LicenseId}
                             end
                     end;
                 _ ->
