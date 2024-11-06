@@ -7,6 +7,8 @@
 git clone https://github.com/chef/automate.git
 cd automate
 git checkout kalroy/cs_plan_changes
+echo $(git branch)
+echo $(git show --summary)
 
 #===============================================================================
 chmod +x ./integration/tests/chef_server.sh
