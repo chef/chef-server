@@ -89,6 +89,14 @@ add_command_under_category "add-client-key", "key-rotation", "Create a new clien
       @helper.exit_failure("Error: A key named #{@options.key_name} already exists for #{@options.clientname} in org #{@options.orgname}.")
     elsif e.response.code == "404"
       @helper.exit_failure("Error: Could not find client #{@options.clientname} in org #{@options.orgname}.")
+    elsif e.response.code == "403"
+      resp_message = JSON.parse(e.response.body)
+      if resp_message['message'] == 'invalid-license'
+        puts resp_message['error']
+        puts resp_message['message']
+      else
+        @helper.exit_http_fail(e)
+      end
     else
       @helper.exit_http_fail(e)
     end
@@ -155,6 +163,14 @@ add_command_under_category "add-user-key", "key-rotation", "Create a new user ke
       @helper.exit_failure("Error: A key named #{@options.key_name} already exists for user #{@options.username}.")
     elsif e.response.code == "404"
       @helper.exit_failure("Error: Could not find user #{@options.username}.")
+    elsif e.response.code == "403"
+      resp_message = JSON.parse(e.response.body)
+      if resp_message['message'] == 'invalid-license'
+        puts resp_message['error']
+        puts resp_message['message']
+      else
+        @helper.exit_http_fail(e)
+      end
     else
       @helper.exit_http_fail(e)
     end
@@ -196,6 +212,14 @@ add_command_under_category "list-client-keys", "key-rotation", "List keys for a 
   rescue Net::HTTPServerException => e
     if e.response.code == "404"
       @helper.exit_failure("Error: Could not find client #{@options.clientname} in org #{@options.orgname}.")
+    elsif e.response.code == "403"
+      resp_message = JSON.parse(e.response.body)
+      if resp_message['message'] == 'invalid-license'
+        puts resp_message['error']
+        puts resp_message['message']
+      else
+        @helper.exit_http_fail(e)
+      end
     else
       @helper.exit_http_fail(e)
     end
@@ -236,6 +260,14 @@ add_command_under_category "list-user-keys", "key-rotation", "List keys for a us
   rescue Net::HTTPServerException => e
     if e.response.code == "404"
       @helper.exit_failure("Error: Could not find user #{@options.username}.")
+    elsif e.response.code == "403"
+      resp_message = JSON.parse(e.response.body)
+      if resp_message['message'] == 'invalid-license'
+        puts resp_message['error']
+        puts resp_message['message']
+      else
+        @helper.exit_http_fail(e)
+      end
     else
       @helper.exit_http_fail(e)
     end
@@ -258,6 +290,14 @@ add_command_under_category "delete-user-key", "key-rotation", "Delete a key.", 2
   rescue Net::HTTPServerException => e
     if e.response.code == "404"
       @helper.exit_failure("Error: Could not find key #{@options.key_name} for user #{@options.username}.")
+    elsif e.response.code == "403"
+      resp_message = JSON.parse(e.response.body)
+      if resp_message['message'] == 'invalid-license'
+        puts resp_message['error']
+        puts resp_message['message']
+      else
+        @helper.exit_http_fail(e)
+      end
     else
       @helper.exit_http_fail(e)
     end
@@ -282,6 +322,14 @@ add_command_under_category "delete-client-key", "key-rotation", "Delete a key.",
   rescue Net::HTTPServerException => e
     if e.response.code == "404"
       @helper.exit_failure("Error: Could not find key #{@options.key_name} for user #{@options.username}.")
+    elsif e.response.code == "403"
+      resp_message = JSON.parse(e.response.body)
+      if resp_message['message'] == 'invalid-license'
+        puts resp_message['error']
+        puts resp_message['message']
+      else
+        @helper.exit_http_fail(e)
+      end
     else
       @helper.exit_http_fail(e)
     end
