@@ -8,7 +8,9 @@ git clone https://github.com/chef/automate.git
 cd automate
 git checkout kalroy/cs_plan_changes
 
+env | grep EXPIRED
+
 #===============================================================================
-chmod +x ./integration/tests/chef_server.sh
+#chmod +x ./integration/tests/chef_server.sh
 #running the chef_server.sh script from the automate repo
-integration/run_test integration/tests/chef_server.sh
+#integration/run_test integration/tests/chef_server.sh

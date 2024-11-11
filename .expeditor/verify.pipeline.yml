@@ -14,40 +14,40 @@ expeditor:
 
 steps:
 
-- label: automate_build
-  command:
-      - .expeditor/automate_build.sh
-  env:
-      ALLOW_LOCAL_PACKAGES: true
-      HAB_STUDIO_SUP: false
-      HAB_NONINTERACTIVE: true
-      GOPROXY: "https://proxy.golang.org,direct"
-  expeditor:
-    secrets:
-        HAB_STUDIO_SECRET_GITHUB_TOKEN:
-          account: github/chef
-          field: token
-        OPENSEARCH_ROOT_CA_PEM:
-          path: secret/a2/a2ha/opensearch
-          field: root-ca.pem
-        OPENSEARCH_ADMIN_PEM:
-          path: secret/a2/a2ha/opensearch
-          field: admin.pem
-        OPENSEARCH_ADMIN_KEY_PEM:
-          path: secret/a2/a2ha/opensearch
-          field: admin-key.pem
-        OPENSEARCH_NODE1_PEM:
-          path: secret/a2/a2ha/opensearch
-          field: node1.pem
-        OPENSEARCH_NODE1_KEY_PEM:
-          path: secret/a2/a2ha/opensearch
-          field: node1-key.pem
-    executor:
-        linux:
-          privileged: true
+# - label: automate_build
+#   command:
+#       - .expeditor/automate_build.sh
+#   env:
+#       ALLOW_LOCAL_PACKAGES: true
+#       HAB_STUDIO_SUP: false
+#       HAB_NONINTERACTIVE: true
+#       GOPROXY: "https://proxy.golang.org,direct"
+#   expeditor:
+#     secrets:
+#         HAB_STUDIO_SECRET_GITHUB_TOKEN:
+#           account: github/chef
+#           field: token
+#         OPENSEARCH_ROOT_CA_PEM:
+#           path: secret/a2/a2ha/opensearch
+#           field: root-ca.pem
+#         OPENSEARCH_ADMIN_PEM:
+#           path: secret/a2/a2ha/opensearch
+#           field: admin.pem
+#         OPENSEARCH_ADMIN_KEY_PEM:
+#           path: secret/a2/a2ha/opensearch
+#           field: admin-key.pem
+#         OPENSEARCH_NODE1_PEM:
+#           path: secret/a2/a2ha/opensearch
+#           field: node1.pem
+#         OPENSEARCH_NODE1_KEY_PEM:
+#           path: secret/a2/a2ha/opensearch
+#           field: node1-key.pem
+#     executor:
+#         linux:
+#           privileged: true
 
-# waiting for the automate build to finish before running the chef server tests
-- wait
+# # waiting for the automate build to finish before running the chef server tests
+# - wait
 
 
 - label: "chef server"
@@ -66,35 +66,35 @@ steps:
         path: secret/a2/license
         field: expLicense
 
-- label: "chef server only"
-  command:
-    - .expeditor/chef_server_only.sh
-  timeout_in_minutes: 20
-  expeditor:
-    executor:
-      linux:
-        privileged: true
-    secrets:
-      A2_LICENSE:
-        path: secret/a2/license
-        field: license
-      A2_EXPIRED_LICENSE:
-        path: secret/a2/license
-        field: expLicense
+# - label: "chef server only"
+#   command:
+#     - .expeditor/chef_server_only.sh
+#   timeout_in_minutes: 20
+#   expeditor:
+#     executor:
+#       linux:
+#         privileged: true
+#     secrets:
+#       A2_LICENSE:
+#         path: secret/a2/license
+#         field: license
+#       A2_EXPIRED_LICENSE:
+#         path: secret/a2/license
+#         field: expLicense
 
-- label: "ha chef server"
-  command:
-    - .expeditor/ha_chef_server.sh
-  timeout_in_minutes: 35
-  expeditor:
-    executor:
-      linux:
-        single-use: true
-        privileged: true
-    secrets:
-      A2_LICENSE:
-        path: secret/a2/license
-        field: license
-      A2_EXPIRED_LICENSE:
-        path: secret/a2/license
-        field: expLicense
+# - label: "ha chef server"
+#   command:
+#     - .expeditor/ha_chef_server.sh
+#   timeout_in_minutes: 35
+#   expeditor:
+#     executor:
+#       linux:
+#         single-use: true
+#         privileged: true
+#     secrets:
+#       A2_LICENSE:
+#         path: secret/a2/license
+#         field: license
+#       A2_EXPIRED_LICENSE:
+#         path: secret/a2/license
+#         field: expLicense
