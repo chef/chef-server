@@ -222,6 +222,9 @@ steps:
       A2_LICENSE:
         path: secret/a2/license
         field: license
+      A2_EXPIRED_LICENSE:
+        path: secret/a2/license
+        field: expLicense
     executor:
       linux:
         privileged: true
@@ -237,6 +240,9 @@ steps:
       A2_LICENSE:
         path: secret/a2/license
         field: license
+      A2_EXPIRED_LICENSE:
+        path: secret/a2/license
+        field: expLicense
     executor:
       linux:
         privileged: true
@@ -253,6 +259,9 @@ steps:
       A2_LICENSE:
         path: secret/a2/license
         field: license
+      A2_EXPIRED_LICENSE:
+        path: secret/a2/license
+        field: expLicense
     executor:
       linux:
         privileged: true
