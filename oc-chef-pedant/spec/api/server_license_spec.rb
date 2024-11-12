@@ -26,6 +26,8 @@ describe "server license testing", :license do
 
     context "when having valid license" do
       it "can get all users", :smoke do
+        puts "inside valid license"
+        puts ENV['IS_AUTOMATE']
         get(request_url, platform.superuser).should look_like({
             :status => 200,
             :body => users_body
