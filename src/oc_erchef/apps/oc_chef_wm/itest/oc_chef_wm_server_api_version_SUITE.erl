@@ -50,6 +50,7 @@ init_per_suite(Config) ->
     Config2 = setup_helper:base_init_per_suite([{org_name, ?ORG_NAME}, {org_authz_id, ?ORG_AUTHZ_ID},
                                                 {authz_id, ?CLIENT_AUTHZ_ID}, {client_name, ?CLIENT_NAME} | Config]),
     setup_helper:make_user(Config2, ?USER_NAME, ?USER_AUTHZ_ID),
+    application:start(chef_license),
     Config2.
 
 end_per_suite(Config) ->
