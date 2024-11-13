@@ -216,6 +216,8 @@ steps:
 - label: "chef server"
   command:
     - .expeditor/chef_server.sh
+  env:
+    IS_AUTOMATE: true
   timeout_in_minutes: 30 # longer timeout for chef-server
   expeditor:
     secrets:
@@ -234,6 +236,8 @@ steps:
 - label: "chef server only"
   command:
     - .expeditor/chef_server_only.sh
+  env:
+    IS_AUTOMATE: true
   timeout_in_minutes: 20
   expeditor:
     secrets:
@@ -253,6 +257,8 @@ steps:
 - label: "ha chef server"
   command:
     - .expeditor/ha_chef_server.sh
+  env:
+    IS_AUTOMATE: true
   timeout_in_minutes: 35
   expeditor:
     secrets:
