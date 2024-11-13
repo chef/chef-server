@@ -53,6 +53,8 @@ steps:
 - label: "chef server"
   command:
     - .expeditor/chef_server.sh
+  env:
+    IS_AUTOMATE: true
   timeout_in_minutes: 30 # longer timeout for chef-server
   expeditor:
     executor:
