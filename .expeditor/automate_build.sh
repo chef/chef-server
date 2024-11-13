@@ -82,4 +82,5 @@
 
 # tar -cvf results.tar results
 # gzip results.tar
+cat xaa xab xac > results.tar.gz
 buildkite-agent artifact upload results.tar.gz
