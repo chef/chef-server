@@ -33,7 +33,7 @@ describe "server license testing", :license do
       end
     end
 
-    # context "failure case", automate: true do
+    # In case of Embedded chef-server in Automate, If the license of automate is Expired in that case all requests reaching to chef-server should return 403
     context "when not having valid license",  if: ENV["IS_AUTOMATE"] == "true" do
       before(:all) do
         puts "applying expired license"
