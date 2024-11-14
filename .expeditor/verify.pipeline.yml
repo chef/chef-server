@@ -154,6 +154,7 @@ steps:
           - USE_OMNIBUS_FILES=0
           - PEDANT_OPTS="--skip-oc_id"
           - BUNDLE_GEMFILE=/workdir/oc-chef-pedant/Gemfile
+          - IS_AUTOMATE=false
 
 - label: With ChefFS=1
   command:
@@ -174,6 +175,7 @@ steps:
           - PEDANT_OPTS="--skip-oc_id"
           - CHEF_FS=1
           - BUNDLE_GEMFILE=/workdir/oc-chef-pedant/Gemfile
+          - IS_AUTOMATE=false
 
 - label: automate_build
   command:
@@ -214,39 +216,61 @@ steps:
 - label: "chef server"
   command:
     - .expeditor/chef_server.sh
+  env:
+    IS_AUTOMATE: true
   timeout_in_minutes: 30 # longer timeout for chef-server
   expeditor:
-    executor:
-      linux:
-        privileged: true
     secrets:
       A2_LICENSE:
         path: secret/a2/license
         field: license
+      A2_EXPIRED_LICENSE:
+        path: secret/a2/license
+        field: expLicense
+    executor:
+      linux:
+        privileged: true
+        environment:
+          - IS_AUTOMATE=true
 
 - label: "chef server only"
   command:
     - .expeditor/chef_server_only.sh
+  env:
+    IS_AUTOMATE: true
   timeout_in_minutes: 20
   expeditor:
-    executor:
-      linux:
-        privileged: true
     secrets:
       A2_LICENSE:
         path: secret/a2/license
         field: license
+      A2_EXPIRED_LICENSE:
+        path: secret/a2/license
+        field: expLicense
+    executor:
+      linux:
+        privileged: true
+        environment:
+          - IS_AUTOMATE=true
+
 
 - label: "ha chef server"
   command:
     - .expeditor/ha_chef_server.sh
+  env:
+    IS_AUTOMATE: true
   timeout_in_minutes: 35
   expeditor:
-    executor:
-      linux:
-        single-use: true
-        privileged: true
     secrets:
       A2_LICENSE:
         path: secret/a2/license
         field: license
+      A2_EXPIRED_LICENSE:
+        path: secret/a2/license
+        field: expLicense
+    executor:
+      linux:
+        privileged: true
+        single-use: true
+        environment:
+          - IS_AUTOMATE=true
