@@ -89,14 +89,14 @@ service_available(Req, #base_state{reqid_header_name = HeaderName} = State) ->
                     {true, Req, State3};
                 _ ->
                     case chef_license_worker:get_license() of
-                        {valid_license, _, _, _, _, _} ->
+                        {valid_license, _, _, _, _, _,_} ->
                             {true, Req, State3};
-                        {commercial_grace_period, _, _, ExpDate, LicWarnMsg, _} ->
+                        {commercial_grace_period, _, _, ExpDate, LicWarnMsg, _,_} ->
                             XOps = binary_to_list(chef_json:encode({[{<<"licenseType">>, <<"commercial">>},{<<"expirationDateTime">>, list_to_binary(ExpDate)},
                                 {<<"warningMessage">>, list_to_binary(LicWarnMsg)}, {<<"gracePeriod">>, true}]})),
                             Req1 = wrq:set_resp_header("X-Ops-License", XOps, Req),
                             {true, Req1, State3};
-                        {_, Type, _, ExpDate, LicWarnMsg, _} ->
+                        {_, Type, _, ExpDate, LicWarnMsg, _,_} ->
                             XOps = binary_to_list(chef_json:encode({[{<<"licenseType">>, Type},{<<"expirationDateTime">>, list_to_binary(ExpDate)},
                                 {<<"warningMessage">>, list_to_binary(LicWarnMsg)}, {<<"gracePeriod">>, false}]})),
                             Req1 = wrq:set_resp_header("X-Ops-License", XOps, Req),
