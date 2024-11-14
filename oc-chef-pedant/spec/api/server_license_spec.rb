@@ -25,7 +25,7 @@ describe "server license testing", :license do
     end
 
     context "when having valid license" do
-      it "can get all users", :smoke do
+      it "can get all users and since the license is valid, they should show 200 as return", :smoke do
         get(request_url, platform.superuser).should look_like({
             :status => 200,
             :body => users_body
@@ -56,11 +56,6 @@ describe "server license testing", :license do
             :status => 403
           })
       end
-      # it "can get status", automate: true do
-      #   get(status_url, platform.superuser).should look_like({
-      #       :status => 200
-      #     })
-      # end
     end
   end # context /users/<name> endpoint
 end # describe users
