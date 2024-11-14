@@ -36,7 +36,7 @@ field_value_test() ->
         user_emails = [[{<<"email">>, <<"test@testorg.com">>}]],
         nodes_count = 10
     },
-    {_Lic, _Type, _GracePeriod, _ExpDate, _Msg, CN,_}  = gen_server:call(chef_license_worker, get_license),
+    {_Lic, _Type, _GracePeriod, _ExpDate, _Msg, CN,_}  = chef_license:get_license(),
     CN1 = case CN of
         CN when CN == undefined, CN== <<"">>, CN == "" -> <<"testorg">>;
                                                        CN ->CN
@@ -142,7 +142,7 @@ get_message() ->
     end.
 
 determine_license_id()->
-    {_Lic, _Type, _GracePeriod, _ExpDate, _Msg, _CN, LicenseID}  = gen_server:call(chef_license_worker, get_license),
+    {_Lic, _Type, _GracePeriod, _ExpDate, _Msg, _CN, LicenseID}  = chef_license:get_license(),
     case LicenseID of
         undefined           ->
             <<"Infra-Server-license-Id">>;

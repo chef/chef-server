@@ -200,11 +200,11 @@ solr_search(Query) ->
     end.
 
 get_license_company_name()->
-    {_Lic, _Type, _GracePeriod, _ExpDate, _Msg, CN,_LID}  = gen_server:call(chef_license_worker, get_license),
+    {_Lic, _Type, _GracePeriod, _ExpDate, _Msg, CN,_LID}  = chef_license:get_license(),
     CN.
 
 determine_license_id()->
-    {_Lic, _Type, _GracePeriod, _ExpDate, _Msg, _CN, LicenseID}  = gen_server:call(chef_license_worker, get_license),
+    {_Lic, _Type, _GracePeriod, _ExpDate, _Msg, _CN, LicenseID}  = chef_license:get_license(),
     case LicenseID of
         undefined           ->
             <<"Infra-Server-license-Id">>;
