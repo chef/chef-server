@@ -28,7 +28,7 @@
     active_nodes = 0,
     fqdn = []}).
 
-feild_value_test() ->
+field_value_test() ->
     State = #state{fqdn_select = {ok, [[{<<"property">>, <<"FQDN:node1.domain1.com">>}],
                                        [{<<"property">>, <<"FQDN:node2.subdomain2.domain2.com">>}],
                                        [{<<"property">>, <<"FQDN:node3.subdomain3.domain3.co.uk">>}]]},
@@ -36,7 +36,13 @@ feild_value_test() ->
         user_emails = [[{<<"email">>, <<"test@testorg.com">>}]],
         nodes_count = 10
     },
-    Expected = #expected{company_name = <<"testorg">>,
+    {_Lic, _Type, _GracePeriod, _ExpDate, _Msg, CN,_}  = chef_license:get_license(),
+    CN1 = case CN of
+        CN when CN == undefined, CN== <<"">>, CN == "" -> <<"testorg">>;
+                                                       CN ->CN
+    end,
+
+    Expected = #expected{company_name = CN1,
         nodes_count = 10,
         active_nodes = 4,
         fqdn = [<<".*\.domain1.com$">>,
@@ -135,12 +141,25 @@ get_message() ->
        throw(no_request)
     end.
 
+determine_license_id()->
+    {_Lic, _Type, _GracePeriod, _ExpDate, _Msg, _CN, LicenseID}  = chef_license:get_license(),
+    case LicenseID of
+        undefined           ->
+            <<"Infra-Server-license-Id">>;
+        <<"undefined">>     ->
+            <<"Infra-Server-license-Id">>;
+        <<>>                ->
+            <<"Infra-Server-license-Id">>;
+        _                   ->
+            LicenseID
+    end.
+
 validate(Req, Expected) ->
     Licence = ej:get({<<"licenseId">>}, Req),
     TotalNodes = ej:get({<<"periods">>, 1, <<"summary">>, <<"nodes">>, <<"total">>}, Req),
     ActiveNodes = ej:get({<<"periods">>, 1, <<"summary">>, <<"nodes">>, <<"active">>}, Req),
     FQDNs = ej:get({<<"metadata">>, <<"Infra Server">>, <<"fqdn">>}, Req),
-    ?assertEqual(<<"Infra-Server-license-Id">>, Licence),
+    ?assertEqual(determine_license_id(), Licence),
     ?assertEqual(Expected#expected.nodes_count, TotalNodes),
     ?assertEqual(Expected#expected.active_nodes, ActiveNodes),
     ?assertEqual(true, check_fqdn(FQDNs, Expected#expected.fqdn)).

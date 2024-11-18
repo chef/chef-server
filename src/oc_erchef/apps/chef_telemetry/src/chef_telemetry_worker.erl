@@ -199,29 +199,51 @@ solr_search(Query) ->
             {Error, Reason}
     end.
 
+get_license_company_name()->
+    {_Lic, _Type, _GracePeriod, _ExpDate, _Msg, CN,_LID}  = chef_license:get_license(),
+    CN.
+
+determine_license_id()->
+    {_Lic, _Type, _GracePeriod, _ExpDate, _Msg, _CN, LicenseID}  = chef_license:get_license(),
+    case LicenseID of
+        undefined           ->
+            <<"Infra-Server-license-Id">>;
+        <<"undefined">>     ->
+            <<"Infra-Server-license-Id">>;
+        <<>>                ->
+            <<"Infra-Server-license-Id">>;
+        _                   ->
+            LicenseID
+    end.
+
+
 get_company_name(State) ->
     CompanyName =
-    case sqerl:adhoc_select([<<"email">>], <<"users">>, all) of
-        {ok, Ids1} ->
-            Ids = [Id || [{_, Id}] <- Ids1],
-            Fun =
-                fun(Email) ->
-                    case re:run(Email, "^[^@]*@\([^.]*\)\..*$") of
-                        {match, [_, {Pos, Len} | _]} ->
-                            {true, binary:part(Email, Pos, Len)};
-                        _ ->
-                            false
-                    end
-                end,
-            CompanyNames = lists:filtermap(Fun, Ids),
-            case length(CompanyNames) == 0 of
-                true ->
-                    throw("no valid Email Ids.");
-                _ ->
-                    get_most_occuring(CompanyNames)
+    case get_license_company_name() of
+        CN when CN =:= undefined; CN=:= <<"">>; CN =:= "" ->
+            case sqerl:adhoc_select([<<"email">>], <<"users">>, all) of
+                    {ok, Ids1} ->
+                        Ids = [Id || [{_, Id}] <- Ids1],
+                        Fun =
+                            fun(Email) ->
+                                case re:run(Email, "^[^@]*@\([^.]*\)\..*$") of
+                                    {match, [_, {Pos, Len} | _]} ->
+                                        {true, binary:part(Email, Pos, Len)};
+                                    _ ->
+                                        false
+                                end
+                            end,
+                        CompanyNames = lists:filtermap(Fun, Ids),
+                        case length(CompanyNames) == 0 of
+                            true ->
+                                throw("no valid Email Ids.");
+                            _ ->
+                                get_most_occuring(CompanyNames)
+                        end;
+                    Error ->
+                        throw(Error)
             end;
-        Error ->
-            throw(Error)
+        CN -> CN
     end,
     CurrentScan = State#state.current_scan,
     State#state{
@@ -276,7 +298,7 @@ get_nodes(#state{req_id = ReqId, db_context = DbContext} = State) ->
 generate_request(ServerVersion, State) ->
     CurrentScan = State#state.current_scan,
     Res = jiffy:encode({[
-    {<<"licenseId">>, <<"Infra-Server-license-Id">>},
+    {<<"licenseId">>, determine_license_id()},
     {<<"customerName">>, State#state.current_scan#current_scan.company_name},
     {<<"periods">>, [
         {[
