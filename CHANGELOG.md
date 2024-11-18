@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.10.18 -->
-## [15.10.18](https://github.com/chef/chef-server/tree/15.10.18) (2024-11-06)
+<!-- latest_release 15.10.19 -->
+## [15.10.19](https://github.com/chef/chef-server/tree/15.10.19) (2024-11-18)
 
 #### Merged Pull Requests
-- Open-Search  upgraded to 1.3.19 [#3931](https://github.com/chef/chef-server/pull/3931) ([talktovikas](https://github.com/talktovikas))
+- License Enforcement Application [#3929](https://github.com/chef/chef-server/pull/3929) ([jashaik](https://github.com/jashaik))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.10.12 -->
 ### Changes since 15.10.12 release
 
 #### Merged Pull Requests
+- License Enforcement Application [#3929](https://github.com/chef/chef-server/pull/3929) ([jashaik](https://github.com/jashaik)) <!-- 15.10.19 -->
 - Open-Search  upgraded to 1.3.19 [#3931](https://github.com/chef/chef-server/pull/3931) ([talktovikas](https://github.com/talktovikas)) <!-- 15.10.18 -->
 - Build tests for embedded Chef-Server in Automate [#3917](https://github.com/chef/chef-server/pull/3917) ([talktovikas](https://github.com/talktovikas)) <!-- 15.10.17 -->
 - added updated production url spelling [#3908](https://github.com/chef/chef-server/pull/3908) ([vviveksharma](https://github.com/vviveksharma)) <!-- 15.10.16 -->
