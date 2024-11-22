@@ -17,12 +17,22 @@
     terminate/2
 ]).
 
+-export([
+    get_total_nodes/0,
+    get_active_nodes/0,
+    get_company_name/0,
+    get_api_fqdn/0,
+    determine_license_id/0
+]).
+
 -record(current_scan, {
-    scan_start_time,
-    scan_end_time,
     total_nodes,
     active_nodes,
-    company_name
+    company_name,
+    fqdns,
+    license_id,
+    scan_start_time,
+    scan_end_time
 }).
 
 -record(state, {
@@ -149,12 +159,12 @@ send_data(State) ->
                 case check_send(Hostname) of
                     true ->
                         [{_Server, ServerVersion, _, _}] = release_handler:which_releases(permanent),
-                        State2 = get_nodes(State1),
-                        State3 = get_company_name(State2),
-                        State4 = get_api_fqdn(State3),
-                        Req = generate_request(ServerVersion, State4),
-                        send_req(Req, State3),
-                        State3;
+                        Funs = [fun get_total_nodes/0, fun get_active_nodes/0, fun get_company_name/0, fun get_api_fqdn/0, fun determine_license_id/0],
+                        Res = [ erlang:spawn_monitor(fun() -> runner(self(), Fun) end) || Fun <- Funs ],
+                        Current_scan = gather_res(Res, #current_scan{}, length(Funs)),
+                        Req = generate_request(ServerVersion, State1#state{current_scan = Current_scan}),
+                        send_req(Req, State1),
+                        State1;
                      _   ->
                         State1
                 end;
@@ -162,17 +172,6 @@ send_data(State) ->
                 State
         end,
     State6.
-
-get_api_fqdn(State) ->
-    sqerl:execute(<<"delete from telemetry where property like 'FQDN:%' and event_timestamp < (current_timestamp - interval '86700')">>),
-    case sqerl:execute(<<"select trim(property) as property from telemetry where property like 'FQDN:%'">>) of
-        {ok, Rows} when is_list(Rows) ->
-            FQDNs = [binary:part(FQDN, 5, size(FQDN) -5) || [{<<"property">>, FQDN}] <- Rows],
-            FQDNs1 = mask(FQDNs),
-            State#state{fqdns = FQDNs1};
-        _ ->
-            State
-    end.
 
 get_org_nodes(OrgName, Query1, ReqId, DbContext) ->
     {Guid1, _AuthzId1} =
@@ -221,8 +220,56 @@ determine_license_id()->
             LicenseID
     end.
 
+get_most_occuring(List) ->
+    FirstElement = lists:nth(1, List),
+    Fun = fun(Element, Map) ->
+        Count = maps:get(Element, Map, 0),
+        maps:put(Element, Count + 1, Map)
+    end,
+    Map1 = lists:foldl(Fun, #{}, List),
 
-get_company_name(State) ->
+    Fun1 =
+        fun(Key1, Count1, {Key2, Count2}) ->
+            case Count1 > Count2 of
+                true ->
+                    {Key1, Count1};
+                _ ->
+                    {Key2, Count2}
+            end
+        end,
+    Res1 = maps:fold(Fun1, {FirstElement, 0}, Map1),
+    element(1, Res1).
+
+get_total_nodes() ->
+    ReqId = base64:encode(term_to_binary(make_ref())),
+    DbContext = chef_db:make_context("1.0", ReqId, false),
+    Count =
+        case chef_db:count_nodes(DbContext) of
+            Count1 when is_integer(Count1) -> Count1;
+            Error -> throw({db_error, Error})
+        end,
+    Count.
+
+get_active_nodes() ->
+    ScanStartTime = erlang:system_time(seconds),
+    ScanEndTime = ScanStartTime - (?DEFAULT_DAYS * 86400),
+    QueryString = lists:flatten(io_lib:format("ohai_time:{~p TO ~p}", [ScanStartTime, ScanEndTime])),
+    Query1 = chef_index:query_from_params("node", QueryString, "0", "10000"),
+    ReqId = base64:encode(term_to_binary(make_ref())),
+    DbContext = chef_db:make_context("1.0", ReqId, false),
+    Orgs =
+        case chef_db:list(#oc_chef_organization{}, DbContext) of
+            Orgs1 when is_list(Orgs1) -> Orgs1;
+            Error1 -> throw({db_error, Error1})
+        end,
+    Stats = [ {Org, get_org_nodes(Org, Query1, ReqId, DbContext)} || Org <- Orgs ],
+    Fun = fun({_Org, Nodes}, Sum) ->
+              Sum + Nodes
+          end,
+    ActiveNodes = lists:foldl(Fun, 0, Stats),
+    ActiveNodes.
+
+get_company_name() ->
     CompanyName =
     case get_license_company_name() of
         CN when CN =:= undefined; CN=:= <<"">>; CN =:= "" ->
@@ -250,55 +297,18 @@ get_company_name(State) ->
             end;
         CN -> CN
     end,
-    CurrentScan = State#state.current_scan,
-    State#state{
-        current_scan = CurrentScan#current_scan{company_name = CompanyName}}.
+    CompanyName.
 
-get_most_occuring(List) ->
-    FirstElement = lists:nth(1, List),
-    Fun = fun(Element, Map) ->
-        Count = maps:get(Element, Map, 0),
-        maps:put(Element, Count + 1, Map)
-    end,
-    Map1 = lists:foldl(Fun, #{}, List),
-
-    Fun1 =
-        fun(Key1, Count1, {Key2, Count2}) ->
-            case Count1 > Count2 of
-                true ->
-                    {Key1, Count1};
-                _ ->
-                    {Key2, Count2}
-            end
-        end,
-    Res1 = maps:fold(Fun1, {FirstElement, 0}, Map1),
-    element(1, Res1).
-
-get_nodes(#state{req_id = ReqId, db_context = DbContext} = State) ->
-    CurrentScan = State#state.current_scan,
-    ScanStartTime = CurrentScan#current_scan.scan_start_time,
-    ScanEndTime = CurrentScan#current_scan.scan_end_time,
-    QueryString = lists:flatten(io_lib:format("ohai_time:{~p TO ~p}", [ScanStartTime, ScanEndTime])),
-    Query1 = chef_index:query_from_params("node", QueryString, "0", "10000"),
-    Count =
-        case chef_db:count_nodes(DbContext) of
-            Count1 when is_integer(Count1) -> Count1;
-            Error -> throw({db_error, Error})
-        end,
-    Orgs =
-        case chef_db:list(#oc_chef_organization{}, DbContext) of
-            Orgs1 when is_list(Orgs1) -> Orgs1;
-            Error1 -> throw({db_error, Error1})
-        end,
-    Stats = [ {Org, get_org_nodes(Org, Query1, ReqId, DbContext)} || Org <- Orgs ],
-    Fun = fun({_Org, Nodes}, Sum) ->
-              Sum + Nodes
-          end,
-    ActiveNodes = lists:foldl(Fun, 0, Stats),
-    State#state{
-        current_scan = CurrentScan#current_scan{
-            total_nodes = Count,
-            active_nodes = ActiveNodes}}.
+get_api_fqdn() ->
+    sqerl:execute(<<"delete from telemetry where property like 'FQDN:%' and event_timestamp < (current_timestamp - interval '86700')">>),
+    case sqerl:execute(<<"select trim(property) as property from telemetry where property like 'FQDN:%'">>) of
+        {ok, Rows} when is_list(Rows) ->
+            FQDNs = [binary:part(FQDN, 5, size(FQDN) -5) || [{<<"property">>, FQDN}] <- Rows],
+            FQDNs1 = mask(FQDNs),
+            FQDNs1;
+        _ ->
+            []
+    end.
 
 generate_request(ServerVersion, State) ->
     CurrentScan = State#state.current_scan,
@@ -439,3 +449,36 @@ mask(FQDNs) ->
         end
     end,
     lists:map(Fun, FQDNs).
+
+runner(Parent, Fun) ->
+    fun() ->
+        Res = Fun(),
+        Parent ! {self(), Res}
+    end.
+
+gather_res(_Ids, Res, Count) when Count < 0->
+    Res;
+
+gather_res(Ids, Res, Count) ->
+    Fun = fun(Id) ->
+            fun({Id1,_}) ->
+              Id =:= Id1
+            end
+          end,
+    receive
+        {Id, Ret} ->
+            case lists:search(Fun(Id), Ids) of
+                {value, _} ->
+                    Res1 = setelement(length(lists:takewhile(Fun(Id), Ids)) +1, Res, Ret),
+                    gather_res(Ids, Res1, Count -1);
+                _ ->
+                    gather_res(Ids, Res, Count)
+            end;
+        {'DOWN', _Ref, process, Id, _Reason} ->
+            case lists:search(Fun(Id), Ids) of
+                {value, _} ->
+                    gather_res(Ids, Res, Count -1);
+                _ ->
+                    gather_res(Ids, Res, Count)
+            end
+    end.
