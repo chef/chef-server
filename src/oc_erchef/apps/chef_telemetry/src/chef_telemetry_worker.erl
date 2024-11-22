@@ -66,10 +66,15 @@ start_link() ->
     gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
 
 init(_Config) ->
-    ConfigFile= envy:get(chef_telemetry, running_filepath, "", string),
-    Ctl = envy:get(chef_telemetry, ctl_command, "", string),
-    Cmd = "which " ++ Ctl,
-    CtlLocation = string:trim(os:cmd(Cmd)),
+    {ConfigFile, CtlLocation} =
+        case re:run(os:cmd("pwd"), "^/hab/.*") of
+          {match,_} ->
+            {"Hab infra server", "Hab infra server"};
+          _ ->
+            CtlLocation1 =
+                string:trim(os:cmd("which " ++ envy:get(chef_telemetry, ctl_command, "", string))),
+            {envy:get(chef_telemetry, running_filepath, "", string), CtlLocation1}
+        end,
     State = #state{
         report_time = ?DEFAULT_REPORTING_TIME,
         reporting_url = ?DEFAULT_REPORTING_URL,
