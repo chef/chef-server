@@ -165,7 +165,8 @@ find_dl_headers(OrgName, IntLB) when is_list(OrgName) ->
     % to nginx in the request but skipping the verification as we are making the RPC call.
     % as chef-server-ctl reindex --all-org can be triggered only from inside the box and with root privileges.
     Ssl3 = proplists:delete(verify, proplists:get_value(ssl_options, Ssl2,[])),
-    {ok, "200", _Headers, Body} = rpc:call(?ERCHEF, ibrowse,send_req, [IntLB ++ "/_route/organizations/" ++ OrgName, [], get, [], [{ssl_options, Ssl3}]]),
+    Ssl4 = [{verify, verify_none} | Ssl3],
+    {ok, "200", _Headers, Body} = rpc:call(?ERCHEF, ibrowse,send_req, [IntLB ++ "/_route/organizations/" ++ OrgName, [], get, [], [{ssl_options, Ssl4}]]),
     Json = rpc:call(?ERCHEF, jiffy, decode, [Body]),
     SubJson = rpc:call(?ERCHEF, ej, get, [{<<"config">>, <<"merged">>}, Json]),
     {KVList} = SubJson,
