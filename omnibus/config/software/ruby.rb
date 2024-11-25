@@ -130,7 +130,7 @@ else
 end
 
 build do
-  command "mv -R  #{install_dir}/embedded/ruby/ruby-3.4.0-preview1 #{install_dir}/embedded/ruby/ruby-3.4.0"
+  command "mv  #{install_dir}/embedded/ruby/ruby-3.4.0-preview1 #{install_dir}/embedded/ruby/ruby-3.4.0"
   # AIX needs /opt/freeware/bin only for patch
   patch_env = env.dup
   patch_env["PATH"] = "/opt/freeware/bin:#{env["PATH"]}" if aix?
