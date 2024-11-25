@@ -26,7 +26,7 @@ skip_transitive_dependency_licensing true
 # the default versions should always be the latest release of ruby
 # if you consume this definition it is your responsibility to pin
 # to the desired version of ruby. don't count on this not changing.
-default_version "3.3.6"
+default_version "3.4.0"
 
 dependency "zlib"
 dependency "openssl"
@@ -42,6 +42,7 @@ dependency "libyaml"
 dependency "ncurses" if freebsd?
 
 # version_list: url=https://cache.ruby-lang.org/pub/ruby/ filter=*.tar.gz
+version("3.4.0") { source sha256: "8dc48fffaf270f86f1019053f28e51e4da4cce32a36760a0603a9aee67d7fd8d" }
 version("3.3.6") { source sha256: "8dc48fffaf270f86f1019053f28e51e4da4cce32a36760a0603a9aee67d7fd8d" }
 version("3.3.1") { source sha256: "8dc2af2802cc700cd182d5430726388ccf885b3f0a14fcd6a0f21ff249c9aa99" }
 version("3.3.0") { source sha256: "96518814d9832bece92a85415a819d4893b307db5921ae1f0f751a9a89a56b7d" }
@@ -59,7 +60,9 @@ version("3.0.3") { source sha256: "3586861cb2df56970287f0fd83f274bd92058872d830d
 version("3.0.2") { source sha256: "5085dee0ad9f06996a8acec7ebea4a8735e6fac22f22e2d98c3f2bc3bef7e6f1" }
 version("3.0.1") { source sha256: "369825db2199f6aeef16b408df6a04ebaddb664fb9af0ec8c686b0ce7ab77727" }
 
-source url: "https://cache.ruby-lang.org/pub/ruby/#{version.match(/^(\d+\.\d+)/)[0]}/ruby-#{version}.tar.gz"
+
+# source url: "https://cache.ruby-lang.org/pub/ruby/#{version.match(/^(\d+\.\d+)/)[0]}/ruby-#{version}.tar.gz"
+source url: "https://cache.ruby-lang.org/pub/ruby/3.4/ruby-3.4.0-preview1.tar.gz"
 internal_source url: "#{ENV["ARTIFACTORY_REPO_URL"]}/#{name}/#{name}-#{version}.tar.gz",
                 authorization: "X-JFrog-Art-Api:#{ENV["ARTIFACTORY_TOKEN"]}"
 
