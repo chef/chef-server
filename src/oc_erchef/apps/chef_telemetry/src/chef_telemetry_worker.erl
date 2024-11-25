@@ -17,19 +17,11 @@
     terminate/2
 ]).
 
--export([
-    get_total_nodes/0,
-    get_active_nodes/0,
-    get_company_name/0,
-    get_api_fqdn/0,
-    determine_license_id/0
-]).
-
 -record(current_scan, {
-    total_nodes,
-    active_nodes,
-    company_name,
-    fqdns,
+    total_nodes = 0,
+    active_nodes = 0,
+    company_name = <<"">>,
+    fqdns = [],
     license_id,
     scan_start_time,
     scan_end_time
@@ -101,6 +93,10 @@ handle_cast(send_data, State) ->
         try send_data(State) of
             State1 -> State1
         catch
+            _:_ when State#state.ctl_command /= "Hab infra server" andalso State#state.ctl_command /= "chef-server-ctl" ->
+                timer:apply_after(60 * 1000, gen_server, cast, [self(), send_data]),
+                sqerl:execute(<<"delete from telemetry where property = 'last_send'">>),
+                State;
             _:_ ->
                 State
         end,
@@ -155,14 +151,14 @@ send_data(State) ->
         case chef_telemetry:is_enabled() of
             true ->
                 State1 = init_req(State),
-                Hostname = get_fqdn(),
-                case check_send(Hostname) of
+                NodeName = to_binary("NODE:" ++ binary:bin_to_list(envy:get(oc_chef_wm, actions_fqdn, <<"">>, binary))), 
+                case check_send(NodeName) of
                     true ->
                         [{_Server, ServerVersion, _, _}] = release_handler:which_releases(permanent),
-                        Funs = [fun get_total_nodes/0, fun get_active_nodes/0, fun get_company_name/0, fun get_api_fqdn/0, fun determine_license_id/0],
-			Pid = self(),
-                        Res = [ erlang:spawn_monitor(runner(Pid, Fun)) || Fun <- Funs ],
-                        Current_scan = gather_res(Res, #current_scan{}, length(Funs)),
+                        Funs = [fun get_total_nodes/1, fun get_active_nodes/1, fun get_company_name/1, fun get_api_fqdn/1, fun determine_license_id/1],
+                        Pid = self(),
+                        Res = [ erlang:spawn_monitor(runner(Pid, State1, Fun)) || Fun <- Funs ],
+                        Current_scan = gather_res(Res, State1#state.current_scan, length(Funs)),
                         Req = generate_request(ServerVersion, State1#state{current_scan = Current_scan}),
                         send_req(Req, State1),
                         State1;
@@ -173,6 +169,17 @@ send_data(State) ->
                 State
         end,
     State6.
+
+get_api_fqdn(_State) ->
+    sqerl:execute(<<"delete from telemetry where property like 'NODE:%' and event_timestamp < (current_timestamp - interval '86700')">>),
+    case sqerl:execute(<<"select trim(property) as property from telemetry where property like 'NODE:%'">>) of
+        {ok, Rows} when is_list(Rows) ->
+            FQDNs = [binary:part(FQDN, 5, size(FQDN) -5) || [{<<"property">>, FQDN}] <- Rows],
+            FQDNs1 = mask(FQDNs),
+        FQDNs1;
+        _ ->
+            [] 
+    end.
 
 get_org_nodes(OrgName, Query1, ReqId, DbContext) ->
     {Guid1, _AuthzId1} =
@@ -208,7 +215,7 @@ get_license_company_name()->
     {_Lic, _Type, _GracePeriod, _ExpDate, _Msg, CN,_LID}  = chef_license:get_license(),
     CN.
 
-determine_license_id()->
+determine_license_id(_State)->
     {_Lic, _Type, _GracePeriod, _ExpDate, _Msg, _CN, LicenseID}  = chef_license:get_license(),
     case LicenseID of
         undefined           ->
@@ -221,56 +228,7 @@ determine_license_id()->
             LicenseID
     end.
 
-get_most_occuring(List) ->
-    FirstElement = lists:nth(1, List),
-    Fun = fun(Element, Map) ->
-        Count = maps:get(Element, Map, 0),
-        maps:put(Element, Count + 1, Map)
-    end,
-    Map1 = lists:foldl(Fun, #{}, List),
-
-    Fun1 =
-        fun(Key1, Count1, {Key2, Count2}) ->
-            case Count1 > Count2 of
-                true ->
-                    {Key1, Count1};
-                _ ->
-                    {Key2, Count2}
-            end
-        end,
-    Res1 = maps:fold(Fun1, {FirstElement, 0}, Map1),
-    element(1, Res1).
-
-get_total_nodes() ->
-    ReqId = base64:encode(term_to_binary(make_ref())),
-    DbContext = chef_db:make_context("1.0", ReqId, false),
-    Count =
-        case chef_db:count_nodes(DbContext) of
-            Count1 when is_integer(Count1) -> Count1;
-            Error -> throw({db_error, Error})
-        end,
-    Count.
-
-get_active_nodes() ->
-    ScanStartTime = erlang:system_time(seconds),
-    ScanEndTime = ScanStartTime - (?DEFAULT_DAYS * 86400),
-    QueryString = lists:flatten(io_lib:format("ohai_time:{~p TO ~p}", [ScanStartTime, ScanEndTime])),
-    Query1 = chef_index:query_from_params("node", QueryString, "0", "10000"),
-    ReqId = base64:encode(term_to_binary(make_ref())),
-    DbContext = chef_db:make_context("1.0", ReqId, false),
-    Orgs =
-        case chef_db:list(#oc_chef_organization{}, DbContext) of
-            Orgs1 when is_list(Orgs1) -> Orgs1;
-            Error1 -> throw({db_error, Error1})
-        end,
-    Stats = [ {Org, get_org_nodes(Org, Query1, ReqId, DbContext)} || Org <- Orgs ],
-    Fun = fun({_Org, Nodes}, Sum) ->
-              Sum + Nodes
-          end,
-    ActiveNodes = lists:foldl(Fun, 0, Stats),
-    ActiveNodes.
-
-get_company_name() ->
+get_company_name(_State) ->
     CompanyName =
     case get_license_company_name() of
         CN when CN =:= undefined; CN=:= <<"">>; CN =:= "" ->
@@ -300,21 +258,58 @@ get_company_name() ->
     end,
     CompanyName.
 
-get_api_fqdn() ->
-    sqerl:execute(<<"delete from telemetry where property like 'FQDN:%' and event_timestamp < (current_timestamp - interval '86700')">>),
-    case sqerl:execute(<<"select trim(property) as property from telemetry where property like 'FQDN:%'">>) of
-        {ok, Rows} when is_list(Rows) ->
-            FQDNs = [binary:part(FQDN, 5, size(FQDN) -5) || [{<<"property">>, FQDN}] <- Rows],
-            FQDNs1 = mask(FQDNs),
-            FQDNs1;
-        _ ->
-            []
-    end.
+get_most_occuring(List) ->
+    FirstElement = lists:nth(1, List),
+    Fun = fun(Element, Map) ->
+        Count = maps:get(Element, Map, 0),
+        maps:put(Element, Count + 1, Map)
+    end,
+    Map1 = lists:foldl(Fun, #{}, List),
+
+    Fun1 =
+        fun(Key1, Count1, {Key2, Count2}) ->
+            case Count1 > Count2 of
+                true ->
+                    {Key1, Count1};
+                _ ->
+                    {Key2, Count2}
+            end
+        end,
+    Res1 = maps:fold(Fun1, {FirstElement, 0}, Map1),
+    element(1, Res1).
+
+get_total_nodes(_State) ->
+    ReqId = base64:encode(term_to_binary(make_ref())),
+    DbContext = chef_db:make_context("1.0", ReqId, false),
+    Count =
+        case chef_db:count_nodes(DbContext) of
+            Count1 when is_integer(Count1) -> Count1;
+            Error -> throw({db_error, Error})
+        end,
+    Count.
+
+get_active_nodes(#state{req_id = ReqId, db_context = DbContext} = State) ->
+    CurrentScan = State#state.current_scan,
+    ScanStartTime = CurrentScan#current_scan.scan_start_time,
+    ScanEndTime = CurrentScan#current_scan.scan_end_time,
+    QueryString = lists:flatten(io_lib:format("ohai_time:{~p TO ~p}", [ScanStartTime, ScanEndTime])),
+    Query1 = chef_index:query_from_params("node", QueryString, "0", "10000"),
+    Orgs =
+        case chef_db:list(#oc_chef_organization{}, DbContext) of
+            Orgs1 when is_list(Orgs1) -> Orgs1;
+            Error1 -> throw({db_error, Error1})
+        end,
+    Stats = [ {Org, get_org_nodes(Org, Query1, ReqId, DbContext)} || Org <- Orgs ],
+    Fun = fun({_Org, Nodes}, Sum) ->
+              Sum + Nodes
+          end,
+    ActiveNodes = lists:foldl(Fun, 0, Stats),
+    ActiveNodes.
 
 generate_request(ServerVersion, State) ->
     CurrentScan = State#state.current_scan,
     Res = jiffy:encode({[
-    {<<"licenseId">>, determine_license_id()},
+    {<<"licenseId">>, CurrentScan#current_scan.license_id},
     {<<"customerName">>, State#state.current_scan#current_scan.company_name},
     {<<"periods">>, [
         {[
@@ -348,7 +343,7 @@ generate_request(ServerVersion, State) ->
         {<<"Infra Server">>, {[
             {<<"deploymentType">>, <<"">>},
             {<<"instanceId">>, <<"">>},
-            {<<"fqdn">>, State#state.fqdns},
+            {<<"fqdn">>, CurrentScan#current_scan.fqdns},
             {<<"config_location">>, to_binary(State#state.running_file)},
             {<<"binary_location">>, to_binary(State#state.ctl_command)}
         ]}}
@@ -383,10 +378,6 @@ check_send(Hostname) ->
         Error ->
             Error
     end.
-
-get_fqdn() ->
-    HostName = binary:bin_to_list(envy:get(oc_chef_wm, actions_fqdn, <<"">>, binary)),
-    to_binary("FQDN:" ++ HostName).
 
 mask(FQDNs) ->
     Join = fun(Elements, Separator) ->
@@ -451,11 +442,10 @@ mask(FQDNs) ->
     end,
     lists:map(Fun, FQDNs).
 
-runner(Parent, Fun) ->
+runner(Parent, State, Fun) ->
     fun() ->
-        Res = Fun(),
-	log("result of fun is ~p~n", [{Fun, Res}]),
-        Parent ! {self(), Res}
+        Res = Fun(State),
+        Parent ! {result, self(), Res}
     end.
 
 gather_res(_Ids, Res, Count) when Count =< 0->
@@ -468,31 +458,24 @@ gather_res(Ids, Res, Count) ->
             end
           end,
     receive
-        {Id, Ret} ->
-	    log("received ~p~n", [{Id, Ret}]),
+        {result, Id, Ret} ->
             case lists:search(Fun(Id), Ids) of
                 {value, _} ->
                     Res1 = erlang:setelement(length(lists:takewhile(Fun(Id), Ids)) + 2, Res, Ret),
-		    log("res ~p~n", [{Res1}]),
-                    gather_res(Ids, Res1, Count -1);
+                    gather_res(Ids, Res1, Count - 1);
                 _ ->
                     gather_res(Ids, Res, Count)
             end;
-        {'DOWN', _Ref, process, Id, normal} ->
-            log("received1 ~p~n", [{Id}]),
+        {'DOWN', _Ref, process, _Id, normal} ->
             gather_res(Ids, Res, Count);
-        {'DOWN', _Ref, process, Id, Reason} ->
-            log("received2 ~p~n", [{Id, Reason}]),
+        {'DOWN', _Ref, process, Id, _Reason} ->
             case lists:search(Fun(Id), Ids) of
                 {value, _} ->
-                    gather_res(Ids, Res, Count -1);
+                    gather_res(Ids, Res, Count - 1);
                 _ ->
                     gather_res(Ids, Res, Count)
             end
-        after 
+        after
             60000 ->
                 Res
     end.
-
-log(Format, Args) ->
-	io:format(Format, Args).
