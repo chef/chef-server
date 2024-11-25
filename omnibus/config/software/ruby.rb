@@ -66,7 +66,7 @@ source url: "https://cache.ruby-lang.org/pub/ruby/3.4/ruby-3.4.0-preview1.tar.gz
 internal_source url: "#{ENV["ARTIFACTORY_REPO_URL"]}/#{name}/#{name}-#{version}.tar.gz",
                 authorization: "X-JFrog-Art-Api:#{ENV["ARTIFACTORY_TOKEN"]}"
 
-command "mv -R  #{install_dir}/embedded/ruby/ruby-3.4.0-preview1 #{install_dir}/embedded/ruby/ruby-3.4.0"
+
 # In order to pass notarization we need to sign any binaries and libraries included in the package.
 # This makes sure we include and bins and libs that are brought in by gems.
 semver = Gem::Version.create(version).segments
@@ -130,6 +130,7 @@ else
 end
 
 build do
+  command "mv -R  #{install_dir}/embedded/ruby/ruby-3.4.0-preview1 #{install_dir}/embedded/ruby/ruby-3.4.0"
   # AIX needs /opt/freeware/bin only for patch
   patch_env = env.dup
   patch_env["PATH"] = "/opt/freeware/bin:#{env["PATH"]}" if aix?
