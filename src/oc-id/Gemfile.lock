@@ -87,6 +87,7 @@ GEM
       aws-sigv4 (~> 1.1)
     aws-sigv4 (1.5.2)
       aws-eventstream (~> 1, >= 1.0.2)
+    base64 (0.2.0)
     bcrypt (3.1.18)
     better_errors (2.9.1)
       coderay (>= 1.0.0)
@@ -288,6 +289,7 @@ GEM
       tty-box (~> 0.6)
       tty-prompt (~> 0.20)
     little-plugger (1.1.4)
+    logger (1.6.1)
     logging (2.3.1)
       little-plugger (~> 1.1)
       multi_json (~> 1.14)
@@ -431,7 +433,7 @@ GEM
     responders (3.1.0)
       actionpack (>= 5.2)
       railties (>= 5.2)
-    rexml (3.2.5)
+    rexml (3.3.9)
     rspec (3.12.0)
       rspec-core (~> 3.12.0)
       rspec-expectations (~> 3.12.0)
@@ -471,7 +473,9 @@ GEM
       tilt
     sdoc (2.6.1)
       rdoc (>= 5.0)
-    selenium-webdriver (4.7.1)
+    selenium-webdriver (4.27.0)
+      base64 (~> 0.2)
+      logger (~> 1.4)
       rexml (~> 3.2, >= 3.2.5)
       rubyzip (>= 1.2.2, < 3.0)
       websocket (~> 1.0)
@@ -568,7 +572,7 @@ GEM
       bcrypt (~> 3.1)
       pbkdf2
     webrick (1.8.1)
-    websocket (1.2.9)
+    websocket (1.2.11)
     websocket-driver (0.7.5)
       websocket-extensions (>= 0.1.0)
     websocket-extensions (0.1.5)
@@ -625,7 +629,7 @@ DEPENDENCIES
   rspec-rails (~> 6.0)
   sass-rails (>= 4.0.3)
   sdoc
-  selenium-webdriver (~> 4.7.1)
+  selenium-webdriver (~> 4.27.0)
   spring
   spring-commands-rspec
   sprockets-rails (>= 3.4.2)
