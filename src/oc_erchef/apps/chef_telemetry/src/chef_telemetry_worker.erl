@@ -160,7 +160,8 @@ send_data(State) ->
                     true ->
                         [{_Server, ServerVersion, _, _}] = release_handler:which_releases(permanent),
                         Funs = [fun get_total_nodes/0, fun get_active_nodes/0, fun get_company_name/0, fun get_api_fqdn/0, fun determine_license_id/0],
-                        Res = [ erlang:spawn_monitor(fun() -> runner(self(), Fun) end) || Fun <- Funs ],
+			Pid = self(),
+                        Res = [ erlang:spawn_monitor(runner(Pid, Fun)) || Fun <- Funs ],
                         Current_scan = gather_res(Res, #current_scan{}, length(Funs)),
                         Req = generate_request(ServerVersion, State1#state{current_scan = Current_scan}),
                         send_req(Req, State1),
@@ -453,32 +454,45 @@ mask(FQDNs) ->
 runner(Parent, Fun) ->
     fun() ->
         Res = Fun(),
+	log("result of fun is ~p~n", [{Fun, Res}]),
         Parent ! {self(), Res}
     end.
 
-gather_res(_Ids, Res, Count) when Count < 0->
+gather_res(_Ids, Res, Count) when Count =< 0->
     Res;
 
 gather_res(Ids, Res, Count) ->
     Fun = fun(Id) ->
             fun({Id1,_}) ->
-              Id =:= Id1
+              Id =/= Id1
             end
           end,
     receive
         {Id, Ret} ->
+	    log("received ~p~n", [{Id, Ret}]),
             case lists:search(Fun(Id), Ids) of
                 {value, _} ->
-                    Res1 = setelement(length(lists:takewhile(Fun(Id), Ids)) +1, Res, Ret),
+                    Res1 = erlang:setelement(length(lists:takewhile(Fun(Id), Ids)) + 2, Res, Ret),
+		    log("res ~p~n", [{Res1}]),
                     gather_res(Ids, Res1, Count -1);
                 _ ->
                     gather_res(Ids, Res, Count)
             end;
-        {'DOWN', _Ref, process, Id, _Reason} ->
+        {'DOWN', _Ref, process, Id, normal} ->
+            log("received1 ~p~n", [{Id}]),
+            gather_res(Ids, Res, Count);
+        {'DOWN', _Ref, process, Id, Reason} ->
+            log("received2 ~p~n", [{Id, Reason}]),
             case lists:search(Fun(Id), Ids) of
                 {value, _} ->
                     gather_res(Ids, Res, Count -1);
                 _ ->
                     gather_res(Ids, Res, Count)
             end
+        after 
+            60000 ->
+                Res
     end.
+
+log(Format, Args) ->
+	io:format(Format, Args).
