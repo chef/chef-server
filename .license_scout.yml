@@ -15,7 +15,7 @@ habitat:
     - origin: chef
       channel: unstable
     - origin: core
-      channel: LTS-2024
+      channel: LTS-2024-unstable
 
 allowed_licenses:
   - Apache-1.0
