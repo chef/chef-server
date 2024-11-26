@@ -48,6 +48,7 @@ build do
           " --with-libedit-preferred" \
           " --with-openssl" \
           " --with-ossp-uuid" \
+          " --without-icu" \
           " --with-includes=#{install_dir}/embedded/include" \
           " --with-libraries=#{install_dir}/embedded/lib", env: env
 
