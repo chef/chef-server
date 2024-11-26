@@ -9,7 +9,7 @@ pkg_deps=(
   core/curl
   core/openssl
   core/gcc-libs
-  core/ruby30
+  core/ruby3_4
   core/sqitch_pg
   core/gecode
   core/libffi
@@ -75,7 +75,7 @@ do_prepare() {
 
 
 do_build() {
-  _ruby_dir="$(pkg_path_for core/ruby30)"
+  _ruby_dir="$(pkg_path_for core/ruby3_4)"
   export REL_VERSION=$pkg_version
   export USE_SYSTEM_GECODE=1
   export GEM_HOME="${pkg_path}/vendor/bundle"
