@@ -278,11 +278,9 @@ get_most_occuring(List) ->
     Res1 = maps:fold(Fun1, {FirstElement, 0}, Map1),
     element(1, Res1).
 
-get_total_nodes(_State) ->
-    ReqId = base64:encode(term_to_binary(make_ref())),
-    DbContext = chef_db:make_context("1.0", ReqId, false),
+get_total_nodes(State) ->
     Count =
-        case chef_db:count_nodes(DbContext) of
+        case chef_db:count_nodes(State#state.db_context) of
             Count1 when is_integer(Count1) -> Count1;
             Error -> throw({db_error, Error})
         end,
