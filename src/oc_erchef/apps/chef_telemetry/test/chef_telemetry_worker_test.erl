@@ -64,7 +64,8 @@ enable_flag_test() ->
 execute(State, Expected, Env) ->
     set_env([{chef_telemetry, reporting_url, "http://127.0.0.1:9001/esi/payload:io"}] ++ Env),
     application:start(ibrowse),
-    put(state, State),
+    ets:new(telemetry_worker_test, [set, public, named_table]),
+    ets:insert(telemetry_worker_test, {state, State}),
     setup(),
     chef_telemetry_test_utils:start_server([]),
     register(telemetry_mock_consumer, self()),
@@ -91,28 +92,28 @@ setup() ->
     meck:expect(release_handler, which_releases, fun(_) -> [{"chef_server", "15.9.38", [], []}] end),
     meck:expect(stats_hero, ctime, fun(_, _, Fun) -> Fun() end).
 
-get_execute(<<"select trim(property) as property from telemetry where property like 'FQDN:%'">>) ->
-    State = get(state),
+get_execute(<<"select trim(property) as property from telemetry where property like 'NODE:%'">>) ->
+    [{state, State}] = ets:lookup(telemetry_worker_test, state),
     State#state.fqdn_select;
 
 get_execute(<<"select telemetry_check_send('", _/binary>>) ->
-    State = get(state),
+    [{state, State}] = ets:lookup(telemetry_worker_test, state),
     State#state.should_send;
 
 get_execute(_) ->
     ok.
 
 adhoc_select([<<"email">>], <<"users">>, all) ->
-    State = get(state),
+    [{state, State}] = ets:lookup(telemetry_worker_test, state),
     {ok, State#state.user_emails}.
 
 count_nodes(_Context) ->
-    State = get(state),
+    [{state, State}] = ets:lookup(telemetry_worker_test, state),
     State#state.nodes_count.
 
 chef_db_list(Record, _context) ->
     RecordName = element(1, Record),
-    State = get(state),
+    [{state, State}] = ets:lookup(telemetry_worker_test, state),
     case RecordName of
         oc_chef_organization -> State#state.organizations;
         _ -> []
@@ -123,10 +124,10 @@ org_metadata(_context, OrgName) ->
     {OrgName1, OrgName1}.
 
 index_search(_) ->
-    State = get(state),
+    [{state, State}] = ets:lookup(telemetry_worker_test, state),
     [Nodes | Rest] = State#state.index_search,
     State1 = State#state{index_search = Rest},
-    put(state, State1),
+    ets:insert(telemetry_worker_test, {state, State1}),
     {ok, 0, length(Nodes), Nodes}.
 
 trigger_send_data() ->
