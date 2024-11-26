@@ -17,6 +17,7 @@
 
 var_base = "/var/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}"
 log_base = "/var/log/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}"
+opt_base = "/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}"
 
 ###
 # Set a project-name for the enterprise-chef-common cookbook
@@ -39,7 +40,7 @@ opscode-chef-mover
 ###
 default['private_chef']['api_version'] = '12.0.0'
 default['private_chef']['flavor'] = 'cs'
-default['private_chef']['install_path'] = "/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}"
+default['private_chef']['install_path'] = opt_base
 
 default['private_chef']['notification_email'] = 'pc-default@chef.io'
 default['private_chef']['from_email'] = '"Opscode" <donotreply@chef.io>'
@@ -83,7 +84,7 @@ default['private_chef']['user']['username'] = ChefUtils::Dist::Server::SYSTEM_US
 # The shell for the chef services user
 default['private_chef']['user']['shell'] = '/usr/sbin/nologin'
 # The home directory for the chef services user
-default['private_chef']['user']['home'] = "/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/embedded"
+default['private_chef']['user']['home'] = "#{opt_base}/embedded"
 
 ####
 # Service data_dir, etc_dir, log_directory perms
@@ -93,7 +94,7 @@ default['private_chef']['service_dir_perms'] = '0750'
 ####
 # CouchDB (legacy required for upgrades to work)
 ####
-default['private_chef']['couchdb']['data_dir'] = "/var/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/couchdb/db"
+default['private_chef']['couchdb']['data_dir'] = "#{var_base}/couchdb/db"
 default['private_chef']['couchdb']['vip'] = '127.0.0.1'
 default['private_chef']['couchdb']['port'] = 5984
 
@@ -234,6 +235,9 @@ opensearch['plugins_directory'] = "#{var_base}/opensearch/plugins"
 opensearch['scripts_directory'] = "#{var_base}/opensearch/scripts"
 opensearch['temp_directory'] = "#{var_base}/opensearch/tmp"
 opensearch['log_directory'] = "#{log_base}/opensearch"
+opensearch['env_directory'] = "#{opt_base}/service/opensearch/env"
+opensearch['opt_conf_directory'] = "#{opt_base}/embedded/opensearch/config"
+opensearch['opt_plugins_directory'] = "#{opt_base}/embedded/opensearch/plugins"
 opensearch['log_rotation']['file_maxbytes'] = 104857600
 opensearch['log_rotation']['num_to_keep'] = 10
 opensearch['vip'] = '127.0.0.1'
