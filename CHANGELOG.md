@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.10.20 -->
-## [15.10.20](https://github.com/chef/chef-server/tree/15.10.20) (2024-11-22)
+<!-- latest_release 15.10.21 -->
+## [15.10.21](https://github.com/chef/chef-server/tree/15.10.21) (2024-11-26)
 
 #### Merged Pull Requests
-- Telemetry automate changes. [#3946](https://github.com/chef/chef-server/pull/3946) ([sreepuramsudheer](https://github.com/sreepuramsudheer))
+- Telemetry code refactor. [#3948](https://github.com/chef/chef-server/pull/3948) ([sreepuramsudheer](https://github.com/sreepuramsudheer))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.10.12 -->
 ### Changes since 15.10.12 release
 
 #### Merged Pull Requests
+- Telemetry code refactor. [#3948](https://github.com/chef/chef-server/pull/3948) ([sreepuramsudheer](https://github.com/sreepuramsudheer)) <!-- 15.10.21 -->
 - Telemetry automate changes. [#3946](https://github.com/chef/chef-server/pull/3946) ([sreepuramsudheer](https://github.com/sreepuramsudheer)) <!-- 15.10.20 -->
 - License Enforcement Application [#3929](https://github.com/chef/chef-server/pull/3929) ([jashaik](https://github.com/jashaik)) <!-- 15.10.19 -->
 - Open-Search  upgraded to 1.3.19 [#3931](https://github.com/chef/chef-server/pull/3931) ([talktovikas](https://github.com/talktovikas)) <!-- 15.10.18 -->
