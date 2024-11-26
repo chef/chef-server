@@ -22,8 +22,6 @@ skip_transitive_dependency_licensing true
 
 license :project_license
 
-skip_transitive_dependency_licensing true
-
 build do
   env = with_standard_compiler_flags(with_embedded_path)
 
