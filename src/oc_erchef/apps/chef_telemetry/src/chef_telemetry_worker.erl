@@ -151,7 +151,7 @@ send_data(State) ->
         case chef_telemetry:is_enabled() of
             true ->
                 State1 = init_req(State),
-                NodeName = to_binary("NODE:" ++ binary:bin_to_list(envy:get(oc_chef_wm, actions_fqdn, <<"">>, binary))), 
+                NodeName = to_binary("NODE:" ++ binary:bin_to_list(envy:get(oc_chef_wm, actions_fqdn, <<"">>, binary))),
                 case check_send(NodeName) of
                     true ->
                         [{_Server, ServerVersion, _, _}] = release_handler:which_releases(permanent),
@@ -176,9 +176,9 @@ get_api_fqdn(_State) ->
         {ok, Rows} when is_list(Rows) ->
             FQDNs = [binary:part(FQDN, 5, size(FQDN) -5) || [{<<"property">>, FQDN}] <- Rows],
             FQDNs1 = mask(FQDNs),
-        FQDNs1;
+            FQDNs1;
         _ ->
-            [] 
+            []
     end.
 
 get_org_nodes(OrgName, Query1, ReqId, DbContext) ->
