@@ -103,6 +103,7 @@ query_body(#chef_solr_query{
               query_string = Query,
               filter_query = undefined,
               start = Start,
+              track_total_hits = TrackTotalHits,
               rows = Rows}) ->
     jiffy:encode({[{fields_tag(), <<"_id">>},
                    {<<"from">>, Start},
@@ -118,6 +119,7 @@ query_body(#chef_solr_query{
     jiffy:encode({[{ fields_tag(), <<"_id">>},
         {<<"from">>, Start},
         {<<"size">>, Rows},
+        {<<"track_total_hits">>,TrackTotalHits},
         {<<"sort">>, [{[{<<"X_CHEF_id_CHEF_X">>, {[{<<"order">>, <<"asc">>}]}}]}]},
         {<<"query">>, {[
             {<<"bool">>,{[
