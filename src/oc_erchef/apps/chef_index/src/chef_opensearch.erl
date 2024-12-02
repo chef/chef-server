@@ -108,12 +108,14 @@ query_body(#chef_solr_query{
     jiffy:encode({[{fields_tag(), <<"_id">>},
                    {<<"from">>, Start},
                    {<<"size">>, Rows},
+                   {<<"track_total_hits">>,TrackTotalHits},
                    {<<"query">>, {[query_string_query_ejson(Query)]}}
                   ]});
 query_body(#chef_solr_query{
               query_string = Query,
               filter_query = FilterQuery,
               start = Start,
+              track_total_hits = TrackTotalHits,
               rows = Rows}) ->
     chef_index_query:assert_org_id_filter(FilterQuery),
     jiffy:encode({[{ fields_tag(), <<"_id">>},
