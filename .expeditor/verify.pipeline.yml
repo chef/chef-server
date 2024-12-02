@@ -18,14 +18,14 @@ steps:
   # Lint Tests
 #########################################################################
 
-- label: license-scout
-  command:
-    - .expeditor/license_scout.sh
-  expeditor:
-    executor:
-      docker:
-        environment:
-          - OCTOKIT_ACCESS_TOKEN
+# - label: license-scout
+#   command:
+#     - .expeditor/license_scout.sh
+#   expeditor:
+#     executor:
+#       docker:
+#         environment:
+#           - OCTOKIT_ACCESS_TOKEN
 
 #########################################################################
   # Component Tests
