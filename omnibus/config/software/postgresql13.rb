@@ -51,10 +51,10 @@ build do
           " --with-ossp-uuid" \
           " --without-icu" \
           " --with-includes=#{install_dir}/embedded/include" \
-          " --with-libraries=#{install_dir}/embedded/lib" #, env: env
+          " --with-libraries=#{install_dir}/embedded/lib" , env: env
 
-  make "world -j #{workers}", env: env
-  make "install-world -j #{workers}", env: env
+  make "world-bin -j #{workers}", env: env
+  make "install-world-bin -j #{workers}", env: env
 
   block do
     Dir.glob("#{install_dir}/embedded/postgresql/#{short_version}/bin/*").sort.each do |bin|
