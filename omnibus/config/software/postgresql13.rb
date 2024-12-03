@@ -50,9 +50,8 @@ build do
           " --with-openssl" \
           " --with-ossp-uuid" \
           " --without-icu" \
-          " --without-docbook" \
           " --with-includes=#{install_dir}/embedded/include" \
-          " --with-libraries=#{install_dir}/embedded/lib", env: env
+          " --with-libraries=#{install_dir}/embedded/lib" #, env: env
 
   make "world -j #{workers}", env: env
   make "install-world -j #{workers}", env: env
