@@ -1,28 +1,26 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.10.21 -->
-## [15.10.21](https://github.com/chef/chef-server/tree/15.10.21) (2024-11-26)
-
-#### Merged Pull Requests
-- Telemetry code refactor. [#3948](https://github.com/chef/chef-server/pull/3948) ([sreepuramsudheer](https://github.com/sreepuramsudheer))
+<!-- latest_release -->
 <!-- latest_release -->
 
-<!-- release_rollup since=15.10.12 -->
-### Changes since 15.10.12 release
-
-#### Merged Pull Requests
-- Telemetry code refactor. [#3948](https://github.com/chef/chef-server/pull/3948) ([sreepuramsudheer](https://github.com/sreepuramsudheer)) <!-- 15.10.21 -->
-- Telemetry automate changes. [#3946](https://github.com/chef/chef-server/pull/3946) ([sreepuramsudheer](https://github.com/sreepuramsudheer)) <!-- 15.10.20 -->
-- License Enforcement Application [#3929](https://github.com/chef/chef-server/pull/3929) ([jashaik](https://github.com/jashaik)) <!-- 15.10.19 -->
-- Open-Search  upgraded to 1.3.19 [#3931](https://github.com/chef/chef-server/pull/3931) ([talktovikas](https://github.com/talktovikas)) <!-- 15.10.18 -->
-- Build tests for embedded Chef-Server in Automate [#3917](https://github.com/chef/chef-server/pull/3917) ([talktovikas](https://github.com/talktovikas)) <!-- 15.10.17 -->
-- added updated production url spelling [#3908](https://github.com/chef/chef-server/pull/3908) ([vviveksharma](https://github.com/vviveksharma)) <!-- 15.10.16 -->
-- License Usage Pointer Update [#3906](https://github.com/chef/chef-server/pull/3906) ([dishanktiwari2501](https://github.com/dishanktiwari2501)) <!-- 15.10.15 -->
-- Update README file [#3905](https://github.com/chef/chef-server/pull/3905) ([kalroy](https://github.com/kalroy)) <!-- 15.10.14 -->
-- Added telemetry section in README [#3870](https://github.com/chef/chef-server/pull/3870) ([kalroy](https://github.com/kalroy)) <!-- 15.10.13 -->
+<!-- release_rollup -->
 <!-- release_rollup -->
 
 <!-- latest_stable_release -->
+## [15.10.21](https://github.com/chef/chef-server/tree/15.10.21) (2024-12-04)
+
+#### Merged Pull Requests
+- Added telemetry section in README [#3870](https://github.com/chef/chef-server/pull/3870) ([kalroy](https://github.com/kalroy))
+- Update README file [#3905](https://github.com/chef/chef-server/pull/3905) ([kalroy](https://github.com/kalroy))
+- License Usage Pointer Update [#3906](https://github.com/chef/chef-server/pull/3906) ([dishanktiwari2501](https://github.com/dishanktiwari2501))
+- added updated production url spelling [#3908](https://github.com/chef/chef-server/pull/3908) ([vviveksharma](https://github.com/vviveksharma))
+- Build tests for embedded Chef-Server in Automate [#3917](https://github.com/chef/chef-server/pull/3917) ([talktovikas](https://github.com/talktovikas))
+- Open-Search  upgraded to 1.3.19 [#3931](https://github.com/chef/chef-server/pull/3931) ([talktovikas](https://github.com/talktovikas))
+- License Enforcement Application [#3929](https://github.com/chef/chef-server/pull/3929) ([jashaik](https://github.com/jashaik))
+- Telemetry automate changes. [#3946](https://github.com/chef/chef-server/pull/3946) ([sreepuramsudheer](https://github.com/sreepuramsudheer))
+- Telemetry code refactor. [#3948](https://github.com/chef/chef-server/pull/3948) ([sreepuramsudheer](https://github.com/sreepuramsudheer))
+<!-- latest_stable_release -->
+
 ## [15.10.12](https://github.com/chef/chef-server/tree/15.10.12) (2024-08-29)
 
 #### Merged Pull Requests
@@ -49,7 +47,6 @@
 - Update the supported platforms [#3890](https://github.com/chef/chef-server/pull/3890) ([kalroy](https://github.com/kalroy))
 - Fix for 12.17.15 -&gt; 15.10.X upgrade [#3902](https://github.com/chef/chef-server/pull/3902) ([jashaik](https://github.com/jashaik))
 - Fixing verify pipeline fixes. [#3903](https://github.com/chef/chef-server/pull/3903) ([sreepuramsudheer](https://github.com/sreepuramsudheer))
-<!-- latest_stable_release -->
 
 ## [15.9.38](https://github.com/chef/chef-server/tree/15.9.38) (2024-05-30)
 
