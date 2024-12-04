@@ -3,6 +3,8 @@
 -compile([export_all, nowarn_export_all]).
 -include_lib("eunit/include/eunit.hrl").
 
+-define(SSL_OPT, {verify, verify_none}).
+
 main([Path]) ->
     application:start(crypto),
     ssl:start(),
@@ -13,7 +15,7 @@ main([Path]) ->
     Client = chef_rest_client:make_chef_rest_client("https://api.chef.io", "seth", Private),
     {Url, Headers0} = chef_rest_client:generate_signed_headers(Client, Path, <<"GET">>),
     Headers = [{"Accept", "application/json"}, {"X-CHEF-VERSION", "0.10.0"} | Headers0],
-    ibrowse:send_req(Url, Headers, get, [], [{ssl_options, []}]).
+    ibrowse:send_req(Url, Headers, get, [], [{ssl_options, [?SSL_OPT]}]).
 
 bad_time([Path]) ->
     application:start(crypto),
@@ -27,7 +29,7 @@ bad_time([Path]) ->
     Headers1 = lists:keyreplace("X-Ops-Timestamp", 1, Headers0,
                                 {"X-Ops-Timestamp", "2011-06-21T19:06:35Z"}),
     Headers = [{"Accept", "application/json"}, {"X-CHEF-VERSION", "0.10.0"} | Headers1],
-    ibrowse:send_req(Url, Headers, get, [], [{ssl_options, []}]).
+    ibrowse:send_req(Url, Headers, get, [], [{ssl_options, [?SSL_OPT]}]).
 
 missing([Path]) ->
     application:start(crypto),
@@ -41,7 +43,7 @@ missing([Path]) ->
     Headers1 = lists:keydelete("X-Ops-Timestamp", 1, Headers0),
     Headers2 = lists:keydelete("X-Ops-Content-Hash", 1, Headers1),
     Headers = [{"Accept", "application/json"}, {"X-CHEF-VERSION", "0.10.0"} | Headers2],
-    ibrowse:send_req(Url, Headers, get, [], [{ssl_options, []}]).
+    ibrowse:send_req(Url, Headers, get, [], [{ssl_options, [?SSL_OPT]}]).
     
 bad_query() ->
     application:start(crypto),
@@ -53,7 +55,7 @@ bad_query() ->
     Client = chef_rest_client:make_chef_rest_client("https://api.chef.io", "seth", Private),
     {Url, Headers0} = chef_rest_client:generate_signed_headers(Client, "/organizations/userprimary/search/role?q=a[b", <<"GET">>),
     Headers = [{"Accept", "application/json"}, {"X-CHEF-VERSION", "0.10.0"} | Headers0],
-    ibrowse:send_req(Url, Headers, get, [], [{ssl_options, []}]).
+    ibrowse:send_req(Url, Headers, get, [], [{ssl_options, [?SSL_OPT]}]).
 
 bad_start() ->
     application:start(crypto),
@@ -65,7 +67,7 @@ bad_start() ->
     Client = chef_rest_client:make_chef_rest_client("https://api.chef.io", "seth", Private),
     {Url, Headers0} = chef_rest_client:generate_signed_headers(Client, "/organizations/userprimary/search/role?q=ab&start=abc", <<"GET">>),
     Headers = [{"Accept", "application/json"}, {"X-CHEF-VERSION", "0.10.0"} | Headers0],
-    ibrowse:send_req(Url, Headers, get, [], [{ssl_options, []}]).
+    ibrowse:send_req(Url, Headers, get, [], [{ssl_options, [?SSL_OPT]}]).
 
 
 user_not_in_org() ->
@@ -78,7 +80,7 @@ user_not_in_org() ->
     Client = chef_rest_client:make_chef_rest_client("https://api.chef.io", "seth", Private),
     {Url, Headers0} = chef_rest_client:generate_signed_headers(Client, "/organizations/knifetest-org/search/role?q=ab&start=abc", <<"GET">>),
     Headers = [{"Accept", "application/json"}, {"X-CHEF-VERSION", "0.10.0"} | Headers0],
-    ibrowse:send_req(Url, Headers, get, [], [{ssl_options, []}]).
+    ibrowse:send_req(Url, Headers, get, [], [{ssl_options, [?SSL_OPT]}]).
 
 no_user() ->
     application:start(crypto),
@@ -90,5 +92,5 @@ no_user() ->
     Client = chef_rest_client:make_chef_rest_client("https://api.chef.io", "seth-xxx-yyy", Private),
     {Url, Headers0} = chef_rest_client:generate_signed_headers(Client, "/organizations/userprimary/search/role?q=ab&start=abc", <<"GET">>),
     Headers = [{"Accept", "application/json"}, {"X-CHEF-VERSION", "0.10.0"} | Headers0],
-    ibrowse:send_req(Url, Headers, get, [], [{ssl_options, []}]).
+    ibrowse:send_req(Url, Headers, get, [], [{ssl_options, [?SSL_OPT]}]).
     
