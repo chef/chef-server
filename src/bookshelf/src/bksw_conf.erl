@@ -150,7 +150,7 @@ ssl() ->
     envy:get(bookshelf, ssl, false, boolean).
 
 ssl_opts() ->
-    envy:get(bookshelf, ssl_opts, [], list).
+    lists:uniq([{verify, verify_none} | envy:get(bookshelf, ssl_opts, [], list)]).
 
 keys() ->
     {ok, AWSAccessKey} = chef_secrets:get(<<"bookshelf">>, <<"access_key_id">>),

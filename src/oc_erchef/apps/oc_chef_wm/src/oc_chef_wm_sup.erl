@@ -28,7 +28,7 @@ init([]) ->
     Ip = envy:get(oc_chef_wm, ip, string),
     Port = envy:get(oc_chef_wm, port, pos_integer),
     Ssl = envy:get(oc_chef_wm, ssl, false, boolean),
-    SslOpts = envy:get(oc_chef_wm, ssl_opts, [], list),
+    SslOpts = lists:uniq([{verify, verify_none} | envy:get(oc_chef_wm, ssl_opts, [], list)]),
 
     WebConfig = [
                  {ip, Ip},

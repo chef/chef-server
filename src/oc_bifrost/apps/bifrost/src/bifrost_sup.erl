@@ -20,7 +20,7 @@ init([]) ->
     Ip = envy:get(bifrost, ip, string),
     Port = envy:get(bifrost, port, integer),
     Ssl = envy:get(bifrost, ssl, false, boolean),
-    SslOpts = envy:get(bifrost, ssl_opts, [], list),
+    SslOpts = lists:uniq([{verify, verify_none} | envy:get(bifrost, ssl_opts, [], list)]),
     {ok, Dispatch} = file:consult(filename:join([code:priv_dir(bifrost),
                                                  "dispatch.conf"])),
 
