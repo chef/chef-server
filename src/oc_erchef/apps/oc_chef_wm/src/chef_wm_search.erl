@@ -140,6 +140,12 @@ to_json(Req, #base_state{chef_db_context = DbContext,
                                  filter_permitted_results(ReqId, RequestorId, OrgId, DbContext, IndexType, Ids);
                              false -> Ids
                          end,
+                         io:format("This is BulkGetFun,Vikas Debug ~p~n", [BulkGetFun]),
+                         io:format("This is FilteredIds,Vikas Debug~p~n ", [FilteredIds]),
+                         io:format("This is BatchSize,Vikas Debug~p~n ", [BatchSize]),
+                         io:format("This is Start1,Vikas Start1 ~p~n ", [Start1]),
+                        io:format("This is SolrNumFound,Vikas Debug~p~n ", [SolrNumFound]),
+
             {DbNumFound, Ans} = make_search_results(BulkGetFun, FilteredIds, BatchSize,
                                                     Start1, SolrNumFound),
             State1 = State#base_state{log_msg = search_log_msg(SolrNumFound,
@@ -479,8 +485,13 @@ safe_split(N, L) ->
 search_result_start(Start, Total) ->
     % {"total":Total,"start":Start,"rows":[i1, i2]}
     ["\"rows\":[", ",",
-     integer_to_list(Start), "\"start\":", ",",
-     integer_to_list(Total), "\"total\":", "{"].
+     integer_to_list(handle_undefined(Start)), "\"start\":", ",",
+     integer_to_list(handle_undefined(Total)), "\"total\":", "{"].
+
+%% This is for the safe case:
+handle_undefined(undefined) ->
+    0;
+handle_undefined(Value)-> Value.
 
 search_result_finish(Result) ->
     %% Note that all we need here is an iolist not a flat binary.
