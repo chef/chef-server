@@ -461,11 +461,11 @@ cache_control(Config) when is_list(Config) ->
     mini_s3:put_object(Bucket, NameExists, Data, [], [], S3Conf),
 
     SignedUrl = mini_s3:s3_url('get', Bucket, NameMissing, 1000, [], S3Conf),
-    {ok, Result} = httpc:request(erlang:binary_to_list(SignedUrl)),
+    {ok, Result} = httpc:request(get, {erlang:binary_to_list(SignedUrl), []}, [{ssl, [{verify, verify_none}]}], []),
     {{_, 404, _}, HeadersMissing, _} = Result,
 
     SignedUrl2 = mini_s3:s3_url('get', Bucket, NameExists, 1000, [], S3Conf),
-    {ok, Result2} = httpc:request(erlang:binary_to_list(SignedUrl2)),
+    {ok, Result2} = httpc:request(get, {erlang:binary_to_list(SignedUrl2), []}, [{ssl, [{verify, verify_none}]}], []),
     {{_, 200, _}, HeadersExists, _} = Result2,
 
     ?assertMatch(false, has_header("Cache-Control", HeadersMissing)),
@@ -546,7 +546,7 @@ sec_fail(Config) when is_list(Config) ->
     ?assertError({aws_error, {http_error, 403, _, _}},
                  mini_s3:create_bucket(Bucket, public_read_write, none, BogusS3Conf)),
     %% also verify that unsigned URL requests don't crash
-    {ok, {{_Version, Status, _ReasonPhrase}, _Headers, Body}} = httpc:request("http://127.0.0.1:4321/foobar"),
+    {ok, {{_Version, Status, _ReasonPhrase}, _Headers, Body}} = httpc:request(get, {"http://127.0.0.1:4321/foobar", []}, [{ssl, [{verify, verify_none}]}], []),
     ?assertEqual(403, Status),
     ?assert(string:str(Body, "<Message>Access Denied</Message>") > 0).
 
@@ -568,14 +568,14 @@ signed_url(Config) when is_list(Config) ->
                                S3Conf),
     Response = httpc:request(put, {erlang:binary_to_list(SignedUrl),
                                    Headers,
-                                   "text/xml", Content}, [], []),
+                                   "text/xml", Content}, [{ssl, [{verify, verify_none}]}], []),
     ?assertMatch({ok, _}, Response),
     Response2 = httpc:request(put, {erlang:binary_to_list(SignedUrl),
                                    [{"content-type", "text/xml"},
                                     {"content-md5",
                                      erlang:binary_to_list(base64:encode(
                                                              erlang:md5("Something Else")))}],
-                                    "text/xml", Content}, [], []),
+                                    "text/xml", Content}, [{ssl, [{verify, verify_none}]}], []),
   ?assertMatch({ok,{{"HTTP/1.1",403,"Forbidden"}, _, _}},
                Response2).
 
@@ -598,7 +598,7 @@ signed_url_fail(Config) when is_list(Config) ->
                                S3Conf),
     Response = httpc:request(put, {erlang:binary_to_list(SignedUrl),
                                    Headers,
-                                   "text/xml", Content}, [], []),
+                                   "text/xml", Content}, [{ssl, [{verify, verify_none}]}], []),
     ?assertMatch({ok,{{"HTTP/1.1",403,"Forbidden"}, _, _}},
                  Response).
 
