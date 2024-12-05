@@ -119,7 +119,7 @@ http_request(Method, RouteSuffix, Json) ->
                      [{"x-ops-userid", "test-client"},
                       {"accept", "application/json"},
                       {"content-type", "application/json"}],
-                     Method, chef_json:encode(Json)),
+                     Method, chef_json:encode(Json), [{ssl_options, [{verify, verify_none}]}]),
     {RespCode, chef_json:decode(RespBody)}.
 
 url_for(RouteSuffix) ->
