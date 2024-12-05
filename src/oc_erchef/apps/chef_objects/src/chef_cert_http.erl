@@ -43,7 +43,7 @@ gen_cert(Guid, RequestId) ->
 
     Url = envy:get(chef_objects, certificate_root_url, string),
     Body = body_for_post(Guid),
-    case ibrowse:send_req(Url, FullHeaders, post, Body) of
+    case ibrowse:send_req(Url, FullHeaders, post, Body, [{ssl_options, [{verify, verify_none}]}]) of
         {ok, Code, ResponseHeaders, ResponseBody} ->
             ok = check_http_response(Code, ResponseHeaders, ResponseBody),
             parse_json_response(ResponseBody);
