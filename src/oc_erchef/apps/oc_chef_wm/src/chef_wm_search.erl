@@ -140,12 +140,6 @@ to_json(Req, #base_state{chef_db_context = DbContext,
                                  filter_permitted_results(ReqId, RequestorId, OrgId, DbContext, IndexType, Ids);
                              false -> Ids
                          end,
-                         io:format("This is BulkGetFun,Vikas Debug ~p~n", [BulkGetFun]),
-                         io:format("This is FilteredIds,Vikas Debug~p~n ", [FilteredIds]),
-                         io:format("This is BatchSize,Vikas Debug~p~n ", [BatchSize]),
-                         io:format("This is Start1,Vikas Start1 ~p~n ", [Start1]),
-                        io:format("This is SolrNumFound,Vikas Debug~p~n ", [SolrNumFound]),
-
             {DbNumFound, Ans} = make_search_results(BulkGetFun, FilteredIds, BatchSize,
                                                     Start1, SolrNumFound),
             State1 = State#base_state{log_msg = search_log_msg(SolrNumFound,
