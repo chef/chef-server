@@ -442,7 +442,7 @@ http_request(Method, RouteSuffix, Body) ->
                      [{"x-ops-userid", "test-client"},
                       {"accept", "application/json"},
                       {"content-type", "application/json"}
-                     ], Method, Body).
+                     ], Method, Body, [{ssl_options, [{verify, verify_none}]}]).
 
 canonical_example_policy_json(Name) ->
     BaseJson = chef_json:decode(?POLICY_FILE_CANONICAL_EXAMPLE),
