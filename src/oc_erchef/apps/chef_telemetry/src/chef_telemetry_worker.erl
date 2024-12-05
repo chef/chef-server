@@ -362,7 +362,7 @@ epoch_to_string(Epoch) ->
     calendar:system_time_to_rfc3339(Epoch, [{offset, "Z"}]).
 
 send_req(Req, State) ->
-    case ibrowse:send_req(State#state.reporting_url, [{"Content-Type", "application/json"}], post, Req, [], 5000) of
+    case ibrowse:send_req(State#state.reporting_url, [{"Content-Type", "application/json"}], post, Req, [{ssl_options, [{verify, verify_none}]}], 5000) of
         {ok, _Status, _ResponseHeaders, _ResponseBody} -> ok;
         Error                                          -> {failed_sending_request, Error}
     end.
