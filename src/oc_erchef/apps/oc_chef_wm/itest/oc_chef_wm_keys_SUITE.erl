@@ -646,12 +646,12 @@ http_key_request(Method, user, Requestor, Body) ->
     Url = "http://localhost:8000/users/user1/keys",
     ibrowse:send_req(Url, [{"x-ops-userid", binary_to_list(Requestor)},
                            {"accept", "application/json"},
-                           {"content-type", "application/json"}], Method, Body);
+                           {"content-type", "application/json"}], Method, Body, [{ssl_options, [{verify, verify_none}]}]);
 http_key_request(Method, client, Requestor, Body) ->
     Url = "http://localhost:8000/organizations/testorg/clients/client1/keys",
     ibrowse:send_req(Url, [{"x-ops-userid", binary_to_list(Requestor)},
                            {"accept", "application/json"},
-                           {"content-type", "application/json"}], Method, Body).
+                           {"content-type", "application/json"}], Method, Body, [{ssl_options, [{verify, verify_none}]}]).
 
 http_named_key_request(Method, Type, Requestor, Name) ->
     http_named_key_request(Method, Type, Requestor, Name, <<>>).
@@ -660,12 +660,12 @@ http_named_key_request(Method, user, Requestor, Name, Body) ->
     Url = "http://localhost:8000/users/user1/keys/" ++ Name,
     ibrowse:send_req(Url, [{"x-ops-userid", binary_to_list(Requestor)},
                            {"accept", "application/json"},
-                           {"content-type", "application/json"}], Method, Body);
+                           {"content-type", "application/json"}], Method, Body, [{ssl_options, [{verify, verify_none}]}]);
 http_named_key_request(Method, client, Requestor, Name, Body) ->
     Url = "http://localhost:8000/organizations/testorg/clients/client1/keys/" ++ Name,
     ibrowse:send_req(Url, [{"x-ops-userid", binary_to_list(Requestor)},
                            {"accept", "application/json"},
-                           {"content-type", "application/json"}], Method, Body).
+                           {"content-type", "application/json"}], Method, Body, [{ssl_options, [{verify, verify_none}]}]).
 
 % Some helpers to keep noise out of the test.
 make_org(OrgName, OrgAuthzId) ->
