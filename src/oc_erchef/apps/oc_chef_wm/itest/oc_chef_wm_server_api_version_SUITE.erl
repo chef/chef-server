@@ -165,11 +165,11 @@ http_request(Method, Route, undefined) ->
     ibrowse:send_req("http://localhost:8000/" ++ Route,
                      [{"x-ops-userid", binary_to_list(?USER_NAME)},
                       {"accept", "application/json"},
-                      {"content-type", "application/json"}], Method, []);
+                      {"content-type", "application/json"}], Method, [], [{ssl_options, [{verify, verify_none}]}]);
 http_request(Method, Route, Version) ->
     ibrowse:send_req("http://localhost:8000/" ++ Route,
                      [{"x-ops-userid", binary_to_list(?USER_NAME)},
                       {"accept", "application/json"},
                       {"x-ops-server-api-version", Version},
-                      {"content-type", "application/json"}], Method, []).
+                      {"content-type", "application/json"}], Method, [], [{ssl_options, [{verify, verify_none}]}]).
 
