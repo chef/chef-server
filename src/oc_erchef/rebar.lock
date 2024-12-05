@@ -124,7 +124,7 @@
   0},
  {<<"opscoderl_httpc">>,
   {git,"https://github.com/chef/opscoderl_httpc",
-       {ref,"3cdc661e55a48af321b7097941b9a03e8d7b113f"}},
+       {branch,"CHEF-11677/CHEF-12498/lbaker"}},
   0},
  {<<"opscoderl_wm">>,
   {git,"https://github.com/chef/opscoderl_wm",
