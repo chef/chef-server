@@ -126,28 +126,28 @@ update_container(_) ->
 
 http_list_containers() ->
     Request = {"http://localhost:8000/organizations/org/containers", ?DEFAULT_HEADERS},
-    httpc:request(get, Request, [], []).
+    httpc:request(get, Request, [{ssl, [{verify, verify_none}]}], []).
 
 http_fetch_container(Name) ->
     Request = {"http://localhost:8000/organizations/org/containers/" ++ Name, ?DEFAULT_HEADERS},
-    httpc:request(get, Request, [], []).
+    httpc:request(get, Request, [{ssl, [{verify, verify_none}]}], []).
 
 http_create_container(Name) ->
     Url = "http://localhost:8000/organizations/org/containers",
     Body = chef_json:encode({[{<<"containername">>, list_to_binary(Name)}]}),
     Request = {Url, ?DEFAULT_HEADERS, "application/json", Body},
-    httpc:request(post, Request, [], []).
+    httpc:request(post, Request, [{ssl, [{verify, verify_none}]}], []).
 
 http_delete_container(Name) ->
     Request = {"http://localhost:8000/organizations/org/containers/" ++ Name, ?DEFAULT_HEADERS},
-    httpc:request(delete, Request, [], []).
+    httpc:request(delete, Request, [{ssl, [{verify, verify_none}]}], []).
 
 http_update_container(Name, Ejson) ->
     Request = {"http://localhost:8000/organizations/org/containers/" ++ Name,
                ?DEFAULT_HEADERS,
                "application/json",
                chef_json:encode(Ejson)},
-    httpc:request(put, Request, [], []).
+    httpc:request(put, Request, [{ssl, [{verify, verify_none}]}], []).
 
 respBody({ok, {{_, _, _}, _, Body}}) ->
     Body.
