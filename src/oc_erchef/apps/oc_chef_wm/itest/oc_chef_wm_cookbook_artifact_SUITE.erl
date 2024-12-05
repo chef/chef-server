@@ -361,7 +361,8 @@ http_request(Method, RouteSuffix, JsonOrNull) ->
                      [{"x-ops-userid", "test-client"},
                       {"accept", "application/json"},
                       {"content-type", "application/json"}],
-                     Method, body(JsonOrNull)),
+                     Method, body(JsonOrNull),
+                     [{ssl_options, [{verify, verify_none}]}]),
     {RespCode, chef_json:decode(RespBody)}.
 
 url_for(RouteSuffix) ->
