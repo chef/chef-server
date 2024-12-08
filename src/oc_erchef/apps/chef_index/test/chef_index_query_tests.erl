@@ -40,7 +40,7 @@ query_from_params_test_() ->
             sort = "X_CHEF_id_CHEF_X asc",
             start = 2,
             rows = 5,
-            track_total_hits=false,
+            track_total_hits=true,
             index = node},
           ?assertEqual(Expect, Query)
       end},
@@ -58,7 +58,7 @@ query_from_params_test_() ->
             sort = "X_CHEF_id_CHEF_X asc",
             start = 0,
             rows = 1000,
-            track_total_hits=false,
+            track_total_hits=true,
             index = role},
           ?assertEqual(Expect, Query)
       end},
