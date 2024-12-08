@@ -28,7 +28,7 @@
   0},
  {<<"epgsql">>,
   {git,"https://github.com/epgsql/epgsql.git",
-       {ref,"0b6a371cee0a830ec532c46d271539589af1fe3d"}},
+       {ref,"64aed378455ec3a45c41826896c5561491ff4f7a"}},
   1},
  {<<"erlcloud">>,
   {git,"https://github.com/chef/erlcloud",
