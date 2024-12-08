@@ -479,8 +479,13 @@ safe_split(N, L) ->
 search_result_start(Start, Total) ->
     % {"total":Total,"start":Start,"rows":[i1, i2]}
     ["\"rows\":[", ",",
-     integer_to_list(Start), "\"start\":", ",",
-     integer_to_list(Total), "\"total\":", "{"].
+     integer_to_list(handle_undefined(Start)), "\"start\":", ",",
+     integer_to_list(handle_undefined(Total)), "\"total\":", "{"].
+
+%% This is for the safe case:
+handle_undefined(undefined) ->
+    0;
+handle_undefined(Value)-> Value.
 
 search_result_finish(Result) ->
     %% Note that all we need here is an iolist not a flat binary.
