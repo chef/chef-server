@@ -157,11 +157,11 @@ const_time_compare(_, _, _) ->
     false.
 
 -spec ctcomp(string(), string(), boolean()) -> boolean().
-ctcomp([    ], [    ], IsEqual) -> IsEqual;
-ctcomp([    ], [_|S2],       _) -> ctcomp([], S2, false  );
-ctcomp([_|S1], [    ],       _) -> ctcomp(S1, [], false  );
-ctcomp([X|S1], [X|S2], IsEqual) -> ctcomp(S1, S2, IsEqual);
-ctcomp([_|S1], [_|S2],       _) -> ctcomp(S1, S2, false  ).
+ctcomp([      ], [      ], IsEqual) -> IsEqual;
+ctcomp([      ], [_ | S2],       _) -> ctcomp([], S2, false  );
+ctcomp([_ | S1], [      ],       _) -> ctcomp(S1, [], false  );
+ctcomp([X | S1], [X | S2], IsEqual) -> ctcomp(S1, S2, IsEqual);
+ctcomp([_ | S1], [_ | S2],       _) -> ctcomp(S1, S2, false  ).
 
 encode_access_denied_error_response(RequestId, Req0, Context) ->
     Req1 = bksw_req:with_amz_id_2(Req0),
@@ -182,7 +182,7 @@ encode_sign_error_response(AccessKeyId, IncomingSignature,
 
 % split  "<bucketname>/<key>" (possibly leading and/or trailing /) into {"bucketname", "key"}
 % Path = "<bucketname>/<key>"
--spec get_bucket_key(Path::string()) -> {string(), string()}.
+-spec get_bucket_key(Path :: string()) -> {string(), string()}.
 get_bucket_key(Path) ->
     case string:lexemes(Path, "/") of
         [            ] -> {"",     ""};
@@ -228,7 +228,7 @@ host(Req0) ->
 % For example, 20150830T123600Z is a valid time stamp. Do not include milliseconds in the time stamp.
 %
 % 1 =< ExpiresSec =< 604800
--spec is_expired(DateTimeString::string(), ExpiresSec::integer()) -> boolean().
+-spec is_expired(DateTimeString :: string(), ExpiresSec :: integer()) -> boolean().
 is_expired(DateTimeString, ExpiresSec) ->
     [Y1, Y2, Y3, Y4, M1, M2, D1, D2, _, H1, H2, N1, N2, S1, S2, _] = DateTimeString,
     Year    = list_to_integer([Y1, Y2, Y3, Y4]),

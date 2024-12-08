@@ -120,7 +120,7 @@ query_body(#chef_solr_query{
         {<<"size">>, Rows},
         {<<"sort">>, [{[{<<"X_CHEF_id_CHEF_X">>, {[{<<"order">>, <<"asc">>}]}}]}]},
         {<<"query">>, {[
-            {<<"bool">>,{[
+            {<<"bool">>, {[
                 {<<"must">>, {[query_string_query_ejson(Query)]}},
                 {<<"filter">>, {[query_string_query_ejson(FilterQuery)]}}
             ]}}]}
@@ -130,7 +130,7 @@ fields_tag() ->
     <<"stored_fields">>.
 
 query_string_query_ejson(QueryString) ->
-    {<<"query_string">>,{[{<<"query">>, list_to_binary(QueryString)}]}}.
+    {<<"query_string">>, {[{<<"query">>, list_to_binary(QueryString)}]}}.
 
 %% A note on deleting
 %%

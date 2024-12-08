@@ -331,5 +331,5 @@ conflict_message(Name) ->
 email_update_error_message() ->
     {[{<<"error">>, <<"Use chef-manage/Chef Manage to change user email">>}]}.
 
-malformed_request_message(Any, _Req, _state) ->
+malformed_request_message(Any, _Req, _State) ->
     error({unexpected_malformed_request_message, Any}).

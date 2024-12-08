@@ -349,7 +349,7 @@ fetch_prereq_objects_when_missing_rev(Config) ->
     ?assertEqual(Expected, Result).
 
 
-verify_insert_policy_group_association_missing_group(Config)->
+verify_insert_policy_group_association_missing_group(Config) ->
     Assoc = pgr_assoc_missing_group(Config),
     Context = chef_test_suite_helper:context(),
     Actor = chef_test_suite_helper:actor_id(),

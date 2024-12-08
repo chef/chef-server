@@ -82,7 +82,7 @@ delete_search_db_by_type(OrgId, Type) ->
         solr -> chef_solr:delete_search_db_by_type(OrgId, Type)
     end.
 
--spec query_from_params(binary()|string(),
+-spec query_from_params(binary() | string(),
                         string() | binary() | undefined,
                         string(),
                         string()) -> #chef_solr_query{}.

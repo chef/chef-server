@@ -36,7 +36,7 @@
 
 test_setup() ->
     start_stats_hero(),
-    Server = {context,<<"test-req-id">>,{server,"localhost",5984,[],[]}},
+    Server = {context,<<"test-req-id">>, {server,"localhost",5984,[],[]}},
     Superuser = <<"cb4dcaabd91a87675a14ec4f4a00050d">>,
     {Server, Superuser}.
 

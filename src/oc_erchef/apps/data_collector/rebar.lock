@@ -19,5 +19,5 @@
   0},
  {<<"pooler">>,
   {git,"https://github.com/chef/pooler",
-       {ref,"681c355abaacc5487ddf41a84b9ed53151a765fe"}},
+       {branch,"CHEF-11677/CHEF-12498/lbaker"}},
   0}].
