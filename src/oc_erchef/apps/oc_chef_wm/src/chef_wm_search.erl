@@ -479,8 +479,8 @@ safe_split(N, L) ->
 search_result_start(Start, Total) ->
     % {"total":Total,"start":Start,"rows":[i1, i2]}
     ["\"rows\":[", ",",
-    integer_to_list(Start), "\"start\":", ",",
-    integer_to_list(Total), "\"total\":", "{"].
+     integer_to_list(Start), "\"start\":", ",",
+     integer_to_list(Total), "\"total\":", "{"].
 
 search_result_finish(Result) ->
     %% Note that all we need here is an iolist not a flat binary.
