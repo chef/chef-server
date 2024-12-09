@@ -6,7 +6,7 @@
 
 git clone https://github.com/chef/automate.git
 cd automate
-git checkout kalroy/cs_plan_changes
+git checkout ssudheer/ruby_update_3.1
 
 #===============================================================================
 chmod +x ./integration/tests/chef_server_only.sh
