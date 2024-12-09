@@ -213,4 +213,6 @@ exceptions:
       reason: Exception made by Chef Legal
     - name: core/nss-myhostname
       reason: Exception made by Chef Legal
+    - name: core/xz
+      reason: Added for test to pass
 
