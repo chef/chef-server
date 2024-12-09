@@ -862,10 +862,9 @@ The response will return something like the following:
 
 ### /users
 
-A user is an individual account that is created to allow access to the Chef Infra Server. For example:
+A user is an individual account that has access to Chef Infra Server. For example:
 
-- A hosted Chef Infra Server account
-- The user that operates the workstation from which a Chef Infra Server will be managed
+- The user that operates the workstation that Chef Infra Server is managed from.
 
 The `/users` endpoint has the following methods: `GET` and `POST`.
 
