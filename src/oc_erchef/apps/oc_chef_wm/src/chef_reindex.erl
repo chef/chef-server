@@ -152,7 +152,7 @@ reindex_by_name(Ctx, {OrgId, OrgName} = OrgInfo, Index, Names) ->
                                 %% The lager warning does not print anything on the console
                                 {Acc, [Name | Missing]}
                             end
-                          end, {[],[]}, Names),
+                          end, {[], []}, Names),
     lager:debug("Ids that will be reindexed: ~p ~n", [Ids]),
     lager:debug("Ids that are missing: ~p ~n", [MissingList]),
     {ok, BatchSize} = application:get_env(oc_chef_wm, reindex_batch_size),
@@ -166,7 +166,7 @@ reindex_by_name(Ctx, {OrgId, OrgName} = OrgInfo, Index, Names) ->
     end.
 
 all_ids_from_name_id_dict(NameIdDict) ->
-    dict:fold(fun(_K, V, Acc) -> [V|Acc] end,
+    dict:fold(fun(_K, V, Acc) -> [V | Acc] end,
               [],
               NameIdDict).
 
@@ -262,7 +262,7 @@ add_batch(Batch, OrgName) ->
 
 log_failures(_OrgName, []) ->
     ok;
-log_failures(OrgName, [Failure|Rest]) ->
+log_failures(OrgName, [Failure | Rest]) ->
     case Failure of
         {{TypeName, Id, _DbName}, Reason} ->
             lager:error("reindexing[~s] item ~s[~s] failed to reindex: ~s", [OrgName, TypeName, Id, Reason]);
@@ -274,13 +274,13 @@ log_failures(OrgName, [Failure|Rest]) ->
 -spec humanize_failures(list(), list()) -> list().
 humanize_failures([], Acc) ->
     Acc;
-humanize_failures([H|T], Acc) ->
+humanize_failures([H | T], Acc) ->
     case H of
         {Id, Reason} -> humanize_failures(T, [{Id, pretty_reason(Reason)} | Acc]);
         Error -> humanize_failures(T, [{<<"unknown">>, pretty_reason(Error)} | Acc])
     end.
 
-pretty_reason({error,{error,no_members}}) ->
+pretty_reason({error, {error, no_members}}) ->
     "no_members: Ran out of HTTP workers talking to search backend";
 pretty_reason({exit, {timeout, _}}) ->
     "timeout";
@@ -298,14 +298,14 @@ stub_records_for_indexing(SerializedObjects, NameKey, NameIdDict, Index, OrgId) 
 
 stub_records_for_indexing([], _NameKey, _NameIdDict, _Index, _OrgId, ExistingAcc, MissingAcc) ->
     {ExistingAcc, MissingAcc};
-stub_records_for_indexing([SO|Rest], NameKey, NameIdDict, Index, OrgId, ExistingAcc, MissingAcc) ->
+stub_records_for_indexing([SO | Rest], NameKey, NameIdDict, Index, OrgId, ExistingAcc, MissingAcc) ->
     PreliminaryEJson = decompress_and_decode(SO),
     ItemName = ej:get({NameKey}, PreliminaryEJson),
     {NewEAcc, NewMAcc} = case dict:find(ItemName, NameIdDict) of
                              {ok, ObjectId} ->
 
                                  StubRec = stub_record(Index, OrgId, ObjectId, ItemName, PreliminaryEJson),
-                                 {[{StubRec, PreliminaryEJson}|ExistingAcc], MissingAcc};
+                                 {[{StubRec, PreliminaryEJson} | ExistingAcc], MissingAcc};
                              error ->
                                  lager:warning("skipping: no id found for name ~p", [ItemName]),
                                  {ExistingAcc, [{Index, ItemName} | MissingAcc]}

@@ -34,7 +34,7 @@
                        | [[tuple()]] %% This is what it looks like when your
                                      %% ReturnTransform is 'rows'
                        | {error, _}.
--type select_callback() :: fun(({ QueryName ::atom(), BindParameters :: list(),
+-type select_callback() :: fun(({ QueryName :: atom(), BindParameters :: list(),
                                   ReturnFieldNames :: [atom()]}
                               | {QueryName :: atom(), BindParameters :: list()}
                               | {QueryName :: atom(), BindParameters :: list(),
@@ -204,7 +204,7 @@ fields_for_fetch(Rec) ->
 is_indexed(Rec) ->
     call(Rec, is_indexed).
 
--spec list(Rec:: object_rec(), CallbackFun :: select_callback()) ->
+-spec list(Rec :: object_rec(), CallbackFun :: select_callback()) ->
                   select_return().
 list(Rec, CallbackFun) ->
     Mod = element(1, Rec),

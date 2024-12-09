@@ -164,5 +164,5 @@ delete_read_access_group(DbContext, AuthzContext, OrgName, RequestorId) ->
             ok
     end.
 
-malformed_request_message(Any, _Req, _state) ->
+malformed_request_message(Any, _Req, _State) ->
     error({unexpected_malformed_request_message, Any}).

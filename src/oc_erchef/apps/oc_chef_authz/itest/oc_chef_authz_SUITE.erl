@@ -35,7 +35,7 @@
 all() -> [fetch_container].
 
 init_per_suite(LastConfig) ->
-    Config = chef_test_db_helper:start_db([{app, oc_chef_authz}|LastConfig], "oc_chef_authz_itests"),
+    Config = chef_test_db_helper:start_db([{app, oc_chef_authz} | LastConfig], "oc_chef_authz_itests"),
     suite_helper:start_server(Config),
     OrgsConfig = chef_test_suite_helper:make_orgs(),
     OrgsConfig ++ Config.

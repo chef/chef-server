@@ -138,7 +138,7 @@ in the search resource.
 
 In `oc_chef_wm` add a dependency on eredis. The eredis client is a
 gen_server with async send/receive. Since exclusive access is not
-needed, we could use pg2 to create a handful of clients to use. Write
+needed, we could use pg to create a handful of clients to use. Write
 the cache logic.
 
 

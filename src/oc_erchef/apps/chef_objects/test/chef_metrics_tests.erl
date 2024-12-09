@@ -59,9 +59,9 @@ label_test_() ->
               application:set_env(chef_objects, s3_url, S3Url),
               application:set_env(chef_objects, s3_platform_bucket_name, Bucket)
       end,
-      fun(_,_) -> ok end,
+      fun(_, _) -> ok end,
       [{{Url, Bucket},
-        fun(_,_) ->
+        fun(_, _) ->
                 ?_assertEqual(Label,
                              chef_metrics:label(Upstream, {Mod, Fun}))
         end} || {Url, Bucket, Upstream, Mod, Fun, Label} <- [{"http://s3.amazonaws.com", "i.haz.a.bukkit",

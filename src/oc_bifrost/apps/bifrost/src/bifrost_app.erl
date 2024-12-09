@@ -1,7 +1,7 @@
 -module(bifrost_app).
 
 -behaviour(application).
--export([start/2,stop/1]).
+-export([start/2, stop/1]).
 
 start(_Type, _StartArgs) ->
     %% erlang 19.3.x SIGTERM changes caused runit failures.
@@ -16,7 +16,7 @@ start(_Type, _StartArgs) ->
             SrcDir =  filename:join([Dir, "../../../../../..", "external-deps"]),
             EbinDir = filename:join([Dir, "../../../../../..", "external-deps/ebin"]),
             application:set_env(sync, src_dirs, {add, [{SrcDir,
-                                                        [{outdir,EbinDir}]}]}),
+                                                        [{outdir, EbinDir}]}]}),
             application:set_env(sync, sync_method, scanner),
             application:start(sync);
       _ -> ok

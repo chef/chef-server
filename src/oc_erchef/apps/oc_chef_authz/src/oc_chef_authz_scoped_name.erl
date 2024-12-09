@@ -97,7 +97,7 @@ initialize_context(OrgId, DbContext, CallBackFun) ->
 %% Output:
 %% { [{Name, AuthzId}, [{Name, ErrorType}] }
 %%
--spec names_to_authz_id(lookup_type() ,[binary()], #context{}) -> { [binary()],[{atom(),binary()}] }.
+-spec names_to_authz_id(lookup_type() , [binary()], #context{}) -> { [binary()], [{atom(), binary()}] }.
 names_to_authz_id(Type, Names, MapperContext) ->
     %% Lower to fully qualified orgname, name
     ScopedNames = parse_scoped_names(Names, is_scoped_type(Type), MapperContext),
@@ -136,17 +136,17 @@ convert_ids_to_names(ActorAuthzIds, GroupAuthzIds, Context) ->
 %%
 %% No error handling; we probably should generate an error when we have missing
 %%
--spec find_client_authz_ids([binary()],#context{org_id::binary(), db_callback_fun::db_callback()}) -> [binary()].
+-spec find_client_authz_ids([binary()], #context{org_id :: binary(), db_callback_fun :: db_callback()}) -> [binary()].
 find_client_authz_ids(ClientNames, Context) ->
     {AuthzIds, _Missing} = names_to_authz_id(client, ClientNames, Context),
     AuthzIds.
 
--spec find_user_authz_ids([binary()],#context{org_id::binary(), db_callback_fun::db_callback()}) -> [binary()].
+-spec find_user_authz_ids([binary()], #context{org_id :: binary(), db_callback_fun :: db_callback()}) -> [binary()].
 find_user_authz_ids(UserNames, Context) ->
     {AuthzIds, _Missing} = names_to_authz_id(user, UserNames, Context),
     AuthzIds.
 
--spec find_group_authz_ids([binary()],#context{org_id::binary(), db_callback_fun::db_callback()}) -> [binary()].
+-spec find_group_authz_ids([binary()], #context{org_id :: binary(), db_callback_fun :: db_callback()}) -> [binary()].
 find_group_authz_ids(GroupNames, Context) ->
     {AuthzIds, _Missing} = names_to_authz_id(group, GroupNames, Context),
     AuthzIds.
@@ -158,7 +158,7 @@ find_group_authz_ids(GroupNames, Context) ->
 org_id_to_name(OrgId) ->
     %% TODO maybe rework this; it bypasses a bunch of our statistics gathering code.
     case chef_sql:select_rows({find_organization_by_id, [OrgId]}) of
-        [Org|_Others] ->  proplists:get_value(<<"name">>, Org);
+        [Org | _Others] ->  proplists:get_value(<<"name">>, Org);
         _ -> not_found
     end.
 
@@ -251,21 +251,21 @@ authz_records_by_name(Type, OrgId, Names) ->
     {AuthzIds, Remaining, ordsets:new()}.
 
 %% Helper functions for oc_chef_authz_db:authz_records_by_name and oc_chef_authz_db:find_org_actors_by_name
--spec names_from_records([{binary(),_} | {binary(),_,_}]) -> [binary()].
+-spec names_from_records([{binary(), _} | {binary(), _, _}]) -> [binary()].
 names_from_records(Records) ->
     [ name_from_record(R) || R  <- Records].
 
--spec name_from_record({binary(),_} | {binary(),_,_}) -> binary().
+-spec name_from_record({binary(), _} | {binary(), _, _}) -> binary().
 name_from_record({Name, _,  _}) ->
     Name;
 name_from_record({Name, _}) ->
     Name.
 
--spec ids_from_records([{_,binary()} | {_,'null' | binary(),'null' | binary()}]) -> [binary()].
+-spec ids_from_records([{_, binary()} | {_, 'null' | binary(), 'null' | binary()}]) -> [binary()].
 ids_from_records(Records) ->
     [ id_from_record(R) || R <- Records ].
 
--spec id_from_record({_, binary()} | {_, binary()|null, binary()|null}) -> binary().
+-spec id_from_record({_, binary()} | {_, binary() | null, binary() | null}) -> binary().
 id_from_record({_, AuthzId}) ->
     AuthzId;
 id_from_record({_, UserAuthzId, null}) ->
@@ -293,8 +293,8 @@ is_ambiguous_actor({_, _, _}) ->
 %% Each type of object has different restrictions on its scope.
 %%
 -spec authz_id_to_names('client' | 'group' | 'user', [binary()],
-                        #context{org_id::binary(), db_callback_fun::db_callback()}) ->
-        {[binary()],[binary()]}.
+                        #context{org_id :: binary(), db_callback_fun :: db_callback()}) ->
+        {[binary()], [binary()]}.
 authz_id_to_names(group, AuthzIds, #context{org_id = OrgId, db_callback_fun = CallbackFun}) ->
     {ScopedNames, DiffedList} = query_and_diff_authz_ids(find_scoped_group_name_in_authz_ids, AuthzIds, CallbackFun),
     {render_names_from_org_id(OrgId, ScopedNames), DiffedList};
@@ -310,9 +310,9 @@ query_and_diff_authz_ids(QueryName, AuthzIds, CallbackFun) ->
     case CallbackFun({QueryName, [AuthzIds]}) of
         not_found ->
             {[], AuthzIds};
-        Results when is_list(Results)->
+        Results when is_list(Results) ->
             {ResultNames, FoundAuthzIds} = lists:foldl(fun extract_maybe_scoped_name/2,
-                                                       {[],[]}, Results),
+                                                       {[], []}, Results),
             DiffedList = sets:to_list(sets:subtract(sets:from_list(AuthzIds), sets:from_list(FoundAuthzIds))),
             {lists:sort(ResultNames), DiffedList};
         _Other ->
@@ -368,7 +368,7 @@ parse_scoped_names(Names, ScopedOk, Context) ->
     [ maybe_parse_scoped_name(Name, Pattern, ScopedOk, Context) || Name <- Names ].
 
 -spec maybe_parse_scoped_name(binary(), re:mp(), boolean(), #context{}) ->
-                                     #sname{} | {ill_formed_name|inappropriate_scoped_name, binary()}.
+                                     #sname{} | {ill_formed_name | inappropriate_scoped_name, binary()}.
 maybe_parse_scoped_name(Name, Pattern, ScopedOk, Context) ->
     process_match(re:run(Name, Pattern, [{capture, all, binary}]), Name, Context, ScopedOk).
 
@@ -413,7 +413,7 @@ group_by_key(L) ->
 %% Expansion of authz ids into scoped names
 %% Takes {OrgName, Name} pairs in ScopedNames and returns
 %% list of names with scoping metacharacter inserted
--spec render_names_from_org_id(binary(),[{binary(), [binary()]}]) -> [binary()].
+-spec render_names_from_org_id(binary(), [{binary(), [binary()]}]) -> [binary()].
 render_names_from_org_id(OrgId, ScopedNames) ->
     GroupedScopedNames = group_by_key(ScopedNames),
     Expanded = lists:foldl(fun(E, A) -> render_names_from_org_id_f(OrgId, E, A) end,
@@ -439,7 +439,7 @@ render_names_from_org_id_f(_OrgId, {AnotherOrgId, Names}, Expanded) ->
             [ENames, Expanded]
     end.
 
--spec make_name(binary(),binary()) -> <<_:16,_:_*8>>.
+-spec make_name(binary(), binary()) -> <<_:16, _:_*8>>.
 make_name(OrgName, Name) ->
     <<OrgName/binary, "::", Name/binary>>.
 

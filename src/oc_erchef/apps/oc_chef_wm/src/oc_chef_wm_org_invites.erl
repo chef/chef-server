@@ -120,7 +120,7 @@ create_path(Req, State) ->
 
 to_json(Req, #base_state{ organization_guid = OrgId, chef_db_context = DbContext } = State) ->
     case chef_db:list(#oc_chef_org_user_invite{org_id = OrgId}, DbContext) of
-        Invitations when is_list(Invitations)->
+        Invitations when is_list(Invitations) ->
             EJson = oc_chef_org_user_invite:ejson_from_list(Invitations, <<"username">>),
             {chef_json:encode(EJson), Req, State};
         Error ->
@@ -199,7 +199,7 @@ invitation_response(Req, #base_state{ organization_name = OrgName,
     Req2 = chef_wm_util:set_json_body(Req1, {[{<<"uri">>, Uri}, OrgUser, Org, UserOut]}),
     {true, Req2, State#base_state{log_msg = LogMsg}}.
 
-malformed_request_message(Any, _Req, _state) ->
+malformed_request_message(Any, _Req, _State) ->
     error({unexpected_malformed_request_message, Any}).
 
 org_name_mismatch_message(OrgName, BadOrgName) ->
