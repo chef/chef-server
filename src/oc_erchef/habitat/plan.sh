@@ -11,7 +11,7 @@ pkg_deps=(
   core/gcc-libs
   core/ruby3_4
   core/sqitch
-  core/gecode
+  core/gecode3/3.7.3/20241204123644
   core/libffi
   core/glibc
 )
