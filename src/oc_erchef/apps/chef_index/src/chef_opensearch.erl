@@ -108,7 +108,7 @@ query_body(#chef_solr_query{
     jiffy:encode({[{fields_tag(), <<"_id">>},
                    {<<"from">>, Start},
                    {<<"size">>, Rows},
-                   {<<"track_total_hits">>,TrackTotalHits},
+                   {<<"track_total_hits">>,true},
                    {<<"query">>, {[query_string_query_ejson(Query)]}}
                   ]});
 query_body(#chef_solr_query{
@@ -150,7 +150,7 @@ query_body(#chef_solr_query{
     jiffy:encode({[{ fields_tag(), <<"_id">>},
         {<<"from">>, Start},
         {<<"size">>, Rows},
-        {<<"track_total_hits">>,TrackTotalHits},
+        {<<"track_total_hits">>,true},
         {<<"sort">>, [{[{<<"X_CHEF_id_CHEF_X">>, {[{<<"order">>, <<"asc">>}]}}]}]},
         {<<"query">>, {[
             {<<"bool">>,{[
