@@ -32,12 +32,12 @@ role-based access control:
 <tbody>
 <tr>
 <td><p><img src="/images/icon_server_organization.svg" class="align-center" width="130" alt="image" /></p></td>
-<td>An organization is the top-level entity for role-based access control in the Chef Infra Server. Each organization contains the default groups (<code>admins</code>, <code>clients</code>, and <code>users</code>, plus <code>billing_admins</code> for the hosted Chef Infra Server), at least one user and at least one node (on which the Chef Infra Client is installed). The Chef Infra Server supports multiple organizations. The Chef Infra Server includes a single default organization that is defined during setup. Additional organizations can be created after the initial setup and configuration of the Chef Infra Server.</td>
+<td>An organization is the top-level entity for role-based access control in the Chef Infra Server. Each organization contains the default groups (<code>admins</code>, <code>clients</code>, and <code>users</code>), at least one user and at least one node (on which the Chef Infra Client is installed). The Chef Infra Server supports multiple organizations. The Chef Infra Server includes a single default organization that is defined during setup. Additional organizations can be created after the initial setup and configuration of the Chef Infra Server.</td>
 </tr>
 <tr>
 <td><p><img src="/images/icon_server_groups.svg" class="align-center" width="130" alt="image" /></p></td>
 <td><p>A group is used to define access to object types and objects in the Chef Infra Server and also to assign permissions that determine what types of tasks are available to members of that group who are authorized to perform them. Groups are configured per-organization.</p>
-<p>Individual users who are members of a group will inherit the permissions assigned to the group. The Chef Infra Server includes the following default groups: <code>admins</code>, <code>clients</code>, and <code>users</code>. For users of the hosted Chef Infra Server, an additional default group is provided: <code>billing_admins</code>.</p></td>
+<p>Individual users who are members of a group will inherit the permissions assigned to the group. The Chef Infra Server includes the following default groups: <code>admins</code>, <code>clients</code>, and <code>users</code>.</p></td>
 </tr>
 <tr>
 <td><p><img src="/images/icon_server_users.svg" class="align-center" width="130" alt="image" /></p></td>
@@ -206,10 +206,6 @@ The Chef Infra Server includes the following default groups:
 <tr>
 <td><code>admins</code></td>
 <td>The <code>admins</code> group defines the list of users who have administrative rights to all objects and object types for a single organization.</td>
-</tr>
-<tr>
-<td><code>billing_admins</code></td>
-<td>The <code>billing_admins</code> group defines the list of users who have permission to manage billing information. This permission exists only for the hosted Chef Infra Server.</td>
 </tr>
 <tr>
 <td><code>clients</code></td>
