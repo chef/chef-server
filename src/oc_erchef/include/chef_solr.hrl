@@ -21,6 +21,7 @@
           search_provider = solr :: 'solr' | 'elasticsearch' | 'opensearch',
           start :: integer() | undefined,
           rows :: integer()  | undefined,
+          track_total_hits :: boolean() |undefined,
           sort :: string()   | undefined,
           index :: 'node'
                  | 'role'
