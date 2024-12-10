@@ -42,6 +42,10 @@ HAB_FEAT_OFFLINE_INSTALL=true HAB_FEAT_IGNORE_LOCAL=false HAB_ORIGIN=chef HAB_CA
 
 git clone https://github.com/chef/automate.git
 cd automate
+if [ "${AUTOMATE_BRANCH}" != "" ]
+then
+  git checkout "${AUTOMATE_BRANCH}"
+fi
 
 RESOLVED_RESULTS_DIR=$(realpath results/)
 export DO_CHECK=true
