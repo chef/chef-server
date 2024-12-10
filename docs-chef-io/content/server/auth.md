@@ -81,7 +81,7 @@ validation key files and optionally a [config.rb]({{< relref "workstation/config
 
 #### From Chef Manage
 
-Chef Manage, which runs Chef Infra Server's user interface, uses Chef Infra Server API to perform most operations.
+Chef Manage, which runs Chef Infra Server's user interface, uses the Chef Infra Server API to perform most operations.
 This ensures that authentication requests to Chef Infra Server are authorized.
 This authentication process is handled automatically and is not something that users need to manage.
 For on-premises Chef Infra Server deployments,
@@ -98,7 +98,7 @@ sections describe a few of the ways that are available for doing that.
 
 An API request can be made using cURL, which is a Bash shell script that
 requires two utilities: awk and openssl. The following example shows how
-an authenticated request can be made using Chef Infra Server API and
+an authenticated request can be made using the Chef Infra Server API and
 cURL:
 
 ```bash
@@ -193,7 +193,7 @@ bash chef_api_request GET "/clients"
 An API request can be made using PyChef, which is a Python library that
 meets the `Mixlib::Authentication` requirements so that it can easily
 interact with Chef Infra Server. The following example shows how an
-authenticated request can be made using Chef Infra Server API and
+authenticated request can be made using the Chef Infra Server API and
 PyChef:
 
 ```python
@@ -324,10 +324,10 @@ Usage()
 ExecuteUserChoice()
 ```
 
-Another way Ruby can be used with Chef Infra Server API is to get
+Another way Ruby can be used with the Chef Infra Server API is to get
 objects from Chef Infra Server, and then interact with the returned
-data using Ruby methods. Whenever possible, Chef Infra Server API
-will return an object of the relevant type. The returned object is then
+data using Ruby methods. Whenever possible, the Chef Infra Server API
+returns an object of the relevant type. The returned object is then
 available to be called by other methods. For example, the `api.get`
 method can be used to return a node named `foobar`, and then `.destroy`
 can be used to delete that node:
@@ -467,5 +467,5 @@ For more information about Chef Infra Server Authorization, see
 
 ## Chef Infra Server API
 
-For more information about using Chef Infra Server API endpoints see
-[Chef Infra Server API]({{< relref "api_chef_server" >}}).
+For more information about using the Chef Infra Server API endpoints see
+the [Chef Infra Server API]({{< relref "api_chef_server" >}}) documentation.
