@@ -93,7 +93,7 @@ log_failure(fail, Pings) ->
     FailureData = {{status, fail}, {upstreams, {Pings}}},
     lager:error("/_status~n~p~n", [FailureData]),
     ok;
-log_failure(_,_) ->
+log_failure(_, _) ->
     ok.
 
 %% Execute health checks in parallel such that no check will exceed `ping_timeout()'
@@ -183,4 +183,4 @@ ping_timeout() ->
     envy:get(oc_chef_wm, health_ping_timeout, pos_integer).
 
 ping_modules() ->
-    envy:get(oc_chef_wm, health_ping_modules,list).
+    envy:get(oc_chef_wm, health_ping_modules, list).

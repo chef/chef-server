@@ -104,9 +104,9 @@ validate_body(Body) ->
 
 -spec solve_dependencies(AllVersions :: [dependency_set()],
                          EnvConstraints :: [constraint()],
-                         Cookbooks :: [Name::binary() |
-                                             {Name::binary(), Version::binary()}]) ->
-                                {ok, [ versioned_cookbook()]} | {error, term()}.
+                         Cookbooks :: [Name :: binary() |
+                                             {Name :: binary(), Version :: binary()}]) ->
+                                {ok, [versioned_cookbook()]} | {error, term()}.
 
 %% @doc Main entry point into the depsolver.  It is supplied with a dependency_set()
 %% containing all the cookbook versions and their dependencies that are in the database
