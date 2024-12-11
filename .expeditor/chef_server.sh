@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e
 
 #===============================================================================
 #Downloading the automate repo
@@ -6,7 +6,10 @@
 
 git clone https://github.com/chef/automate.git
 cd automate
-git checkout kalroy/cs_plan_changes
+if [ "${AUTOMATE_BRANCH}" != "" ]
+then
+  git checkout "${AUTOMATE_BRANCH}"
+fi
 
 #===============================================================================
 chmod +x ./integration/tests/chef_server.sh
