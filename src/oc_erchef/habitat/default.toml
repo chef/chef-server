@@ -30,6 +30,7 @@ keygen_timeout=5000
 [chef_db]
 
 [chef_index]
+track_total_hits=false
 
 [chef_objects]
 
