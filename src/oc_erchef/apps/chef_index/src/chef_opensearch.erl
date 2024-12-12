@@ -103,21 +103,54 @@ query_body(#chef_solr_query{
               query_string = Query,
               filter_query = undefined,
               start = Start,
+              track_total_hits = true,
               rows = Rows}) ->
     jiffy:encode({[{fields_tag(), <<"_id">>},
                    {<<"from">>, Start},
                    {<<"size">>, Rows},
+                   {<<"track_total_hits">>,true},
                    {<<"query">>, {[query_string_query_ejson(Query)]}}
                   ]});
+query_body(#chef_solr_query{
+    query_string = Query,
+    filter_query = undefined,
+    start = Start,
+    track_total_hits = false,
+    rows = Rows}) ->
+    jiffy:encode({[{fields_tag(), <<"_id">>},
+                    {<<"from">>, Start},
+                    {<<"size">>, Rows},
+                    {<<"query">>, {[query_string_query_ejson(Query)]}}
+                ]});
+
+query_body(#chef_solr_query{
+    query_string = Query,
+    filter_query = FilterQuery,
+    start = Start,
+    track_total_hits = false,
+    rows = Rows}) ->
+chef_index_query:assert_org_id_filter(FilterQuery),
+jiffy:encode({[{ fields_tag(), <<"_id">>},
+    {<<"from">>, Start},
+    {<<"size">>, Rows},
+    {<<"sort">>, [{[{<<"X_CHEF_id_CHEF_X">>, {[{<<"order">>, <<"asc">>}]}}]}]},
+    {<<"query">>, {[
+        {<<"bool">>,{[
+            {<<"must">>, {[query_string_query_ejson(Query)]}},
+            {<<"filter">>, {[query_string_query_ejson(FilterQuery)]}}
+        ]}}]}
+    }]});
 query_body(#chef_solr_query{
               query_string = Query,
               filter_query = FilterQuery,
               start = Start,
+              track_total_hits = true,
               rows = Rows}) ->
     chef_index_query:assert_org_id_filter(FilterQuery),
     jiffy:encode({[{ fields_tag(), <<"_id">>},
         {<<"from">>, Start},
         {<<"size">>, Rows},
+        {<<"track_total_hits">>,true},
         {<<"sort">>, [{[{<<"X_CHEF_id_CHEF_X">>, {[{<<"order">>, <<"asc">>}]}}]}]},
         {<<"query">>, {[
             {<<"bool">>,{[
