@@ -142,8 +142,8 @@ describe "running configs required by Chef Server and plugins", :config do
       expect(config['opscode-erchef']['solr_http_max_age'].to_s).not_to eq ''
     end
 
-    it "opscode-erchef/solr_track_total_hit" do
-      expect(config['opscode-erchef']['solr_track_total_hit'].to_s).not_to eq ''
+    it "opscode-erchef/solr_track_total_hits" do
+      expect(config['opscode-erchef']['solr_track_total_hits'].to_s).not_to eq ''
     end
 
     it "opscode-erchef/solr_http_max_connection_duration" do
