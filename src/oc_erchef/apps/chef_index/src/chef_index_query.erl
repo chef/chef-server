@@ -30,6 +30,7 @@ from_params(Provider, ObjType, QueryString, Start, Rows) ->
                      search_provider = Provider,
                      start = decode({nonneg_int, "start"}, Start, 0),
                      rows = decode({nonneg_int, "rows"}, Rows, 1000),
+                     track_total_hits = envy:get(chef_index, track_total_hits, false, boolean),
                      sort = "X_CHEF_id_CHEF_X asc",
                      index = index_type(ObjType)}.
 
