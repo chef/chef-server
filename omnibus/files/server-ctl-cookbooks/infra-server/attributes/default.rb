@@ -352,6 +352,7 @@ default['private_chef']['opscode-erchef']['solr_http_init_count'] = 25
 default['private_chef']['opscode-erchef']['solr_http_max_count'] = 100
 default['private_chef']['opscode-erchef']['solr_http_cull_interval'] = '{1, min}'
 default['private_chef']['opscode-erchef']['solr_http_max_age'] = '{70, sec}'
+default['private_chef']['opscode-erchef']['solr_track_total_hits'] = false
 default['private_chef']['opscode-erchef']['solr_http_max_connection_duration'] = '{70,sec}'
 default['private_chef']['opscode-erchef']['solr_retry_on_conn_closed'] = true
 default['private_chef']['opscode-erchef']['solr_ibrowse_options'] = '[{connect_timeout, 10000}]'
