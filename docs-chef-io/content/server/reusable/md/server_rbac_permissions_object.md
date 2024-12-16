@@ -1,4 +1,4 @@
-The Chef Infra Server includes the following object permissions:
+Chef Infra Server includes the following object permissions:
 
 | Permission | Description |
 | --- | --- |
