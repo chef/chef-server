@@ -129,7 +129,7 @@ If you're looking to contribute to certain parts of the Chef Infra Server, famil
 
 ## Chef Expeditor
 
-The `chef/chef-server` repository, like many other Chef Software repositories, leverages an internal utility called Chef Expeditor to create a pub-sub model of actions across our various CI/CD utilities.
+The `chef/chef-server`  repository, like many other Chef Software repositories, leverages an internal utility called Chef Expeditor to create a pub-sub model of actions across our various CI/CD utilities.
 
 ## Contributing
 
