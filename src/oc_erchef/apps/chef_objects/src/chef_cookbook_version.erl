@@ -114,7 +114,7 @@
 
 -behaviour(chef_object).
 
-authz_id(#chef_cookbook_version{authz_id = AuthzId})->
+authz_id(#chef_cookbook_version{authz_id = AuthzId}) ->
     AuthzId.
 
 -spec name(#chef_cookbook_version{}) -> binary().
@@ -388,9 +388,9 @@ is_valid_version(Version) ->
 %% than one dot or more than two dots is an error.
 %%
 %% @end
--spec parse_version(Version::binary()) -> {Major::non_neg_integer(),
-                                           Minor::non_neg_integer(),
-                                           Patch::non_neg_integer()}.
+-spec parse_version(Version :: binary()) -> {Major :: non_neg_integer(),
+                                             Minor :: non_neg_integer(),
+                                             Patch :: non_neg_integer()}.
 parse_version(Version) when is_binary(Version) ->
     Parts = [list_to_integer(binary_to_list(V))
              || V <- binary:split(Version, <<".">>, [global])],
@@ -432,9 +432,9 @@ not_larger_than(Max, L) ->
 %% @doc given a version tuple {Major, Minor, Patch} return it as a
 %% binary()
 %% @end
--spec version_to_binary({Major::non_neg_integer(),
-                         Minor::non_neg_integer(),
-                         Patch::non_neg_integer()}) ->
+-spec version_to_binary({Major :: non_neg_integer(),
+                         Minor :: non_neg_integer(),
+                         Patch :: non_neg_integer()}) ->
                      binary().
 version_to_binary({Major, Minor, Patch}) ->
     iolist_to_binary([integer_to_list(Major), ".",
@@ -593,7 +593,7 @@ inflate(_Type, Data) ->
 %% Originally intended to operate on the `serialized_object' data of a Cookbook Version (the
 %% piece that actually has the recipes in it), but could also work on the gzipped JSON
 %% string for the entire cookbook, if that's ever a thing you'd want to do.
--spec extract_recipe_names(XCookbookJSON::binary()) -> [RecipeName::binary()].
+-spec extract_recipe_names(XCookbookJSON :: binary()) -> [RecipeName :: binary()].
 extract_recipe_names(<<31, 139, _Rest/binary>>=XCookbookJSON) ->
     EJson = chef_db_compression:decompress_and_decode(XCookbookJSON),
 

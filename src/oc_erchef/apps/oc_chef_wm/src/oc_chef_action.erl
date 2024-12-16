@@ -41,11 +41,11 @@ create_message(Req, #base_state{resource_state = ResourceState} = State) ->
 %%
 %% Internal functions
 %%
--spec construct_payload(FullActionPayload :: [{binary(), binary()},...],
+-spec construct_payload(FullActionPayload :: [{binary(), binary()}, ...],
                         Task :: binary(),
                         Req :: wm_req(),
                         State :: #base_state{},
-                        EntitySpecificPayload :: [{binary(), binary()},...]) -> binary().
+                        EntitySpecificPayload :: [{binary(), binary()}, ...]) -> binary().
 construct_payload(FullActionPayload, Task, Req,
                   #base_state{ requestor = #chef_client{name = Name} } = State,
                   EntitySpecificPayload) ->
@@ -260,10 +260,10 @@ task(Req, #base_state{resource_state=#association_state{}, log_msg = LogMsg}) ->
                 invite_deleted -> <<"reject">>
             end
     end;
-task(Req, _State)->
+task(Req, _State) ->
     key_for_method(wrq:method(Req)).
 
--spec key_for_method('POST'|'PUT'|'DELETE') -> <<_:48>>.
+-spec key_for_method('POST' | 'PUT' | 'DELETE') -> <<_:48>>.
 key_for_method('DELETE') ->
     <<"delete">>;
 key_for_method('POST') ->

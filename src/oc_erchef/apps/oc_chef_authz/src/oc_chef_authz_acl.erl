@@ -89,7 +89,7 @@ validate_actors_clients_users(Part, FullACL) ->
             end
     end.
 
--spec update_part(string(), ejson_term(), chef_type() | chef_authz_type(), id(), id())->
+-spec update_part(string(), ejson_term(), chef_type() | chef_authz_type(), id(), id()) ->
     {ok, ejson_term()}.
 update_part(Part, AceRecord, Type, AuthzId, OrgId) ->
     Ids = names_to_ids(ej:get({Part}, AceRecord), OrgId),
@@ -215,7 +215,7 @@ fetch_cookbook_id(DbContext, Name, OrgId) ->
 fetch(Type, OrgId, AuthzId) ->
     fetch(Type, OrgId, AuthzId, undefined).
 
--spec fetch(chef_type(), binary(), id(), granular|undefined) -> ejson_term() | {error, term()} | forbidden.
+-spec fetch(chef_type(), binary(), id(), granular | undefined) -> ejson_term() | {error, term()} | forbidden.
 fetch(Type, OrgId, AuthzId, Granular) ->
     Path = acl_path(Type, AuthzId),
     Result = oc_chef_authz_http:request(Path, get, ?DEFAULT_HEADERS, [], superuser_id()),
@@ -311,7 +311,7 @@ convert_all_ids_to_names(OrgId, Record, Granular) ->
                                   <<"delete">>, <<"grant">>],
                                  OrgId, Record, Granular).
 
--spec convert_ids_to_names_in_part(list(binary()), binary(), ejson_term(), granular|undefined) -> ejson_term().
+-spec convert_ids_to_names_in_part(list(binary()), binary(), ejson_term(), granular | undefined) -> ejson_term().
 convert_ids_to_names_in_part([], _OrgId, Record, _Granular) ->
     Record;
 convert_ids_to_names_in_part([Part | Rest], OrgId, Record, Granular) ->
@@ -368,7 +368,7 @@ acl_path(Type, AuthzId) ->
 
 -spec acl_path(chef_type() | chef_authz_type(), id(), string() ) -> string().
 acl_path(Type, AuthzId, Part) ->
-    acl_path(Type,AuthzId) ++ "/" ++ Part.
+    acl_path(Type, AuthzId) ++ "/" ++ Part.
 
 -spec acl_auth_path(chef_type() | chef_authz_type(), id(), binary() ) -> string().
 acl_auth_path(Type, AuthzId, RequestorId) ->

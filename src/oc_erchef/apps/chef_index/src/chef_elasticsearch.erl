@@ -125,7 +125,7 @@ query_body(#chef_solr_query{
         {<<"size">>, Rows},
         {<<"sort">>, [{[{<<"X_CHEF_id_CHEF_X">>, {[{<<"order">>, <<"asc">>}]}}]}]},
         {<<"query">>, {[
-            {<<"bool">>,{[
+            {<<"bool">>, {[
                 {<<"must">>, {[query_string_query_ejson(Query)]}},
                 {<<"filter">>, {[query_string_query_ejson(FilterQuery)]}}
             ]}}]}
@@ -142,9 +142,9 @@ query_string_query_ejson(QueryString) ->
     QueryEjson1 =
     case envy:get(chef_index, solr_elasticsearch_major_version, 2, non_neg_integer) of
         7 -> QueryEjson;
-        _ -> [{<<"lowercase_expanded_terms">>, false}| QueryEjson]
+        _ -> [{<<"lowercase_expanded_terms">>, false} | QueryEjson]
     end,
-    {<<"query_string">>,{QueryEjson1}}.
+    {<<"query_string">>, {QueryEjson1}}.
 
 %% A note on deleting
 %%

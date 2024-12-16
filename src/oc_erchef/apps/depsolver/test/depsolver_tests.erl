@@ -82,4 +82,4 @@ filter_versions() ->
 
     Ret = depsolver:filter_packages(Packages,
                                     [{"foo", "1.0.0", '~~~~'} | Cons]),
-    ?assertMatch({error, {invalid_constraints, [{<<"foo">>,{{1,0,0},{[],[]}},'~~~~'}]}}, Ret).
+    ?assertMatch({error, {invalid_constraints, [{<<"foo">>, {{1,0,0}, {[],[]}},'~~~~'}]}}, Ret).
