@@ -2023,6 +2023,11 @@ This configuration file has the following settings for `opscode-erchef`:
 
     Default value: `127.0.0.1`.
 
+`opscode_erchef['track_total_hits']`
+
+:   Whether to return how many documents matched the query.
+
+    Default value: `false`.
 
 ### opscode-expander
 
