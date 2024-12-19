@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.10.22 -->
-## [15.10.22](https://github.com/chef/chef-server/tree/15.10.22) (2024-12-16)
+<!-- latest_release 15.10.23 -->
+## [15.10.23](https://github.com/chef/chef-server/tree/15.10.23) (2024-12-19)
 
 #### Merged Pull Requests
-- Space changes to trigger version bump. [#3965](https://github.com/chef/chef-server/pull/3965) ([sreepuramsudheer](https://github.com/sreepuramsudheer))
+- Pinning meck to 0.9.2. [#3966](https://github.com/chef/chef-server/pull/3966) ([sreepuramsudheer](https://github.com/sreepuramsudheer))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.10.21 -->
 ### Changes since 15.10.21 release
 
 #### Merged Pull Requests
+- Pinning meck to 0.9.2. [#3966](https://github.com/chef/chef-server/pull/3966) ([sreepuramsudheer](https://github.com/sreepuramsudheer)) <!-- 15.10.23 -->
 - Space changes to trigger version bump. [#3965](https://github.com/chef/chef-server/pull/3965) ([sreepuramsudheer](https://github.com/sreepuramsudheer)) <!-- 15.10.22 -->
 <!-- release_rollup -->
 
