@@ -189,6 +189,7 @@
         {solr_elasticsearch_major_version, <%= @solr_elasticsearch_major_version %>},
         {search_auth_username, "<%= node['private_chef']['opscode-erchef']['search_auth_username'] %>"},
         {search_auth_password, "<%= @helper.search_auth_password() %>"},
+        {track_total_hits, <%= node['private_chef']['opscode-erchef']['track_total_hits'] -%>},
         {solr_service, [
             {root_url, "<%= @helper.search_engine_url() %>"},
             {timeout, <%= @solr_timeout %>},
