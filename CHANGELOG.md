@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.10.23 -->
-## [15.10.23](https://github.com/chef/chef-server/tree/15.10.23) (2024-12-19)
+<!-- latest_release 15.10.24 -->
+## [15.10.24](https://github.com/chef/chef-server/tree/15.10.24) (2024-12-20)
 
 #### Merged Pull Requests
-- Pinning meck to 0.9.2. [#3966](https://github.com/chef/chef-server/pull/3966) ([sreepuramsudheer](https://github.com/sreepuramsudheer))
+- postgresql 13.14 -&gt; 13.18 (CVE-2024-7348) [#3952](https://github.com/chef/chef-server/pull/3952) ([lbakerchef](https://github.com/lbakerchef))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.10.21 -->
 ### Changes since 15.10.21 release
 
 #### Merged Pull Requests
+- postgresql 13.14 -&gt; 13.18 (CVE-2024-7348) [#3952](https://github.com/chef/chef-server/pull/3952) ([lbakerchef](https://github.com/lbakerchef)) <!-- 15.10.24 -->
 - Pinning meck to 0.9.2. [#3966](https://github.com/chef/chef-server/pull/3966) ([sreepuramsudheer](https://github.com/sreepuramsudheer)) <!-- 15.10.23 -->
 - Space changes to trigger version bump. [#3965](https://github.com/chef/chef-server/pull/3965) ([sreepuramsudheer](https://github.com/sreepuramsudheer)) <!-- 15.10.22 -->
 <!-- release_rollup -->
