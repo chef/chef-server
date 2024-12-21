@@ -8,7 +8,7 @@ setup_schema:
 	@echo "Dropping and recreating database '$(TEST_DB)'"
 	@psql --dbname template1 --command 'DROP DATABASE IF EXISTS $(TEST_DB)'
 	@createdb $(TEST_DB)
-	@sqitch --engine pg --db-name $(TEST_DB) deploy
+	@sqitch --db-name $(TEST_DB) deploy
 
 setup_tests:
 	@psql --dbname $(TEST_DB) --command 'CREATE EXTENSION pgtap;'

@@ -10,7 +10,7 @@ override :ruby, version: "3.0.1"
 override :perl, version: "5.34.0"
 override :redis, version: "5.0.14"
 override :runit, version: "2.1.1" #standalone upgrade is failing, Needs to be reverted to 2.1.2 after fixing the umbrella
-override :sqitch, version: "0.973"
+# override :sqitch, version: "1.4.0"
 
 override :logrotate, version: "3.19.0"
 
