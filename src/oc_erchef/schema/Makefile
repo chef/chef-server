@@ -16,7 +16,7 @@ all : setup_schema setup_tests test
 setup_schema:
 	$(MAKE) -C baseline setup_schema
 	@echo "Deploying Enterprise Chef Server Schema on top..."
-	@sqitch --engine pg --db-name $(TEST_DB) deploy --verify
+	@sqitch --db-name $(TEST_DB) deploy --verify
 
 # Load up all testing functions.  pgTAP libraries and open source
 # schema test functions are loaded by the open source makefile target
