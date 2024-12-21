@@ -15,7 +15,7 @@
 #
 
 name "opensearch"
-default_version "1.3.19"
+default_version "1.3.20"
 
 dependency "server-open-jre"
 
@@ -68,6 +68,11 @@ end
 version "1.3.19" do
   source url: "https://artifacts.opensearch.org/releases/bundle/opensearch/#{version}/opensearch-#{version}-linux-x64.tar.gz",
          sha256: "af901097211df4c3d2ef75f0c3699452d82a87adac60c240520a3ca03f969595"
+end
+
+version "1.3.20" do
+  source url: "https://artifacts.opensearch.org/releases/bundle/opensearch/#{version}/opensearch-#{version}-linux-x64.tar.gz",
+         sha256: "a786fe52b4d25db85cc49f34df6118f19c434b25935f28bd98c0f874ae77ccc3"
 end
 
 target_path = "#{install_dir}/embedded/opensearch"
