@@ -8,7 +8,7 @@ pkg_deps=(
   core/coreutils
   core/curl
   core/gcc-libs
-  core/sqitch_pg
+  core/sqitch
 )
 pkg_build_deps=(core/make core/git core/gcc)
 pkg_bin_dirs=(bin)
