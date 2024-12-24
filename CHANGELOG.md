@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.10.24 -->
-## [15.10.24](https://github.com/chef/chef-server/tree/15.10.24) (2024-12-20)
+<!-- latest_release 15.10.25 -->
+## [15.10.25](https://github.com/chef/chef-server/tree/15.10.25) (2024-12-24)
 
 #### Merged Pull Requests
-- postgresql 13.14 -&gt; 13.18 (CVE-2024-7348) [#3952](https://github.com/chef/chef-server/pull/3952) ([lbakerchef](https://github.com/lbakerchef))
+- Knife search issue: when search entries are more than 10K [#3951](https://github.com/chef/chef-server/pull/3951) ([talktovikas](https://github.com/talktovikas))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.10.21 -->
 ### Changes since 15.10.21 release
 
 #### Merged Pull Requests
+- Knife search issue: when search entries are more than 10K [#3951](https://github.com/chef/chef-server/pull/3951) ([talktovikas](https://github.com/talktovikas)) <!-- 15.10.25 -->
 - postgresql 13.14 -&gt; 13.18 (CVE-2024-7348) [#3952](https://github.com/chef/chef-server/pull/3952) ([lbakerchef](https://github.com/lbakerchef)) <!-- 15.10.24 -->
 - Pinning meck to 0.9.2. [#3966](https://github.com/chef/chef-server/pull/3966) ([sreepuramsudheer](https://github.com/sreepuramsudheer)) <!-- 15.10.23 -->
 - Space changes to trigger version bump. [#3965](https://github.com/chef/chef-server/pull/3965) ([sreepuramsudheer](https://github.com/sreepuramsudheer)) <!-- 15.10.22 -->
