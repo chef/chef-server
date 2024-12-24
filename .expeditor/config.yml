@@ -129,3 +129,4 @@ artifact_channels:
   - unstable
   - current
   - stable
+  - LTS-2024

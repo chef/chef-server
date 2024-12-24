@@ -47,5 +47,5 @@ generate_id() ->
     %% it reset on node restarts -- thus we add os:timestamp/0
     %% We can't use os:timestamp/0 only, since it's not guaranteed to be unique
     %% in multiple invocations.
-    Id = term_to_binary({node(), os:timestamp(), erlang:unique_integer([positive])}),
+    Id = term_to_binary({node(), os:timestamp(), erlang:unique_integer([positive])}, [{minor_version, 1}]),
     bksw_format:to_base64(Id).
