@@ -4,6 +4,7 @@ pkg_maintainer="The Chef Server Maintainers <support@chef.io>"
 pkg_license=('Apache-2.0')
 pkg_deps=(
   core/sqitch
+  core/postgresql17-client
   core/curl
   core/node
   core/ruby3_4
