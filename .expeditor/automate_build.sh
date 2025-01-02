@@ -11,6 +11,9 @@ export HAB_STUDIO_SECRET_HAB_FEAT_IGNORE_LOCAL=false
 export HAB_FEAT_IGNORE_LOCAL=false
 export HAB_STUDIO_HOST_ARCH=x86_64-linux
 export HAB_FEAT_OFFLINE_INSTALL=true
+export HAB_BLDR_CHANNEL: "LTS-2024"
+export HAB_STUDIO_SECRET_HAB_FALLBACK_CHANNEL: "LTS-2024"
+export HAB_FALLBACK_CHANNEL: "LTS-2024"
 
 curl https://raw.githubusercontent.com/habitat-sh/habitat/main/components/hab/install.sh | sudo bash
 
@@ -75,7 +78,7 @@ HAB_FEAT_OFFLINE_INSTALL=true HAB_FEAT_IGNORE_LOCAL=false HAB_ORIGIN=chef HAB_CA
 .expeditor/create-manifest.rb
 mv manifest.json results/build.json
 
-HAB_PKG_CHANNEL=unstable NO_PIN_HAB=true .expeditor/create-manifest.rb
+HAB_PKG_CHANNEL=LTS-2024 NO_PIN_HAB=true .expeditor/create-manifest.rb
 mv manifest.json results/build-habdev.json
 
 echo "after build" `ls -l results`
