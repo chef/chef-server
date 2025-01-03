@@ -68,8 +68,7 @@ module Partybus
       def run_sqitch(target, service, opts = {})
         options = default_opts_for_service(service).merge(opts)
         command = <<-EOM.gsub(/\s+/," ").strip!
-          sqitch --engine pg
-            --db-name #{options[:database]}
+          sqitch --db-name #{options[:database]}
             --db-host #{Partybus.config.postgres['vip']}
             --db-port #{Partybus.config.postgres['port']}
             --db-user #{options[:username]}
