@@ -2029,6 +2029,12 @@ This configuration file has the following settings for `opscode-erchef`:
 
     Default value: `false`.
 
+{{< warning >}}
+
+when `true`,`opscode_erchef['track_total_hits']` can increase query latency and memory usage by calculating the exact total of matching documents, which may impact performance.
+
+{{< /warning >}}
+
 ### opscode-expander
 
 {{< readfile file="content/server/reusable/md/server_services_expander.md" >}}
