@@ -2025,7 +2025,7 @@ This configuration file has the following settings for `opscode-erchef`:
 
 `opscode_erchef['track_total_hits']`
 
-:   Whether to return how many documents matched the query.
+:   If true, it will return the total number of matching documents. If false, the count is capped at 10,000 documents.
 
     Default value: `false`.
 
