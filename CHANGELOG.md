@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.10.27 -->
-## [15.10.27](https://github.com/chef/chef-server/tree/15.10.27) (2025-01-02)
+<!-- latest_release 15.10.28 -->
+## [15.10.28](https://github.com/chef/chef-server/tree/15.10.28) (2025-01-07)
 
 #### Merged Pull Requests
-- Updated opensearch version to 1.3.20 . [#3972](https://github.com/chef/chef-server/pull/3972) ([sreepuramsudheer](https://github.com/sreepuramsudheer))
+- Docs | Added warning along with track_total_hits [#3973](https://github.com/chef/chef-server/pull/3973) ([talktovikas](https://github.com/talktovikas))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.10.21 -->
 ### Changes since 15.10.21 release
 
 #### Merged Pull Requests
+- Docs | Added warning along with track_total_hits [#3973](https://github.com/chef/chef-server/pull/3973) ([talktovikas](https://github.com/talktovikas)) <!-- 15.10.28 -->
 - Updated opensearch version to 1.3.20 . [#3972](https://github.com/chef/chef-server/pull/3972) ([sreepuramsudheer](https://github.com/sreepuramsudheer)) <!-- 15.10.27 -->
 - update license_scout version [#3971](https://github.com/chef/chef-server/pull/3971) ([muthuja](https://github.com/muthuja)) <!-- 15.10.26 -->
 - Knife search issue: when search entries are more than 10K [#3951](https://github.com/chef/chef-server/pull/3951) ([talktovikas](https://github.com/talktovikas)) <!-- 15.10.25 -->
