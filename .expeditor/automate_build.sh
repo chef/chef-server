@@ -17,10 +17,10 @@ export HAB_FALLBACK_CHANNEL="LTS-2024"
 
 curl https://raw.githubusercontent.com/habitat-sh/habitat/main/components/hab/install.sh | sudo bash
 
-sudo -E hab pkg install core/ruby
+sudo -E hab pkg install core/ruby3_4
 export PATH
-PATH="$(hab pkg path core/ruby)/bin:$PATH"
-sudo -E "$(hab pkg path core/ruby)"/bin/gem install toml
+PATH="$(hab pkg path core/ruby3_4)/bin:$PATH"
+sudo -E "$(hab pkg path core/ruby3_4)"/bin/gem install toml
 
 export JOB_TEMP_ROOT
 JOB_TEMP_ROOT=$(mktemp -d /tmp/job-root-XXXXXX)
@@ -40,7 +40,7 @@ done
 ./.expeditor/replace.sh "nginx" "src"
 
 echo "generating package for nginx"
-openresty_hart=$(ls -1t results/chef-openresty*.hart | head -1)
+openresty_hart=$(ls -1t results/*openresty*.hart | head -1)
 HAB_FEAT_OFFLINE_INSTALL=true HAB_FEAT_IGNORE_LOCAL=false HAB_ORIGIN=chef HAB_CACHE_KEY_PATH="$JOB_TEMP_ROOT/keys" DO_CHECK=true HAB_BLDR_CHANNEL=dev hab studio run -D "set -e; hab pkg install $openresty_hart; hab pkg build src/nginx"
 
 git clone https://github.com/chef/automate.git
