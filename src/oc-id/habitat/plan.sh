@@ -4,10 +4,10 @@ pkg_maintainer="The Chef Server Maintainers <support@chef.io>"
 pkg_license=('Apache-2.0')
 pkg_deps=(
   core/sqitch
-  core/postgresql-client
+  core/postgresql17-client
   core/curl
-  core/node14
-  core/ruby30
+  core/node
+  core/ruby3_4
   core/rsync
   core/sed
   core/libffi
@@ -103,7 +103,10 @@ do_install() {
     --with-xml2-lib=$(pkg_path_for core/libxml2)/lib \
     --with-xslt-include=$(pkg_path_for core/libxslt)/include/libxslt \
     --with-xslt-lib=$(pkg_path_for core/libxslt)/lib
-  bundle install --path "${HOME}/vendor/bundle" --binstubs="${HOME}/bin" --shebang ruby --deployment
+  bundle config set path "${HOME}/vendor/bundle"
+  bundle config set deployment 'true'
+  bundle config set --local shebang 'ruby'
+  bundle install --binstubs="${HOME}/bin" 
   # fix tzdata location
   echo "Adding core/tzdata zoneinfo search path to tzinfo gem"
   grep -l DEFAULT_SEARCH_PATH $HOME/vendor/bundle/ruby/*/gems/tzinfo*/lib/tzinfo/zoneinfo_data_source.rb | while read -r f; do
