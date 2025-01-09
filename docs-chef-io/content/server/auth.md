@@ -81,6 +81,12 @@ validation key files and optionally a [config.rb]({{< relref "workstation/config
 
 #### From Chef Manage
 
+{{< warning >}}
+
+{{< readfile file="content/reusable/md/EOL_manage.md" >}}
+
+{{< /warning >}}
+
 Chef Manage, which runs Chef Infra Server's user interface, uses the Chef Infra Server API to perform most operations.
 This ensures that authentication requests to Chef Infra Server are authorized.
 This authentication process is handled automatically and is not something that users need to manage.
