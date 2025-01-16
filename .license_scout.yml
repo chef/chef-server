@@ -205,7 +205,7 @@ exceptions:
       reason: Exception made by Chef Legal
     - name: core/rsync
       reason: Exception made by Chef Legal
-    - name: core/ruby
+    - name:  core/ruby31/3.1.6/20240912144513
       reason: Exception made by Chef Legal
     - name: core/sed
       reason: Exception made by Chef Legal
