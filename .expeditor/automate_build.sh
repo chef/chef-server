@@ -11,14 +11,14 @@ export HAB_STUDIO_SECRET_HAB_FEAT_IGNORE_LOCAL=false
 export HAB_FEAT_IGNORE_LOCAL=false
 export HAB_STUDIO_HOST_ARCH=x86_64-linux
 export HAB_FEAT_OFFLINE_INSTALL=true
-export HAB_BLDR_CHANNEL: "LTS-2024"
+export HAB_BLDR_CHANNEL="LTS-2024"
 
 curl https://raw.githubusercontent.com/habitat-sh/habitat/main/components/hab/install.sh | sudo bash
 
-sudo -E hab pkg install  core/ruby31/3.1.6/20240912144513
+sudo -E hab pkg install  core/ruby3_4
 export PATH
-PATH="$(hab pkg path core/ruby31)/bin:$PATH"
-sudo -E "$(hab pkg path core/ruby31)"/bin/gem install toml
+PATH="$(hab pkg path core/ruby3_4)/bin:$PATH"
+sudo -E "$(hab pkg path core/ruby3_4)"/bin/gem install toml
 
 export JOB_TEMP_ROOT
 JOB_TEMP_ROOT=$(mktemp -d /tmp/job-root-XXXXXX)
