@@ -12,6 +12,8 @@ export HAB_FEAT_IGNORE_LOCAL=false
 export HAB_STUDIO_HOST_ARCH=x86_64-linux
 export HAB_FEAT_OFFLINE_INSTALL=true
 export HAB_BLDR_CHANNEL="LTS-2024"
+export HAB_STUDIO_SECRET_HAB_FALLBACK_CHANNEL="LTS-2024"
+export HAB_FALLBACK_CHANNEL="LTS-2024"
 
 curl https://raw.githubusercontent.com/habitat-sh/habitat/main/components/hab/install.sh | sudo bash
 
@@ -43,10 +45,11 @@ HAB_FEAT_OFFLINE_INSTALL=true HAB_FEAT_IGNORE_LOCAL=false HAB_ORIGIN=chef HAB_CA
 
 git clone https://github.com/chef/automate.git
 cd automate
-if [ "${AUTOMATE_BRANCH}" != "" ]
-then
-  git checkout "${AUTOMATE_BRANCH}"
-fi
+git checkout dave/LTS-channel # this is the branch that has the changes for LTS channel
+# if [ "${AUTOMATE_BRANCH}" != "" ]
+# then
+#   git checkout "${AUTOMATE_BRANCH}"
+# fi
 
 RESOLVED_RESULTS_DIR=$(realpath results/)
 export DO_CHECK=true
