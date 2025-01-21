@@ -3,9 +3,9 @@ pkg_origin=chef
 pkg_maintainer="The Chef Server Maintainers <support@chef.io>"
 pkg_license=('Apache-2.0')
 pkg_deps=(
-  core/curl
-  core/libossp-uuid
-  "${HAB_ORIGIN:-chef}/openresty-noroot"
+  core/curl/8.7.1/20241017131032
+  core/libossp-uuid/1.6.2/20241017142439
+  "${HAB_ORIGIN:-chef}/openresty-noroot/1.27.1.1/20250122105551"
 )
 pkg_build_deps=()
 pkg_exposes=(port ssl-port)
