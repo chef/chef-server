@@ -32,6 +32,9 @@ bundle_install_dirs=(
   chef-server-ctl
   oc-id
 )
+echo "+++ Using Ruby version: $(ruby -v)"
+echo "+++ Running License Scout"
+license_scout --only-show-failures
 
 for dir in "${bundle_install_dirs[@]}"; do
   echo "--- Installing gem dependencies for $dir"
