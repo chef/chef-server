@@ -862,16 +862,14 @@ The response will return something like the following:
 
 ### /users
 
-A user is an individual account that is created to allow access to the Chef Infra Server. For example:
-
-- A hosted Chef Infra Server account
-- The user that operates the workstation from which a Chef Infra Server will be managed
+A user is an individual account created to allow access to Chef Infra Server.
+For example, a user that operates the workstation or host that Chef Infra Server is managed from.
 
 The `/users` endpoint has the following methods: `GET` and `POST`.
 
 {{< warning >}}
 
-This endpoint may only be accessed by the `pivotal` user, which is created as part of the installation process for the Chef Infra Server. (See the "Query for Users and Orgs" example below for an example of how to access this endpoint with the `pivotal` user.)
+This endpoint may only be accessed by the `pivotal` user, which is created as part of the Chef Infra Server installation process. (See the "Query for Users and Orgs" example below for an example of how to access this endpoint with the `pivotal` user.)
 
 {{< /warning >}}
 
