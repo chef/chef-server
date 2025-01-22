@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.10.29 -->
-## [15.10.29](https://github.com/chef/chef-server/tree/15.10.29) (2025-01-22)
+<!-- latest_release 15.10.30 -->
+## [15.10.30](https://github.com/chef/chef-server/tree/15.10.30) (2025-01-22)
 
 #### Merged Pull Requests
-- Remove hosted chef from docs [#3956](https://github.com/chef/chef-server/pull/3956) ([IanMadd](https://github.com/IanMadd))
+- Remove duplicate heading [#3921](https://github.com/chef/chef-server/pull/3921) ([IanMadd](https://github.com/IanMadd))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.10.27 -->
 ### Changes since 15.10.27 release
 
 #### Merged Pull Requests
+- Remove duplicate heading [#3921](https://github.com/chef/chef-server/pull/3921) ([IanMadd](https://github.com/IanMadd)) <!-- 15.10.30 -->
 - Remove hosted chef from docs [#3956](https://github.com/chef/chef-server/pull/3956) ([IanMadd](https://github.com/IanMadd)) <!-- 15.10.29 -->
 - Docs | Added warning along with track_total_hits [#3973](https://github.com/chef/chef-server/pull/3973) ([talktovikas](https://github.com/talktovikas)) <!-- 15.10.28 -->
 <!-- release_rollup -->
