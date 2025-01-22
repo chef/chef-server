@@ -26,7 +26,7 @@ end
 def get_hab_deps_latest()
   ret = {}
   ["hab", "hab-sup", "hab-launcher"].each do |name|
-    d = get_latest("LTS-2024", "core", name)
+    d = get_latest("stable", "core", name)
     ret[name] = "#{d["origin"]}/#{d["name"]}/#{d["version"]}/#{d["release"]}"
   end
   ret
@@ -78,7 +78,7 @@ pkg_origin = "chef"
   # that were part of the build group. Pulling from unstable means
   # that we might include packages that were built as part of an
   # ad-hoc run of the pipeline or a concurrently running build.
-  latest_release = get_latest("LTS-2024", pkg_origin, pkg_name)
+  latest_release = get_latest("stable", pkg_origin, pkg_name)
 
   pkg_version = latest_release["version"]
   pkg_release = latest_release["release"]
