@@ -78,7 +78,7 @@ pkg_origin = "chef"
   # that were part of the build group. Pulling from unstable means
   # that we might include packages that were built as part of an
   # ad-hoc run of the pipeline or a concurrently running build.
-  latest_release = get_latest("stable", pkg_origin, pkg_name)
+  latest_release = get_latest("unstable", pkg_origin, pkg_name)
 
   pkg_version = latest_release["version"]
   pkg_release = latest_release["release"]
