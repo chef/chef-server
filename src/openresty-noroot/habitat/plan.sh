@@ -10,16 +10,16 @@ pkg_filename=openresty-${pkg_version}.tar.gz
 pkg_upstream_url=http://openresty.org/
 pkg_shasum=79b071e27bdc143d5f401d0dbf504de4420070d867538c5edc2546d0351fd5c0
 pkg_deps=(
-  core/bzip2
-  core/coreutils
-  core/gcc-libs
-  core/glibc
+  core/bzip2/1.0.8/20241017112023
+  core/coreutils/9.4/20241017111752
+  core/gcc-libs/12.2.0/20241017104024
+  core/glibc/2.36/20241017094131
   core/libxml2
   core/libxslt
-  core/openssl
+  core/openssl/3.0.9/20241017121505
   core/pcre2
   core/perl
-  core/zlib
+  core/zlib/1.3.1/20241017112207
 )
 pkg_build_deps=(
   core/gcc

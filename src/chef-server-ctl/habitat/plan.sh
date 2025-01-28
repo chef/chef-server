@@ -3,17 +3,17 @@ pkg_origin=chef
 pkg_maintainer="The Chef Server Maintainers <support@chef.io>"
 pkg_license=('Apache-2.0')
 pkg_deps=(
-  core/coreutils
+  core/coreutils/9.4/20241017111752
   core/curl
   core/jq-static
   core/ruby3_4
-  core/libffi
+  core/libffi/3.4.4/20241017125515
   core/postgresql17-client
-  core/gcc-libs
-  core/glibc
+  core/gcc-libs/12.2.0/20241017104024
+  core/glibc/2.36/20241017094131
 )
 pkg_build_deps=(
-  core/glibc
+  core/glibc/2.36/20241017094131
   core/git
   core/diffutils
   core/patch
