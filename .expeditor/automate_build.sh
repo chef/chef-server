@@ -31,6 +31,7 @@ echo "--- :key: Generating fake origin key"
 hab license accept
 hab origin key generate
 export HAB_BLDR_CHANNEL=LTS-2024
+export HAB_REFRESH_CHANNEL=LTS-2024
 for pkg_name in `echo "bookshelf chef-server-ctl oc-id oc_bifrost oc_erchef openresty-noroot"`
 do
   echo "generating package for $pkg_name"
