@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.10.30 -->
-## [15.10.30](https://github.com/chef/chef-server/tree/15.10.30) (2025-01-22)
+<!-- latest_release 15.10.31 -->
+## [15.10.31](https://github.com/chef/chef-server/tree/15.10.31) (2025-01-30)
 
 #### Merged Pull Requests
-- Remove duplicate heading [#3921](https://github.com/chef/chef-server/pull/3921) ([IanMadd](https://github.com/IanMadd))
+- Bump rexml from 3.2.5 to 3.3.9 in /src/oc-id [#3932](https://github.com/chef/chef-server/pull/3932) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.10.27 -->
 ### Changes since 15.10.27 release
 
 #### Merged Pull Requests
+- Bump rexml from 3.2.5 to 3.3.9 in /src/oc-id [#3932](https://github.com/chef/chef-server/pull/3932) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.10.31 -->
 - Remove duplicate heading [#3921](https://github.com/chef/chef-server/pull/3921) ([IanMadd](https://github.com/IanMadd)) <!-- 15.10.30 -->
 - Remove hosted chef from docs [#3956](https://github.com/chef/chef-server/pull/3956) ([IanMadd](https://github.com/IanMadd)) <!-- 15.10.29 -->
 - Docs | Added warning along with track_total_hits [#3973](https://github.com/chef/chef-server/pull/3973) ([talktovikas](https://github.com/talktovikas)) <!-- 15.10.28 -->
