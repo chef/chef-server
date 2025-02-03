@@ -46,7 +46,7 @@ HAB_FEAT_OFFLINE_INSTALL=true HAB_FEAT_IGNORE_LOCAL=false HAB_ORIGIN=chef HAB_CA
 
 git clone https://github.com/chef/automate.git
 cd automate
-# git checkout vikas/LTS-pipeline
+git checkout vikas/LTS-pipeline
 # git checkout dave/LTS-channel # this is the branch that has the changes for LTS channel
 
 RESOLVED_RESULTS_DIR=$(realpath results/)
