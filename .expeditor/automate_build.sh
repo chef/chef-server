@@ -72,7 +72,7 @@ HAB_FEAT_OFFLINE_INSTALL=true HAB_FEAT_IGNORE_LOCAL=false HAB_ORIGIN=chef HAB_CA
 
 HAB_FEAT_OFFLINE_INSTALL=true HAB_FEAT_IGNORE_LOCAL=false HAB_ORIGIN=chef HAB_CACHE_KEY_PATH="$JOB_TEMP_ROOT/keys" DO_CHECK=true HAB_BLDR_CHANNEL=LTS-2024 HAB_REFRESH_CHANNEL=LTS-2024 hab studio run -D "set -e; hab pkg install $oc_id; export HAB_STUDIO_SECRET_HAB_FALLBACK_CHANNEL=dev; hab pkg build components/automate-cs-ocid"
 
-HAB_FEAT_OFFLINE_INSTALL=true HAB_FEAT_IGNORE_LOCAL=false HAB_ORIGIN=chef HAB_CACHE_KEY_PATH="$JOB_TEMP_ROOT/keys" DO_CHECK=true HAB_BLDR_CHANNEL=LTS-2024 HAB_REFRESH_CHANNEL=LTS-2024 hab studio run -D "set -e; hab pkg install $nginx; export HAB_STUDIO_SECRET_HAB_FALLBACK_CHANNEL=dev; export  hab pkg build components/automate-cs-nginx"
+HAB_FEAT_OFFLINE_INSTALL=true HAB_FEAT_IGNORE_LOCAL=false HAB_ORIGIN=chef HAB_CACHE_KEY_PATH="$JOB_TEMP_ROOT/keys" DO_CHECK=true HAB_BLDR_CHANNEL=LTS-2024 HAB_REFRESH_CHANNEL=LTS-2024 hab studio run -D "set -e; hab pkg install $nginx; export HAB_STUDIO_SECRET_HAB_FALLBACK_CHANNEL=dev; hab pkg build components/automate-cs-nginx"
 
 .expeditor/create-manifest.rb
 mv manifest.json results/build.json
