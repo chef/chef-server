@@ -184,7 +184,10 @@ steps:
       ALLOW_LOCAL_PACKAGES: true
       HAB_STUDIO_SUP: false
       HAB_NONINTERACTIVE: true
+      HAB_REFRESH_CHANNEL: LTS-2024
       GOPROXY: "https://proxy.golang.org,direct"
+      HAB_BLDR_CHANNEL: LTS-2024
+      HAB_FALLBACK_CHANNEL: "dev"
   expeditor:
     secrets:
         HAB_STUDIO_SECRET_GITHUB_TOKEN:
