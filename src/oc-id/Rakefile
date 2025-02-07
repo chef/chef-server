@@ -6,6 +6,32 @@ if ENV['CHEF_SECRETS_FD'].nil?
   ENV['CHEF_SECRETS_DATA'] ||= File.read(File.expand_path("../config/private-#{ChefUtils::Dist::Infra::SHORT}-secrets.json", __FILE__))
 end
 
+puts "Shravani- Rakefile loaded successfully."
+
+# Print the DATABASE_URL environment variable
+puts "DATABASE_URL: #{ENV['DATABASE_URL']}"
+
+def pg_superuser_id_from_env
+  fd = ENV['CHEF_SECRETS_FD']
+  if fd
+    f = IO.for_fd(fd.to_i)
+    secrets = JSON.parse(f.read())
+    secrets['userconfig']['pg_superuser_password']
+  else
+    raise "No PG secrets data found in environment"
+  end
+end
+
+  dbname = ENV['DATABASE_URL']
+  if dbname.match('redacted') != nil
+    userpass = pg_superuser_id_from_env()
+    dbname.dup.sub!('<redacted>',userpass)
+  else
+    dbname
+  end
+end
+
+
 require File.expand_path('../config/application', __FILE__)
 
 OcId::Application.load_tasks
