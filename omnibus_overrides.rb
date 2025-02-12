@@ -4,7 +4,7 @@
 #
 override :erlang, version: "24.3.2"
 override :'omnibus-ctl', version: "main"
-override :chef, version: "v18.6.1"
+override :chef, version: "v18.6.2"
 override :ohai, version: "v16.17.0"
 override :ruby, version: "3.1.6"
 override :perl, version: "5.34.0"
