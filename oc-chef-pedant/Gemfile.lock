@@ -245,7 +245,7 @@ GEM
     netrc (0.11.0)
     nori (2.7.0)
       bigdecimal
-    ohai (18.2.4)
+    ohai (18.1.18)
       chef-config (>= 14.12, < 19)
       chef-utils (>= 16.0, < 19)
       ffi (~> 1.9)
