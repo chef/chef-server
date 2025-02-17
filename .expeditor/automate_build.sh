@@ -7,8 +7,8 @@ export OCTOKIT_ACCESS_TOKEN
 export CHEF_LICENSE="accept-no-persist"
 export CI=true
 export HAB_ORIGIN_KEYS=chef
-export HAB_STUDIO_SECRET_HAB_FEAT_IGNORE_LOCAL=false
-export HAB_FEAT_IGNORE_LOCAL=false
+# export HAB_STUDIO_SECRET_HAB_FEAT_IGNORE_LOCAL=false
+# export HAB_FEAT_IGNORE_LOCAL=false
 export HAB_STUDIO_HOST_ARCH=x86_64-linux
 export HAB_FEAT_OFFLINE_INSTALL=true
 
