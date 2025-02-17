@@ -30,4 +30,4 @@ DEPENDENCIES
   rest-client (~> 2.1.0)
 
 BUNDLED WITH
-   2.2.19
+   2.3.7
