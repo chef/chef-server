@@ -38,7 +38,7 @@ done
 
 echo "generating package for nginx"
 openresty_hart=$(ls -1t results/chef-openresty*.hart | head -1)
-HAB_FEAT_OFFLINE_INSTALL=true HAB_ORIGIN=chef HAB_CACHE_KEY_PATH="$JOB_TEMP_ROOT/keys" DO_CHECK=true HAB_BLDR_CHANNEL=dev hab studio run -D "set -e; hab pkg install $openresty_hart; hab pkg build src/nginx"
+HAB_FEAT_OFFLINE_INSTALL=true HAB_FEAT_IGNORE_LOCAL=false HAB_ORIGIN=chef HAB_CACHE_KEY_PATH="$JOB_TEMP_ROOT/keys" DO_CHECK=true HAB_BLDR_CHANNEL=dev hab studio run -D "set -e; hab pkg install $openresty_hart; hab pkg build src/nginx"
 
 git clone https://github.com/chef/automate.git
 cd automate
@@ -70,7 +70,7 @@ HAB_FEAT_OFFLINE_INSTALL=true HAB_ORIGIN=chef HAB_CACHE_KEY_PATH="$JOB_TEMP_ROOT
 
 HAB_FEAT_OFFLINE_INSTALL=true HAB_ORIGIN=chef HAB_CACHE_KEY_PATH="$JOB_TEMP_ROOT/keys" DO_CHECK=true HAB_BLDR_CHANNEL=dev hab studio run -D "set -e; hab pkg install $oc_id; hab pkg build components/automate-cs-ocid"
 
-HAB_FEAT_OFFLINE_INSTALL=true HAB_ORIGIN=chef HAB_CACHE_KEY_PATH="$JOB_TEMP_ROOT/keys" DO_CHECK=true HAB_BLDR_CHANNEL=dev hab studio run -D "set -e; hab pkg install $nginx; hab pkg build components/automate-cs-nginx"
+HAB_STUDIO_SECRET_HAB_FEAT_IGNORE_LOCAL= HAB_FEAT_OFFLINE_INSTALL=true HAB_ORIGIN=chef HAB_CACHE_KEY_PATH="$JOB_TEMP_ROOT/keys" DO_CHECK=true HAB_BLDR_CHANNEL=dev hab studio run -D "set -e; hab pkg install $nginx; hab pkg build components/automate-cs-nginx"
 
 .expeditor/create-manifest.rb
 mv manifest.json results/build.json
