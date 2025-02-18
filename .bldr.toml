@@ -3,7 +3,7 @@ plan_path = "src/openresty-noroot"
 
 [oc_id]
 plan_path = "src/oc-id"
-export_targets = ["docker.io/habitat/default-studio-x86_64-linux:1.6.1041"]
+export_targets = ["docker"]
 
 [chef-server-nginx]
 plan_path = "src/nginx"
