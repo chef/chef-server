@@ -29,12 +29,11 @@ action :deploy do
   converge_by "Deploying schema from #{new_resource.name}" do
     execute "sqitch_deploy_#{new_resource.name}" do
       command <<-EOM.gsub(/\s+/, ' ').strip!
-        sqitch --engine pg
-               --db-name #{new_resource.database}
+        sqitch --db-name #{new_resource.database}
                --db-host #{new_resource.hostname}
                --db-port #{new_resource.port}
                --db-user #{new_resource.username}
-               --top-dir #{new_resource.name}
+               --chdir #{new_resource.name}
                deploy #{target} --verify
       EOM
       environment 'PERL5LIB' => "/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/embedded/lib", # force us to use omnibus perl

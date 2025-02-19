@@ -34,7 +34,7 @@ createdb $PG_ARGS $DB "oc_bifrost"
 psql $PG_ARGS --command 'CREATE EXTENSION IF NOT EXISTS "uuid-ossp"' $DB
 
 cd "{{pkg.path}}/schema/baseline"
-sqitch --quiet --engine pg deploy "db:pg://${USER}:${PASS}@${HOST}/$DB"
+sqitch --quiet deploy "db:pg://${USER}:${PASS}@${HOST}/$DB"
 
 cd "{{pkg.path}}/schema"
-sqitch --quiet --engine pg deploy "db:pg://${USER}:${PASS}@${HOST}/$DB"
+sqitch --quiet deploy "db:pg://${USER}:${PASS}@${HOST}/$DB"
