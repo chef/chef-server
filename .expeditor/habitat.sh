@@ -6,7 +6,7 @@
 export CHEF_SERVER_SRC='/workdir/src'
 export ORIGIN=chef
 export HAB_LICENSE=accept-no-persist
-pkg_name="chef-server"
+name="chef-server"
 # export PACKAGE_NAME=$1
 
 
