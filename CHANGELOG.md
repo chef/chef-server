@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.10.32 -->
-## [15.10.32](https://github.com/chef/chef-server/tree/15.10.32) (2025-01-30)
+<!-- latest_release 15.10.33 -->
+## [15.10.33](https://github.com/chef/chef-server/tree/15.10.33) (2025-02-20)
 
 #### Merged Pull Requests
-- Bump rexml from 3.2.6 to 3.3.9 in /src/chef-server-ctl [#3933](https://github.com/chef/chef-server/pull/3933) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Fix for TLS verify_ca verify mode while connecting psql [#3974](https://github.com/chef/chef-server/pull/3974) ([jashaik](https://github.com/jashaik))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.10.27 -->
 ### Changes since 15.10.27 release
 
 #### Merged Pull Requests
+- Fix for TLS verify_ca verify mode while connecting psql [#3974](https://github.com/chef/chef-server/pull/3974) ([jashaik](https://github.com/jashaik)) <!-- 15.10.33 -->
 - Bump rexml from 3.2.6 to 3.3.9 in /src/chef-server-ctl [#3933](https://github.com/chef/chef-server/pull/3933) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.10.32 -->
 - Bump rexml from 3.2.5 to 3.3.9 in /src/oc-id [#3932](https://github.com/chef/chef-server/pull/3932) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.10.31 -->
 - Remove duplicate heading [#3921](https://github.com/chef/chef-server/pull/3921) ([IanMadd](https://github.com/IanMadd)) <!-- 15.10.30 -->
