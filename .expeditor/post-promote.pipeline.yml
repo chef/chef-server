@@ -12,3 +12,5 @@ steps:
           field: token
       accounts:
         - aws/chef-cd
+      executor:
+        docker:
