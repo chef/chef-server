@@ -22,7 +22,7 @@ hab origin key generate
 
 # cd /workdir/src/bookshelf
 echo "generating package for $PACKAGE_NAME"
-hab studio build "src/$PACKAGE_NAME" -D
+hab pkg build "src/$PACKAGE_NAME"
 echo "which pushd " $(which pushd)
 
 pushd results
