@@ -1,25 +1,23 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.10.33 -->
-## [15.10.33](https://github.com/chef/chef-server/tree/15.10.33) (2025-02-20)
-
-#### Merged Pull Requests
-- Fix for TLS verify_ca verify mode while connecting psql [#3974](https://github.com/chef/chef-server/pull/3974) ([jashaik](https://github.com/jashaik))
+<!-- latest_release -->
 <!-- latest_release -->
 
-<!-- release_rollup since=15.10.27 -->
-### Changes since 15.10.27 release
-
-#### Merged Pull Requests
-- Fix for TLS verify_ca verify mode while connecting psql [#3974](https://github.com/chef/chef-server/pull/3974) ([jashaik](https://github.com/jashaik)) <!-- 15.10.33 -->
-- Bump rexml from 3.2.6 to 3.3.9 in /src/chef-server-ctl [#3933](https://github.com/chef/chef-server/pull/3933) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.10.32 -->
-- Bump rexml from 3.2.5 to 3.3.9 in /src/oc-id [#3932](https://github.com/chef/chef-server/pull/3932) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.10.31 -->
-- Remove duplicate heading [#3921](https://github.com/chef/chef-server/pull/3921) ([IanMadd](https://github.com/IanMadd)) <!-- 15.10.30 -->
-- Remove hosted chef from docs [#3956](https://github.com/chef/chef-server/pull/3956) ([IanMadd](https://github.com/IanMadd)) <!-- 15.10.29 -->
-- Docs | Added warning along with track_total_hits [#3973](https://github.com/chef/chef-server/pull/3973) ([talktovikas](https://github.com/talktovikas)) <!-- 15.10.28 -->
+<!-- release_rollup -->
 <!-- release_rollup -->
 
 <!-- latest_stable_release -->
+## [15.10.33](https://github.com/chef/chef-server/tree/15.10.33) (2025-03-03)
+
+#### Merged Pull Requests
+- Docs | Added warning along with track_total_hits [#3973](https://github.com/chef/chef-server/pull/3973) ([talktovikas](https://github.com/talktovikas))
+- Remove hosted chef from docs [#3956](https://github.com/chef/chef-server/pull/3956) ([IanMadd](https://github.com/IanMadd))
+- Remove duplicate heading [#3921](https://github.com/chef/chef-server/pull/3921) ([IanMadd](https://github.com/IanMadd))
+- Bump rexml from 3.2.5 to 3.3.9 in /src/oc-id [#3932](https://github.com/chef/chef-server/pull/3932) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump rexml from 3.2.6 to 3.3.9 in /src/chef-server-ctl [#3933](https://github.com/chef/chef-server/pull/3933) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Fix for TLS verify_ca verify mode while connecting psql [#3974](https://github.com/chef/chef-server/pull/3974) ([jashaik](https://github.com/jashaik))
+<!-- latest_stable_release -->
+
 ## [15.10.27](https://github.com/chef/chef-server/tree/15.10.27) (2025-01-09)
 
 #### Merged Pull Requests
@@ -29,7 +27,6 @@
 - Knife search issue: when search entries are more than 10K [#3951](https://github.com/chef/chef-server/pull/3951) ([talktovikas](https://github.com/talktovikas))
 - update license_scout version [#3971](https://github.com/chef/chef-server/pull/3971) ([muthuja](https://github.com/muthuja))
 - Updated opensearch version to 1.3.20 . [#3972](https://github.com/chef/chef-server/pull/3972) ([sreepuramsudheer](https://github.com/sreepuramsudheer))
-<!-- latest_stable_release -->
 
 ## [15.10.21](https://github.com/chef/chef-server/tree/15.10.21) (2024-12-04)
 
