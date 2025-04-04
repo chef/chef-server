@@ -221,4 +221,9 @@ exceptions:
       reason: Exception made by Chef Legal
     - name: core/libunistring
       reason: Exception made by Chef Legal
+    - name: core/libmpc
+      reason: Exception made by Chef Legal
+    - name: core/mpfr 
+      reason: Exception made by Chef Legal
+      
 
