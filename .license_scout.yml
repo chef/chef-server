@@ -215,4 +215,15 @@ exceptions:
       reason: Exception made by Chef Legal
     - name: core/xz
       reason: Exception made by Chef Legal
+    - name: core/libiconv
+      reason: Exception made by Chef Legal
+    - name: core/libidn2
+      reason: Exception made by Chef Legal
+    - name: core/libunistring
+      reason: Exception made by Chef Legal
+    - name: core/libmpc
+      reason: Exception made by Chef Legal
+    - name: core/mpfr 
+      reason: Exception made by Chef Legal
+      
 
