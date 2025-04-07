@@ -14,7 +14,11 @@ aliases = ["/install_server_tiered.html", "/install_server_tiered/"]
     weight = 50
 +++
 
-{{< note >}} The tiered configuration in Chef Infra Server is now deprecated. {{< /note >}}
+{{< note >}}
+
+The Chef Infra Server tiered configuration is deprecated.
+
+{{< /note >}}
 
 This topic describes how to set up the Chef Infra Server with a single
 back end and multiple load-balanced frontend servers.
