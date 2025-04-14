@@ -14,6 +14,16 @@ aliases = ["/install_server_tiered.html", "/install_server_tiered/"]
     weight = 50
 +++
 
+{{< note >}}
+
+The Chef Infra Server tiered configuration is deprecated and no longer under active development.
+
+For guidance on migrating to Chef Automate High Availability (HA), please contact your Chef account representative. Additional information is available on the [Chef Automate HA](https://docs.chef.io/automate/ha/) page.
+
+Please note that this document is no longer being maintained.
+
+{{< /note >}}
+
 This topic describes how to set up the Chef Infra Server with a single
 back end and multiple load-balanced frontend servers.
 
