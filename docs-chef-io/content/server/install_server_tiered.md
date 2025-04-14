@@ -16,7 +16,11 @@ aliases = ["/install_server_tiered.html", "/install_server_tiered/"]
 
 {{< note >}}
 
-The Chef Infra Server tiered configuration is deprecated.
+The Chef Infra Server tiered configuration is deprecated and no longer under active development.
+
+For guidance on migrating to Chef Automate High Availability (HA), please contact your Chef account representative. Additional information is available on the [Chef Automate HA](https://docs.chef.io/automate/ha/) page.
+
+Please note that this document is no longer being maintained.
 
 {{< /note >}}
 

@@ -146,12 +146,3 @@ high availability. The **Backend Cluster** setup is strongly recommended
 for new installations:
 
 -   [High Availability using Backend Cluster]({{< relref "install_server_ha" >}})
-
-## Tiered (Single Backend)
-
-The following link describes how to configure the Chef Infra Server with
-a single backend machine and multiple frontend machines. Note that this
-process has been deprecated in favor of a [Backend
-Cluster]({{< relref "install_server_ha" >}}) setup:
-
--   [Tiered Installation]({{< relref "install_server_tiered" >}})
