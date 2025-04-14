@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.10.34 -->
-## [15.10.34](https://github.com/chef/chef-server/tree/15.10.34) (2025-04-04)
+<!-- latest_release 15.10.35 -->
+## [15.10.35](https://github.com/chef/chef-server/tree/15.10.35) (2025-04-14)
 
 #### Merged Pull Requests
-- Upgrade actionmailer to 7.0.8.5 to address  CVE-2024-47889 in oc-id [#4001](https://github.com/chef/chef-server/pull/4001) ([RoyShravani](https://github.com/RoyShravani))
+- Deprecation Note [#4005](https://github.com/chef/chef-server/pull/4005) ([dishanktiwari2501](https://github.com/dishanktiwari2501))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.10.33 -->
 ### Changes since 15.10.33 release
 
 #### Merged Pull Requests
+- Deprecation Note [#4005](https://github.com/chef/chef-server/pull/4005) ([dishanktiwari2501](https://github.com/dishanktiwari2501)) <!-- 15.10.35 -->
 - Upgrade actionmailer to 7.0.8.5 to address  CVE-2024-47889 in oc-id [#4001](https://github.com/chef/chef-server/pull/4001) ([RoyShravani](https://github.com/RoyShravani)) <!-- 15.10.34 -->
 <!-- release_rollup -->
 
