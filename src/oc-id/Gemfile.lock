@@ -343,7 +343,7 @@ GEM
       net-protocol
     net-ssh (6.1.0)
     nio4r (2.5.9)
-    nokogiri (1.15.6)
+    nokogiri (1.18.8)
       mini_portile2 (~> 2.8.2)
       racc (~> 1.4)
     nori (2.6.0)
@@ -614,7 +614,7 @@ DEPENDENCIES
   jwt
   mailcatcher
   mixlib-authentication (>= 2.1, < 4)
-  nokogiri (= 1.15.6)
+  nokogiri (= 1.18.8)
   omniauth-chef (~> 0.4)
   pg (>= 0.18, < 2.0)
   pry-byebug
