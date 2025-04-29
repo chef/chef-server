@@ -16,7 +16,7 @@
 
 name "postgresql13"
 
-default_version "13.18"
+default_version "17.2"
 
 license "PostgreSQL"
 license_file "COPYRIGHT"
@@ -30,6 +30,7 @@ dependency "libossp-uuid"
 dependency "config_guess"
 
 source url: "https://ftp.postgresql.org/pub/source/v#{version}/postgresql-#{version}.tar.bz2"
+version("17.2") { source sha256: "82ef27c0af3751695d7f64e2d963583005fbb6a0c3df63d0e4b42211d7021164" }
 version("13.18") { source sha256: "ceea92abee2a8c19408d278b68de6a78b6bd3dbb4fa2d653fa7ca745d666aab1" }
 version("13.14") { source sha256: "b8df078551898960bd500dc5d38a177e9905376df81fe7f2b660a1407fa6a5ed" }
 version("13.5") { source sha256: "9b81067a55edbaabc418aacef457dd8477642827499560b00615a6ea6c13f6b3" }
@@ -48,11 +49,12 @@ build do
           " --with-libedit-preferred" \
           " --with-openssl" \
           " --with-ossp-uuid" \
+          " --without-icu" \
           " --with-includes=#{install_dir}/embedded/include" \
           " --with-libraries=#{install_dir}/embedded/lib", env: env
 
-  make "world -j #{workers}", env: env
-  make "install-world -j #{workers}", env: env
+  make "world-bin -j #{workers}", env: env
+  make "install-world-bin -j #{workers}", env: env
 
   block do
     Dir.glob("#{install_dir}/embedded/postgresql/#{short_version}/bin/*").sort.each do |bin|
