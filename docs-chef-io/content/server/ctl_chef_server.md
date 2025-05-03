@@ -48,7 +48,7 @@ and then to restore those backups.
 **Examples**
 
 ```bash
-chef-server-ctl restore /path/to/tar/archive.tar.gz
+chef-server-ctl restore /path/to/tar/archive.tgz
 ```
 
 ## cleanse
