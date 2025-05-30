@@ -65,7 +65,7 @@ Vagrant.configure("2") do |config|
   config.vm.network "forwarded_port", guest: 443, host: 8443
   config.vm.box = "bento/ubuntu-20.04"
   config.ssh.forward_agent = true
-  config.omnibus.chef_version = :latest
+  #config.omnibus.chef_version = :latest
 
   if start_external_service?("postgresql" , attributes)
     config.vm.define("database") do |c|
@@ -204,7 +204,7 @@ def define_chef_server(config, attributes)
     recipes = %w{provisioning::hosts provisioning::chef-server
                  provisioning::chef-server-rb
                  dev::system dev::user-env dev::dvm}
-    provision_with_chef_zero(config, accept_license: package.match(/(?<=_)\d+/)[0].to_i >= 13 ? true : false, recipes: recipes, binary_path: "/opt/opscode/embedded/bin", json: json)
+    provision_with_chef_zero(config, accept_license: false, recipes: recipes, binary_path: "/opt/opscode/embedded/bin", json: json) # Changed to enable interactive ELU prompt
 
     if chef_backend_active?(attributes)
       # Grab the chef-server.rb that chef-backend generates for us and overwrite the one we
@@ -214,29 +214,29 @@ def define_chef_server(config, attributes)
     # We do a number of things that can affect the initial configuration - by
     # running reconfigure here we can ensure that they're all completed
     # first  -- no matter what kind of pre-reconfigure provisioning we doing.
-    config.vm.provision "shell", inline: "chef-server-ctl reconfigure --verbose  --chef-license accept"
+    config.vm.provision "shell", inline: "chef-server-ctl reconfigure --verbose"
 
     # Another chef-zero provision - now that the server has been reconfigured, we can set
     # up a default data for testing
     recipes = %w{dev::create-test-data dev::setup-knife}
-    provision_with_chef_zero(config, accept_license: package.match(/(?<=_)\d+/)[0].to_i >= 13 ? true : false, recipes: recipes, binary_path: "/opt/opscode/embedded/bin", json: json)
+    provision_with_chef_zero(config, accept_license: false, recipes: recipes, binary_path: "/opt/opscode/embedded/bin", json: json) # Changed to enable interactive ELU prompt
 
 
     if plugin_active?('chef-manage', attributes)
       config.vm.provision "shell", "inline": generate_install_script(m_package, 'chef-manage')
-      config.vm.provision "shell", "inline": "chef-manage-ctl reconfigure --chef-license accept"
+      config.vm.provision "shell", "inline": "chef-manage-ctl reconfigure"
     end
 
     if plugin_active?('push-jobs-server', attributes)
       backend_compat_message('push-jobs-server') if chef_backend_active?(attributes)
       config.vm.provision "shell", "inline": generate_install_script(ps_package, 'opscode-push-jobs-server')
-      config.vm.provision "shell", "inline": "opscode-push-jobs-server-ctl reconfigure --chef-license accept"
+      config.vm.provision "shell", "inline": "opscode-push-jobs-server-ctl reconfigure"
     end
 
     if plugin_active?('reporting', attributes)
       backend_compat_message('reporting') if chef_backend_active?(attributes)
       config.vm.provision "shell", "inline": generate_install_script(r_package, 'opscode-reporting')
-      config.vm.provision "shell", "inline": "opscode-reporting-ctl reconfigure --chef-license accept"
+      config.vm.provision "shell", "inline": "opscode-reporting-ctl reconfigure"
     end
 
   end
@@ -248,7 +248,7 @@ def define_ldap_server(config, attributes)
   customize_vm(config, name: "ldap#{Variant}", memory: 512, cpus: 1)
 
   config.vm.provision "chef_zero" do |chef|
-    chef.arguments = '--chef-license accept'
+    # chef.arguments = '--chef-license accept' # Removed to enable interactive ELU prompt
     chef.node_name = config.vm.hostname
     chef.cookbooks_path = "cookbooks"
     chef.add_recipe("provisioning::ldap-server")
@@ -266,7 +266,7 @@ def define_db_server(config, attributes)
   config.vm.network "private_network", ip: IPS[:db]
   customize_vm(config, name: "database#{Variant}", memory: 512, cpus: 1)
   provision_with_chef_zero(config,
-                             accept_license: true,
+                             accept_license: false, # Changed to enable interactive ELU prompt
                              recipes: ["provisioning::hosts"],
                              json: { 'provisioning' => { 'hosts' =>  ips_to_fqdns } })
   config.vm.provision "shell", path: "scripts/provision-postgres.sh", args: "#{IPS[:cs]}"
@@ -277,7 +277,7 @@ def define_custom_server(config, attributes)
   config.vm.network "private_network", ip: IPS[:custom]
   customize_vm(config, name: "custom#{Variant}", memory: 2048, cpus: 2)
   provision_with_chef_zero(config,
-                             accept_license: true,
+                             accept_license: false, # Changed to enable interactive ELU prompt
                              recipes: ["provisioning::hosts"],
                              json: { 'provisioning' => { 'hosts' =>  ips_to_fqdns } })
 end
@@ -287,7 +287,7 @@ def define_elasticsearch_server(config, attributes)
   config.vm.network "private_network", ip: IPS[:elasticsearch]
   customize_vm(config, name: "elasticsearch#{Variant}", memory: 2048, cpus: 2)
   provision_with_chef_zero(config,
-                             accept_license: true,
+                             accept_license: false, # Changed to enable interactive ELU prompt
                              recipes: ["provisioning::hosts"],
                              json: { 'provisioning' => { 'hosts' =>  ips_to_fqdns } })
   config.vm.provision "shell",
@@ -303,7 +303,7 @@ def define_backend_server(config, attribute)
   if provisioning
     config.vm.synced_folder package_path, "/packages"
     provision_with_chef_zero(config,
-                               accept_license: package.match(/(?<=_)\d+/)[0].to_i >= 13 ? true : false,
+                               accept_license: false, # Changed to enable interactive ELU prompt
                                recipes: ["provisioning::hosts"],
                                json: { 'provisioning' => { 'hosts' =>  ips_to_fqdns } })
     config.vm.provision "file", source: "~/.gitconfig", destination: ".gitconfig"
@@ -318,7 +318,7 @@ def define_db_server_reporting(config, attributes)
   config.vm.network "private_network", ip: IPS[:reportingdb]
   customize_vm(config, name: "reportingdb#{Variant}", memory: 512, cpus: 1)
   provision_with_chef_zero(config,
-                             accept_license: true,
+                             accept_license: false, # Changed to enable interactive ELU prompt
                              recipes: ["provisioning::hosts"],
                              json: { 'provisioning' => { 'hosts' =>  ips_to_fqdns } })
   # Using shell here to ave the trouble of downloading
@@ -518,7 +518,7 @@ end
 
 def provision_with_chef_zero(config, opts)
   config.vm.provision "chef_zero" do |chef|
-    chef.arguments = "--chef-license accept" if opts[:accept_license]
+    # chef.arguments = "--chef-license accept" if opts[:accept_license] # Removed to enable interactive ELU prompt
     chef.node_name = config.vm.hostname
     chef.cookbooks_path = "cookbooks"
     chef.nodes_path = "nodes"
