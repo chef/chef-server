@@ -11,6 +11,7 @@ export HAB_STUDIO_SECRET_HAB_FEAT_IGNORE_LOCAL=false
 export HAB_FEAT_IGNORE_LOCAL=false
 export HAB_STUDIO_HOST_ARCH=x86_64-linux
 export HAB_FEAT_OFFLINE_INSTALL=true
+name="chef-server"
 
 curl https://raw.githubusercontent.com/habitat-sh/habitat/main/components/hab/install.sh | sudo bash
 
