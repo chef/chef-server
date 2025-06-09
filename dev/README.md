@@ -28,6 +28,56 @@ Requirements:
   you've acquired root by using `sudo -i`. Otherwise dvm won't be in your
   path.
 
+### License Acceptance
+
+If you encounter the following error during provisioning:
+```
+==> chef-server: Chef Infra Client cannot execute without accepting the license
+Chef never successfully completed! Any errors should be visible in the
+output above. Please fix your recipes so that they properly complete.
+```
+
+You have two options to accept the Chef license:
+
+#### Option 1: Modify the Vagrantfile
+
+Modify the `Vagrantfile` by uncommenting the line:
+```ruby
+# chef.arguments = "--chef-license accept" if opts[:accept_license]
+```
+and change it to:
+```ruby
+chef.arguments = "--chef-license accept" if opts[:accept_license]
+```
+
+Then re-run `vagrant provision` to continue the setup.
+
+#### Option 2: SSH into the VM and Accept the License Manually
+
+1. SSH into the Vagrant VM:
+   ```
+   vagrant ssh
+   ```
+
+2. Become the root user:
+   ```
+   sudo -i
+   ```
+
+3. Run `chef-server-ctl reconfigure` and follow the interactive EULA prompt:
+   ```
+   chef-server-ctl reconfigure
+   ```
+
+4. When prompted with the Chef Infra Client license acceptance, type `yes` to accept
+
+5. Once complete, exit the VM and continue with `vagrant provision`:
+   ```
+   exit
+   exit
+   vagrant provision
+   ```
+
 First, add the following configuration to your `/etc/hosts` file:
 
     192.168.56.100 api.chef-server.dev manage.chef-server.dev
