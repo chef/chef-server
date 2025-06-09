@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.10.36 -->
-## [15.10.36](https://github.com/chef/chef-server/tree/15.10.36) (2025-04-15)
+<!-- latest_release 15.10.37 -->
+## [15.10.37](https://github.com/chef/chef-server/tree/15.10.37) (2025-06-09)
 
 #### Merged Pull Requests
-- make pipelines public: habitat/test [#4002](https://github.com/chef/chef-server/pull/4002) ([jaymzh](https://github.com/jaymzh))
+- CHEF-20995 - Changes to not auto accept the license while using vagrant file [#4016](https://github.com/chef/chef-server/pull/4016) ([jashaik](https://github.com/jashaik))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.10.33 -->
 ### Changes since 15.10.33 release
 
 #### Merged Pull Requests
+- CHEF-20995 - Changes to not auto accept the license while using vagrant file [#4016](https://github.com/chef/chef-server/pull/4016) ([jashaik](https://github.com/jashaik)) <!-- 15.10.37 -->
 - make pipelines public: habitat/test [#4002](https://github.com/chef/chef-server/pull/4002) ([jaymzh](https://github.com/jaymzh)) <!-- 15.10.36 -->
 - Deprecation Note [#4005](https://github.com/chef/chef-server/pull/4005) ([dishanktiwari2501](https://github.com/dishanktiwari2501)) <!-- 15.10.35 -->
 - Upgrade actionmailer to 7.0.8.5 to address  CVE-2024-47889 in oc-id [#4001](https://github.com/chef/chef-server/pull/4001) ([RoyShravani](https://github.com/RoyShravani)) <!-- 15.10.34 -->
