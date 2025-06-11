@@ -58,9 +58,9 @@ module Pedant
           [502, "Bad Gateway"],
           [503, "Service Unavailable"],
           [504, "Gateway Timeout"],
-          [505, "HTTP Version Not Supported"]]
+          [505, "HTTP Version Not Supported"]].freeze
 
-      STATUS_CODES = RFC2616_HTTP_STATUS_CODES.inject({}) { |h, e| h[e[0]]=e[1]; h }
+      STATUS_CODES = RFC2616_HTTP_STATUS_CODES.inject({}) { |h, e| h[e[0]] = e[1]; h }
     end
   end
 end

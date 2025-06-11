@@ -13,27 +13,27 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'pedant/rspec/knife_util'
-require 'securerandom'
+require "pedant/rspec/knife_util"
+require "securerandom"
 
-describe 'knife', :knife do
-  context 'role' do
-    context 'from file ROLE' do
+describe "knife", :knife do
+  context "role" do
+    context "from file ROLE" do
       include Pedant::RSpec::KnifeUtil
       include Pedant::RSpec::KnifeUtil::Role
 
       let(:command) { "knife role from file #{role_name}.json -c #{knife_config}" }
       after(:each) { knife "role delete #{role_name} -c #{knife_config} --yes" }
 
-      context 'with existing role' do
-        context 'as an admin' do
+      context "with existing role" do
+        context "as an admin" do
           let(:requestor) { knife_admin }
 
-          it 'should succeed' do
+          it "should succeed" do
             assume_fixture_file!
 
             # Runs knife role from file
-            should have_outcome :status => 0, :stderr => /Updated Role\s+#{role_name}/
+            should have_outcome status: 0, stderr: /Updated Role\s+#{role_name}/
           end
         end
       end

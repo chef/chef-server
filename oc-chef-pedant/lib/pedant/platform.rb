@@ -13,29 +13,29 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'uri'
-require 'pathname'
-require 'fileutils'
-require 'pedant/acl'
+require "uri" unless defined?(URI)
+require "pathname" unless defined?(Pathname)
+require "fileutils" unless defined?(FileUtils)
+require "pedant/acl"
 module Pedant
 
   # Representation of the Chef Server platform
   class Platform
     include Pedant::Request
 
-    GLOBAL_OBJECTS = ['users', 'organizations']
+    GLOBAL_OBJECTS = %w{users organizations}.freeze
     MAX_ATTEMPTS = 5
 
     attr_reader :test_org, :test_org_owner, :validate_org, :internal_account_url,
-                :internal_server, :ldap, :ldap_testing,
-                :server, :base_resource_url, :superuser, :superuser_key_data, :webui_key,
-                :stats_user, :stats_password
+      :internal_server, :ldap, :ldap_testing,
+      :server, :base_resource_url, :superuser, :superuser_key_data, :webui_key,
+      :stats_user, :stats_password
 
     # Create a Platform object for a given server (specified by
     # protocol, hostname, and port ONLY). You must supply the
     # superuser's key data in PEM form.
     #
-    def initialize(server, superuser_key, webui_key, superuser_name='pivotal', stats_user, stats_password)
+    def initialize(server, superuser_key, webui_key, superuser_name = "pivotal", stats_user, stats_password)
       @superuser_key_data = superuser_key
       @webui_key = webui_key
       @server = (Pedant.config.explicit_port_url ? explicit_port_url(server) : server )
@@ -51,19 +51,19 @@ module Pedant
       @stats_password = stats_password
 
       @internal_account_url = Pedant::Config[:internal_account_url]
-      @internal_server = Pedant::Config.internal_server || (fail "Missing internal_server in Pedant config.")
+      @internal_server = Pedant::Config.internal_server || (raise "Missing internal_server in Pedant config.")
       @ldap = Pedant::Config[:ldap]
       @ldap_testing = Pedant::Config[:ldap_testing]
-      self.pedant_run_timestamp # Cache the global timestamp at initialization
-      self
+      pedant_run_timestamp # Cache the global timestamp at initialization
     end
 
-    DEFAULT_ORG_REWRITE = /^\/?(search|nodes|cookbooks|data|roles|sandboxes|environments|clients|principals|runs|groups|containers|keys)/
+    DEFAULT_ORG_REWRITE = %r{^/?(search|nodes|cookbooks|data|roles|sandboxes|environments|clients|principals|runs|groups|containers|keys)}
     def map_to_default_orgname?(path_fragment)
       return false unless Pedant::Config.use_default_org # Don't even bother unless we are in default_orgname mode
       return false if path_fragment =~ /_acl/            # False if _acl appears anywhere
       return true  if path_fragment =~ DEFAULT_ORG_REWRITE
-      return false                                       # Default to false
+
+      false # Default to false
     end
 
     # Intelligently construct a complete API URL based on the
@@ -72,24 +72,24 @@ module Pedant
     # "/organizations/#{org}" to the given path fragment, while
     # single-tenant targeted URLs (i.e., Open Source Chef and Private
     # Chef) do not.
-    def api_url(path_fragment = '/', org=test_org)
-      path_prefix = (map_to_default_orgname?(path_fragment) ? '' : "/organizations/#{org.name}")
-      slash = path_fragment.start_with?('/') ? '' : '/'
+    def api_url(path_fragment = "/", org = test_org)
+      path_prefix = (map_to_default_orgname?(path_fragment) ? "" : "/organizations/#{org.name}")
+      slash = path_fragment.start_with?("/") ? "" : "/"
       "#{server}#{path_prefix}#{slash}#{path_fragment}"
     end
 
     # Construct a complete API URL for internal APIs that are not typically exposed
     # via the public-facing load balancers.   Other than the server itself,
     # behaves the same as api_url
-    def internal_api_url(path_fragment = '/', org=test_org)
+    def internal_api_url(path_fragment = "/", org = test_org)
       path_prefix = "/organizations/#{org.name}"
-      slash = path_fragment.start_with?('/') ? '' : '/'
+      slash = path_fragment.start_with?("/") ? "" : "/"
       "#{internal_server}#{path_prefix}#{slash}#{path_fragment}"
     end
 
     # Construct the appropriate URL for returned resources
     #
-    def resource_url(path_fragment = '/', org=test_org)
+    def resource_url(path_fragment = "/", org = test_org)
       "#{@base_resource_url}#{path_helper(path_fragment, org)}"
     end
 
@@ -97,7 +97,7 @@ module Pedant
     def path_helper(path_fragment, org)
       orgname = org.respond_to?(:name) ? org.name : org.to_s
       path_prefix = "/organizations/#{orgname}"
-      slash = path_fragment.start_with?('/') ? '' : '/'
+      slash = path_fragment.start_with?("/") ? "" : "/"
       "#{path_prefix}#{slash}#{path_fragment}"
     end
 
@@ -120,7 +120,7 @@ module Pedant
       create_me = requestor_spec[:create_me]
       key_file = requestor_spec[:key_file]
       associate = requestor_spec[:associate]
-      admin  = requestor_spec[:admin]
+      admin = requestor_spec[:admin]
 
       if create_me
         create_user(name, admin: admin, associate: associate).tap do |user|
@@ -133,7 +133,7 @@ module Pedant
       end
     end
 
-    def org_from_config()
+    def org_from_config
       org = Pedant::Config[:org]
       # If default_orgname is set, override the settings for org
       name = pedant_orgname
@@ -158,13 +158,16 @@ module Pedant
         puts "Pedant did not create the org, so will not delete it"
       end
     end
+
     # TODO can these just live in 'rspec/common'?
     def org_name
       test_org.name
     end
+
     def validator_client
       test_org.validator
     end
+
     def validator_client_name
       "#{org_name}-validator"
     end
@@ -175,10 +178,11 @@ module Pedant
     def explicit_port_url(url)
       uri = URI.parse(url)
       return url unless uri.default_port == uri.port
-      return "#{url}:#{uri.port}"
+
+      "#{url}:#{uri.port}"
     end
 
-    def setup(requestors=Pedant::Config.requestors)
+    def setup(requestors = Pedant::Config.requestors)
       requestors[:clients].each do |kind, client_hash|
 
         key = cache_key(kind, :client)
@@ -201,12 +205,11 @@ module Pedant
 
           requestor_cache[key] = user
           make_owner(user, @test_org) if user_hash[:admin]
-          make_user(user, @test_org) if user_hash[:associate] and !user_hash[:admin]
+          make_user(user, @test_org) if user_hash[:associate] && !user_hash[:admin]
 
           create_requestor_accessor(key)
         end
       end
-
     end
 
     def cleanup
@@ -214,21 +217,21 @@ module Pedant
       delete_org_from_config
     end
 
-    def create_client(name, org = self.test_org)
+    def create_client(name, org = test_org)
       clientname = name.to_s
       payload = { "name" => clientname }
 
       if server_api_version == 0
-        r = post(api_url('/clients', org), org.validator, :payload => payload)
+        r = post(api_url("/clients", org), org.validator, payload: payload)
         if r.code == 409
           payload["private_key"] = true
-          r = put(api_url("/clients/#{clientname}", org), org.validator, :payload => payload)
+          r = put(api_url("/clients/#{clientname}", org), org.validator, payload: payload)
         end
         private_key = parse(r)["private_key"]
       else
-        r = post(api_url('/clients', org), org.validator, :payload => payload.with("create_key", true))
+        r = post(api_url("/clients", org), org.validator, payload: payload.with("create_key", true))
         if r.code == 409
-          r = put(api_url("/clients/#{clientname}/keys/default", org), org.validator, :payload => { "create_key" => true} )
+          r = put(api_url("/clients/#{clientname}/keys/default", org), org.validator, payload: { "create_key" => true } )
         end
         private_key = parse(r)["chef_key"]["private_key"]
       end
@@ -250,15 +253,15 @@ module Pedant
       end
     end
 
-    def delete_client(client, org = self.test_org)
-      r = delete("#{@server}/organizations/#{org.name}/clients/#{client.name}", self.superuser)
+    def delete_client(client, org = test_org)
+      r = delete("#{@server}/organizations/#{org.name}/clients/#{client.name}", superuser)
       if r.code != 200
         puts "Unexpected response #{r.code}: #{r}"
       end
     end
 
     def test_repository_path
-      @_test_respository_path ||= Pedant::Utility.fixture_path('test_repository')
+      @_test_respository_path ||= Pedant::Utility.fixture_path("test_repository")
     end
 
     def requestor_cache
@@ -276,10 +279,11 @@ module Pedant
     #
     # you would pass in 'admin' for +config_key+.
     def cache_key(config_key, type)
-      valid_types = [:user, :client]
+      valid_types = %i{user client}
       unless valid_types.include?(type)
         raise "Can only create a cache key for #{valid_types}; you gave #{type.inspect}"
       end
+
       "#{config_key}_#{type}".to_sym
     end
 
@@ -297,7 +301,7 @@ module Pedant
     #
     # Similar logic holds for users as well.
     def create_requestor_accessor(cache_key)
-      self.class.send(:define_method, cache_key, lambda{requestor_cache[cache_key]})
+      self.class.send(:define_method, cache_key, lambda { requestor_cache[cache_key] })
     end
 
     def cleanup_requestors
@@ -313,7 +317,6 @@ module Pedant
     def clients
       requestor_cache.values.select { |r| Pedant::Client === r }
     end
-
 
     def dummy_client(h)
       Pedant::Client.new(h[:name], bogus_key, platform: self, preexisting: false, bogus: true)
@@ -331,7 +334,7 @@ module Pedant
     # Global timestamp marking the beginning of the run
     # Use this for things like generating unique names
     def pedant_run_timestamp
-      @_pedant_run_timestamp ||= self.timestamp
+      @_pedant_run_timestamp ||= timestamp
     end
 
     # TODO: Expose entire payload as an input parameter
@@ -339,11 +342,11 @@ module Pedant
       payload = {
         "name" => orgname,
         "full_name" => orgname,
-        "org_type" => "Business"
+        "org_type" => "Business",
       }
       puts "Creating org #{orgname}"
       MAX_ATTEMPTS.times do |attempt|
-        r = post("#{@server}/organizations", superuser, :payload => payload)
+        r = post("#{@server}/organizations", superuser, payload: payload)
 
         case r.code
         when 201, 200
@@ -372,7 +375,7 @@ module Pedant
 
     def delete_org(orgname)
       r = delete("#{@server}/organizations/#{orgname}/clients/#{orgname}-validator", superuser)
-      if r.code != 200 and r.code != 404
+      if (r.code != 200) && (r.code != 404)
         puts "Unexpected response when deleting org validator: #{r.code}: #{r}"
       end
       puts "Deleting organization #{orgname} ..."
@@ -389,18 +392,19 @@ module Pedant
         "first_name" => username,
         "last_name" => username,
         "display_name" => username,
-        "password" => "foobar"
+        "password" => "foobar",
       }
-      if options.has_key?(:overrides)
+      if options.key?(:overrides)
         payload = payload.merge(options[:overrides])
       end
       users_url = "#{@server}/users"
-      post(users_url, @superuser, :payload => payload)
-
+      post(users_url, @superuser, payload: payload)
     end
+
     def create_user(username, options = {})
       r = create_min_user(username, options)
       raise "Could not create user #{username}: #{r}" unless r.code == 201
+
       if server_api_version == 0
         private_key = parse(r)["private_key"]
       else
@@ -431,8 +435,8 @@ module Pedant
     end
 
     def associate_user_with_org(orgname, user)
-      r = post("#{@server}/organizations/#{orgname}/users", superuser, :payload => { "username" => user.name })
-      if r.code == 201 or (r.code == 409 and parse(r)["error"] == "The association already exists.")
+      r = post("#{@server}/organizations/#{orgname}/users", superuser, payload: { "username" => user.name })
+      if (r.code == 201) || ((r.code == 409) && (parse(r)["error"] == "The association already exists."))
         r
       else
         raise "Bad response #{r.code} from POST /organizations/#{orgname}/users w/ { 'username' : '#{user.name}'}: #{r}"
@@ -443,48 +447,48 @@ module Pedant
     # metaprogramming magic, but I think a refactor of the
     # user calls to accept just a username instead of a user
     # object would be in order.
-    def add_user_to_group(orgname, user, groupname, actor=nil)
+    def add_user_to_group(orgname, user, groupname, actor = nil)
       alter_group(orgname, groupname, :add, :user, user.name, actor)
     end
 
-    def remove_user_from_group(orgname, user, groupname, actor=nil)
+    def remove_user_from_group(orgname, user, groupname, actor = nil)
       alter_group(orgname, groupname, :remove, :user, user.name, actor)
     end
 
-    def add_client_to_group(orgname, client, groupname, actor=nil)
+    def add_client_to_group(orgname, client, groupname, actor = nil)
       alter_group(orgname, groupname, :add, :client, client.name, actor)
     end
 
-    def remove_client_from_group(orgname, client, groupname, actor=nil)
+    def remove_client_from_group(orgname, client, groupname, actor = nil)
       alter_group(orgname, groupname, :remove, :client, client.name, actor)
     end
 
-    def add_group_to_group(orgname, object_name, groupname, actor=nil)
+    def add_group_to_group(orgname, object_name, groupname, actor = nil)
       alter_group(orgname, groupname, :add, :group, object_name, actor)
     end
 
-    def remove_group_from_group(orgname, object_name, groupname, actor=nil)
+    def remove_group_from_group(orgname, object_name, groupname, actor = nil)
       alter_group(orgname, groupname, :remove, :group, object_name, actor)
     end
 
-    def alter_group(orgname, groupname, action, object_type, object_name, actor=nil)
+    def alter_group(orgname, groupname, action, object_type, object_name, actor = nil)
       # since we can't set the default param to an attr_accessor, this will have
       # to suffice
       actor ||= superuser
 
-      type_map = { :user => :users, :group => :groups, :client => :clients }
+      type_map = { user: :users, group: :groups, client: :clients }
 
       group_url = "#{@server}/organizations/#{orgname}/groups/#{groupname}"
       r = get(group_url, actor)
       group = parse(r)
 
       payload = {
-        :groupname => groupname,
-        :actors => {
-          :users => group["actors"],
-          :groups => group["groups"],
-          :clients => group["clients"]
-        }
+        groupname: groupname,
+        actors: {
+          users: group["actors"],
+          groups: group["groups"],
+          clients: group["clients"],
+        },
       }
 
       case action
@@ -494,12 +498,12 @@ module Pedant
         payload[:actors][type_map[object_type]].delete(object_name)
       end
 
-      put(group_url, actor, :payload => payload)
+      put(group_url, actor, payload: payload)
     end
 
     # As though +user+ had created +org+ themselves
     def make_owner(user, org)
-      associate_in_groups(user, org, ["admins", "billing-admins", "users"])
+      associate_in_groups(user, org, %w{admins billing-admins users})
     end
 
     def make_user(user, org)
@@ -515,7 +519,6 @@ module Pedant
       end
     end
 
-
     def before_configure_rspec
       # Note that validate_created_org is also responsible for associating an
       # owner with the org.
@@ -528,23 +531,22 @@ module Pedant
       FileUtils.mkpath File.join(Dir.tmpdir, "oc-chef-pedant")
       ::RSpec.configure do |c|
         c.run_all_when_everything_filtered = true
-        c.filter_run_excluding :intermittent_failure => true
+        c.filter_run_excluding intermittent_failure: true
         c.include Pedant::ACL
       end
     end
-
 
     def validate_created_org(org)
       puts "Validating Org Creation"
 
       @test_org_owner = create_user("#{org.name}_owner", associate: true, admin: true)
       requestor_cache[:owner] = @test_org_owner
-      make_owner(self.test_org_owner, org)
+      make_owner(test_org_owner, org)
 
       ::RSpec.configure do |c|
         # If you just want to run one (or a few) tests in development,
         # add :focus metadata
-        c.filter_run :focus => true
+        c.filter_run focus: true
         c.run_all_when_everything_filtered = true
         c.include Pedant::RSpec::Common
       end
@@ -555,7 +557,7 @@ module Pedant
                []
              end
       if Pedant.config[:tags]
-        args.concat(Pedant.config[:tags].map { |tag| ['-t', tag.to_s] } )
+        args.concat(Pedant.config[:tags].map { |tag| ["-t", tag.to_s] } )
       end
       args.concat(Pedant::Gem.test_directories("org_creation"))
 
@@ -570,10 +572,11 @@ module Pedant
       ::RSpec.reset
       ::RSpec.configuration.extend RSpecShared::Methods
     end
+
     # Well-formed key, but not actually associated with the server
     def bogus_key
       @_bogus_key ||=
-"-----BEGIN RSA PRIVATE KEY-----
+        "-----BEGIN RSA PRIVATE KEY-----
 MIIEogIBAAKCAQEA7TfhToresZudM5gaBfzM/eHrGuJtN8uMaG51fLk9rNVwOxIw
 eb9AmWJSQgftRj4AJSnt8Jv+QyAafjg79rEmCpd2K+toN1fXiVsf/ld/VdMI5vCd
 usJc8aC4OFIVrLetm9eq+joXiCSLfEYP1w4d1gc9wqr54rnGVgQdWv31NhqXX7Tl
@@ -607,11 +610,11 @@ yap6MUYSjPOa7eCrhg2zFZiqO6VLEogPc1nsjb9Zl2UWLLYyCVz=
       priv = Tempfile.new("pedant-key-#{name}")
       pub = Tempfile.new("pedant-key-#{name}.pub")
       rsakey = OpenSSL::PKey::RSA.new(2048)
-      open priv.path, 'w' do |io| io.write rsakey.to_pem end
-      open pub.path, 'w' do |io| io.write rsakey.public_key.to_pem end
-      key = { :path => "#{pub.path}",
-              :private => File.read(priv.path),
-              :public => File.read(pub.path) }
+      open priv.path, "w" do |io| io.write rsakey.to_pem end
+      open pub.path, "w" do |io| io.write rsakey.public_key.to_pem end
+      key = { path: "#{pub.path}",
+              private: File.read(priv.path),
+              public: File.read(pub.path) }
       priv.close
       priv.unlink
       pub.close

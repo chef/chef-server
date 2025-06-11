@@ -13,15 +13,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'pedant/rspec/common'
-require 'pedant/platform'
+require "pedant/rspec/common"
+require "pedant/platform"
 
 module Pedant
   module RSpec
     module AuthHeadersUtil
       # rspec dsl is mixed into every module
 
-      shared_context 'handles authentication headers correctly' do
+      shared_context "handles authentication headers correctly" do
         def digester
           Mixlib::Authentication::Digester
         end
@@ -35,13 +35,16 @@ module Pedant
         # compute the signature from the request, using the looked-up user secret
         # ====Parameters
         # private_key<OpenSSL::PKey::RSA>:: user's RSA private key.
-        def manufacture_signed_headers(requestor, method, url, body, options={})
+        def manufacture_signed_headers(requestor, method, url, body, options = {})
           # Calculate things and handle options
-          body = "" if !body
+          body = "" unless body
           body = to_json(body) if body.class == Hash
 
-          signing_description = options.include?(:signing_description) ?
-                                  options[:signing_description] : "version=1.0"
+          signing_description = if options.include?(:signing_description)
+                                  options[:signing_description]
+                                else
+                                  "version=1.0"
+                                end
 
           version = if signing_description =~ /version=([0-9\.]*)/
                       $1
@@ -55,21 +58,42 @@ module Pedant
                      OpenSSL::Digest::SHA1
                    end
 
-          user_id = options.include?(:user_id) ?
-            options[:user_id] : requestor.name
-          timestamp = options.include?(:timestamp) ?
-            options[:timestamp] : Time.now.utc.iso8601
-          hashed_body = options.include?(:hashed_body) ?
-            options[:hashed_body] : digester.hash_string(body, digest)
+          user_id = if options.include?(:user_id)
+                      options[:user_id]
+                    else
+                      requestor.name
+                    end
+          timestamp = if options.include?(:timestamp)
+                        options[:timestamp]
+                      else
+                        Time.now.utc.iso8601
+                      end
+          hashed_body = if options.include?(:hashed_body)
+                          options[:hashed_body]
+                        else
+                          digester.hash_string(body, digest)
+                        end
 
-          private_key = options.include?(:private_key) ?
-            options[:private_key] : requestor.signing_key
-          http_method = options.include?(:method) ?
-            options[:method] : method
-          path = options.include?(:path) ?
-            options[:path] : URI.parse(url).path
-          hashed_path = options.include?(:hashed_path) ?
-            options[:hashed_path] : digester.hash_string(path, digest)
+          private_key = if options.include?(:private_key)
+                          options[:private_key]
+                        else
+                          requestor.signing_key
+                        end
+          http_method = if options.include?(:method)
+                          options[:method]
+                        else
+                          method
+                        end
+          path = if options.include?(:path)
+                   options[:path]
+                 else
+                   URI.parse(url).path
+                 end
+          hashed_path = if options.include?(:hashed_path)
+                          options[:hashed_path]
+                        else
+                          digester.hash_string(path, digest)
+                        end
 
           header_hash = {}
           header_hash["X-Ops-Sign"] = signing_description if signing_description
@@ -83,14 +107,14 @@ module Pedant
                              options[:string_to_sign]
                            elsif version == "1.3"
                              "Method:#{http_method.to_s.upcase}\nPath:#{path}\n" +
-                             "X-Ops-Content-Hash:#{hashed_body}\nX-Ops-Sign:version=#{version}\n" +
-                             "X-Ops-Timestamp:#{timestamp}\n" +
-                             "X-Ops-UserId:#{user_id}\n" +
-                             "X-Ops-Server-API-Version:#{server_api_version}"
+                               "X-Ops-Content-Hash:#{hashed_body}\nX-Ops-Sign:version=#{version}\n" +
+                               "X-Ops-Timestamp:#{timestamp}\n" +
+                               "X-Ops-UserId:#{user_id}\n" +
+                               "X-Ops-Server-API-Version:#{server_api_version}"
                            else
                              "Method:#{http_method.to_s.upcase}\nHashed Path:#{hashed_path}\n" +
-                             "X-Ops-Content-Hash:#{hashed_body}\nX-Ops-Timestamp:#{timestamp}\n" +
-                             "X-Ops-UserId:#{user_id}"
+                               "X-Ops-Content-Hash:#{hashed_body}\nX-Ops-Timestamp:#{timestamp}\n" +
+                               "X-Ops-UserId:#{user_id}"
                            end
 
           signature = if options.include?(:signature)
@@ -103,7 +127,7 @@ module Pedant
 
           if signature
             # lines - X-Ops-Authorization-1, ... (starts at 1, not 0!)
-            signature_lines = signature.split(/\n/)
+            signature_lines = signature.split("\n")
             signature_lines.each_index do |idx|
               if signature_lines[idx]
                 key = "X-Ops-Authorization-#{idx + 1}"
@@ -113,7 +137,7 @@ module Pedant
           end
 
           Mixlib::Authentication::Log.debug "String to sign: '#{string_to_sign}'\n" +
-                                            "Header hash: #{header_hash.inspect}"
+            "Header hash: #{header_hash.inspect}"
           header_hash
         end
 
@@ -151,8 +175,8 @@ module Pedant
         # Everything correct
         let(:response) do
           authenticated_request(method, url, user,
-                                :payload => body,
-                                :auth_headers => auth_headers)
+            payload: body,
+            auth_headers: auth_headers)
         end
 
         def self.with_modified_auth_headers(desc, expected_status, auth_header_options)
@@ -163,10 +187,12 @@ module Pedant
           context_options << :authentication if expected_status == 401
           context_options << :authorization if expected_status == 403
           context(desc, *context_options) do
-            let(:auth_headers) { manufacture_signed_headers(user, method, url, body,
-                                                            auth_header_options) }
+            let(:auth_headers) {
+              manufacture_signed_headers(user, method, url, body,
+                auth_header_options)
+            }
             it "returns #{expected_status}" do
-              response.should look_like({ :status => expected_status })
+              response.should look_like({ status: expected_status })
             end
           end
         end
@@ -183,11 +209,11 @@ module Pedant
 
           let(:auth_headers) {
             manufacture_signed_headers(user, method, url, body,
-                                       :signing_description => "algorithm=sha256;version=1.3")
+              signing_description: "algorithm=sha256;version=1.3")
           }
 
           it "returns successfully" do
-            response.should look_like({ :status => expected_status })
+            response.should look_like({ status: expected_status })
           end
         end
 
@@ -195,52 +221,54 @@ module Pedant
           let(:user) { success_user }
           context "with everything correct" do
             let(:auth_headers) { manufacture_signed_headers(user, method, url, body) }
-            it 'is successful' do
+            it "is successful" do
               response_should_be_successful
             end
           end
 
           # X-Ops-Sign
-          with_modified_auth_headers('missing X-Ops-Sign', 400, :signing_description => nil)
-          with_modified_auth_headers('unsupported X-Ops-Sign version', 400,
-                                     :signing_description => 'version=8.1')
-          with_modified_auth_headers('empty X-Ops-Sign', 400, :signing_description => '')
+          with_modified_auth_headers("missing X-Ops-Sign", 400, signing_description: nil)
+          with_modified_auth_headers("unsupported X-Ops-Sign version", 400,
+            signing_description: "version=8.1")
+          with_modified_auth_headers("empty X-Ops-Sign", 400, signing_description: "")
 
           # X-Ops-Userid
-          with_modified_auth_headers('missing X-Ops-Userid', 400, :user_id => nil,
-                                     :skip => true)
+          with_modified_auth_headers("missing X-Ops-Userid", 400, user_id: nil,
+            skip: true)
           # an empty header should be treated as missing by the server
-          with_modified_auth_headers('empty X-Ops-Userid', 400, :user_id => '',
-                                     :skip => true)
-          with_modified_auth_headers('nonexistent username in X-Ops-Userid', 401,
-                                     :user_id => 'nowaythisexists')
+          with_modified_auth_headers("empty X-Ops-Userid", 400, user_id: "",
+            skip: true)
+          with_modified_auth_headers("nonexistent username in X-Ops-Userid", 401,
+            user_id: "nowaythisexists")
           context "when X-Ops-Userid does not match signature", :authentication do
             let(:auth_headers) do
               manufacture_signed_headers(user, method, url, body)
-              .merge({ 'X-Ops-Userid' => failure_user.name })
+                .merge({ "X-Ops-Userid" => failure_user.name })
             end
-            it 'returns 401' do
-              response.should look_like({ :status => 401 })
+            it "returns 401" do
+              response.should look_like({ status: 401 })
             end
           end
-          with_modified_auth_headers('absolutely immense X-Ops-Userid', 401, :user_id => 'x'*2000, :skip => true)
+          with_modified_auth_headers("absolutely immense X-Ops-Userid", 401, user_id: "x" * 2000, skip: true)
 
           # X-Ops-Timestamp
-          with_modified_auth_headers('missing X-Ops-Timestamp', 400, :timestamp => nil)
+          with_modified_auth_headers("missing X-Ops-Timestamp", 400, timestamp: nil)
           # empty should behave just like missing
-          with_modified_auth_headers('empty X-Ops-Timestamp', 400,
-                                     :timestamp => '')
-          with_modified_auth_headers('malformed X-Ops-Timestamp', 401,
-                                     :timestamp => 'xxx')
-          with_modified_auth_headers('old X-Ops-Timestamp', 401,
-                                     :timestamp => (Time.now.utc - 60*60).iso8601)
+          with_modified_auth_headers("empty X-Ops-Timestamp", 400,
+            timestamp: "")
+          with_modified_auth_headers("malformed X-Ops-Timestamp", 401,
+            timestamp: "xxx")
+          with_modified_auth_headers("old X-Ops-Timestamp", 401,
+            timestamp: (Time.now.utc - 60 * 60).iso8601)
 
-          with_modified_auth_headers('future X-Ops-Timestamp', 401,
-                                     :timestamp => (Time.now.utc + 60*60).iso8601)
+          with_modified_auth_headers("future X-Ops-Timestamp", 401,
+            timestamp: (Time.now.utc + 60 * 60).iso8601)
 
-          context 'recent X-Ops-Timestamp' do
-            let(:auth_headers) { manufacture_signed_headers(user, method, url, body,
-                                                            :timestamp => (Time.now.utc - 30).iso8601) }
+          context "recent X-Ops-Timestamp" do
+            let(:auth_headers) {
+              manufacture_signed_headers(user, method, url, body,
+                timestamp: (Time.now.utc - 30).iso8601)
+            }
             it "succeeds" do
               response_should_be_successful
             end
@@ -248,118 +276,118 @@ module Pedant
           context "when X-Ops-Timestamp does not match signature", :authentication do
             let(:auth_headers) do
               manufacture_signed_headers(user, method, url, body)
-              .merge({ 'X-Ops-Timestamp' => (Time.now.utc - 30).iso8601 })
+                .merge({ "X-Ops-Timestamp" => (Time.now.utc - 30).iso8601 })
             end
-            it 'returns 401' do
-              response.should look_like({ :status => 401 })
+            it "returns 401" do
+              response.should look_like({ status: 401 })
             end
           end
 
           # X-Ops-Content-Hash: hashed body of request
-          with_modified_auth_headers('missing X-Ops-Content-Hash', 400, :hashed_body => nil)
-          with_modified_auth_headers('empty X-Ops-Content-Hash', 400, :hashed_body => '')
-          with_modified_auth_headers('malformed X-Ops-Content-Hash', 401, :hashed_body => 'xxx')
-          with_modified_auth_headers('when body does not match X-Ops-Content-Hash and signature', 401,
-                                     :hashed_body => digester.hash_string('{thisisnotevenjson}'))
+          with_modified_auth_headers("missing X-Ops-Content-Hash", 400, hashed_body: nil)
+          with_modified_auth_headers("empty X-Ops-Content-Hash", 400, hashed_body: "")
+          with_modified_auth_headers("malformed X-Ops-Content-Hash", 401, hashed_body: "xxx")
+          with_modified_auth_headers("when body does not match X-Ops-Content-Hash and signature", 401,
+            hashed_body: digester.hash_string("{thisisnotevenjson}"))
           context "when X-Ops-Content-Hash does not match body and signature", :authentication do
             let(:auth_headers) do
               manufacture_signed_headers(user, method, url, body)
-              .merge({ 'X-Ops-Content-Hash' => digester.hash_string('{thisisnotevenjson}') })
+                .merge({ "X-Ops-Content-Hash" => digester.hash_string("{thisisnotevenjson}") })
             end
-            it 'returns 401' do
-              response.should look_like({ :status => 401 })
+            it "returns 401" do
+              response.should look_like({ status: 401 })
             end
           end
 
           # X-Ops-Authorization-\d+: 1-n lines of signature
-          with_modified_auth_headers('missing signature in X-Ops-Authorization-', 401, :signature => nil)
-          with_modified_auth_headers('malformed signature in X-Ops-Authorization-', 401, :signature => 'xxx')
+          with_modified_auth_headers("missing signature in X-Ops-Authorization-", 401, signature: nil)
+          with_modified_auth_headers("malformed signature in X-Ops-Authorization-", 401, signature: "xxx")
           # Note that an empty signature doesn't really end up empty
           # in the request. This actually results in the empty string
           # being signed and base 64 encoded.
-          with_modified_auth_headers('empty signature in X-Ops-Authorization-', 401, :signature => '')
-          context 'missing line 1 in signature in X-Ops-Authorization-', :authentication do
+          with_modified_auth_headers("empty signature in X-Ops-Authorization-", 401, signature: "")
+          context "missing line 1 in signature in X-Ops-Authorization-", :authentication do
             let(:auth_headers) do
               headers = manufacture_signed_headers(user, method, url, body)
-              headers.delete('X-Ops-Authorization-1')
+              headers.delete("X-Ops-Authorization-1")
               headers
             end
-            it 'returns 401' do
-              response.should look_like({ :status => 401 })
+            it "returns 401" do
+              response.should look_like({ status: 401 })
             end
           end
-          context 'missing a middle line in signature in X-Ops-Authorization-', :authentication do
+          context "missing a middle line in signature in X-Ops-Authorization-", :authentication do
             let(:auth_headers) do
               headers = manufacture_signed_headers(user, method, url, body)
-              headers.delete('X-Ops-Authorization-2')
+              headers.delete("X-Ops-Authorization-2")
               headers
             end
-            it 'returns 401' do
-              response.should look_like({ :status => 401 })
+            it "returns 401" do
+              response.should look_like({ status: 401 })
             end
           end
-          context 'missing the last line in signature in X-Ops-Authorization-', :authentication do
+          context "missing the last line in signature in X-Ops-Authorization-", :authentication do
             let(:auth_headers) do
               headers = manufacture_signed_headers(user, method, url, body)
               signature_headers = headers.each_key.select { |key| key =~ /X-Ops-Authorization-/ }
-              max_header = signature_headers.map { |key| key.split('-')[-1].to_i }.max
+              max_header = signature_headers.map { |key| key.split("-")[-1].to_i }.max
               headers.delete("X-Ops-Authorization-#{max_header}")
               headers
             end
-            it 'returns 401' do
-              response.should look_like({ :status => 401 })
+            it "returns 401" do
+              response.should look_like({ status: 401 })
             end
           end
-          context 'with a different method in the signature', :authentication do
+          context "with a different method in the signature", :authentication do
             let(:auth_headers) do
               manufacture_signed_headers(user, method, url, body,
-                                         :method => (method == :GET ? :POST : :GET))
+                method: (method == :GET ? :POST : :GET))
             end
-            it 'returns 401' do
-              response.should look_like({ :status => 401 })
+            it "returns 401" do
+              response.should look_like({ status: 401 })
             end
           end
-          with_modified_auth_headers('with a different path in the signature', 401,
-                                     :path => '/organizations/SomeoneElse/whatever')
-          with_modified_auth_headers('with an empty decoded signature', 401,
-                                     :string_to_sign => '')
-          with_modified_auth_headers('with a malformed decoded signature', 401,
-                                     :string_to_sign => 'XXX')
+          with_modified_auth_headers("with a different path in the signature", 401,
+            path: "/organizations/SomeoneElse/whatever")
+          with_modified_auth_headers("with an empty decoded signature", 401,
+            string_to_sign: "")
+          with_modified_auth_headers("with a malformed decoded signature", 401,
+            string_to_sign: "XXX")
           context "when signature does not match body and X-Ops-Content-Hash", :authentication do
             let(:auth_headers) do
               # Make a different signature
               other_headers = manufacture_signed_headers(user, method, url,
-                                                         '{ "noooo" => "kh11n" }')
-              other_headers.delete_if { |key,value| key !~ /X-Ops-Authorization-/ }
+                '{ "noooo" => "kh11n" }')
+              other_headers.delete_if { |key, value| key !~ /X-Ops-Authorization-/ }
               manufacture_signed_headers(user, method, url, body).merge(other_headers)
             end
-            it 'returns 401' do
-              response.should look_like({ :status => 401 })
+            it "returns 401" do
+              response.should look_like({ status: 401 })
             end
           end
         end
 
         # X-Ops-Request-Source
-        context 'when X-Ops-Request-Source is web' do
+        context "when X-Ops-Request-Source is web" do
           if Pedant::Config.pedant_platform.webui_key
             # If no webui_key defined (i.e., in pushy pedant) skip
             # these tests
 
             let(:auth_headers) do
-              manufacture_signed_headers(user, method, url, body).
-                merge({ 'X-Ops-Request-Source' => 'web' })
+              manufacture_signed_headers(user, method, url, body)
+                .merge({ "X-Ops-Request-Source" => "web" })
             end
 
-            context 'impersonating successful user' do
+            context "impersonating successful user" do
               let(:user) { impersonate(success_user) }
-              it 'succeeds' do
+              it "succeeds" do
                 response_should_be_successful
               end
             end
 
-            context 'impersonating failed user', :authentication do
+            context "impersonating failed user", :authentication do
               let(:user) { impersonate(failure_user) }
-              it 'fails' do
+              it "fails" do
                 response.should look_like forbidden_response
               end
             end
@@ -367,30 +395,30 @@ module Pedant
             # But make sure to include pending tests, in case webui_key
             # missing is accidental
 
-            context 'impersonating successful user' do
-              it 'succeeds',
-                :skip => 'no webui_key available in key store' do
-                ;
-              end
+            context "impersonating successful user" do
+              it "succeeds",
+                skip: "no webui_key available in key store" do
+
+                end
             end
 
-            context 'impersonating failed user', :authentication do
-              it 'fails',
-                :skip => 'no webui_key defined in pedant config' do
-                ;
-              end
+            context "impersonating failed user", :authentication do
+              it "fails",
+                skip: "no webui_key defined in pedant config" do
+
+                end
             end
           end
         end
 
         # X-Ops-Webkey-Tag
-        context 'X-Ops-Webkey-Tag', :skip => "Write X-Ops-Webkey-Tag tests" do
+        context "X-Ops-Webkey-Tag", skip: "Write X-Ops-Webkey-Tag tests" do
         end
 
         context "with other successful user" do
-          let (:user) { success_user }
-          let (:auth_headers) { nil }
-          it 'succeeds' do
+          let(:user) { success_user }
+          let(:auth_headers) { nil }
+          it "succeeds" do
             response_should_be_successful
           end
         end

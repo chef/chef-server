@@ -1,12 +1,12 @@
 #!/usr/bin/env ruby
 
-require 'bundler/setup' # so we don't need to type 'bundle exec' to run it
+require "bundler/setup" # so we don't need to type 'bundle exec' to run it
 
-require 'rspec/core'
-require 'pedant'
-require 'pedant/organization'
+require "rspec/core"
+require "pedant"
+require "pedant/organization"
 
-Pedant.config.suite = ["api", "running_configs"]
+Pedant.config.suite = %w{api running_configs}
 Pedant.setup(ARGV)
 puts Pedant::UI.new.info_banner
 

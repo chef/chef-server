@@ -48,9 +48,9 @@ describe "Policies API endpoint", :policies do
   end
 
   # Just until we rename the requestors
-  let(:admin_requestor){ admin_user }
+  let(:admin_requestor) { admin_user }
 
-  let(:requestor){admin_requestor}
+  let(:requestor) { admin_requestor }
 
   let(:policies_url) { api_url("/policies") }
 
@@ -166,9 +166,9 @@ describe "Policies API endpoint", :policies do
           "some_policy_name" => {
             "uri" => api_url("policies/some_policy_name"),
             "revisions" => {
-              "909c26701e291510eacdc6c06d626b9fa5350d25" => {}
-            }
-          }
+              "909c26701e291510eacdc6c06d626b9fa5350d25" => {},
+            },
+          },
         }
       end
 
@@ -178,10 +178,10 @@ describe "Policies API endpoint", :policies do
             "uri" => api_url("policy_groups/some_policy_group"),
             "policies" => {
               "some_policy_name" => {
-                "revision_id" => "909c26701e291510eacdc6c06d626b9fa5350d25"
-              }
-            }
-          }
+                "revision_id" => "909c26701e291510eacdc6c06d626b9fa5350d25",
+              },
+            },
+          },
         }
       end
 
@@ -207,17 +207,17 @@ describe "Policies API endpoint", :policies do
           "some_policy_name" => {
             "uri" => api_url("policies/some_policy_name"),
             "revisions" => {
-              "909c26701e291510eacdc6c06d626b9fa5350d25" => {}
-            }
-          }
+              "909c26701e291510eacdc6c06d626b9fa5350d25" => {},
+            },
+          },
         }
       end
 
       let(:expected_policy_group_list) do
         {
           "some_policy_group" => {
-            "uri" => api_url("policy_groups/some_policy_group")
-          }
+            "uri" => api_url("policy_groups/some_policy_group"),
+          },
         }
       end
 
@@ -251,7 +251,7 @@ describe "Policies API endpoint", :policies do
           policy_name: policy_name,
           policy_group: policy_group,
           policy_data: policy_data,
-          rev_id: rev_id_of(policy_data)
+          rev_id: rev_id_of(policy_data),
         }
       end
 
@@ -292,32 +292,32 @@ describe "Policies API endpoint", :policies do
           "some_policy_name" => {
             "uri" => api_url("policies/some_policy_name"),
             "revisions" => {
-              "909c26701e291510eacdc6c06d626b9fa5350d25" => {}
-            }
+              "909c26701e291510eacdc6c06d626b9fa5350d25" => {},
+            },
           },
           "appserver" => {
             "uri" => api_url("policies/appserver"),
             "revisions" => {
               "1111111111111111111111111111111111111111" => {},
               "2222222222222222222222222222222222222222" => {},
-              "3333333333333333333333333333333333333333" => {}
-            }
+              "3333333333333333333333333333333333333333" => {},
+            },
           },
           "db" => {
             "uri" => api_url("policies/db"),
             "revisions" => {
               "6666666666666666666666666666666666666666" => {},
               "7777777777777777777777777777777777777777" => {},
-              "8888888888888888888888888888888888888888" => {}
-            }
+              "8888888888888888888888888888888888888888" => {},
+            },
           },
           "cache" => {
             "uri" => api_url("policies/cache"),
             "revisions" => {
               "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" => {},
-              "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb" => {}
-            }
-          }
+              "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb" => {},
+            },
+          },
         }
       end
 
@@ -327,8 +327,8 @@ describe "Policies API endpoint", :policies do
           "policies" => {
             "db" => { "revision_id" => "6666666666666666666666666666666666666666" },
             "appserver" => { "revision_id" => "1111111111111111111111111111111111111111" },
-            "cache" => { "revision_id" => "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" }
-          }
+            "cache" => { "revision_id" => "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" },
+          },
         }
       end
 
@@ -338,8 +338,8 @@ describe "Policies API endpoint", :policies do
           "policies" => {
             "db" => { "revision_id" => "7777777777777777777777777777777777777777" },
             "appserver" => { "revision_id" => "2222222222222222222222222222222222222222" },
-            "cache" => { "revision_id" => "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb" }
-          }
+            "cache" => { "revision_id" => "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb" },
+          },
         }
       end
 
@@ -348,8 +348,8 @@ describe "Policies API endpoint", :policies do
           "uri" => api_url("policy_groups/prod"),
           "policies" => {
             "db" => { "revision_id" => "8888888888888888888888888888888888888888" },
-            "appserver" => { "revision_id" => "3333333333333333333333333333333333333333" }
-          }
+            "appserver" => { "revision_id" => "3333333333333333333333333333333333333333" },
+          },
         }
       end
 
@@ -431,7 +431,7 @@ describe "Policies API endpoint", :policies do
         let(:expected_body) do
           {
             "uri" => api_url("policy_groups/example-policy-group"),
-            "policies" => {}
+            "policies" => {},
           }
         end
 
@@ -460,8 +460,8 @@ describe "Policies API endpoint", :policies do
           {
             "uri" => api_url("policy_groups/example-policy-group"),
             "policies" => {
-              "some_policy_name" => { "revision_id" => "909c26701e291510eacdc6c06d626b9fa5350d25" }
-            }
+              "some_policy_name" => { "revision_id" => "909c26701e291510eacdc6c06d626b9fa5350d25" },
+            },
           }
         end
 
@@ -564,7 +564,7 @@ describe "Policies API endpoint", :policies do
         {
           "revisions" => {
             "909c26701e291510eacdc6c06d626b9fa5350d25" => {},
-          }
+          },
         }
       end
 
@@ -879,7 +879,7 @@ describe "Policies API endpoint", :policies do
         context "with a payload demonstrating validation edge conditions for 'name'" do
 
           context "when the name contains every valid character" do
-            let(:name_with_all_valid_chars) { 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqurstuvwxyz0123456789-_:.' }
+            let(:name_with_all_valid_chars) { "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqurstuvwxyz0123456789-_:." }
 
             # Have to override the URL or else we will hit validation that name in
             # document matches the one in URL
@@ -898,7 +898,7 @@ describe "Policies API endpoint", :policies do
 
             # On Chef Zero, some backends will append `.json` to a file name,
             # which can exceed the common limit of 255 characters.
-            let(:max_size_name) { 'a' * 250 }
+            let(:max_size_name) { "a" * 250 }
 
             # Have to override the URL or else we will hit validation that name in
             # document matches the one in URL
@@ -915,7 +915,7 @@ describe "Policies API endpoint", :policies do
 
           context "when a revision_id is the maximum size", :chef_zero_quirks do
 
-            let(:max_size_revision_id) { 'a' * 255 }
+            let(:max_size_revision_id) { "a" * 255 }
 
             let(:request_payload) do
               mutate_json(minimum_valid_policy_payload) do |policy|
@@ -930,7 +930,7 @@ describe "Policies API endpoint", :policies do
 
           context "when a revision_id contains every valid character" do
 
-            let(:revision_id_with_all_valid_chars) { 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqurstuvwxyz0123456789-_:.' }
+            let(:revision_id_with_all_valid_chars) { "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqurstuvwxyz0123456789-_:." }
 
             let(:request_payload) do
               mutate_json(minimum_valid_policy_payload) do |policy|
@@ -946,13 +946,13 @@ describe "Policies API endpoint", :policies do
 
           context "when a cookbook identifier is the maximum size" do
 
-            let(:max_size_identifier) { 'a' * 255 }
+            let(:max_size_identifier) { "a" * 255 }
 
             let(:request_payload) do
               mutate_json(minimum_valid_policy_payload) do |policy|
                 policy["cookbook_locks"]["edge_case"] = {
                   "identifier" => max_size_identifier,
-                  "version" => "1.2.3"
+                  "version" => "1.2.3",
                 }
               end
             end
@@ -964,13 +964,13 @@ describe "Policies API endpoint", :policies do
 
           context "when a cookbook identifier contains every valid character" do
 
-            let(:identifier_with_all_valid_chars) { 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqurstuvwxyz0123456789-_:.' }
+            let(:identifier_with_all_valid_chars) { "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqurstuvwxyz0123456789-_:." }
 
             let(:request_payload) do
               mutate_json(minimum_valid_policy_payload) do |policy|
                 policy["cookbook_locks"]["edge_case"] = {
                   "identifier" => identifier_with_all_valid_chars,
-                  "version" => "1.2.3"
+                  "version" => "1.2.3",
                 }
               end
             end
@@ -1053,7 +1053,7 @@ describe "Policies API endpoint", :policies do
 
           end
 
-          [ ' ', '+', '!' ].each do |invalid_char|
+          [ " ", "+", "!" ].each do |invalid_char|
             context "because the revision_id contains invalid character #{invalid_char}" do
 
               let(:invalid_revision_id) { "invalid" + invalid_char + "invalid" }
@@ -1112,7 +1112,7 @@ describe "Policies API endpoint", :policies do
 
           end
 
-          [ ' ', '+', '!' ].each do |invalid_char|
+          [ " ", "+", "!" ].each do |invalid_char|
             context "because the name contains invalid character '#{invalid_char}'" do
 
               let(:invalid_policy_name) { "invalid" + invalid_char + "invalid" }
@@ -1238,7 +1238,7 @@ describe "Policies API endpoint", :policies do
             let(:invalid_lock) do
               {
                 "identifier" => long_identifier,
-                "version" => "1.2.3"
+                "version" => "1.2.3",
               }
             end
 
@@ -1328,7 +1328,7 @@ describe "Policies API endpoint", :policies do
       context "PUT (add to another policy group)" do
 
         let(:other_named_policy_url) { api_url("/policy_groups/other_policy_group/policies/some_policy_name") }
-        
+
         let(:canonical_payload_response) do
           <<-PAYLOAD
             {

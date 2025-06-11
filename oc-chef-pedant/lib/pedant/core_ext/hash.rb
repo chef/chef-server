@@ -19,22 +19,22 @@ module Pedant
 
       # Stores value into the hash and returns the hash
       def with!(key, value = {})
-        self.tap { |h| h.store(key, value) }
+        tap { |h| h.store(key, value) }
       end
 
       # Clones hash, stores value, and returns new hash
       def with(key, value = {})
-        self.dup.with!(key, value)
+        dup.with!(key, value)
       end
 
       def except!(key)
-        self.tap { |h| h.delete(key) }
+        tap { |h| h.delete(key) }
       end
 
       # standard_request.except(:headers)
       # standard_resource.except(:json_class)
       def except(key)
-        self.dup.except!(key)
+        dup.except!(key)
       end
     end
   end

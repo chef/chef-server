@@ -13,11 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'openssl'
-require 'mixlib/authentication/signedheaderauth'
-require 'erubis'
-require 'pathname'
-require 'tmpdir'
+require "openssl" unless defined?(OpenSSL)
+require "mixlib/authentication/signedheaderauth"
+require "erubis" unless defined?(Erubis)
+require "pathname" unless defined?(Pathname)
+require "tmpdir" unless defined?(Dir.mktmpdir)
 
 module Pedant
   # Encapsulate a user / client of the Chef REST API
@@ -41,8 +41,8 @@ module Pedant
                             end
                       OpenSSL::PKey::RSA.new(raw)
                     when OpenSSL::PKey::RSA then key
-                    else fail "Unknown key type. Must be String or OpenSSL::PKey::RSA. #{key.inspect}"
-                    end
+                    else raise "Unknown key type. Must be String or OpenSSL::PKey::RSA. #{key.inspect}"
+                     end
       @preexisting = options[:preexisting]
       @admin = !!options[:admin]
     end
@@ -55,16 +55,16 @@ module Pedant
     # `timestamp` is a parameter in order to verify that the platform behaves appropriately
     # when a signed request has expired.
     def signing_headers(method, url, body)
-      signing_object = Mixlib::Authentication::SignedHeaderAuth.signing_object(:http_method => method,
-                                                                               :path => URI.parse(url).path,
-                                                                               :body => body,
-                                                                               :timestamp => Time.now.utc.iso8601,
-                                                                               :user_id => @name)
+      signing_object = Mixlib::Authentication::SignedHeaderAuth.signing_object(http_method: method,
+        path: URI.parse(url).path,
+        body: body,
+        timestamp: Time.now.utc.iso8601,
+        user_id: @name)
       signing_object.sign(@signing_key)
     end
 
     def knife_dir
-      @_knife_dir ||= Dir.mktmpdir('dot-chef-', File.join(Dir.tmpdir, "oc-chef-pedant"))
+      @_knife_dir ||= Dir.mktmpdir("dot-chef-", File.join(Dir.tmpdir, "oc-chef-pedant"))
     end
 
     def knife_rb_path
@@ -78,18 +78,18 @@ module Pedant
       # source file... seemed like the sanest place for it at the time
       template_data = File.read(Pathname.new(__FILE__).dirname.join("knife.rb.erb"))
       template = Erubis::Eruby.new(template_data)
-      File.open(knife_rb_path, 'w') do |f|
+      File.open(knife_rb_path, "w") do |f|
         f.write(template.result(org_name:            platform.org_name,
-                                knife_user:          name,
-                                key_dir:             knife_dir,
-                                server_url:          platform.api_url,
-                                test_repository_dir: platform.test_repository_path))
+          knife_user:          name,
+          key_dir:             knife_dir,
+          server_url:          platform.api_url,
+          test_repository_dir: platform.test_repository_path))
       end
     end
 
     # Write out the key out as a PEM file. The name of the PEM file will be "USER_NAME.pem".
     def generate_user_pem!
-      File.open("#{knife_dir}/#{name}.pem", 'w') {|f| f.write(signing_key)}
+      File.open("#{knife_dir}/#{name}.pem", "w") { |f| f.write(signing_key) }
     end
 
     # +server_url+ becomes +chef_server_url+ in the generated knife.rb
@@ -104,7 +104,7 @@ module Pedant
     end
 
     def delete!
-      fail "Define #delete!"
+      raise "Define #delete!"
     end
 
   end

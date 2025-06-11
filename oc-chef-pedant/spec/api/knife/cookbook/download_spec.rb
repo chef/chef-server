@@ -13,12 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'pedant/rspec/knife_util'
-require 'pedant/rspec/cookbook_util'
+require "pedant/rspec/knife_util"
+require "pedant/rspec/cookbook_util"
 
-describe 'knife', :knife do
-  context 'cookbook' do
-    context 'download' do
+describe "knife", :knife do
+  context "cookbook" do
+    context "download" do
       include Pedant::RSpec::KnifeUtil
       include Pedant::RSpec::CookbookUtil
       let(:cookbook_url_base) { "cookbooks" }
@@ -34,23 +34,23 @@ describe 'knife', :knife do
 
       let(:cookbook_payload) do
         new_cookbook(cookbook_name, version).tap do |c|
-          c['metadata']['providing'] = metadata_providing
+          c["metadata"]["providing"] = metadata_providing
         end
       end
       let(:metadata_providing) { { "farthing" => "0.0.1" } }
 
-      context 'as an admin' do
+      context "as an admin" do
         let(:requestor) { knife_admin }
 
-        it 'should succeed' do
-          should have_outcome :status => 0, :stderr => /Cookbook downloaded to.*#{cookbook_name}/
+        it "should succeed" do
+          should have_outcome status: 0, stderr: /Cookbook downloaded to.*#{cookbook_name}/
         end
       end
 
-      context 'as a normal user' do
+      context "as a normal user" do
         let(:requestor) { knife_user }
-        it 'should succeed' do
-          should have_outcome :status => 0, :stderr => /Cookbook downloaded to.*#{cookbook_name}/
+        it "should succeed" do
+          should have_outcome status: 0, stderr: /Cookbook downloaded to.*#{cookbook_name}/
         end
       end
     end

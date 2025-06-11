@@ -13,8 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'pedant/request'
-require 'rspec/core/shared_context'
+require "pedant/request"
+require "rspec/core/shared_context"
 
 module Pedant
   module RSpec
@@ -24,8 +24,8 @@ module Pedant
       # Creates an empty testing data bag and cleans up afterward
       #
       # TODO: find clean way to have multiple testing data bags, and ones with items in them
-      shared_context 'with testing data bag' do
-        let(:temporary_data_bag_name){unique_name('temporary_bag')}
+      shared_context "with testing data bag" do
+        let(:temporary_data_bag_name) { unique_name("temporary_bag") }
 
         before :each do
           create_data_bag(admin_requestor, new_data_bag(temporary_data_bag_name))
@@ -35,13 +35,13 @@ module Pedant
           delete_data_bag(admin_requestor, temporary_data_bag_name)
         end
 
-        let(:data_bag_name){temporary_data_bag_name}
+        let(:data_bag_name) { temporary_data_bag_name }
       end
 
-      shared_context 'with testing data bag items' do
+      shared_context "with testing data bag items" do
         # Override this if you want to put things into a different bag
-        let(:containing_data_bag){data_bag_name}
-        let(:items){fail 'Please supply an array of complete data bag item hashes for \'items\''}
+        let(:containing_data_bag) { data_bag_name }
+        let(:items) { raise "Please supply an array of complete data bag item hashes for 'items'" }
 
         before :each do
           items.each do |i|
@@ -51,7 +51,7 @@ module Pedant
 
         after :each do
           items.each do |i|
-            delete_data_bag_item(admin_requestor, containing_data_bag, i['id'])
+            delete_data_bag_item(admin_requestor, containing_data_bag, i["id"])
           end
         end
 
@@ -63,10 +63,10 @@ module Pedant
       # Can't do PUTs or DELETEs to /data
       let(:data_endpoint_method_not_allowed_response) do
         {
-          :status => 405,
-          :headers => {
-            "allow" => ["GET, POST"]
-          }
+          status: 405,
+          headers: {
+            "allow" => ["GET, POST"],
+          },
         }
       end
 
@@ -74,12 +74,12 @@ module Pedant
 
       let(:fetch_data_bag_list_full_response) do
         {
-          :status => 200,
-          :body_exact => {
+          status: 200,
+          body_exact: {
             data_bag_1_name => api_url("/data/#{data_bag_1_name}"),
 
-            data_bag_2_name => api_url("/data/#{data_bag_2_name}")
-          }
+            data_bag_2_name => api_url("/data/#{data_bag_2_name}"),
+          },
         }
       end
 
@@ -87,10 +87,10 @@ module Pedant
       # Can't PUT to a specific data bag
       let(:data_bag_endpoint_method_not_allowed_response) do
         {
-          :status => 405,
-          :headers => {
-            "allow" => ["GET, POST, DELETE"]
-          }
+          status: 405,
+          headers: {
+            "allow" => ["GET, POST, DELETE"],
+          },
         }
       end
 
@@ -98,53 +98,53 @@ module Pedant
 
       let(:fetch_full_data_bag_success_response) do
         {
-          :status => 200,
-          :body_exact => {
+          status: 200,
+          body_exact: {
             data_bag_item_1_id => api_url("/data/#{data_bag_name}/#{data_bag_item_1_id}"),
             data_bag_item_2_id => api_url("/data/#{data_bag_name}/#{data_bag_item_2_id}"),
-            data_bag_item_3_id => api_url("/data/#{data_bag_name}/#{data_bag_item_3_id}")
-          }
+            data_bag_item_3_id => api_url("/data/#{data_bag_name}/#{data_bag_item_3_id}"),
+          },
         }
       end
 
       let(:data_bag_not_found_response) { http_404_response.with(:body_exact, "error" => ["Cannot load data bag #{data_bag_name}"] ) }
 
       let(:create_data_bag_success_response) { http_201_response.with(:body_exact, "uri" => api_url("/data/#{data_bag_name}")) }
-      let(:create_data_bag_no_name_failure_response) { http_400_response.with(:body_exact, "error"=> ["Field 'name' missing"]) }
+      let(:create_data_bag_no_name_failure_response) { http_400_response.with(:body_exact, "error" => ["Field 'name' missing"]) }
       let(:create_data_bag_bad_name_failure_response) { http_400_response.with(:body_exact, "error" => ["Field 'name' invalid"]) }
       let(:create_data_bag_conflict_response) { http_409_response.with(:body_Exact, "error" => ["Data bag already exists"]) }
 
       let(:delete_data_bag_success_response) do
         {
-          :status => 200,
-          :body_exact => {
+          status: 200,
+          body_exact: {
             "name" => data_bag_name,
             "json_class" => "Chef::DataBag",
-            "chef_type" => "data_bag"
-          }
+            "chef_type" => "data_bag",
+          },
         }
       end
 
       let(:search_data_bag_no_data_bag_response) do
         {
-          :status => 404,
-          :body_exact => {
-            "error" => ["I don't know how to search for #{data_bag_name} data objects."]
-          }
+          status: 404,
+          body_exact: {
+            "error" => ["I don't know how to search for #{data_bag_name} data objects."],
+          },
         }
       end
 
       # Relies on 'data_bag_items' and 'data_bag_name' being set appropriately
       let(:search_data_bag_success_response) do
         {
-          :status => 200,
-          :body_exact => {
+          status: 200,
+          body_exact: {
             "total" => data_bag_items.size,
             "start" => 0, # TODO: test this
             "rows" => data_bag_items.map do |i|
-              search_result_databag_item(data_bag_name, i['id'], i) # TODO: clean up this signature!
-            end
-          }}
+              search_result_databag_item(data_bag_name, i["id"], i) # TODO: clean up this signature!
+            end,
+          } }
       end
 
 
@@ -154,10 +154,10 @@ module Pedant
       # Can't POST to a specific data bag
       let(:data_bag_item_endpoint_method_not_allowed_response) do
         {
-          :status => 405,
-          :headers => {
-            "allow" => ["GET, PUT, DELETE"]
-          }
+          status: 405,
+          headers: {
+            "allow" => ["GET, PUT, DELETE"],
+          },
         }
       end
 
@@ -190,8 +190,8 @@ module Pedant
 
       let(:create_data_bag_item_success_response) do
         {
-          :status => create_data_bag_item_status_code,
-          :body_exact => with_extra_data_bag_item_fields(data_bag_item)
+          status: create_data_bag_item_status_code,
+          body_exact: with_extra_data_bag_item_fields(data_bag_item),
         }
       end
 
@@ -215,32 +215,32 @@ module Pedant
 
       # Even if the body is missing the ID, it'll get added back from the URL
       let(:update_data_bag_item_missing_id_response) do
-        item = with_extra_data_bag_item_fields(updated_data_bag_item).with('id', data_bag_item_id)
+        item = with_extra_data_bag_item_fields(updated_data_bag_item).with("id", data_bag_item_id)
         http_200_response.with :body_exact, item
       end
 
       let(:delete_data_bag_item_success_response) do
         {
-          :status => 200,
-          :body_exact => {
+          status: 200,
+          body_exact: {
             "name" => "data_bag_item_#{data_bag_name}_#{data_bag_item_id}",
             "json_class" => "Chef::DataBagItem",
             "chef_type" => "data_bag_item",
             "data_bag" => data_bag_name,
-            "raw_data" => data_bag_item
-          }
+            "raw_data" => data_bag_item,
+          },
         }
       end
 
       # Shared Contexts
       ################################################################################
-      shared_context 'a successful data bag POST' do
+      shared_context "a successful data bag POST" do
 
         before :each do
           # Ensure it's not there before hand
           delete_data_bag(admin_user, data_bag_name)
           # Issue the POST and save the request for inspection later
-          @request = post(data_bags_url, requestor, :payload => data_bag)
+          @request = post(data_bags_url, requestor, payload: data_bag)
         end
 
         after :each do
@@ -248,46 +248,46 @@ module Pedant
           delete_data_bag(admin_user, data_bag_name)
         end
 
-        it 'returns success' do
+        it "returns success" do
           @request.should look_like create_data_bag_success_response
         end
-        it 'creates the data bag' do
+        it "creates the data bag" do
           get(named_data_bag_url, requestor).should look_like fetch_empty_data_bag_success_response
         end
       end # end shared context
 
-      shared_context 'an unsuccessful data bag POST' do
+      shared_context "an unsuccessful data bag POST" do
         before :each do
-          @request = post(data_bags_url, requestor, :payload => data_bag)
+          @request = post(data_bags_url, requestor, payload: data_bag)
         end
 
-        it 'returns failure' do
+        it "returns failure" do
           @request.should look_like expected_failure_response
         end
-        it 'does not create a data bag' do
+        it "does not create a data bag" do
           get(named_data_bag_url, requestor).should look_like data_bag_not_found_response
         end
       end # end shared context
 
-      shared_context 'a successful data bag item POST' do
+      shared_context "a successful data bag item POST" do
         before :each do
-          @response = post(named_data_bag_url, requestor, :payload => data_bag_item)
+          @response = post(named_data_bag_url, requestor, payload: data_bag_item)
         end
 
-        it 'returns success' do
+        it "returns success" do
           @response.should look_like create_data_bag_item_success_response
         end
-        it 'creates the resource' do
+        it "creates the resource" do
           get(data_bag_item_url, requestor).should look_like fetch_data_bag_item_success_response
         end
       end # shared context
 
-      shared_context 'an unsuccessful data bag item POST' do
+      shared_context "an unsuccessful data bag item POST" do
         before :each do
-          @response = post(named_data_bag_url, requestor, :payload => data_bag_item)
+          @response = post(named_data_bag_url, requestor, payload: data_bag_item)
         end
 
-        it 'returns failure' do
+        it "returns failure" do
           @response.should look_like expected_failure_response
         end
 
@@ -295,26 +295,26 @@ module Pedant
       end # shared context
 
 
-      shared_context 'a successful data bag item PUT' do
+      shared_context "a successful data bag item PUT" do
         before :each do
-          @response = put(data_bag_item_url, requestor, :payload => updated_data_bag_item)
+          @response = put(data_bag_item_url, requestor, payload: updated_data_bag_item)
         end
 
-        it 'returns success' do
+        it "returns success" do
           @response.should look_like update_data_bag_item_success_response
         end
 
-        it 'updates the data bag item' do
+        it "updates the data bag item" do
           get(data_bag_item_url, requestor).should look_like fetch_updated_data_bag_item_success_response
         end
       end # end shared context
 
-      shared_context 'an unsuccessful data bag item PUT' do
+      shared_context "an unsuccessful data bag item PUT" do
         before :each do
-          @response = put(data_bag_item_url, requestor, :payload => updated_data_bag_item)
+          @response = put(data_bag_item_url, requestor, payload: updated_data_bag_item)
         end
 
-        it 'should return failure', :validation do
+        it "should return failure", :validation do
           @response.should look_like expected_failure_response
         end
       end # shared context
@@ -325,8 +325,8 @@ module Pedant
       def with_extra_data_bag_item_fields(data_bag_item)
         should_be_hash(data_bag_item)
         i = data_bag_item.clone
-        i['chef_type'] = 'data_bag_item'
-        i['data_bag'] = data_bag_name
+        i["chef_type"] = "data_bag_item"
+        i["data_bag"] = data_bag_name
         i
       end
 
@@ -335,7 +335,7 @@ module Pedant
         {
           "name" => name,
           "json_class" => "Chef::DataBag",
-          "chef_type" => "data_bag"
+          "chef_type" => "data_bag",
         }
       end
 
@@ -344,7 +344,7 @@ module Pedant
         {
           "id" => id,
           "foo" => "bar",
-          "baz" => "quux"
+          "baz" => "quux",
         }
       end
 
@@ -352,8 +352,8 @@ module Pedant
         should_be_string(bag_name)
         should_be_hash(item)
         post(api_url("/data/#{bag_name}"),
-             user,
-             :payload => item)
+          user,
+          payload: item)
       end
 
       def delete_data_bag_item(user, bag_name, item_id)
@@ -369,14 +369,14 @@ module Pedant
       def create_data_bag(user, bag)
         should_be_hash(bag)
         post(api_url("/data"),
-             user,
-             :payload => bag)
+          user,
+          payload: bag)
       end
 
       def delete_data_bag(user, name)
         should_be_string(name)
         delete(api_url("/data/#{name}"),
-               user)
+          user)
       end
 
     end

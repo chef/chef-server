@@ -15,9 +15,9 @@
 
 module Pedant
   module Utility
-    require 'digest'
-    require 'base64'
-    require 'tempfile'
+    require "digest" unless defined?(Digest)
+    require "base64" unless defined?(Base64)
+    require "tempfile" unless defined?(Tempfile)
 
     # This is equivalent to what Chef itself does internally for
     # checksumming cookbook files to go into a sandbox
@@ -70,7 +70,7 @@ module Pedant
           return candidate_path
         end
       end
-      return nil # Cannot find the fixture. Raise an error?
+      nil # Cannot find the fixture. Raise an error?
     end
 
     # Returns a File object for the file located at
@@ -79,14 +79,14 @@ module Pedant
       fixture_path(filename) do |candidate_file|
         return File.open(candidate_file)
       end
-      return nil # Cannot find the fixture. Raise an error?
+      nil # Cannot find the fixture. Raise an error?
     end
 
     # Chef::ServerAPI always sets the Host header to HOSTNAME:PORT.
     # We do the same thing here since the Version 4 AWS Signature
     # scheme uses the Host header as part of the canonically signed content.
-    def self.get_host_port http, uri
-        http.get uri.request_uri, {"Host" => "#{uri.hostname}:#{uri.port}"}
+    def self.get_host_port(http, uri)
+      http.get uri.request_uri, { "Host" => "#{uri.hostname}:#{uri.port}" }
     end
   end
 end

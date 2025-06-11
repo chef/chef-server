@@ -1,13 +1,13 @@
-require 'json'
-require 'pedant/rspec/common'
+require "json"
+require "pedant/rspec/common"
 
 describe "running configs required by chef-server-ctl", :config do
-  let (:complete_config) { JSON.parse(IO.read("/etc/#{::ChefUtils::Dist::Org::LEGACY_CONF_DIR}/#{::ChefUtils::Dist::Server::SERVER}-running.json")) }
-  let (:config) { complete_config['private_chef'] }
+  let(:complete_config) { JSON.parse(IO.read("/etc/#{::ChefUtils::Dist::Org::LEGACY_CONF_DIR}/#{::ChefUtils::Dist::Server::SERVER}-running.json")) }
+  let(:config) { complete_config["private_chef"] }
 
   context "partybus upgrade framework" do
     it "postgresql/vip" do
-      expect(config["postgresql"]["vip"].to_s).to_not eq('')
+      expect(config["postgresql"]["vip"].to_s).to_not eq("")
     end
 
     it "postgresql/port" do
@@ -15,17 +15,17 @@ describe "running configs required by chef-server-ctl", :config do
     end
 
     it "postgresql/db_superuser" do
-      expect(config["postgresql"]["db_superuser"].to_s).to_not eq('')
+      expect(config["postgresql"]["db_superuser"].to_s).to_not eq("")
     end
   end
 
   context "migration 20" do
     it "opscode-erchef/sql_user" do
-      expect(config["opscode-erchef"]["sql_user"].to_s).to_not eq('')
+      expect(config["opscode-erchef"]["sql_user"].to_s).to_not eq("")
     end
 
     it "postgresql/vip" do
-      expect(config["postgresql"]["vip"].to_s).to_not eq('')
+      expect(config["postgresql"]["vip"].to_s).to_not eq("")
     end
 
     it "postgresql/port" do
@@ -48,13 +48,13 @@ describe "running configs required by chef-server-ctl", :config do
 
   context "reindex" do
     it "fips_enabled" do
-      expect(config['fips_enabled']).to be(true).or be(false)
+      expect(config["fips_enabled"]).to be(true).or be(false)
     end
 
     it "opscode-erchef/search_queue_mode" do
       expect(config["opscode-erchef"]["search_queue_mode"]).to eq("rabbitmq")
-                                                                 .or eq("batch")
-                                                                       .or eq("inline")
+        .or eq("batch")
+        .or eq("inline")
     end
 
     it "redis_lb/vip" do
@@ -89,7 +89,7 @@ describe "running configs required by chef-server-ctl", :config do
       if config["postgresql"]["external"]
         skip "not used for external postgresql"
       # These tests should not run on the frontend of a tier setup.
-      elsif (Pedant::Config.topology == "tier" && Pedant::Config.role == "frontend")
+      elsif Pedant::Config.topology == "tier" && Pedant::Config.role == "frontend"
         skip "no postgresql installed on front-end of a tier server"
       else
         expect(File.exist?(config["postgresql"]["data_dir"])).to eq(true)

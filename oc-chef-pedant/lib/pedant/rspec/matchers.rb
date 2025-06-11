@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'rspec/expectations'
+require "rspec/expectations"
 
 module RSpec
   module Matchers
@@ -27,7 +27,7 @@ module RSpec
     end
 
     class PedantHashComparator
-      def initialize(expected, mode=:strict)
+      def initialize(expected, mode = :strict)
         @expected = expected
         @mode = mode
       end
@@ -39,12 +39,13 @@ module RSpec
       end
 
       def matches?(actual)
-        return false unless actual.class == @expected.class or (actual.class == String and @expected.class == Regexp)
+        return false unless (actual.class == @expected.class) || ((actual.class == String) && (@expected.class == Regexp))
+
         if actual.is_a? Hash
           hash_matches?(actual)
         elsif actual.is_a? Array
-          @expected = {:hashwrapper => @expected}
-          result = hash_matches?({ :hashwrapper => actual } )
+          @expected = { hashwrapper: @expected }
+          result = hash_matches?({ hashwrapper: actual } )
           @expected = @expected[:hashwrapper]
           result
         else
@@ -71,7 +72,6 @@ module RSpec
           value = actual[key]
           compare_value(spec, value)
         end
-
       end
 
       def array_matches?(spec, value)
@@ -79,16 +79,17 @@ module RSpec
         # (kind of) like sets
         return true if spec == value
         return false if value.length < spec.length
-        return false if strict? and value.length != spec.length
+        return false if strict? && (value.length != spec.length)
         # Note this is going to be slow for large arrays,
         # though our actual usage shows we don't have any arrays on a
         # scale that would matter.
         return true if spec.all? do |s|
           value.any? do |v|
-            compare_value(s,v)
+            compare_value(s, v)
           end
         end
-        return false
+
+        false
       end
 
       def compare_value(spec, value)
@@ -143,7 +144,7 @@ module RSpec
       end
 
       def friendly_actual
-        if @actual.class == Hash and @actual.has_key? :hashwrapper
+        if (@actual.class == Hash) && @actual.key?(:hashwrapper)
           @actual[:hashwrapper]
         else
           @actual
@@ -159,7 +160,7 @@ module RSpec
       end
 
       def failure_message
-        """
+        "
 Expected a #{strict? ? "full" : "partial"} match of the result
 
   #{PP.pp(friendly_actual, "")}
@@ -169,11 +170,11 @@ to the spec
   #{PP.pp(@expected, "")}
 
 to succeed, but it didn't!
-"""
+"
       end
 
       def failure_message_when_negated
-        """
+        "
 Expected a #{strict? ? "full" : "partial"} match of the result
 
   #{PP.pp(friendly_actual, "")}
@@ -183,7 +184,7 @@ to the spec
   #{PP.pp(@expected, "")}
 
 to fail, but it succeeded!
-"""
+"
       end
     end
   end
@@ -195,7 +196,7 @@ end # PedantHashComparator
 RSpec::Matchers.define :have_status_code do |code|
   match do |response|
     if code.respond_to?(:any?)
-      code.any?{|c| response.code == c }
+      code.any? { |c| response.code == c }
     else
       response.code == code
     end
@@ -237,18 +238,18 @@ RSpec::Matchers.define :have_error do |code, message|
   end
 
   failure_message do |response|
-    <<-EOM
-1) HTTP status code should have been #{code} ('#{codes[code]}'); it was #{response.code}.
+    <<~EOM
+      1) HTTP status code should have been #{code} ('#{codes[code]}'); it was #{response.code}.
 
-2) The response should have contained the error message
+      2) The response should have contained the error message
 
-       #{message}
+             #{message}
 
-   Instead, the entire response body was
+         Instead, the entire response body was
 
-       #{response}
+             #{response}
 
-EOM
+    EOM
   end
 end
 
@@ -282,72 +283,72 @@ RSpec::Matchers.define :look_like do |expected_response_spec|
   include ::Pedant::JSON
 
   match do |response|
-    begin
-      things_to_check = expected_response_spec.keys
-      json_tests = [:body, :body_exact]
 
-      # Test the HTTP Status Code, if given
-      if expected_response_spec[:status]
-        expect(response).to have_status_code expected_response_spec[:status]
-      end
+    things_to_check = expected_response_spec.keys
+    json_tests = %i{body body_exact}
 
-      # If you want to check the raw, unprocessed body for some
-      # reason.  Mainly useful for asserting a response has a
-      # completely empty body.
-      if expected_response_spec[:body_raw]
-        expect(response).to eq expected_response_spec[:body_raw]
-      end
-
-      actual_headers = response.raw_headers
-      # Test the headers
-      if expected_response_spec[:headers]
-        headers = expected_response_spec[:headers]
-        headers.each do |header, value|
-          actual_headers[header].should eq value
-        end
-      end
-
-      # Test headers that shouldn't be
-      if expected_response_spec[:no_headers]
-        expected_response_spec[:no_headers].each do |header|
-          actual_headers.key?(header).should be(false)
-        end
-      end
-
-      if not (things_to_check & json_tests).empty? # '&' = intersection
-        is_error = expected_response_spec[:status] && expected_response_spec[:status] >= 400
-        if Pedant.config.verify_error_messages || !is_error
-          # Only parse the body as JSON if we're going to test it as
-          # JSON.  While all the "normal" calls to the API should return
-          # non-empty JSON bodies, some calls may not (such as trying to
-          # use a non-allowed HTTP method and getting a 405 response
-          # back with an empty body).  In cases like that, trying to
-          # parse an empty body will result in an error.
-          parsed_json = parse(response)
-
-          expected_body_spec = expected_response_spec[:body] || expected_response_spec[:body_exact]
-
-          # :body_exact implies that there should be no keys that are
-          # untested, i.e., you test everything that's there. It does not
-          # imply ordering.
-          if expected_body_spec.is_a?(Hash) or expected_body_spec.is_a?(Array)
-            if expected_response_spec[:body_exact]
-              expect(parsed_json).to strictly_match expected_body_spec
-            else # just a body spec (looser)
-              expect(parsed_json).to loosely_match expected_body_spec
-            end
-          else
-            expect(parsed_json).to eql(expected_body_spec)
-          end
-        end
-      end
-
-      true
-    rescue RSpec::Expectations::ExpectationNotMetError => e
-      @error_message = e.message
-      # fail the overall matcher
-      false
+    # Test the HTTP Status Code, if given
+    if expected_response_spec[:status]
+      expect(response).to have_status_code expected_response_spec[:status]
     end
+
+    # If you want to check the raw, unprocessed body for some
+    # reason.  Mainly useful for asserting a response has a
+    # completely empty body.
+    if expected_response_spec[:body_raw]
+      expect(response).to eq expected_response_spec[:body_raw]
+    end
+
+    actual_headers = response.raw_headers
+    # Test the headers
+    if expected_response_spec[:headers]
+      headers = expected_response_spec[:headers]
+      headers.each do |header, value|
+        actual_headers[header].should eq value
+      end
+    end
+
+    # Test headers that shouldn't be
+    if expected_response_spec[:no_headers]
+      expected_response_spec[:no_headers].each do |header|
+        actual_headers.key?(header).should be(false)
+      end
+    end
+
+    unless (things_to_check & json_tests).empty? # '&' = intersection
+      is_error = expected_response_spec[:status] && expected_response_spec[:status] >= 400
+      if Pedant.config.verify_error_messages || !is_error
+        # Only parse the body as JSON if we're going to test it as
+        # JSON.  While all the "normal" calls to the API should return
+        # non-empty JSON bodies, some calls may not (such as trying to
+        # use a non-allowed HTTP method and getting a 405 response
+        # back with an empty body).  In cases like that, trying to
+        # parse an empty body will result in an error.
+        parsed_json = parse(response)
+
+        expected_body_spec = expected_response_spec[:body] || expected_response_spec[:body_exact]
+
+        # :body_exact implies that there should be no keys that are
+        # untested, i.e., you test everything that's there. It does not
+        # imply ordering.
+        if expected_body_spec.is_a?(Hash) || expected_body_spec.is_a?(Array)
+          if expected_response_spec[:body_exact]
+            expect(parsed_json).to strictly_match expected_body_spec
+          else # just a body spec (looser)
+            expect(parsed_json).to loosely_match expected_body_spec
+          end
+        else
+          expect(parsed_json).to eql(expected_body_spec)
+        end
+      end
+    end
+
+    true
+  rescue RSpec::Expectations::ExpectationNotMetError => e
+    @error_message = e.message
+    # fail the overall matcher
+    false
+
   end
 
   description do
@@ -371,7 +372,7 @@ end
 
 RSpec::Matchers.define :have_outcome do |outcome_spec|
   match do |executed_shellout_command|
-    valid_keys =  [:status, :stdout, :stderr]
+    valid_keys = %i{status stdout stderr}
     if outcome_spec.keys & valid_keys == []
       throw "You did not specify values for any of #{valid_keys}!"
     end

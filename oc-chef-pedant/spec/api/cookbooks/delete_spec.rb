@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'pedant/rspec/cookbook_util'
+require "pedant/rspec/cookbook_util"
 
 describe "Cookbooks API endpoint", :cookbooks, :cookbooks_delete do
 
@@ -55,7 +55,7 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_delete do
 
         should_respond_with 404
 
-        context 'with bad version', :validation do
+        context "with bad version", :validation do
           let(:expected_response) { invalid_cookbook_version_exact_response }
           let(:cookbook_version) { "1.2.3.4" }
           should_respond_with 400
@@ -90,16 +90,16 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_delete do
           let(:recipe_content) { "hello-#{unique_suffix}-#{rand(1000)}-#{rand(1000)}" }
           let(:recipe_spec) do
             {
-              :name => recipe_name,
-              :content => recipe_content
+              name: recipe_name,
+              content: recipe_content,
             }
           end
 
           let(:cookbooks) do
             {
               cookbook_name => {
-                cookbook_version => [recipe_spec]
-              }
+                cookbook_version => [recipe_spec],
+              },
             }
           end
 
@@ -111,7 +111,7 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_delete do
 
           it "should cleanup unused checksum data in s3/bookshelf" do
             verify_checksum_cleanup(:recipes) do
-              response.should look_like(:status => 200)
+              response.should look_like(status: 200)
             end
           end
 
@@ -119,14 +119,14 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_delete do
       end # context for existing cookbooks
 
       context "with permissions for" do
-        let(:cookbook_name) {"delete-cookbook"}
+        let(:cookbook_name) { "delete-cookbook" }
         let(:cookbook_version) { "0.0.1" }
         let(:not_found_msg) { ["Cannot find a cookbook named delete-cookbook with version 0.0.1"] }
 
         before(:each) { make_cookbook(admin_user, cookbook_name, cookbook_version) }
         after(:each) { delete_cookbook(admin_user, cookbook_name, cookbook_version) }
 
-        context 'as admin user' do
+        context "as admin user" do
           let(:expected_response) { delete_cookbook_success_response }
 
           it "should respond with 200 (\"OK\") and be deleted" do
@@ -135,7 +135,7 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_delete do
           end # it admin user returns 200
         end # as admin user
 
-        context 'as normal user', :authorization do
+        context "as normal user", :authorization do
           let(:expected_response) { delete_cookbook_success_response }
 
           let(:requestor) { normal_user }
@@ -145,7 +145,7 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_delete do
           end # it admin user returns 200
         end # with normal user
 
-        context 'as a user outside of the organization', :authorization do
+        context "as a user outside of the organization", :authorization do
           let(:expected_response) { unauthorized_access_credential_response }
           let(:requestor) { outside_user }
 
@@ -155,7 +155,7 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_delete do
           end
         end # it outside user returns 403
 
-        context 'with invalid user', :authorization do
+        context "with invalid user", :authorization do
           let(:expected_response) { invalid_credential_exact_response }
           let(:requestor) { invalid_user }
 

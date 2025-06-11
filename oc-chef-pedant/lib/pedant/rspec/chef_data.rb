@@ -13,11 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'pedant/concern'
-require 'pedant/json'
-require 'pedant/request'
-require 'pedant/rspec/common_responses'
-require 'pedant/rspec/http_status_codes'
+require "pedant/concern"
+require "pedant/json"
+require "pedant/request"
+require "pedant/rspec/common_responses"
+require "pedant/rspec/http_status_codes"
 
 module Pedant
   module RSpec
@@ -32,7 +32,7 @@ module Pedant
         #   client 'x', '{ "name": "x" }'
         def self.client(name, client)
           before(:each) do
-            post(api_url("clients/#{name}"), admin_user, :payload => client).should look_like({ :status => 201 })
+            post(api_url("clients/#{name}"), admin_user, payload: client).should look_like({ status: 201 })
           end
           after(:each) { delete(api_url("clients/#{name}"), admin_user) }
         end
@@ -47,9 +47,9 @@ module Pedant
         #     'item2' => '{ "id": "item2" }'
         def self.data_bag(name, data_bag)
           before(:each) do
-            post(api_url("data"), admin_user, :payload => "{ \"name\": \"#{name}\" }").should look_like({ :status => 201 })
+            post(api_url("data"), admin_user, payload: "{ \"name\": \"#{name}\" }").should look_like({ status: 201 })
             data_bag.each do |item_name, item|
-              post(api_url("data/#{name}"), admin_user, :payload => item).should look_like({ :status => 201 })
+              post(api_url("data/#{name}"), admin_user, payload: item).should look_like({ status: 201 })
             end
           end
           after(:each) do
@@ -67,7 +67,7 @@ module Pedant
         #   environment 'x', '{ "name": "x" }'
         def self.environment(name, environment)
           before(:each) do
-            post(api_url("environments"), admin_user, :payload => environment).should look_like({ :status => 201 })
+            post(api_url("environments"), admin_user, payload: environment).should look_like({ status: 201 })
           end
           after(:each) { delete(api_url("environments/#{name}"), admin_user) }
         end
@@ -79,7 +79,7 @@ module Pedant
         #   node 'x', '{ "name": "x" }'
         def self.node(name, node)
           before(:each) do
-            post(api_url("nodes"), admin_user, :payload => node).should look_like({ :status => 201 })
+            post(api_url("nodes"), admin_user, payload: node).should look_like({ status: 201 })
           end
           after(:each) { delete(api_url("nodes/#{name}"), admin_user) }
         end
@@ -91,7 +91,7 @@ module Pedant
         #   role 'x', '{ "name": "x" }'
         def self.role(name, role)
           before(:each) do
-            post(api_url("roles"), admin_user, :payload => role).should look_like({ :status => 201 })
+            post(api_url("roles"), admin_user, payload: role).should look_like({ status: 201 })
           end
           after(:each) { delete(api_url("roles/#{name}"), admin_user) }
         end

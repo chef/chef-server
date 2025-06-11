@@ -32,8 +32,8 @@ chef_server_uid = "private-chef_#{Process.pid}"
 # include the `:create_me => true` pair.  If you wish to use an
 # existing organization for tests, you should supply a `:validator_key
 # => "/full/path/to/key.pem"` pair
-org({:name => "pedant_testorg_#{chef_server_uid}",
-     :create_me => true})
+org({ name: "pedant_testorg_#{chef_server_uid}",
+     create_me: true })
 
 validate_org_creation true
 
@@ -100,27 +100,27 @@ ldap_testing false
 # Put :key => nil if there is no value
 ldap({
        # Change this to your AD samAccountName (i.e., my login name) for your test server
-       :account_name => "your_ldap_account_name",
+       account_name: "your_ldap_account_name",
        # Change this to your current AD password for your test server
-       :account_password => "your_ldap_password!",
+       account_password: "your_ldap_password!",
        # Your first name in AD
-       :first_name => "Firsname",
+       first_name: "Firsname",
        # Your last name in AD
-       :last_name => "Lastname",
+       last_name: "Lastname",
        # Your display name in AD, likely "Firstname Lastname"
-       :display_name => "Firstname Lastname",
+       display_name: "Firstname Lastname",
        # Your common name in AD, likely "Firstname Lastname"
-       :common_name => "Firstname Lastname",
+       common_name: "Firstname Lastname",
        # Your email in AD
-       :email => "your@email.com",
+       email: "your@email.com",
        # Likely nil
-       :city => nil,
+       city: nil,
        # Likely nil
-       :country => nil,
+       country: nil,
        # Set to "linked" or "unlinked" depending on the status of your account in AD
-       :status => "unlinked",
+       status: "unlinked",
        # Set to true or false, depending on your user state in Chef itself
-       :recovery_authentication_enabled => false
+       recovery_authentication_enabled: false,
      })
 
 # SSL protocol version to use for secure communications
@@ -135,55 +135,55 @@ ssl_version :TLSv1
 # which should be the fully-qualified path /on the machine Pedant is
 # running on/ to a private key for that user.
 
-superuser_name 'pivotal'
-superuser_key  '/etc/opscode/pivotal.pem'
-webui_key '/etc/opscode/webui_priv.pem'
-stats_user 'statsuser'
+superuser_name "pivotal"
+superuser_key  "/etc/opscode/pivotal.pem"
+webui_key "/etc/opscode/webui_priv.pem"
+stats_user "statsuser"
 
 requestors({
-             :clients => {
-               :admin => {
-                 :name => "pedant_admin_client_#{chef_server_uid}",
-                 :create_me => true,
-                 :create_knife => true,
-                 :admin => true
+             clients: {
+               admin: {
+                 name: "pedant_admin_client_#{chef_server_uid}",
+                 create_me: true,
+                 create_knife: true,
+                 admin: true,
                },
-               :non_admin => {
-                 :name => "pedant_client_#{chef_server_uid}",
-                 :create_me => true,
-                 :create_knife => true,
+               non_admin: {
+                 name: "pedant_client_#{chef_server_uid}",
+                 create_me: true,
+                 create_knife: true,
                },
-               :bad => {
-                 :name => "bad_client_#{chef_server_uid}",
-                 :create_me => true,
-                 :bogus => true
-               }
+               bad: {
+                 name: "bad_client_#{chef_server_uid}",
+                 create_me: true,
+                 bogus: true,
+               },
              },
 
-             :users => {
+             users: {
                # An administrator in the testing organization
-               :admin => {
-                 :name => "pedant_admin_user_#{chef_server_uid}",
-                 :create_me => true,
-                 :create_knife => true,
-                 :admin => true
+               admin: {
+                 name: "pedant_admin_user_#{chef_server_uid}",
+                 create_me: true,
+                 create_knife: true,
+                 admin: true,
                },
 
-               :non_admin => {
-                 :name => "pedant_user_#{chef_server_uid}",
-                 :create_me => true,
-                 :create_knife => true,
-                 :admin => false
+               non_admin: {
+                 name: "pedant_user_#{chef_server_uid}",
+                 create_me: true,
+                 create_knife: true,
+                 admin: false,
                },
 
                # A user that is not a member of the testing organization
-               :bad => {
-                 :name => "pedant_nobody_#{chef_server_uid}",
-                 :create_me => true,
-                 :create_knife => true,
-                 :associate => false
+               bad: {
+                 name: "pedant_nobody_#{chef_server_uid}",
+                 create_me: true,
+                 create_knife: true,
+                 associate: false,
                },
-             }
+             },
            })
 
 # To facilitate testing, we have added a org creation validation tests.

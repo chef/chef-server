@@ -14,13 +14,13 @@
 # until a longer-term solution (such as submitting a patch upstream) is
 # implemented.
 
-require 'net/http'
-require 'timeout'
+require "net/http" unless defined?(Net::HTTP)
+require "timeout" unless defined?(Timeout)
 
 module Net
   class HTTP < Protocol
     def connect
-      if proxy? then
+      if proxy?
         conn_address = proxy_address
         conn_port    = proxy_port
       else
@@ -42,13 +42,13 @@ module Net
       if use_ssl?
         if proxy?
           plain_sock = BufferedIO.new(s, read_timeout: @read_timeout,
-                                      continue_timeout: @continue_timeout,
-                                      debug_output: @debug_output)
+            continue_timeout: @continue_timeout,
+            debug_output: @debug_output)
           buf = "CONNECT #{@address}:#{@port} HTTP/#{HTTPVersion}\r\n"
           # This is the only bit that we actually monkeypatch
           buf << "Host: #{host_header}\r\n"
           if proxy_user
-            credential = ["#{proxy_user}:#{proxy_pass}"].pack('m0')
+            credential = ["#{proxy_user}:#{proxy_pass}"].pack("m0")
             buf << "Proxy-Authorization: Basic #{credential}\r\n"
           end
           buf << "\r\n"
@@ -57,11 +57,11 @@ module Net
           # assuming nothing left in buffers after successful CONNECT response
         end
 
-        ssl_parameters = Hash.new
+        ssl_parameters = {}
         iv_list = instance_variables
         SSL_IVNAMES.each_with_index do |ivname, i|
-          if iv_list.include?(ivname) and
-            value = instance_variable_get(ivname)
+          if iv_list.include?(ivname) &&
+              ((value = instance_variable_get(ivname)))
             ssl_parameters[SSL_ATTRIBUTES[i]] = value if value
           end
         end
@@ -72,8 +72,8 @@ module Net
         s.sync_close = true
         # Server Name Indication (SNI) RFC 3546
         s.hostname = @address if s.respond_to? :hostname=
-        if @ssl_session and
-           Process.clock_gettime(Process::CLOCK_REALTIME) < @ssl_session.time.to_f + @ssl_session.timeout
+        if @ssl_session &&
+            (Process.clock_gettime(Process::CLOCK_REALTIME) < @ssl_session.time.to_f + @ssl_session.timeout)
           s.session = @ssl_session if @ssl_session
         end
         ssl_socket_connect(s, @open_timeout)
@@ -84,8 +84,8 @@ module Net
         D "SSL established"
       end
       @socket = BufferedIO.new(s, read_timeout: @read_timeout,
-                               continue_timeout: @continue_timeout,
-                               debug_output: @debug_output)
+        continue_timeout: @continue_timeout,
+        debug_output: @debug_output)
       on_connect
     rescue => exception
       if s
@@ -94,27 +94,28 @@ module Net
       end
       raise
     end
-    private :connect 
+    private :connect
 
-    def host_header		
-      if ipv6_address?(@address)		
+    def host_header
+      if ipv6_address?(@address)
         "[#{@address}]:#{@port}"
-      else		
+      else
         "#{@address}:#{@port}"
-      end		
-    end		
-		
-    # This does not verify that the address is a		
-    # valid ipv6 address. Rather, it assumes that any		
-    # address string that contains a colon is an		
-    # ipv6 address. Since colons are not allowed in		
-    # domain names, it should fail on a name lookup.		
-    # By the time this is called, the socket should be		
-    # open, so whatever address is being used would		
-    # technically be a valid one.		
-    def ipv6_address?(addr)		
-      return true if addr =~ /:/		
-      return false		
+      end
+    end
+
+    # This does not verify that the address is a
+    # valid ipv6 address. Rather, it assumes that any
+    # address string that contains a colon is an
+    # ipv6 address. Since colons are not allowed in
+    # domain names, it should fail on a name lookup.
+    # By the time this is called, the socket should be
+    # open, so whatever address is being used would
+    # technically be a valid one.
+    def ipv6_address?(addr)
+      return true if addr =~ /:/
+
+      false
     end
   end
 end

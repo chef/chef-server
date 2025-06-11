@@ -13,26 +13,26 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'pedant/rspec/knife_util'
-require 'securerandom'
+require "pedant/rspec/knife_util"
+require "securerandom"
 
-describe 'knife', :knife do
-  context 'node' do
-    context 'list' do
+describe "knife", :knife do
+  context "node" do
+    context "list" do
       include Pedant::RSpec::KnifeUtil
       include Pedant::RSpec::KnifeUtil::Node
 
       let(:command) { "knife node list -c #{knife_config}" }
       after(:each)  { knife "node delete #{node_name} -c #{knife_config} --yes" }
 
-      context 'as an admin' do
+      context "as an admin" do
         let(:requestor) { knife_admin }
 
-        it 'should succeed' do
+        it "should succeed" do
           knife "node create #{node_name} -c #{knife_config} --disable-editing"
 
           # Runs knife node list
-          should have_outcome :status => 0, :stdout => /#{node_name}/
+          should have_outcome status: 0, stdout: /#{node_name}/
         end
       end
 

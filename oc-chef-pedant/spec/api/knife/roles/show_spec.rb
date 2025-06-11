@@ -13,12 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'pedant/rspec/knife_util'
-require 'securerandom'
+require "pedant/rspec/knife_util"
+require "securerandom"
 
-describe 'knife', :knife do
-  context 'role' do
-    context 'show [ROLE]' do
+describe "knife", :knife do
+  context "role" do
+    context "show [ROLE]" do
       include Pedant::RSpec::KnifeUtil
       include Pedant::RSpec::KnifeUtil::Role
 
@@ -27,27 +27,27 @@ describe 'knife', :knife do
 
       after(:each) { knife "role delete #{role_name} -c #{knife_config} --yes" }
 
-      context 'with existing role' do
-        context 'as an admin' do
+      context "with existing role" do
+        context "as an admin" do
           let(:requestor) { knife_admin }
 
-          it 'should succeed' do
+          it "should succeed" do
             assume_existing_role!
 
             # Runs knife role from file
-            should have_outcome :status => 0, :stdout => /name:\s+#{role_name}/
+            should have_outcome status: 0, stdout: /name:\s+#{role_name}/
           end
         end
       end
 
-      context 'without existing role' do
+      context "without existing role" do
         let(:role_name) { "does_not_exist_#{rand(1000)}" }
 
-        context 'as an admin' do
+        context "as an admin" do
           let(:requestor) { knife_admin }
 
-          it 'should fail' do
-            should have_outcome :status => 100, :stderr => /The object you are looking for could not be found/
+          it "should fail" do
+            should have_outcome status: 100, stderr: /The object you are looking for could not be found/
           end
         end
       end

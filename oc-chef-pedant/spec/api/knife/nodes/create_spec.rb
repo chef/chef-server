@@ -13,39 +13,39 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'pedant/rspec/knife_util'
+require "pedant/rspec/knife_util"
 
-describe 'knife', :knife do
-  context 'node' do
-    context 'create' do
+describe "knife", :knife do
+  context "node" do
+    context "create" do
       include Pedant::RSpec::KnifeUtil
       include Pedant::RSpec::KnifeUtil::Node
 
       let(:command) { "knife node create #{node_name} -c #{knife_config} --disable-editing" }
       after(:each)  { knife "node delete #{node_name} -c #{knife_config} --yes" }
 
-      context 'without existing node of the same name' do
-        context 'as an admin' do
+      context "without existing node of the same name" do
+        context "as an admin" do
           let(:requestor) { knife_admin }
 
-          it 'should succeed' do
-            should have_outcome :status => 0, :stdout => /Created node\[#{node_name}\]/
+          it "should succeed" do
+            should have_outcome status: 0, stdout: /Created node\[#{node_name}\]/
           end
         end
       end
 
-      context 'with an existing node of the same name' do
-        context 'as an admin' do
+      context "with an existing node of the same name" do
+        context "as an admin" do
           let(:requestor) { knife_admin }
 
-          it 'should fail' do
-            pending 'CHEF-982: `knife node create` does not report name conflicts'
+          it "should fail" do
+            pending "CHEF-982: `knife node create` does not report name conflicts"
             # Create a node with the same name
-            #knife "node create #{node_name} -c #{knife_config} --disable-editing"
+            # knife "node create #{node_name} -c #{knife_config} --disable-editing"
             post(api_url("/nodes"), platform.admin_user, payload: { "name" => node_name })
 
             # Run knife a second time
-            should have_outcome :status => 0, :stderr => /Node #{node_name} already exists/
+            should have_outcome status: 0, stderr: /Node #{node_name} already exists/
           end
         end
       end

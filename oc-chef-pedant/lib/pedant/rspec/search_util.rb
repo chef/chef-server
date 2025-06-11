@@ -13,11 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'pedant/concern'
-require 'pedant/request'
-require 'pedant/utility'
-require 'rspec/core/shared_context'
-require 'addressable/uri'
+require "pedant/concern"
+require "pedant/request"
+require "pedant/utility"
+require "rspec/core/shared_context"
+require "addressable/uri" unless defined?(Addressable::URI)
 
 module Pedant
   module RSpec
@@ -47,7 +47,7 @@ module Pedant
            "recipe[#{cookbook_name}]",
            "recipe[#{cookbook_name}::default]",
            "recipe[#{cookbook_name}::default@#{version}]",
-           "recipe[#{cookbook_name}@#{version}]"
+           "recipe[#{cookbook_name}@#{version}]",
           ]
         end
 
@@ -58,7 +58,7 @@ module Pedant
           stripped_name = strip_recipe(recipe_name)
           [
            "recipe:#{stripped_name}",
-           "run_list:recipe[#{stripped_name}]"
+           "run_list:recipe[#{stripped_name}]",
           ]
         end
 
@@ -108,27 +108,27 @@ module Pedant
           valid_object_type?(object_type)
           it "should return filtered results when ACL on #{object_type}s exist", skip: !Pedant::Config.search_acls? do
             restrict_permissions_to "/#{object_type}s/#{base_object_name}_3",
-                                    normal_user => ["delete"],
-                                    admin_user => ["read"]
+              normal_user => ["delete"],
+              admin_user => ["read"]
 
             # A little bit of confirmation that the ACL has applied correctly
             n = get(api_url("/#{object_type}s/#{base_object_name}_3"), normal_user)
-            n.should look_like({:status => 403})
+            n.should look_like({ status: 403 })
 
             with_search_polling do
               admin_response = get("#{request_url}/?q=name:*", admin_user)
-              parse(admin_response)["rows"].any? {|row| row["name"] == "#{base_object_name}_3"}.should be true
+              parse(admin_response)["rows"].any? { |row| row["name"] == "#{base_object_name}_3" }.should be true
               r = get("#{request_url}/?q=name:*", normal_user)
-              parse(r)["rows"].any? {|row| row["name"] == "#{base_object_name}_3"}.should be false
+              parse(r)["rows"].any? { |row| row["name"] == "#{base_object_name}_3" }.should be false
             end
           end
         end
 
         def perform_a_search_that_returns_no_results(object_type)
           valid_object_type?(object_type)
-          context 'a search that should return no results' do
-            let(:request_query_parameters){"q=no_way:no_how"}
-            let(:search_result_items){[]}
+          context "a search that should return no results" do
+            let(:request_query_parameters) { "q=no_way:no_how" }
+            let(:search_result_items) { [] }
 
             it "should have multiple #{object_type}s on the system (for our search to ignore)" do
               r = get(api_url("/#{object_type}s"), requestor)
@@ -143,7 +143,7 @@ module Pedant
               parsed_body.keys.length.should be > 0
             end
 
-            performing_a_search 'returns 200, with no search results'
+            performing_a_search "returns 200, with no search results"
           end
         end
 
@@ -151,24 +151,24 @@ module Pedant
           context "invalid partial search requests" do
             bad_payloads = [
                             "z[$blah",
-                            {'a_string' => 'blah'},
-                            {'a_number' => 1},
-                            {'a_true' => true},
-                            {'an_object' => {'oop' => true}},
-                            {'an_array' => [1, 2]},
-                            {'an_array' => ['a', 2]}
+                            { "a_string" => "blah" },
+                            { "a_number" => 1 },
+                            { "a_true" => true },
+                            { "an_object" => { "oop" => true } },
+                            { "an_array" => [1, 2] },
+                            { "an_array" => ["a", 2] },
                            ]
 
             bad_payloads.each do |bad|
               context "with a request body of '#{bad}'", :validation do
-                let(:request_query_parameters){"q=name:make-no-difference"}
-                let(:request_payload){bad}
+                let(:request_query_parameters) { "q=name:make-no-difference" }
+                let(:request_payload) { bad }
                 it "fails" do
-                  should look_like({:status => 400}) #bad_request_response
+                  should look_like({ status: 400 }) # bad_request_response
                 end # it fails
               end # with a request body of
             end # each
-          end  # invalid partial search
+          end # invalid partial search
         end # test_bad_partial_search_bodies
 
         # Simple helper method to ensure we're using the correct Chef
@@ -176,7 +176,7 @@ module Pedant
         # methods, but could conceivably be used elsewhere in the
         # future.
         def valid_object_type?(object_type)
-          unless ["environment", "role", "node", "client"].include?(object_type.to_s)
+          unless %w{environment role node client}.include?(object_type.to_s)
             raise "#{object_type} is not a valid object type!"
           end
         end
@@ -205,7 +205,7 @@ module Pedant
         # object_names => An array of the names of all objects created
         #
         # objects => An array of all the objects created
-        def setup_multiple_objects(object_type, number_to_create=5)
+        def setup_multiple_objects(object_type, number_to_create = 5)
           # Basic check
           valid_object_type?(object_type)
 
@@ -222,10 +222,10 @@ module Pedant
           object_add_method_symbol = "add_#{object_type}".to_sym
           object_delete_method_symbol = "delete_#{object_type}".to_sym
 
-          let(:base_object_name){unique_name("multiple_#{object_type}")}
-          let(:object_names){(1..number_to_create).map{|n| "#{base_object_name}_#{n}"}}
+          let(:base_object_name) { unique_name("multiple_#{object_type}") }
+          let(:object_names) { (1..number_to_create).map { |n| "#{base_object_name}_#{n}" } }
           # TODO: come up with a way to pass in name/body pairs for more flexibility?
-          let(:objects){object_names.map{|n| send(object_creator_method_symbol, n)}}
+          let(:objects) { object_names.map { |n| send(object_creator_method_symbol, n) } }
 
           before :each do
             objects.each do |o|
@@ -235,7 +235,7 @@ module Pedant
 
           after :each do
             objects.each do |o|
-              send(object_delete_method_symbol, admin_requestor, o['name'])
+              send(object_delete_method_symbol, admin_requestor, o["name"])
             end
           end
         end
@@ -274,9 +274,9 @@ module Pedant
           perform_a_search_that_returns_no_results(object_type)
 
           context "when searching for a single #{object_type} by name", :smoke do
-            let(:search_target_name){send(name_block_symbol)}
-            let(:request_query_parameters){"q=name:#{search_target_name}"}
-            let(:search_result_items){[send(object_block_symbol)]}
+            let(:search_target_name) { send(name_block_symbol) }
+            let(:request_query_parameters) { "q=name:#{search_target_name}" }
+            let(:search_result_items) { [send(object_block_symbol)] }
 
             # This is just a basic check
             it "should have more than just the target of our #{object_type} search on the system" do
@@ -303,8 +303,8 @@ module Pedant
             # `setup_multiple_objects`, but should not return the
             # single object created by the 'with temporary testing
             # XXX' context.
-            let(:request_query_parameters){"q=name:#{base_object_name}*"} # <- note the '*'
-            let(:search_result_items){objects}
+            let(:request_query_parameters) { "q=name:#{base_object_name}*" } # <- note the '*'
+            let(:search_result_items) { objects }
 
             # Another basic check
             it "should have more than just the targets of our #{object_type} search on the system" do
@@ -392,8 +392,7 @@ module Pedant
         # If `smoke` is true, then the "basic" partial search test
         # generated by this macro will be tagged as a smoke test.  By
         # default, no tests are tagged as such.
-        def can_perform_basic_partial_search_for(object_type, attribute_key, attribute_value, options={})
-
+        def can_perform_basic_partial_search_for(object_type, attribute_key, attribute_value, options = {})
           # Pull out optional parameters
           attribute_path = options[:attribute_path] || []
           smoke = options[:smoke] || false
@@ -409,7 +408,7 @@ module Pedant
             # All 'with temporary testing XXX' contexts allow you to
             # override the value of any object attribute by passing in
             # a `let` block named `XXX_ATTRIBUTE`
-            let("#{object_type}_#{attribute_key}".to_sym) {attribute_value}
+            let("#{object_type}_#{attribute_key}".to_sym) { attribute_value }
           end
 
           # This will be used to query the name of the object just
@@ -425,10 +424,10 @@ module Pedant
               "possibly_nested" => real_search_path(object_type, attribute_key, attribute_path),
               "the_name" => ["name"],
               # there is no data in the object corresponding to this path
-              "not_found" => ["foo", "bar", "baz", "totally_not_a_real_field"],
-              "empty" => []
+              "not_found" => %w{foo bar baz totally_not_a_real_field},
+              "empty" => [],
             }
-          let(:request_payload){partial_search_payload}
+          let(:request_payload) { partial_search_payload }
 
           # When we do a partial search targeted toward a single
           # object, this is what we expect to get back.
@@ -436,16 +435,16 @@ module Pedant
             [{
                "url" => api_url("/#{object_type}s/#{send(object_name_symbol)}"),
                "data" => {
-                  # This is getting the value from the JSON as posted
-                  # to create the object, which is not necessarily the
-                  # same as the data that is ultimately indexed (like
-                  # nodes)
-                 "possibly_nested"=> possibly_nested_target((send object_type.to_sym),
-                                                            attribute_key, attribute_path),
+                 # This is getting the value from the JSON as posted
+                 # to create the object, which is not necessarily the
+                 # same as the data that is ultimately indexed (like
+                 # nodes)
+                 "possibly_nested" => possibly_nested_target((send object_type.to_sym),
+                   attribute_key, attribute_path),
                  "the_name" => send(object_name_symbol),
                  "not_found" => nil,
-                 "empty" => nil
-               }
+                 "empty" => nil,
+               },
              }]
           end
 
@@ -456,41 +455,41 @@ module Pedant
           # item bodies onto `single_search_expected_results`
           let(:multiple_search_expected_results) do
             single_search_expected_results +
-            objects.map{|o|
-              {
-                "url" => api_url("/#{object_type}s/#{o['name']}"),
-                "data" => {
-                  # This is getting the value from the JSON as posted
-                  # to create the object, which is not necessarily the
-                  # same as the data that is ultimately indexed (like
-                  # nodes)
-                  "possibly_nested"=> possibly_nested_target(o, attribute_key, attribute_path),
-                  "the_name" => o['name'],
-                  "not_found" => nil,
-                  "empty" => nil
+              objects.map { |o|
+                {
+                  "url" => api_url("/#{object_type}s/#{o["name"]}"),
+                  "data" => {
+                    # This is getting the value from the JSON as posted
+                    # to create the object, which is not necessarily the
+                    # same as the data that is ultimately indexed (like
+                    # nodes)
+                    "possibly_nested" => possibly_nested_target(o, attribute_key, attribute_path),
+                    "the_name" => o["name"],
+                    "not_found" => nil,
+                    "empty" => nil,
+                  },
                 }
               }
-            }
           end
 
           context "targeted toward no #{object_type}s with body of #{partial_search_payload}" do
-            let(:request_query_parameters){"q=no_way:no_how"} # This isn't going to find anything
-            let(:search_result_items){ [] }
-            performing_a_search 'should succeed, but return nothing'
+            let(:request_query_parameters) { "q=no_way:no_how" } # This isn't going to find anything
+            let(:search_result_items) { [] }
+            performing_a_search "should succeed, but return nothing"
           end
 
           context "targeted toward one #{object_type} with body of #{partial_search_payload}" do
             # Isolate query to the object we just created
 
-            let(:request_query_parameters){"q=name:#{send(object_name_symbol)}"}
-            let(:search_result_items){single_search_expected_results}
+            let(:request_query_parameters) { "q=name:#{send(object_name_symbol)}" }
+            let(:search_result_items) { single_search_expected_results }
             performing_a_search "should succeed, and return the single #{object_type}"
           end
 
-          context "targeted toward many #{object_type}s with body of #{partial_search_payload}", :smoke => smoke do
+          context "targeted toward many #{object_type}s with body of #{partial_search_payload}", smoke: smoke do
             # Isolate the query to our test objects + our custom created one, ignoring anything that Pedant did not make
-            let(:request_query_parameters){"q=name:#{send(object_name_symbol)}%20OR%20name:#{base_object_name}*"}
-            let(:search_result_items){multiple_search_expected_results}
+            let(:request_query_parameters) { "q=name:#{send(object_name_symbol)}%20OR%20name:#{base_object_name}*" }
+            let(:search_result_items) { multiple_search_expected_results }
             performing_a_search "should succeed, and return multiple #{object_type}s"
           end
         end # can_perform_basic_partial_search_for
@@ -499,15 +498,15 @@ module Pedant
           valid_object_type? object_type
           it "should return filtered results when ACLs exist", skip: !Pedant::Config.search_acls? do
             restrict_permissions_to "/#{object_type}s/#{base_object_name}_3",
-                                    normal_user => ["delete"],
-                                    admin_user => ["read"]
+              normal_user => ["delete"],
+              admin_user => ["read"]
 
             payload = { "name" => ["name"] }
             with_search_polling do
-              admin_response = post("#{request_url}?q=name:*", admin_user, {payload: payload})
-              parse(admin_response)["rows"].any? {|row| row["data"]["name"] == "#{base_object_name}_3"}.should be true
-              r = post("#{request_url}?q=name:*", normal_user, {payload: payload})
-              parse(r)["rows"].any? {|row| row["data"]["name"] == "#{base_object_name}_3"}.should be false
+              admin_response = post("#{request_url}?q=name:*", admin_user, { payload: payload })
+              parse(admin_response)["rows"].any? { |row| row["data"]["name"] == "#{base_object_name}_3" }.should be true
+              r = post("#{request_url}?q=name:*", normal_user, { payload: payload })
+              parse(r)["rows"].any? { |row| row["data"]["name"] == "#{base_object_name}_3" }.should be false
             end
           end
         end
@@ -520,8 +519,8 @@ module Pedant
         # such, those keys should not be present at the beginning of
         # the search path.
         def real_search_path(object_type, key, sub_path)
-          if (object_type.to_s == 'node') &&
-              (['default', 'normal', 'override', 'automatic'].include? key.to_s)
+          if (object_type.to_s == "node") &&
+              (%w{default normal override automatic}.include? key.to_s)
             sub_path
           else
             [key.to_s] + sub_path
@@ -558,26 +557,26 @@ module Pedant
           automatic = attribute_hash[:automatic] || {}
 
           context "searching a node with #{attribute_hash.keys} attributes, with a partial search path of #{search_path}" do
-            include_context 'with temporary testing node' do
-              let(:node_default){default}
-              let(:node_normal){normal}
-              let(:node_override){override}
-              let(:node_automatic){automatic}
+            include_context "with temporary testing node" do
+              let(:node_default) { default }
+              let(:node_normal) { normal }
+              let(:node_override) { override }
+              let(:node_automatic) { automatic }
             end
 
             # Just target the search to this node; we're testing the
             # override properties of attributes for the indexing
             # process
-            let(:request_query_parameters){"q=name:#{node_name}"}
+            let(:request_query_parameters) { "q=name:#{node_name}" }
             let(:request_payload) do
-              {"target" => search_path}
+              { "target" => search_path }
             end
             let(:search_result_items) do
               [{
                  "url" => api_url("/nodes/#{node_name}"),
                  "data" => {
-                   "target" => expected_result
-                 }
+                   "target" => expected_result,
+                 },
                }]
             end
             performing_a_search "should return #{expected_result}, #{message}"
@@ -585,17 +584,17 @@ module Pedant
         end # node_attribute_partial_search
 
         # Normal search, needs to be run with method=GET
-        def node_run_list_search(run_list, search_query_fragment, should_find=true, message=nil)
+        def node_run_list_search(run_list, search_query_fragment, should_find = true, message = nil)
           context "with a run_list of #{run_list}" do
 
-            include_context 'with temporary testing node' do
-              let(:node_run_list){run_list}
+            include_context "with temporary testing node" do
+              let(:node_run_list) { run_list }
             end
 
-            let(:request_query_parameters){"q=#{sanitize_query_fragment(search_query_fragment)}"}
-            let(:search_result_items) {should_find ? [normalize_node(node)] : []}
+            let(:request_query_parameters) { "q=#{sanitize_query_fragment(search_query_fragment)}" }
+            let(:search_result_items) { should_find ? [normalize_node(node)] : [] }
 
-            performing_a_search "searching for #{search_query_fragment} (properly escaped) should#{should_find ? ' ' : " not "}return the node#{message ? ', ' + message : ''}"
+            performing_a_search "searching for #{search_query_fragment} (properly escaped) should#{should_find ? " " : " not "}return the node#{message ? ", " + message : ""}"
 
           end
         end # with a run list
@@ -607,7 +606,7 @@ module Pedant
       #
       # Not doing global URL encoding; just the Solr query operators
       def sanitize_query_fragment(search_query_fragment)
-        search_query_fragment.gsub(/(?<!^recipe|^role|^run_list):/, '%5C:').gsub(/[\[\]]/, '[' => '%5C%5B', ']' => '%5C%5D').gsub(/@/, '@' =>'%40')
+        search_query_fragment.gsub(/(?<!^recipe|^role|^run_list):/, "%5C:").gsub(/[\[\]]/, "[" => "%5C%5B", "]" => "%5C%5D").gsub(/@/, "@" => "%40")
       end
 
       # Given a JSON representation of a Chef object (e.g., as
@@ -621,38 +620,39 @@ module Pedant
       # for can_perform_basic_partial_search_for.  Currently this method is only
       # used in that macro.
       def possibly_nested_target(object, original_key, sub_path)
-        ([original_key.to_s] + sub_path).reduce(object){|obj, elem|
+        ([original_key.to_s] + sub_path).reduce(object) { |obj, elem|
           lookup = obj[elem]
           return if lookup.nil? # the value could be false!!
+
           lookup
         }
       end
 
-      built_in_indexes = ['client', 'environment', 'node', 'role']
+      built_in_indexes = %w{client environment node role}
 
       let(:fetch_search_index_success_response) do
         dbs = begin data_bag_names rescue [] end
         index_names = built_in_indexes + dbs
 
         {
-          :status => 200,
-          :body_exact => index_names.inject({}){|acc, i|
+          status: 200,
+          body_exact: index_names.inject({}) { |acc, i|
             acc[i] = api_url("/search/#{i}")
             acc
-          }
+          },
         }
       end
 
       let(:reindex_search_success_response) do
         {
-          :status => 200,
-          :body_exact => {
-            "Chef::ApiClient" =>"success",
+          status: 200,
+          body_exact: {
+            "Chef::ApiClient" => "success",
             "Chef::Node" => "success",
             "Chef::Role" => "success",
-            "Chef::Environment" =>"success",
-            "Chef::DataBag" => "success"
-          }
+            "Chef::Environment" => "success",
+            "Chef::DataBag" => "success",
+          },
         }
       end
 
@@ -669,20 +669,20 @@ module Pedant
       # present in the results.
       let(:search_success_response) do
         {
-          :status => 200,
-          :body => {
+          status: 200,
+          body: {
             "start" => 0, # TODO: Test paging
-            "rows" => search_result_items
-          }
+            "rows" => search_result_items,
+          },
         }
       end
 
-      require 'uri'
-      require 'cgi'
+      require "uri" unless defined?(URI)
+      require "cgi" unless defined?(CGI)
 
       # Amount of time to try searches until giving up... this gives Solr
       # an opportunity to commit.
-      let(:maximum_search_time){ Pedant::Config.maximum_search_time}
+      let(:maximum_search_time) { Pedant::Config.maximum_search_time }
       # Databag items that come back from a search are wrapped in a bit of
       # extra cruft.
       #
@@ -693,23 +693,23 @@ module Pedant
           "json_class" => "Chef::DataBagItem",
           "chef_type" => "data_bag_item",
           "data_bag" => bag_name,
-          "raw_data" => item
+          "raw_data" => item,
         }
       end
 
       # Added for opensearch authorization header
-      def get_search_headers()
-        if Pedant::Config.search_provider == 'opensearch'
+      def get_search_headers
+        if Pedant::Config.search_provider == "opensearch"
           username = Pedant::Config.search_auth_username
           password = Pedant::Config.search_auth_password
           auth = Base64.strict_encode64("#{username}:#{password}")
           {
             "Accept" => "application/json",
-            "Authorization" => "Basic #{auth}"
+            "Authorization" => "Basic #{auth}",
           }
         else
           {
-            "Accept" => "application/json"
+            "Accept" => "application/json",
           }
         end
       end
@@ -725,15 +725,15 @@ module Pedant
         # Chef Object type (in addition to filtering based on org).  We
         # don't have an easy way to access the org's guid in the tests, so
         # I'm not using that. In any event, the following query works.
-        url = "#{Pedant::Config.search_server}#{Pedant::Config.search_url_fmt}" % {:type => CGI.escape(type), :query => CGI.escape(query)}
-        headers = get_search_headers()
+        url = "#{Pedant::Config.search_server}#{Pedant::Config.search_url_fmt}" % { type: CGI.escape(type), query: CGI.escape(query) }
+        headers = get_search_headers
         sleep Pedant::Config.direct_solr_query_sleep_time
         r = RestClient.send :get, url, headers
         parse(r)
       end
 
       def get_response_count(r)
-        if (r["response"].nil?) and (r["hits"]["total"].is_a? Hash)
+        if (r["response"].nil?) && (r["hits"]["total"].is_a? Hash)
           r["hits"]["total"]["value"]
         elsif r["response"].nil?
           r["hits"]["total"]
@@ -752,8 +752,8 @@ module Pedant
         # should be enough of a wait.
         sleep Pedant::Config.direct_solr_query_sleep_time
         url = "#{Pedant::Config.search_server}#{Pedant::Config.search_commit_url}"
-        body = ''
-        headers = get_search_headers()
+        body = ""
+        headers = get_search_headers
         RestClient.send :post, url, body, headers
       end
 
@@ -763,7 +763,7 @@ module Pedant
       # `search_server` parameter is specified in the Pedant config file,
       # however, a commit packet is sent to that server and the block is
       # executed only once.
-      def with_search_polling(time=maximum_search_time, increment = 5, elapsed_time = 0, &block)
+      def with_search_polling(time = maximum_search_time, increment = 5, elapsed_time = 0, &block)
         if Pedant::Config.search_server
           force_solr_commit
           yield
@@ -785,13 +785,13 @@ module Pedant
         user = options[:user] || admin_user
         results = options[:results]
         with_search_polling do
-          get(api_url("/search/#{options[:type]}?q=#{options[:query]}"),user) do |response|
+          get(api_url("/search/#{options[:type]}?q=#{options[:query]}"), user) do |response|
             response.should look_like({
-                                        :status => 200,
-                                        :body => {
+                                        status: 200,
+                                        body: {
                                           "start" => 0,
-                                          "rows" => results
-                                        }
+                                          "rows" => results,
+                                        },
                                       })
           end
         end
@@ -805,8 +805,8 @@ module Pedant
       def search(index, query)
         with_search_polling do
           response = search_result(index, query)
-          response.should look_like({:status => 200, :body => { 'start' => 0 }})
-          parse(response)['rows']
+          response.should look_like({ status: 200, body: { "start" => 0 } })
+          parse(response)["rows"]
         end
       end
     end
@@ -820,8 +820,8 @@ module Pedant
         # fractional second from the epoch, followed by the pid.  This
         # ought to be suitably unique.  Grabbing a UUID gem just for
         # this seems a bit overblown.
-        let(:item_name) { a_search_item.('resource') }
-        let(:deletion_identifier) { item_name } #default to item_name; override this for data bag items
+        let(:item_name) { a_search_item.call("resource") }
+        let(:deletion_identifier) { item_name } # default to item_name; override this for data bag items
 
         after :each do
           delete_chef_object(container, requestor, item_name)
@@ -829,7 +829,7 @@ module Pedant
 
         let(:index_name) { raise 'Must specify an :index_name! (e.g., a search index like "node", "role", or "data")' }
         let(:container) { raise 'Must specify a :container! (e.g., "nodes", "roles", "data", etc.' }
-        let(:item) { raise 'Must specify an :item (JSON string or Hash to insert)'}
+        let(:item) { raise "Must specify an :item (JSON string or Hash to insert)" }
 
         it "deletes an object from Solr when deleting from the system as a whole" do
           # Assert that there is no item of the given type with the given name in the search index
@@ -868,17 +868,17 @@ module Pedant
       include_context "with testing data bag"
       include_context "with testing data bag items" do
         let(:items) {
-          array = [{'id' => 'test_item', 'key' => 'value'}]
+          array = [{ "id" => "test_item", "key" => "value" }]
           # add a bunch of junk so reindex will scroll
-          for i in 0..1010
-            array << {'id' => "test_item#{i}", 'key' => 'value'}
+          (0..1010).each do |i|
+            array << { "id" => "test_item#{i}", "key" => "value" }
           end
           array
         }
       end
 
       # Arguments supplied to the reindexing escript after the subcommand.
-      let(:reindex_args){[]}
+      let(:reindex_args) { [] }
 
       def should_find(type, name)
         do_search(type, name, true)
@@ -897,7 +897,7 @@ module Pedant
         end
       end
 
-      def do_paginated_search(type, start=0, page_size=1000, rows_accum=[])
+      def do_paginated_search(type, start = 0, page_size = 1000, rows_accum = [])
         result = authenticated_request(:GET, api_url("/search/#{type}?start=#{start}&rows=#{page_size}"), requestor, {})
         result.should have_status_code 200
 
@@ -915,16 +915,16 @@ module Pedant
         end
       end
 
-      def do_search(type, name, should_find=true)
+      def do_search(type, name, should_find = true)
         with_search_polling do
           rows = do_paginated_search(type)
           identifiers = case type
                         when "node", "role", "environment"
-                          rows.map{|r| r['name']}
+                          rows.map { |r| r["name"] }
                         when "client"
-                          rows.map{|r| r['name'] || r['clientname']}
+                          rows.map { |r| r["name"] || r["clientname"] }
                         else # data bag
-                          rows.map{|r| r['raw_data']['id']}
+                          rows.map { |r| r["raw_data"]["id"] }
                         end
           if should_find
             identifiers.should include(name)
