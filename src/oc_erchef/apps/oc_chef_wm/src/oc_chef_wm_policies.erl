@@ -86,13 +86,13 @@ build_base_policy_list_ejson(Req, PolicyRevisions) ->
     UriMap= [{Name, RouteFun(Name)} || {Name, _Rev} <- PolicyRevisions],
     build_nested_base_ejson(UriMap, {[]}).
 
-build_nested_base_ejson([{PolicyName, URI}|Rest], EJSON) ->
+build_nested_base_ejson([{PolicyName, URI} | Rest], EJSON) ->
     NewEJSON = ej:set_p({PolicyName, "uri"}, EJSON, URI),
     build_nested_base_ejson(Rest, NewEJSON);
 build_nested_base_ejson([], EJSON) ->
     EJSON.
 
-build_policy_list_ejson([{PolicyName, RevisionID}|Rest], EJSON) ->
+build_policy_list_ejson([{PolicyName, RevisionID} | Rest], EJSON) ->
     NewEJSON = ej:set_p({PolicyName, "revisions", RevisionID}, EJSON, {[]}),
     build_policy_list_ejson(Rest, NewEJSON);
 build_policy_list_ejson([], EJSON) ->

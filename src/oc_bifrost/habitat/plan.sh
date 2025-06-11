@@ -3,12 +3,13 @@ pkg_origin=chef
 pkg_license=('Apache-2.0')
 pkg_maintainer="The Chef Server Maintainers <support@chef.io>"
 pkg_deps=(
-  core/erlang24
+  core/erlang26
   core/cacerts
   core/coreutils
   core/curl
   core/gcc-libs
-  core/sqitch_pg
+  core/sqitch
+  core/postgresql-client
 )
 pkg_build_deps=(core/make core/git core/gcc)
 pkg_bin_dirs=(bin)

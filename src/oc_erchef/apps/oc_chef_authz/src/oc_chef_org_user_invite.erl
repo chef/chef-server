@@ -126,7 +126,7 @@ validation_spec(create) ->
     {[ {<<"user">>, string} ]};
 validation_spec(response) ->
     {[
-        {<<"response">>,{fun_match, {fun valid_response/1, string, <<"Param response must be either 'accept' or 'reject'">>}}}
+        {<<"response">>, {fun_match, {fun valid_response/1, string, <<"Param response must be either 'accept' or 'reject'">>}}}
     ]}.
 
 fields_for_update(#oc_chef_org_user_invite{}) ->
