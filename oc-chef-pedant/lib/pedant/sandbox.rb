@@ -16,8 +16,8 @@
 module Pedant
   module Sandbox
     def self.create_payload(files)
-      checksums = files.reduce({}){|m,f| m[Pedant::Utility.checksum(f)] = nil; m}
-      {"checksums" => checksums}
+      checksums = files.reduce({}) { |m, f| m[Pedant::Utility.checksum(f)] = nil; m }
+      { "checksums" => checksums }
     end
   end
 end

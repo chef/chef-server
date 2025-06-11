@@ -19,9 +19,9 @@ module Pedant
   # URL Generation and Authorized HTTP Request Helpers
   ################################################################################
   module Request
-    require 'rest_client'
-    require 'mixlib/shellout'
-    require 'uuidtools'
+    require "rest_client"
+    require "mixlib/shellout" unless defined?(Mixlib::ShellOut)
+    require "uuidtools"
     include Pedant::JSON
 
     # TODO: alternative suggestions?
@@ -29,6 +29,7 @@ module Pedant
     def server_api_version=(v)
       $server_api_version = v || Pedant::Config.server_api_version
     end
+
     def server_api_version
       $server_api_version
     end
@@ -37,19 +38,19 @@ module Pedant
     # to properly set the X-Chef-Version header
     KNIFE_VERSION = begin
                       # Historically we've not included chef in our Gemfile/lock, so this always fails.
-                      require 'chef/version'
+                      require "chef/version"
                       Chef::VERSION
                     rescue LoadError
                       # This apparently is needed in some cases for pedant to work. We should
                       # explore whether we can simplify this mess
                       #
                       # Don't want Bundler to poison the shelling out :(
-                      cmd = Mixlib::ShellOut.new("knife --version", :environment => {
-                                                   'BUNDLE_GEMFILE' => nil,
-                                                   'BUNDLE_BIN_PATH' => nil,
-                                                   'GEM_PATH' => nil,
-                                                   'GEM_HOME' => nil,
-                                                   'RUBYOPT' => nil
+                      cmd = Mixlib::ShellOut.new("knife --version", environment: {
+                                                   "BUNDLE_GEMFILE" => nil,
+                                                   "BUNDLE_BIN_PATH" => nil,
+                                                   "GEM_PATH" => nil,
+                                                   "GEM_HOME" => nil,
+                                                   "RUBYOPT" => nil,
                                                  })
                       cmd.run_command
                       cmd.stdout =~ /^Chef(?:\s+Infra Client)?: (.*)$/
@@ -59,10 +60,10 @@ module Pedant
     # Headers that are added to all requests
     def standard_headers
       {
-        'Accept' => 'application/json',
-        'Content-Type' => 'application/json',
-        'User-Agent' => 'chef-pedant rspec tests',
-        'X-Chef-Version' => KNIFE_VERSION
+        "Accept" => "application/json",
+        "Content-Type" => "application/json",
+        "User-Agent" => "chef-pedant rspec tests",
+        "X-Chef-Version" => KNIFE_VERSION,
       }
     end
 
@@ -105,13 +106,13 @@ module Pedant
     # receive a single argument, the HTTP response (as a
     # RestClient::Response object).  Testing methods should use this to
     # carry out any validation tests of the response.
-    def authenticated_request(method, url, requestor, opts={}, &validator)
+    def authenticated_request(method, url, requestor, opts = {}, &validator)
       headers, payload = construct_request(method, url, requestor, opts)
       do_request(method, url, headers, payload, &validator)
     end
 
     # Construct an authenticated request against a Chef Server
-    def construct_request(method, url, requestor, opts={})
+    def construct_request(method, url, requestor, opts = {})
       user_headers = opts[:headers] || {}
       version = opts[:server_api_version]
       payload_raw = opts[:payload] || ""
@@ -123,15 +124,15 @@ module Pedant
                 end
 
       # Provide a means to explicitly delete version header for test purposes
-      version_headers = if opts.has_key?(:api_version)
+      version_headers = if opts.key?(:api_version)
                           version = opts[:api_version]
                           if version.nil?
                             {}
                           else
-                            {"X-Ops-Server-API-Version" =>  version}
+                            { "X-Ops-Server-API-Version" => version }
                           end
                         else
-                          {"X-Ops-Server-API-Version" => server_api_version}
+                          { "X-Ops-Server-API-Version" => server_api_version }
                         end
 
       auth_headers = opts[:auth_headers] || requestor.signing_headers(method, url, payload)
@@ -141,11 +142,11 @@ module Pedant
       # for further details, see: get_host_port in oc-chef-pedant/lib/pedant/utility.rb
       host = "#{uri.host}:#{uri.port}"
 
-      final_headers = standard_headers.
-        merge(auth_headers).
-        merge(user_headers).
-        merge(version_headers).
-        merge({'Host' => host, 'X-REMOTE-REQUEST-ID' => UUIDTools::UUID.random_create.to_s})
+      final_headers = standard_headers
+        .merge(auth_headers)
+        .merge(user_headers)
+        .merge(version_headers)
+        .merge({ "Host" => host, "X-REMOTE-REQUEST-ID" => UUIDTools::UUID.random_create.to_s })
 
       [final_headers, payload]
     end
@@ -160,13 +161,13 @@ module Pedant
     end
 
     def do_request_with_retry(method, url, final_headers, payload, retries_left, &validator)
-      response_handler = lambda{|response, request, result| response}
+      response_handler = lambda { |response, request, result| response }
 
       begin
         request_time = Time.now.utc
         response = RestClient::Request.execute(method: method,
                                                url: url,
-                                               payload: [:PUT, :POST].include?(method) ? payload : nil,
+                                               payload: %i{PUT POST}.include?(method) ? payload : nil,
                                                headers: final_headers,
                                                ssl_version: Pedant::Config.ssl_version,
                                                verify_ssl: false,
@@ -174,7 +175,7 @@ module Pedant
                                                ssl_client_cert: Pedant::Config.ssl_client_cert,
                                                ssl_client_key: Pedant::Config.ssl_client_key,
                                                ssl_ca_file: Pedant::Config.ssl_ca_file,
-                                               &response_handler)
+          &response_handler)
 
         if block_given?
           yield(response)
@@ -183,14 +184,14 @@ module Pedant
         end
       rescue RestClient::Exceptions::OpenTimeout, RestClient::Exceptions::ReadTimeout => e
         orig = e.original_exception
-        req_id = final_headers['X-REMOTE-REQUEST-ID'] || "id missing"
+        req_id = final_headers["X-REMOTE-REQUEST-ID"] || "id missing"
         puts "#{e.class} error from request started #{request_time} took #{Time.now.utc - request_time} with method #{method} to #{url} #{req_id}\n"
         puts "Retries left #{retries_left} Msg #{e.message} #{orig} C #{orig.class} V #{orig.instance_variables}"
         puts "#{e.backtrace}"
 
         if retries_left > 0
           sleep RETRY_DELAY
-          do_request_with_retry(method, url, final_headers, payload, retries_left -1 , &validator)
+          do_request_with_retry(method, url, final_headers, payload, retries_left - 1 , &validator)
           ## We might want to just succeed in the future, but I'm a
           ## little but jumpy about normalizing deviance with the
           ## retries. We should track thatcount, but let's just see if
@@ -203,23 +204,23 @@ module Pedant
 
     # Accessory methods for making requests a bit easier
 
-    def get(url, requestor, opts={}, &validator)
+    def get(url, requestor, opts = {}, &validator)
       authenticated_request :GET, url, requestor, opts, &validator
     end
 
-    def head(url, requestor, opts={}, &validator)
+    def head(url, requestor, opts = {}, &validator)
       authenticated_request :HEAD, url, requestor, opts, &validator
     end
 
-    def put(url, requestor, opts={}, &validator)
+    def put(url, requestor, opts = {}, &validator)
       authenticated_request :PUT, url, requestor, opts, &validator
     end
 
-    def post(url, requestor, opts={}, &validator)
+    def post(url, requestor, opts = {}, &validator)
       authenticated_request :POST, url, requestor, opts, &validator
     end
 
-    def delete(url, requestor, opts={}, &validator)
+    def delete(url, requestor, opts = {}, &validator)
       authenticated_request :DELETE, url, requestor, opts, &validator
     end
 

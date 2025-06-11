@@ -13,32 +13,32 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'pedant/rspec/knife_util'
-require 'securerandom'
+require "pedant/rspec/knife_util"
+require "securerandom"
 
 # Bulk role deletion currently uses search under the hood; we're
 # including the search_util to access the 'force_solr_commit' helper
 # method
-require 'pedant/rspec/search_util'
+require "pedant/rspec/search_util"
 
-describe 'knife', :knife do
-  context 'role' do
-    context 'bulk delete REGEX' do
+describe "knife", :knife do
+  context "role" do
+    context "bulk delete REGEX" do
       include Pedant::RSpec::KnifeUtil
       include Pedant::RSpec::KnifeUtil::Role
       include Pedant::RSpec::SearchUtil
 
       let(:command) { "knife role bulk delete '^pedant-role-' -c #{knife_config} --yes" }
-      let(:roles)   { %w(pedant-role-0 pedant-role-1 pedant-master) }
+      let(:roles)   { %w{pedant-role-0 pedant-role-1 pedant-master} }
       after(:each)  { roles.each(&delete_role!) }
 
       let(:create_role!) { ->(n) { knife "role create #{n} -c #{knife_config} -d #{role_description}" } }
       let(:delete_role!) { ->(n) { knife "role delete #{n} -c #{knife_config} --yes" } }
 
-      context 'as an admin' do
+      context "as an admin" do
         let(:requestor) { knife_admin }
 
-        it 'should succeed' do
+        it "should succeed" do
           # Create all the testing roles
           roles.each(&create_role!)
 
@@ -46,7 +46,7 @@ describe 'knife', :knife do
           # we need to wait until the search results are ready.
           with_search_polling do
             # Runs knife role list
-            should have_outcome :status => 0, :stdout => /Deleted role pedant-role-0\s+Deleted role pedant-role-1/
+            should have_outcome status: 0, stdout: /Deleted role pedant-role-0\s+Deleted role pedant-role-1/
           end
         end
       end

@@ -13,10 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'pedant/request'
-require 'rspec/core/shared_context'
-require 'active_support/core_ext/hash/keys'
-require 'pedant/concern'
+require "pedant/request"
+require "rspec/core/shared_context"
+require "active_support/core_ext/hash/keys"
+require "pedant/concern"
 
 module Pedant
   module RSpec
@@ -35,15 +35,17 @@ module Pedant
         # that has values for `request_method` (must be POST),
         # `request_url` (must be to the /roles endpoint),
         # `request_payload`, and `requestor`, as well as `role_name`
-        def should_successfully_create_a_role(message=nil)
-          it 'should respond with 201 and the correct path' do
-            request_method.should == :POST
-            request_url.should == api_url("/roles")
+        def should_successfully_create_a_role(message = nil)
+          it "should respond with 201 and the correct path" do
+            request_method.should
+            request_url.should
+            api_url("/roles")
             should look_like create_role_success_response
           end
-          it "should persist the role#{message ? ' ' + message : ''}" do
+          it "should persist the role#{message ? " " + message : ""}" do
             # Extra paranoia here
-            request_payload['name'].should == role_name
+            request_payload["name"].should
+            role_name
             response.should look_like created_response # this saves it again
             get(api_url("/roles/#{role_name}"), requestor).should look_like fetch_role_success_response
           end
@@ -60,12 +62,13 @@ module Pedant
         # `request_payload`, and `requestor`, as well as `role_name`
         def should_fail_to_create_a_role(code, message)
           # This checks the status code and error message of the failed creation attempt
-          it{
-            request_method.should == :POST
-            request_url.should == api_url('/roles')
+          it {
+            request_method.should
+            request_url.should
+            api_url("/roles")
             should have_error code, message
           }
-          it 'should not actually create a role' do
+          it "should not actually create a role" do
             # This attempts the creation again (this is a separate `it` block)
             response.should look_like bad_request_response
             begin
@@ -87,12 +90,13 @@ module Pedant
         # `request_url` (must be to the /roles endpoint), and
         # `requestor`, as well as `role_name`
         def should_successfully_delete_a_role
-          it 'should respond with 201 and the deleted role body' do
-            request_method.should == :DELETE
-            request_url.should == api_url("/roles/#{role_name}")
+          it "should respond with 201 and the deleted role body" do
+            request_method.should
+            request_url.should
+            api_url("/roles/#{role_name}")
             response.should look_like delete_role_success_response
           end
-          it 'should actually delete the role' do
+          it "should actually delete the role" do
             # This deletes the role again (this is a separate `it` block)
             response.should look_like ok_response
             get(api_url("/roles/#{role_name}"), requestor).should look_like role_not_found_response
@@ -110,14 +114,15 @@ module Pedant
         # `request_payload`, and `requestor`, as well as `role_name`
         def should_fail_to_update_a_role(code, message)
           # This verifies that the update request fails as expected
-          it{
-            request_method.should == :PUT
-            request_url.should == api_url("/roles/#{role_name}")
+          it {
+            request_method.should
+            request_url.should
+            api_url("/roles/#{role_name}")
             response.should have_error code, message
           }
           # Compare the role before and after the failed update to
           # ensure nothing changed
-          it 'does not change the role in any way' do
+          it "does not change the role in any way" do
             original = parse(get(request_url, requestor))
             # This performs the ill-fated update request
             response.should look_like bad_request_response
@@ -143,12 +148,13 @@ module Pedant
         # that the correct fields (and only those fields) were
         # updated.
         def should_successfully_update_a_role
-          it 'should respond with 200 and the updated role body' do
-            request_method.should == :PUT
-            request_url.should == api_url("/roles/#{role_name}")
+          it "should respond with 200 and the updated role body" do
+            request_method.should
+            request_url.should
+            api_url("/roles/#{role_name}")
             response.should look_like update_role_success_response
           end
-          it 'should actually update the role' do
+          it "should actually update the role" do
             # check the value before
             original = parse(get(request_url, requestor))
             # update the role
@@ -191,24 +197,26 @@ module Pedant
       # When you include this context, 'role_name' is set to the name
       # of the testing role, and 'role' is set to the Ruby Hash of the
       # actual role
-      shared_context 'with temporary testing role' do
-        let(:role_name){unique_name("temporary_role")}
-        let(:role_description){"blah"}
-        let(:role_override_attributes){ {} }
-        let(:role_default_attributes){ {} }
-        let(:role_run_list){ [] }
-        let(:role_env_run_lists){ {} }
-        let(:role_payload) {{
-            'name' => role_name,
-            'description' => role_description,
-            'json_class' => "Chef::Role",
-            'chef_type' => 'role',
-            'default_attributes' => role_default_attributes,
-            'override_attributes' => role_override_attributes,
-            'run_list' => role_run_list,
-            'env_run_lists' => role_env_run_lists
-          }}
-        let(:role){role_payload}
+      shared_context "with temporary testing role" do
+        let(:role_name) { unique_name("temporary_role") }
+        let(:role_description) { "blah" }
+        let(:role_override_attributes) { {} }
+        let(:role_default_attributes) { {} }
+        let(:role_run_list) { [] }
+        let(:role_env_run_lists) { {} }
+        let(:role_payload) {
+          {
+            "name" => role_name,
+            "description" => role_description,
+            "json_class" => "Chef::Role",
+            "chef_type" => "role",
+            "default_attributes" => role_default_attributes,
+            "override_attributes" => role_override_attributes,
+            "run_list" => role_run_list,
+            "env_run_lists" => role_env_run_lists,
+          }
+        }
+        let(:role) { role_payload }
 
         before :each do
           add_role(admin_requestor, role_payload)
@@ -221,96 +229,94 @@ module Pedant
 
       # Override as needed
       # let(:create_role_as_non_admin_response) { create_role_success_response }
-      #let(:update_role_as_non_admin_response) { update_role_success_response }
-      #let(:delete_role_as_non_admin_response) { delete_role_success_response }
+      # let(:update_role_as_non_admin_response) { update_role_success_response }
+      # let(:delete_role_as_non_admin_response) { delete_role_success_response }
 
       let(:fetch_role_success_response) do
         {
-          :status => 200,
-          :body => normalize_role(role)
+          status: 200,
+          body: normalize_role(role),
         }
       end
 
       let(:fetch_roles_list_response) do
         {
           status: 200,
-          :body => roles
+          body: roles,
         }
       end
 
       let(:create_role_success_response) do
         {
-          :status => 201,
-          :body => { "uri" => api_url("/roles/#{role_name}") }
+          status: 201,
+          body: { "uri" => api_url("/roles/#{role_name}") },
         }
       end
 
       let(:create_role_conflict_response) do
         {
-          :status => 409,
-          :body => { "error" => ["Role already exists"] }
+          status: 409,
+          body: { "error" => ["Role already exists"] },
         }
       end
 
       let(:update_role_success_response) do
         {
-          :status => 200,
-          :body => updated_role
+          status: 200,
+          body: updated_role,
         }
       end
 
       let(:delete_role_success_response) do
         {
-          :status => 200,
-          :body => role
+          status: 200,
+          body: role,
         }
       end
 
       let(:role_not_found_response) do
         {
-          :status => 404,
-          :body => { "error" => ["Cannot load role #{role_name}"] }
+          status: 404,
+          body: { "error" => ["Cannot load role #{role_name}"] },
         }
       end
 
       let(:invalid_role_response) do
         {
-          :status => 400,
-          :body =>   { "error" => invalid_role_error_message }
+          status: 400,
+          body: { "error" => invalid_role_error_message },
         }
       end
 
-      let(:invalid_role_error_message) { fail "Define let(:invalid_role_error_message) in the example group" }
+      let(:invalid_role_error_message) { raise "Define let(:invalid_role_error_message) in the example group" }
 
       # Ensure that all run lists in a role have been normalized.
       def normalize_role(role)
-        run_list = role['run_list'] || []
-        role['run_list'] = normalize_run_list(run_list)
+        run_list = role["run_list"] || []
+        role["run_list"] = normalize_run_list(run_list)
 
-        env_run_lists = role['env_run_lists'] || {}
-        normalized = env_run_lists.inject({}){|acc, item|
+        env_run_lists = role["env_run_lists"] || {}
+        normalized = env_run_lists.inject({}) { |acc, item|
           env = item.first
           list = item.last
           acc[env] = normalize_run_list(list)
           acc
         }
-        role['env_run_lists'] = normalized
+        role["env_run_lists"] = normalized
         role
       end
 
       def add_role(requestor, role)
         post(api_url("/roles"),
-             requestor,
-             :payload => role)
+          requestor,
+          payload: role)
       end
 
       def delete_role(requestor, name)
-        begin
-          delete(api_url("/roles/#{name}"),
-                 requestor)
-        rescue URI::InvalidURIError
-          # OK, don't fail
-        end
+        delete(api_url("/roles/#{name}"),
+          requestor)
+      rescue URI::InvalidURIError
+        # OK, don't fail
       end
 
       def new_role(name, opts = {}, lists = {} )
@@ -321,8 +327,8 @@ module Pedant
           "default_attributes" => {},
           "override_attributes" => {},
           "chef_type" => "role",
-          "run_list" =>  [],
-          "env_run_lists" => lists[:env_run_lists] || {}
+          "run_list" => [],
+          "env_run_lists" => lists[:env_run_lists] || {},
         }.merge(opts.stringify_keys).merge(lists.stringify_keys)
         # TODO: For backwards compatibility. This should be simplified to arity 1 and the tests refactored
       end

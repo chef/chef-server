@@ -29,17 +29,21 @@ describe "Principals API Endpoint", :principals do
 
   let(:principal_client_name) { platform.non_admin_client.name }
   let(:principal_user_name) { normal_user.name }
-  let(:non_existent_principal_name) { 'not_a_number' }
-  let(:non_existent_org) { 'bogus-org' }
+  let(:non_existent_principal_name) { "not_a_number" }
+  let(:non_existent_org) { "bogus-org" }
 
   let(:failed_to_authenticate_as_invalid_msg) {
-    ["Failed to authenticate as 'invalid'. Ensure that your node_name and client key are correct."] }
+    ["Failed to authenticate as 'invalid'. Ensure that your node_name and client key are correct."]
+  }
   let(:outside_user_not_associated_msg) {
-    ["'pedant-nobody' not associated with organization '#{org}'"] }
+    ["'pedant-nobody' not associated with organization '#{org}'"]
+  }
   let(:cannot_load_nonexistent_msg) {
-    "Cannot find principal #{non_existent_principal_name}" }
+    "Cannot find principal #{non_existent_principal_name}"
+  }
   let(:cannot_load_org_msg) {
-    "Cannot find org #{non_existent_org}" }
+    "Cannot find org #{non_existent_org}"
+  }
   let(:client_body) {
     {
       "name" => principal_client_name,
@@ -49,8 +53,9 @@ describe "Principals API Endpoint", :principals do
       "public_key" => /^-----BEGIN (RSA )?PUBLIC KEY-----/,
       "type" => "client",
       "authz_id" => /^[0-9a-f]{32}$/,
-      "org_member" => true
-    } }
+      "org_member" => true,
+    }
+  }
   let(:user_body) {
     {
       "name" => principal_user_name,
@@ -58,73 +63,74 @@ describe "Principals API Endpoint", :principals do
       "public_key" => /^-----BEGIN (RSA )?PUBLIC KEY-----/,
       "type" => "user",
       "authz_id" => /^[0-9a-f]{32}$/,
-      "org_member" => true
-    } }
+      "org_member" => true,
+    }
+  }
 
-  describe 'access control' do
-    context 'with bogus org' do
+  describe "access control" do
+    context "with bogus org" do
       it 'returns a 404 ("Not Found") for admin' do
         get("#{server}/organizations/#{non_existent_org}/principals/#{principal_client_name}",
-            admin_user) do |response|
-          response.
-            should look_like({
-              :status => 404,
-              :body => {
-                "error" => cannot_load_org_msg,
-                "not_found" => "org"}
-            })
-        end
+          admin_user) do |response|
+            response
+              .should look_like({
+                status: 404,
+                body: {
+                  "error" => cannot_load_org_msg,
+                  "not_found" => "org" },
+              })
+          end
       end
       it 'returns a 404 ("Not Found") for normal user' do
         get("#{server}/organizations/#{non_existent_org}/principals/#{principal_client_name}",
-            normal_user) do |response|
-          response.
-            should look_like({
-              :status => 404,
-              :body => {
-                "error" => cannot_load_org_msg,
-                "not_found" => "org"
-              }
-            })
-        end
+          normal_user) do |response|
+            response
+              .should look_like({
+                status: 404,
+                body: {
+                  "error" => cannot_load_org_msg,
+                  "not_found" => "org",
+                },
+              })
+          end
       end
     end
 
-    context 'GET /principals' do
+    context "GET /principals" do
       # No client supplied = 404
       it 'returns a 404 ("Not Found") for admin' do
         get(api_url("/principals/"), admin_user) do |response|
-          response.
-            should look_like({ :status => 404 })
+          response
+            .should look_like({ status: 404 })
         end
       end
       it 'returns a 404 ("Not Found") for normal user' do
         get(api_url("/principals/"), normal_user) do |response|
-          response.
-            should look_like({ :status => 404 })
+          response
+            .should look_like({ status: 404 })
         end
       end
       it 'returns a 404 ("Not Found") for invalid user' do
         get(api_url("/principals/"), invalid_user) do |response|
-          response.
-            should look_like({ :status => 404 })
+          response
+            .should look_like({ status: 404 })
         end
       end
 
       it 'returns a 404 ("Not Found") for outside user' do
         get(api_url("/principals/"), outside_user) do |response|
-          response.should look_like({ :status => 404 })
+          response.should look_like({ status: 404 })
         end
       end
     end
 
-    shared_context 'GET /principals/<name>' do
-      context 'when requesting a client' do
+    shared_context "GET /principals/<name>" do
+      context "when requesting a client" do
         it 'returns a 200 ("OK") for admin' do
           get(api_url("/principals/#{principal_client_name}"), admin_user) do |response|
             response.should look_like({
-                :status => 200,
-                :body_exact => versioned_client_body
+                status: 200,
+                body_exact: versioned_client_body,
               })
           end
         end
@@ -132,8 +138,8 @@ describe "Principals API Endpoint", :principals do
         it 'returns a 200 ("OK") for normal user' do
           get(api_url("/principals/#{principal_client_name}"), normal_user) do |response|
             response.should look_like({
-                :status => 200,
-                :body_exact => versioned_client_body
+                status: 200,
+                body_exact: versioned_client_body,
               })
           end
         end
@@ -144,8 +150,8 @@ describe "Principals API Endpoint", :principals do
 
           get(api_url("/principals/#{principal_client_name}"), invalid_user) do |response|
             response.should look_like({
-                :status => 200,
-                :body_exact => versioned_client_body
+                status: 200,
+                body_exact: versioned_client_body,
               })
           end
         end
@@ -153,19 +159,19 @@ describe "Principals API Endpoint", :principals do
         it 'returns a 200 ("OK") for outside user' do
           get(api_url("/principals/#{principal_client_name}"), outside_user) do |response|
             response.should look_like({
-                :status => 200,
-                :body_exact => versioned_client_body
+                status: 200,
+                body_exact: versioned_client_body,
               })
           end
         end
       end
 
-      context 'when requesting a user' do
+      context "when requesting a user" do
         it 'returns a 200 ("OK") for admin' do
           get(api_url("/principals/#{principal_user_name}"), admin_user) do |response|
             response.should look_like({
-                :status => 200,
-                :body_exact => versioned_user_body
+                status: 200,
+                body_exact: versioned_user_body,
               })
           end
         end
@@ -173,8 +179,8 @@ describe "Principals API Endpoint", :principals do
         it 'returns a 200 ("OK") for normal user' do
           get(api_url("/principals/#{principal_user_name}"), normal_user) do |response|
             response.should look_like({
-                :status => 200,
-                :body_exact => versioned_user_body
+                status: 200,
+                body_exact: versioned_user_body,
               })
           end
         end
@@ -182,8 +188,8 @@ describe "Principals API Endpoint", :principals do
         it 'returns a 200 ("OK") for invalid user' do
           get(api_url("/principals/#{principal_user_name}"), invalid_user) do |response|
             response.should look_like({
-                :status => 200,
-                :body_exact => versioned_user_body
+                status: 200,
+                body_exact: versioned_user_body,
               })
           end
         end
@@ -191,14 +197,14 @@ describe "Principals API Endpoint", :principals do
         it 'returns a 200 ("OK") for outside user' do
           get(api_url("/principals/#{principal_user_name}"), outside_user) do |response|
             response.should look_like({
-                :status => 200,
-                :body_exact => versioned_user_body
+                status: 200,
+                body_exact: versioned_user_body,
               })
           end
         end
       end
 
-      context 'when requesting an outside user', :multiuser do
+      context "when requesting an outside user", :multiuser do
         let(:principal_user_name) { outside_user.name }
         let(:user_body) {
           {
@@ -206,14 +212,15 @@ describe "Principals API Endpoint", :principals do
             "public_key" => /^-----BEGIN (RSA )?PUBLIC KEY-----/,
             "type" => "user",
             "authz_id" => /^[0-9a-f]{32}$/,
-            "org_member" => false
-          } }
+            "org_member" => false,
+          }
+        }
 
         it 'returns a 200 ("OK") for admin' do
           get(api_url("/principals/#{principal_user_name}"), admin_user) do |response|
             response.should look_like({
-                :status => 200,
-                :body_exact => versioned_user_body
+                status: 200,
+                body_exact: versioned_user_body,
               })
           end
         end
@@ -221,8 +228,8 @@ describe "Principals API Endpoint", :principals do
         it 'returns a 200 ("OK") for normal user' do
           get(api_url("/principals/#{principal_user_name}"), normal_user) do |response|
             response.should look_like({
-                :status => 200,
-                :body_exact => versioned_user_body
+                status: 200,
+                body_exact: versioned_user_body,
               })
           end
         end
@@ -230,8 +237,8 @@ describe "Principals API Endpoint", :principals do
         it 'returns a 200 ("OK") for invalid user' do
           get(api_url("/principals/#{principal_user_name}"), invalid_user) do |response|
             response.should look_like({
-                :status => 200,
-                :body_exact => versioned_user_body
+                status: 200,
+                body_exact: versioned_user_body,
               })
           end
         end
@@ -239,26 +246,27 @@ describe "Principals API Endpoint", :principals do
         it 'returns a 200 ("OK") for outside user' do
           get(api_url("/principals/#{principal_user_name}"), outside_user) do |response|
             response.should look_like({
-                :status => 200,
-                :body_exact => versioned_user_body
+                status: 200,
+                body_exact: versioned_user_body,
               })
           end
         end
       end
 
-      context 'when requesting a bad client' do
+      context "when requesting a bad client" do
         let(:principal_client_name) { platform.bad_client.name }
         let(:cannot_load_nonexistent_msg) {
-          "Cannot find principal #{principal_client_name}" }
+          "Cannot find principal #{principal_client_name}"
+        }
 
         it 'returns a 404 ("Not Found") for admin' do
           get(api_url("/principals/#{principal_client_name}"), admin_user) do |response|
             response.should look_like({
-                :status => 404,
-                :body_exact => {
+                status: 404,
+                body_exact: {
                   "error" => cannot_load_nonexistent_msg,
-                  "not_found" => "principal"
-                }
+                  "not_found" => "principal",
+                },
               })
           end
         end
@@ -266,11 +274,11 @@ describe "Principals API Endpoint", :principals do
         it 'returns a 404 ("Not Found") for normal user' do
           get(api_url("/principals/#{principal_client_name}"), normal_user) do |response|
             response.should look_like({
-                :status => 404,
-                :body_exact => {
+                status: 404,
+                body_exact: {
                   "error" => cannot_load_nonexistent_msg,
-                  "not_found" => "principal"
-                }
+                  "not_found" => "principal",
+                },
               })
           end
         end
@@ -278,11 +286,11 @@ describe "Principals API Endpoint", :principals do
         it 'returns a 404 ("Not Found") for invalid user' do
           get(api_url("/principals/#{principal_client_name}"), invalid_user) do |response|
             response.should look_like({
-                :status => 404,
-                :body_exact => {
+                status: 404,
+                body_exact: {
                   "error" => cannot_load_nonexistent_msg,
-                  "not_found" => "principal"
-                }
+                  "not_found" => "principal",
+                },
               })
           end
         end
@@ -290,11 +298,11 @@ describe "Principals API Endpoint", :principals do
         it 'returns a 404 ("Not Found") for outside user' do
           get(api_url("/principals/#{principal_client_name}"), outside_user) do |response|
             response.should look_like({
-                :status => 404,
-                :body_exact => {
+                status: 404,
+                body_exact: {
                   "error" => cannot_load_nonexistent_msg,
-                  "not_found" => "principal"
-                }
+                  "not_found" => "principal",
+                },
               })
           end
         end
@@ -302,47 +310,47 @@ describe "Principals API Endpoint", :principals do
 
       it 'returns a 404 ("Not Found") for missing principal for admin' do
         get(api_url("/principals/#{non_existent_principal_name}"),
-            admin_user) do |response|
-          response.should look_like({
-              :status => 404,
-              :body_exact => {
-                "error" => cannot_load_nonexistent_msg,
-                "not_found" => "principal"
-              }
-            })
-        end
+          admin_user) do |response|
+            response.should look_like({
+                status: 404,
+                body_exact: {
+                  "error" => cannot_load_nonexistent_msg,
+                  "not_found" => "principal",
+                },
+              })
+          end
       end
 
       it 'returns a 404 ("Not Found") for missing principal for normal user' do
 
         get(api_url("/principals/#{non_existent_principal_name}"), normal_user) do |response|
           response.should look_like({
-              :status => 404,
-              :body_exact => {
+              status: 404,
+              body_exact: {
                 "error" => cannot_load_nonexistent_msg,
-                "not_found" => "principal"
-              }
+                "not_found" => "principal",
+              },
             })
         end
       end
     end
 
-    context '[deprecated] v0', :api_v0 do
-        let(:versioned_client_body) { client_body }
-        let(:versioned_user_body) { user_body }
-        include_context 'GET /principals/<name>'
+    context "[deprecated] v0", :api_v0 do
+      let(:versioned_client_body) { client_body }
+      let(:versioned_user_body) { user_body }
+      include_context "GET /principals/<name>"
     end
 
-    context '[current] v > 0', :api_v1 do
-        before(:all) do
-            platform.use_max_server_api_version
-        end
-        after(:all) do
-            platform.reset_server_api_version
-        end
-        let(:versioned_client_body) { {"principals" => [ client_body ]} }
-        let(:versioned_user_body) { {"principals" => [ user_body ]} }
-        include_context 'GET /principals/<name>'
+    context "[current] v > 0", :api_v1 do
+      before(:all) do
+        platform.use_max_server_api_version
+      end
+      after(:all) do
+        platform.reset_server_api_version
+      end
+      let(:versioned_client_body) { { "principals" => [ client_body ] } }
+      let(:versioned_user_body) { { "principals" => [ user_body ] } }
+      include_context "GET /principals/<name>"
     end
   end
 end

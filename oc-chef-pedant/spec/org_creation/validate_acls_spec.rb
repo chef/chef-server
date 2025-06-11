@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # Author:: Ho-Sheng Hsiao (<hosh@chef.io>)
 # Copyright:: Copyright (c) 2013 Chef Software, Inc.
@@ -20,11 +19,11 @@ describe "Org Creation", :org_creation do
 
   let(:acl_body) do
     {
-      "create" => {"actors" => create_actors, "groups" => create_groups},
-      "read"   => {"actors" => read_actors,   "groups" => read_groups},
-      "update" => {"actors" => update_actors, "groups" => update_groups},
-      "delete" => {"actors" => delete_actors, "groups" => delete_groups},
-      "grant"  => {"actors" => grant_actors,  "groups" => grant_groups}
+      "create" => { "actors" => create_actors, "groups" => create_groups },
+      "read" => { "actors" => read_actors, "groups" => read_groups },
+      "update" => { "actors" => update_actors, "groups" => update_groups },
+      "delete" => { "actors" => delete_actors, "groups" => delete_groups },
+      "grant" => { "actors" => grant_actors, "groups" => grant_groups },
     }
   end
 
@@ -42,9 +41,9 @@ describe "Org Creation", :org_creation do
   let(:delete_groups) { admin_groups }
   let(:grant_groups)  { admin_groups }
 
-  let(:admin_groups)     { %w(admins) }
-  let(:user_groups)      { %w(admins users) }
-  let(:requestor_groups) { %w(admins clients users) }
+  let(:admin_groups)     { %w{admins} }
+  let(:user_groups)      { %w{admins users} }
+  let(:requestor_groups) { %w{admins clients users} }
 
   context "when validating default acls" do
 
@@ -54,11 +53,11 @@ describe "Org Creation", :org_creation do
         let(:request_url) { api_url(_url) }
 
         instance_eval(&additional_examples) if additional_examples
-        should_respond_with 200, 'and have default acl settings'
+        should_respond_with 200, "and have default acl settings"
       end
     end
 
-    context '[account]' do
+    context "[account]" do
       # This is for /ORGNAME/organizations/_acl
       should_have_default_acls_for "/organizations" do
         let(:create_groups) { admin_groups }
@@ -85,7 +84,7 @@ describe "Org Creation", :org_creation do
       end
     end
 
-    context '[chef]' do
+    context "[chef]" do
       should_have_default_acls_for "/containers/clients" do
         let(:create_groups) { admin_groups }
         let(:read_groups)   { user_groups }
@@ -135,22 +134,22 @@ describe "Org Creation", :org_creation do
       end
     end
 
-    context '[default clients]' do
+    context "[default clients]" do
       should_have_default_acls_for "/clients/#{Pedant::Config.pedant_platform.test_org.name}-validator" do
         let(:create_groups) { admin_groups }
         let(:read_groups)   { user_groups }
         let(:update_groups) { admin_groups }
-        let(:delete_groups) { user_groups }  # Users can't update a validator, but they can delete one
+        let(:delete_groups) { user_groups } # Users can't update a validator, but they can delete one
         let(:grant_groups)  { admin_groups }
       end
     end
 
-    context '[default groups]' do
+    context "[default groups]" do
       should_have_default_acls_for "/groups/billing-admins" do
         # Not even admins have create, delete, or grant privs for billing-admins group
         let(:create_groups) { [] }
-        let(:read_groups)   { %w(billing-admins) }
-        let(:update_groups) { %w(billing-admins) }
+        let(:read_groups)   { %w{billing-admins} }
+        let(:update_groups) { %w{billing-admins} }
         let(:delete_groups) { [] }
         let(:grant_groups)  { [] }
       end

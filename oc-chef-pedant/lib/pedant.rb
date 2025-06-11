@@ -13,31 +13,31 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-#Override the connect() method to set appropriate IPV6 host headers
-require 'pedant/core_ext/net_http'
+# Override the connect() method to set appropriate IPV6 host headers
+require "pedant/core_ext/net_http"
 
-require 'uri'
-require 'pp' # Debugging
+require "uri" unless defined?(URI)
+require "pp" unless defined?(PP) # Debugging
 
-require 'rspec'
-require 'rspec-shared'
+require "rspec"
+require "rspec-shared"
 
-require 'pedant/concern'
-require 'pedant/json'
-require 'pedant/requestor'
-require 'pedant/request'
-require 'pedant/platform'
-require 'pedant/config'
-require 'pedant/utility'
-require 'pedant/sandbox'
-require 'pedant/chef_utility'
-require 'pedant/command_line'
-require 'pedant/gem'
-require 'pedant/knife'
-require 'pedant/ui'
+require "pedant/concern"
+require "pedant/json"
+require "pedant/requestor"
+require "pedant/request"
+require "pedant/platform"
+require "pedant/config"
+require "pedant/utility"
+require "pedant/sandbox"
+require "pedant/chef_utility"
+require "pedant/command_line"
+require "pedant/gem"
+require "pedant/knife"
+require "pedant/ui"
 
-require 'pedant/rspec/matchers'
-require 'pedant/rspec/common'
+require "pedant/rspec/matchers"
+require "pedant/rspec/common"
 
 module Pedant
   def self.config
@@ -52,14 +52,14 @@ module Pedant
     # The URI gets normalized many places in the chain from pedant to erchef; in particular redundant port
     # specifications (e.g 443 for https) are stripped out.  We normalize the URI here to make sure that the
     # specs we check against conform to that requirement.
-    if Config.has_key?(:chef_server)
+    if Config.key?(:chef_server)
       # chomp is to strip the trailing slash, which while technically correct, is improperly handled when we construct our specs
-      Config[:chef_server] = URI.parse(Config[:chef_server]).normalize.to_s.chomp('/')
+      Config[:chef_server] = URI.parse(Config[:chef_server]).normalize.to_s.chomp("/")
     end
     Config
   end
 
-  def self.setup(argv=[], option_sets=["core_options", "api_options"])
+  def self.setup(argv = [], option_sets = %w{core_options api_options})
     config.from_argv(argv, option_sets)
     puts "Configuring logging..."
     configure_logging
@@ -74,52 +74,52 @@ module Pedant
   # Enable detailed HTTP traffic logging for debugging purposes
   def self.configure_logging
     if config.log_file
-      require 'net-http-spy'
+      require "net-http-spy"
       Net::HTTP.http_logger_options = {
-        :trace =>true,
-        :verbose => true,
-        :body => true
+        trace: true,
+        verbose: true,
+        body: true,
       }
       Net::HTTP.http_logger = Logger.new(config.log_file)
     end
   end
 
   def self.create_platform
-    superuser_key = ENV['CHEF_SECRET_CHEF-SERVER.SUPERUSER_KEY'] || ENV['SUPERUSER_KEY']
-    webui_key = ENV['CHEF_SECRET_CHEF-SERVER.WEBUI_KEY'] || ENV['WEBUI_KEY']
-    stats_password = ENV['CHEF_SECRET_OPSCODE_ERCHEF.STATS_PASSWORD'] || ENV['STATS_PASSWORD']
+    superuser_key = ENV["CHEF_SECRET_CHEF-SERVER.SUPERUSER_KEY"] || ENV["SUPERUSER_KEY"]
+    webui_key = ENV["CHEF_SECRET_CHEF-SERVER.WEBUI_KEY"] || ENV["WEBUI_KEY"]
+    stats_password = ENV["CHEF_SECRET_OPSCODE_ERCHEF.STATS_PASSWORD"] || ENV["STATS_PASSWORD"]
     config.pedant_platform = Pedant::Platform.new(config.chef_server,
-                                                  superuser_key,
-                                                  webui_key,
-                                                  config.superuser_name,
-                                                  config.stats_user,
-                                                  stats_password)
+      superuser_key,
+      webui_key,
+      config.superuser_name,
+      config.stats_user,
+      stats_password)
   end
 
   def self.configure_rspec
     ::RSpec.configure do |c|
       c.expect_with :rspec do |expectation|
-        expectation.syntax = [:should, :expect]
+        expectation.syntax = %i{should expect}
       end
 
       c.mock_with :rspec do |mock|
-        mock.syntax = [:should, :expect]
+        mock.syntax = %i{should expect}
       end
 
       # If you just want to run one (or a few) tests in development,
       # add :focus metadata
-      c.filter_run :focus => true
+      c.filter_run focus: true
 
       if Pedant.config.only_internal
         c.filter_run :cleanup
       else
-        c.filter_run_excluding :cleanup => true unless Pedant.config.include_internal
+        c.filter_run_excluding cleanup: true unless Pedant.config.include_internal
       end
 
       if Pedant.config.only_internal_orgs
         c.filter_run :internal_orgs
       elsif Pedant.config.exclude_internal_orgs
-        c.filter_run_excluding :internal_orgs => true
+        c.filter_run_excluding internal_orgs: true
       end
 
       c.run_all_when_everything_filtered = true

@@ -32,7 +32,7 @@ module Pedant
       def absolute_paths_for(relative_path)
         base_directories.inject([]) do |acc, dir|
           f = "#{dir}/#{relative_path}"
-          File.exists?(f) ? acc << f : acc
+          File.exist?(f) ? acc << f : acc
         end
       end
 
@@ -50,7 +50,7 @@ module Pedant
 
       # Returns an array of absolute paths to fixtures directories in Pedant test gems
       def fixture_directories
-        @_fixture_directories ||= absolute_paths_for('fixtures')
+        @_fixture_directories ||= absolute_paths_for("fixtures")
       end
     end
   end

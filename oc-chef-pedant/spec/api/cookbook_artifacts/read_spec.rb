@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'pedant/rspec/cookbook_util'
+require "pedant/rspec/cookbook_util"
 
 # FIXME  We don't test GET /cookbook_artifacts/NAME/VERSION when we have
 # any files in the segments.  Thus we're not checking the creation
@@ -50,7 +50,7 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
     end
 
     context "GET /cookbook_artifacts" do
-      let(:request_url){api_url("/#{cookbook_url_base}/")}
+      let(:request_url) { api_url("/#{cookbook_url_base}/") }
       let(:requestor) { admin_user }
 
       context "with no cookbook artifacts on the server", :smoke do
@@ -114,17 +114,17 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
                 { "identifier" => identifier_1,
                   "url" => cookbook_artifact_version_url(cookbook_name, identifier_1) },
               { "identifier" => identifier_2,
-                "url" => cookbook_artifact_version_url(cookbook_name, identifier_2) }
-              ]},
-              cookbook_name2 => {
+                "url" => cookbook_artifact_version_url(cookbook_name, identifier_2) },
+              ] },
+            cookbook_name2 => {
                 "url" => cookbook_url(cookbook_name2),
                 "versions" => [
                   { "identifier" => identifier_3,
-                    "url" => cookbook_artifact_version_url(cookbook_name2, identifier_3) }]}
+                    "url" => cookbook_artifact_version_url(cookbook_name2, identifier_3) }] },
           }
         end
 
-        it 'should respond with a cookbook collection containing all versions of each cookbook' do
+        it "should respond with a cookbook collection containing all versions of each cookbook" do
           list_response = get(request_url, requestor)
           expect(list_response.code).to eq(200)
           expect(parse(list_response)).to strictly_match(expected_cookbook_artifact_collection)
@@ -141,15 +141,15 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
       let(:default_version) { "1.2.3" }
       let(:cookbook_identifier) { "1111111111111111111111111111111111111111" }
 
-      let(:request_url)    { cookbook_artifact_version_url(cookbook_name, cookbook_identifier) }
+      let(:request_url) { cookbook_artifact_version_url(cookbook_name, cookbook_identifier) }
 
       let(:recipe_name) { "test_recipe" }
       let(:recipe_content) { "hello-#{unique_suffix}" }
 
       let(:recipe_spec) do
         {
-          :name => recipe_name,
-          :content => recipe_content
+          name: recipe_name,
+          content: recipe_content,
         }
       end
 
@@ -157,7 +157,7 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
         make_cookbook_artifact_with_recipes(cookbook_name, cookbook_identifier, [recipe_spec])
       end
 
-      after(:each)  { delete_cookbook_artifact(admin_user, cookbook_name, cookbook_identifier) }
+      after(:each) { delete_cookbook_artifact(admin_user, cookbook_name, cookbook_identifier) }
 
       shared_examples_for "successful_cookbook_fetch" do
 
@@ -173,11 +173,11 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
               {
                 "name" => rn,
                 "path" => "recipes/#{recipe_name}.rb",
-                "specificity" => "default"
-              }
+                "specificity" => "default",
+              },
             ]
-            cba["metadata"]["providing"] = { "#{cookbook_name}::#{recipe_name}"=>">= 0.0.0" }
-            cba["metadata"]["recipes"] = { "#{cookbook_name}::#{recipe_name}"=>"" }
+            cba["metadata"]["providing"] = { "#{cookbook_name}::#{recipe_name}" => ">= 0.0.0" }
+            cba["metadata"]["recipes"] = { "#{cookbook_name}::#{recipe_name}" => "" }
           end
         end
 
@@ -188,7 +188,7 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
           recipes = extract_segment(response_data, "recipes")
           expect(recipes).to be_a_kind_of(Array)
           expect(recipes.size).to eq(1)
-          expect(recipes.first.keys).to match_array(%w[ name path checksum specificity url ])
+          expect(recipes.first.keys).to match_array(%w{ name path checksum specificity url })
 
           # URL and checksum are not predictable.
           target = platform.server_api_version >= 2 ? "all_files" : "recipes"
@@ -223,19 +223,19 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
 
       end # as a normal user
 
-      context 'as a normal user' do
+      context "as a normal user" do
         let(:requestor) { normal_user }
 
         include_examples("successful_cookbook_fetch")
       end
 
-      context 'as an admin user' do
+      context "as an admin user" do
         let(:requestor) { admin_user }
 
         include_examples("successful_cookbook_fetch")
       end # as an admin user
 
-      context 'as an user outside of the organization', :authorization do
+      context "as an user outside of the organization", :authorization do
         let(:request_method) { :GET }
         let(:expected_response) { unauthorized_access_credential_response }
         let(:requestor) { outside_user }
@@ -243,7 +243,7 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
         should_respond_with 403
       end # as an outside user
 
-      context 'with invalid user', :authentication do
+      context "with invalid user", :authentication do
         let(:request_method) { :GET }
         let(:expected_response) { invalid_credential_exact_response }
         let(:requestor) { invalid_user }

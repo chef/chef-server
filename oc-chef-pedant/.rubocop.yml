@@ -1,0 +1,37 @@
+AllCops:
+  TargetRubyVersion: 3.1
+  Exclude:
+    - "spec/data/**/*"
+    - "vendor/**/*"
+    - "pkg/**/*"
+
+# these have shellout examples that need to have the tabs that come with the shellout
+Layout/IndentationStyle:
+  Exclude:
+    - "lib/ohai/plugins/mono.rb"
+    - "lib/ohai/plugins/darwin/hardware.rb"
+
+Lint/UnderscorePrefixedVariableName:
+  Enabled: false
+
+Lint/NestedMethodDefinition:
+  Enabled: false
+
+Style/OptionalArguments:
+  Enabled: false  
+
+Lint/DuplicateHashKey:
+  Enabled: false
+
+Lint/NonLocalExitFromIterator:
+  Enabled: false
+
+Lint/UselessAssignment:
+  Enabled: false
+
+Style/ArrayIntersect:
+  Enabled: false
+
+Security/Eval:
+  Enabled: false
+

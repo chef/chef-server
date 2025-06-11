@@ -13,8 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'pedant/rspec/environment_util'
-require 'pedant/rspec/cookbook_util'
+require "pedant/rspec/environment_util"
+require "pedant/rspec/cookbook_util"
 
 
 describe "/environments/ENVIRONMENT/cookbooks/COOKBOOK API endpoint", :environments, :cookbooks do
@@ -42,20 +42,20 @@ describe "/environments/ENVIRONMENT/cookbooks/COOKBOOK API endpoint", :environme
   def self.cookbooks
     {
       "cb_one" => {
-      "1.0.0" => ['webserver'],
-      "2.0.0" => ['database', 'webserver'],
-      "3.0.0" => ['awesome_sauce', 'database', 'webserver']
+      "1.0.0" => ["webserver"],
+      "2.0.0" => %w{database webserver},
+      "3.0.0" => %w{awesome_sauce database webserver},
     },
       "cb_two" => {
-      "1.0.0" => ['chicken'],
-      "1.2.0" => ['beef', 'chicken'],
-      "1.2.5" => ['beef', 'chicken', 'stewed_monkey_brains']
+      "1.0.0" => ["chicken"],
+      "1.2.0" => %w{beef chicken},
+      "1.2.5" => %w{beef chicken stewed_monkey_brains},
     },
       "cb_three" => {
-      "0.5.1" => ['server'],
-      "0.6.0" => ['client', 'server'],
-      "1.0.0" => ['client', 'replication', 'server']
-    }
+      "0.5.1" => ["server"],
+      "0.6.0" => %w{client server},
+      "1.0.0" => %w{client replication server},
+    },
     }
   end
 
@@ -68,18 +68,18 @@ describe "/environments/ENVIRONMENT/cookbooks/COOKBOOK API endpoint", :environme
 
   context "with no cookbooks" do
     it "fails if the environment does not exist" do
-      non_existent_environment = 'bad_env'
+      non_existent_environment = "bad_env"
       non_existent_environment.should_not eq env
 
       get(api_url("/environments/#{non_existent_environment}/cookbooks/fake_cookbook_doesnt_matter"), admin_user) do |response|
         response.should look_like(
-                                    {
-                                      :status => 404,
-                                      :body_exact => {
-                                        "error" => ["Cannot load environment #{non_existent_environment}"]
-                                      }
-                                    }
-                                  )
+          {
+            status: 404,
+            body_exact: {
+              "error" => ["Cannot load environment #{non_existent_environment}"],
+            },
+          }
+        )
       end
     end
 
@@ -96,19 +96,19 @@ describe "/environments/ENVIRONMENT/cookbooks/COOKBOOK API endpoint", :environme
 
         get(api_url("/environments/#{environment}/cookbooks/#{non_existent_cookbook}"), admin_user) do |response|
           response.should look_like(
-                                      {
-                                        :status => 404,
-                                        :body_exact => {
-                                          "error" => ["Cannot find a cookbook named #{non_existent_cookbook}"]
-                                        }
-                                      }
-                                    )
+            {
+              status: 404,
+              body_exact: {
+                "error" => ["Cannot find a cookbook named #{non_existent_cookbook}"],
+              },
+            }
+          )
         end
       end
     end
   end
 
-  context 'with multiple versions of multiple cookbooks' do
+  context "with multiple versions of multiple cookbooks" do
 
     before :each do
       setup_cookbooks(cookbooks)
@@ -123,17 +123,17 @@ describe "/environments/ENVIRONMENT/cookbooks/COOKBOOK API endpoint", :environme
     def expected_for_cookbooks(cookbooks, cookbook_name, num_versions)
       latest = get_latest_cookbooks(cookbooks, num_versions)
       latest.inject({}) do |body, cookbook_spec|
-        name, version_specs  = cookbook_spec
+        name, version_specs = cookbook_spec
 
-        if (name == cookbook_name)
+        if name == cookbook_name
           body[name] = {
             "url" => api_url("/cookbooks/#{name}"),
             "versions" => version_specs.map do |version_string, recipe_names|
               {
                 "url" => api_url("/cookbooks/#{name}/#{version_string}"),
-                "version" => version_string
+                "version" => version_string,
               }
-            end
+            end,
             }
         end
 
@@ -141,10 +141,10 @@ describe "/environments/ENVIRONMENT/cookbooks/COOKBOOK API endpoint", :environme
       end
     end
 
-    context 'with no environment constraints' do
+    context "with no environment constraints" do
       [env, default].each do |environment|
         cookbooks.keys.each do |cookbook|
-          [nil, 1, 2, 3, 30, 'all'].each do |num_versions|
+          [nil, 1, 2, 3, 30, "all"].each do |num_versions|
 
             description = if num_versions
                             "returns #{num_versions} acceptable cookbook version(s) of #{cookbook} from the '#{environment}' environment"
@@ -160,12 +160,12 @@ describe "/environments/ENVIRONMENT/cookbooks/COOKBOOK API endpoint", :environme
                     end
               get(url, admin_user) do |response|
                 response.should look_like({
-                                            :status => 200,
-                                            :body_exact => expected_for_cookbooks(cookbooks, cookbook, num_versions ? num_versions : "all") # should default to "all"
+                                            status: 200,
+                                            body_exact: expected_for_cookbooks(cookbooks, cookbook, num_versions || "all"), # should default to "all"
                                           })
               end
             end # it
-          end #numversions
+          end # numversions
         end # cookbooks
       end # env
     end # with no environment constraints context
@@ -175,8 +175,7 @@ describe "/environments/ENVIRONMENT/cookbooks/COOKBOOK API endpoint", :environme
 
 
     def self.test_with_constraints(cookbook, cookbook_constraint, expected_results_for_num_versions)
-
-      constraint_hash = {cookbook => cookbook_constraint}
+      constraint_hash = { cookbook => cookbook_constraint }
 
       context "with constraints #{constraint_hash.inspect}" do
         ## Temporary work-around until I can fix the environment_body_util shared context
@@ -185,13 +184,13 @@ describe "/environments/ENVIRONMENT/cookbooks/COOKBOOK API endpoint", :environme
         before :each do
           # Add constraints to environment
           put(api_url("/environments/#{env}"), admin_user,
-              :payload => make_payload('cookbook_versions' => constraint_hash))
+            payload: make_payload("cookbook_versions" => constraint_hash))
         end
 
         after :each do
           # Remove constraints from the environment
           put(api_url("/environments/#{env}"), admin_user,
-              :payload => make_payload('cookbook_versions' => {}))
+            payload: make_payload("cookbook_versions" => {}))
         end
 
         # Doing this to make the tests less verbose; explicitly
@@ -205,31 +204,31 @@ describe "/environments/ENVIRONMENT/cookbooks/COOKBOOK API endpoint", :environme
             "versions" => allowed_versions.map do |version|
               {
                 "url" => api_url("/cookbooks/#{cookbook}/#{version}"),
-                "version" => version
+                "version" => version,
               }
-            end
+            end,
           }
           body
         end
 
-        expected_results_for_num_versions.each do |num_versions,v|
+        expected_results_for_num_versions.each do |num_versions, v|
           it "retrieves appropriate cookbook versions of '#{cookbook}' with num_versions=#{num_versions}" do
             get(api_url("/environments/#{env}/cookbooks/#{cookbook}?num_versions=#{num_versions}"), admin_user) do |response|
               response.should look_like({
-                                          :status => 200,
-                                          :body_exact => expected_filtered_response(cookbook, v)
+                                          status: 200,
+                                          body_exact: expected_filtered_response(cookbook, v),
                                         })
-            end #get
+            end # get
           end # it
 
-          if num_versions == 'all'
+          if num_versions == "all"
             it "retrieves all appropriate cookbook versions of '#{cookbook}' without 'num_versions'" do
               get(api_url("/environments/#{env}/cookbooks/#{cookbook}"), admin_user) do |response|
                 response.should look_like({
-                                            :status => 200,
-                                            :body_exact => expected_filtered_response(cookbook, v)
+                                            status: 200,
+                                            body_exact: expected_filtered_response(cookbook, v),
                                         })
-              end #get
+              end # get
             end # it
           end # if
 
@@ -237,41 +236,41 @@ describe "/environments/ENVIRONMENT/cookbooks/COOKBOOK API endpoint", :environme
 
         end # expected results
       end # inner context
-    end #self.test_with_constraints
+    end # self.test_with_constraints
 
-    context 'with environment constraints' do
+    context "with environment constraints" do
       test_with_constraints("cb_one",
-                            '= 1.0.0',
-                            {
-                              '1' => ['1.0.0'],
-                              '2' => ['1.0.0'],
-                              '3' => ['1.0.0'],
-                              'all' => ['1.0.0']
-                            })
+        "= 1.0.0",
+        {
+          "1" => ["1.0.0"],
+          "2" => ["1.0.0"],
+          "3" => ["1.0.0"],
+          "all" => ["1.0.0"],
+        })
       test_with_constraints("cb_one",
-                            '> 1.0.0',
-                            {
-                              '1' => ['3.0.0'],
-                              '2' => ['3.0.0', '2.0.0'],
-                              '3' => ['3.0.0', '2.0.0'],
-                              'all' => ['3.0.0', '2.0.0']
-                            })
+        "> 1.0.0",
+        {
+          "1" => ["3.0.0"],
+          "2" => ["3.0.0", "2.0.0"],
+          "3" => ["3.0.0", "2.0.0"],
+          "all" => ["3.0.0", "2.0.0"],
+        })
       test_with_constraints("cb_one",
-                            '= 6.6.6',
-                            {
-                              '1' => [],
-                              '2' => [],
-                              '3' => [],
-                              'all' => []
-                            })
+        "= 6.6.6",
+        {
+          "1" => [],
+          "2" => [],
+          "3" => [],
+          "all" => [],
+        })
       test_with_constraints("cb_three",
-                            '~> 0.5',
-                            {
-                              '1' => ['0.6.0'],
-                              '2' => ['0.6.0', '0.5.1'],
-                              '3' => ['0.6.0', '0.5.1'],
-                              'all' => ['0.6.0', '0.5.1']
-                            })
+        "~> 0.5",
+        {
+          "1" => ["0.6.0"],
+          "2" => ["0.6.0", "0.5.1"],
+          "3" => ["0.6.0", "0.5.1"],
+          "all" => ["0.6.0", "0.5.1"],
+        })
 
 
     end # with environment constraints context

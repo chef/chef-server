@@ -13,37 +13,38 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'pedant/rspec/knife_util'
+require "pedant/rspec/knife_util"
 
-describe 'knife', :knife do
-  context 'role' do
-    context 'create [ROLE]' do
+describe "knife", :knife do
+  context "role" do
+    context "create [ROLE]" do
       include Pedant::RSpec::KnifeUtil
       include Pedant::RSpec::KnifeUtil::Role
 
       let(:command) { "knife role create #{role_name} -c #{knife_config} -d '#{role_description}' " }
       after(:each)  { knife "role delete #{role_name} -c #{knife_config} --yes" }
 
-      context 'without existing role of the same name' do
-        context 'as an admin' do
+      context "without existing role of the same name" do
+        context "as an admin" do
           let(:requestor) { knife_admin }
 
-          it 'should succeed' do
-            should have_outcome :status => 0, :stdout => /Created role\[#{role_name}\]/
+          it "should succeed" do
+            should have_outcome status: 0, stdout: /Created role\[#{role_name}\]/
           end
         end
       end
 
-      context 'with an existing role of the same name' do
-        context 'as an admin' do
+      context "with an existing role of the same name" do
+        context "as an admin" do
           let(:requestor) { knife_admin }
 
-          it 'should fail' do skip 'CHEF-982: `knife role create` does not report name conflicts'
+          it "should fail" do
+            skip "CHEF-982: `knife role create` does not report name conflicts"
             # Create a role with the same name
             knife "role create #{role_name} -c #{knife_config} --disable-editing"
 
             # Run knife a second time
-            should have_outcome :status => 0, :stderr => /Role #{role_name} already exists/
+            should have_outcome status: 0, stderr: /Role #{role_name} already exists/
           end
         end
       end

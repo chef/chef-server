@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'rspec/core/shared_context'
+require "rspec/core/shared_context"
 
 module Pedant
   module RSpec
@@ -67,14 +67,14 @@ module Pedant
       end
 
       def delete_client_key(org, client, key_name, options = {})
-        requestor = options[:requestor] ? options[:requestor] : superuser
+        requestor = options[:requestor] || superuser
         delete("#{platform.server}/organizations/#{org}/clients/#{client}/keys/#{key_name}", requestor)
       end
 
       def add_key_body(key, key_name, options)
         request = {
           "name" => key_name,
-          "expiration_date" => options[:expires] || "infinity"
+          "expiration_date" => options[:expires] || "infinity",
         }
 
         if key == :create_key
@@ -89,18 +89,18 @@ module Pedant
       # These behaviors are identical for POSTing to create a client or user key
       shared_context "basic keys POST validation" do
         # Generate validation tests
-        { "when name is empty"   => { replace: { "name" => "" } },
+        { "when name is empty" => { replace: { "name" => "" } },
           "when name is invalid" => { replace: { "name" => "key the first" } },
           "when name is missing" => { delete:  [ "name" ] },
           "when date is invalid" => { replace: { "expiration_date" => "2010-09-32T10:00:00Z" } },
-          "when date is empty"   => { replace: { "expiration_date" => "" } },
+          "when date is empty" => { replace: { "expiration_date" => "" } },
           "when date is missing" => { delete:  [ "expiration_date" ] },
           "when public key is not a valid key" => { replace: { "public_key" => "Nope." } },
           "when public key is missing" => { delete: [ "public_key" ] },
-          "when both a public_key and create_key are present" => { replace: { "create_key" => true } }
+          "when both a public_key and create_key are present" => { replace: { "create_key" => true } },
         }.each do |desc, setup|
           it "#{desc} it responds with 400", :validation do
-            setup = {:replace=>{}, :delete => []}.merge(setup)
+            setup = { replace: {}, delete: [] }.merge(setup)
             payload = key_payload.dup
             payload.merge!(setup[:replace])
             setup[:delete].each { |field| payload.delete(field) }
@@ -120,106 +120,108 @@ module Pedant
 
         context "when all fields are present and valid" do
           after do
-            delete("#{key_url}/#{key_payload['name']}", superuser).should look_like(status: 200)
+            delete("#{key_url}/#{key_payload["name"]}", superuser).should look_like(status: 200)
           end
 
           it "should create a key with proper response and Location header" do
-            expected_location = "#{key_url}/#{key_payload['name']}"
+            expected_location = "#{key_url}/#{key_payload["name"]}"
             response = post("#{key_url}", superuser, payload: key_payload)
             response.should look_like(
               {
-                :status => 201,
-                :body_exact => { "uri" => expected_location },
-                :headers => [ "Location" => expected_location ]
-              })
+                status: 201,
+                body_exact: { "uri" => expected_location },
+                headers: [ "Location" => expected_location ],
+              }
+            )
           end
 
           it "and infinity date is specfied it should still create a key with proper response and Location header" do
-            expected_location = "#{key_url}/#{key_payload['name']}"
+            expected_location = "#{key_url}/#{key_payload["name"]}"
             key_payload["expiration_date"] = "infinity"
             response = post("#{key_url}", superuser, payload: key_payload)
             response.should look_like(
               {
-                :status => 201,
-                :body_exact => { "uri" => expected_location },
-                :headers => [ "Location" => expected_location ]
-              })
+                status: 201,
+                body_exact: { "uri" => expected_location },
+                headers: [ "Location" => expected_location ],
+              }
+            )
           end
 
           it "when 'create_key' is false alongside a public key it should not generate a private key" do
             key_payload["create_key"] = false
-            expected_location = "#{key_url}/#{key_payload['name']}"
+            expected_location = "#{key_url}/#{key_payload["name"]}"
             response = post(key_url, superuser, payload: key_payload)
             response.should look_like(status: 201,
-                                      body_exact: { "uri" => expected_location })
+              body_exact: { "uri" => expected_location })
           end
 
           it "when 'create_key' : true is specified in lieu of public key it should generate a new private key and reply with it in the body" do
             key_payload["create_key"] = true
             key_payload.delete("public_key")
-            expected_location = "#{key_url}/#{key_payload['name']}"
+            expected_location = "#{key_url}/#{key_payload["name"]}"
             response = post(key_url, superuser, payload: key_payload)
             response.should look_like(status: 201,
-                                      body_exact: { "uri" => expected_location,
-                                                    "private_key" => /.*BEGIN (RSA )?PRIVATE.*/  })
+              body_exact: { "uri" => expected_location,
+                            "private_key" => /.*BEGIN (RSA )?PRIVATE.*/ })
           end
         end
       end
 
       shared_context "basic keys PUT validation" do
-        before (:each) do
+        before(:each) do
           @named_key_url = "#{key_url}/#{key_payload["name"]}"
           post(key_url, superuser, payload: key_payload).should look_like(status: 201)
         end
-        after (:each) do
+        after(:each) do
           # TODO we really only need to delte/recreate if we succeed in a PUT?
           delete(@named_key_url, superuser).should look_like(status: 200)
         end
 
-        it "when all fields are modified it should update the key and send us back the updated body and header"  do
-          key_payload['name'] = 'altname1'
-          key_payload['public_key'] = keys[:key][:public]
-          key_payload['expiration_date'] = unexpired_date_2
+        it "when all fields are modified it should update the key and send us back the updated body and header" do
+          key_payload["name"] = "altname1"
+          key_payload["public_key"] = keys[:key][:public]
+          key_payload["expiration_date"] = unexpired_date_2
           expected_location = "#{key_url}/altname1"
           response = put(@named_key_url, superuser, payload: key_payload)
           @named_key_url = expected_location # Update so we can delete
           response.should look_like(status: 201, body_exact: key_payload,
-                                    headers: ["Location" => expected_location])
+            headers: ["Location" => expected_location])
         end
         it "when 'create_key' is false alongside a public key it should not generate a private key" do
-          key_payload['create_key'] = false
-          key_payload['public_key'] = keys[:key][:public]
+          key_payload["create_key"] = false
+          key_payload["public_key"] = keys[:key][:public]
           key_payload.delete("name")
           key_payload.delete("expiration_date")
           response = put(@named_key_url, superuser, payload: key_payload)
           response.should look_like(status: 200,
-                                    body_exact: { "public_key" => key_payload['public_key'] })
+            body_exact: { "public_key" => key_payload["public_key"] })
         end
         it "when 'create_key' : true is specified in lieu of public key it should generate a new private key and reply with it and the public_key in the body" do
-            response = put(@named_key_url, superuser, payload: { "create_key" => true })
-            response.should look_like(status: 200,
-                                      body_exact: { "public_key" => /.*BEGIN (RSA )?PUBLIC KEY.*/,
-                                                    "private_key" => /.*BEGIN (RSA )?PRIVATE KEY.*/ } )
+          response = put(@named_key_url, superuser, payload: { "create_key" => true })
+          response.should look_like(status: 200,
+            body_exact: { "public_key" => /.*BEGIN (RSA )?PUBLIC KEY.*/,
+                          "private_key" => /.*BEGIN (RSA )?PRIVATE KEY.*/ } )
         end
         it "when PUT body is empty it should fail with a 400" do
           put(@named_key_url, superuser, payload: {}).should look_like(status: 400)
         end
 
         # Note that ommitted fields are preserved, so we're not testing those as invalid updates.
-        { "when name is empty" => {:replace => {"name" => ""}, :code => 400 },
-          "when name is invalid" => {:replace => {"name" => "key the first"}, :code => 400 },
-          "when date is empty" => {:replace => {"expiration_date" => ""}, :code => 400},
-          "when date is invalid" => {:replace => {"expiration_date" => "2010-09-32T10:00:00"}, :code => 400},
-          "when public key is empty" => {:replace => { "public_key" => ""}, :code => 400},
-          "when public key is invalid" => {:replace => { "public_key" => "Nope."}, :code => 400},
-          "when a key of the same name already exists" => {:replace => {"name" => "default"}, :code => 409},
-          "when both a public_key and create_key are present" => {:replace => { "create_key" => true }, :code => 400},
-          "when both a public_key and create_key are present but create_key is false" => {:replace => { "create_key" => false }, :code => 200}
+        { "when name is empty" => { replace: { "name" => "" }, code: 400 },
+          "when name is invalid" => { replace: { "name" => "key the first" }, code: 400 },
+          "when date is empty" => { replace: { "expiration_date" => "" }, code: 400 },
+          "when date is invalid" => { replace: { "expiration_date" => "2010-09-32T10:00:00" }, code: 400 },
+          "when public key is empty" => { replace: { "public_key" => "" }, code: 400 },
+          "when public key is invalid" => { replace: { "public_key" => "Nope." }, code: 400 },
+          "when a key of the same name already exists" => { replace: { "name" => "default" }, code: 409 },
+          "when both a public_key and create_key are present" => { replace: { "create_key" => true }, code: 400 },
+          "when both a public_key and create_key are present but create_key is false" => { replace: { "create_key" => false }, code: 200 },
         }.each do |desc, setup|
           it "#{desc} it responds with #{setup[:code]}" do
-            setup = {:replace=>{}}.merge(setup)
+            setup = { replace: {} }.merge(setup)
             payload = key_payload.merge(setup[:replace])
-            put(@named_key_url, superuser, payload:payload).should look_like(status: setup[:code])
+            put(@named_key_url, superuser, payload: payload).should look_like(status: setup[:code])
           end
         end
       end
@@ -227,41 +229,45 @@ module Pedant
       # PATCHy PUT behaviors allow us to do partial updates via PUT. If a field
       # is not specified,  it should not be changed.
       shared_context "PUT like a PATCH" do
-        before (:each) do
-          @named_key_url = "#{key_url}/#{key_payload['name']}"
+        before(:each) do
+          @named_key_url = "#{key_url}/#{key_payload["name"]}"
           post(key_url, superuser, payload: key_payload).should look_like(status: 201)
         end
 
-        after (:each) do
+        after(:each) do
           delete(@named_key_url, superuser).should look_like(status: 200)
         end
 
         it "when only name is present and is changed, responds with 201 and a Location header" do
-          payload = { "name" =>  "altname1"}
+          payload = { "name" =>  "altname1" }
           expected_location = "#{key_url}/altname1"
           put(@named_key_url, superuser, payload: payload ).should look_like(
-            { :status => 201, :body_exact => payload,
-              :headers => [ "Location" => expected_location ] })
+            { status: 201, body_exact: payload,
+              headers: [ "Location" => expected_location ] }
+          )
           @named_key_url = expected_location
         end
 
         it "when only name is present and has not been changed" do
           payload = { "name" => key_payload["name"] }
           put(@named_key_url, superuser, payload: payload).should look_like(
-            { :status => 200, :body_exact => payload,
-              :no_headers => ["Location"] })
+            { status: 200, body_exact: payload,
+              no_headers: ["Location"] }
+          )
         end
 
         it "should only update  public_key when that is the only provided field" do
           payload = { "public_key" => keys[:key][:public] }
           put(@named_key_url, superuser, payload: payload).should look_like(
-            { :status => 200, :body_exact => payload,:no_headers => ["Location"] })
+            { status: 200, body_exact: payload, no_headers: ["Location"] }
+          )
         end
 
         it "should only update expiration date when that is the only provided field" do
-          payload = { "expiration_date" =>  unexpired_date_2 }
+          payload = { "expiration_date" => unexpired_date_2 }
           put(@named_key_url, superuser, payload: payload).should look_like(
-            { :status => 200, :body_exact => payload,:no_headers => ["Location"] })
+            { status: 200, body_exact: payload, no_headers: ["Location"] }
+          )
         end
       end
     end

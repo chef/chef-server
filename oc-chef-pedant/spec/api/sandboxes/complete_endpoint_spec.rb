@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'pedant/rspec/cookbook_util'
+require "pedant/rspec/cookbook_util"
 
 describe "Sandboxes API Endpoint", :sandboxes do
   include Pedant::RSpec::CookbookUtil
@@ -31,19 +31,19 @@ describe "Sandboxes API Endpoint", :sandboxes do
   # S3 storage, though.  And really, we shouldn't have to verify the
   # URLs to that degree anyway, since the rest of the tests are all
   # hypermedia-driven.
-  url_regex = /^http[s]?:\/\/.*$/
+  url_regex = %r{^http[s]?://.*$}
 
-  describe 'Sandboxes Endpoint, POST' do
+  describe "Sandboxes Endpoint, POST" do
     let(:request_method) { :POST }
 
-    context 'when creating a new sandbox' do
+    context "when creating a new sandbox" do
       let(:expected_response) { resource_created_exact_response }
 
       let(:request_payload) do
         {
           "checksums" => {
           checksums[0] => nil,
-          checksums[1] => nil }
+          checksums[1] => nil },
         }
       end
 
@@ -54,64 +54,64 @@ describe "Sandboxes API Endpoint", :sandboxes do
           "uri" => api_url("/sandboxes/#{sandbox_id}"),
           "checksums" => {
             checksums[0] => {
-            # URLs might be for local
-            # storage, or for S3 (at
-            # Amazon or elsewhere).
-            # We're just going to do a
-            # basic check that they're
-            # actually URLs
+              # URLs might be for local
+              # storage, or for S3 (at
+              # Amazon or elsewhere).
+              # We're just going to do a
+              # basic check that they're
+              # actually URLs
               "url" => url_regex,
               "needs_upload" => true },
             checksums[1] => {
               "url" => url_regex,
-              "needs_upload" => true }
-          }
+              "needs_upload" => true },
+          },
         }
       end
 
-      it 'should respond with 201 Created', :smoke do
+      it "should respond with 201 Created", :smoke do
         checksums[0].should_not eq checksums[1]
         response.should look_like expected_response
       end
     end
 
-    context 'when creating an invalid sandbox', :validation do
-      context 'with an empty request hash' do
-        let(:request_payload){ {} }
-        it 'should fail' do
+    context "when creating an invalid sandbox", :validation do
+      context "with an empty request hash" do
+        let(:request_payload) { {} }
+        it "should fail" do
           should look_like({
-                             :status => 400,
-                             :body_exact => { "error" => ["Field 'checksums' missing"] }
+                             status: 400,
+                             body_exact: { "error" => ["Field 'checksums' missing"] },
                            })
         end
       end
 
-      context 'with an empty checksums hash' do
-        let(:request_payload){ {"checksums" => {}} }
-        it 'should fail' do
-          should look_like ({
-                              :status => 400,
-                              :body_exact => {
-                                "error" =>["Bad checksums!"]
-                              }
+      context "with an empty checksums hash" do
+        let(:request_payload) { { "checksums" => {} } }
+        it "should fail" do
+          should look_like({
+                              status: 400,
+                              body_exact: {
+                                "error" => ["Bad checksums!"],
+                              },
                             })
         end
       end
 
-      context 'with non-null hash values' do
-        let(:request_payload){ {"checksums" => {checksums[0] => "foo"} }}
-        it 'should fail' do
-          should look_like ({
-                              :status => 400,
-                              :body_exact => {
-                                "error" => ["Bad checksums!"]
-                              }
+      context "with non-null hash values" do
+        let(:request_payload) { { "checksums" => { checksums[0] => "foo" } } }
+        it "should fail" do
+          should look_like({
+                              status: 400,
+                              body_exact: {
+                                "error" => ["Bad checksums!"],
+                              },
                             })
         end
       end
     end
 
-    context 'with existing file' do
+    context "with existing file" do
       let(:expected_response) { resource_created_exact_response }
       let(:request_payload) { Pedant::Sandbox.create_payload([new_file, existing_file]) }
 
@@ -125,8 +125,8 @@ describe "Sandboxes API Endpoint", :sandboxes do
               "needs_upload" => true },
             existing_file_checksum => {
               # no URL key if it's already been uploaded
-              "needs_upload" => false }
-          }
+              "needs_upload" => false },
+          },
         }
       end
 
@@ -145,43 +145,43 @@ describe "Sandboxes API Endpoint", :sandboxes do
       end
 
 
-      it 'should recognize files that are already on the server' do
+      it "should recognize files that are already on the server" do
         assume_existing_sandbox
         response.should look_like expected_response
       end
     end
 
-    it 'should actually require checksums to create a sandbox', :cleanup do
-      pending 'Fix this in Erchef'
+    it "should actually require checksums to create a sandbox", :cleanup do
+      pending "Fix this in Erchef"
       post(api_url("/sandboxes"),
-           admin_user,
-           :payload => {"checksums" => {}}) do |response|
-        response.should look_like({
-                                    :status => 400,
-                                    :error => ["Missing checksums!"]
-                                  })
-      end
+        admin_user,
+        payload: { "checksums" => {} }) do |response|
+          response.should look_like({
+                                      status: 400,
+                                      error: ["Missing checksums!"],
+                                    })
+        end
     end
 
-    it 'should require valid checksums to create a sandbox', :cleanup do
-      pending 'Fix this in Erchef'
+    it "should require valid checksums to create a sandbox", :cleanup do
+      pending "Fix this in Erchef"
       post(api_url("/sandboxes"),
-           admin_user,
-           :payload => {
-             "checksums" => {
-               "Not-A-Checksum-----$@%@#!" => nil
-             }}) do |response|
-        response.should look_like({
-                                    :status => 400,
-                                    :error => ["Invalid checksum!"]
-                                  })
-      end
+        admin_user,
+        payload: {
+          "checksums" => {
+            "Not-A-Checksum-----$@%@#!" => nil,
+          } }) do |response|
+            response.should look_like({
+                                        status: 400,
+                                        error: ["Invalid checksum!"],
+                                      })
+          end
     end
 
     respects_maximum_payload_size
   end
 
-  describe 'Sandboxes Endpoint, PUT' do
+  describe "Sandboxes Endpoint, PUT" do
     let(:request_method) { :PUT }
     let(:request_url)    { sandbox["uri"] } # Use uri returned by sandbox
 
@@ -190,28 +190,28 @@ describe "Sandboxes API Endpoint", :sandboxes do
     let(:dummy_file) { Pedant::Utility.new_random_file }
 
     let(:sandbox) { create_sandbox(files) }
-    let(:sandbox_id) { sandbox['sandbox_id'] }
-    let(:error_sums) { files.map{ |f| Pedant::Utility.checksum(f) }.sort }
+    let(:sandbox_id) { sandbox["sandbox_id"] }
+    let(:error_sums) { files.map { |f| Pedant::Utility.checksum(f) }.sort }
 
-    context 'when committing an incomplete sandbox' do
+    context "when committing an incomplete sandbox" do
       let(:expected_response) { { status: 503 } }
       let(:request_payload) { { "is_completed" => true } }
 
       let(:error_message) do
-        ["Cannot update sandbox #{sandbox_id}: the following checksums have not been uploaded: #{error_sums.join(', ')}"]
+        ["Cannot update sandbox #{sandbox_id}: the following checksums have not been uploaded: #{error_sums.join(", ")}"]
       end
 
       should_respond_with 503
     end
 
-    context 'when uploading expected files to the sandbox ' do
+    context "when uploading expected files to the sandbox " do
       let(:response) { upload_to_sandbox(file1, sandbox) }
 
-      it 'should respond with 200 OK or 204 No Content' do
-        should look_like({:status => [200, 204]})
+      it "should respond with 200 OK or 204 No Content" do
+        should look_like({ status: [200, 204] })
       end
 
-      it 'response headers should not contain :content_length when response code is 204' do
+      it "response headers should not contain :content_length when response code is 204" do
         response2 = upload_to_sandbox(file1, sandbox)
         # Protect in case the response is a 200 e.g from chef-zero
         # TODO: Fix chef-zero to rerurn a 204 in this situation instead of 200
@@ -222,53 +222,53 @@ describe "Sandboxes API Endpoint", :sandboxes do
       end
     end
 
-    context 'when committing a sandbox after uploading files' do
+    context "when committing a sandbox after uploading files" do
       let(:expected_response) { ok_full_response }
       let(:request_payload) { { "is_completed" => true } }
 
       let(:responses_from_upload) { files.map { |f| upload_to_sandbox f, sandbox } }
       let(:success_message) do
         {
-          "guid"        => sandbox_id,
-          "name"        => sandbox_id,
-          "checksums"   => checksums,
-          "create_time" => timestamp_regexp
+          "guid" => sandbox_id,
+          "name" => sandbox_id,
+          "checksums" => checksums,
+          "create_time" => timestamp_regexp,
         }
       end
 
       # YYYY-MM-DDT00:00:00+00:00, but we'll constraint it to at least today's date
-      let(:timestamp_regexp) { Regexp.new "#{platform.now.strftime('%Y-%m-%d')}T\\d\\d:\\d\\d:\\d\\d\[\\+\\-\]\\d\\d:\\d\\d" }
+      let(:timestamp_regexp) { Regexp.new "#{platform.now.strftime("%Y-%m-%d")}T\\d\\d:\\d\\d:\\d\\d[\\+\\-]\\d\\d:\\d\\d" }
 
-      it 'should respond with 200 OK', :smoke do
+      it "should respond with 200 OK", :smoke do
         # Upload and check files
-        responses_from_upload.each { |r| r.should look_like({:status => [200, 204]}) }
+        responses_from_upload.each { |r| r.should look_like({ status: [200, 204] }) }
 
         # Signal that the sandbox is complete
         response.should look_like expected_response
-        parsed_response.should have_key 'is_completed'
+        parsed_response.should have_key "is_completed"
       end
     end
 
-    it 'erroneously reports a file is not uploaded when trying to commit an already committed sandbox', :cleanup do
-      pending 'fix this in Erchef'
+    it "erroneously reports a file is not uploaded when trying to commit an already committed sandbox", :cleanup do
+      pending "fix this in Erchef"
       file1 = Pedant::Utility.new_random_file
       checksum = Pedant::Utility.checksum(file1)
 
       sandbox = create_sandbox([file1])
       sandbox_id = sandbox["sandbox_id"]
       upload_to_sandbox(file1, sandbox).should look_like({
-                                                           :status => 200,
-                                                           :body_exact => {
-                                                             "uri" => sandbox["checksums"][checksum]["url"]
-                                                           }
+                                                           status: 200,
+                                                           body_exact: {
+                                                             "uri" => sandbox["checksums"][checksum]["url"],
+                                                           },
                                                          })
 
       commit_sandbox(sandbox).should look_like({
-                                                 :status => 200,
-                                                 :body => {
+                                                 status: 200,
+                                                 body: {
                                                    "guid" => sandbox_id,
-                                                   "checksums" => [checksum]
-                                                 }
+                                                   "checksums" => [checksum],
+                                                 },
                                                })
       r = commit_sandbox(sandbox)
       r.should have_status_code 400
@@ -286,16 +286,16 @@ describe "Sandboxes API Endpoint", :sandboxes do
 
       sandbox = create_sandbox([file1, file2])
       sandbox_id = sandbox["sandbox_id"]
-      [file1, file2].each {|f| upload_to_sandbox(f, sandbox)}
+      [file1, file2].each { |f| upload_to_sandbox(f, sandbox) }
       commit_sandbox(sandbox).should look_like({
-                                                 :status => 200,
-                                                 :body => {
+                                                 status: 200,
+                                                 body: {
                                                    # Basic checks
                                                    "guid" => sandbox_id,
-                                                   "checksums" => [file1, file2].map{|f| Pedant::Utility.checksum(f)},
+                                                   "checksums" => [file1, file2].map { |f| Pedant::Utility.checksum(f) },
                                                    # This is the real test
-                                                   "is_completed" => true
-                                                 }
+                                                   "is_completed" => true,
+                                                 },
                                                })
     end
 
@@ -304,7 +304,7 @@ describe "Sandboxes API Endpoint", :sandboxes do
       file2 = Pedant::Utility.new_random_file
 
       sandbox = create_sandbox([file1, file2])
-      [file1, file2].each {|f| upload_to_sandbox(f, sandbox)}
+      [file1, file2].each { |f| upload_to_sandbox(f, sandbox) }
 
       r = commit_sandbox(sandbox)
       r.should have_status_code 200

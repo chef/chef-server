@@ -13,11 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'mixlib/config'
-require 'pedant/command_line'
-require 'pedant/gem'
-require 'rspec-rerun/formatter'
-require 'rspec-rerun/tasks'
+require "mixlib/config" unless defined?(Mixlib::Config)
+require "pedant/command_line"
+require "pedant/gem"
+require "rspec-rerun/formatter"
+require "rspec-rerun/tasks"
 
 module Pedant
   class Config
@@ -26,10 +26,10 @@ module Pedant
     # Configure Pedant based on command-line arguments
     def self.from_argv(argv, option_sets)
       cli_options = Pedant::CommandLine.new(argv).parse(option_sets)
-      cli_options.config_file ||= self.config_file
+      cli_options.config_file ||= config_file
 
       if File.exist?(cli_options.config_file)
-        self.from_file(cli_options.config_file)
+        from_file(cli_options.config_file)
       else
         raise "Configuration file '#{cli_options.config_file}' not found!"
       end
@@ -41,7 +41,7 @@ module Pedant
       # ensure we remove any nil options before merging so we don't clobber
       # values set in the default Pedant::Config class OR user provided config
       # file
-      non_nil_cli_options = cli_options.to_hash.delete_if{|key, value| value.nil? }
+      non_nil_cli_options = cli_options.to_hash.delete_if { |key, value| value.nil? }
       merge!(non_nil_cli_options)
 
       # TODO: suggestions?
@@ -64,18 +64,17 @@ module Pedant
       end
     end
 
-
     # Return an array of arguments for RSpec.
     def self.rspec_args
       args = []
 
       # Only apply filtering flags if 'run_all' is not set to override them
       if self[:tags] && !run_all
-        args.concat(self[:tags].map { |tag| ['-t', tag.to_s] } )
+        args.concat(self[:tags].map { |tag| ["-t", tag.to_s] } )
       end
 
       if self[:seed]
-        args.concat([ '--seed', self[:seed] ])
+        args.push( "--seed", self[:seed] )
       end
 
       args.concat(rspec_formatting_args)
@@ -87,7 +86,7 @@ module Pedant
         # Remove the failures file if we aren't running with --rerun;
         # otherwise, if it exists, we would only ever run those tests,
         # even if they all pass!
-        FileUtils.rm(::RSpec::Rerun::Formatter::FILENAME, :force => true)
+        FileUtils.rm(::RSpec::Rerun::Formatter::FILENAME, force: true)
 
         # This is the set of tests we're running.
         _test_dirs = test_directories
@@ -101,11 +100,11 @@ module Pedant
     # Returns just the arguments for formatting
     def self.rspec_formatting_args
       format_args = if junit_file
-                      %W[-r rspec_junit_formatter -f RspecJunitFormatter -o #{junit_file} -f documentation]
+                      %W{-r rspec_junit_formatter -f RspecJunitFormatter -o #{junit_file} -f documentation}
                     else
-                      %w[ --color -f documentation --tty]
+                      %w{ --color -f documentation --tty}
                     end
-      format_args + %w(--require rspec-rerun/formatter --format RSpec::Rerun::Formatter)
+      format_args + %w{--require rspec-rerun/formatter --format RSpec::Rerun::Formatter}
     end
 
     # Default Values
