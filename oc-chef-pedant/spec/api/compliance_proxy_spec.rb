@@ -1,17 +1,17 @@
 def wait_for_http_listener(uri_string, retries = 10)
-  require 'net/http'
-  require 'openssl'
-  require 'uri'
+  require "net/http"
+  require "openssl"
+  require "uri"
   uri = URI(uri_string)
   begin
     puts "Trying GET #{uri_string}"
     Net::HTTP.start(uri.host, uri.port,
-                    use_ssl: true,
-                    ssl_version: Pedant::Config.ssl_version, # ??
-                    verify_mode: OpenSSL::SSL::VERIFY_NONE) do |http|
-      request = Net::HTTP::Get.new uri
-      http.request request
-    end
+      use_ssl: true,
+      ssl_version: Pedant::Config.ssl_version, # ??
+      verify_mode: OpenSSL::SSL::VERIFY_NONE) do |http|
+        request = Net::HTTP::Get.new uri
+        http.request request
+      end
     puts "Succesfully made GET to #{uri_string}"
   rescue StandardError => e
     if retries <= 0
@@ -27,23 +27,22 @@ end
 
 def start_compliance_stub(port)
   # Start stub compliance server in a thread
-  require 'webrick'
-  require 'webrick/https'
-  require 'openssl'
-  require 'thread'
+  require "webrick"
+  require "webrick/https"
+  require "openssl"
   Thread.new do
-    server = WEBrick::HTTPServer.new(:Port => port,
-                                     :SSLEnable => true,
-                                     :SSLVerifyClient => OpenSSL::SSL::VERIFY_NONE,
-                                     :SSLCertName => [%w[CN localhost]])
-    server.mount_proc '/' do |req, res|
+    server = WEBrick::HTTPServer.new(Port: port,
+      SSLEnable: true,
+      SSLVerifyClient: OpenSSL::SSL::VERIFY_NONE,
+      SSLCertName: [%w{CN localhost}])
+    server.mount_proc "/" do |req, res|
       case req.path
       when %r{/compliance/profiles/([^/]+)/?}
         res.body = '{ "response": "ok" }'
       when %r{/compliance/profiles/([^/]+)/([^/]+)/?}
         res.body = '{ "response": "ok" }'
       else
-        res.body = '{}'
+        res.body = "{}"
         res.status = 404
       end
     end

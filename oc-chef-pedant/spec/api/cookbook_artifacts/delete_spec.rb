@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'pedant/rspec/cookbook_util'
+require "pedant/rspec/cookbook_util"
 
 describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artifacts_delete do
 
@@ -42,8 +42,8 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
 
     context "DELETE /cookbook_artifacts/<name>/<version>" do
       let(:request_method) { :DELETE }
-      let(:request_url){api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_identifier}")}
-      let(:requestor)      { admin_user }
+      let(:request_url) { api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_identifier}") }
+      let(:requestor) { admin_user }
 
       let(:cookbook_identifier) { "1111111111111111111111111111111111111111" }
       let(:default_version) { "1.2.3" }
@@ -57,17 +57,17 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
         it "returns 404" do
           response = delete(request_url, requestor)
           expect(response.code).to eq(404)
-          expect(parse(response)).to eq({"error"=>["not_found"]})
+          expect(parse(response)).to eq({ "error" => ["not_found"] })
         end
 
-        context 'with bad identifier' do
+        context "with bad identifier" do
 
           let(:cookbook_identifier) { "foo@bar" }
 
           it "returns 404" do
             response = delete(request_url, requestor)
             expect(response.code).to eq(404)
-            expect(parse(response)).to eq({"error"=>["not_found"]})
+            expect(parse(response)).to eq({ "error" => ["not_found"] })
           end
 
         end # with bad version
@@ -87,7 +87,7 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
           it "should respond with 404 (\"Not Found\") and not delete existing versions" do
             delete(non_existing_version_url, requestor) do |response|
               expect(response.code).to eq(404)
-              expect(parse(response)).to eq({"error"=>["not_found"]})
+              expect(parse(response)).to eq({ "error" => ["not_found"] })
             end
 
             expect(get(request_url, requestor).code).to eq(200)
@@ -100,8 +100,8 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
           let(:recipe_content) { "hello-#{unique_suffix}" }
           let(:recipe_spec) do
             {
-              :name => recipe_name,
-              :content => recipe_content
+              name: recipe_name,
+              content: recipe_content,
             }
           end
 
@@ -109,7 +109,7 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
             make_cookbook_artifact_with_recipes(cookbook_name, cookbook_identifier, [recipe_spec])
           end
 
-          after(:each)  { delete_cookbook_artifact(requestor, cookbook_name, cookbook_identifier) }
+          after(:each) { delete_cookbook_artifact(requestor, cookbook_name, cookbook_identifier) }
 
           it "should cleanup unused checksum data in s3/bookshelf" do
             artifact_json = get(request_url, requestor)
@@ -138,7 +138,7 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
       end # context for existing cookbooks
 
       context "with permissions for" do
-        let(:cookbook_name) {"delete-cookbook"}
+        let(:cookbook_name) { "delete-cookbook" }
         let(:cookbook_identifier) { "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" }
         let(:not_found_msg) { ["Cannot find a cookbook named delete-cookbook with version 0.0.1"] }
 
@@ -148,7 +148,7 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
         before(:each) { make_cookbook_artifact(admin_user, cookbook_name, cookbook_identifier) }
         after(:each) { delete_cookbook_artifact(admin_user, cookbook_name, cookbook_identifier) }
 
-        context 'as admin user' do
+        context "as admin user" do
 
           it "should respond with 200 (\"OK\") and be deleted" do
             delete_response = delete(request_url, admin_user)
@@ -159,7 +159,7 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
           end # it admin user returns 200
         end # as admin user
 
-        context 'as normal user', :authorization do
+        context "as normal user", :authorization do
           let(:expected_response) { delete_cookbook_success_response }
 
           let(:requestor) { normal_user }
@@ -168,7 +168,7 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
           end # it admin user returns 200
         end # with normal user
 
-        context 'as a user outside of the organization', :authorization do
+        context "as a user outside of the organization", :authorization do
           let(:expected_response) { unauthorized_access_credential_response }
           let(:requestor) { outside_user }
 
@@ -178,7 +178,7 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
           end
         end # it outside user returns 403
 
-        context 'with invalid user', :authorization do
+        context "with invalid user", :authorization do
           let(:expected_response) { invalid_credential_exact_response }
           let(:requestor) { invalid_user }
 

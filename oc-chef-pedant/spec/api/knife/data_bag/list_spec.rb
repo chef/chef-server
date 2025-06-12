@@ -13,26 +13,26 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'pedant/rspec/knife_util'
-require 'securerandom'
+require "pedant/rspec/knife_util"
+require "securerandom"
 
-describe 'knife', :knife do
-  context 'data bag' do
-    context 'show [ITEM]' do
+describe "knife", :knife do
+  context "data bag" do
+    context "show [ITEM]" do
       include Pedant::RSpec::KnifeUtil
       include Pedant::RSpec::KnifeUtil::DataBag
 
       let(:command) { "knife data bag list -c #{knife_config}" }
       after(:each)  { knife "data bag delete #{bag_name} -c #{knife_config} --yes" }
 
-      context 'as an admin' do
+      context "as an admin" do
         let(:requestor) { knife_admin }
 
-        it 'should succeed' do
+        it "should succeed" do
           knife "data bag create #{bag_name} -c #{knife_config}"
 
           # Runs knife data bag list
-          should have_outcome :status => 0, :stdout => /#{bag_name}/
+          should have_outcome status: 0, stdout: /#{bag_name}/
         end
       end
 

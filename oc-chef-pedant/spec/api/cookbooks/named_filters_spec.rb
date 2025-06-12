@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'pedant/rspec/cookbook_util'
+require "pedant/rspec/cookbook_util"
 
 describe "Cookbooks API endpoint, named filters", :cookbooks, :cookbooks_named_filters do
 
@@ -48,7 +48,7 @@ describe "Cookbooks API endpoint, named filters", :cookbooks, :cookbooks_named_f
     def expected_for_latest(cookbooks)
       latest = get_latest_cookbooks(cookbooks)
       latest.inject({}) do |body, cookbook_spec|
-        name, version_specs  = cookbook_spec
+        name, version_specs = cookbook_spec
         latest_version = version_specs.first
         version_string, _recipe_names = latest_version
         body[name] = api_url("/#{cookbook_url_base}/#{name}/#{version_string}")
@@ -57,18 +57,18 @@ describe "Cookbooks API endpoint, named filters", :cookbooks, :cookbooks_named_f
     end
 
     def expected_for_named_cookbook(cookbooks, named_cookbook)
-      cookbook = cookbooks.select{ |k,v| k == named_cookbook}
+      cookbook = cookbooks.select { |k, v| k == named_cookbook }
 
 
       cookbook.inject({}) do |body, cookbook_spec|
-        name, version_specs  = cookbook_spec
+        name, version_specs = cookbook_spec
         body[name] = {
           "url" => api_url("/#{cookbook_url_base}/#{name}"),
           "versions" => version_specs.map do |version, recipes|
             { "version" => version,
-              "url" => api_url("/#{cookbook_url_base}/#{name}/#{version}")
+              "url" => api_url("/#{cookbook_url_base}/#{name}/#{version}"),
             }
-          end
+          end,
         }
         body
       end
@@ -81,7 +81,7 @@ describe "Cookbooks API endpoint, named filters", :cookbooks, :cookbooks_named_f
       nested = latest.map do |cookbook_spec|
         cookbook_name, version_specs = cookbook_spec
         latest_version = version_specs.first
-        _version_string, recipe_names =latest_version
+        _version_string, recipe_names = latest_version
 
         # don't sort the recipes for the Ruby endpoint; CouchDB keeps them in insertion order
         recipe_names.sort!
@@ -94,7 +94,7 @@ describe "Cookbooks API endpoint, named filters", :cookbooks, :cookbooks_named_f
     end
 
     let(:cookbooks) { raise "Must define a cookbook spec!" }
-    let(:cookbook_name) {"my_cookbook"}
+    let(:cookbook_name) { "my_cookbook" }
 
     # Changed from before(:all) to avoid some problems, but it slows down these tests
     before(:each) { setup_cookbooks(cookbooks) }
@@ -104,7 +104,7 @@ describe "Cookbooks API endpoint, named filters", :cookbooks, :cookbooks_named_f
     # cookbooks in the system, so I'm pulling it all out into a shared
     # set of examples
     def self.should_respond_with_latest_cookbooks
-      context 'when requesting /cookbooks/_latest' do
+      context "when requesting /cookbooks/_latest" do
         let(:named_filter) { :_latest }
         let(:expected_response) { fetch_cookbook_success_exact_response }
         let(:fetched_cookbook) { expected_for_latest(cookbooks) }
@@ -116,7 +116,7 @@ describe "Cookbooks API endpoint, named filters", :cookbooks, :cookbooks_named_f
     end
 
     def self.should_respond_with_recipes_from_latest_cookbooks
-      context 'when requesting /cookbooks/_recipes' do
+      context "when requesting /cookbooks/_recipes" do
         let(:named_filter) { :_recipes }
         let(:expected_response) { fetch_cookbook_success_exact_response }
 
@@ -128,7 +128,7 @@ describe "Cookbooks API endpoint, named filters", :cookbooks, :cookbooks_named_f
     end
 
     def self.should_respond_with_single_cookbook
-      context 'when requesting /cookbooks/my_cookbook' do
+      context "when requesting /cookbooks/my_cookbook" do
         let(:cookbook) { "my_cookbook" }
         let(:named_filter) { "my_cookbook" }
         let(:fetched_cookbook) { expected_for_named_cookbook(cookbooks, named_filter) }
@@ -141,7 +141,7 @@ describe "Cookbooks API endpoint, named filters", :cookbooks, :cookbooks_named_f
     end
 
     def self.should_respond_with_single_cookbook_not_found
-      context 'when requesting /cookbooks/my_cookbook' do
+      context "when requesting /cookbooks/my_cookbook" do
         let(:named_filter) { "my_cookbook" }
         let(:expected_response) { fetch_cookbook_not_found_exact_response }
 
@@ -169,7 +169,7 @@ describe "Cookbooks API endpoint, named filters", :cookbooks, :cookbooks_named_f
     # smoke tests.
     context "with one cookbook, one version" do
       let(:cookbooks) do
-        {"my_cookbook" => {"1.0.0" => ["recipe1", "recipe2"]}}
+        { "my_cookbook" => { "1.0.0" => %w{recipe1 recipe2} } }
       end
 
       should_respond_with_latest_cookbooks
@@ -179,7 +179,7 @@ describe "Cookbooks API endpoint, named filters", :cookbooks, :cookbooks_named_f
 
     context "with different cookbook, one version" do
       let(:cookbooks) do
-        {"your_cookbook" => {"1.0.0" => ["recipe1", "recipe2"]}}
+        { "your_cookbook" => { "1.0.0" => %w{recipe1 recipe2} } }
       end
 
       should_respond_with_latest_cookbooks
@@ -190,8 +190,8 @@ describe "Cookbooks API endpoint, named filters", :cookbooks, :cookbooks_named_f
     context "with multiple cookbooks, one version each" do
       let(:cookbooks) do
         {
-          "my_cookbook" => {"1.0.0" => ["recipe1", "recipe2"]},
-          "your_cookbook" => {"1.3.0" => ["foo", "bar"]},
+          "my_cookbook" => { "1.0.0" => %w{recipe1 recipe2} },
+          "your_cookbook" => { "1.3.0" => %w{foo bar} },
         }
       end
 
@@ -204,12 +204,12 @@ describe "Cookbooks API endpoint, named filters", :cookbooks, :cookbooks_named_f
       let(:cookbooks) do
         {
           "my_cookbook" => {
-            "1.0.0" => ["monitoring", "security"],
-            "1.5.0" => ["security", "users"]
+            "1.0.0" => %w{monitoring security},
+            "1.5.0" => %w{security users},
           },
           "your_cookbook" => {
-            "1.3.0" => ["webserver", "database"],
-            "2.0.0" => ["webserver", "database", "load_balancer"]
+            "1.3.0" => %w{webserver database},
+            "2.0.0" => %w{webserver database load_balancer},
           },
         }
       end

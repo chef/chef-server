@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # Author:: Seth Falcon (<seth@chef.io>)
 # Author:: James Casey (<james@chef.io>)
@@ -7,8 +6,8 @@
 # Copyright:: Copyright (c) Chef Software, Inc.
 #
 
-require 'pp'
-require 'pedant/rspec/cookbook_util'
+require "pp"
+require "pedant/rspec/cookbook_util"
 
 describe "Cookbooks API endpoint", :cookbooks do
   let(:cookbook_url_base) { "cookbooks" }
@@ -23,14 +22,14 @@ describe "Cookbooks API endpoint", :cookbooks do
     let(:original_cookbook) { new_cookbook(cookbook_name, cookbook_version) }
     let(:fetched_cookbook) { original_cookbook }
 
-    context 'with delete cookbook authorization' do
-      let(:cookbook_name) {"delete-cookbook"}
+    context "with delete cookbook authorization" do
+      let(:cookbook_name) { "delete-cookbook" }
       let(:cookbook_version) { "0.0.1" }
 
       before(:each) { make_cookbook(admin_user, cookbook_name, cookbook_version) }
       after(:each)  { delete_cookbook(admin_user, cookbook_name, cookbook_version) }
 
-      context 'as an authorized, normal user' do
+      context "as an authorized, normal user" do
         let(:expected_response) { delete_cookbook_success_response }
         let(:requestor) { normal_user }
 
@@ -40,13 +39,13 @@ describe "Cookbooks API endpoint", :cookbooks do
         end # it normal user returns 200
       end # as an authorized, normal user
 
-      context 'as an unauthorized, normal user' do
+      context "as an unauthorized, normal user" do
         let(:expected_response) { forbidden_action_response }
         let(:requestor) { normal_user }
         let(:restrict_permissions!) do
           restrict_permissions_to "/cookbooks/#{cookbook_name}",
-                                  normal_user => ['read'],
-                                   admin_user => ['read', 'delete']
+            normal_user => ["read"],
+            admin_user => %w{read delete}
         end
 
 

@@ -13,30 +13,30 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'pedant/rspec/knife_util'
-require 'securerandom'
+require "pedant/rspec/knife_util"
+require "securerandom"
 
-describe 'knife', :knife do
-  context 'node' do
-    context 'bulk delete REGEX' do
+describe "knife", :knife do
+  context "node" do
+    context "bulk delete REGEX" do
       include Pedant::RSpec::KnifeUtil
       include Pedant::RSpec::KnifeUtil::Node
 
       let(:command) { "knife node bulk delete '^pedant-node-' -c #{knife_config} --yes" }
-      let(:nodes)   { %w(pedant-node-0 pedant-node-1 pedant-master) }
+      let(:nodes)   { %w{pedant-node-0 pedant-node-1 pedant-master} }
       after(:each)  { nodes.each(&delete_node!) }
 
       let(:create_node!) { ->(n) { knife "node create #{n} -c #{knife_config} --disable-editing" } }
       let(:delete_node!) { ->(n) { knife "node delete #{n} -c #{knife_config} --yes" } }
 
-      context 'as an admin' do
+      context "as an admin" do
         let(:requestor) { knife_admin }
 
-        it 'should succeed' do
+        it "should succeed" do
           nodes.each(&create_node!)
 
           # Runs knife node list
-          should have_outcome :status => 0, :stdout => /Deleted node pedant-node-0\s+Deleted node pedant-node-1/
+          should have_outcome status: 0, stdout: /Deleted node pedant-node-0\s+Deleted node pedant-node-1/
         end
       end
 

@@ -11,7 +11,7 @@
 # the Ruby version still assumes things are stored in CouchDB, instead
 # of MySQL
 
-require 'pedant/rspec/node_util'
+require "pedant/rspec/node_util"
 
 describe "Private Chef Nodes API endpoint", :nodes do
   include Pedant::RSpec::NodeUtil
@@ -34,29 +34,30 @@ describe "Private Chef Nodes API endpoint", :nodes do
       delete_node(admin_user, node_name)
     end
 
-    context 'attempting to change node name on update', :validation do
+    context "attempting to change node name on update", :validation do
       let(:node_update_name_mismatch_response) {
         {
-          :status => 400,
-          :body => {
-            "error" => ["Node name mismatch."]
-          }
+          status: 400,
+          body: {
+            "error" => ["Node name mismatch."],
+          },
         }
       }
 
       let(:invalid_node) {
         {
           "name" => "Not_the_same_name",
-          "json_class" => "Chef::Node"
+          "json_class" => "Chef::Node",
         }
       }
 
-      let(:expected_response){ node_update_name_mismatch_response }
+      let(:expected_response) { node_update_name_mismatch_response }
 
       it 'returns a 400 ("Bad Request")' do
-        invalid_node["name"].should_not == node_name
+        invalid_node["name"].should_not
+        node_name
 
-        put(named_node_url, requestor, :payload => invalid_node) do |response|
+        put(named_node_url, requestor, payload: invalid_node) do |response|
           response.should look_like expected_response
         end
       end

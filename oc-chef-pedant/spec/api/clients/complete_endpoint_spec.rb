@@ -13,8 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'pedant/rspec/client_util'
-require 'pedant/rspec/validations'
+require "pedant/rspec/client_util"
+require "pedant/rspec/validations"
 
 describe "Client API endpoint", :clients do
   include Pedant::RSpec::ClientUtil
@@ -31,31 +31,31 @@ describe "Client API endpoint", :clients do
   # already in the system, but there are always clients present in the
   # system, so we don't make that distinction.
 
-  context 'GET /clients' do
+  context "GET /clients" do
     let(:request_method) { :GET }
     let(:request_url)    { clients_url }
 
     let(:clients_collection) { pedant_clients.inject({}, &client_name_to_url) }
     let(:client_name_to_url) { ->(body, name) { body.with!(name, api_url("/clients/#{name}")) } }
 
-    context 'as an admin user' do
-      let(:requestor){admin_requestor}
+    context "as an admin user" do
+      let(:requestor) { admin_requestor }
       let(:expected_response) { ok_response }
 
-      context 'with an operational server', :smoke do
+      context "with an operational server", :smoke do
         it { should look_like ok_response }
       end
 
-      context 'with only Pedant-created clients' do
+      context "with only Pedant-created clients" do
         let(:expected_response) { ok_exact_response }
         let(:success_message)   { clients_collection }
 
-        should_respond_with 200, 'and the Pedant-created clients'
+        should_respond_with 200, "and the Pedant-created clients"
       end
     end
   end
 
-  context 'POST /clients' do
+  context "POST /clients" do
     include Pedant::RSpec::Validations::Create
 
     let(:request_method)  { :POST }
@@ -66,7 +66,7 @@ describe "Client API endpoint", :clients do
     let(:default_client_attributes) do
       {
         "name" => client_name,
-        "validator" => false
+        "validator" => false,
       }
     end
 
@@ -79,71 +79,71 @@ describe "Client API endpoint", :clients do
     let(:resource_url) { client_url }
     let(:persisted_resource_response) { get(resource_url, superuser) }
     let(:default_resource_attributes) { default_client_attributes }
-    let(:required_attributes) { default_client_attributes.except('private_key') }
+    let(:required_attributes) { default_client_attributes.except("private_key") }
 
     after :each do
-      begin
-        delete_client(admin_requestor, client_name)
-      rescue URI::InvalidURIError
-        # ok, since some bad names can result in bad URLs
-      end
+
+      delete_client(admin_requestor, client_name)
+    rescue URI::InvalidURIError
+      # ok, since some bad names can result in bad URLs
+
     end
 
-    context 'when validating' do
+    context "when validating" do
       let(:client_name) { test_client }
       let(:test_client) { "pedant_test_#{rand(100000)}" }
 
       should_create_public_key
     end
 
-    context 'valid requests of various types to create a client' do
+    context "valid requests of various types to create a client" do
 
-      context 'with a valid name' do
-        ['pedanttestingclient', 'pedanttestingclient123', 'pedant_testing_client', 'pedant.testing.client'].each do |n|
+      context "with a valid name" do
+        ["pedanttestingclient", "pedanttestingclient123", "pedant_testing_client", "pedant.testing.client"].each do |n|
           context "like '#{n}'" do
-            let(:client_name){n}
+            let(:client_name) { n }
             it { should look_like create_client_success_response }
           end
         end
       end # valid names
     end
 
-    context 'invalid requests of various types to create a client', :validation do
-      context 'with an invalid name' do
-        ['pedant$testing$client', 'pedant testing client', 'pedant{testing}client'].each do |n|
+    context "invalid requests of various types to create a client", :validation do
+      context "with an invalid name" do
+        ["pedant$testing$client", "pedant testing client", "pedant{testing}client"].each do |n|
           context "like '#{n}'" do
-            let(:client_name){n}
-            it 'fails' do
+            let(:client_name) { n }
+            it "fails" do
               should look_like create_client_bad_name_failure_response
             end
           end
         end
       end # invalid names
 
-      context 'with an empty payload' do
-        let(:request_payload){{}}
-        it 'fails' do
+      context "with an empty payload" do
+        let(:request_payload) { {} }
+        it "fails" do
           should look_like create_client_no_name_failure_response
         end
       end
     end
 
-    context 'creation of an existing client' do
-      include_context 'with temporary testing client'
+    context "creation of an existing client" do
+      include_context "with temporary testing client"
 
       it { should look_like create_client_conflict_response }
     end
 
-    context 'as different kinds of clients', :authorization do
+    context "as different kinds of clients", :authorization do
       def self.should_create_client_when(_options = {})
         context "when creating #{client_type(_options)} client" do
           let(:expected_response) { created_response }
           let(:request_payload) { client_attributes }
-          let(:client_attributes) { {"name" => client_name, 'validator' => _options[:validator] || false} }
+          let(:client_attributes) { { "name" => client_name, "validator" => _options[:validator] || false } }
           let(:success_message) do
-            new_client(client_name).
-              merge(client_attributes).
-              with('public_key', expected_public_key)
+            new_client(client_name)
+              .merge(client_attributes)
+              .with("public_key", expected_public_key)
           end
 
           should_respond_with 201 do
@@ -157,7 +157,7 @@ describe "Client API endpoint", :clients do
           # This is really a 403 Forbidden
           let(:fobidden_action_error_message) { ["missing create permission"] }
           let(:expected_response) { forbidden_response }
-          let(:request_payload) { { "name" => client_name, 'validator' => _options[:validator] || false } }
+          let(:request_payload) { { "name" => client_name, "validator" => _options[:validator] || false } }
 
           should_respond_with 403 do
             # Nothing new should have been created (using
@@ -168,18 +168,18 @@ describe "Client API endpoint", :clients do
         end
       end
 
-      context 'as an org admin' do
-        let (:requestor) { admin_requestor }
+      context "as an org admin" do
+        let(:requestor) { admin_requestor }
         should_create_client_when validator: false
         should_create_client_when validator: true
       end
-      context 'as client' do
-        let (:requestor) { normal_client }
+      context "as client" do
+        let(:requestor) { normal_client }
         should_not_create_client_when validator: false
         should_not_create_client_when validator: true
       end
-      context 'as a validator client' do
-        let (:requestor) { validator_client }
+      context "as a validator client" do
+        let(:requestor) { validator_client }
         should_create_client_when validator: false
         should_not_create_client_when validator: true
       end
@@ -188,41 +188,41 @@ describe "Client API endpoint", :clients do
     respects_maximum_payload_size
 
   end
-  context 'GET /clients/<name>' do
+  context "GET /clients/<name>" do
     let(:request_method) { :GET }
     let(:request_url)    { named_client_url }
 
-    context 'without an existing client' do
+    context "without an existing client" do
       let(:request_url) { api_url "/clients/#{pedant_nonexistent_client_name}" }
       it { should look_like not_found_response }
     end
 
-    context 'with an existing client' do
-      include_context 'with temporary testing client'
+    context "with an existing client" do
+      include_context "with temporary testing client"
 
       def self.should_fetch_client
-        it { should look_like ok_response.with(body: { 'name' => client_name }) }
+        it { should look_like ok_response.with(body: { "name" => client_name }) }
       end
 
       def self.forbids_fetching
-       let(:fobidden_action_error_message) { ["missing read permission"] }
-        it('forbids fetching', :authorization) { should look_like forbidden_response }
+        let(:fobidden_action_error_message) { ["missing read permission"] }
+        it("forbids fetching", :authorization) { should look_like forbidden_response }
       end
 
-      context 'as an org admin' do
-        let (:requestor) { admin_requestor }
+      context "as an org admin" do
+        let(:requestor) { admin_requestor }
         with_another_validator_client { should_fetch_client }
         with_another_normal_client    { should_fetch_client }
       end
-      context 'as client' do
-        let (:requestor) { normal_client }
+      context "as client" do
+        let(:requestor) { normal_client }
         with_another_validator_client { forbids_fetching }
-        with_another_normal_client    { forbids_fetching}
+        with_another_normal_client    { forbids_fetching }
       end
 
       # Validator clients can only fetch themselves
-      context 'as a validator client' do
-        let(:requestor) { validator_client}
+      context "as a validator client" do
+        let(:requestor) { validator_client }
 
         with_another_validator_client { forbids_fetching }
         with_another_normal_client    { forbids_fetching }
@@ -234,14 +234,14 @@ describe "Client API endpoint", :clients do
       end
 
       # Normal clients can only fetch themselves
-      context 'as a normal client' do
+      context "as a normal client" do
         let(:requestor) { normal_client }
         with_another_validator_client { forbids_fetching }
         with_another_normal_client    { forbids_fetching }
         with_self                     { should_fetch_client }
       end
 
-      context 'as a user' do
+      context "as a user" do
         let(:requestor) { normal_user }
         with_another_validator_client { should_fetch_client }
         with_another_normal_client    { should_fetch_client }
@@ -249,7 +249,7 @@ describe "Client API endpoint", :clients do
     end
   end
 
-  context 'PUT /clients/<name>' do
+  context "PUT /clients/<name>" do
     include Pedant::RSpec::Validations::Update
 
     let(:request_method)  { :PUT }
@@ -261,9 +261,9 @@ describe "Client API endpoint", :clients do
     let(:resource_url)        { client_url }
     let(:required_attributes) { required_client_attributes }
 
-    context 'modifying a non-existent client' do
+    context "modifying a non-existent client" do
       let(:request_url) { api_url "/clients/#{pedant_nonexistent_client_name}" }
-      let(:request_payload) { {"name" => pedant_nonexistent_client_name} }
+      let(:request_payload) { { "name" => pedant_nonexistent_client_name } }
 
       it { should look_like client_not_found_response }
     end
@@ -275,15 +275,15 @@ describe "Client API endpoint", :clients do
 
         # Test default values
         let(:client_attributes) do
-          {"name" => client_name }.tap do |h|
-            h['validator'] = _options[:validator] unless _options[:validator].nil?
+          { "name" => client_name }.tap do |h|
+            h["validator"] = _options[:validator] unless _options[:validator].nil?
           end
         end
 
         let(:success_message) do
-          new_client(client_name).
-            merge(client_attributes).
-            with('public_key', expected_public_key)
+          new_client(client_name)
+            .merge(client_attributes)
+            .with("public_key", expected_public_key)
         end
 
         should_respond_with 200 do
@@ -299,7 +299,7 @@ describe "Client API endpoint", :clients do
         # This is really a 403 Forbidden
         let(:fobidden_action_error_message) { ["missing update permission"] }
         let(:expected_response) { forbidden_response }
-        let(:request_payload) { { "name" => client_name, 'validator' => _options[:validator] || false } }
+        let(:request_payload) { { "name" => client_name, "validator" => _options[:validator] || false } }
 
         should_respond_with 403 do
           get(client_url, platform.admin_user).should look_like original_resource_attributes
@@ -308,30 +308,30 @@ describe "Client API endpoint", :clients do
     end
 
     def self.forbids_renaming
-      context 'when renaming client' do
-        let(:request_payload) { { 'name' => new_name } }
+      context "when renaming client" do
+        let(:request_payload) { { "name" => new_name } }
         let(:persisted_renamed_client_response) { get renamed_client_url, admin_user }
         let(:original_client_response) { persisted_resource_response }
         let(:renamed_client_url) { api_url "/clients/#{new_name}" }
-        let(:renamed_client_attributes) { original_resource_attributes.with('name', new_name) }
+        let(:renamed_client_attributes) { original_resource_attributes.with("name", new_name) }
         let(:fobidden_action_error_message) { ["missing update permission"] }
 
-        context 'to an unclaimed name' do
+        context "to an unclaimed name" do
           let(:expected_response) { forbidden_response }
-          #TODO: Test the exact response body
+          # TODO: Test the exact response body
 
           let(:new_name) { "#{client_name}_new" }
 
-          should_respond_with 403, 'and does not rename the client' do
+          should_respond_with 403, "and does not rename the client" do
             original_client_response.should look_like ok_response
           end
         end
 
-        context 'to an existing name' do
+        context "to an existing name" do
           let(:expected_response) { forbidden_response }
           let(:new_name) { normal_client.name }
 
-          should_respond_with 403, 'and does not rename the client' do
+          should_respond_with 403, "and does not rename the client" do
             original_client_response.should look_like ok_response
           end
         end
@@ -339,33 +339,33 @@ describe "Client API endpoint", :clients do
     end # should rename client
 
     def self.should_rename_client
-      context 'when renaming client' do
-        let(:request_payload) { { 'name' => new_name } }
+      context "when renaming client" do
+        let(:request_payload) { { "name" => new_name } }
         let(:persisted_renamed_client_response) { get renamed_client_url, admin_user }
         let(:original_client_response) { persisted_resource_response }
         let(:renamed_client_url) { api_url "/clients/#{new_name}" }
-        let(:renamed_client_attributes) { original_resource_attributes.with('name', new_name) }
+        let(:renamed_client_attributes) { original_resource_attributes.with("name", new_name) }
 
         # TODO: This test will probably break legacy code that uses couchdb
 
-        context 'to an unclaimed name' do
+        context "to an unclaimed name" do
           let(:expected_response) { created_response } # Not sure why renames create a new resource
-          #TODO: Test the exact response body
+          # TODO: Test the exact response body
 
           after(:each) { delete_client admin_user, new_name }
           let(:new_name) { "#{client_name}_new" }
 
-          should_respond_with 201, 'and rename the client' do
+          should_respond_with 201, "and rename the client" do
             original_client_response.should look_like not_found_response
-            persisted_renamed_client_response.should look_like ok_response.with('body_exact', renamed_client_attributes)
+            persisted_renamed_client_response.should look_like ok_response.with("body_exact", renamed_client_attributes)
           end
         end
 
-        context 'to an existing name' do
+        context "to an existing name" do
           let(:expected_response) { conflict_response }
           let(:new_name) { normal_client.name }
 
-          should_respond_with 409, 'and does not rename the client' do
+          should_respond_with 409, "and does not rename the client" do
             original_client_response.should look_like ok_response
           end
         end
@@ -398,7 +398,7 @@ describe "Client API endpoint", :clients do
     end
 
     # Validator clients can't update anything.
-    context 'as a validator client' do
+    context "as a validator client" do
       let(:requestor) { validator_client }
 
       with_another_validator_client do
@@ -430,7 +430,7 @@ describe "Client API endpoint", :clients do
     end
 
     # Normal clients can only update self
-    context 'as a normal client' do
+    context "as a normal client" do
       let(:requestor) { normal_client }
 
       with_another_validator_client do
@@ -467,22 +467,22 @@ describe "Client API endpoint", :clients do
     respects_maximum_payload_size
   end
 
-  context 'DELETE /clients/<name>' do
+  context "DELETE /clients/<name>" do
     let(:request_method)  { :DELETE }
     let(:request_url)     { named_client_url }
 
-    include_context 'with temporary testing client'
+    include_context "with temporary testing client"
 
     def self.should_delete_client
-      it { should look_like ok_response.with(body: { 'name' => client_name }) }
+      it { should look_like ok_response.with(body: { "name" => client_name }) }
     end
 
     def self.forbids_deletion
-       let(:fobidden_action_error_message) { ["missing delete permission"] }
-      it('forbids deletion', :authorization) { should look_like forbidden_response }
+      let(:fobidden_action_error_message) { ["missing delete permission"] }
+      it("forbids deletion", :authorization) { should look_like forbidden_response }
     end
 
-    context 'without an existing client' do
+    context "without an existing client" do
       let(:requestor) { admin_requestor }
       let(:request_url) { api_url "/clients/#{pedant_nonexistent_client_name}" }
 
@@ -497,7 +497,7 @@ describe "Client API endpoint", :clients do
     end
 
     # Validators can't even delete itself
-    context 'as a validator client' do
+    context "as a validator client" do
       let(:requestor) { validator_client }
 
       with_another_validator_client { forbids_deletion }
@@ -509,7 +509,7 @@ describe "Client API endpoint", :clients do
     end
 
     # Normal clients can only delete itself
-    context 'as a normal client' do
+    context "as a normal client" do
       let(:requestor) { normal_client }
 
       with_another_validator_client { forbids_deletion }

@@ -13,28 +13,28 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'pedant/rspec/knife_util'
-require 'securerandom'
+require "pedant/rspec/knife_util"
+require "securerandom"
 
-describe 'knife', :knife do
-  context 'node' do
-    context 'from file NODE' do
-      #, skip: "OC-3957: Write specs for `knife node from file`" do
+describe "knife", :knife do
+  context "node" do
+    context "from file NODE" do
+      # , skip: "OC-3957: Write specs for `knife node from file`" do
       include Pedant::RSpec::KnifeUtil
       include Pedant::RSpec::KnifeUtil::Node
 
       let(:command) { "knife node from file #{node_name}.json -c #{knife_config}" }
       after(:each) { knife "node delete #{node_name} -c #{knife_config} --yes" }
 
-      context 'with existing node' do
-        context 'as an admin' do
+      context "with existing node" do
+        context "as an admin" do
           let(:requestor) { knife_admin }
 
-          it 'should succeed' do
+          it "should succeed" do
             assume_fixture_file!
 
             # Runs knife node from file
-            should have_outcome :status => 0, :stderr => /Updated Node\s+#{node_name}/
+            should have_outcome status: 0, stderr: /Updated Node\s+#{node_name}/
           end
 
         end

@@ -17,11 +17,11 @@ def rand_id
   rand(10**7...10**8).to_s
 end
 
-RSpec.shared_context 'when the current_requestor is the superuser' do
+RSpec.shared_context "when the current_requestor is the superuser" do
   let(:current_requestor) { superuser }
 end
 
-RSpec.shared_context 'when the current_requestor is a user in the main org' do
+RSpec.shared_context "when the current_requestor is a user in the main org" do
   let(:test_user_name) { "pedant_test_user_#{rand_id}" }
   let(:current_requestor) { platform.create_user(test_user_name) }
 
@@ -34,7 +34,7 @@ RSpec.shared_context 'when the current_requestor is a user in the main org' do
   end
 end
 
-RSpec.shared_context 'when the current_requestor is a client in the main org' do
+RSpec.shared_context "when the current_requestor is a client in the main org" do
   let(:test_client_name) { "pedant_test_client_#{rand_id}" }
   let(:current_requestor) { platform.create_client(test_client_name, @test_org) }
 
@@ -43,7 +43,7 @@ RSpec.shared_context 'when the current_requestor is a client in the main org' do
   end
 end
 
-RSpec.shared_context 'when the current_requestor is a user in a different org' do
+RSpec.shared_context "when the current_requestor is a user in a different org" do
   let(:test_user_name) { "pedant_test_user_#{rand_id}" }
   let(:test_org_name) { "pedant_test_org_#{rand_id}" }
   let(:current_requestor) { platform.create_user(test_user_name) }
@@ -60,7 +60,7 @@ RSpec.shared_context 'when the current_requestor is a user in a different org' d
   end
 end
 
-RSpec.shared_context 'when the current_requestor is a client in a different org' do
+RSpec.shared_context "when the current_requestor is a client in a different org" do
   let(:test_client_name) { "pedant_test_client_#{rand_id}" }
   let(:test_org_name) { "pedant_test_org_#{rand_id}" }
   let(:second_org) { platform.create_org(test_org_name) }

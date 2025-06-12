@@ -1,5 +1,4 @@
-# -*- coding: utf-8 -*-
-require 'pedant/rspec/common'
+require "pedant/rspec/common"
 
 describe "users", :users do
 
@@ -14,7 +13,7 @@ describe "users", :users do
   # Pedant has configurable test users.
   # Selects Pedant users that are marked as associated
   let(:default_pedant_user_names) { platform.users.select(&:associate).map(&:name).sort }
-  let(:default_users_body)        { default_pedant_user_names.map { |user| {"user" => {"username" => user} } } }
+  let(:default_users_body)        { default_pedant_user_names.map { |user| { "user" => { "username" => user } } } }
 
   context "/users endpoint" do
     let(:request_url) { "#{platform.server}/users" }
@@ -35,22 +34,22 @@ describe "users", :users do
       end
       let(:filtered_users_body) do
         {
-          platform.non_admin_user.name => "#{request_url}/#{platform.non_admin_user.name}"
+          platform.non_admin_user.name => "#{request_url}/#{platform.non_admin_user.name}",
         }
       end
 
       context "superuser" do
         it "can get all users", :smoke do
           get(request_url, platform.superuser).should look_like({
-              :status => 200,
-              :body => users_body
+              status: 200,
+              body: users_body,
             })
         end
 
         it "returns no users when filtering by non-existing email", :smoke do
           get("#{request_url}?email=somenonexistingemail@somewhere.com", platform.superuser).should look_like({
-              :status => 200,
-              :body_exact => empty_users_body
+              status: 200,
+              body_exact: empty_users_body,
             })
         end
 
@@ -59,8 +58,8 @@ describe "users", :users do
           response = get("#{request_url}/#{platform.non_admin_user.name}", platform.superuser)
           email = JSON.parse(response)["email"]
           get("#{request_url}?email=#{email}", platform.superuser).should look_like({
-              :status => 200,
-              :body_exact => filtered_users_body
+              status: 200,
+              body_exact: filtered_users_body,
             })
         end
 
@@ -74,12 +73,12 @@ describe "users", :users do
           end
 
           let(:user_options) do
-            { :overrides => {
+            { overrides: {
                 "first_name" => "external",
                 "last_name" => "user",
                 "display_name" => "SAML USER",
-                "external_authentication_uid" => external_auth_id
-              }
+                "external_authentication_uid" => external_auth_id,
+              },
             }
           end
 
@@ -97,15 +96,15 @@ describe "users", :users do
 
           it "returns no users when filtering by non-existing external_authentication_uid", :smoke do
             get("#{request_url}?external_authentication_uid=somenonexistingemail@somewhere.com", platform.superuser).should look_like({
-                :status => 200,
-                :body_exact => empty_users_body
+                status: 200,
+                body_exact: empty_users_body,
               })
           end
 
           it "returns a single user when filtering by that user's external_authentication_uid", :smoke do
             get("#{request_url}?external_authentication_uid=#{external_auth_id}", platform.superuser).should look_like({
-                :status => 200,
-                :body_exact => filtered_external_users_body
+                status: 200,
+                body_exact: filtered_external_users_body,
               })
           end
         end
@@ -126,12 +125,12 @@ describe "users", :users do
           let(:username) { "user_for_email_tests" }
           let(:email) { "User@aol.com" }
           let(:user_options) do
-            { :overrides => {
+            { overrides: {
                 "first_name" => "user",
                 "last_name" => "user",
                 "display_name" => "USER USER",
-                "email" => email
-              }
+                "email" => email,
+              },
             }
           end
 
@@ -149,24 +148,24 @@ describe "users", :users do
 
           it "finds a user by email if the query does matches what is stored" do
             get("#{request_url}?email=#{email}", platform.superuser).should look_like({
-                :status => 200,
-                :body_exact => filtered_users_body
+                status: 200,
+                body_exact: filtered_users_body,
               })
           end
 
           it "finds a user by email if the query is all uppercase" do
-            uppercase = 'USER@AOL.COM'
+            uppercase = "USER@AOL.COM"
             get("#{request_url}?email=#{uppercase}", platform.superuser).should look_like({
-                :status => 200,
-                :body_exact => filtered_users_body
+                status: 200,
+                body_exact: filtered_users_body,
               })
           end
 
           it "finds a user by email if the query is all lowercase" do
-            lowercase = 'user@aol.com'
+            lowercase = "user@aol.com"
             get("#{request_url}?email=#{lowercase}", platform.superuser).should look_like({
-                :status => 200,
-                :body_exact => filtered_users_body
+                status: 200,
+                body_exact: filtered_users_body,
               })
           end
 
@@ -174,12 +173,12 @@ describe "users", :users do
             let(:username_two) { "user_for_email_tests_two" }
             let(:email_two) { "useR@aOl.com" }
             let(:user_options_two) do
-              { :overrides => {
+              { overrides: {
                   "first_name" => "user",
                   "last_name" => "user",
                   "display_name" => "USER USER",
-                  "email" => email_two
-                }
+                  "email" => email_two,
+                },
               }
             end
             let(:user_two) do
@@ -189,7 +188,7 @@ describe "users", :users do
                 "first_name" => username,
                 "last_name" => username,
                 "display_name" => username,
-                "password" => "foobar"
+                "password" => "foobar",
               }
             end
 
@@ -199,25 +198,25 @@ describe "users", :users do
             end
 
             before :each do
-              begin
-                platform.create_user(username_two, user_options_two)
-              rescue StandardError => e  
-                puts e
-                puts "Username or email address already in use."
-              end
+
+              platform.create_user(username_two, user_options_two)
+            rescue StandardError => e
+              puts e
+              puts "Username or email address already in use."
+
             end
 
             it "finds only one users by this email" do
               get("#{request_url}?email=#{email}", platform.superuser).should look_like({
-                  :status => 200,
-                  :body_exact => filtered_users_body
+                  status: 200,
+                  body_exact: filtered_users_body,
               })
             end
 
             it "conflict when trying to create a user with duplicate case-insensitive email address." do
-              post(request_url, platform.superuser, :payload => user_two).should look_like({
-                  :status => 409,
-                  :body_exact => {"error"=>["Username or email address already in use."]}
+              post(request_url, platform.superuser, payload: user_two).should look_like({
+                  status: 409,
+                  body_exact: { "error" => ["Username or email address already in use."] },
               })
             end
           end
@@ -228,7 +227,7 @@ describe "users", :users do
       context "admin user" do
         it "returns 403", :authorization, :smoke do
           get(request_url, platform.admin_user).should look_like({
-              :status => 403
+              status: 403,
             })
         end
       end
@@ -236,7 +235,7 @@ describe "users", :users do
       context "default normal user" do
         it "returns 403", :authorization do
           get(request_url, platform.non_admin_user).should look_like({
-              :status => 403
+              status: 403,
             })
         end
       end
@@ -244,7 +243,7 @@ describe "users", :users do
       context "default client" do
         it "returns 401", :authentication do
           get(request_url, platform.non_admin_client).should look_like({
-              :status => 401
+              status: 401,
             })
         end
       end
@@ -252,7 +251,7 @@ describe "users", :users do
       context "outside user" do
         it "returns 403", :authorization do
           get(request_url, outside_user).should look_like({
-              :status => 403
+              status: 403,
             })
         end
       end
@@ -260,7 +259,7 @@ describe "users", :users do
       context "invalid user" do
         it "returns 401", :authentication do
           get(request_url, invalid_user).should look_like({
-              :status => 401
+              status: 401,
             })
         end
       end
@@ -270,7 +269,7 @@ describe "users", :users do
       context "admin user" do
         it "returns  405" do
           put(request_url, platform.admin_user).should look_like({
-              :status => 405
+              status: 405,
             })
         end
       end
@@ -286,14 +285,14 @@ describe "users", :users do
           "first_name" => username,
           "last_name" => username,
           "display_name" => username,
-          "password" => "badger badger"
+          "password" => "badger badger",
         }
       end
 
       let(:response_body) do
         {
           "uri" => "#{platform.server}/users/#{username}",
-          "private_key" => private_key_regex
+          "private_key" => private_key_regex,
         }
       end
 
@@ -306,14 +305,14 @@ describe "users", :users do
           platform.admin_user.name => "#{request_url}/#{platform.admin_user.name}",
           platform.non_admin_user.name => "#{request_url}/#{platform.non_admin_user.name}",
           # As should our test user:
-          username => user_url
+          username => user_url,
         }
       end
 
       after :each do
         # For the test with a space: we can't create it -- but also can't delete it,
         # ne?  No naked spaces allowed in URLs.
-        if (username !~ / /)
+        if username !~ / /
           delete("#{platform.server}/users/#{username}", platform.superuser)
         end
       end
@@ -321,16 +320,16 @@ describe "users", :users do
       context "superuser" do
         it "can create new user", :smoke do
           post(request_url, platform.superuser,
-            :payload => request_body).should look_like({
-              :status => 201,
-              :body_exact => response_body
+            payload: request_body).should look_like({
+              status: 201,
+              body_exact: response_body,
             })
           get(request_url, platform.superuser).should look_like({
-              :status => 200,
-              :body => users_with_new_user
+              status: 200,
+              body: users_with_new_user,
             })
           get(user_url, platform.superuser).should look_like({
-              :status => 200
+              status: 200,
             })
         end
       end
@@ -338,11 +337,11 @@ describe "users", :users do
       context "admin user" do
         it "returns 403", :authorization, :smoke do
           post(request_url, platform.admin_user,
-            :payload => request_body).should look_like({
-              :status => 403
+            payload: request_body).should look_like({
+              status: 403,
             })
           get(user_url, platform.superuser).should look_like({
-              :status => 404
+              status: 404,
             })
         end
       end
@@ -355,14 +354,14 @@ describe "users", :users do
               "email" => "#{username}@chef.io",
               "first_name" => username,
               "last_name" => username,
-              "display_name" => username
+              "display_name" => username,
             }
           end
 
           it "returns 400", :validation do
             post(request_url, platform.superuser,
-                 :payload => request_body).should look_like({
-                   :status => 400
+              payload: request_body).should look_like({
+                   status: 400,
                  })
           end
         end
@@ -374,19 +373,19 @@ describe "users", :users do
               "first_name" => username,
               "last_name" => username,
               "display_name" => username,
-              "external_authentication_uid" => username
+              "external_authentication_uid" => username,
             }
           end
 
           it "returns 201 when password is not provided" do
-            post(request_url, platform.superuser, :payload => request_body).should look_like({
-                   :status => 201
+            post(request_url, platform.superuser, payload: request_body).should look_like({
+                   status: 201,
                  })
           end
           it "returns 201 when password is provided" do
-            final_body = request_body.merge( { "password" => "foo bar"} )
-            post(request_url, platform.superuser, :payload => final_body).should look_like({
-                   :status => 201
+            final_body = request_body.merge( { "password" => "foo bar" } )
+            post(request_url, platform.superuser, payload: final_body).should look_like({
+                   status: 201,
                  })
           end
         end
@@ -398,14 +397,14 @@ describe "users", :users do
               "email" => "#{username}@chef.io",
               "first_name" => username,
               "last_name" => username,
-              "password" => "badger badger"
+              "password" => "badger badger",
             }
           end
 
           it "returns 400", :validation do
             post(request_url, platform.superuser,
-                 :payload => request_body).should look_like({
-                   :status => 400
+              payload: request_body).should look_like({
+                   status: 400,
                  })
           end
         end
@@ -416,19 +415,19 @@ describe "users", :users do
               "username" => username,
               "email" => "#{username}@chef.io",
               "display_name" => username,
-              "password" => "badger badger"
+              "password" => "badger badger",
             }
           end
 
           it "can create new user" do
             post(request_url, platform.superuser,
-              :payload => request_body).should look_like({
-                :status => 201,
-                :body_exact => response_body
+              payload: request_body).should look_like({
+                status: 201,
+                body_exact: response_body,
               })
             get(request_url, platform.superuser).should look_like({
-                :status => 200,
-                :body => users_with_new_user
+                status: 200,
+                body: users_with_new_user,
               })
           end
         end
@@ -448,13 +447,13 @@ describe "users", :users do
 
           it "can create new user" do
             post(request_url, platform.superuser,
-              :payload => request_body).should look_like({
-                :status => 201,
-                :body_exact => response_body
+              payload: request_body).should look_like({
+                status: 201,
+                body_exact: response_body,
               })
             get(request_url, platform.superuser).should look_like({
-                :status => 200,
-                :body => users_with_new_user
+                status: 200,
+                body: users_with_new_user,
               })
           end
         end
@@ -474,13 +473,13 @@ describe "users", :users do
 
           it "can create new user" do
             post(request_url, platform.superuser,
-              :payload => request_body).should look_like({
-                :status => 201,
-                :body_exact => response_body
+              payload: request_body).should look_like({
+                status: 201,
+                body_exact: response_body,
               })
             get(request_url, platform.superuser).should look_like({
-                :status => 200,
-                :body => users_with_new_user
+                status: 200,
+                body: users_with_new_user,
               })
           end
         end
@@ -500,13 +499,13 @@ describe "users", :users do
 
           it "can create new user" do
             post(request_url, platform.superuser,
-              :payload => request_body).should look_like({
-                :status => 201,
-                :body_exact => response_body
+              payload: request_body).should look_like({
+                status: 201,
+                body_exact: response_body,
               })
             get(request_url, platform.superuser).should look_like({
-                :status => 200,
-                :body => users_with_new_user
+                status: 200,
+                body: users_with_new_user,
               })
           end
         end
@@ -517,14 +516,14 @@ describe "users", :users do
               "first_name" => username,
               "last_name" => username,
               "display_name" => username,
-              "password" => "badger badger"
+              "password" => "badger badger",
             }
           end
 
           it "returns 400", :validation do
             post(request_url, platform.superuser,
-                 :payload => request_body).should look_like({
-                   :status => 400
+              payload: request_body).should look_like({
+                   status: 400,
                  })
           end
         end
@@ -536,14 +535,14 @@ describe "users", :users do
               "last_name" => username,
               "display_name" => username,
               "password" => "badger badger",
-              "external_authentication_uid" => username
+              "external_authentication_uid" => username,
             }
           end
 
           it "returns 201" do
             post(request_url, platform.superuser,
-                 :payload => request_body).should look_like({
-                   :status => 201
+              payload: request_body).should look_like({
+                   status: 201,
                  })
           end
         end
@@ -554,14 +553,14 @@ describe "users", :users do
               "first_name" => username,
               "last_name" => username,
               "display_name" => username,
-              "password" => "badger badger"
+              "password" => "badger badger",
             }
           end
 
           it "returns 400", :validation do
             post(request_url, platform.superuser,
-                 :payload => request_body).should look_like({
-                   :status => 400
+              payload: request_body).should look_like({
+                   status: 400,
                  })
           end
         end
@@ -574,14 +573,14 @@ describe "users", :users do
               "first_name" => username,
               "last_name" => username,
               "display_name" => username,
-              "password" => "badger badger"
+              "password" => "badger badger",
             }
           end
 
           it "returns 400", :validation do
             post(request_url, platform.superuser,
-              :payload => request_body).should look_like({
-                :status => 400
+              payload: request_body).should look_like({
+                status: 400,
               })
           end
         end
@@ -594,19 +593,19 @@ describe "users", :users do
               "first_name" => "Yi Ling",
               "last_name" => "van Dijk",
               "display_name" => username,
-              "password" => "badger badger"
+              "password" => "badger badger",
             }
           end
 
           it "can create new user" do
             post(request_url, platform.superuser,
-              :payload => request_body).should look_like({
-                :status => 201,
-                :body_exact => response_body
+              payload: request_body).should look_like({
+                status: 201,
+                body_exact: response_body,
               })
             get(request_url, platform.superuser).should look_like({
-                :status => 200,
-                :body => users_with_new_user
+                status: 200,
+                body: users_with_new_user,
               })
           end
         end
@@ -620,19 +619,19 @@ describe "users", :users do
               "last_name" => username,
               "display_name" => username,
               "password" => "badger badger",
-              "bogus" => "look at me"
+              "bogus" => "look at me",
             }
           end
 
           it "can create new user" do
             post(request_url, platform.superuser,
-              :payload => request_body).should look_like({
-                :status => 201,
-                :body_exact => response_body
+              payload: request_body).should look_like({
+                status: 201,
+                body_exact: response_body,
               })
             get(request_url, platform.superuser).should look_like({
-                :status => 200,
-                :body => users_with_new_user
+                status: 200,
+                body: users_with_new_user,
               })
           end
         end
@@ -645,19 +644,19 @@ describe "users", :users do
               "first_name" => username,
               "last_name" => username,
               "display_name" => "some user",
-              "password" => "badger badger"
+              "password" => "badger badger",
             }
           end
 
           it "can create new user" do
             post(request_url, platform.superuser,
-              :payload => request_body).should look_like({
-                :status => 201,
-                :body_exact => response_body
+              payload: request_body).should look_like({
+                status: 201,
+                body_exact: response_body,
               })
             get(request_url, platform.superuser).should look_like({
-                :status => 200,
-                :body => users_with_new_user
+                status: 200,
+                body: users_with_new_user,
               })
           end
         end
@@ -670,19 +669,19 @@ describe "users", :users do
               "first_name" => username,
               "last_name" => username,
               "display_name" => "超人",
-              "password" => "badger badger"
+              "password" => "badger badger",
             }
           end
 
           it "can create new user" do
             post(request_url, platform.superuser,
-              :payload => request_body).should look_like({
-                :status => 201,
-                :body_exact => response_body
+              payload: request_body).should look_like({
+                status: 201,
+                body_exact: response_body,
               })
             get(request_url, platform.superuser).should look_like({
-                :status => 200,
-                :body => users_with_new_user
+                status: 200,
+                body: users_with_new_user,
               })
           end
         end
@@ -695,19 +694,19 @@ describe "users", :users do
               "first_name" => "Guðrún",
               "last_name" => "Guðmundsdóttir",
               "display_name" => username,
-              "password" => "badger badger"
+              "password" => "badger badger",
             }
           end
 
           it "can create new user" do
             post(request_url, platform.superuser,
-              :payload => request_body).should look_like({
-                :status => 201,
-                :body_exact => response_body
+              payload: request_body).should look_like({
+                status: 201,
+                body_exact: response_body,
               })
             get(request_url, platform.superuser).should look_like({
-                :status => 200,
-                :body => users_with_new_user
+                status: 200,
+                body: users_with_new_user,
               })
           end
         end
@@ -721,14 +720,14 @@ describe "users", :users do
               "first_name" => username,
               "last_name" => username,
               "display_name" => username,
-              "password" => "badger badger"
+              "password" => "badger badger",
             }
           end
 
           it "returns 400", :validation do
             post(request_url, platform.superuser,
-                 :payload => request_body).should look_like({
-                   :status => 400
+              payload: request_body).should look_like({
+                   status: 400,
                  })
           end
         end
@@ -742,14 +741,14 @@ describe "users", :users do
               "first_name" => username,
               "last_name" => username,
               "display_name" => username,
-              "password" => "badger badger"
+              "password" => "badger badger",
             }
           end
 
           it "returns 400", :validation do
             post(request_url, platform.superuser,
-                 :payload => request_body).should look_like({
-                   :status => 400
+              payload: request_body).should look_like({
+                   status: 400,
                  })
           end
         end
@@ -762,23 +761,23 @@ describe "users", :users do
               "first_name" => username,
               "last_name" => username,
               "display_name" => username,
-              "password" => "badger badger"
+              "password" => "badger badger",
             }
           end
 
           it "returns 409" do
             post(request_url, platform.superuser,
-              :payload => request_body).should look_like({
-                :status => 201,
-                :body_exact => response_body
+              payload: request_body).should look_like({
+                status: 201,
+                body_exact: response_body,
               })
             get(request_url, platform.superuser).should look_like({
-                :status => 200,
-                :body => users_with_new_user
+                status: 200,
+                body: users_with_new_user,
               })
             post(request_url, platform.superuser,
-              :payload => request_body).should look_like({
-                :status => 409
+              payload: request_body).should look_like({
+                status: 409,
               })
           end
         end
@@ -789,7 +788,7 @@ describe "users", :users do
       context "admin user" do
         it "returns  405" do
           delete(request_url, platform.admin_user).should look_like({
-              :status => 405
+              status: 405,
             })
         end
       end
@@ -808,7 +807,7 @@ describe "users", :users do
           "display_name" => username,
           "email" => "#{username}@chef.io",
           "username" => username,
-          "public_key" => public_key_regex
+          "public_key" => public_key_regex,
         }
       end
 
@@ -822,8 +821,8 @@ describe "users", :users do
       context "superuser" do
         it "can get user" do
           get(request_url, platform.superuser).should look_like({
-              :status => 200,
-              :body_exact => user_body
+              status: 200,
+              body_exact: user_body,
             })
         end
       end
@@ -831,8 +830,8 @@ describe "users", :users do
       context "admin user" do
         it "can get user" do
           get(request_url, platform.admin_user).should look_like({
-              :status => 200,
-              :body_exact => user_body
+              status: 200,
+              body_exact: user_body,
             })
         end
       end
@@ -840,15 +839,15 @@ describe "users", :users do
       context "default normal user" do
         it "can get self" do
           get(request_url, platform.non_admin_user).should look_like({
-              :status => 200,
-              :body_exact => user_body
+              status: 200,
+              body_exact: user_body,
             })
         end
 
         it "can get the admin user since they share an organization", :authorization do
           req_url = "#{platform.server}/users/#{platform.admin_user.name}"
           get(req_url, platform.non_admin_user).should look_like({
-              :status => 200
+              status: 200,
            })
         end
       end
@@ -856,7 +855,7 @@ describe "users", :users do
       context "default client" do
         it "returns 401", :authentication do
           get(request_url, platform.non_admin_client).should look_like({
-              :status => 401
+              status: 401,
             })
         end
       end
@@ -864,7 +863,7 @@ describe "users", :users do
       context "outside user" do
         it "returns 403", :authorization do
           get(request_url, outside_user).should look_like({
-              :status => 403
+              status: 403,
             })
         end
       end
@@ -872,7 +871,7 @@ describe "users", :users do
       context "invalid user" do
         it "returns 401", :authentication do
           get(request_url, invalid_user).should look_like({
-              :status => 401
+              status: 401,
             })
         end
       end
@@ -881,7 +880,7 @@ describe "users", :users do
         let(:username) { "bogus" }
         it "returns 404" do
           get(request_url, platform.superuser).should look_like({
-              :status => 404
+              status: 404,
             })
         end
       end
@@ -896,19 +895,19 @@ describe "users", :users do
           "first_name" => username,
           "last_name" => username,
           "display_name" => "new name",
-          "external_authentication_uid" => username
+          "external_authentication_uid" => username,
         }
       end
       before :each do
         response = post("#{platform.server}/users", platform.superuser,
-                        :payload => {
-                          "username" => username,
-                          "first_name" => username,
-                          "last_name" => username,
-                          "display_name" => username,
-                          "external_authentication_uid" => username
-                        })
-        response.should look_like({ :status => 201 })
+          payload: {
+            "username" => username,
+            "first_name" => username,
+            "last_name" => username,
+            "display_name" => username,
+            "external_authentication_uid" => username,
+          })
+        response.should look_like({ status: 201 })
       end
 
       after :each do
@@ -920,14 +919,14 @@ describe "users", :users do
         let(:request_body) do
           {
             "username" => username,
-            "display_name" => username
+            "display_name" => username,
           }
         end
 
         it "returns 200" do
           put(request_url, platform.superuser,
-              :payload => request_body).should look_like({
-                                                           :status => 200
+            payload: request_body).should look_like({
+                                                           status: 200,
                                                          })
         end
       end
@@ -943,7 +942,7 @@ describe "users", :users do
           "first_name" => username,
           "last_name" => username,
           "display_name" => "new name",
-          "password" => password
+          "password" => password,
         }
       end
 
@@ -954,7 +953,7 @@ describe "users", :users do
           "first_name" => username,
           "last_name" => username,
           "display_name" => "new name",
-          "external_authentication_uid" => "bob"
+          "external_authentication_uid" => "bob",
         }
       end
 
@@ -965,7 +964,7 @@ describe "users", :users do
           "first_name" => username,
           "last_name" => username,
           "display_name" => "new name",
-          "recovery_authentication_enabled" => true
+          "recovery_authentication_enabled" => true,
         }
       end
 
@@ -976,60 +975,60 @@ describe "users", :users do
           "first_name" => username,
           "last_name" => username,
           "display_name" => "new name",
-          "public_key" => public_key_regex
+          "public_key" => public_key_regex,
         }
       end
 
       let(:input_public_key) do
-        <<EOF
------BEGIN PUBLIC KEY-----
-MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA+h5g/r/qaFH6OdYOG0OO
-2/WpLb9qik7SPFmcOvujqZzLO2yv4kXwuvncx/ADHdkobaoFn3FE84uzIVCoSeaj
-xTMeuTcPr5y+wsVqCYMkwIJpPezbwcrErt14BvD9BPN0UDyOJZW43ZN4iIw5xW8y
-lQKuZtTNsm7FoznG+WsmRryTM3OjOrtDYjN/JHwDfrZZtVu7pT8FYnnz0O8j2zEf
-9NALhpS7oDCf+VSo6UUk/w5m4/LpouDxT2dKBwQOuA8pzXd5jHP6rYdbHkroOUqx
-Iy391UeSCiPVHcAN82sYV7R2MnUYj6b9Fev+62FKrQ6v9QYZcyljh6hldmcbmABy
-EQIDAQAB
------END PUBLIC KEY-----
-EOF
+        <<~EOF
+          -----BEGIN PUBLIC KEY-----
+          MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA+h5g/r/qaFH6OdYOG0OO
+          2/WpLb9qik7SPFmcOvujqZzLO2yv4kXwuvncx/ADHdkobaoFn3FE84uzIVCoSeaj
+          xTMeuTcPr5y+wsVqCYMkwIJpPezbwcrErt14BvD9BPN0UDyOJZW43ZN4iIw5xW8y
+          lQKuZtTNsm7FoznG+WsmRryTM3OjOrtDYjN/JHwDfrZZtVu7pT8FYnnz0O8j2zEf
+          9NALhpS7oDCf+VSo6UUk/w5m4/LpouDxT2dKBwQOuA8pzXd5jHP6rYdbHkroOUqx
+          Iy391UeSCiPVHcAN82sYV7R2MnUYj6b9Fev+62FKrQ6v9QYZcyljh6hldmcbmABy
+          EQIDAQAB
+          -----END PUBLIC KEY-----
+        EOF
       end
 
       let(:input_certificate) do
-        <<EOF
------BEGIN CERTIFICATE-----
-MIIDNjCCAp+gAwIBAgIBATANBgkqhkiG9w0BAQUFADCBnjELMAkGA1UEBhMCVVM
-EzARBgNVBAgMCldhc2hpbmd0b24xEDAOBgNVBAcMB1NlYXR0bGUxFjAUBgNVBAo
-DU9wc2NvZGUsIEluYy4xHDAaBgNVBAsME0NlcnRpZmljYXRlIFNlcnZpY2UxMjA
-BgNVBAMMKW9wc2NvZGUuY29tL2VtYWlsQWRkcmVzcz1hdXRoQG9wc2NvZGUuY29
-GIBBERISHGIBBERISHGIBBERISHGIBBERISHGIBBERISHGIBBERISHGIBBERISH
-44XkW6yWRQbShOQImeop9ODWTkZ4mR1p8+0YBIN9nJaVEQsq112w9SF84I23clE
-YAl2yCI8v2GiDgeJbC4MheYITeBUpqquacSNYya7jWSEPuP3Hq4r0A9O7yZk+F9
-cF4OxBcyrMVFaUaLLNzuYjom8Oe5rZIJqE2Je8ujOMMrWJQpCLrZNY6ZNivQQBf
-tjl8Dbe7xvWWTtD/HdY0LL+UT5MUi/rUx0zfKPHgvsERM+r4sod6E6GhbMesP0i
-+ewJb/FRGbyF6VDB5xYshHJ28MWpQ8KsW2An+tVwqRtaHWOGWXLXHaLkG3EOgv0
-70sCAwEAATANBgkqhkiG9w0BAQUFAAOBgQAj+j4oxrg0Q6L3sEhDfxDy8dV+P/4
-ik9R4ZgC1xooGZcEumJZgT/GhWBsCe97BZXntArgt1zKM2Ad30pElgbWoqbtGLX
-B4ybSWTCCW3xnQw+bSDiSP/nZjo5RlxWk6bqLjA9+wTMsxotaMd4Sd5P64lZZrS
-eXXVMgVGvcGheA==
------END CERTIFICATE-----
-EOF
+        <<~EOF
+          -----BEGIN CERTIFICATE-----
+          MIIDNjCCAp+gAwIBAgIBATANBgkqhkiG9w0BAQUFADCBnjELMAkGA1UEBhMCVVM
+          EzARBgNVBAgMCldhc2hpbmd0b24xEDAOBgNVBAcMB1NlYXR0bGUxFjAUBgNVBAo
+          DU9wc2NvZGUsIEluYy4xHDAaBgNVBAsME0NlcnRpZmljYXRlIFNlcnZpY2UxMjA
+          BgNVBAMMKW9wc2NvZGUuY29tL2VtYWlsQWRkcmVzcz1hdXRoQG9wc2NvZGUuY29
+          GIBBERISHGIBBERISHGIBBERISHGIBBERISHGIBBERISHGIBBERISHGIBBERISH
+          44XkW6yWRQbShOQImeop9ODWTkZ4mR1p8+0YBIN9nJaVEQsq112w9SF84I23clE
+          YAl2yCI8v2GiDgeJbC4MheYITeBUpqquacSNYya7jWSEPuP3Hq4r0A9O7yZk+F9
+          cF4OxBcyrMVFaUaLLNzuYjom8Oe5rZIJqE2Je8ujOMMrWJQpCLrZNY6ZNivQQBf
+          tjl8Dbe7xvWWTtD/HdY0LL+UT5MUi/rUx0zfKPHgvsERM+r4sod6E6GhbMesP0i
+          +ewJb/FRGbyF6VDB5xYshHJ28MWpQ8KsW2An+tVwqRtaHWOGWXLXHaLkG3EOgv0
+          70sCAwEAATANBgkqhkiG9w0BAQUFAAOBgQAj+j4oxrg0Q6L3sEhDfxDy8dV+P/4
+          ik9R4ZgC1xooGZcEumJZgT/GhWBsCe97BZXntArgt1zKM2Ad30pElgbWoqbtGLX
+          B4ybSWTCCW3xnQw+bSDiSP/nZjo5RlxWk6bqLjA9+wTMsxotaMd4Sd5P64lZZrS
+          eXXVMgVGvcGheA==
+          -----END CERTIFICATE-----
+        EOF
       end
 
       before :each do
         response = post("#{platform.server}/users", platform.superuser,
-          :payload => {
+          payload: {
             "username" => username,
             "email" => "#{username}@chef.io",
             "first_name" => username,
             "last_name" => username,
             "display_name" => username,
-            "password" => "badger badger"
+            "password" => "badger badger",
           })
 
         # Verify required preconditions are in place
         response.should look_like({
-            :status => 201,
-            :body => { "private_key" => private_key_regex }})
+            status: 201,
+            body: { "private_key" => private_key_regex } })
 
         @original_private_key = JSON.parse(response.body)["private_key"]
       end
@@ -1042,12 +1041,12 @@ EOF
       context "superuser" do
         it "can modify user", :smoke do
           put(request_url, platform.superuser,
-            :payload => request_body).should look_like({
-              :status => 200
+            payload: request_body).should look_like({
+              status: 200,
             })
           get(request_url, platform.superuser).should look_like({
-              :status => 200,
-              :body_exact => modified_user
+              status: 200,
+              body_exact: modified_user,
             })
         end
 
@@ -1055,31 +1054,31 @@ EOF
           let(:auth_url) { "#{platform.server}/authenticate_user" }
           context "when password is unchanged" do
             it "can authenticate as the modified user when password has not been changed.", :smoke do
-              put(request_url, platform.superuser, :payload => request_body).should look_like({ :status => 200 })
-              post(auth_url, superuser, :payload => { 'username' => username,
-                                                      'password' => password }).should look_like({
-                  :status => 200
+              put(request_url, platform.superuser, payload: request_body).should look_like({ status: 200 })
+              post(auth_url, superuser, payload: { "username" => username,
+                                                   "password" => password }).should look_like({
+                  status: 200,
               })
             end
           end
 
           context "when password is updated" do
-            let(:password) { "bidger bidger"}
+            let(:password) { "bidger bidger" }
             it "can authenticate as the modified user when password has been changed" do
-              put(request_url, platform.superuser, :payload => request_body).should look_like({ :status => 200 })
+              put(request_url, platform.superuser, payload: request_body).should look_like({ status: 200 })
 
-              post(auth_url, superuser, :payload => { 'username' => username,
-                                                      'password' => password }).should look_like({
-                  :status => 200
+              post(auth_url, superuser, payload: { "username" => username,
+                                                   "password" => password }).should look_like({
+                  status: 200,
               })
 
             end
             it "fails to authenticate as the modified user using the old password" do
-              put(request_url, platform.superuser, :payload => request_body).should look_like({ :status => 200 })
+              put(request_url, platform.superuser, payload: request_body).should look_like({ status: 200 })
 
-              post(auth_url, superuser, :payload => { 'username' => username,
-                                                      'password' => 'badger badger' }).should look_like({
-                  :status => 401
+              post(auth_url, superuser, payload: { "username" => username,
+                                                   "password" => "badger badger" }).should look_like({
+                  status: 401,
               })
             end
 
@@ -1088,15 +1087,15 @@ EOF
 
         it "can enable recovery" do
           put(request_url, platform.superuser,
-            :payload => request_body_with_recovery).should look_like({
-              :status => 200
+            payload: request_body_with_recovery).should look_like({
+              status: 200,
             })
 
         end
         it "can set external id" do
           put(request_url, platform.superuser,
-            :payload => request_body_with_ext_id).should look_like({
-              :status => 200
+            payload: request_body_with_ext_id).should look_like({
+              status: 200,
             })
         end
       end
@@ -1104,21 +1103,21 @@ EOF
       context "admin user" do
         it "returns 403", :authorization, :smoke do
           put(request_url, platform.admin_user,
-            :payload => request_body).should look_like({
-              :status => 403
+            payload: request_body).should look_like({
+              status: 403,
             })
         end
         it "cannot enable recovery", :authorization do
           put(request_url, platform.admin_user,
-            :payload => request_body_with_recovery).should look_like({
-              :status => 403
+            payload: request_body_with_recovery).should look_like({
+              status: 403,
             })
 
         end
         it "cannot set external id", :authorization do
           put(request_url, platform.admin_user,
-            :payload => request_body_with_ext_id).should look_like({
-              :status => 403
+            payload: request_body_with_ext_id).should look_like({
+              status: 403,
             })
         end
       end
@@ -1126,22 +1125,22 @@ EOF
 
         it "can modify its own account", :authorization do
           put(request_url, platform.non_admin_user,
-            :payload => request_body).should look_like({
-              :status => 403
+            payload: request_body).should look_like({
+              status: 403,
             })
 
         end
         it "cannot enable recovery", :authorization do
           put(request_url, platform.non_admin_user,
-            :payload => request_body_with_recovery).should look_like({
-              :status => 403
+            payload: request_body_with_recovery).should look_like({
+              status: 403,
             })
 
         end
         it "cannot set external id", :authorization do
           put(request_url, platform.non_admin_user,
-            :payload => request_body_with_ext_id).should look_like({
-              :status => 403
+            payload: request_body_with_ext_id).should look_like({
+              status: 403,
             })
         end
       end
@@ -1149,8 +1148,8 @@ EOF
       context "default client" do
         it "returns 401", :authentication do
           put(request_url, platform.non_admin_client,
-            :payload => request_body).should look_like({
-              :status => 401
+            payload: request_body).should look_like({
+              status: 401,
             })
         end
       end
@@ -1159,8 +1158,8 @@ EOF
         let(:request_url) { "#{platform.server}/users/bogus" }
         it "returns 404" do
           put(request_url, platform.superuser,
-            :payload => request_body).should look_like({
-              :status => 404
+            payload: request_body).should look_like({
+              status: 404,
             })
         end
       end
@@ -1173,18 +1172,18 @@ EOF
               "email" => "#{username}@chef.io",
               "first_name" => username,
               "last_name" => username,
-              "display_name" => "new name"
+              "display_name" => "new name",
             }
           end
 
           it "can modify user" do
             put(request_url, platform.superuser,
-              :payload => request_body).should look_like({
-                :status => 200
+              payload: request_body).should look_like({
+                status: 200,
               })
             get(request_url, platform.superuser).should look_like({
-                :status => 200,
-                :body_exact => modified_user
+                status: 200,
+                body_exact: modified_user,
               })
           end
         end
@@ -1198,18 +1197,18 @@ EOF
               "last_name" => username,
               "display_name" => "new name",
               "password" => "badger badger",
-              "bogus" => "not a badger"
+              "bogus" => "not a badger",
             }
           end
 
           it "can modify user", :validation do
             put(request_url, platform.superuser,
-              :payload => request_body).should look_like({
-                :status => 200
+              payload: request_body).should look_like({
+                status: 200,
               })
             get(request_url, platform.superuser).should look_like({
-                :status => 200,
-                :body_exact => modified_user
+                status: 200,
+                body_exact: modified_user,
               })
           end
         end
@@ -1221,14 +1220,14 @@ EOF
               "email" => "#{username}@chef.io",
               "first_name" => username,
               "last_name" => username,
-              "password" => "badger badger"
+              "password" => "badger badger",
             }
           end
 
           it "returns 400", :validation do
             put(request_url, platform.superuser,
-              :payload => request_body).should look_like({
-                :status => 400
+              payload: request_body).should look_like({
+                status: 400,
               })
           end
         end
@@ -1239,7 +1238,7 @@ EOF
               "username" => username,
               "email" => "#{username}@chef.io",
               "display_name" => "new name",
-              "password" => "badger badger"
+              "password" => "badger badger",
             }
           end
 
@@ -1248,18 +1247,18 @@ EOF
               "username" => username,
               "email" => "#{username}@chef.io",
               "display_name" => "new name",
-              "public_key" => public_key_regex
+              "public_key" => public_key_regex,
             }
           end
 
           it "can modify user" do
             put(request_url, platform.superuser,
-              :payload => request_body).should look_like({
-                :status => 200
+              payload: request_body).should look_like({
+                status: 200,
               })
             get(request_url, platform.superuser).should look_like({
-                :status => 200,
-                :body => modified_user
+                status: 200,
+                body: modified_user,
               })
           end
         end
@@ -1271,14 +1270,14 @@ EOF
               "first_name" => username,
               "last_name" => username,
               "display_name" => username,
-              "password" => "badger badger"
+              "password" => "badger badger",
             }
           end
 
           it "returns 400", :validation do
             put(request_url, platform.superuser,
-              :payload => request_body).should look_like({
-                :status => 400
+              payload: request_body).should look_like({
+                status: 400,
               })
           end
         end
@@ -1288,13 +1287,13 @@ EOF
             {
               "username" => username,
               "display_name" => username,
-              "external_authentication_uid" => username
+              "external_authentication_uid" => username,
             }
           end
           it "returns 200" do
             put(request_url, platform.superuser,
-              :payload => request_body).should look_like({
-                :status => 200
+              payload: request_body).should look_like({
+                status: 200,
               })
           end
         end
@@ -1305,14 +1304,14 @@ EOF
               "first_name" => username,
               "last_name" => username,
               "display_name" => username,
-              "password" => "badger badger"
+              "password" => "badger badger",
             }
           end
 
           it "returns 400", :validation do
             put(request_url, platform.superuser,
-              :payload => request_body).should look_like({
-                :status => 400
+              payload: request_body).should look_like({
+                status: 400,
               })
           end
         end
@@ -1325,14 +1324,14 @@ EOF
               "first_name" => username,
               "last_name" => username,
               "display_name" => username,
-              "password" => "badger badger"
+              "password" => "badger badger",
             }
           end
 
           it "returns 400", :validation do
             put(request_url, platform.superuser,
-              :payload => request_body).should look_like({
-                :status => 400
+              payload: request_body).should look_like({
+                status: 400,
               })
           end
         end
@@ -1345,7 +1344,7 @@ EOF
               "first_name" => "Ren Kai",
               "last_name" => "de Boers",
               "display_name" => username,
-              "password" => "badger badger"
+              "password" => "badger badger",
             }
           end
 
@@ -1356,18 +1355,18 @@ EOF
               "first_name" => "Ren Kai",
               "last_name" => "de Boers",
               "display_name" => username,
-              "public_key" => public_key_regex
+              "public_key" => public_key_regex,
             }
           end
 
           it "can modify user" do
             put(request_url, platform.superuser,
-              :payload => request_body).should look_like({
-                :status => 200
+              payload: request_body).should look_like({
+                status: 200,
               })
             get(request_url, platform.superuser).should look_like({
-                :status => 200,
-                :body => modified_user
+                status: 200,
+                body: modified_user,
               })
           end
         end
@@ -1380,7 +1379,7 @@ EOF
               "first_name" => username,
               "last_name" => username,
               "display_name" => "some user",
-              "password" => "badger badger"
+              "password" => "badger badger",
             }
           end
 
@@ -1391,18 +1390,18 @@ EOF
               "first_name" => username,
               "last_name" => username,
               "display_name" => "some user",
-              "public_key" => public_key_regex
+              "public_key" => public_key_regex,
             }
           end
 
           it "can modify user" do
             put(request_url, platform.superuser,
-              :payload => request_body).should look_like({
-                :status => 200
+              payload: request_body).should look_like({
+                status: 200,
               })
             get(request_url, platform.superuser).should look_like({
-                :status => 200,
-                :body => modified_user
+                status: 200,
+                body: modified_user,
               })
           end
         end
@@ -1415,7 +1414,7 @@ EOF
               "first_name" => username,
               "last_name" => username,
               "display_name" => "ギリギリ",
-              "password" => "badger badger"
+              "password" => "badger badger",
             }
           end
 
@@ -1426,18 +1425,18 @@ EOF
               "first_name" => username,
               "last_name" => username,
               "display_name" => "ギリギリ",
-              "public_key" => public_key_regex
+              "public_key" => public_key_regex,
             }
           end
 
           it "can modify user" do
             put(request_url, platform.superuser,
-              :payload => request_body).should look_like({
-                :status => 200
+              payload: request_body).should look_like({
+                status: 200,
               })
             get(request_url, platform.superuser).should look_like({
-                :status => 200,
-                :body => modified_user
+                status: 200,
+                body: modified_user,
               })
           end
         end
@@ -1450,7 +1449,7 @@ EOF
               "first_name" => "Eliška",
               "last_name" => "Horáčková",
               "display_name" => username,
-              "password" => "badger badger"
+              "password" => "badger badger",
             }
           end
 
@@ -1461,18 +1460,18 @@ EOF
               "first_name" => "Eliška",
               "last_name" => "Horáčková",
               "display_name" => username,
-              "public_key" => public_key_regex
+              "public_key" => public_key_regex,
             }
           end
 
           it "can modify user" do
             put(request_url, platform.superuser,
-              :payload => request_body).should look_like({
-                :status => 200
+              payload: request_body).should look_like({
+                status: 200,
               })
             get(request_url, platform.superuser).should look_like({
-                :status => 200,
-                :body => modified_user
+                status: 200,
+                body: modified_user,
               })
           end
         end
@@ -1485,15 +1484,15 @@ EOF
               "first_name" => username,
               "last_name" => username,
               "display_name" => "new name",
-              "password" => "bidgerbidger"
+              "password" => "bidgerbidger",
             }
           end
           it "changes the password" do
-            put_response = put(request_url, platform.superuser, :payload => request_body)
-            put_response.should look_like({ :status => 200 })
+            put_response = put(request_url, platform.superuser, payload: request_body)
+            put_response.should look_like({ status: 200 })
 
             response = post("#{platform.server}/authenticate_user", platform.superuser,
-                            :payload => { 'username' => username, 'password' => 'bidgerbidger' })
+              payload: { "username" => username, "password" => "bidgerbidger" })
             JSON.parse(response.body)["status"].should eq("linked")
 
           end
@@ -1508,16 +1507,16 @@ EOF
               "last_name" => username,
               "display_name" => "new name",
               "password" => "badger badger",
-              "public_key" => input_public_key
+              "public_key" => input_public_key,
             }
           end
 
           it "accepts the public key and subsequently responds with it" do
-            put_response = put(request_url, platform.superuser, :payload => request_body)
+            put_response = put(request_url, platform.superuser, payload: request_body)
             put_response.should look_like({
-                                            :status => 200,
-                                            :body=> {
-                                              "uri" => request_url
+                                            status: 200,
+                                            body: {
+                                              "uri" => request_url,
                                             },
                                           })
             get_response = get(request_url, platform.superuser)
@@ -1535,26 +1534,26 @@ EOF
               "last_name" => username,
               "display_name" => "new name",
               "password" => "badger badger",
-              "private_key" => true
+              "private_key" => true,
             }
           end
 
           it "can be used to successfully authenticate request" do
-            put_response = put(request_url, platform.superuser, :payload => request_body)
+            put_response = put(request_url, platform.superuser, payload: request_body)
             put_response.should look_like({
-                                            :status => 200,
-                                            :body_exact => {
+                                            status: 200,
+                                            body_exact: {
                                               "uri" => request_url,
-                                              "private_key" => private_key_regex
+                                              "private_key" => private_key_regex,
                                             },
                                           })
 
             new_private_key = JSON.parse(put_response.body)["private_key"]
-            org_user = Pedant::User.new(username, new_private_key, {:associate => true,
-                                                                    :preexisting => true })
+            org_user = Pedant::User.new(username, new_private_key, { associate: true,
+                                                                    preexisting: true })
             platform.make_user(org_user, platform.test_org)
             get(api_url("users"), org_user).should look_like({
-                :status => 200
+                status: 200,
             })
           end
         end
@@ -1568,7 +1567,7 @@ EOF
               "last_name" => username,
               "display_name" => "new name",
               "password" => "badger badger",
-              "private_key" => true
+              "private_key" => true,
             }
           end
 
@@ -1576,12 +1575,12 @@ EOF
             original_response = get(request_url, platform.superuser)
             original_public_key = JSON.parse(original_response.body)["public_key"]
 
-            put_response = put(request_url, platform.superuser, :payload => request_body)
+            put_response = put(request_url, platform.superuser, payload: request_body)
             put_response.should look_like({
-                                            :status => 200,
-                                            :body_exact => {
+                                            status: 200,
+                                            body_exact: {
                                               "uri" => request_url,
-                                              "private_key" => private_key_regex
+                                              "private_key" => private_key_regex,
                                             },
                                           })
 
@@ -1606,7 +1605,7 @@ EOF
               "display_name" => "new name",
               "password" => "badger badger",
               "private_key" => true,
-              "public_key" => input_public_key
+              "public_key" => input_public_key,
             }
           end
 
@@ -1614,12 +1613,12 @@ EOF
             original_response = get(request_url, platform.superuser)
             original_public_key = JSON.parse(original_response.body)["public_key"]
 
-            put_response = put(request_url, platform.superuser, :payload => request_body)
+            put_response = put(request_url, platform.superuser, payload: request_body)
             put_response.should look_like({
-                                            :status => 200,
-                                            :body_exact => {
+                                            status: 200,
+                                            body_exact: {
                                               "uri" => request_url,
-                                              "private_key" => private_key_regex
+                                              "private_key" => private_key_regex,
                                             },
                                           })
 
@@ -1644,7 +1643,7 @@ EOF
               "display_name" => "new name",
               "password" => "badger badger",
               "private_key" => true,
-              "public_key" => input_certificate
+              "public_key" => input_certificate,
             }
           end
 
@@ -1652,12 +1651,12 @@ EOF
             original_response = get(request_url, platform.superuser)
             original_public_key = JSON.parse(original_response.body)["public_key"]
 
-            put_response = put(request_url, platform.superuser, :payload => request_body)
+            put_response = put(request_url, platform.superuser, payload: request_body)
             put_response.should look_like({
-                                            :status => 200,
-                                            :body_exact => {
+                                            status: 200,
+                                            body_exact: {
                                               "uri" => request_url,
-                                              "private_key" => private_key_regex
+                                              "private_key" => private_key_regex,
                                             },
                                           })
 
@@ -1681,14 +1680,14 @@ EOF
               "last_name" => username,
               "display_name" => "new name",
               "password" => "badger badger",
-              "public_key" => input_certificate
+              "public_key" => input_certificate,
             }
           end
 
           it "returns 400", :validation do
-            response = put(request_url, platform.superuser, :payload => request_body)
+            response = put(request_url, platform.superuser, payload: request_body)
             response.should look_like({
-                                        :status => 400,
+                                        status: 400,
                                       })
           end
         end
@@ -1706,7 +1705,7 @@ EOF
               "first_name" => username,
               "last_name" => username,
               "display_name" => username,
-              "password" => "badger badger"
+              "password" => "badger badger",
             }
           end
 
@@ -1717,7 +1716,7 @@ EOF
               "first_name" => username,
               "last_name" => username,
               "display_name" => username,
-              "public_key" => public_key_regex
+              "public_key" => public_key_regex,
             }
           end
 
@@ -1731,20 +1730,20 @@ EOF
             # behavior of recreating users.
             it "updates the user to the new name and provides a new uri" do
               put(request_url, platform.superuser,
-                :payload => request_body).should look_like({
-                  :status => 201,
-                  :body_exact => { "uri" => new_request_url },
-                  :headers => [ "Location" => new_request_url ]
+                payload: request_body).should look_like({
+                  status: 201,
+                  body_exact: { "uri" => new_request_url },
+                  headers: [ "Location" => new_request_url ],
                 })
 
               # it "makes the user unavailable at the old URI"
               get(request_url, platform.superuser).should look_like({
-                  :status => 404
+                  status: 404,
                 })
               # it "makes the user available at the new URI"
               get(new_request_url, platform.superuser).should look_like({
-                  :status => 200,
-                  :body_exact => modified_user
+                  status: 200,
+                  body_exact: modified_user,
                 })
             end
           end
@@ -1760,18 +1759,18 @@ EOF
               "first_name" => username,
               "last_name" => username,
               "display_name" => username,
-              "password" => "badger badger"
+              "password" => "badger badger",
             }
           end
 
           it "returns 400", :validation do
             put(request_url, platform.superuser,
-              :payload => request_body).should look_like({
-                :status => 400
+              payload: request_body).should look_like({
+                status: 400,
               })
             # it "does not process any change to username" do
             get(request_url, platform.superuser).should look_like({
-                :status => 200
+                status: 200,
               })
           end
         end
@@ -1786,17 +1785,17 @@ EOF
               "first_name" => username,
               "last_name" => username,
               "display_name" => username,
-              "password" => "badger badger"
+              "password" => "badger badger",
             }
           end
 
           it "returns 400", :validation do
-            put(request_url, platform.superuser, :payload => request_body).should look_like({
-                :status => 400
+            put(request_url, platform.superuser, payload: request_body).should look_like({
+                status: 400,
               })
             # it "does not process any change to username" do
             get(request_url, platform.superuser).should look_like({
-                :status => 200
+                status: 200,
               })
           end
         end
@@ -1811,18 +1810,18 @@ EOF
               "first_name" => username,
               "last_name" => username,
               "display_name" => username,
-              "password" => "badger badger"
+              "password" => "badger badger",
             }
           end
 
           it "returns 400", :validation do
             put(request_url, platform.superuser,
-              :payload => request_body).should look_like({
-                :status => 400
+              payload: request_body).should look_like({
+                status: 400,
               })
             # it "does not process any change to username" do
             get(request_url, platform.superuser).should look_like({
-                :status => 200
+                status: 200,
               })
           end
         end
@@ -1836,7 +1835,7 @@ EOF
               "first_name" => username,
               "last_name" => username,
               "display_name" => username,
-              "password" => "badger badger"
+              "password" => "badger badger",
             }
           end
 
@@ -1847,18 +1846,18 @@ EOF
               "first_name" => username,
               "last_name" => username,
               "display_name" => username,
-              "public_key" => public_key_regex
+              "public_key" => public_key_regex,
             }
           end
 
           it "returns 409" do
             put(request_url, platform.superuser,
-              :payload => request_body).should look_like({
-                :status => 409
+              payload: request_body).should look_like({
+                status: 409,
               })
             get(request_url, platform.superuser).should look_like({
-                :status => 200,
-                :body_exact => unmodified_user
+                status: 200,
+                body_exact: unmodified_user,
               })
           end
         end
@@ -1869,7 +1868,7 @@ EOF
       context "admin user" do
         it "returns  405" do
           post(request_url, platform.admin_user).should look_like({
-              :status => 405
+              status: 405,
             })
         end
       end
@@ -1880,19 +1879,19 @@ EOF
 
       before :each do
         post("#{platform.server}/users", platform.superuser,
-          :payload => {
+          payload: {
             "username" => username,
             "email" => "#{username}@chef.io",
             "first_name" => username,
             "last_name" => username,
             "display_name" => username,
-            "password" => "badger badger"
+            "password" => "badger badger",
           }).should look_like({
-            :status => 201,
-            :body_exact => {
+            status: 201,
+            body_exact: {
               "uri" => "#{platform.server}/users/#{username}",
-              "private_key" => private_key_regex
-            }})
+              "private_key" => private_key_regex,
+            } })
       end
 
       after :each do
@@ -1902,13 +1901,13 @@ EOF
       context "superuser" do
         it "can delete user" do
           delete(request_url, platform.superuser).should look_like({
-              :status => 200
+              status: 200,
             })
           # Similar to rename, the existing before :each interferese with making this into a separate test
           # because it recreates the user.
           # it "did delete the user"
           get(request_url, platform.superuser).should look_like({
-              :status => 404
+              status: 404,
           })
         end
 
@@ -1917,12 +1916,12 @@ EOF
       context "admin user" do
         it "returns 403", :authorization do
           delete(request_url, platform.admin_user).should look_like({
-              :status => 403
+              status: 403,
             })
           # it "did not delete user" do
           get("#{platform.server}/users/#{username}",
             platform.superuser).should look_like({
-              :status => 200
+              status: 200,
             })
         end
       end
@@ -1930,21 +1929,21 @@ EOF
       context "default client" do
         it "returns 401", :authentication do
           delete(request_url, platform.non_admin_client).should look_like({
-              :status => 401
+              status: 401,
             })
           # it "did not delete user" do
           get("#{platform.server}/users/#{username}",
             platform.superuser).should look_like({
-              :status => 200
+              status: 200,
             })
         end
       end
 
       context "when deleting a non-existent user" do
-          let(:request_url) { "#{platform.server}/users/bogus" }
+        let(:request_url) { "#{platform.server}/users/bogus" }
         it "returns 404" do
           delete(request_url, platform.superuser).should look_like({
-              :status => 404
+              status: 404,
             })
         end
       end

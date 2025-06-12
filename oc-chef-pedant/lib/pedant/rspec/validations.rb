@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright: Copyright (c) Chef Software, Inc.
 # License: Apache License, Version 2.0
 #
@@ -14,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'securerandom'
+require "securerandom" unless defined?(SecureRandom)
 
 module Pedant
   module RSpec
@@ -38,15 +37,15 @@ module Pedant
           if options[:skip_persistance_test]
             should_respond_with 400
           else
-            should_respond_with 400, 'and not persist the resource' do
-              begin
-                persisted_resource_response.should look_like does_not_persist_response
-              rescue URI::InvalidURIError
-                # This can happen when we try to create an item with a
-                # name that is illegal in a URL (like "this+ is
-                # bad!!!").  In this case, we can assume the item was
-                # not persisted :)
-              end
+            should_respond_with 400, "and not persist the resource" do
+
+              persisted_resource_response.should look_like does_not_persist_response
+            rescue URI::InvalidURIError
+              # This can happen when we try to create an item with a
+              # name that is illegal in a URL (like "this+ is
+              # bad!!!").  In this case, we can assume the item was
+              # not persisted :)
+
             end
           end
         end
@@ -55,7 +54,7 @@ module Pedant
           let(:request_payload) { instance_eval_if_proc(options[:payload]) }
           let(:expected_response) { forbidden_response }
 
-          should_respond_with 403, 'and not persist the resource' do
+          should_respond_with 403, "and not persist the resource" do
             persisted_resource_response.should look_like does_not_persist_response
           end
         end
@@ -64,7 +63,7 @@ module Pedant
           let(:request_payload) { instance_eval_if_proc(options[:payload]) }
           let(:expected_response) { created_response }
 
-          should_respond_with 201, 'and persist the resource' do
+          should_respond_with 201, "and persist the resource" do
             persisted_resource_response.should look_like ok_response
           end
         end
@@ -73,7 +72,7 @@ module Pedant
           let(:request_payload) { instance_eval_if_proc(options[:payload]) }
           let(:expected_response) { ok_response }
 
-          should_respond_with 200, 'and persist the resource' do
+          should_respond_with 200, "and persist the resource" do
             persisted_resource_response.should look_like ok_response
           end
         end
@@ -94,7 +93,7 @@ module Pedant
         end
 
         def rejects_invalid_value(value, options = {})
-          value = value || options[:with]
+          value ||= options[:with]
           context "when passing invalid value \"#{value}\"", :validation do
             rejects_with_400 payload: Proc.new { default_resource_attributes.with(validate_attribute, value) },
               error_message: options[:error_message] || options[:valid_format] || Proc.new { "Field '#{validate_attribute}' invalid" }
@@ -102,12 +101,12 @@ module Pedant
         end
 
         def rejects_invalid_keys
-          context 'with invalid top-level keys', :validation do
-            rejects_invalid_value_of 'something_random', with: 'something random', error_message: 'Invalid key something_random in request body'
-            rejects_invalid_value_of '漢字ひらがな한문', with: 'something random', error_message: 'Invalid key 漢字ひらがな한문 in request body'
+          context "with invalid top-level keys", :validation do
+            rejects_invalid_value_of "something_random", with: "something random", error_message: "Invalid key something_random in request body"
+            rejects_invalid_value_of "漢字ひらがな한문", with: "something random", error_message: "Invalid key 漢字ひらがな한문 in request body"
             1.upto(3) do
               random_key = SecureRandom.hex(16)
-              rejects_invalid_value_of random_key, with: 'something random', error_message: "Invalid key #{random_key} in request body"
+              rejects_invalid_value_of random_key, with: "something random", error_message: "Invalid key #{random_key} in request body"
             end
           end
         end
@@ -119,9 +118,9 @@ module Pedant
         extend ::Pedant::Concern
 
         included do
-          let(:persisted_resource_response) { fail "Must define 'persisted_resource_response', usually a get() operation" }
+          let(:persisted_resource_response) { raise "Must define 'persisted_resource_response', usually a get() operation" }
           let(:does_not_persist_response) { resource_not_found_response }
-          let(:resource_name) { request_payload['name'] }
+          let(:resource_name) { request_payload["name"] }
 
           extend Pedant::RSpec::Validations::SharedMacros
         end
@@ -133,18 +132,18 @@ module Pedant
             random_value_of_length = ->(len) { SecureRandom.hex(len)[1..len] }
 
             context "when validating the length of #{attribute}" do
-              let(:test_payload) { ->(len) { default_resource_attributes.with(attribute, random_value_of_length.(len)) } }
+              let(:test_payload) { ->(len) { default_resource_attributes.with(attribute, random_value_of_length.call(len)) } }
 
               if options[:min]
                 context "with value below the minimum length of #{options[:min]}", :validation do
-                  rejects_with_400 payload: Proc.new { test_payload.(options[:min] - 1) },
+                  rejects_with_400 payload: Proc.new { test_payload.call(options[:min] - 1) },
                     error_message: [ options[:error_message] ]
                 end
                 context "with value at the minimum length of #{options[:min]}" do
-                  accepts_with_201 payload: Proc.new { test_payload.(options[:min]) }
+                  accepts_with_201 payload: Proc.new { test_payload.call(options[:min]) }
                 end
                 context "with value above the minimum length of #{options[:min]}" do
-                  accepts_with_201 payload: Proc.new { test_payload.(options[:min] + 1) }
+                  accepts_with_201 payload: Proc.new { test_payload.call(options[:min] + 1) }
                 end
               end
 
@@ -163,7 +162,7 @@ module Pedant
           end
 
           def accepts_valid_value(value, options = {})
-            value = value || options[:with]
+            value ||= options[:with]
             context "when passing valid value \"#{value}\"" do
               accepts_with_201 payload: Proc.new { default_resource_attributes.with(validate_attribute, value) }
             end
@@ -171,7 +170,6 @@ module Pedant
 
           # optionally_accepts 'field', with: 'value'
           def optionally_accepts(_attribute, options = {})
-
             context "with the \"#{_attribute}\" attribute" do
               accepts_with_201 payload: Proc.new { default_resource_attributes.with(_attribute, options[:with]) }
             end
@@ -203,7 +201,7 @@ module Pedant
         extend ::Pedant::Concern
 
         included do
-          let(:persisted_resource_response) { fail "Must define 'persisted_resource_response', usually a get() operation" }
+          let(:persisted_resource_response) { raise "Must define 'persisted_resource_response', usually a get() operation" }
           let(:does_not_persist_response) { ok_exact_response }
           let(:success_message) { original_resource_attributes }
 
@@ -217,18 +215,18 @@ module Pedant
             random_value_of_length = ->(len) { SecureRandom.hex(len)[1..len] }
 
             context "when validating the length of #{attribute}" do
-              let(:test_payload) { ->(len) { default_resource_attributes.with(attribute, random_value_of_length.(len)) } }
+              let(:test_payload) { ->(len) { default_resource_attributes.with(attribute, random_value_of_length.call(len)) } }
 
               if options[:min]
                 context "with value below the minimum length of #{options[:min]}", :validation do
-                  rejects_with_400 payload: Proc.new { test_payload.(options[:min] - 1) },
+                  rejects_with_400 payload: Proc.new { test_payload.call(options[:min] - 1) },
                     error_message: [ options[:error_message] ]
                 end
                 context "with value at the minimum length of #{options[:min]}" do
-                  accepts_with_200 payload: Proc.new { test_payload.(options[:min]) }
+                  accepts_with_200 payload: Proc.new { test_payload.call(options[:min]) }
                 end
                 context "with value above the minimum length of #{options[:min]}" do
-                  accepts_with_200 payload: Proc.new { test_payload.(options[:min] + 1) }
+                  accepts_with_200 payload: Proc.new { test_payload.call(options[:min] + 1) }
                 end
               end
 
@@ -247,12 +245,11 @@ module Pedant
           end
 
           def accepts_valid_value(value, options = {})
-            value = value || options[:with]
+            value ||= options[:with]
             context "when passing valid value \"#{value}\"" do
               accepts_with_200 payload: Proc.new { default_resource_attributes.with(validate_attribute, value) }
             end
           end
-
 
           def optionally_accepts(_attribute, options = {})
             context "with the \"#{_attribute}\" attribute" do

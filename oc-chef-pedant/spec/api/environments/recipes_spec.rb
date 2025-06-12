@@ -13,8 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'pedant/rspec/environment_util'
-require 'pedant/rspec/cookbook_util'
+require "pedant/rspec/environment_util"
+require "pedant/rspec/cookbook_util"
 
 describe "/environments/ENVIRONMENT/recipes API endpoint", :environments do
   include Pedant::RSpec::CookbookUtil
@@ -33,74 +33,74 @@ describe "/environments/ENVIRONMENT/recipes API endpoint", :environments do
   include_context "environment_body_util"
 
   # TODO: Refactor
-  def self.env; 'test_env'; end
-  def self.default; '_default'; end
+  def self.env; "test_env"; end
+  def self.default; "_default"; end
 
-  shared(:env)     { 'test_env' }
-  shared(:default) { '_default' }
+  shared(:env)     { "test_env" }
+  shared(:default) { "_default" }
 
   before(:all) { add_environment(admin_user, new_environment(env)) }
   after(:all)  { delete_environment(admin_user, env) }
 
   def self.should_respond_with_success(message)
-    it ["should respond with 200 OK", message].compact.join(' ') do
+    it ["should respond with 200 OK", message].compact.join(" ") do
       should have_status_code 200
       parsed_response.should =~ expected_recipes
     end
   end
 
-  context 'with no cookbooks' do
-    context 'when environment does not exist' do
-      let(:expected_response)       { resource_not_found_exact_response }
+  context "with no cookbooks" do
+    context "when environment does not exist" do
+      let(:expected_response) { resource_not_found_exact_response }
       let(:environment_name) { non_existent_environment }
-      let(:non_existent_environment) { 'bad_env' }
+      let(:non_existent_environment) { "bad_env" }
 
       let(:not_found_error_message) { ["Cannot load environment #{non_existent_environment}"] }
       should_respond_with 404
     end
 
-    context 'when fetching recipes' do
+    context "when fetching recipes" do
       let(:expected_recipes) { [] }
-      should_respond_with_success 'and no recipes'
+      should_respond_with_success "and no recipes"
     end
 
-    context 'when fetching recipes from _default environment' do
+    context "when fetching recipes from _default environment" do
       let(:environment_name) { default }
       let(:expected_recipes) { [] }
-      should_respond_with_success 'and no recipes'
+      should_respond_with_success "and no recipes"
     end
   end
 
-  context 'with multiple versions of multiple cookbooks' do
+  context "with multiple versions of multiple cookbooks" do
     let(:cookbooks) do
       {
         "pedant_cb_one" =>
         {
-          "1.0.0" => ['webserver'],
-          "2.0.0" => ['database', 'webserver'],
-          "3.0.0" => ['awesome_sauce', 'database', 'webserver']
+          "1.0.0" => ["webserver"],
+          "2.0.0" => %w{database webserver},
+          "3.0.0" => %w{awesome_sauce database webserver},
         },
-          "pedant_cb_two" =>
+        "pedant_cb_two" =>
         {
-          "1.0.0" => ['chicken'],
-          "1.2.0" => ['beef', 'chicken'],
-          "1.2.5" => ['beef', 'chicken', 'stewed_monkey_brains']
+          "1.0.0" => ["chicken"],
+          "1.2.0" => %w{beef chicken},
+          "1.2.5" => %w{beef chicken stewed_monkey_brains},
         },
-          "pedant_cb_three" =>
+        "pedant_cb_three" =>
         {
-          "0.0.1" => ['server'],
-          "0.5.0" => ['client', 'server'],
-          "1.0.0" => ['client', 'replication', 'server']
-        }
+          "0.0.1" => ["server"],
+          "0.5.0" => %w{client server},
+          "1.0.0" => %w{client replication server},
+        },
       }
     end
 
     before(:each) { setup_cookbooks(cookbooks) }
     after(:each)  { remove_cookbooks(cookbooks) }
 
-    context 'with no environment constraints' do
+    context "with no environment constraints" do
       let(:expected_recipes) do
-        %w( pedant_cb_one::awesome_sauce
+        %w{ pedant_cb_one::awesome_sauce
             pedant_cb_one::database
             pedant_cb_one::webserver
             pedant_cb_three::client
@@ -108,17 +108,17 @@ describe "/environments/ENVIRONMENT/recipes API endpoint", :environments do
             pedant_cb_three::server
             pedant_cb_two::beef
             pedant_cb_two::chicken
-            pedant_cb_two::stewed_monkey_brains )
+            pedant_cb_two::stewed_monkey_brains }
       end
 
       # These smoke tests may be too slow
-      context 'when fetching recipes from a non-default environment', :smoke do
-        should_respond_with_success 'and recipes from the latest version of all cookbooks within the environment'
+      context "when fetching recipes from a non-default environment", :smoke do
+        should_respond_with_success "and recipes from the latest version of all cookbooks within the environment"
       end
 
-      context 'when fetching recipes from _default environment', :smoke do
+      context "when fetching recipes from _default environment", :smoke do
         let(:environment_name) { default }
-        should_respond_with_success 'and recipes from the latest version of all cookbooks within the environment'
+        should_respond_with_success "and recipes from the latest version of all cookbooks within the environment"
       end
     end
 
@@ -130,16 +130,16 @@ describe "/environments/ENVIRONMENT/recipes API endpoint", :environments do
         before :each do
           # Add constraints to environment
           put(api_url("/environments/#{env}"), admin_user,
-              :payload => make_payload('cookbook_versions' => constraint_hash))
+            payload: make_payload("cookbook_versions" => constraint_hash))
         end
 
         after :each do
           # Remove constraints from the environment
           put(api_url("/environments/#{env}"), admin_user,
-              :payload => make_payload('cookbook_versions' => {}))
+            payload: make_payload("cookbook_versions" => {}))
         end
 
-        it 'retrieves appropriate recipes' do
+        it "retrieves appropriate recipes" do
           get(api_url("/environments/#{env}/recipes"), admin_user) do |response|
             response.should have_status_code 200
             parse(response).should =~ expected_recipes
@@ -148,55 +148,55 @@ describe "/environments/ENVIRONMENT/recipes API endpoint", :environments do
       end
     end
 
-    context 'with environment constraints' do
+    context "with environment constraints" do
       test_with_constraints({
-                              'pedant_cb_one' => '= 1.0.0'
+                              "pedant_cb_one" => "= 1.0.0",
                             },
-                            [
-                             'pedant_cb_one::webserver',
-                             'pedant_cb_three::client',
-                             'pedant_cb_three::replication',
-                             'pedant_cb_three::server',
-                             'pedant_cb_two::beef',
-                             'pedant_cb_two::chicken',
-                             'pedant_cb_two::stewed_monkey_brains'
-                            ])
+        [
+         "pedant_cb_one::webserver",
+         "pedant_cb_three::client",
+         "pedant_cb_three::replication",
+         "pedant_cb_three::server",
+         "pedant_cb_two::beef",
+         "pedant_cb_two::chicken",
+         "pedant_cb_two::stewed_monkey_brains",
+        ])
 
       test_with_constraints({
-                              'pedant_cb_one' => '< 2.5.0'
+                              "pedant_cb_one" => "< 2.5.0",
                             },
-                            [
-                             'pedant_cb_one::database',
-                             'pedant_cb_one::webserver',
-                             'pedant_cb_three::client',
-                             'pedant_cb_three::replication',
-                             'pedant_cb_three::server',
-                             'pedant_cb_two::beef',
-                             'pedant_cb_two::chicken',
-                             'pedant_cb_two::stewed_monkey_brains'
-                            ])
+        [
+         "pedant_cb_one::database",
+         "pedant_cb_one::webserver",
+         "pedant_cb_three::client",
+         "pedant_cb_three::replication",
+         "pedant_cb_three::server",
+         "pedant_cb_two::beef",
+         "pedant_cb_two::chicken",
+         "pedant_cb_two::stewed_monkey_brains",
+        ])
 
       test_with_constraints({
-                              'pedant_cb_one' => '< 2.5.0',
-                              'pedant_cb_two' => '= 1.0.0'
+                              "pedant_cb_one" => "< 2.5.0",
+                              "pedant_cb_two" => "= 1.0.0",
                             },
-                            [
-                             'pedant_cb_one::database',
-                             'pedant_cb_one::webserver',
-                             'pedant_cb_three::client',
-                             'pedant_cb_three::replication',
-                             'pedant_cb_three::server',
-                             'pedant_cb_two::chicken'
-                            ])
+        [
+         "pedant_cb_one::database",
+         "pedant_cb_one::webserver",
+         "pedant_cb_three::client",
+         "pedant_cb_three::replication",
+         "pedant_cb_three::server",
+         "pedant_cb_two::chicken",
+        ])
 
       # Nothing satisfies these constraints!
       # 6.6.6 = The Semantic Version of the Beast
       test_with_constraints({
-                              'pedant_cb_one' => '= 6.6.6',
-                              'pedant_cb_two' => '= 6.6.6',
-                              'pedant_cb_three' => '= 6.6.6',
+                              "pedant_cb_one" => "= 6.6.6",
+                              "pedant_cb_two" => "= 6.6.6",
+                              "pedant_cb_three" => "= 6.6.6",
                             },
-                            [])
+        [])
     end
   end
 end

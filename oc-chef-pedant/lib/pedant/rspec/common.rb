@@ -13,13 +13,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'rspec-shared/methods'
+require "rspec-shared/methods"
 
-require 'pedant/concern'
-require 'pedant/json'
-require 'pedant/request'
-require 'pedant/rspec/common_responses'
-require 'pedant/rspec/http_status_codes'
+require "pedant/concern"
+require "pedant/json"
+require "pedant/request"
+require "pedant/rspec/common_responses"
+require "pedant/rspec/http_status_codes"
 
 # Temporary, until knife tests are activated for non-open-source platforms
 
@@ -41,24 +41,24 @@ module Pedant
 
         # Request/Response
         subject { response } # By default, we are always testing responses
-        let(:response) { authenticated_request(request_method, request_url_with_query_parameters, requestor, request_options.merge({server_api_version: request_version })) }
-        let(:request_url_with_query_parameters){ request_url + (request_query_parameters ? "?#{request_query_parameters}" : "") }
+        let(:response) { authenticated_request(request_method, request_url_with_query_parameters, requestor, request_options.merge({ server_api_version: request_version })) }
+        let(:request_url_with_query_parameters) { request_url + (request_query_parameters ? "?#{request_query_parameters}" : "") }
         let(:parsed_response) { parse(response) }
         let(:request_version) { server_api_version }
-        let(:request_method) { fail "Define one of the following: :GET, :POST, :PUT, :DELETE" }
-        let(:requestor)      { fail "Define requestor (ex: admin_user, normal_user, etc.)" }
-        let(:request_url)    { fail "Define url" }
+        let(:request_method) { raise "Define one of the following: :GET, :POST, :PUT, :DELETE" }
+        let(:requestor)      { raise "Define requestor (ex: admin_user, normal_user, etc.)" }
+        let(:request_url)    { raise "Define url" }
 
         let(:request_options) { { payload: request_payload, headers: request_headers, auth_headers: request_auth_headers } }
         let(:request_payload) { nil }      # No payload by default
         let(:request_headers) { {} }       # No extra headers by default
         let(:request_auth_headers) { nil } # Override for your own headers
-        let(:request_query_parameters){ nil } # This should be a string, like "foo=bar"
+        let(:request_query_parameters) { nil } # This should be a string, like "foo=bar"
 
         # Pedant-created requestors:
         let(:pedant_clients) { ([ platform.validator_client_name ] + pedant_created_clients).sort }
         let(:pedant_created_clients) { platform.clients.reject(&:bogus?).map(&:name).sort }
-        let(:pedant_users)   { (['admin'] + platform.users.map(&:name)).sort }
+        let(:pedant_users) { (["admin"] + platform.users.map(&:name)).sort }
 
 
         def self.named_response_code(code)
@@ -74,7 +74,7 @@ module Pedant
           metadata[:validation] = true if code == 400
           metadata[:authentication] = true if code == 401
           metadata[:authorization] = true if code == 403
-          it ["should respond with", named_response_code(code), additional_message].compact.join(' '), metadata do
+          it ["should respond with", named_response_code(code), additional_message].compact.join(" "), metadata do
             should look_like expected_response
 
             instance_eval(&additional_assertions) if additional_assertions
@@ -115,7 +115,7 @@ module Pedant
         # 'json_class', etc.)
         def self.should_set_default_value_for(object_type, field, default_value)
           context "when missing '#{field}' value" do
-            it  "should create #{object_type} and set '#{default_value}' as '#{field}' value" do
+            it "should create #{object_type} and set '#{default_value}' as '#{field}' value" do
               # Ensure that the field-under-test is not present in the request payload
               request_payload.delete field
 
@@ -128,10 +128,10 @@ module Pedant
               # looking at the field, not the rest of the body; other
               # tests do that.
               fetched_resource_response.should look_like({
-                                                           :status => 200,
-                                                           :body => {
-                                                             field => default_value
-                                                           }
+                                                           status: 200,
+                                                           body: {
+                                                             field => default_value,
+                                                           },
                                                          })
             end
           end
@@ -149,17 +149,17 @@ module Pedant
           should_set_default_value_for(object_type, field, proper_value)
 
           context "when using something other than '#{proper_value}' as '#{field}' value" do
-            it  "should fail to create the #{object_type}" do
+            it "should fail to create the #{object_type}" do
 
               # Ensure that the value in the payload will always be wrong.
               override_value = "gibberish_that_will_never_be_a_valid_value"
-              override_value.should_not == proper_value
+              override_value.should_not
               request_payload[field] = override_value
 
               # Try to create the object, and fail miserably
               response.should look_like({
-                                          :status => 400,
-                                          :body_exact => {"error" => ["Field '#{field}' invalid"]}
+                                          status: 400,
+                                          body_exact: { "error" => ["Field '#{field}' invalid"] },
                                         })
             end
           end
@@ -187,10 +187,10 @@ module Pedant
             it "fails to create the #{object_type}" do
               request_payload[field] = test_value
               response.should look_like({
-                                          :status => 400,
-                                          :body_exact => {
-                                            "error" => ["Field '#{field}' is not a #{proper_type}"]
-                                          }
+                                          status: 400,
+                                          body_exact: {
+                                            "error" => ["Field '#{field}' is not a #{proper_type}"],
+                                          },
                                         })
             end
           end
@@ -211,23 +211,24 @@ module Pedant
         #
         # We're only testing whether the size is a problem or not.
         def self.respects_maximum_payload_size
-          context 'with a payload size', :validation do
-            let(:maximum_request_size){2000000}
-            context 'exactly equal to the maximum allowable size' do
+          context "with a payload size", :validation do
+            let(:maximum_request_size) { 2000000 }
+            context "exactly equal to the maximum allowable size" do
               let(:request_payload) { Pedant::Utility.get_pedant_file("payloads/maxfile.json").read }
               # We use this form of `it` because the
               # `have_status_code` prints a nice message, which we'll
               # use for the name of this test
               it {
-                request_payload.length.should == maximum_request_size
+                request_payload.length.should
+                maximum_request_size
                 # For this test, we don't really care what the
                 # response is; just that it's *not* a 413.
                 should_not have_status_code 413
               }
             end
-            context 'exceeding the maximum allowable size' do
+            context "exceeding the maximum allowable size" do
               let(:request_payload) { Pedant::Utility.get_pedant_file("payloads/toobigfile.json").read }
-              it{
+              it {
                 request_payload.length.should be > maximum_request_size
                 # Again, not particularly caring what the body is,
                 # just that the code is correct
@@ -245,8 +246,8 @@ module Pedant
         # api_url("/roles"), and either `node_name` or `role_name` set
         # to an appropriate value.
         def self.test_run_list_corner_cases(object_type)
-          valid_args = [:node, :role]
-          if !valid_args.include? object_type
+          valid_args = %i{node role}
+          unless valid_args.include? object_type
             raise "Can only perform run list tests for one of #{valid_args}!  You tried '#{object_type}'"
           end
 
@@ -262,11 +263,11 @@ module Pedant
           # Method to invoke to create the test object
           object_constructor_symbol = "new_#{object_type}".to_sym
 
-          context 'with a non-normalized run list' do
+          context "with a non-normalized run list" do
             let(:run_list) do
               ["foo", "foo::bar", "bar::baz@1.0.0", "recipe[web]", "role[prod]"]
             end
-            let(object_symbol){send(object_constructor_symbol, send(object_name_symbol), :run_list => run_list)}
+            let(object_symbol) { send(object_constructor_symbol, send(object_name_symbol), run_list: run_list) }
             send(test_method_symbol, "with a normalized run list")
           end
 
@@ -277,7 +278,7 @@ module Pedant
               ["recipe", "recipe::foo", "recipe::bar@1.0.0", "role", "role::foo", "role::bar@1.0.0",
                "recipe[recipe]", "recipe[role]", "role[recipe]", "role[role]"]
             end
-            let(object_symbol){send(object_constructor_symbol, send(object_name_symbol), :run_list => run_list)}
+            let(object_symbol) { send(object_constructor_symbol, send(object_name_symbol), run_list: run_list) }
             send(test_method_symbol, "with all oddly-named recipes intact in the run list")
           end
 
@@ -285,7 +286,7 @@ module Pedant
             let(:run_list) do
               ["webserver", "recipe[webserver]", "role[prod]", "role[prod]"]
             end
-            let(object_symbol){send(object_constructor_symbol, send(object_name_symbol), :run_list => run_list)}
+            let(object_symbol) { send(object_constructor_symbol, send(object_name_symbol), run_list: run_list) }
             send(test_method_symbol, "with all run list duplicates removed")
           end
 
@@ -293,19 +294,18 @@ module Pedant
             let(:run_list) do
               ["webserver", "webserver::default"]
             end
-            let(object_symbol){send(object_constructor_symbol, send(object_name_symbol), :run_list => run_list)}
+            let(object_symbol) { send(object_constructor_symbol, send(object_name_symbol), run_list: run_list) }
             send(test_method_symbol, "with both versions remaining in the run list")
           end
-
         end # test_run_list_corner_cases
 
         # Timestamp suffixes
         # Suffix unique between runs. Timestamp is generated once per pedant run
-        shared(:pedant_suffix) { suffix_for_names.(platform.pedant_run_timestamp) }
+        shared(:pedant_suffix) { suffix_for_names.call(platform.pedant_run_timestamp) }
 
         # Suffix unique to the example, bound to a let().
-        shared(:unique_suffix) { suffix_for_names.(platform.timestamp) }
-        shared(:suffix_for_names) {->(t) { "#{t.to_i}-#{t.nsec}-#{Process.pid}" } }
+        shared(:unique_suffix) { suffix_for_names.call(platform.timestamp) }
+        shared(:suffix_for_names) { ->(t) { "#{t.to_i}-#{t.nsec}-#{Process.pid}" } }
 
         # The suffix is unique for Pedant runs, but not within each pedant run.
         # For a unique timestamp within a Pedant run, use platform.timestamp
@@ -367,7 +367,7 @@ module Pedant
         # as either a recipe or a role.  Also filters out duplicates
         # once everything has been normalized.
         def normalize_run_list(run_list)
-          run_list.map{|item|
+          run_list.map { |item|
             case item
             when /^recipe\[.*\]$/
               item # explicit recipe
@@ -409,7 +409,6 @@ module Pedant
           Pedant::Config.pedant_platform
         end
 
-
         ## TODO: Remove this method; we probably don't need to access it directly
         def server
           platform.server
@@ -428,6 +427,7 @@ module Pedant
           if response.code > 299
             raise "bad response code #{response.code} in response: #{response}"
           end
+
           response
         end
 
@@ -438,7 +438,7 @@ module Pedant
         # If we're logging traffic, delimit the traffic from each test example
         if Pedant::Config.log_file
           before :each do |example|
-            File.open(Pedant::Config.log_file, 'a') do |f1|
+            File.open(Pedant::Config.log_file, "a") do |f1|
               f1.puts("<-<-<-<-<-<-<-<")
               f1.puts("BEGIN: " + example.description)
               f1.puts
@@ -446,7 +446,7 @@ module Pedant
           end
 
           after :each do |example|
-            File.open(Pedant::Config.log_file, 'a') do |f1|
+            File.open(Pedant::Config.log_file, "a") do |f1|
               f1.puts
               f1.puts("END: " + example.description)
               f1.puts(">->->->->->->->")
@@ -461,11 +461,7 @@ module Pedant
         # Helper function for setting options; return option is set, otherwise return default
         # Prevents repetitive logic
         def set_opt(opt, default)
-          if opt
-            opt
-          else
-            default
-          end
+          opt || default
         end
 
         ################################################################################
@@ -477,10 +473,10 @@ module Pedant
         shared(:org)              { platform.test_org.name }
         # TODO look at how these are set up - is accurate?
         shared(:admin_user)       { platform.admin_user }
-        shared(:org_admin)        { platform.admin_user}
+        shared(:org_admin)        { platform.admin_user }
         shared(:normal_user)      { platform.non_admin_user }
 
-        shared(:outside_user)     { platform.bad_user}
+        shared(:outside_user)     { platform.bad_user }
 
         # TODO no such thing - eliminate tests referring to it!
         shared(:admin_client)     { platform.admin_client }
@@ -489,8 +485,8 @@ module Pedant
         shared(:outside_client)   { platform.bad_client }
         shared(:validator_client) { platform.validator_client }
 
-        shared(:knife_admin)      {  admin_user }
-        shared(:knife_user)       { normal_user}
+        shared(:knife_admin)      { admin_user }
+        shared(:knife_user)       { normal_user }
 
         # TODO: Ultimately, I'd like to see all access to the superuser go
         # away, and all tasks that require its use become methods on the
@@ -508,7 +504,7 @@ module Pedant
 
         # Need a well-formed yet invalid key for a requestor to test authentiction
         shared(:bogus_key) { platform.bogus_key }
-        shared(:invalid_user) { Pedant::Requestor.new('invalid', bogus_key, bogus: true) }
+        shared(:invalid_user) { Pedant::Requestor.new("invalid", bogus_key, bogus: true) }
 
         ################################################################################
         # Test Context Helpers
@@ -521,7 +517,7 @@ module Pedant
         # by parameterizing on the container name.
 
         def add_chef_object(container_name, requestor, object_json)
-          post(api_url("/#{container_name}"), requestor, :payload => object_json)
+          post(api_url("/#{container_name}"), requestor, payload: object_json)
         end
 
         def delete_chef_object(container_name, requestor, object_name)

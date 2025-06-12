@@ -14,8 +14,8 @@
 # limitations under the License.
 #
 
-require 'pedant/rspec/cookbook_util'
-require 'pedant/rspec/validations'
+require "pedant/rspec/cookbook_util"
+require "pedant/rspec/validations"
 
 describe "Cookbooks API endpoint", :cookbooks, :cookbooks_create do
 
@@ -43,13 +43,13 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_create do
 
     context "PUT /cookbooks/<name>/<version> [create]" do
       include Pedant::RSpec::Validations::Create
-      let(:request_method){:PUT}
-      let(:request_url){api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}")}
-      shared(:requestor){admin_user}
+      let(:request_method) { :PUT }
+      let(:request_url) { api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}") }
+      shared(:requestor) { admin_user }
 
-      let(:default_resource_attributes){ new_cookbook(cookbook_name, cookbook_version)}
+      let(:default_resource_attributes) { new_cookbook(cookbook_name, cookbook_version) }
 
-      context 'with a basic cookbook', :smoke do
+      context "with a basic cookbook", :smoke do
         after(:each) { delete_cookbook(admin_user, cookbook_name, cookbook_version) }
 
         let(:request_payload) { default_resource_attributes }
@@ -67,13 +67,13 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_create do
         let(:cookbook_name) { "cookbook_name" }
         let(:cookbook_version) { "1.2.3" }
 
-        let(:resource_url){api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}")}
-        let(:persisted_resource_response){ get(resource_url, requestor) }
+        let(:resource_url) { api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}") }
+        let(:persisted_resource_response) { get(resource_url, requestor) }
 
-        after(:each){ delete_cookbook(requestor, cookbook_name, cookbook_version)}
+        after(:each) { delete_cookbook(requestor, cookbook_name, cookbook_version) }
 
         context "the 'json_class' field" do
-          let(:validate_attribute){"json_class"}
+          let(:validate_attribute) { "json_class" }
           accepts_valid_value "Chef::CookbookVersion"
           rejects_invalid_value "Chef::Node"
         end
@@ -120,9 +120,9 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_create do
             delete_cookbook(admin_user, cookbook_name, cookbook_version)
           end
 
-          should_create('json_class', :delete, true, 'Chef::CookbookVersion')
-          should_fail_to_create('json_class', 'Chef::Role', 400, "Field 'json_class' invalid")
-          should_fail_to_create('metadata', {}, 400, "Field 'metadata.version' missing")
+          should_create("json_class", :delete, true, "Chef::CookbookVersion")
+          should_fail_to_create("json_class", "Chef::Role", 400, "Field 'json_class' invalid")
+          should_fail_to_create("metadata", {}, 400, "Field 'metadata.version' missing")
         end # context basic tests
 
         context "checking segments" do
@@ -135,17 +135,17 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_create do
           segments.each do |segment|
 
             should_fail_to_create(segment, "foo", 400,
-                                  "Field '#{segment}' invalid")
+              "Field '#{segment}' invalid")
             should_fail_to_create(segment, [ {} ], 400,
-                                  "Invalid element in array value of '#{segment}'.")
+              "Invalid element in array value of '#{segment}'.")
           end
         end # context checking segments
 
         context "checking metadata sections" do
           %w{platforms dependencies}.each do |section|
             should_fail_to_create_metadata(section, "foo", 400, "Field 'metadata.#{section}' invalid")
-            should_fail_to_create_metadata(section, {"foo" => malformed_constraint},
-                                           400, "Invalid value '#{malformed_constraint}' for metadata.#{section}")
+            should_fail_to_create_metadata(section, { "foo" => malformed_constraint },
+              400, "Invalid value '#{malformed_constraint}' for metadata.#{section}")
           end
 
           def self.should_create_with_metadata(_attribute, _value)
@@ -165,14 +165,15 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_create do
             end
 
             ["> 1", "< 2", "3", "<= 4", "~> 5", ">= 6", "= 7", "> 1.0", "< 2.1.2", "3.3", "<= 4.6", "~> 5.6.2", ">= 6.0"].each do |dep|
-              should_create_with_metadata 'dependencies', {"chef-client" => "> 2.0.0", "apt" => dep}
+              should_create_with_metadata "dependencies", { "chef-client" => "> 2.0.0", "apt" => dep }
             end
 
             [">= 1.2.3.4", "<= 5.6.7.8.9.0"].each do |dep|
               should_fail_to_create_metadata(
-                'dependencies',
-                {"chef-client" => "> 2.0.0", "apt" => dep},
-                400, "Invalid value '#{dep}' for metadata.dependencies")
+                "dependencies",
+                { "chef-client" => "> 2.0.0", "apt" => dep },
+                400, "Invalid value '#{dep}' for metadata.dependencies"
+              )
             end
           end
 
@@ -180,29 +181,29 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_create do
             after(:each) { delete_cookbook admin_user, cookbook_name, cookbook_version }
 
             # https://docs.chef.io/config_rb_metadata/#provides
-            should_create_with_metadata 'providing', 'cats::sleep'
-            should_create_with_metadata 'providing', 'here(:kitty, :time_to_eat)'
-            should_create_with_metadata 'providing', 'service[snuggle]'
-            should_create_with_metadata 'providing', ''
-            should_create_with_metadata 'providing', 1
-            should_create_with_metadata 'providing', true
-            should_create_with_metadata 'providing', ['cats', 'sleep', 'here']
-            should_create_with_metadata 'providing',
-              { 'cats::sleep'                => '0.0.1',
-                'here(:kitty, :time_to_eat)' => '0.0.1',
-                'service[snuggle]'           => '0.0.1'  }
+            should_create_with_metadata "providing", "cats::sleep"
+            should_create_with_metadata "providing", "here(:kitty, :time_to_eat)"
+            should_create_with_metadata "providing", "service[snuggle]"
+            should_create_with_metadata "providing", ""
+            should_create_with_metadata "providing", 1
+            should_create_with_metadata "providing", true
+            should_create_with_metadata "providing", %w{cats sleep here}
+            should_create_with_metadata "providing",
+              { "cats::sleep" => "0.0.1",
+                "here(:kitty, :time_to_eat)" => "0.0.1",
+                "service[snuggle]" => "0.0.1" }
 
           end
         end # context checking metadata sections
 
-        context 'with invalid version in url' do
+        context "with invalid version in url" do
           let(:expected_response) { invalid_cookbook_version_response }
           let(:url) { named_cookbook_url }
           let(:payload) { {} }
-          let(:cookbook_version) { 'abc' }
+          let(:cookbook_version) { "abc" }
 
           it "should respond with an error" do
-            put(url, admin_user, :payload => payload) do |response|
+            put(url, admin_user, payload: payload) do |response|
               response.should look_like expected_response
             end
           end # it invalid version in URL is a 400
@@ -211,43 +212,43 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_create do
         it "invalid cookbook name in URL is a 400" do
           payload = {}
           put(api_url("/#{cookbook_url_base}/first@second/1.2.3"), admin_user,
-              :payload => payload) do |response|
-            error = "Invalid cookbook name 'first@second' using regex: 'Malformed cookbook name. Must only contain A-Z, a-z, 0-9, _, . or -'."
-            response.should look_like({
-              :status => 400,
-              :body => {
-                "error" => [error]
-              }
-            })
-          end
+            payload: payload) do |response|
+              error = "Invalid cookbook name 'first@second' using regex: 'Malformed cookbook name. Must only contain A-Z, a-z, 0-9, _, . or -'."
+              response.should look_like({
+                status: 400,
+                body: {
+                  "error" => [error],
+                },
+              })
+            end
         end # it invalid cookbook name in URL is a 400
 
         it "mismatched metadata.cookbook_version is a 400" do
           payload = new_cookbook(cookbook_name, "0.0.1")
           put(api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}"), admin_user,
-              :payload => payload) do |response|
-            error = "Field 'name' invalid"
-            response.should look_like({
-              :status => 400,
-              :body => {
-                "error" => [error]
-              }
-            })
-          end
+            payload: payload) do |response|
+              error = "Field 'name' invalid"
+              response.should look_like({
+                status: 400,
+                body: {
+                  "error" => [error],
+                },
+              })
+            end
         end # it mismatched metadata.cookbook_version is a 400
 
         it "mismatched cookbook_name is a 400" do
           payload = new_cookbook("foobar", cookbook_version)
           put(api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}"), admin_user,
-              :payload => payload) do |response|
-            error = "Field 'name' invalid"
-            response.should look_like({
-              :status => 400,
-              :body => {
-                "error" => [error]
-              }
-            })
-          end
+            payload: payload) do |response|
+              error = "Field 'name' invalid"
+              response.should look_like({
+                status: 400,
+                body: {
+                  "error" => [error],
+                },
+              })
+            end
         end # it mismatched cookbook_name is a 400
 
         context "sandbox checks" do
@@ -262,19 +263,19 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_create do
                 "name" => "default.rb",
                 "path" => "recipes/default.rb",
                 "checksum" => "8288b67da0793b5abec709d6226e6b73",
-                "specificity" => "default"
-              }
+                "specificity" => "default",
+              },
             ]
             put(api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}"),
-                admin_user, :payload => payload) do |response|
-              error = "Manifest has a checksum that hasn't been uploaded."
-              response.should look_like({
-                :status => 400,
-                :body => {
-                  "error" => [error]
-                }
-              })
-            end
+              admin_user, payload: payload) do |response|
+                error = "Manifest has a checksum that hasn't been uploaded."
+                response.should look_like({
+                  status: 400,
+                  body: {
+                    "error" => [error],
+                  },
+                })
+              end
           end # it specifying file not in sandbox is a 400
         end # context sandbox checks
       end # context creating broken cookbooks to test validation and defaults
@@ -289,13 +290,13 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_create do
         let(:maintainer_email) { "cookbook_author@example.com" }
         let(:license) { "MPL" }
 
-        let (:opts) {
+        let(:opts) {
           {
-            :description => description,
-            :long_description => long_description,
-            :maintainer => maintainer,
-            :maintainer_email => maintainer_email,
-            :license => license
+            description: description,
+            long_description: long_description,
+            maintainer: maintainer,
+            maintainer_email: maintainer_email,
+            license: license,
           }
         }
 
@@ -313,27 +314,27 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_create do
           payload = retrieved_cookbook(cookbook_name, cookbook_version)
 
           put(api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}"),
-              admin_user,
-              :payload => payload) do |response|
-                response.
-                  should look_like({
-                  :status => 201,
-                  :body => payload
-                })
-              end
+            admin_user,
+            payload: payload) do |response|
+              response
+                .should look_like({
+                status: 201,
+                body: payload,
+              })
+            end
         end # it allows creation of a minimal cookbook with no data
 
         it "allows override of defaults" do
           payload = new_cookbook(cookbook_name, cookbook_version, opts)
           put(api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}"),
-              admin_user, :payload => payload) do |response|
-            response.
-              should look_like({
-              :status => 201,
-              :body => retrieved_cookbook(cookbook_name, cookbook_version,
-                                          opts)
-            })
-          end
+            admin_user, payload: payload) do |response|
+              response
+                .should look_like({
+                status: 201,
+                body: retrieved_cookbook(cookbook_name, cookbook_version,
+                  opts),
+              })
+            end
         end # it allows override of defaults
       end # context creating good gookbooks to test defaults
     end # context PUT /cookbooks/<name>/<version> [create]
@@ -352,39 +353,39 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_create do
       it "allows us to create 2 versions of the same cookbook" do
         payload = new_cookbook(cookbook_name, cookbook_version1, {})
         put(api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version1}"),
-            admin_user,
-            :payload => payload) do |response|
-              response.should look_like({
-                :status => 201,
-                :body => payload
-              })
-            end
+          admin_user,
+          payload: payload) do |response|
+            response.should look_like({
+              status: 201,
+              body: payload,
+            })
+          end
 
-            payload2 = new_cookbook(cookbook_name, cookbook_version2, {})
-            put(api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version2}"),
-                admin_user,
-                :payload => payload2) do |response|
-                  response.should look_like({
-                    :status => 201,
-                    :body => payload2
-                  })
-                end
+        payload2 = new_cookbook(cookbook_name, cookbook_version2, {})
+        put(api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version2}"),
+          admin_user,
+          payload: payload2) do |response|
+            response.should look_like({
+              status: 201,
+              body: payload2,
+            })
+          end
 
-                get(api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version1}"),
-                    admin_user) do |response|
-                  response.should look_like({
-                    :status => 200,
-                    :body => retrieved_cookbook(cookbook_name, cookbook_version1)
-                  })
-                end
+        get(api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version1}"),
+          admin_user) do |response|
+            response.should look_like({
+              status: 200,
+              body: retrieved_cookbook(cookbook_name, cookbook_version1),
+            })
+          end
 
-                get(api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version2}"),
-                    admin_user) do |response|
-                  response.should look_like({
-                    :status => 200,
-                    :body => retrieved_cookbook(cookbook_name, cookbook_version2)
-                  })
-                end
+        get(api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version2}"),
+          admin_user) do |response|
+            response.should look_like({
+              status: 200,
+              body: retrieved_cookbook(cookbook_name, cookbook_version2),
+            })
+          end
       end # it allows us to create 2 versions of the same cookbook
     end # context PUT multiple cookbooks
   end

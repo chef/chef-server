@@ -6,22 +6,22 @@
 # Copyright => : Copyright (c) 2014 Chef Software, Inc.
 #
 
-require 'pedant/rspec/common'
-require 'pedant/rspec/node_util'
+require "pedant/rspec/common"
+require "pedant/rspec/node_util"
 
 describe "Controls API Endpoint", :controls do
-  it 'a POST to controls endpoint returns 410' do
-    post(api_url("/controls"), platform.superuser, :payload => {} ) do |response|
+  it "a POST to controls endpoint returns 410" do
+    post(api_url("/controls"), platform.superuser, payload: {} ) do |response|
       response.should look_like({
-                                  :status => 410, :body_exact => {"error" => /\A/}
+                                  status: 410, body_exact: { "error" => /\A/ }
                                 })
     end
   end
 
-  it 'a GET to controls endpoint returns 410' do
+  it "a GET to controls endpoint returns 410" do
     get(api_url("/controls"), platform.superuser) do |response|
       response.should look_like({
-                                  :status => 410, :body_exact => {"error" => /\A/}
+                                  status: 410, body_exact: { "error" => /\A/ }
                                 })
     end
   end
