@@ -610,8 +610,8 @@ yap6MUYSjPOa7eCrhg2zFZiqO6VLEogPc1nsjb9Zl2UWLLYyCVz=
       priv = Tempfile.new("pedant-key-#{name}")
       pub = Tempfile.new("pedant-key-#{name}.pub")
       rsakey = OpenSSL::PKey::RSA.new(2048)
-      open priv.path, "w" do |io| io.write rsakey.to_pem end
-      open pub.path, "w" do |io| io.write rsakey.public_key.to_pem end
+      File.open(priv.path, "w") { |io| io.write rsakey.to_pem }
+      File.open(pub.path, "w") { |io| io.write rsakey.public_key.to_pem }
       key = { path: "#{pub.path}",
               private: File.read(priv.path),
               public: File.read(pub.path) }
