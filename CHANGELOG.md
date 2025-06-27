@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.10.38 -->
-## [15.10.38](https://github.com/chef/chef-server/tree/15.10.38) (2025-06-27)
+<!-- latest_release 15.10.39 -->
+## [15.10.39](https://github.com/chef/chef-server/tree/15.10.39) (2025-06-27)
 
 #### Merged Pull Requests
-- Update license_scout [#4020](https://github.com/chef/chef-server/pull/4020) ([marcparadise](https://github.com/marcparadise))
+- tweaking for linting [#4018](https://github.com/chef/chef-server/pull/4018) ([johnmccrae](https://github.com/johnmccrae))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.10.33 -->
 ### Changes since 15.10.33 release
 
 #### Merged Pull Requests
+- tweaking for linting [#4018](https://github.com/chef/chef-server/pull/4018) ([johnmccrae](https://github.com/johnmccrae)) <!-- 15.10.39 -->
 - Update license_scout [#4020](https://github.com/chef/chef-server/pull/4020) ([marcparadise](https://github.com/marcparadise)) <!-- 15.10.38 -->
 - CHEF-20995 - Changes to not auto accept the license while using vagrant file [#4016](https://github.com/chef/chef-server/pull/4016) ([jashaik](https://github.com/jashaik)) <!-- 15.10.37 -->
 - make pipelines public: habitat/test [#4002](https://github.com/chef/chef-server/pull/4002) ([jaymzh](https://github.com/jaymzh)) <!-- 15.10.36 -->
