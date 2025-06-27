@@ -13,26 +13,26 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'pedant/rspec/knife_util'
-require 'securerandom'
+require "pedant/rspec/knife_util"
+require "securerandom"
 
-describe 'knife', :knife do
-  context 'role' do
-    context 'list' do
+describe "knife", :knife do
+  context "role" do
+    context "list" do
       include Pedant::RSpec::KnifeUtil
       include Pedant::RSpec::KnifeUtil::Role
 
       let(:command) { "knife role list -c #{knife_config}" }
       after(:each)  { knife "role delete #{role_name} -c #{knife_config} --yes" }
 
-      context 'as an admin' do
+      context "as an admin" do
         let(:requestor) { knife_admin }
 
-        it 'should succeed' do
+        it "should succeed" do
           knife "role create #{role_name} -c #{knife_config} -d #{role_name}"
 
           # Runs knife role list
-          should have_outcome :status => 0, :stdout => /#{role_name}/
+          should have_outcome status: 0, stdout: /#{role_name}/
         end
       end
 

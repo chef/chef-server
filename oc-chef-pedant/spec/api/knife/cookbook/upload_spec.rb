@@ -13,42 +13,42 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'pedant/rspec/knife_util'
+require "pedant/rspec/knife_util"
 
 
-describe 'knife', :knife do
-  context 'cookbook' do
-    context 'upload' do
+describe "knife", :knife do
+  context "cookbook" do
+    context "upload" do
       include Pedant::RSpec::KnifeUtil
 
       let(:command) { "knife cookbook upload #{cookbook_name} -c #{knife_config}" }
-      let(:cookbook_name){ "joy_of_cooking" }
+      let(:cookbook_name) { "joy_of_cooking" }
       let(:cwd) { repository }
 
       after(:each) { knife "cookbook delete #{cookbook_name} -c #{knife_config} --yes" }
 
-      context 'as an admin' do
+      context "as an admin" do
         let(:requestor) { knife_admin }
 
-        it 'should succeed' do
-          should have_outcome :status => 0, :stderr => /Uploaded 1 cookbook/
+        it "should succeed" do
+          should have_outcome status: 0, stderr: /Uploaded 1 cookbook/
         end
       end
-      context 'as a normal user' do
+      context "as a normal user" do
         let(:requestor) { knife_user }
 
-        it 'should succeed' do
-          should have_outcome :status => 0, :stderr => /Uploaded 1 cookbook/
+        it "should succeed" do
+          should have_outcome status: 0, stderr: /Uploaded 1 cookbook/
         end
       end
 
       # clients can't upload cookbooks, only users can.
       # TODO hopefully this is covered in cookbooks? If so, let's delete this one.and any similar?
-      context 'as a normal client' do
+      context "as a normal client" do
         let(:requestor) { normal_client }
 
-        it 'should fail', :authorization do
-          should have_outcome :status => 100, :stderr => /missing create permission/
+        it "should fail", :authorization do
+          should have_outcome status: 100, stderr: /missing create permission/
         end
       end
 

@@ -11,7 +11,7 @@ module RSpecShared
       location = if parent.respond_to?(:metadata)
                    parent.metadata[:example_group][:location]
                  else
-                   'rspec_global_'
+                   "rspec_global_"
                  end
       key = location + name.to_s
 
@@ -41,7 +41,6 @@ module RSpecShared
       end
     end
 
-    private
     def self.mutex
       @@_mutex ||= Mutex.new
     end

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # Author:: Ho-Sheng Hsiao (<hosh@chef.io>)
 # Copyright:: Copyright (c) 2013 Chef Software, Inc.
@@ -11,13 +10,13 @@ describe "Org Creation", :org_creation do
   let(:request_method) { :GET }
 
   context "when validating default containers" do
-    let(:request_url)    { api_url("/containers") }
+    let(:request_url) { api_url("/containers") }
 
-    let(:default_containers) { %w(clients containers cookbooks data environments groups nodes roles sandboxes policies policy_groups cookbook_artifacts) }
-    let(:default_container_hash) { Hash[*default_containers.map(&container_to_url).flatten]  }
+    let(:default_containers) { %w{clients containers cookbooks data environments groups nodes roles sandboxes policies policy_groups cookbook_artifacts} }
+    let(:default_container_hash) { Hash[*default_containers.map(&container_to_url).flatten] }
     let(:container_to_url) { ->(x) { [x, platform.api_url("/containers/#{x}", org)] } }
 
-    it 'should have default containers' do
+    it "should have default containers" do
       # This also tests to make sure there are no extraneous containers in the response
       expect(parsed_response).to strictly_match(default_container_hash)
     end
@@ -33,10 +32,10 @@ describe "Org Creation", :org_creation do
       context "for #{resource} container" do
         let(:request_url)       { api_url("/containers/#{resource}") }
         let(:expected_response) { ok_full_response }
-        let(:success_message)   { {"containername" => resource } }
+        let(:success_message)   { { "containername" => resource } }
 
 
-        should_respond_with 200, 'and have default settings'
+        should_respond_with 200, "and have default settings"
       end
     end
 

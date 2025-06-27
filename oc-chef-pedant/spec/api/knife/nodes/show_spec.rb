@@ -13,12 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'pedant/rspec/knife_util'
-require 'securerandom'
+require "pedant/rspec/knife_util"
+require "securerandom"
 
-describe 'knife', :knife do
-  context 'node' do
-    context 'show [NODE]' do
+describe "knife", :knife do
+  context "node" do
+    context "show [NODE]" do
       include Pedant::RSpec::KnifeUtil
       include Pedant::RSpec::KnifeUtil::Node
 
@@ -27,7 +27,7 @@ describe 'knife', :knife do
       let(:assume_existing_node!) do
         assume_fixture_file!
         knife "node create #{node_name} -c #{knife_config} --disable-editing"
-        #knife_debug "node from file #{fixture_file_path} -c #{knife_config}"
+        # knife_debug "node from file #{fixture_file_path} -c #{knife_config}"
         # This command does not actually w work for some reason, with knife reporting
         # "Method not allowed"
         # knife "node from file #{node_name}.json -c #{knife_config}"
@@ -35,27 +35,27 @@ describe 'knife', :knife do
 
       after(:each) { knife "node delete #{node_name} -c #{knife_config} --yes" }
 
-      context 'with existing node' do
-        context 'as an admin' do
+      context "with existing node" do
+        context "as an admin" do
           let(:requestor) { knife_admin }
 
-          it 'should succeed' do
+          it "should succeed" do
             assume_existing_node!
 
             # Runs knife node from file
-            should have_outcome :status => 0, :stdout => /Node Name:\s+#{node_name}/
+            should have_outcome status: 0, stdout: /Node Name:\s+#{node_name}/
           end
         end
       end
 
-      context 'without existing node' do
+      context "without existing node" do
         let(:node_name) { "does_not_exist_#{rand(1000)}" }
 
-        context 'as an admin' do
+        context "as an admin" do
           let(:requestor) { knife_admin }
 
-          it 'should fail' do
-            should have_outcome :status => 100, :stderr => /node '#{node_name}' not found/
+          it "should fail" do
+            should have_outcome status: 100, stderr: /node '#{node_name}' not found/
           end
         end
       end

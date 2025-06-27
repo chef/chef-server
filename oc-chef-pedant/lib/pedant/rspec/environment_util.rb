@@ -13,9 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'pedant/request'
-require 'pedant/rspec/matchers'
-require 'rspec/core/shared_context'
+require "pedant/request"
+require "pedant/rspec/matchers"
+require "rspec/core/shared_context"
 
 module Pedant
   module RSpec
@@ -32,11 +32,11 @@ module Pedant
       module ClassMethods
 
         def incorrect_json_type_body_msg
-          'Incorrect JSON type for request body'
+          "Incorrect JSON type for request body"
         end
 
         def must_supply_data_msg
-          'Must supply environment data'
+          "Must supply environment data"
         end
 
         def incorrect_json_type_name_msg
@@ -52,38 +52,38 @@ module Pedant
         end
       end
 
-      let(:environment_not_found_message){"environment '#{environment_name}' not found"}
+      let(:environment_not_found_message) { "environment '#{environment_name}' not found" }
 
       # TODO: This is a holdover from Ruby days that snuck into Erchef.  Consolidate!
-      let(:environment_not_found_message_alternate){"Cannot load environment #{environment_name}"}
+      let(:environment_not_found_message_alternate) { "Cannot load environment #{environment_name}" }
 
       let(:environment_not_found_response) do
         {
-          :status => 404,
-          :body_exact => {
-            "error" => [environment_not_found_message]
-          }
+          status: 404,
+          body_exact: {
+            "error" => [environment_not_found_message],
+          },
         }
       end
 
       # When you include this context, 'environment_name' is set to the
       # name of the testing environment
-      shared_context 'with temporary testing environment' do
-        let(:environment_name){unique_name("temporary_environment")}
-        let(:environment_description){"A Pedant Environment"}
-        let(:environment_cookbook_versions){ {} }
-        let(:environment_cookbook_versions){ {} }
-        let(:environment_default_attributes){ {} }
-        let(:environment_override_attributes){ {} }
+      shared_context "with temporary testing environment" do
+        let(:environment_name) { unique_name("temporary_environment") }
+        let(:environment_description) { "A Pedant Environment" }
+        let(:environment_cookbook_versions) { {} }
+        let(:environment_cookbook_versions) { {} }
+        let(:environment_default_attributes) { {} }
+        let(:environment_override_attributes) { {} }
         let(:environment_payload) do
           {
-            'name' => environment_name,
-            'json_class' => 'Chef::Environment',
-            'chef_type' => 'environment',
-            'description' => environment_description,
-            'cookbook_versions' => environment_cookbook_versions,
-            'default_attributes' => environment_default_attributes,
-            'override_attributes' => environment_override_attributes
+            "name" => environment_name,
+            "json_class" => "Chef::Environment",
+            "chef_type" => "environment",
+            "description" => environment_description,
+            "cookbook_versions" => environment_cookbook_versions,
+            "default_attributes" => environment_default_attributes,
+            "override_attributes" => environment_override_attributes,
           }
         end
         let(:environment) { environment_payload }
@@ -102,11 +102,11 @@ module Pedant
         {
           "name" => name,
           "json_class" => "Chef::Environment", # Absolutely required due to Ruby JSON magic
-          'chef_type' => 'environment',
-          'description' => '',
-          'cookbook_versions' => {},
-          'default_attributes' => {},
-          'override_attributes' => {}
+          "chef_type" => "environment",
+          "description" => "",
+          "cookbook_versions" => {},
+          "default_attributes" => {},
+          "override_attributes" => {},
         }
       end
 
@@ -115,16 +115,16 @@ module Pedant
           "name" => name,
           "description" => "Behold, a testing environment!",
           "cookbook_versions" => {
-            "ultimatecookbook" => "= 1.1.0"
+            "ultimatecookbook" => "= 1.1.0",
           },
           "json_class" => "Chef::Environment",
           "chef_type" => "environment",
           "default_attributes" => {
-            "defaultattr" => "y"
+            "defaultattr" => "y",
           },
           "override_attributes" => {
-            "overrideattr" => "b"
-          }
+            "overrideattr" => "b",
+          },
         }.merge(attributes)
       end
 
@@ -136,12 +136,12 @@ module Pedant
           "json_class" => "Chef::Environment",
           "chef_type" => "environment",
           "default_attributes" => {},
-          "override_attributes" => {}
+          "override_attributes" => {},
         }
       end
 
       def add_environment(requestor, environment)
-        post(api_url("/environments"), requestor, :payload => environment)
+        post(api_url("/environments"), requestor, payload: environment)
       end
 
       def delete_environment(requestor, environment_name)
@@ -158,42 +158,42 @@ module Pedant
     shared_context "environment_body_util" do
       let(:default_payload) {
         {
-          'name' => new_environment_name,
-          'chef_type' => 'environment',
-          'json_class' => 'Chef::Environment',
-          'description' => 'A florid description',
-          'cookbook_versions' => {
-            'schmapache' => '= 1.5.1'
+          "name" => new_environment_name,
+          "chef_type" => "environment",
+          "json_class" => "Chef::Environment",
+          "description" => "A florid description",
+          "cookbook_versions" => {
+            "schmapache" => "= 1.5.1",
           },
-          'default_attributes' => {
-            'a' => 'b'
+          "default_attributes" => {
+            "a" => "b",
           },
-          'override_attributes' => {
-            'a' => 'b'
-          }
+          "override_attributes" => {
+            "a" => "b",
+          },
         }
       }
       let(:empty_payload) {
         {
-          'name' => '',
-          'chef_type' => 'environment',
-          'json_class' => 'Chef::Environment',
-          'description' => '',
-          'cookbook_versions' => {},
-          'default_attributes' => {},
-          'override_attributes' => {}
+          "name" => "",
+          "chef_type" => "environment",
+          "json_class" => "Chef::Environment",
+          "description" => "",
+          "cookbook_versions" => {},
+          "default_attributes" => {},
+          "override_attributes" => {},
         }
       }
 
       def make_payload(overwrite_variables, defaults = nil)
         result = defaults || default_payload
-        if (overwrite_variables[:skip_delete])
+        if overwrite_variables[:skip_delete]
           overwrite_variables.delete(:skip_delete)
           skip_delete = true
         end
-        overwrite_variables.each do |variable,value|
+        overwrite_variables.each do |variable, value|
           if value == :delete
-            if (skip_delete)
+            if skip_delete
               result[variable] = empty_payload[variable]
             else
               result.delete(variable)
@@ -202,22 +202,22 @@ module Pedant
             result[variable] = value
           end
         end
-        return result
+        result
       end
 
       def self.fails_with_value(variable, value, expected_error, existing_environment = nil,
-                                pending = false)
-        if (pending)
+        pending = false)
+        if pending
           it "with #{variable} = #{value} it reports 400", :validation, :skip do
           end
         else
           it "with #{variable} = #{value} it reports 400", :validation do
-            if (existing_environment)
+            if existing_environment
               response = put(api_url("/environments/#{new_environment_name}"), admin_user,
-                             :payload => make_payload(variable => value))
+                payload: make_payload(variable => value))
             else
               response = post(api_url("/environments"), admin_user,
-                              :payload => make_payload(variable => value))
+                payload: make_payload(variable => value))
             end
             response.should have_error(400, expected_error)
           end
@@ -225,37 +225,37 @@ module Pedant
       end
 
       def self.succeeds_with_value(variable, value, expected_value = nil,
-                                   existing_environment = nil, pending = false)
+        existing_environment = nil, pending = false)
         expected_value ||= value
-        if (pending)
+        if pending
           it "with #{variable} = #{value} it succeeds", :skip do
           end
         else
           it "with #{variable} = #{value} it succeeds" do
-            if (existing_environment)
+            if existing_environment
               response = put(api_url("/environments/#{new_environment_name}"), admin_user,
-                             :payload => make_payload(variable => value))
+                payload: make_payload(variable => value))
               response.should look_like({
-                                          :status => 200,
-                                          :body_exact => make_payload(variable => value,
-                                                                      :skip_delete => true)
+                                          status: 200,
+                                          body_exact: make_payload(variable => value,
+                                            :skip_delete => true),
                                         })
             else
               response = post(api_url("/environments"), admin_user,
-                              :payload => make_payload(variable => value))
+                payload: make_payload(variable => value))
               response.should look_like({
-                                          :status => 201,
-                                          :body_exact => {
+                                          status: 201,
+                                          body_exact: {
                                             "uri" => api_url("/environments/" +
-                                                             "#{new_environment_name}")
-                                          }})
+                                                             "#{new_environment_name}"),
+                                          } })
             end
 
             response = get(api_url("/environments/#{new_environment_name}"), admin_user)
             response.should look_like({
-                                        :status => 200,
-                                        :body_exact => make_payload(variable => value,
-                                                                    :skip_delete => true) })
+                                        status: 200,
+                                        body_exact: make_payload(variable => value,
+                                          :skip_delete => true) })
           end
         end
       end

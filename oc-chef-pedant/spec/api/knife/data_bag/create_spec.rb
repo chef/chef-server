@@ -13,37 +13,37 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'pedant/rspec/knife_util'
+require "pedant/rspec/knife_util"
 
-describe 'knife', :knife do
-  context 'data bag' do
-    context 'create' do
+describe "knife", :knife do
+  context "data bag" do
+    context "create" do
       include Pedant::RSpec::KnifeUtil
       include Pedant::RSpec::KnifeUtil::DataBag
 
       let(:command) { "knife data bag create #{bag_name} -c #{knife_config}" }
       after(:each)  { knife "data bag delete #{bag_name} -c #{knife_config} --yes" }
 
-      context 'without existing data bag of the same name' do
-        context 'as an admin' do
+      context "without existing data bag of the same name" do
+        context "as an admin" do
           let(:requestor) { knife_admin }
 
-          it 'should succeed' do
-            should have_outcome :status => 0, :stderr => /Created data_bag\[#{bag_name}\]/
+          it "should succeed" do
+            should have_outcome status: 0, stderr: /Created data_bag\[#{bag_name}\]/
           end
         end
       end
 
-      context 'with an existing data bag of the same name' do
-        context 'as an admin' do
+      context "with an existing data bag of the same name" do
+        context "as an admin" do
           let(:requestor) { knife_admin }
 
-          it 'should fail' do
+          it "should fail" do
             # Create a data bag with the same name
             knife "data bag create #{bag_name} -c #{knife_config}"
 
             # Run knife a second time
-            should have_outcome :status => 0, :stderr => /Data bag #{bag_name} already exists/
+            should have_outcome status: 0, stderr: /Data bag #{bag_name} already exists/
           end
         end
       end
