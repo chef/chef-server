@@ -10,8 +10,8 @@ pkg_deps=(
   core/openssl
   core/gcc-libs
   core/ruby3_1/3.1.7/20250714070610
-  core/sqitch_pg
-  core/gecode
+  core/sqitch
+  core/gecode3
   core/libffi
   core/glibc
 )
@@ -80,9 +80,9 @@ do_build() {
   export USE_SYSTEM_GECODE=1
   export GEM_HOME="${pkg_path}/vendor/bundle"
   export GEM_PATH="${_ruby_dir}:${GEM_HOME}"
-  export LIBRARY_PATH="$(pkg_path_for core/gecode)/lib"
-  export LD_LIBRARY_PATH="$(pkg_path_for core/gecode)/lib"
-  export CPLUS_INCLUDE_PATH="$(pkg_path_for core/gecode)/include"
+  export LIBRARY_PATH="$(pkg_path_for core/gecode3)/lib"
+  export LD_LIBRARY_PATH="$(pkg_path_for core/gecode3)/lib"
+  export CPLUS_INCLUDE_PATH="$(pkg_path_for core/gecode3)/include"
   mkdir -p "$GEM_HOME"
 
   make omnibus
