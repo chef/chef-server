@@ -13,11 +13,11 @@ export HAB_STUDIO_HOST_ARCH=x86_64-linux
 export HAB_FEAT_OFFLINE_INSTALL=true
 export HAB_BLDR_CHANNEL="LTS-2024"
 export HAB_STUDIO_SECRET_HAB_FALLBACK_CHANNEL="LTS-2024"
-export HAB_FALLBACK_CHANNEL="LTS-2024"
+export HAB_FALLBACK_CHANNEL="dev"
 
 curl https://raw.githubusercontent.com/habitat-sh/habitat/main/components/hab/install.sh | sudo bash
 
-sudo -E hab pkg install  core/ruby3_1
+sudo -E hab pkg install core/ruby3_1
 export PATH
 PATH="$(hab pkg path core/ruby3_1)/bin:$PATH"
 sudo -E "$(hab pkg path core/ruby3_1)"/bin/gem install toml
@@ -30,7 +30,8 @@ HAB_CACHE_KEY_PATH="$JOB_TEMP_ROOT/keys"
 echo "--- :key: Generating fake origin key"
 hab license accept
 hab origin key generate
-
+export HAB_BLDR_CHANNEL=LTS-2024
+export HAB_REFRESH_CHANNEL=LTS-2024
 for pkg_name in `echo "bookshelf chef-server-ctl oc-id oc_bifrost oc_erchef openresty-noroot"`
 do
   echo "generating package for $pkg_name"
@@ -40,16 +41,12 @@ done
 ./.expeditor/replace.sh "nginx" "src"
 
 echo "generating package for nginx"
-openresty_hart=$(ls -1t results/chef-openresty*.hart | head -1)
-HAB_FEAT_OFFLINE_INSTALL=true HAB_FEAT_IGNORE_LOCAL=false HAB_ORIGIN=chef HAB_CACHE_KEY_PATH="$JOB_TEMP_ROOT/keys" DO_CHECK=true HAB_BLDR_CHANNEL=dev hab studio run -D "set -e; hab pkg install $openresty_hart; hab pkg build src/nginx"
+openresty_hart=$(ls -1t results/*openresty*.hart | head -1)
+HAB_FEAT_OFFLINE_INSTALL=true HAB_FEAT_IGNORE_LOCAL=false HAB_ORIGIN=chef HAB_CACHE_KEY_PATH="$JOB_TEMP_ROOT/keys" DO_CHECK=true HAB_BLDR_CHANNEL=LTS-2024 HAB_REFRESH_CHANNEL=LTS-2024 hab studio run -D "set -e; hab pkg install $openresty_hart; export HAB_REFRESH_CHANNEL=LTS-2024; hab pkg build src/nginx"
 
 git clone https://github.com/chef/automate.git
 cd automate
 # git checkout dave/LTS-channel # this is the branch that has the changes for LTS channel
-if [ "${AUTOMATE_BRANCH}" != "" ]
-then
-  git checkout "${AUTOMATE_BRANCH}"
-fi
 
 RESOLVED_RESULTS_DIR=$(realpath results/)
 export DO_CHECK=true
@@ -65,21 +62,21 @@ oc_id=$(ls -1t results/chef-oc_id*.hart | head -1)
 bifrost_hart=$(ls -1t results/chef-oc_bifrost*.hart | head -1)
 erchef_hart=$(ls -1t results/chef-oc_erchef*.hart | head -1)
 
+#No releases of chef/automate-scaffolding exist in the 'LTS-2024' channel== this is for bookshelf.
+HAB_FEAT_OFFLINE_INSTALL=true HAB_FEAT_IGNORE_LOCAL=false HAB_ORIGIN=chef HAB_CACHE_KEY_PATH="$JOB_TEMP_ROOT/keys" DO_CHECK=true HAB_BLDR_CHANNEL=LTS-2024 HAB_REFRESH_CHANNEL=LTS-2024 hab studio run -D "set -e; hab pkg install $bookshelf_hart; export HAB_STUDIO_SECRET_HAB_FALLBACK_CHANNEL=dev; hab pkg build components/automate-cs-bookshelf"
 
-HAB_FEAT_OFFLINE_INSTALL=true HAB_FEAT_IGNORE_LOCAL=false HAB_ORIGIN=chef HAB_CACHE_KEY_PATH="$JOB_TEMP_ROOT/keys" DO_CHECK=true HAB_BLDR_CHANNEL=dev hab studio run -D "set -e; hab pkg install $bookshelf_hart; hab pkg build components/automate-cs-bookshelf"
+HAB_FEAT_OFFLINE_INSTALL=true HAB_FEAT_IGNORE_LOCAL=false HAB_ORIGIN=chef HAB_CACHE_KEY_PATH="$JOB_TEMP_ROOT/keys" DO_CHECK=true HAB_BLDR_CHANNEL=LTS-2024 HAB_REFRESH_CHANNEL=LTS-2024 hab studio run -D "set -e; hab pkg install $bifrost_hart; export HAB_STUDIO_SECRET_HAB_FALLBACK_CHANNEL=dev; hab pkg build components/automate-cs-oc-bifrost"
 
-HAB_FEAT_OFFLINE_INSTALL=true HAB_FEAT_IGNORE_LOCAL=false HAB_ORIGIN=chef HAB_CACHE_KEY_PATH="$JOB_TEMP_ROOT/keys" DO_CHECK=true HAB_BLDR_CHANNEL=dev hab studio run -D "set -e; hab pkg install $bifrost_hart; hab pkg build components/automate-cs-oc-bifrost"
+HAB_FEAT_OFFLINE_INSTALL=true HAB_FEAT_IGNORE_LOCAL=false HAB_ORIGIN=chef HAB_CACHE_KEY_PATH="$JOB_TEMP_ROOT/keys" DO_CHECK=true HAB_BLDR_CHANNEL=LTS-2024 HAB_REFRESH_CHANNEL=LTS-2024 hab studio run -D "set -e; hab pkg install $erchef_hart; export HAB_STUDIO_SECRET_HAB_FALLBACK_CHANNEL=dev; hab pkg build components/automate-cs-oc-erchef"
 
-HAB_FEAT_OFFLINE_INSTALL=true HAB_FEAT_IGNORE_LOCAL=false HAB_ORIGIN=chef HAB_CACHE_KEY_PATH="$JOB_TEMP_ROOT/keys" DO_CHECK=true HAB_BLDR_CHANNEL=dev hab studio run -D "set -e; hab pkg install $erchef_hart; hab pkg build components/automate-cs-oc-erchef"
+HAB_FEAT_OFFLINE_INSTALL=true HAB_FEAT_IGNORE_LOCAL=false HAB_ORIGIN=chef HAB_CACHE_KEY_PATH="$JOB_TEMP_ROOT/keys" DO_CHECK=true HAB_BLDR_CHANNEL=LTS-2024 HAB_REFRESH_CHANNEL=LTS-2024 hab studio run -D "set -e; hab pkg install $oc_id; export HAB_STUDIO_SECRET_HAB_FALLBACK_CHANNEL=dev; hab pkg build components/automate-cs-ocid"
 
-HAB_FEAT_OFFLINE_INSTALL=true HAB_FEAT_IGNORE_LOCAL=false HAB_ORIGIN=chef HAB_CACHE_KEY_PATH="$JOB_TEMP_ROOT/keys" DO_CHECK=true HAB_BLDR_CHANNEL=dev hab studio run -D "set -e; hab pkg install $oc_id; hab pkg build components/automate-cs-ocid"
-
-HAB_FEAT_OFFLINE_INSTALL=true HAB_FEAT_IGNORE_LOCAL=false HAB_ORIGIN=chef HAB_CACHE_KEY_PATH="$JOB_TEMP_ROOT/keys" DO_CHECK=true HAB_BLDR_CHANNEL=dev hab studio run -D "set -e; hab pkg install $nginx; hab pkg build components/automate-cs-nginx"
+HAB_FEAT_OFFLINE_INSTALL=true HAB_FEAT_IGNORE_LOCAL=false HAB_ORIGIN=chef HAB_CACHE_KEY_PATH="$JOB_TEMP_ROOT/keys" DO_CHECK=true HAB_BLDR_CHANNEL=LTS-2024 HAB_REFRESH_CHANNEL=LTS-2024 hab studio run -D "set -e; hab pkg install $nginx; export HAB_STUDIO_SECRET_HAB_FALLBACK_CHANNEL=dev; hab pkg build components/automate-cs-nginx"
 
 .expeditor/create-manifest.rb
 mv manifest.json results/build.json
 
-HAB_PKG_CHANNEL=LTS-2024 NO_PIN_HAB=true .expeditor/create-manifest.rb
+HAB_PKG_CHANNEL=unstable NO_PIN_HAB=true .expeditor/create-manifest.rb
 mv manifest.json results/build-habdev.json
 
 echo "after build" `ls -l results`
