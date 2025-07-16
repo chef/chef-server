@@ -233,5 +233,11 @@ exceptions:
       reason: Exception made by Chef Legal
     - name: core/ncurses
       reason: Exception made by Chef Legal
-      
-
+    - name: core/cpanminus
+      reason: Exception made by Chef Legal
+    - name : core/ncurses
+      reason: Exception made by Chef Legal
+    - name: core/sqlite
+      reason: Exception made by Chef Legal
+    - name : core/tzdata
+      reason: Exception made by Chef Legal
