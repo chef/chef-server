@@ -6,7 +6,7 @@ pkg_deps=(
   core/coreutils
   core/curl
   core/jq-static
-  core/ruby31/3.1.6/20250307064402
+  core/ruby3_1/3.1.7/20250714070610
   core/libffi
   core/postgresql-client
   core/gcc-libs
