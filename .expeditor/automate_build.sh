@@ -17,10 +17,10 @@ export HAB_FALLBACK_CHANNEL="LTS-2024"
 
 curl https://raw.githubusercontent.com/habitat-sh/habitat/main/components/hab/install.sh | sudo bash
 
-sudo -E hab pkg install  core/ruby3_4
+sudo -E hab pkg install  core/ruby3_1
 export PATH
-PATH="$(hab pkg path core/ruby3_4)/bin:$PATH"
-sudo -E "$(hab pkg path core/ruby3_4)"/bin/gem install toml
+PATH="$(hab pkg path core/ruby3_1)/bin:$PATH"
+sudo -E "$(hab pkg path core/ruby3_1)"/bin/gem install toml
 
 export JOB_TEMP_ROOT
 JOB_TEMP_ROOT=$(mktemp -d /tmp/job-root-XXXXXX)
