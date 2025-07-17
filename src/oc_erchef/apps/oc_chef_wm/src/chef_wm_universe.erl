@@ -69,15 +69,15 @@ to_json(Req, #base_state{chef_db_context = DbContext,
   Universe = make_universe(Req, DependencyList),
   {chef_json:encode({Universe}), Req, State}.
 
--spec make_dependencies(Dependencies::[ {binary(), version(), binary()}]) -> list().
+-spec make_dependencies(Dependencies :: [ {binary(), version(), binary()}]) -> list().
 make_dependencies(Dependencies) ->
     [ begin
           Spec = iolist_to_binary(io_lib:format("~s ~s", [Match, Version])),
           {Name, Spec}
       end || {Name, Version, Match} <- Dependencies].
 
--spec make_version_list(CookbookUrlFun::fun(),
-                       Versions::[ {version(), [ {binary(), version(), binary()} ] } ]) ->
+-spec make_version_list(CookbookUrlFun :: fun(),
+                       Versions :: [ {version(), [ {binary(), version(), binary()} ] } ]) ->
     list().
 make_version_list(CookbookUrlFun, Versions) ->
     [ begin
@@ -90,7 +90,7 @@ make_version_list(CookbookUrlFun, Versions) ->
           }
       end || { Version, Dependencies} <- Versions].
 
--spec make_universe(Req::#wm_reqdata{}, DependencyList::[depsolver:dependency_set()]) ->
+-spec make_universe(Req :: #wm_reqdata{}, DependencyList :: [depsolver:dependency_set()]) ->
     list().
 make_universe(Req, DependencyList) ->
   [ begin

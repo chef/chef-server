@@ -195,7 +195,7 @@ check_signed_headers_common(SignedHeaders, Headers) ->
     [] == [Key || {Key, _} <- Headers, is_amz(Key), not proplists:is_defined(Key, SignedHeaders)].
 
 % https://docs.aws.amazon.com/general/latest/gr/sigv4-date-handling.html
--spec get_check_date(ISO8601Date::string() | undefined, DateIfUndefined::string(), string()) -> {ok, string()} | {error, get_check_date}.
+-spec get_check_date(ISO8601Date :: string() | undefined, DateIfUndefined :: string(), string()) -> {ok, string()} | {error, get_check_date}.
 get_check_date(ISO8601Date, DateIfUndefined, [Y1, Y2, Y3, Y4, M1, M2, D1, D2]) ->
     Date = case ISO8601Date of
                undefined -> DateIfUndefined;
@@ -211,7 +211,7 @@ get_check_date(ISO8601Date, DateIfUndefined, [Y1, Y2, Y3, Y4, M1, M2, D1, D2]) -
 % keys, get corresponding key-value pairs. results are undefined
 % for nonexistent key(s).
 %-spec get_signed_headers(proplist(), proplist(), proplist()) -> proplist(). % for erlang20+
--spec get_signed_headers(SignedHeaderKeys::[string()], Headers::[tuple()], SignedHeaders::[tuple()]) -> [tuple()].
+-spec get_signed_headers(SignedHeaderKeys :: [string()], Headers :: [tuple()], SignedHeaders :: [tuple()]) -> [tuple()].
 get_signed_headers([], _, SignedHeaders) -> lists:reverse(SignedHeaders);
 get_signed_headers(_, [], SignedHeaders) -> lists:reverse(SignedHeaders);
 get_signed_headers([Key | SignedHeaderKeys], Headers0, SignedHeaders) ->
@@ -232,8 +232,8 @@ is_amz(_) ->
 parse_x_amz_credential(Cred) ->
     Parse = string:split(Cred, "/", all),
     case Parse of
-        [_access_key_id, _date, _aws_region, "s3", "aws4_request"] -> {ok, Parse};
-        _                                                          -> {error, parse_x_amz_credential}
+        [_AccessKeyId, _Date, _AwsRegion, "s3", "aws4_request"] -> {ok, Parse};
+        _                                                       -> {error, parse_x_amz_credential}
     end.
 
 % @doc split signed header string into component parts. return empty string on empty string.
@@ -243,7 +243,7 @@ parse_x_amz_signed_headers(Headers) ->
    string:split(Headers, ";", all).
 
 % @doc convert the keys of key-value pairs to lowercase strings
--spec process_headers(Headers::[tuple()]) -> [tuple()].
+-spec process_headers(Headers :: [tuple()]) -> [tuple()].
 process_headers(Headers) ->
     [{string:casefold(
         case is_atom(Key) of

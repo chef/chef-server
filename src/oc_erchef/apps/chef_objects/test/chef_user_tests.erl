@@ -71,7 +71,7 @@ assemble_user_ejson_non_deprecated_test_() ->
      fun chef_objects_test_utils:bcrypt_cleanup/1,
      chef_objects_test_utils:make_non_deprecated_tests(fun assemble_user_ejson_non_deprecated_tests/1) }.
 
-assemble_user_ejson_non_deprecated_tests(Version)->
+assemble_user_ejson_non_deprecated_tests(Version) ->
     {setup,
      fun chef_objects_test_utils:bcrypt_setup/0,
      fun chef_objects_test_utils:bcrypt_cleanup/1,

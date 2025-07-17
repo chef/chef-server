@@ -65,7 +65,7 @@ request_type() ->
   "data".
 
 allowed_methods(Req, State) ->
-    {['GET','POST'], Req, State}.
+    {['GET', 'POST'], Req, State}.
 
 -spec validate_request(chef_wm:http_verb(), wm_req(), chef_wm:base_state()) ->
                               {wm_req(), chef_wm:base_state()}.
