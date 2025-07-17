@@ -33,7 +33,7 @@ update_object_embedded_key_data_v0(Req, State, ObjectRec, EJ) ->
     case chef_key_base:maybe_generate_key_pair(EJ) of
         keygen_timeout ->
             {{halt, 503}, Req, State#base_state{log_msg = keygen_timeout}};
-        EJWithKeys->
+        EJWithKeys ->
             oc_chef_wm_base:update_from_json(Req, State, ObjectRec, EJWithKeys)
     end.
 

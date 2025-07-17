@@ -26,7 +26,7 @@
 
 -behaviour(chef_object).
 
--mixin([{chef_object_default_callbacks,[{fetch/2, fetch}]}]).
+-mixin([{chef_object_default_callbacks, [{fetch/2, fetch}]}]).
 
 %% chef_object behaviour callbacks
 -export([id/1,

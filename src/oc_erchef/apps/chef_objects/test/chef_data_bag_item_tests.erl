@@ -52,7 +52,7 @@ new_record_test() ->
     Item = chef_data_bag_item:new_record(?API_MIN_VER, OrgId, no_authz_id, {<<"my-bag">>, Data}),
     ?assertMatch(#chef_data_bag_item{}, Item),
     %% TODO: validate more fields?
-    ?assertEqual({<<"my-bag">>,<<"my-item">>}, chef_data_bag_item:name(Item)).
+    ?assertEqual({<<"my-bag">>, <<"my-item">>}, chef_data_bag_item:name(Item)).
 
 ejson_for_indexing_test() ->
     RawItem = {[{<<"id">>, <<"the_item_name">>},

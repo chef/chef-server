@@ -42,7 +42,7 @@ max_size(Req) ->
         disabled ->
             Req;
         TunedMaxSize ->
-            max_size(wrq:method(Req),Req, TunedMaxSize)
+            max_size(wrq:method(Req), Req, TunedMaxSize)
     end.
 
 max_size(Method, Req, MaxSize) when Method =:= 'POST';

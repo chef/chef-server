@@ -55,8 +55,8 @@ insert_cbv_null_id() ->
                                              meta_long_desc= <<"">>,
                                              metadata= <<"">>,
                                              last_updated_by= chef_test_suite_helper:actor_id(),
-                                             created_at= {datetime, {{2011,10,1},{16,47,46}}},
-                                             updated_at= {datetime, {{2011,10,1},{16,47,46}}},
+                                             created_at= {datetime, {{2011, 10, 1}, {16, 47, 46}}},
+                                             updated_at= {datetime, {{2011, 10, 1}, {16, 47, 46}}},
                                              serialized_object= <<"">>,
                                              checksums = [] },
 

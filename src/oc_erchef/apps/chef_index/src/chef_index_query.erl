@@ -20,7 +20,7 @@ type_field() ->
     <<"X_CHEF_type_CHEF_X">>.
 
 -spec from_params(atom(),
-                  binary()|string(),
+                  binary() | string(),
                   string() | binary() | undefined,
                   string(),
                   string()) -> #chef_solr_query{}.
@@ -124,21 +124,21 @@ validate_non_neg(_Key, Int, _OrigValue) ->
 
 %% @doc Generates a constraint for chef_type
 %% @end
--spec search_type_constraint(Type :: atom()) -> TypeConstraint :: [byte(),...].
+-spec search_type_constraint(Type :: atom()) -> TypeConstraint :: [byte(), ...].
 search_type_constraint(Type) ->
     binary_to_list(type_field()) ++ atom_to_list(Type).
 
 %% @doc Generate a constraint for chef_database
--spec search_db_from_orgid(OrgId :: binary()) -> DBName :: [byte(),...].
+-spec search_db_from_orgid(OrgId :: binary()) -> DBName :: [byte(), ...].
 search_db_from_orgid(OrgId) ->
     binary_to_list(database_field()) ++ ":" ++ db_from_orgid(OrgId).
 
 db_from_orgid(OrgId) ->
     "chef_" ++ binary_to_list(OrgId).
 
-hex2dec(X) when (X>=$0) andalso (X=<$9) -> X-$0;
-hex2dec(X) when (X>=$A) andalso (X=<$F) -> X-$A+10;
-hex2dec(X) when (X>=$a) andalso (X=<$f) -> X-$a+10.
+hex2dec(X) when (X>=$0) andalso (X=<$9) -> X - $0;
+hex2dec(X) when (X>=$A) andalso (X=<$F) -> X - $A + 10;
+hex2dec(X) when (X>=$a) andalso (X=<$f) -> X - $a + 10.
 
 -type maybe_hex_uri() :: string() | binary(). %% A possibly hexadecimal encoded URI.
 -type uri() :: string() | binary().
@@ -149,10 +149,10 @@ http_uri_decode(String) when is_list(String) ->
 http_uri_decode(String) when is_binary(String) ->
     do_decode_binary(String).
 
-do_decode([$%,Hex1,Hex2|Rest]) ->
-    [hex2dec(Hex1)*16+hex2dec(Hex2)|do_decode(Rest)];
-do_decode([First|Rest]) ->
-    [First|do_decode(Rest)];
+do_decode([$%, Hex1, Hex2 | Rest]) ->
+    [hex2dec(Hex1) * 16 + hex2dec(Hex2) | do_decode(Rest)];
+do_decode([First | Rest]) ->
+    [First | do_decode(Rest)];
 do_decode([]) ->
     [].
 
