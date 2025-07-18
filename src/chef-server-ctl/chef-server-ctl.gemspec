@@ -18,7 +18,7 @@ Gem::Specification.new do |spec|
   spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
   spec.require_paths = ["lib"]
 
-  spec.required_ruby_version = ">= 3.1.0"
+  spec.required_ruby_version = ">= 2.7.0"
 
   spec.add_runtime_dependency "highline", ">= 1.6.9", "< 3.0"
 
@@ -43,7 +43,6 @@ Gem::Specification.new do |spec|
 
   spec.add_runtime_dependency "chef"
   spec.add_runtime_dependency "knife"
-  spec.add_runtime_dependency "chef-licensing"
 
   # tools we bundle in the chef-server install and include here so we can have a single Gemfile.lock
   # for the overall chef-server "app"

@@ -2,5 +2,5 @@ source "https://rubygems.org"
 
 gemspec
 
-gem "chef", "~> 18.6"
+gem "chef", "~> 17.10"
 gem "toml" # for habitat-land
