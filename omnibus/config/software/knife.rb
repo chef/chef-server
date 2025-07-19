@@ -15,7 +15,7 @@
 #
 
 name "knife"
-default_version "17.10.0"
+default_version "18.7.10"
 
 license "Apache-2.0"
 license_file "https://raw.githubusercontent.com/chef/chef/main/knife/LICENSE"
