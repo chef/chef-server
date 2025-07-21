@@ -16,7 +16,7 @@
 require 'mixlib/config'
 require 'pedant/command_line'
 
-require 'rspec-rerun/formatters/failures_formatter'
+require 'rspec-rerun/formatter'
 
 module Pedant
   class Config
@@ -60,16 +60,16 @@ module Pedant
       end
 
       # Always use the failures formatter, in case we want to rerun failures
-      args.concat(%W[-f #{::RSpec::Rerun::Formatters::FailuresFormatter}])
+      args.concat(%W[-f #{::RSpec::Rerun::Formatter}])
 
       # Load up the failures file if we're re-running
       if rerun
-        args.concat(%W[-O #{::RSpec::Rerun::Formatters::FailuresFormatter::FILENAME}])
+        args.concat(%W[-O #{::RSpec::Rerun::Formatter::FILENAME}])
       else
         # Remove the failures file if we aren't running with --rerun;
         # otherwise, if it exists, we would only ever run those tests,
         # even if they all pass!
-        FileUtils.rm(::RSpec::Rerun::Formatters::FailuresFormatter::FILENAME, :force => true)
+        FileUtils.rm(::RSpec::Rerun::Formatter::FILENAME, :force => true)
       end
 
       # Tell it which tests to run
