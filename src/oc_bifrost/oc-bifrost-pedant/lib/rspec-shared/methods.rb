@@ -5,10 +5,11 @@ module RSpecShared
   module Methods
     def shared(name, &block)
       Thread.current[:rspec] ||= {}
-      location = ancestors.last.metadata[:example_group][:location]
+      # Use a simpler key that doesn't rely on RSpec metadata
+      cache_key = "#{self.class.name}_#{name}"
 
       define_method(name) do
-        Thread.current[:rspec][location + name.to_s] ||= instance_eval(&block)
+        Thread.current[:rspec][cache_key] ||= instance_eval(&block)
       end
     end
   end

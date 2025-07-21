@@ -6,7 +6,7 @@ if ENV['CHEF_SECRETS_FD'].nil?
   ENV['CHEF_SECRETS_DATA'] ||= File.read(File.expand_path("../config/private-#{ChefUtils::Dist::Infra::SHORT}-secrets.json", __FILE__))
 end
 
-require File.expand_path('../config/application', __FILE__)
+require_relative 'config/application'
 
 OcId::Application.load_tasks
 
