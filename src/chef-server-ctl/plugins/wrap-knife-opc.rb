@@ -39,8 +39,40 @@ cmds.each do |cmd, args|
   opc_noun = args[1]
   description = args[2]
   add_command_under_category cmd, "organization-and-user-management", description, 2 do
-    escaped_args = cmd_args.map { |a| Shellwords.escape(a) }.join(" ")
-    status = run_command("#{knife_cmd} opc #{opc_noun} #{opc_cmd} #{escaped_args} -c #{knife_config}")
+    # Transform knife-opc arguments to native knife format
+    transformed_args = transform_knife_opc_args(cmd_args, cmd, opc_noun, opc_cmd)
+    escaped_args = transformed_args.map { |a| Shellwords.escape(a) }.join(" ")
+    # Use native knife instead of knife-opc
+    status = run_command("#{knife_cmd} #{opc_noun} #{opc_cmd} #{escaped_args} -c #{knife_config}")
     exit status.exitstatus
   end
+end
+
+# Transform arguments from knife-opc format to native knife format
+def transform_knife_opc_args(args, chef_server_ctl_cmd, knife_noun, knife_verb)
+  transformed = args.dup
+  
+  case chef_server_ctl_cmd
+  when "user-create"
+    # Handle --filename to --file conversion (native knife expects --file)
+    transformed = transformed.map do |arg|
+      case arg
+      when "--filename"
+        "--file"
+      when /^--filename=(.+)$/
+        "--file=#{$1}"
+      else
+        arg
+      end
+    end
+    
+  when "user-list"
+    # Handle --all-info option (not supported in native knife)
+    # TODO: Revisit when suitable native knife option is found
+    if transformed.include?("--all-info") || transformed.include?("-a")
+      transformed = transformed.reject { |arg| %w[--all-info -a].include?(arg) }
+    end
+  end
+  
+  transformed
 end
