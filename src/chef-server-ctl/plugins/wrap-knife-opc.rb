@@ -16,7 +16,7 @@
 require "shellwords"
 require "chef-utils"
 
-knife_config = ::ChefServerCtl::Config.knife_config_file
+# knife_config = ::ChefServerCtl::Config.knife_config_file
 knife_cmd    = ::ChefServerCtl::Config.knife_bin
 cmd_args     = ARGV[1..-1]
 
@@ -39,8 +39,205 @@ cmds.each do |cmd, args|
   opc_noun = args[1]
   description = args[2]
   add_command_under_category cmd, "organization-and-user-management", description, 2 do
-    escaped_args = cmd_args.map { |a| Shellwords.escape(a) }.join(" ")
-    status = run_command("#{knife_cmd} opc #{opc_noun} #{opc_cmd} #{escaped_args} -c #{knife_config}")
-    exit status.exitstatus
+    # Transform knife-opc arguments to native knife format
+    puts "DEBUG: Input args: #{cmd_args.inspect}"
+    transformed_args = transform_knife_opc_args(cmd_args, cmd, opc_noun, opc_cmd)
+    puts "DEBUG: Transformed args: #{transformed_args.inspect}"
+    
+    server_url = get_server_url()
+    
+    # Build authentication arguments directly here
+    auth_args = []
+    auth_args << "--server-url" << server_url
+    auth_args << "--user" << "pivotal"
+    auth_args << "--key" << "/etc/opscode/pivotal.pem"
+    auth_args << "--config-option" << "ssl_verify_mode=verify_none"
+    
+    puts "DEBUG: Auth args: #{auth_args.inspect}"
+    
+    escaped_args = (transformed_args + auth_args).map { |a| Shellwords.escape(a) }.join(" ")
+    # Use native knife instead of knife-opc
+    full_command = "#{knife_cmd} #{opc_noun} #{opc_cmd} #{escaped_args} -VVV"
+    puts "DEBUG: Running command: #{full_command}"
+    
+    # Special handling: for user-create capture key output and write to file
+    if cmd == "user-create"
+      require 'mixlib/shellout'
+      shell = Mixlib::ShellOut.new(full_command)
+      shell.run_command
+      puts "DEBUG: knife stdout length: #{shell.stdout.length}"
+      puts "DEBUG: knife stdout content:"
+      puts shell.stdout
+      puts "DEBUG: knife stderr content:"
+      puts shell.stderr
+      puts "DEBUG: knife exit status: #{shell.exitstatus}"
+      
+      # Debug filesystem state AFTER running knife
+      begin
+        puts "DEBUG: /home directory contents AFTER knife:"
+        puts `ls -la /home 2>/dev/null || echo "  (unable to list /home)"`
+        puts "DEBUG: /home/ubuntu directory contents AFTER knife:"
+        puts `ls -la /home/ubuntu 2>/dev/null || echo "  (unable to list /home/ubuntu)"`
+      rescue => e
+        puts "DEBUG: Error checking directories: #{e.message}"
+      end
+      
+      # extract file path from args
+      if (idx = transformed_args.index('--file')) && transformed_args[idx+1]
+        keyfile = transformed_args[idx+1]
+        puts "DEBUG: Looking for private key file: #{keyfile}"
+        
+        # Check if knife wrote the file directly (which is what --file does)
+        if File.exist?(keyfile)
+          puts "DEBUG: Private key file was created by knife: #{keyfile}"
+          puts "DEBUG: File size: #{File.size(keyfile)} bytes"
+          # Verify it contains a key
+          content = File.read(keyfile)
+          if content =~ /-----BEGIN.*PRIVATE KEY-----/
+            puts "DEBUG: Confirmed private key file contains valid key"
+          else
+            puts "DEBUG: WARNING: File exists but doesn't contain expected key format"
+            puts "DEBUG: File content preview: #{content[0..100]}..."
+          end
+        else
+          puts "DEBUG: Private key file was not created by knife"
+          # Fallback: try to extract from stdout (legacy behavior)
+          puts "DEBUG: Attempting to extract key from stdout and write manually..."
+          
+          # Try multiple key formats
+          key = shell.stdout[/-----BEGIN RSA PRIVATE KEY-----.*?-----END RSA PRIVATE KEY-----/m] ||
+                shell.stdout[/-----BEGIN PRIVATE KEY-----.*?-----END PRIVATE KEY-----/m] ||
+                shell.stdout[/-----BEGIN OPENSSH PRIVATE KEY-----.*?-----END OPENSSH PRIVATE KEY-----/m]
+          
+          if key
+            File.write(keyfile, key)
+            puts "DEBUG: Successfully extracted and wrote private key to #{keyfile}"
+            puts "DEBUG: Key starts with: #{key[0..50]}..."
+          else
+            puts "DEBUG: No private key found in knife output and no file created"
+            puts "DEBUG: This indicates knife may not have generated a key"
+          end
+        end
+      else
+        puts "DEBUG: No --file argument found in transformed args"
+      end
+      exit shell.exitstatus
+    else
+      status = run_command(full_command)
+      exit status.exitstatus
+    end
   end
+end
+
+# Transform arguments from knife-opc format to native knife format
+def transform_knife_opc_args(args, chef_server_ctl_cmd, _knife_noun, _knife_verb)
+  transformed = args.dup
+  
+  case chef_server_ctl_cmd
+  when "user-create"
+    # Handle knife-opc formats:
+    # Format 1: USERNAME FIRST_NAME LAST_NAME EMAIL PASSWORD --filename FILE
+    # Format 2: USERNAME FIRST_NAME MIDDLE_NAME LAST_NAME EMAIL PASSWORD --filename FILE  
+    # native knife format: USERNAME --email EMAIL --password PASSWORD --first-name FIRST --last-name LAST --file FILE
+    
+    if args.length >= 5 && !args[0].start_with?('-')
+      username = args[0]
+      
+      # Detect format based on number of args before flags
+      non_flag_args = args.take_while { |arg| !arg.start_with?('-') }
+      
+      if non_flag_args.length == 5
+        # Format 1: USERNAME FIRST_NAME LAST_NAME EMAIL PASSWORD
+        first_name = args[1]
+        last_name = args[2]
+        email = args[3]
+        password = args[4]
+      elsif non_flag_args.length == 6
+        # Format 2: USERNAME FIRST_NAME MIDDLE_NAME LAST_NAME EMAIL PASSWORD  
+        first_name = args[1]
+        middle_name = args[2]  # Optional middle name, combine with first
+        last_name = args[3]    
+        email = args[4]
+        password = args[5]
+        # Combine first and middle names
+        first_name = "#{first_name} #{middle_name}"
+      else
+        # Fallback to original args if format doesn't match
+        return transformed
+      end
+      
+      # Start with username (quoted like colleague's working commands)
+      transformed = ["\"#{username}\""]
+      
+      # Use minimal working syntax (like colleague's successful commands)
+      # Don't include --first-name/--last-name as they may not be supported
+      transformed << "--email" << "\"#{email}\""
+      transformed << "--password" << password
+      # transformed << "--first-name" << first_name
+      # transformed << "--last-name" << last_name
+      
+      # Handle any additional flags (like --filename/--file)
+      remaining_args = args[non_flag_args.length..-1] || []
+      file_specified = false
+      remaining_args.each do |arg|
+        case arg
+        when "--filename"
+          transformed << "--file"
+          file_specified = true
+        when /^--filename=(.+)$/
+          transformed << "--file=#{$1}"
+          file_specified = true
+        when "--file"
+          transformed << arg
+          file_specified = true
+        when /^--file=(.+)$/
+          transformed << arg
+          file_specified = true
+        else
+          transformed << arg
+        end
+      end
+      
+      # Always add --file for private key generation if not specified
+      unless file_specified
+        transformed << "--file" << "#{username}.pem"
+      end
+    else
+      # Handle --filename to --file conversion for other formats
+      transformed = args.map do |arg|
+        case arg
+        when "--filename"
+          "--file"
+        when /^--filename=(.+)$/
+          "--file=#{$1}"
+        else
+          arg
+        end
+      end
+    end
+    
+  when "user-list"
+    # Handle --all-info option (not supported in native knife)
+    # TODO: Revisit when suitable native knife option is found
+    if transformed.include?("--all-info") || transformed.include?("-a")
+      transformed = transformed.reject { |arg| %w[--all-info -a].include?(arg) }
+    end
+  end
+  
+  transformed
+end
+
+# Get the Chef Server URL for knife commands
+def get_server_url()
+  # Get server URL - use lb_url from ChefServerCtl::Config
+  begin
+    server_url = ::ChefServerCtl::Config.lb_url
+    puts "DEBUG: Using server URL from config: #{server_url}"
+  rescue => e
+    puts "DEBUG: Failed to get lb_url from config: #{e.message}"
+    server_url = "https://localhost"
+    puts "DEBUG: Falling back to server URL: #{server_url}"
+  end
+  
+  server_url
 end
