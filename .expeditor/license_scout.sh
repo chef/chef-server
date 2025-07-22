@@ -32,6 +32,7 @@ bundle_install_dirs=(
   chef-server-ctl
   oc-id
 )
+echo "+++ Using Ruby version: $(ruby -v)"
 
 for dir in "${bundle_install_dirs[@]}"; do
   echo "--- Installing gem dependencies for $dir"
