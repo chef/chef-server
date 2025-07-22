@@ -54,15 +54,47 @@ def transform_knife_opc_args(args, chef_server_ctl_cmd, knife_noun, knife_verb)
   
   case chef_server_ctl_cmd
   when "user-create"
-    # Handle --filename to --file conversion (native knife expects --file)
-    transformed = transformed.map do |arg|
-      case arg
-      when "--filename"
-        "--file"
-      when /^--filename=(.+)$/
-        "--file=#{$1}"
-      else
-        arg
+    # knife-opc format: USERNAME DISPLAY_NAME FIRST_NAME LAST_NAME EMAIL PASSWORD --filename FILE
+    # native knife format: USERNAME --email EMAIL --password PASSWORD --file FILE
+    
+    if args.length >= 6 && !args[0].start_with?('-')
+      username = args[0]
+      # display_name = args[1] # Not used in native knife
+      # first_name = args[2]   # Not used in native knife  
+      # last_name = args[3]    # Not used in native knife
+      email = args[4]
+      password = args[5]
+      
+      # Start with username
+      transformed = [username]
+      
+      # Add email and password flags
+      transformed << "--email" << email
+      transformed << "--password" << password
+      
+      # Handle any additional flags (like --filename/--file)
+      remaining_args = args[6..-1] || []
+      remaining_args.each do |arg|
+        case arg
+        when "--filename"
+          transformed << "--file"
+        when /^--filename=(.+)$/
+          transformed << "--file=#{$1}"
+        else
+          transformed << arg
+        end
+      end
+    else
+      # Handle --filename to --file conversion for other formats
+      transformed = args.map do |arg|
+        case arg
+        when "--filename"
+          "--file"
+        when /^--filename=(.+)$/
+          "--file=#{$1}"
+        else
+          arg
+        end
       end
     end
     
