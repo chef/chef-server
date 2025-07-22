@@ -3,7 +3,7 @@ pkg_origin=chef
 pkg_maintainer="The Chef Server Maintainers <support@chef.io>"
 pkg_license=('Apache-2.0')
 pkg_deps=(
-  core/sqitch_pg
+  core/sqitch
   core/curl
   core/node14
   core/ruby31/3.1.6/20250307064402

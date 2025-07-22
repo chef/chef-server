@@ -10,7 +10,7 @@ pkg_deps=(
   core/openssl
   core/gcc-libs
   core/ruby31/3.1.6/20250307064402
-  core/sqitch_pg
+  core/sqitch
   core/gecode
   core/libffi
   core/glibc
