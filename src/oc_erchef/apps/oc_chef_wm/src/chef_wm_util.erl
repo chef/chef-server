@@ -330,5 +330,5 @@ scheme(Req) ->
 port_string(Default) when Default =:= 80; Default =:= 443 ->
     "";
 port_string(Port) ->
-    [$:|erlang:integer_to_list(Port)].
+    [$: | erlang:integer_to_list(Port)].
 

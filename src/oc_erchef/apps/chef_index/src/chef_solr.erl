@@ -55,7 +55,7 @@ transform_data(Data) ->
 %% searching for to escape.  Note that technically we don't need to
 %% escape `>' nor `"', symmetry and matching of a pre-existing Ruby
 %% implementation suggest otherwise.
--spec xml_text_escape(binary()|[binary()]) -> binary()|[binary()].
+-spec xml_text_escape(binary() | [binary()]) -> binary() | [binary()].
 xml_text_escape(BinStr) ->
     iolist_to_binary(xml_text_escape1(BinStr)).
 

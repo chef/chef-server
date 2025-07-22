@@ -106,7 +106,7 @@ maybe_generate_key_pair_test_() ->
       {"when called with create_key false and a public key, the key is not generated and the public key is passed into the continuation fun",
       fun() ->
         Echo = fun(Data) -> Data end,
-        Result = chef_key_base:maybe_generate_key_pair({[{<<"create_key">>, false},{<<"public_key">>, <<"pubkey">>}]},
+        Result = chef_key_base:maybe_generate_key_pair({[{<<"create_key">>, false}, {<<"public_key">>, <<"pubkey">>}]},
                                                       Echo),
         ?assertMatch({<<"pubkey">>, undefined}, Result)
 

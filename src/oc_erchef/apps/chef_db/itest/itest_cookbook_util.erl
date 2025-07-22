@@ -184,7 +184,7 @@ generate_cookbook_and_versions({CookbookPrefix, Versions}) when is_binary(Cookbo
     {Cookbook, CookbookVersions}.
 
 -spec add_cookbook_versions_to_db([#chef_cookbook_version{}]) -> ok.
-add_cookbook_versions_to_db(CookbookVersions) when is_list(CookbookVersions)->
+add_cookbook_versions_to_db(CookbookVersions) when is_list(CookbookVersions) ->
     [ chef_sql:create_cookbook_version(V) || V <- CookbookVersions ],
     ok.
 
@@ -289,8 +289,8 @@ make_cookbook_version(Prefix, Version, {AuthzId, OrgId, Name}, Properties) when 
                            meta_long_desc= <<"">>,
                            metadata=Prefix,
                            last_updated_by= chef_test_suite_helper:actor_id(),
-                           created_at= {datetime, {{2011,10,1},{16,47,46}}},
-                           updated_at= {datetime, {{2011,10,1},{16,47,46}}},
+                           created_at= {datetime, {{2011, 10, 1}, {16, 47, 46}}},
+                           updated_at= {datetime, {{2011, 10, 1}, {16, 47, 46}}},
                            serialized_object= process_property(serialized_object, Properties),
                            checksums = [] }.
 
@@ -314,7 +314,7 @@ process_property(dependencies=Property, Properties) ->
         {Property, Binary} when is_binary(Binary) ->
             %% Already JSON
             Binary ;
-        {Property, PropertyList} when is_list(PropertyList)->
+        {Property, PropertyList} when is_list(PropertyList) ->
             chef_json:encode({PropertyList});
         none ->
             chef_json:encode({[]})

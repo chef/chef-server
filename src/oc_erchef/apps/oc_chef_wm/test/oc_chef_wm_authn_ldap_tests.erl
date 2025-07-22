@@ -68,17 +68,17 @@
 value_of_test_() ->
     Data = [{"key1", ["a_value"]}, {"key2", ["first", "second"]}],
     [{"returns a scalar (binary) value for the given key in a proplist where the values are arrays",
-      fun()->
+      fun() ->
               ?assertEqual(<<"a_value">>, oc_chef_wm_authn_ldap:value_of("key1", Data, "default"))
       end
      },
      {"returns the first value when there are multiple items in the array",
-      fun()->
+      fun() ->
               ?assertEqual(<<"first">>, oc_chef_wm_authn_ldap:value_of("key2", Data, "default"))
       end
      },
      {"returns the default if the key is missing",
-      fun()->
+      fun() ->
               ?assertEqual(<<"default">>, oc_chef_wm_authn_ldap:value_of("key3", Data, "default"))
       end
      }
@@ -86,19 +86,19 @@ value_of_test_() ->
 
 canonical_username_test_() ->
     [{"returns a lowercased bindary",
-      fun()->
+      fun() ->
               ?assertEqual(<<"foobar">>, oc_chef_wm_authn_ldap:canonical_username("FOOBAR"))
       end},
      {"replaces special characters with _",
-      fun()->
+      fun() ->
               ?assertEqual(<<"f_o_o_b_a_r">>, oc_chef_wm_authn_ldap:canonical_username("f^o&o)b@a$r"))
       end},
      {"does not replace 0-9",
-      fun()->
+      fun() ->
               ?assertEqual(<<"0123456789">>, oc_chef_wm_authn_ldap:canonical_username("0123456789"))
       end},
      {"does not replace -",
-      fun()->
+      fun() ->
               ?assertEqual(<<"foo-bar">>, oc_chef_wm_authn_ldap:canonical_username("foo-bar"))
       end}
     ].
