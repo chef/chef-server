@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.10.41 -->
-## [15.10.41](https://github.com/chef/chef-server/tree/15.10.41) (2025-07-21)
+<!-- latest_release 15.10.42 -->
+## [15.10.42](https://github.com/chef/chef-server/tree/15.10.42) (2025-07-23)
 
 #### Merged Pull Requests
-- Temporary fix for asdf 16 upgrade warning. [#4029](https://github.com/chef/chef-server/pull/4029) ([sreepuramsudheer](https://github.com/sreepuramsudheer))
+- upgrading the PG from 13.8 to 13.21 [#4023](https://github.com/chef/chef-server/pull/4023) ([talktovikas](https://github.com/talktovikas))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.10.33 -->
 ### Changes since 15.10.33 release
 
 #### Merged Pull Requests
+- upgrading the PG from 13.8 to 13.21 [#4023](https://github.com/chef/chef-server/pull/4023) ([talktovikas](https://github.com/talktovikas)) <!-- 15.10.42 -->
 - Temporary fix for asdf 16 upgrade warning. [#4029](https://github.com/chef/chef-server/pull/4029) ([sreepuramsudheer](https://github.com/sreepuramsudheer)) <!-- 15.10.41 -->
 - changing hardcoded date in test case. [#4024](https://github.com/chef/chef-server/pull/4024) ([sreepuramsudheer](https://github.com/sreepuramsudheer)) <!-- 15.10.40 -->
 - tweaking for linting [#4018](https://github.com/chef/chef-server/pull/4018) ([johnmccrae](https://github.com/johnmccrae)) <!-- 15.10.39 -->
