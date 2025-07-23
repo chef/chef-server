@@ -15,7 +15,7 @@
 #
 
 name "erlang"
-default_version "26.2.5.2"
+default_version "26.2.5.14"
 
 license "Apache-2.0"
 license_file "LICENSE.txt"
@@ -34,6 +34,7 @@ relative_path "otp-OTP-#{version}"
 
 # versions_list: https://github.com/erlang/otp/tags filter=*.tar.gz
 # to get the SHA256, download the tar.gz, then calculate the SHA256 on it
+version("26.2.5.14") { source sha256: "5378dc60382c3d43ecdc0e8666c5db0f8a1df1525fff706779f720ad1d54c56c" }
 version("26.2.5.2")  { source sha256: "8e537e2d984770796cc7f0c7c079a9e5fbc67b8c368e0dcd9aa2ceaeb2844da2" } 
 version("26.2.2")    { source sha256: "93c09aa8814018c23d218ac68b2bcdba188e12086223fbfa08af5cc70edd7ee1" } 
 version("25.2")      { source sha256: "d33a988f39e534aff67799c5b9635612858459c9d8890772546d71ea38de897a" }
