@@ -54,26 +54,46 @@ def transform_knife_opc_args(args, chef_server_ctl_cmd, knife_noun, knife_verb)
   
   case chef_server_ctl_cmd
   when "user-create"
-    # knife-opc format: USERNAME DISPLAY_NAME FIRST_NAME LAST_NAME EMAIL PASSWORD --filename FILE
-    # native knife format: USERNAME --email EMAIL --password PASSWORD --file FILE
+    # Handle both formats:
+    # Format 1: USERNAME FIRST_NAME LAST_NAME EMAIL PASSWORD --filename FILE
+    # Format 2: USERNAME DISPLAY_NAME FIRST_NAME LAST_NAME EMAIL PASSWORD --filename FILE
+    # native knife format: USERNAME --email EMAIL --password PASSWORD --first-name FIRST --last-name LAST --file FILE
     
-    if args.length >= 6 && !args[0].start_with?('-')
+    if args.length >= 5 && !args[0].start_with?('-')
       username = args[0]
-      # display_name = args[1] # Not used in native knife
-      # first_name = args[2]   # Not used in native knife  
-      # last_name = args[3]    # Not used in native knife
-      email = args[4]
-      password = args[5]
+      
+      # Detect format based on number of args before flags
+      non_flag_args = args.take_while { |arg| !arg.start_with?('-') }
+      
+      if non_flag_args.length == 5
+        # Format 1: USERNAME FIRST_NAME LAST_NAME EMAIL PASSWORD
+        first_name = args[1]
+        last_name = args[2]
+        email = args[3]
+        password = args[4]
+      elsif non_flag_args.length >= 6
+        # Format 2: USERNAME DISPLAY_NAME FIRST_NAME LAST_NAME EMAIL PASSWORD
+        display_name = args[1] # Not used in native knife
+        first_name = args[2]   
+        last_name = args[3]    
+        email = args[4]
+        password = args[5]
+      else
+        # Fallback to original args if format doesn't match
+        return transformed
+      end
       
       # Start with username
       transformed = [username]
       
-      # Add email and password flags
+      # Add required flags
       transformed << "--email" << email
       transformed << "--password" << password
+      transformed << "--first-name" << first_name
+      transformed << "--last-name" << last_name
       
       # Handle any additional flags (like --filename/--file)
-      remaining_args = args[6..-1] || []
+      remaining_args = args[non_flag_args.length..-1] || []
       remaining_args.each do |arg|
         case arg
         when "--filename"
