@@ -55,5 +55,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "chefstyle"
   spec.add_development_dependency "rake"
   spec.add_development_dependency "rspec"
-  spec.add_development_dependency "berkshelf" # needed for the berks install
+  spec.add_development_dependency "berkshelf", "~> 8.0.22" # needed for the berks install
 end
