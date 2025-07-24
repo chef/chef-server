@@ -76,16 +76,16 @@ do_install() {
   bundle config path ${RUBY_VENDOR}
   popd
 
-  # in chef dir bundle install
-  echo "====== BUILDING KNIFE-OPC ==== "
+  # in chef dir bundle install  
+  echo "====== BUILDING CHEF DEPENDENCIES ==== "
   export chef_dir="${pkg_prefix}"/chef
   mkdir $chef_dir
   pushd $chef_dir
 
   cat > Gemfile << EOF
 source 'https://rubygems.org'
-gem 'chef', '~>15.12.22'
-gem 'knife-opc'
+gem 'chef', '~> 18.7.10'
+gem 'knife'
 EOF
 
   bundle install --path ${RUBY_VENDOR} --binstubs
