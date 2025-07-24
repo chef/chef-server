@@ -10,7 +10,6 @@ PATH
       highline (>= 1.6.9, < 3.0)
       knife
       knife-ec-backup
-      knife-opc
       license-acceptance
       mixlib-install
       mixlib-log
@@ -217,7 +216,6 @@ GEM
       pg
       sequel (~> 5.9)
       veil
-    knife-opc (0.4.8)
     knife-tidy (2.1.6)
     libyajl2 (2.1.0)
     license-acceptance (2.1.13)

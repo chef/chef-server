@@ -29,10 +29,10 @@ describe "knife", :validation, :knife do
         let(:requestor) { superuser }
         let(:admin_requestor) { superuser }
 
-        after(:each) { knife "opc org delete #{org_name} -c #{superuser_rb} --yes" }
+        after(:each) { knife "org delete #{org_name} -c #{superuser_rb} --yes" }
 
         context "without associations" do
-          let(:command) { "knife opc org create #{org_name} #{org_name} -c #{superuser_rb} --disable-editing" }
+          let(:command) { "knife org create #{org_name} #{org_name} -c #{superuser_rb} --disable-editing" }
           it "should succeed" do
             should have_outcome status: 0, stdout: /-----BEGIN (RSA )?PRIVATE KEY-----/
           end
@@ -40,10 +40,10 @@ describe "knife", :validation, :knife do
 
         context "with associations" do
           let(:username) { "user-#{rand(1 << 32)}" }
-          let(:command) { "knife opc org create #{org_name} #{org_name} --association #{username} -c #{superuser_rb} --disable-editing" }
+          let(:command) { "knife org create #{org_name} #{org_name} --association_user #{username} -c #{superuser_rb} --disable-editing" }
 
-          before(:each) { knife "opc user create #{username} #{username} #{username} #{username}@foo.bar 'badger badger' -c #{superuser_rb} --disable-editing" }
-          after(:each) { knife "opc user remove #{username} -c #{superuser_rb} --disable-editing" }
+          before(:each) { knife "user create #{username} --email #{username}@foo.bar --password 'badger badger' --first-name #{username} --last-name #{username} -c #{superuser_rb} --disable-editing" }
+          after(:each) { knife "user delete #{username} -c #{superuser_rb} --disable-editing" }
 
           it "should succeed" do
             should have_outcome status: 0, stdout: /-----BEGIN (RSA )?PRIVATE KEY-----/
