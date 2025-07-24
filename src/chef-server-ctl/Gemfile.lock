@@ -21,7 +21,6 @@ PATH
       highline (>= 1.6.9, < 3.0)
       knife
       knife-ec-backup
-      knife-opc
       license-acceptance
       mixlib-install
       mixlib-log
@@ -294,7 +293,13 @@ GEM
       tty-prompt (~> 0.21)
       tty-screen (~> 0.6)
       tty-table (~> 0.11)
-    knife-opc (0.4.8)
+    knife-ec-backup (3.0.1)
+      chef (>= 11.8)
+      knife-tidy
+      pg
+      sequel (~> 5.9)
+      veil
+    knife-tidy (2.1.6)
     libyajl2 (2.1.0)
     license-acceptance (2.1.13)
       pastel (~> 0.7)
