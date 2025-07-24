@@ -114,24 +114,42 @@ build do
   # explicitly.
   wx = "without"
 
-  command "./configure" \
-          " --prefix=#{install_dir}/embedded" \
-          " --enable-threads" \
-          " --enable-smp-support" \
-          " --enable-kernel-poll" \
-          " --enable-dynamic-ssl-lib" \
-          " --enable-shared-zlib" \
-          " --enable-fips" \
-          " --#{hipe}-hipe" \
-          " --#{wx}-wx" \
-          " --#{wx}-et" \
-          " --#{wx}-debugger" \
-          " --#{wx}-observer" \
-          " --without-megaco" \
-          " --without-javac" \
-          " --with-ssl=#{install_dir}/embedded" \
-          " --disable-debug", env: env
-
+  if fips_mode?
+    command "./configure" \
+            " --prefix=#{install_dir}/embedded" \
+            " --enable-threads" \
+            " --enable-smp-support" \
+            " --enable-kernel-poll" \
+            " --enable-dynamic-ssl-lib" \
+            " --enable-shared-zlib" \
+            " --enable-fips" \
+            " --#{hipe}-hipe" \
+            " --#{wx}-wx" \
+            " --#{wx}-et" \
+            " --#{wx}-debugger" \
+            " --#{wx}-observer" \
+            " --without-megaco" \
+            " --without-javac" \
+            " --with-ssl=#{install_dir}/embedded" \
+            " --disable-debug", env: env
+  else
+    command "./configure" \
+            " --prefix=#{install_dir}/embedded" \
+            " --enable-threads" \
+            " --enable-smp-support" \
+            " --enable-kernel-poll" \
+            " --enable-dynamic-ssl-lib" \
+            " --enable-shared-zlib" \
+            " --#{hipe}-hipe" \
+            " --#{wx}-wx" \
+            " --#{wx}-et" \
+            " --#{wx}-debugger" \
+            " --#{wx}-observer" \
+            " --without-megaco" \
+            " --without-javac" \
+            " --with-ssl=#{install_dir}/embedded" \
+            " --disable-debug", env: env
+  end
   make "-j #{workers}", env: env
   make "install", env: env
 end
