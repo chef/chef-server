@@ -6,7 +6,7 @@ override :erlang, version: "24.3.2"
 override :'omnibus-ctl', version: "main"
 override :chef, version: "v18.6.1"
 override :ohai, version: "v16.17.0"
-override :ruby, version: "3.1.6"
+override :ruby, version: "3.1.7"
 override :perl, version: "5.34.0"
 override :redis, version: "5.0.14"
 override :runit, version: "2.1.1" #standalone upgrade is failing, Needs to be reverted to 2.1.2 after fixing the umbrella
