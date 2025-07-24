@@ -9,7 +9,8 @@ end
 
 group :test do
   gem 'test-kitchen' # for Test Kitchen testing of the omnibus builds
-  gem 'berkshelf' # depsolving the Test Kitchen suite
-  gem 'chef', '~> 18.7.10' # Updated for chef 18.7.10 upgrade
+  gem 'berkshelf', '~> 8.0.22' # depsolving the Test Kitchen suite
+  gem 'archive-tar-minitar' # required by berkshelf for packaging
+  gem 'chef', '~> 18.7.10'
   gem 'rake'
 end
