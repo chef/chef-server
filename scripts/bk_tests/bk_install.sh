@@ -33,7 +33,7 @@ echo "Removing packages.microsoft.com"
 #
 # Since we don't use any software from this repository in our tests,
 # we can temporarily remove it from our sources.
-rm /etc/apt/sources.list.d/microsoft-prod.list
+rm -f /etc/apt/sources.list.d/microsoft-prod.list
 
 echo  "Installing test dependencies"
 apt-get update -y
@@ -72,3 +72,6 @@ env
 
 echo "Restarting Postgresql"
 service postgresql restart
+
+# temporarely supressing asdf 16 upgrade warning, build service support can give permenent fix.
+sudo sed 's/^\( *print_0_16_0_migration_notice\)$/#\1/' -i /opt/asdf/bin/asdf
