@@ -43,6 +43,9 @@ build do
   env = with_standard_compiler_flags(with_embedded_path)
   env['PATH'] = "#{env['PATH']}:#{install_dir}/embedded/nodejs/bin"
 
+  # Force ruby platform to compile from source instead of using precompiled gems
+  bundle "config set force_ruby_platform true", env: env
+  
   bundle "config build.nokogiri --use-system-libraries" \
          " --with-xml2-config=#{install_dir}/embedded/bin/xml2-config" \
          " --with-xslt-config=#{install_dir}/embedded/bin/xslt-config"
