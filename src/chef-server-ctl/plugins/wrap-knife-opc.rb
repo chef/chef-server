@@ -43,7 +43,9 @@ cmds.each do |cmd, args|
     transformed_args = transform_knife_opc_args(cmd_args, cmd, opc_noun, opc_cmd)
     escaped_args = transformed_args.map { |a| Shellwords.escape(a) }.join(" ")
     # Use native knife instead of knife-opc
-    status = run_command("#{knife_cmd} #{opc_noun} #{opc_cmd} #{escaped_args} -c #{knife_config}")
+    full_command = "#{knife_cmd} #{opc_noun} #{opc_cmd} #{escaped_args} -c #{knife_config} -VVV"
+    puts "DEBUG: Running command: #{full_command}"
+    status = run_command(full_command)
     exit status.exitstatus
   end
 end
