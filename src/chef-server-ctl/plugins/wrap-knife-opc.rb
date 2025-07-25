@@ -39,8 +39,113 @@ cmds.each do |cmd, args|
   opc_noun = args[1]
   description = args[2]
   add_command_under_category cmd, "organization-and-user-management", description, 2 do
-    escaped_args = cmd_args.map { |a| Shellwords.escape(a) }.join(" ")
-    status = run_command("#{knife_cmd} opc #{opc_noun} #{opc_cmd} #{escaped_args} -c #{knife_config}")
-    exit status.exitstatus
+    # Transform knife-opc arguments to native knife format
+    transformed_args = transform_knife_opc_args(cmd_args, cmd, opc_noun, opc_cmd)
+    escaped_args = transformed_args.map { |a| Shellwords.escape(a) }.join(" ")
+    # Use native knife instead of knife-opc
+    full_command = "#{knife_cmd} #{opc_noun} #{opc_cmd} #{escaped_args} -c #{knife_config} -VVV"
+    puts "DEBUG: Running command: #{full_command}"
+    # Special handling: for user-create capture key output and write to file
+    if cmd == "user-create"
+      require 'mixlib/shellout'
+      shell = Mixlib::ShellOut.new(full_command)
+      shell.run_command
+      puts shell.stdout
+      # extract file path from args
+      if (idx = transformed_args.index('--file')) && transformed_args[idx+1]
+        keyfile = transformed_args[idx+1]
+        if (key = shell.stdout[/-----BEGIN RSA PRIVATE KEY-----.*?-----END RSA PRIVATE KEY-----/m])
+          File.write(keyfile, key)
+          puts "Wrote private key to #{keyfile}"
+        end
+      end
+      exit shell.exitstatus
+    else
+      status = run_command(full_command)
+      exit status.exitstatus
+    end
   end
+end
+
+# Transform arguments from knife-opc format to native knife format
+def transform_knife_opc_args(args, chef_server_ctl_cmd, knife_noun, knife_verb)
+  transformed = args.dup
+  
+  case chef_server_ctl_cmd
+  when "user-create"
+    # Handle knife-opc formats:
+    # Format 1: USERNAME FIRST_NAME LAST_NAME EMAIL PASSWORD --filename FILE
+    # Format 2: USERNAME FIRST_NAME MIDDLE_NAME LAST_NAME EMAIL PASSWORD --filename FILE  
+    # native knife format: USERNAME --email EMAIL --password PASSWORD --first-name FIRST --last-name LAST --file FILE
+    
+    if args.length >= 5 && !args[0].start_with?('-')
+      username = args[0]
+      
+      # Detect format based on number of args before flags
+      non_flag_args = args.take_while { |arg| !arg.start_with?('-') }
+      
+      if non_flag_args.length == 5
+        # Format 1: USERNAME FIRST_NAME LAST_NAME EMAIL PASSWORD
+        first_name = args[1]
+        last_name = args[2]
+        email = args[3]
+        password = args[4]
+      elsif non_flag_args.length == 6
+        # Format 2: USERNAME FIRST_NAME MIDDLE_NAME LAST_NAME EMAIL PASSWORD  
+        first_name = args[1]
+        middle_name = args[2]  # Optional middle name, combine with first
+        last_name = args[3]    
+        email = args[4]
+        password = args[5]
+        # Combine first and middle names
+        first_name = "#{first_name} #{middle_name}"
+      else
+        # Fallback to original args if format doesn't match
+        return transformed
+      end
+      
+      # Start with username
+      transformed = [username]
+      
+      # Add required flags
+      transformed << "--email" << email
+      transformed << "--password" << password
+      transformed << "--first-name" << first_name
+      transformed << "--last-name" << last_name
+      
+      # Handle any additional flags (like --filename/--file)
+      remaining_args = args[non_flag_args.length..-1] || []
+      remaining_args.each do |arg|
+        case arg
+        when "--filename"
+          transformed << "--file"
+        when /^--filename=(.+)$/
+          transformed << "--file=#{$1}"
+        else
+          transformed << arg
+        end
+      end
+    else
+      # Handle --filename to --file conversion for other formats
+      transformed = args.map do |arg|
+        case arg
+        when "--filename"
+          "--file"
+        when /^--filename=(.+)$/
+          "--file=#{$1}"
+        else
+          arg
+        end
+      end
+    end
+    
+  when "user-list"
+    # Handle --all-info option (not supported in native knife)
+    # TODO: Revisit when suitable native knife option is found
+    if transformed.include?("--all-info") || transformed.include?("-a")
+      transformed = transformed.reject { |arg| %w[--all-info -a].include?(arg) }
+    end
+  end
+  
+  transformed
 end
