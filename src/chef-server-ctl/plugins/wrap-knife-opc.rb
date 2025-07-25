@@ -45,8 +45,25 @@ cmds.each do |cmd, args|
     # Use native knife instead of knife-opc
     full_command = "#{knife_cmd} #{opc_noun} #{opc_cmd} #{escaped_args} -c #{knife_config} -VVV"
     puts "DEBUG: Running command: #{full_command}"
-    status = run_command(full_command)
-    exit status.exitstatus
+    # Special handling: for user-create capture key output and write to file
+    if cmd == "user-create"
+      require 'mixlib/shellout'
+      shell = Mixlib::ShellOut.new(full_command)
+      shell.run_command
+      puts shell.stdout
+      # extract file path from args
+      if (idx = transformed_args.index('--file')) && transformed_args[idx+1]
+        keyfile = transformed_args[idx+1]
+        if (key = shell.stdout[/-----BEGIN RSA PRIVATE KEY-----.*?-----END RSA PRIVATE KEY-----/m])
+          File.write(keyfile, key)
+          puts "Wrote private key to #{keyfile}"
+        end
+      end
+      exit shell.exitstatus
+    else
+      status = run_command(full_command)
+      exit status.exitstatus
+    end
   end
 end
 
