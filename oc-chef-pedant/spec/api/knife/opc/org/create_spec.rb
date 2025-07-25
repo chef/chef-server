@@ -40,7 +40,7 @@ describe "knife", :validation, :knife do
 
         context "with associations" do
           let(:username) { "user-#{rand(1 << 32)}" }
-          let(:command) { "knife org create #{org_name} #{org_name} --association #{username} -c #{superuser_rb} --disable-editing" }
+          let(:command) { "knife org create #{org_name} #{org_name} --association_user #{username} -c #{superuser_rb} --disable-editing" }
 
           before(:each) { knife "user create #{username} --email #{username}@foo.bar --password 'badger badger' --first-name #{username} --last-name #{username} -c #{superuser_rb} --disable-editing" }
           after(:each) { knife "user delete #{username} -c #{superuser_rb} --disable-editing" }
