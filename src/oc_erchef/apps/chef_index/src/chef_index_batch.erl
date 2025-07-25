@@ -179,7 +179,7 @@ flush(State = #chef_idx_batch_state{item_queue = Queue,
     spawn(
       fun() ->
               prometheus_gauge:inc(chef_index_batch_inflight_flushes_count),
-              lager:debug("Batch posting to ~s ~p documents (~p bytes)", [Provider, length(DocsToAdd), CurrentSize+WrapperSize]),
+              lager:debug("Batch posting to ~s ~p documents (~p bytes)", [Provider, length(DocsToAdd), CurrentSize + WrapperSize]),
               Now = erlang:monotonic_time(),
               Res = chef_index:update(Provider, Doc),
               Now1 = erlang:monotonic_time(),
@@ -196,7 +196,7 @@ flush(State = #chef_idx_batch_state{item_queue = Queue,
                     end,
                     {0, 0},
                     Timestamps),
-              gen_server:cast(Self, {stats_update, TotalDocs, {BeforeDiff/TotalDocs, AfterDiff/TotalDocs}, Res}),
+              gen_server:cast(Self, {stats_update, TotalDocs, {BeforeDiff / TotalDocs, AfterDiff / TotalDocs}, Res}),
               [gen_server:reply(From, Res) || From <- PidsToReply],
               prometheus_gauge:dec(chef_index_batch_inflight_flushes_count)
       end),
@@ -213,14 +213,14 @@ handle_call({add_item, Doc, Size, AddedTime}, From,
     prometheus_gauge:set(chef_index_batch_current_batch_size_bytes, Size),
     prometheus_gauge:set(chef_index_batch_current_batch_doc_count, 1),
     {noreply, State1#chef_idx_batch_state{
-                item_queue = [{From, AddedTime, Doc}| Queue],
+                item_queue = [{From, AddedTime, Doc} | Queue],
                 current_size = Size
                }};
 handle_call({add_item, Doc, Size, AddedTime}, From, State = #chef_idx_batch_state{item_queue=Queue, current_size=CurrentSize}) ->
     CurrentSizeUpdated = CurrentSize + Size,
     prometheus_gauge:set(chef_index_batch_current_batch_size_bytes, CurrentSizeUpdated),
     prometheus_gauge:inc(chef_index_batch_current_batch_doc_count),
-    {noreply, State#chef_idx_batch_state{item_queue = [{From, AddedTime, Doc}|Queue],
+    {noreply, State#chef_idx_batch_state{item_queue = [{From, AddedTime, Doc} | Queue],
                                          current_size = CurrentSizeUpdated
                                         }};
 handle_call(status, _From, State) ->
@@ -252,8 +252,8 @@ collect_process_info() ->
          {total_heap_size, HeapSizeWords},
          {memory, MemorySizeBytes}] ->
             WordSize = erlang:system_info(wordsize),
-            prometheus_gauge:set(chef_index_batch_stack_size_bytes, StackSizeWords*WordSize),
-            prometheus_gauge:set(chef_index_batch_heap_size_bytes, HeapSizeWords*WordSize),
+            prometheus_gauge:set(chef_index_batch_stack_size_bytes, StackSizeWords * WordSize),
+            prometheus_gauge:set(chef_index_batch_heap_size_bytes, HeapSizeWords * WordSize),
             prometheus_gauge:set(chef_index_batch_memory_size_bytes, MemorySizeBytes),
             prometheus_gauge:set(chef_index_batch_mailbox_size, MailboxSize);
         Other ->
@@ -261,7 +261,7 @@ collect_process_info() ->
     end.
 
 
-handle_cast({stats_update, TotalDocs, {AvgQueueLatency,AvgSuccessLatency}, Resp},
+handle_cast({stats_update, TotalDocs, {AvgQueueLatency, AvgSuccessLatency}, Resp},
             State = #chef_idx_batch_state{avg_queue_latency = OQL,
                                           avg_success_latency = OSL,
                                           total_docs_queued = TQ,
@@ -269,14 +269,14 @@ handle_cast({stats_update, TotalDocs, {AvgQueueLatency,AvgSuccessLatency}, Resp}
                                          }) ->
     collect_process_info(),
     TotalDocsQueuedUpdated = TQ + TotalDocs,
-    AvgQueueLatencyUpdated = ((AvgQueueLatency*TotalDocs)+(OQL*TQ))/(TQ+TotalDocs),
+    AvgQueueLatencyUpdated = ((AvgQueueLatency * TotalDocs) + (OQL * TQ)) / (TQ + TotalDocs),
     State1 = State#chef_idx_batch_state{total_docs_queued = TotalDocsQueuedUpdated,
                                         avg_queue_latency = AvgQueueLatencyUpdated},
     case Resp of
         ok ->
             prometheus_counter:inc(chef_index_batch_successful_docs_total, TotalDocs),
-            TotalDocsSuccessUpdated = TS+TotalDocs,
-            AvgSuccessLatencyUpdated = ((AvgSuccessLatency*TotalDocs)+(OSL*TS))/(TS+TotalDocs),
+            TotalDocsSuccessUpdated = TS + TotalDocs,
+            AvgSuccessLatencyUpdated = ((AvgSuccessLatency * TotalDocs) + (OSL * TS)) / (TS + TotalDocs),
             {noreply, State1#chef_idx_batch_state{
                         total_docs_success = TotalDocsSuccessUpdated,
                         avg_success_latency = AvgSuccessLatencyUpdated
@@ -307,4 +307,4 @@ code_change(_OldVsn, State, _Extra) ->
 time_diff_in_ms(EndTime, StartTime) ->
     TimeTaken =  EndTime - StartTime,
     TimeTakenInMicro = erlang:convert_time_unit(TimeTaken, native, microsecond),
-    TimeTakenInMicro/1000.0.
+    TimeTakenInMicro / 1000.0.

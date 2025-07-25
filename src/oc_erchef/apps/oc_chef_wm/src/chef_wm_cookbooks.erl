@@ -169,9 +169,9 @@ aggregate_versions(CookbookVersions) ->
 %% and a per-version map containing the version and the URL for the version
 %%
 %% @end
--spec make_version_list(CookbookVersionFun::fun(),
-        Versions::[ {binary(), version()}],
-        NumVersions:: non_neg_integer() | all) ->
+-spec make_version_list(CookbookVersionFun :: fun(),
+        Versions :: [ {binary(), version()}],
+        NumVersions :: non_neg_integer() | all) ->
     list().
 make_version_list(CookbookVersionFun, Versions, NumVersions) ->
     TrimmedVersions = case NumVersions of
@@ -184,9 +184,9 @@ make_version_list(CookbookVersionFun, Versions, NumVersions) ->
           {<<"url">>, CookbookVersionFun(VersionBinary) }]}
       end  || Version <- TrimmedVersions].
 
--spec make_cookbook_list(Req::#wm_reqdata{},
-                         Cookbooks:: [ { binary(), [ {version()} ] } ],
-                         NumVersions:: all | non_neg_integer()) ->
+-spec make_cookbook_list(Req :: #wm_reqdata{},
+                         Cookbooks :: [ { binary(), [ {version()} ] } ],
+                         NumVersions :: all | non_neg_integer()) ->
     list().
 make_cookbook_list(Req, Cookbooks, NumVersions) ->
     [ begin

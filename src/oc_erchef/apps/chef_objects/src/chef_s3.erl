@@ -125,7 +125,7 @@ make_key(OrgId, Checksum) ->
     lists:append(["organization-", as_string(OrgId), "/checksum-", as_string(Checksum)]).
 
 %% @doc Base64-encode an MD5 hex string.
--spec base64_checksum(Checksum::binary()) -> binary().
+-spec base64_checksum(Checksum :: binary()) -> binary().
 base64_checksum(Checksum) ->
     {ok, [BigNum], []} = io_lib:fread("~16u", as_string(Checksum)),
     Bin = <<BigNum:128>>,
@@ -136,7 +136,7 @@ base64_checksum(Checksum) ->
 bucket() ->
     envy:get(chef_objects, s3_platform_bucket_name, string).
 
--spec headers_for_type(http_verb(), Checksum::binary()) -> [ {string(), string()} ].
+-spec headers_for_type(http_verb(), Checksum :: binary()) -> [ {string(), string()} ].
 %% @doc helper function for generating headers for the S3 URL
 %%
 headers_for_type(put, Checksum) ->
@@ -178,7 +178,7 @@ s3_internal_url() ->
 %% to be publicly accessible. If the url is configured with the
 %% atom host_header, then use the passed-in vhost url parameter.
 s3_external_url(VHostUrl) ->
-    case envy:get(chef_objects, s3_external_url, [atom,string]) of
+    case envy:get(chef_objects, s3_external_url, [atom, string]) of
         host_header ->
             VHostUrl;
          "http" ++ _ = Url ->

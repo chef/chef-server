@@ -77,7 +77,7 @@ org_id(#chef_client{org_id = OrgId}) ->
 type_name(#chef_client{}) ->
     client.
 
-authz_id(#chef_client{authz_id = AuthzId})->
+authz_id(#chef_client{authz_id = AuthzId}) ->
     AuthzId.
 
 is_indexed(_ObjectRec) ->
@@ -241,7 +241,7 @@ base_client_ejson(#chef_client{name = Name, validator = Validator}, OrgName) ->
 %% EJson-encoded Erlang data structure, using passed defaults
 %% @end
 
--spec parse_binary_json(api_version(), binary(), undefined | #chef_client{}) -> {'ok',ej:json_object()}. % or throw
+-spec parse_binary_json(api_version(), binary(), undefined | #chef_client{}) -> {'ok', ej:json_object()}. % or throw
 parse_binary_json(ApiVersion, Bin, undefined) ->
     validate_json(ApiVersion, Bin, undefined, undefined);
 parse_binary_json(ApiVersion, Bin, #chef_client{name = ReqName} = CurrentClient) ->

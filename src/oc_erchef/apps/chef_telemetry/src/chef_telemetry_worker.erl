@@ -70,7 +70,7 @@ start_link() ->
 init(_Config) ->
     {ConfigFile, CtlLocation} =
         case re:run(os:cmd("pwd"), "^/hab/.*") of
-          {match,_} ->
+          {match, _} ->
             {"Hab infra server", "Hab infra server"};
           _ ->
             CtlLocation1 =
@@ -158,8 +158,8 @@ send_data(State) ->
                         Funs = [fun get_total_nodes/1, fun get_active_nodes/1, fun get_company_name/1, fun get_api_fqdn/1, fun determine_license_id/1],
                         Pid = self(),
                         Res = [ erlang:spawn_monitor(runner(Pid, State1, Fun)) || Fun <- Funs ],
-                        Current_scan = gather_res(Res, State1#state.current_scan, length(Funs)),
-                        Req = generate_request(ServerVersion, State1#state{current_scan = Current_scan}),
+                        CurrentScan = gather_res(Res, State1#state.current_scan, length(Funs)),
+                        Req = generate_request(ServerVersion, State1#state{current_scan = CurrentScan}),
                         send_req(Req, State1),
                         State1;
                      _   ->
@@ -174,7 +174,7 @@ get_api_fqdn(_State) ->
     sqerl:execute(<<"delete from telemetry where property like 'NODE:%' and event_timestamp < (current_timestamp - interval '86700')">>),
     case sqerl:execute(<<"select trim(property) as property from telemetry where property like 'NODE:%'">>) of
         {ok, Rows} when is_list(Rows) ->
-            FQDNs = [binary:part(FQDN, 5, size(FQDN) -5) || [{<<"property">>, FQDN}] <- Rows],
+            FQDNs = [binary:part(FQDN, 5, size(FQDN) - 5) || [{<<"property">>, FQDN}] <- Rows],
             FQDNs1 = mask(FQDNs),
             FQDNs1;
         _ ->
@@ -211,11 +211,11 @@ solr_search(Query) ->
             {Error, Reason}
     end.
 
-get_license_company_name()->
-    {_Lic, _Type, _GracePeriod, _ExpDate, _Msg, CN,_LID}  = chef_license:get_license(),
+get_license_company_name() ->
+    {_Lic, _Type, _GracePeriod, _ExpDate, _Msg, CN, _LID}  = chef_license:get_license(),
     CN.
 
-determine_license_id(_State)->
+determine_license_id(_State) ->
     {_Lic, _Type, _GracePeriod, _ExpDate, _Msg, _CN, LicenseID}  = chef_license:get_license(),
     case LicenseID of
         undefined           ->
@@ -369,9 +369,9 @@ send_req(Req, State) ->
 
 check_send(Hostname) ->
     case sqerl:execute(<<"select telemetry_check_send('", Hostname/binary, "')">>) of
-        {ok,[[{_, true}]]} ->
+        {ok, [[{_, true}]]} ->
             true;
-        {ok,[[{_, false}]]}  ->
+        {ok, [[{_, false}]]} ->
             false;
         Error ->
             Error
@@ -394,15 +394,15 @@ mask(FQDNs) ->
                         Hash = crypto:hash(md5, FQDN1),
                         Domain2 = <<"">>;
                     _ ->
-                        FQDN_parts = binary:split(FQDN1, <<"\.">>, [global]),
-                        case size(lists:last(FQDN_parts)) =:= 2 of
+                        FQDNparts = binary:split(FQDN1, <<"\.">>, [global]),
+                        case size(lists:last(FQDNparts)) =:= 2 of
                             true ->
-                                {SubDomain1, Domain1} = lists:split(erlang:length(FQDN_parts) - 3, FQDN_parts),
+                                {SubDomain1, Domain1} = lists:split(erlang:length(FQDNparts) - 3, FQDNparts),
                                 SubDomain2 = Join(SubDomain1, <<".">>),
                                 Domain2 = Join(Domain1, <<".">>);
                             _    ->
 
-                                {SubDomain1, Domain1} = lists:split(erlang:length(FQDN_parts) - 2, FQDN_parts),
+                                {SubDomain1, Domain1} = lists:split(erlang:length(FQDNparts) - 2, FQDNparts),
                                 SubDomain2 = Join(SubDomain1, <<".">>),
                                 Domain2 = Join(Domain1, <<".">>)
                         end,
@@ -446,12 +446,12 @@ runner(Parent, State, Fun) ->
         Parent ! {result, self(), Res}
     end.
 
-gather_res(_Ids, Res, Count) when Count =< 0->
+gather_res(_Ids, Res, Count) when Count =< 0 ->
     Res;
 
 gather_res(Ids, Res, Count) ->
     Fun = fun(Id) ->
-            fun({Id1,_}) ->
+            fun({Id1, _}) ->
               Id =/= Id1
             end
           end,
