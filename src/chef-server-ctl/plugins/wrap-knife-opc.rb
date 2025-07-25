@@ -54,9 +54,9 @@ def transform_knife_opc_args(args, chef_server_ctl_cmd, knife_noun, knife_verb)
   
   case chef_server_ctl_cmd
   when "user-create"
-    # Handle both formats:
+    # Handle knife-opc formats:
     # Format 1: USERNAME FIRST_NAME LAST_NAME EMAIL PASSWORD --filename FILE
-    # Format 2: USERNAME DISPLAY_NAME FIRST_NAME LAST_NAME EMAIL PASSWORD --filename FILE
+    # Format 2: USERNAME FIRST_NAME MIDDLE_NAME LAST_NAME EMAIL PASSWORD --filename FILE  
     # native knife format: USERNAME --email EMAIL --password PASSWORD --first-name FIRST --last-name LAST --file FILE
     
     if args.length >= 5 && !args[0].start_with?('-')
@@ -71,13 +71,15 @@ def transform_knife_opc_args(args, chef_server_ctl_cmd, knife_noun, knife_verb)
         last_name = args[2]
         email = args[3]
         password = args[4]
-      elsif non_flag_args.length >= 6
-        # Format 2: USERNAME DISPLAY_NAME FIRST_NAME LAST_NAME EMAIL PASSWORD
-        display_name = args[1] # Not used in native knife
-        first_name = args[2]   
+      elsif non_flag_args.length == 6
+        # Format 2: USERNAME FIRST_NAME MIDDLE_NAME LAST_NAME EMAIL PASSWORD  
+        first_name = args[1]
+        middle_name = args[2]  # Optional middle name, combine with first
         last_name = args[3]    
         email = args[4]
         password = args[5]
+        # Combine first and middle names
+        first_name = "#{first_name} #{middle_name}"
       else
         # Fallback to original args if format doesn't match
         return transformed
