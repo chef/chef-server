@@ -92,7 +92,7 @@
   0},
  {<<"lhttpc">>,
   {git,"https://github.com/chef/lhttpc",
-       {branch,"CHEF-11677/CHEF-12498/lbaker"}},
+       {ref,"b8ea2a03b081c65902600e358cbdb17b5f826ffe"}},
   1},
  {<<"meck">>,
   {git,"https://github.com/eproxus/meck",
