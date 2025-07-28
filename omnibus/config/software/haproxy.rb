@@ -47,7 +47,7 @@ build do
    # Required to resolve hostnames to IPv6 addresses
    # off-by-default because of prolems on older glibc's
    "USE_GETADDRINFO" => "1",
-   "TARGET" => "linux2628"
+   "TARGET" => "linux-glibc"
   }
 
   if intel?
