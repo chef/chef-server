@@ -40,7 +40,9 @@ cmds.each do |cmd, args|
   description = args[2]
   add_command_under_category cmd, "organization-and-user-management", description, 2 do
     # Transform knife-opc arguments to native knife format
+    puts "DEBUG: Input args: #{cmd_args.inspect}"
     transformed_args = transform_knife_opc_args(cmd_args, cmd, opc_noun, opc_cmd)
+    puts "DEBUG: Transformed args: #{transformed_args.inspect}"
     escaped_args = transformed_args.map { |a| Shellwords.escape(a) }.join(" ")
     # Use native knife instead of knife-opc
     full_command = "#{knife_cmd} #{opc_noun} #{opc_cmd} #{escaped_args} -c #{knife_config} -VVV"
@@ -61,14 +63,38 @@ cmds.each do |cmd, args|
       require 'mixlib/shellout'
       shell = Mixlib::ShellOut.new(full_command)
       shell.run_command
+      puts "DEBUG: knife stdout length: #{shell.stdout.length}"
+      puts "DEBUG: knife stdout content:"
       puts shell.stdout
+      puts "DEBUG: knife stderr content:"
+      puts shell.stderr
+      puts "DEBUG: knife exit status: #{shell.exitstatus}"
+      
       # extract file path from args
       if (idx = transformed_args.index('--file')) && transformed_args[idx+1]
         keyfile = transformed_args[idx+1]
-        if (key = shell.stdout[/-----BEGIN RSA PRIVATE KEY-----.*?-----END RSA PRIVATE KEY-----/m])
+        puts "DEBUG: Looking for private key in output, will write to: #{keyfile}"
+        
+        # Try multiple key formats
+        key = shell.stdout[/-----BEGIN RSA PRIVATE KEY-----.*?-----END RSA PRIVATE KEY-----/m] ||
+              shell.stdout[/-----BEGIN PRIVATE KEY-----.*?-----END PRIVATE KEY-----/m] ||
+              shell.stdout[/-----BEGIN OPENSSH PRIVATE KEY-----.*?-----END OPENSSH PRIVATE KEY-----/m]
+        
+        if key
           File.write(keyfile, key)
-          puts "Wrote private key to #{keyfile}"
+          puts "DEBUG: Successfully wrote private key to #{keyfile}"
+          puts "DEBUG: Key starts with: #{key[0..50]}..."
+        else
+          puts "DEBUG: No private key found in knife output"
+          puts "DEBUG: Searching for any key-like patterns..."
+          if shell.stdout =~ /(-----BEGIN.*?-----.*?-----END.*?-----)/m
+            puts "DEBUG: Found potential key pattern: #{$1[0..100]}..."
+          else
+            puts "DEBUG: No key patterns found at all"
+          end
         end
+      else
+        puts "DEBUG: No --file argument found in transformed args"
       end
       exit shell.exitstatus
     else
