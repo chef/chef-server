@@ -17,7 +17,5 @@ override :logrotate, version: "3.19.0"
 # update `src/openresty-noroot/habitat/plan.sh` when updating this version.
 override :openresty, version: "1.25.3.1"
 
-override :openssl, version: "1.0.2zi"
-
-# Force nokogiri to use Ruby platform for glibc compatibility
 override :nokogiri, version: "1.18.9"
+override :openssl, version: "3.2.4", fips_version: "3.1.2"
