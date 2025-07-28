@@ -45,6 +45,14 @@ class SslPreflightValidator < PreflightValidator
     "/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/embedded/bin/openssl"
   end
 
+  def openssl_providers
+    @openssl_providers ||= begin
+                              `#{openssl_exe} list -providers`
+                            rescue
+                              `unknown`
+                            end
+  end
+
   def openssl_version
     @openssl_version ||= begin
                            `#{openssl_exe} version`
@@ -54,12 +62,12 @@ class SslPreflightValidator < PreflightValidator
   end
 
   def fips_supported_ssl?
-    case openssl_version
+    case openssl_providers
     when /^unknown/
       Chef::Log.warn('Failed to parse openssl version, assuming it would have supported FIPS')
       # We could report false here if we wanted to be pessimistic
       true
-    when /OpenSSL .*-fips/
+    when /OpenSSL .*fips/i
       true
     else
       false
