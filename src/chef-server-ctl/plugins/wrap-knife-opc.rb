@@ -45,6 +45,17 @@ cmds.each do |cmd, args|
     # Use native knife instead of knife-opc
     full_command = "#{knife_cmd} #{opc_noun} #{opc_cmd} #{escaped_args} -c #{knife_config} -VVV"
     puts "DEBUG: Running command: #{full_command}"
+    
+    # Debug filesystem state before running knife
+    begin
+      puts "DEBUG: /home directory contents:"
+      puts `ls -la /home 2>/dev/null || echo "  (unable to list /home)"`
+      puts "DEBUG: /home/ubuntu directory contents:"
+      puts `ls -la /home/ubuntu 2>/dev/null || echo "  (unable to list /home/ubuntu)"`
+    rescue => e
+      puts "DEBUG: Error checking directories: #{e.message}"
+    end
+    
     # Special handling: for user-create capture key output and write to file
     if cmd == "user-create"
       require 'mixlib/shellout'
