@@ -26,6 +26,10 @@ if [[ "${BUILDKITE:-false}" == "true" ]]; then
   apt-get autoremove 
   apt-get update
   apt-get install -y libpq-dev libsqlite3-dev libyaml-dev
+  asdf plugin add erlang
+  asdf install erlang 26.2.5.14
+  asdf local erlang 26.2.5.14
+  export PATH=/opt/asdf/shims:$PATH
 fi
 
 bundle_install_dirs=(

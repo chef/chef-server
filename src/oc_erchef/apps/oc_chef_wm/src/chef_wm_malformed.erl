@@ -166,7 +166,7 @@ malformed_request_message(#ej_invalid{type=json_type,
 %% Entire run list is the wrong type
 malformed_request_message(#ej_invalid{type=json_type,
                                      key=Key}, _Req, _State) when Key =:= <<"run_list">> ->
-    error_envelope([<<"Field '", Key/binary,"' is not a valid run list">>]);
+    error_envelope([<<"Field '", Key/binary, "' is not a valid run list">>]);
 
 %% entire env_run_lists is the wrong type
 malformed_request_message(#ej_invalid{type=json_type,
@@ -215,7 +215,7 @@ bin_str_join(L, Sep) ->
     bin_str_join(L, Sep, []).
 
 bin_str_join([H], _Sep, Acc) ->
-    lists:reverse([<<"'">>, H, <<"'">>|Acc]);
+    lists:reverse([<<"'">>, H, <<"'">> | Acc]);
 bin_str_join([H | T], Sep, Acc) ->
     bin_str_join(T, Sep, [Sep, <<"'">>, H, <<"'">> | Acc]).
 
@@ -223,9 +223,9 @@ bin_str_join([H | T], Sep, Acc) ->
 -spec to_binary( any() ) -> binary().
 to_binary(A) when is_atom(A) ->
     atom_to_binary(A, utf8);
-to_binary(I) when is_integer(I)->
+to_binary(I) when is_integer(I) ->
     list_to_binary(integer_to_list(I));
-to_binary(B) when is_binary(B)->
+to_binary(B) when is_binary(B) ->
     B;
 to_binary(O) ->
     %% Catch-all case
