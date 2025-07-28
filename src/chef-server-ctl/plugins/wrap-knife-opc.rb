@@ -126,15 +126,29 @@ def transform_knife_opc_args(args, chef_server_ctl_cmd, knife_noun, knife_verb)
       
       # Handle any additional flags (like --filename/--file)
       remaining_args = args[non_flag_args.length..-1] || []
+      file_specified = false
       remaining_args.each do |arg|
         case arg
         when "--filename"
           transformed << "--file"
+          file_specified = true
         when /^--filename=(.+)$/
           transformed << "--file=#{$1}"
+          file_specified = true
+        when "--file"
+          transformed << arg
+          file_specified = true
+        when /^--file=(.+)$/
+          transformed << arg
+          file_specified = true
         else
           transformed << arg
         end
+      end
+      
+      # Always add --file for private key generation if not specified
+      unless file_specified
+        transformed << "--file" << "#{username}.pem"
       end
     else
       # Handle --filename to --file conversion for other formats
