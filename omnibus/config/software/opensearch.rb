@@ -25,6 +25,7 @@ skip_transitive_dependency_licensing true
 
 relative_path "opensearch-#{version}"
 
+
 version "1.1.0" do
   source url: "https://artifacts.opensearch.org/releases/bundle/opensearch/#{version}/opensearch-#{version}-linux-x64.tar.gz",
          sha512: "4c2626ee56b4cdc4c8110931c369a8b9bd2c7268f5c0baa4022276e9198cf25eb7103ea3aa427a931508a4047a2a0e25fda20a2a5b1a0f6686c187b62134037a"
@@ -71,8 +72,8 @@ version "1.3.19" do
 end
 
 version "1.3.20" do
-  source url: "https://artifacts.opensearch.org/releases/bundle/opensearch/#{version}/opensearch-#{version}-linux-x64.tar.gz",
-         sha256: "a786fe52b4d25db85cc49f34df6118f19c434b25935f28bd98c0f874ae77ccc3"
+  internal_source url: "#{ENV["ARTIFACTORY_REPO_URL"]}/#{name}/#{name}-#{version}.tar.gz",
+                authorization: "X-JFrog-Art-Api:#{ENV["ARTIFACTORY_TOKEN"]}"
 end
 
 target_path = "#{install_dir}/embedded/opensearch"
