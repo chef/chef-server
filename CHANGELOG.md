@@ -1,16 +1,19 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.10.40 -->
-## [15.10.40](https://github.com/chef/chef-server/tree/15.10.40) (2025-07-17)
+<!-- latest_release 15.10.43 -->
+## [15.10.43](https://github.com/chef/chef-server/tree/15.10.43) (2025-07-24)
 
 #### Merged Pull Requests
-- changing hardcoded date in test case. [#4024](https://github.com/chef/chef-server/pull/4024) ([sreepuramsudheer](https://github.com/sreepuramsudheer))
+- [CHEF-23713] Update Ruby to 3.1.7 version [#4028](https://github.com/chef/chef-server/pull/4028) ([RoyShravani](https://github.com/RoyShravani))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.10.33 -->
 ### Changes since 15.10.33 release
 
 #### Merged Pull Requests
+- [CHEF-23713] Update Ruby to 3.1.7 version [#4028](https://github.com/chef/chef-server/pull/4028) ([RoyShravani](https://github.com/RoyShravani)) <!-- 15.10.43 -->
+- upgrading the PG from 13.8 to 13.21 [#4023](https://github.com/chef/chef-server/pull/4023) ([talktovikas](https://github.com/talktovikas)) <!-- 15.10.42 -->
+- Temporary fix for asdf 16 upgrade warning. [#4029](https://github.com/chef/chef-server/pull/4029) ([sreepuramsudheer](https://github.com/sreepuramsudheer)) <!-- 15.10.41 -->
 - changing hardcoded date in test case. [#4024](https://github.com/chef/chef-server/pull/4024) ([sreepuramsudheer](https://github.com/sreepuramsudheer)) <!-- 15.10.40 -->
 - tweaking for linting [#4018](https://github.com/chef/chef-server/pull/4018) ([johnmccrae](https://github.com/johnmccrae)) <!-- 15.10.39 -->
 - Update license_scout [#4020](https://github.com/chef/chef-server/pull/4020) ([marcparadise](https://github.com/marcparadise)) <!-- 15.10.38 -->
