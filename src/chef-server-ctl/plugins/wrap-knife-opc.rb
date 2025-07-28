@@ -87,8 +87,7 @@ def transform_knife_opc_args(args, chef_server_ctl_cmd, knife_noun, knife_verb)
     # Handle knife-opc formats:
     # Format 1: USERNAME FIRST_NAME LAST_NAME EMAIL PASSWORD --filename FILE
     # Format 2: USERNAME FIRST_NAME MIDDLE_NAME LAST_NAME EMAIL PASSWORD --filename FILE  
-    # OLD: USERNAME --email EMAIL --password PASSWORD --first-name FIRST --last-name LAST --file FILE
-    # NEW: native knife positional format: USERNAME DISPLAY_NAME FIRST_NAME LAST_NAME EMAIL PASSWORD --file FILE
+    # native knife format: USERNAME --email EMAIL --password PASSWORD --first-name FIRST --last-name LAST --file FILE
     
     if args.length >= 5 && !args[0].start_with?('-')
       username = args[0]
@@ -105,18 +104,25 @@ def transform_knife_opc_args(args, chef_server_ctl_cmd, knife_noun, knife_verb)
       elsif non_flag_args.length == 6
         # Format 2: USERNAME FIRST_NAME MIDDLE_NAME LAST_NAME EMAIL PASSWORD  
         first_name = args[1]
-        _middle_name = args[2]  # Drop middle name - knife doesn't support it
+        middle_name = args[2]  # Optional middle name, combine with first
         last_name = args[3]    
         email = args[4]
         password = args[5]
+        # Combine first and middle names
+        first_name = "#{first_name} #{middle_name}"
       else
         # Fallback to original args if format doesn't match
         return transformed
       end
       
-      # Build positional arguments: USERNAME DISPLAY_NAME FIRST_NAME LAST_NAME EMAIL PASSWORD
-      display_name = username  # Use username as display name
-      transformed = [username, display_name, first_name, last_name, email, password]
+      # Start with username
+      transformed = [username]
+      
+      # Add required flags
+      transformed << "--email" << email
+      transformed << "--password" << password
+      transformed << "--first-name" << first_name
+      transformed << "--last-name" << last_name
       
       # Handle any additional flags (like --filename/--file)
       remaining_args = args[non_flag_args.length..-1] || []
@@ -130,17 +136,6 @@ def transform_knife_opc_args(args, chef_server_ctl_cmd, knife_noun, knife_verb)
           transformed << arg
         end
       end
-
-      # COMMENTED OUT: Previous flag-based approach for reference
-      # # Start with username
-      # transformed = [username]
-      # 
-      # # Add required flags
-      # transformed << "--email" << email
-      # transformed << "--password" << password
-      # transformed << "--first-name" << first_name
-      # transformed << "--last-name" << last_name
-      
     else
       # Handle --filename to --file conversion for other formats
       transformed = args.map do |arg|
