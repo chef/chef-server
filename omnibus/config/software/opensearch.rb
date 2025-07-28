@@ -25,7 +25,6 @@ skip_transitive_dependency_licensing true
 
 relative_path "opensearch-#{version}"
 
-
 version "1.1.0" do
   source url: "https://artifacts.opensearch.org/releases/bundle/opensearch/#{version}/opensearch-#{version}-linux-x64.tar.gz",
          sha512: "4c2626ee56b4cdc4c8110931c369a8b9bd2c7268f5c0baa4022276e9198cf25eb7103ea3aa427a931508a4047a2a0e25fda20a2a5b1a0f6686c187b62134037a"
@@ -72,8 +71,9 @@ version "1.3.19" do
 end
 
 version "1.3.20" do
-  internal_source url: "#{ENV["ARTIFACTORY_REPO_URL"]}/#{name}/#{name}-#{version}.tuxcare.1-linux-x64.tar.gz",
-                authorization: "X-JFrog-Art-Api:#{ENV["ARTIFACTORY_TOKEN"]}"
+  internal_source url: "#{ENV['ARTIFACTORY_REPO_URL']}/#{name}/#{name}-#{version}.tuxcare.1-linux-x64.tar.gz",
+                  authorization: "X-JFrog-Art-Api:#{ENV['ARTIFACTORY_TOKEN']}",
+                  sha256: "bc2bee135feb6ff70b8526cbdf8302bd02c6bf1551dcf352a7b57e43a2a76869"
 end
 
 target_path = "#{install_dir}/embedded/opensearch"
@@ -88,15 +88,16 @@ build do
   delete "#{project_dir}/modules/x-pack-ml"
   delete "#{project_dir}/modules/ingest-geoip"
   mkdir  "#{project_dir}/plugins"
-  command "cd #{project_dir}/plugins; ls | grep -v opensearch-security| xargs rm -rf "
+  command "cd #{project_dir}/plugins; ls | grep -v opensearch-security | xargs rm -rf"
   # by default RPMs will not include empty directories in the final package
   # OpenSearch will fail to start if this dir is not present.
-  # touch  "#{project_dir}/plugins/.gitkeep"
+  # touch "#{project_dir}/plugins/.gitkeep"
 
-  sync   "#{project_dir}/", "#{target_path}"
+  sync "#{project_dir}/", "#{target_path}"
   command "chmod ugo+x #{project_dir}/plugins/opensearch-security/tools/*"
   command "chmod ugo+x #{target_path}/plugins/opensearch-security/tools/*"
   # Dropping a VERSION file here allows additional software definitions
   # to read it to determine OpenSearch plugin compatibility.
   command "echo #{version} > #{target_path}/VERSION"
 end
+
