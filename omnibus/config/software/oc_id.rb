@@ -47,6 +47,9 @@ build do
          " --with-xml2-config=#{install_dir}/embedded/bin/xml2-config" \
          " --with-xslt-config=#{install_dir}/embedded/bin/xslt-config"
 
+  # Configure pg gem to use embedded PostgreSQL
+  bundle "config build.pg --with-pg-config=#{install_dir}/embedded/bin/pg_config", env: env
+
   bundle "config set --local without development test doc", env: env
   bundle "install" \
          " --path=#{install_dir}/embedded/service/gem", env: env

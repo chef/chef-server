@@ -28,6 +28,9 @@ build do
 
   env = with_standard_compiler_flags(with_embedded_path)
 
+  # Configure pg gem to use embedded PostgreSQL
+  bundle "config build.pg --with-pg-config=#{install_dir}/embedded/bin/pg_config", env: env
+
   # we would like to do this 'bundle config set --local without development' but appbundler is insisting
   # on installing
   bundle "install", env: env
