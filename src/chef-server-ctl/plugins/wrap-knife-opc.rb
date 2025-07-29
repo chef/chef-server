@@ -16,7 +16,7 @@
 require "shellwords"
 require "chef-utils"
 
-knife_config = ::ChefServerCtl::Config.knife_config_file
+# knife_config = ::ChefServerCtl::Config.knife_config_file
 knife_cmd    = ::ChefServerCtl::Config.knife_bin
 cmd_args     = ARGV[1..-1]
 
@@ -45,18 +45,9 @@ cmds.each do |cmd, args|
     puts "DEBUG: Transformed args: #{transformed_args.inspect}"
     escaped_args = transformed_args.map { |a| Shellwords.escape(a) }.join(" ")
     # Use native knife instead of knife-opc
-    full_command = "#{knife_cmd} #{opc_noun} #{opc_cmd} #{escaped_args} -c #{knife_config} -VVV"
+    #full_command = "#{knife_cmd} #{opc_noun} #{opc_cmd} #{escaped_args} -c #{knife_config} -VVV"
+    full_command = "#{knife_cmd} #{opc_noun} #{opc_cmd} #{escaped_args} -VVV"
     puts "DEBUG: Running command: #{full_command}"
-    
-    # Debug filesystem state before running knife
-    begin
-      puts "DEBUG: /home directory contents:"
-      puts `ls -la /home 2>/dev/null || echo "  (unable to list /home)"`
-      puts "DEBUG: /home/ubuntu directory contents:"
-      puts `ls -la /home/ubuntu 2>/dev/null || echo "  (unable to list /home/ubuntu)"`
-    rescue => e
-      puts "DEBUG: Error checking directories: #{e.message}"
-    end
     
     # Special handling: for user-create capture key output and write to file
     if cmd == "user-create"
@@ -70,27 +61,50 @@ cmds.each do |cmd, args|
       puts shell.stderr
       puts "DEBUG: knife exit status: #{shell.exitstatus}"
       
+      # Debug filesystem state AFTER running knife
+      begin
+        puts "DEBUG: /home directory contents AFTER knife:"
+        puts `ls -la /home 2>/dev/null || echo "  (unable to list /home)"`
+        puts "DEBUG: /home/ubuntu directory contents AFTER knife:"
+        puts `ls -la /home/ubuntu 2>/dev/null || echo "  (unable to list /home/ubuntu)"`
+      rescue => e
+        puts "DEBUG: Error checking directories: #{e.message}"
+      end
+      
       # extract file path from args
       if (idx = transformed_args.index('--file')) && transformed_args[idx+1]
         keyfile = transformed_args[idx+1]
-        puts "DEBUG: Looking for private key in output, will write to: #{keyfile}"
+        puts "DEBUG: Looking for private key file: #{keyfile}"
         
-        # Try multiple key formats
-        key = shell.stdout[/-----BEGIN RSA PRIVATE KEY-----.*?-----END RSA PRIVATE KEY-----/m] ||
-              shell.stdout[/-----BEGIN PRIVATE KEY-----.*?-----END PRIVATE KEY-----/m] ||
-              shell.stdout[/-----BEGIN OPENSSH PRIVATE KEY-----.*?-----END OPENSSH PRIVATE KEY-----/m]
-        
-        if key
-          File.write(keyfile, key)
-          puts "DEBUG: Successfully wrote private key to #{keyfile}"
-          puts "DEBUG: Key starts with: #{key[0..50]}..."
-        else
-          puts "DEBUG: No private key found in knife output"
-          puts "DEBUG: Searching for any key-like patterns..."
-          if shell.stdout =~ /(-----BEGIN.*?-----.*?-----END.*?-----)/m
-            puts "DEBUG: Found potential key pattern: #{$1[0..100]}..."
+        # Check if knife wrote the file directly (which is what --file does)
+        if File.exist?(keyfile)
+          puts "DEBUG: Private key file was created by knife: #{keyfile}"
+          puts "DEBUG: File size: #{File.size(keyfile)} bytes"
+          # Verify it contains a key
+          content = File.read(keyfile)
+          if content =~ /-----BEGIN.*PRIVATE KEY-----/
+            puts "DEBUG: Confirmed private key file contains valid key"
           else
-            puts "DEBUG: No key patterns found at all"
+            puts "DEBUG: WARNING: File exists but doesn't contain expected key format"
+            puts "DEBUG: File content preview: #{content[0..100]}..."
+          end
+        else
+          puts "DEBUG: Private key file was not created by knife"
+          # Fallback: try to extract from stdout (legacy behavior)
+          puts "DEBUG: Attempting to extract key from stdout and write manually..."
+          
+          # Try multiple key formats
+          key = shell.stdout[/-----BEGIN RSA PRIVATE KEY-----.*?-----END RSA PRIVATE KEY-----/m] ||
+                shell.stdout[/-----BEGIN PRIVATE KEY-----.*?-----END PRIVATE KEY-----/m] ||
+                shell.stdout[/-----BEGIN OPENSSH PRIVATE KEY-----.*?-----END OPENSSH PRIVATE KEY-----/m]
+          
+          if key
+            File.write(keyfile, key)
+            puts "DEBUG: Successfully extracted and wrote private key to #{keyfile}"
+            puts "DEBUG: Key starts with: #{key[0..50]}..."
+          else
+            puts "DEBUG: No private key found in knife output and no file created"
+            puts "DEBUG: This indicates knife may not have generated a key"
           end
         end
       else
@@ -105,7 +119,7 @@ cmds.each do |cmd, args|
 end
 
 # Transform arguments from knife-opc format to native knife format
-def transform_knife_opc_args(args, chef_server_ctl_cmd, knife_noun, knife_verb)
+def transform_knife_opc_args(args, chef_server_ctl_cmd, _knife_noun, _knife_verb)
   transformed = args.dup
   
   case chef_server_ctl_cmd
@@ -141,14 +155,15 @@ def transform_knife_opc_args(args, chef_server_ctl_cmd, knife_noun, knife_verb)
         return transformed
       end
       
-      # Start with username
-      transformed = [username]
+      # Start with username (quoted like colleague's working commands)
+      transformed = ["\"#{username}\""]
       
-      # Add required flags
-      transformed << "--email" << email
+      # Use minimal working syntax (like colleague's successful commands)
+      # Don't include --first-name/--last-name as they may not be supported
+      transformed << "--email" << "\"#{email}\""
       transformed << "--password" << password
-      transformed << "--first-name" << first_name
-      transformed << "--last-name" << last_name
+      # transformed << "--first-name" << first_name
+      # transformed << "--last-name" << last_name
       
       # Handle any additional flags (like --filename/--file)
       remaining_args = args[non_flag_args.length..-1] || []
