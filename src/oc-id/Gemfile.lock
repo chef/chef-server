@@ -616,7 +616,7 @@ DEPENDENCIES
   mixlib-authentication (>= 2.1, < 4)
   nokogiri (= 1.15.6)
   omniauth-chef (~> 0.4)
-  pg (>= 0.18, < 2.0)
+  pg (>= 0.18, < 1.6)
   pry-byebug
   rails (~> 7.0.8.1)
   rails-controller-testing
