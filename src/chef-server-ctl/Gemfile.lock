@@ -15,7 +15,7 @@ PATH
       mixlib-install
       mixlib-log
       omnibus-ctl (<= 0.6.10)
-      pg (~> 1.2, >= 1.2.3)
+      pg (~> 1.2, >= 1.2.3, < 1.6.0)
       redis
       rest-client
       uuidtools (~> 2.1, >= 2.1.3)
