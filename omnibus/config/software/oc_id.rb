@@ -43,7 +43,17 @@ build do
   env = with_standard_compiler_flags(with_embedded_path)
   env['PATH'] = "#{env['PATH']}:#{install_dir}/embedded/nodejs/bin"
 
-  bundle "config build.nokogiri --use-system-libraries" \
+  # Create .bundle directory for configuration
+  mkdir "#{project_dir}/.bundle"
+
+  # Create a bundle config file to force platform to ruby
+  File.open("#{project_dir}/.bundle/config", "w") do |f|
+    f.puts "---"
+    f.puts "BUNDLE_FORCE_RUBY_PLATFORM: 'true'"
+  end
+
+  # Configure nokogiri to use system libraries and ruby platform
+  bundle "config build.nokogiri --platform=ruby --use-system-libraries" \
          " --with-xml2-config=#{install_dir}/embedded/bin/xml2-config" \
          " --with-xslt-config=#{install_dir}/embedded/bin/xslt-config"
 
@@ -51,6 +61,10 @@ build do
   bundle "config build.pg --with-pg-config=#{install_dir}/embedded/bin/pg_config", env: env
 
   bundle "config set --local without development test doc", env: env
+  
+  # Force install nokogiri with ruby platform
+  bundle "config set force_ruby_platform true", env: env
+  
   bundle "install" \
          " --path=#{install_dir}/embedded/service/gem", env: env
 
