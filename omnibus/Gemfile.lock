@@ -1,6 +1,6 @@
 GIT
   remote: https://github.com/chef/omnibus-software.git
-  revision: 692cba6056f4661336708fea24e79be488264066 
+  revision: b9b586e3d5fffb6ab51380052b62e1561c087d5a
   branch: main
   specs:
     omnibus-software (25.7.330)
@@ -8,8 +8,8 @@ GIT
 
 GIT
   remote: https://github.com/chef/omnibus.git
-  revision: 0fa193a9631c59d58bd379edf4247264715f113c
-  branch: poorndm/overide-download-tuxcare 
+  revision: c885825f1886cfe3d7a2e139e40de1f5b4b91374
+  branch: main
   specs:
     omnibus (9.1.0)
       aws-sdk-s3 (~> 1.116.0)
