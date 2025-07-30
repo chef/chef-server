@@ -1,6 +1,6 @@
 install:
 	bundle config set --local without development
-	bundle install --deployment
+	bundle install --deployment --force_ruby_platform
 	psql -c 'create database oc_id_test;' -U postgres
 
 travis: ci

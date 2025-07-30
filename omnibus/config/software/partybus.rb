@@ -26,6 +26,8 @@ dependency "postgresql13"
 build do
   env = with_standard_compiler_flags(with_embedded_path)
 
+  # Configure pg gem to use embedded PostgreSQL
+  bundle "config build.pg --with-pg-config=#{install_dir}/embedded/bin/pg_config", env: env
   bundle "config set --local without mysql", env: env
   bundle "install" \
          " --path=#{install_dir}/embedded/service/gem", env: env
