@@ -1,0 +1,4 @@
+source 'https://rubygems.org'
+
+gem 'berkshelf', '~> 8.0.22'
+gem 'archive-tar-minitar' # required by berkshelf for packaging operations
