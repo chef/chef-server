@@ -14,4 +14,4 @@
 #
 
 node.default['private_chef']['nginx']['enable_non_ssl'] = true
-node.default['private_chef']['nginx']['ssl_ciphers'] = 'FIPS@STRENGTH:!aNULL:!eNULL'
+node.default['private_chef']['nginx']['ssl_ciphers'] = 'ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256'
