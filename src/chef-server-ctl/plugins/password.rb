@@ -44,11 +44,11 @@ add_command_under_category "password", "organization-and-user-management", "Set 
               end
 
     # enable system recovery and update the password
-    run_knife_opc_cmd("#{knife_cmd} #{Shellwords.escape(username)} #{Shellwords.escape(password)} -c #{knife_config}", message)
+    run_knife_cmd("#{knife_cmd} #{Shellwords.escape(username)} #{Shellwords.escape(password)} -c #{knife_config}", message)
 
   else # if --enable-external-auth was passed, enable ldap for this user
     if ldap_authentication_enabled?
-      run_knife_opc_cmd("#{knife_cmd} #{Shellwords.escape(username)} --enable-external-auth -c #{knife_config}", "External authentication enable for user.")
+      run_knife_cmd("#{knife_cmd} #{Shellwords.escape(username)} --enable-external-auth -c #{knife_config}", "External authentication enable for user.")
     else # doesn't make sense to pass --enable-external-auth if ldap isn't in use on the system
       STDERR.puts "External authentication (such as LDAP) must be enabled to clear a user's password."
       exit 1
@@ -57,7 +57,7 @@ add_command_under_category "password", "organization-and-user-management", "Set 
 end
 
 # Private Script Functions
-def run_knife_opc_cmd(cmd, message)
+def run_knife_cmd(cmd, message)
   run_command(cmd)
   if $?.exitstatus != 0
     STDERR.puts "Command failed"
