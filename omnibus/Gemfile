@@ -5,11 +5,13 @@ group :omnibus do
   gem "omnibus", github: ENV.fetch("OMNIBUS_GITHUB_REPO", "chef/omnibus"), branch: ENV.fetch("OMNIBUS_GITHUB_BRANCH", "main")
   gem "omnibus-software", github: ENV.fetch("OMNIBUS_SOFTWARE_GITHUB_REPO", "chef/omnibus-software"), branch: ENV.fetch("OMNIBUS_SOFTWARE_GITHUB_BRANCH", "main")
   gem 'artifactory'
+  gem 'license_scout',   git: "https://github.com/chef/license_scout.git", branch: "1-stable"
 end
 
 group :test do
   gem 'test-kitchen' # for Test Kitchen testing of the omnibus builds
-  gem 'berkshelf' # depsolving the Test Kitchen suite
-  gem 'chef', '< 18' # Do not pull in chef 18 until the build image is updated with > ruby 3.0
+  gem 'berkshelf', '~> 8.0.22' # depsolving the Test Kitchen suite
+  gem 'archive-tar-minitar' # required by berkshelf for packaging
+  gem 'chef', '~> 18.7.10'
   gem 'rake'
 end

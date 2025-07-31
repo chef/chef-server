@@ -16,6 +16,8 @@
 # limitations under the License.
 #
 
+require 'chef-utils/dist'
+
 # If no sign_up_url is defined, use the server URL.
 #
 # We don't have a clear way to detect whether Manage is installed or running or
@@ -156,6 +158,36 @@ link database_file do
   to "#{node['private_chef']['oc_id']['dir']}/config/database.yml"
 end
 
+# Ensure the secrets file is accessible to Rails at the expected location
+secrets_link = "/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/embedded/service/oc_id/config/private-#{ChefUtils::Dist::Infra::SHORT}-secrets.json"
+file secrets_link do
+  action :delete
+  not_if { File.symlink?(secrets_link) }
+end
+
+link secrets_link do
+  to "/etc/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/private-#{ChefUtils::Dist::Infra::SHORT}-secrets.json"
+end
+
+# # Create monkey patch file to fix Veil credential handling
+# template "#{oc_id_config_dir}/veil_monkey_patch.rb" do
+#   source 'veil_monkey_patch.rb'
+#   owner OmnibusHelper.new(node).ownership['owner']
+#   group OmnibusHelper.new(node).ownership['group']
+#   mode '640'
+# end
+
+# # Symlink monkey patch into Rails initializers
+# monkey_patch_file = "/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/embedded/service/oc_id/config/initializers/veil_monkey_patch.rb"
+# file monkey_patch_file do
+#   action :delete
+#   not_if { File.symlink?(monkey_patch_file) }
+# end
+
+# link monkey_patch_file do
+#   to "#{oc_id_config_dir}/veil_monkey_patch.rb"
+# end
+
 # Ensure log files are owned by opscode. In Chef 12.14 the svlogd
 # service was changed to run as opscode rather than root. This is done
 # as an execute to avoid issues with the `current` file not being
@@ -193,6 +225,9 @@ end
 
 component_runit_service 'oc_id' do
   package 'private_chef'
+  retries 10
+  retry_delay 1
+
 end
 
 if node['private_chef']['bootstrap']['enable']

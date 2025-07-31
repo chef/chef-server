@@ -64,10 +64,11 @@ GEM
 
 PLATFORMS
   ruby
+  x86_64-linux
 
 DEPENDENCIES
   oc-bifrost-pedant!
   veil
 
 BUNDLED WITH
-   2.1.4
+   2.6.9
