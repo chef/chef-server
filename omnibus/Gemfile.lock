@@ -1,14 +1,24 @@
 GIT
+  remote: https://github.com/chef/license_scout.git
+  revision: 9f00bccb86bea89193b0fc745aed654be2d14046
+  branch: 1-stable
+  specs:
+    license_scout (1.3.19)
+      ffi-yajl (~> 2.2)
+      mixlib-shellout (>= 2.2, < 4.0)
+      toml-rb (>= 1, < 3)
+
+GIT
   remote: https://github.com/chef/omnibus-software.git
-  revision: b9b586e3d5fffb6ab51380052b62e1561c087d5a
+  revision: d3688eca9503fcdbd0461dcdb5103fe3b88af3a5
   branch: main
   specs:
-    omnibus-software (25.7.330)
+    omnibus-software (25.7.332)
       omnibus (>= 9.0.0)
 
 GIT
   remote: https://github.com/chef/omnibus.git
-  revision: c885825f1886cfe3d7a2e139e40de1f5b4b91374
+  revision: d3264e1fa66cb53ea1124f45c0b9c04ff7c0cdf0
   branch: main
   specs:
     omnibus (9.1.0)
@@ -29,7 +39,7 @@ GIT
 GEM
   remote: https://rubygems.org/
   specs:
-    activesupport (7.2.2.1)
+    activesupport (8.0.2)
       base64
       benchmark (>= 0.3)
       bigdecimal
@@ -41,6 +51,7 @@ GEM
       minitest (>= 5.1)
       securerandom (>= 0.3)
       tzinfo (~> 2.0, >= 2.0.5)
+      uri (>= 0.13.1)
     addressable (2.8.7)
       public_suffix (>= 2.0.2, < 7.0)
     archive-tar-minitar (0.5.2)
@@ -48,7 +59,7 @@ GEM
     ast (2.4.3)
     awesome_print (1.9.2)
     aws-eventstream (1.4.0)
-    aws-partitions (1.1135.0)
+    aws-partitions (1.1138.0)
     aws-sdk-core (3.227.0)
       aws-eventstream (~> 1, >= 1.3.0)
       aws-partitions (~> 1, >= 1.992.0)
@@ -56,7 +67,7 @@ GEM
       base64
       jmespath (~> 1, >= 1.6.1)
       logger
-    aws-sdk-kms (1.107.0)
+    aws-sdk-kms (1.108.0)
       aws-sdk-core (~> 3, >= 3.227.0)
       aws-sigv4 (~> 1.5)
     aws-sdk-s3 (1.116.0)
@@ -184,7 +195,7 @@ GEM
     ed25519 (1.4.0)
     erubi (1.13.1)
     erubis (2.7.0)
-    faraday (2.13.3)
+    faraday (2.13.4)
       faraday-net_http (>= 2.0, < 3.5)
       json
       logger
@@ -239,7 +250,7 @@ GEM
     iostruct (0.5.0)
     ipaddress (0.8.3)
     jmespath (1.6.2)
-    json (2.13.1)
+    json (2.13.2)
     language_server-protocol (3.17.0.5)
     libyajl2 (2.1.0)
     license-acceptance (2.1.13)
@@ -247,10 +258,6 @@ GEM
       tomlrb (>= 1.2, < 3.0)
       tty-box (~> 0.6)
       tty-prompt (~> 0.20)
-    license_scout (1.3.18)
-      ffi-yajl (~> 2.2)
-      mixlib-shellout (>= 2.2, < 4.0)
-      toml-rb (>= 1, < 3)
     lint_roller (1.1.0)
     little-plugger (1.1.4)
     logger (1.7.0)
@@ -261,7 +268,7 @@ GEM
     mime-types (3.7.0)
       logger
       mime-types-data (~> 3.2025, >= 3.2025.0507)
-    mime-types-data (3.2025.0722)
+    mime-types-data (3.2025.0729)
     minitar (1.0.2)
     minitest (5.25.5)
     mixlib-archive (1.1.7)
@@ -317,7 +324,7 @@ GEM
       train-core
       wmi-lite (~> 1.0)
     parallel (1.27.0)
-    parser (3.3.8.0)
+    parser (3.3.9.0)
       ast (~> 2.4.1)
       racc
     parslet (2.0.0)
@@ -337,7 +344,7 @@ GEM
       method_source (~> 1.0)
     public_suffix (6.0.2)
     racc (1.8.1)
-    rack (3.1.16)
+    rack (3.2.0)
     rackup (2.2.1)
       rack (>= 3)
     rainbow (3.1.1)
@@ -399,7 +406,7 @@ GEM
       unicode_utils (~> 1.4)
     strings-ansi (0.2.0)
     syslog-logger (1.6.8)
-    test-kitchen (3.8.0)
+    test-kitchen (3.8.1)
       bcrypt_pbkdf (~> 1.0)
       chef-utils (>= 16.4.35)
       ed25519 (~> 1.3)
@@ -494,6 +501,7 @@ DEPENDENCIES
   artifactory
   berkshelf (~> 8.0.22)
   chef (~> 18.7.10)
+  license_scout!
   omnibus!
   omnibus-software!
   rake
