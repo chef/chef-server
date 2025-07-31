@@ -15,6 +15,6 @@ override :sqitch, version: "0.973"
 override :logrotate, version: "3.19.0"
 
 # update `src/openresty-noroot/habitat/plan.sh` when updating this version.
-override :openresty, version: "1.27.1.2"
+override :openresty, version: "1.25.3.1"
 
 override :openssl, version: "3.2.4", fips_version: "3.1.2"
