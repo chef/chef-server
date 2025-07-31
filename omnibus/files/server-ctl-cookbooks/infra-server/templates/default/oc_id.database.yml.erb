@@ -10,3 +10,6 @@ production:
   username: <%= node['private_chef']['oc_id']['sql_connection_user'] || node['private_chef']['oc_id']['sql_user'] %>
   password: <%= "\<%= Secrets.get('oc_id', 'sql_password') %\>" %>
   sslmode: <%= node['private_chef']['postgresql']['sslmode'] %>
+
+
+# This password will be overridden by Rails when it starts up using the Secrets class, but we need to provide a placeholder here for the initial database connection during migrations.

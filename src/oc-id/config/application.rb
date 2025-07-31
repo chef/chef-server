@@ -11,6 +11,9 @@ require "sprockets/railtie"
 # you've limited to :test, :development, or :production.
 Bundler.require(:default, Rails.env)
 
+# Load secrets early to make them available during database configuration
+require_relative 'initializers/00_secrets'
+
 module OcId
   class Application < Rails::Application
     # Settings in config/environments/* take precedence over those specified here.
