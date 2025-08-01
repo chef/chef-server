@@ -9,7 +9,7 @@ pkg_deps=(
   core/curl
   core/openssl
   core/gcc-libs
-  core/ruby3_1/3.1.7/20250714070610
+  core/ruby3_1/3.1.7
   core/sqitch
   core/gecode3
   core/libffi
