@@ -43,9 +43,20 @@ cmds.each do |cmd, args|
     puts "DEBUG: Input args: #{cmd_args.inspect}"
     transformed_args = transform_knife_opc_args(cmd_args, cmd, opc_noun, opc_cmd)
     puts "DEBUG: Transformed args: #{transformed_args.inspect}"
-    escaped_args = transformed_args.map { |a| Shellwords.escape(a) }.join(" ")
+    
+    server_url = get_server_url()
+    
+    # Build authentication arguments directly here
+    auth_args = []
+    auth_args << "--server-url" << server_url
+    auth_args << "--user" << "pivotal"
+    auth_args << "--key" << "/etc/opscode/pivotal.pem"
+    auth_args << "--config-option" << "ssl_verify_mode=verify_none"
+    
+    puts "DEBUG: Auth args: #{auth_args.inspect}"
+    
+    escaped_args = (transformed_args + auth_args).map { |a| Shellwords.escape(a) }.join(" ")
     # Use native knife instead of knife-opc
-    #full_command = "#{knife_cmd} #{opc_noun} #{opc_cmd} #{escaped_args} -c #{knife_config} -VVV"
     full_command = "#{knife_cmd} #{opc_noun} #{opc_cmd} #{escaped_args} -VVV"
     puts "DEBUG: Running command: #{full_command}"
     
@@ -214,4 +225,19 @@ def transform_knife_opc_args(args, chef_server_ctl_cmd, _knife_noun, _knife_verb
   end
   
   transformed
+end
+
+# Get the Chef Server URL for knife commands
+def get_server_url()
+  # Get server URL - use lb_url from ChefServerCtl::Config
+  begin
+    server_url = ::ChefServerCtl::Config.lb_url
+    puts "DEBUG: Using server URL from config: #{server_url}"
+  rescue => e
+    puts "DEBUG: Failed to get lb_url from config: #{e.message}"
+    server_url = "https://localhost"
+    puts "DEBUG: Falling back to server URL: #{server_url}"
+  end
+  
+  server_url
 end
