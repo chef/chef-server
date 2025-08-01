@@ -21,6 +21,9 @@ fetcher_read_timeout 120
 
 fatal_transitive_dependency_licensing_warnings true
 
+# use_internal_sources ENV.fetch("OMNIBUS_USE_INTERNAL_SOURCES", true)
+
 # Build in FIPS compatability mode
 # ------------------------------
 fips_mode (ENV['OMNIBUS_FIPS_MODE'] || '').downcase == "true"
+

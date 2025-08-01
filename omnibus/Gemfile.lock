@@ -8,8 +8,8 @@ GIT
 
 GIT
   remote: https://github.com/chef/omnibus.git
-  revision: c885825f1886cfe3d7a2e139e40de1f5b4b91374
-  branch: main
+  revision: 0fa193a9631c59d58bd379edf4247264715f113c
+  branch: poorndm/overide-download-tuxcare
   specs:
     omnibus (9.1.0)
       aws-sdk-s3 (~> 1.116.0)
