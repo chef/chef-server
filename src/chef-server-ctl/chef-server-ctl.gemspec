@@ -41,7 +41,7 @@ Gem::Specification.new do |spec|
 
   spec.add_runtime_dependency "appbundler"
 
-  spec.add_runtime_dependency "chef"
+  spec.add_runtime_dependency "chef", "~> 18.7.10"
   spec.add_runtime_dependency "knife"
 
   # tools we bundle in the chef-server install and include here so we can have a single Gemfile.lock
@@ -55,5 +55,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "chefstyle"
   spec.add_development_dependency "rake"
   spec.add_development_dependency "rspec"
-  spec.add_development_dependency "berkshelf" # needed for the berks install
+  spec.add_development_dependency "berkshelf", "~> 8.0.22" # needed for the berks install
 end
