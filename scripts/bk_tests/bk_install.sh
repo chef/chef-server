@@ -9,7 +9,7 @@ set -e
 # The fix:
 # 1. Add `deb https://apt-archive.postgresql.org/pub/repos/apt bionic-pgdg main` to sources.list
 # 2. Remove /etc/apt/sources.list.d/pgdg.list
-sudo echo "deb https://apt.postgresql.org/pub/repos/apt/ focal-pgdg main 13">>/etc/apt/sources.list
+sudo echo "deb https://apt-archive.postgresql.org/pub/repos/apt/ focal-pgdg main 13">>/etc/apt/sources.list
 rm -f /etc/apt/sources.list.d/pgdg.list
 
 echo "Removing postgresql-9.3"
@@ -51,7 +51,7 @@ asdf local erlang 26.2.5.14
 erl -eval 'erlang:display(erlang:system_info(otp_release)), halt().' -noshell
 
 echo "Installing Bundler"
-gem install bundler --version '~> 1.17' --no-document
+gem install bundler --version '~> 2.1' --no-document
 
 echo "Installing Lua"
 export LUALIB=~/.luarocks/lib/lua/5.2
