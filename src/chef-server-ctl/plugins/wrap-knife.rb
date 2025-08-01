@@ -17,7 +17,10 @@ require "shellwords"
 require "chef-utils"
 
 # knife_config = ::ChefServerCtl::Config.knife_config_file
-knife_cmd    = ::ChefServerCtl::Config.knife_bin
+knife_cmd    = "knife"
+puts "=== REVISION 4 - ADDING sudo TO KNIFE COMMAND ==="
+puts "DEBUG: Using knife from PATH: #{knife_cmd}"
+puts "KNIFE PATH: #{knife_cmd}"
 cmd_args     = ARGV[1..-1]
 
 cmds = {
@@ -55,32 +58,48 @@ cmds.each do |cmd, args|
     
     puts "DEBUG: Auth args: #{auth_args.inspect}"
     
-    escaped_args = (transformed_args + auth_args).map { |a| Shellwords.escape(a) }.join(" ")
-    # Use native knife instead of knife-opc
-    full_command = "#{knife_cmd} #{opc_noun} #{opc_cmd} #{escaped_args} -VVV"
-    puts "DEBUG: Running command: #{full_command}"
+    # Build command args - don't escape config options with = signs
+    all_args = transformed_args + auth_args
+    escaped_args = all_args.map do |arg|
+      # Don't escape arguments that contain = (like config options)
+      if arg.include?('=')
+        arg
+      else
+        Shellwords.escape(arg)
+      end
+    end.join(" ")
+    
+    # Use native knife instead of knife-opc (remove -VVV which might interfere)
+    full_command = "#{knife_cmd} #{opc_noun} #{opc_cmd} #{escaped_args}"
+    puts "===== EXECUTING COMMAND: #{full_command} ====="
     
     # Special handling: for user-create capture key output and write to file
     if cmd == "user-create"
       require 'mixlib/shellout'
-      shell = Mixlib::ShellOut.new(full_command)
-      shell.run_command
-      puts "DEBUG: knife stdout length: #{shell.stdout.length}"
-      puts "DEBUG: knife stdout content:"
-      puts shell.stdout
-      puts "DEBUG: knife stderr content:"
-      puts shell.stderr
-      puts "DEBUG: knife exit status: #{shell.exitstatus}"
       
-      # Debug filesystem state AFTER running knife
-      begin
-        puts "DEBUG: /home directory contents AFTER knife:"
-        puts `ls -la /home 2>/dev/null || echo "  (unable to list /home)"`
-        puts "DEBUG: /home/ubuntu directory contents AFTER knife:"
-        puts `ls -la /home/ubuntu 2>/dev/null || echo "  (unable to list /home/ubuntu)"`
-      rescue => e
-        puts "DEBUG: Error checking directories: #{e.message}"
-      end
+      # Debug working directory
+      puts "DEBUG: Current working directory: #{`pwd`.strip}"
+      puts "DEBUG: HOME environment variable: #{`echo $HOME`.strip}"
+      puts "DEBUG: pwd command output: #{`pwd`.strip}"
+      puts "DEBUG: Directory contents BEFORE knife:"
+      puts `ls -la`
+      
+      # Use system() instead of Mixlib::ShellOut to match manual execution
+      puts "DEBUG: Executing with system() instead of Mixlib::ShellOut"
+      puts "DEBUG: About to execute: #{full_command}"
+      
+      # Try using exec form to avoid shell interpretation issues
+      args_array = ["sudo", knife_cmd, opc_noun, opc_cmd] + all_args
+      puts "DEBUG: Exec array form: #{args_array.inspect}"
+      
+      # Use spawn with explicit arguments instead of shell string
+      pid = spawn(*args_array)
+      _, status = Process.wait2(pid)
+      puts "DEBUG: spawn() exit status: #{status.exitstatus}"
+      puts "DEBUG: spawn() success?: #{status.success?}"
+      
+      puts "DEBUG: Directory contents AFTER knife:"
+      puts `ls -la`
       
       # extract file path from args
       if (idx = transformed_args.index('--file')) && transformed_args[idx+1]
@@ -89,39 +108,15 @@ cmds.each do |cmd, args|
         
         # Check if knife wrote the file directly (which is what --file does)
         if File.exist?(keyfile)
-          puts "DEBUG: Private key file was created by knife: #{keyfile}"
+          puts "DEBUG: SUCCESS! Private key file was created: #{keyfile}"
           puts "DEBUG: File size: #{File.size(keyfile)} bytes"
-          # Verify it contains a key
-          content = File.read(keyfile)
-          if content =~ /-----BEGIN.*PRIVATE KEY-----/
-            puts "DEBUG: Confirmed private key file contains valid key"
-          else
-            puts "DEBUG: WARNING: File exists but doesn't contain expected key format"
-            puts "DEBUG: File content preview: #{content[0..100]}..."
-          end
         else
-          puts "DEBUG: Private key file was not created by knife"
-          # Fallback: try to extract from stdout (legacy behavior)
-          puts "DEBUG: Attempting to extract key from stdout and write manually..."
-          
-          # Try multiple key formats
-          key = shell.stdout[/-----BEGIN RSA PRIVATE KEY-----.*?-----END RSA PRIVATE KEY-----/m] ||
-                shell.stdout[/-----BEGIN PRIVATE KEY-----.*?-----END PRIVATE KEY-----/m] ||
-                shell.stdout[/-----BEGIN OPENSSH PRIVATE KEY-----.*?-----END OPENSSH PRIVATE KEY-----/m]
-          
-          if key
-            File.write(keyfile, key)
-            puts "DEBUG: Successfully extracted and wrote private key to #{keyfile}"
-            puts "DEBUG: Key starts with: #{key[0..50]}..."
-          else
-            puts "DEBUG: No private key found in knife output and no file created"
-            puts "DEBUG: This indicates knife may not have generated a key"
-          end
+          puts "DEBUG: ERROR! Private key file was not created: #{keyfile}"
         end
       else
         puts "DEBUG: No --file argument found in transformed args"
       end
-      exit shell.exitstatus
+      exit(status.exitstatus || 0)
     else
       status = run_command(full_command)
       exit status.exitstatus
@@ -166,12 +161,12 @@ def transform_knife_opc_args(args, chef_server_ctl_cmd, _knife_noun, _knife_verb
         return transformed
       end
       
-      # Start with username (quoted like colleague's working commands)
-      transformed = ["\"#{username}\""]
+      # Start with username (pass through as-is, let user control quoting)
+      transformed = [username]
       
       # Use minimal working syntax (like colleague's successful commands)
       # Don't include --first-name/--last-name as they may not be supported
-      transformed << "--email" << "\"#{email}\""
+      transformed << "--email" << email
       transformed << "--password" << password
       # transformed << "--first-name" << first_name
       # transformed << "--last-name" << last_name
