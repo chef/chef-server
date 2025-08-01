@@ -44,7 +44,7 @@ build do
   env['PATH'] = "#{env['PATH']}:#{install_dir}/embedded/nodejs/bin"
 
   # Create bundle directory if it doesn't exist
-  mkdir ".bundle" unless File.exists?(".bundle")
+  mkdir ".bundle" unless File.exist?(".bundle")
 
   # Create a bundle config file directly with command
   bundle "config set --local force_ruby_platform true", env: env
