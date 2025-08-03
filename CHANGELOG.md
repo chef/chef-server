@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.10.45 -->
-## [15.10.45](https://github.com/chef/chef-server/tree/15.10.45) (2025-07-31)
+<!-- latest_release 15.10.46 -->
+## [15.10.46](https://github.com/chef/chef-server/tree/15.10.46) (2025-08-03)
 
 #### Merged Pull Requests
-- Pin pg gem version &lt; 1.6 for older linux distros [#4041](https://github.com/chef/chef-server/pull/4041) ([RoyShravani](https://github.com/RoyShravani))
+- Upgrade nokogiri to 1.18.9 [#4043](https://github.com/chef/chef-server/pull/4043) ([RoyShravani](https://github.com/RoyShravani))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.10.33 -->
 ### Changes since 15.10.33 release
 
 #### Merged Pull Requests
+- Upgrade nokogiri to 1.18.9 [#4043](https://github.com/chef/chef-server/pull/4043) ([RoyShravani](https://github.com/RoyShravani)) <!-- 15.10.46 -->
 - Pin pg gem version &lt; 1.6 for older linux distros [#4041](https://github.com/chef/chef-server/pull/4041) ([RoyShravani](https://github.com/RoyShravani)) <!-- 15.10.45 -->
 - Updating the erlang version 26.2 [#4025](https://github.com/chef/chef-server/pull/4025) ([talktovikas](https://github.com/talktovikas)) <!-- 15.10.44 -->
 - [CHEF-23713] Update Ruby to 3.1.7 version [#4028](https://github.com/chef/chef-server/pull/4028) ([RoyShravani](https://github.com/RoyShravani)) <!-- 15.10.43 -->
