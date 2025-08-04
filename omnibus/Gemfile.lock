@@ -8,8 +8,8 @@ GIT
 
 GIT
   remote: https://github.com/chef/omnibus.git
-  revision: 0fa193a9631c59d58bd379edf4247264715f113c
-  branch: poorndm/overide-download-tuxcare
+  revision: 1e60f2f6cefca41efb07c6c227e731bb196b90cc
+  branch: sean-sype-simmons/CHEF-24775-OmnibusConfigurationPipelineConfigurations3CacheCconfiguration
   specs:
     omnibus (9.1.0)
       aws-sdk-s3 (~> 1.116.0)
