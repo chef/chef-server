@@ -1,0 +1,2 @@
+#!/bin/bash
+export ARTIFACTORY_REPO_URL="https://artifactory-internal.ps.chef.co/artifactory/omnibus-software-local"
