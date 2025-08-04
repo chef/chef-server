@@ -1,3 +1,32 @@
+require 'omnibus/s3_helpers'
+
+module Omnibus
+  module S3Helpers
+    module InstanceMethods
+      # Patch the bucket creation method
+      alias_method :original_bucket, :bucket
+      
+      def bucket
+        @s3_bucket ||= begin
+          bucket = client.bucket(s3_configuration[:bucket_name])
+          unless bucket.exists?
+            bucket_config = if s3_configuration[:region] == "us-east-1"
+                             nil
+                           else
+                             {
+                               location_constraint: s3_configuration[:region],
+                             }
+                           end
+            # Add explicit private ACL when creating the bucket
+            bucket.create(create_bucket_configuration: bucket_config, acl: 'private')
+          end
+          bucket
+        end
+      end
+    end
+  end
+end
+
 require 'omnibus/s3_cache'
 
 module Omnibus
