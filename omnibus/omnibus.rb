@@ -1,3 +1,36 @@
+require 'omnibus/s3_cache'
+
+module Omnibus
+  class S3Cache
+    class << self
+      alias_method :original_populate, :populate
+      
+      def populate
+        missing.each do |software|
+          without_caching do
+            software.fetch
+          end
+
+          key     = key_for(software)
+          fetcher = software.fetcher
+
+          log.info(log_key) do
+            "Caching '#{fetcher.downloaded_file}' to '#{Config.s3_bucket}/#{key}'"
+          end
+
+          md5 = digest(fetcher.downloaded_file, :md5)
+
+          File.open(fetcher.downloaded_file, "rb") do |file|
+            store_object(key, file, md5, "private")  # Changed to private
+          end
+        end
+
+        true
+      end
+    end
+  end
+end
+
 # Disable git caching
 # ------------------------------
 # use_git_caching false
