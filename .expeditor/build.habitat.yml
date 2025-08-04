@@ -1,4 +1,17 @@
 ---
+env:
+  HAB_BLDR_CHANNEL: "LTS-2024"
+  HAB_STUDIO_SECRET_HAB_FALLBACK_CHANNEL: "LTS-2024"
+  HAB_FALLBACK_CHANNEL: "dev"
 
 origin: chef
 smart_build: false
+studio_secrets:
+  HAB_BLDR_CHANNEL:
+    value: "LTS-2024"
+  HAB_STUDIO_SECRET_HAB_FALLBACK_CHANNEL:
+    value: "dev"
+  HAB_FALLBACK_CHANNEL:
+    value: "dev"
+
+
