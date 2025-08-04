@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.10.46 -->
-## [15.10.46](https://github.com/chef/chef-server/tree/15.10.46) (2025-08-03)
+<!-- latest_release 15.10.47 -->
+## [15.10.47](https://github.com/chef/chef-server/tree/15.10.47) (2025-08-04)
 
 #### Merged Pull Requests
-- Upgrade nokogiri to 1.18.9 [#4043](https://github.com/chef/chef-server/pull/4043) ([RoyShravani](https://github.com/RoyShravani))
+- Bump webrick from 1.7.0 to 1.8.2 in /src/chef-server-ctl [#3944](https://github.com/chef/chef-server/pull/3944) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.10.33 -->
 ### Changes since 15.10.33 release
 
 #### Merged Pull Requests
+- Bump webrick from 1.7.0 to 1.8.2 in /src/chef-server-ctl [#3944](https://github.com/chef/chef-server/pull/3944) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.10.47 -->
 - Upgrade nokogiri to 1.18.9 [#4043](https://github.com/chef/chef-server/pull/4043) ([RoyShravani](https://github.com/RoyShravani)) <!-- 15.10.46 -->
 - Pin pg gem version &lt; 1.6 for older linux distros [#4041](https://github.com/chef/chef-server/pull/4041) ([RoyShravani](https://github.com/RoyShravani)) <!-- 15.10.45 -->
 - Updating the erlang version 26.2 [#4025](https://github.com/chef/chef-server/pull/4025) ([talktovikas](https://github.com/talktovikas)) <!-- 15.10.44 -->
