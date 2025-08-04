@@ -239,3 +239,5 @@ exceptions:
       reason: Exception made by Chef Legal
     - name : core/tzdata
       reason: Exception made by Chef Legal
+    - name: core/gawk
+      reason: Exception made by Chef Legal
