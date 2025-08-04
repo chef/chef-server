@@ -8,6 +8,13 @@ end
 
 require_relative 'config/application'
 
+# Ensure bundler is set up and gems are available
+require_relative 'config/boot'
+
+# Load the Secrets class before the application to ensure it's available for database.yml parsing
+require 'veil'
+require_relative 'config/initializers/00_secrets'
+
 OcId::Application.load_tasks
 
 task :default => :spec
