@@ -757,6 +757,7 @@ DEPENDENCIES
   jwt
   mailcatcher
   mixlib-authentication (>= 2.1, < 4)
+  mutex_m
   nokogiri (= 1.18.9)
   omniauth-chef (~> 0.4.1)!
   pg (>= 0.18, < 1.6)
