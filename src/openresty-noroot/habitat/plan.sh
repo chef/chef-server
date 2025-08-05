@@ -54,7 +54,7 @@ do_build() {
     --error-log-path=stderr \
     --with-ipv6 \
     --with-debug \
-    --with-pcre \
+    --with-pcre="$(pkg_path_for core/pcre2)" \
     --with-md5-asm \
     --with-pcre-jit \
     --with-sha1-asm \
