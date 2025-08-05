@@ -96,7 +96,9 @@ cmds.each do |cmd, args|
       begin
         # Use Mixlib::ShellOut - the Chef-native way with sudo
         # puts "DEBUG: Using Mixlib::ShellOut with sudo prefix"
-        full_command_with_sudo = "sudo #{full_command}"
+        # Original: full_command_with_sudo = "sudo #{full_command}"
+        # Try multiple knife paths: /opt/opscode/bin/knife || /opt/opscode/embedded/bin/knife || /usr/bin/knife || /usr/local/bin/knife
+        full_command_with_sudo = "sudo #{full_command.sub('knife', '/opt/opscode/bin/knife')} || sudo #{full_command.sub('knife', '/opt/opscode/embedded/bin/knife')} || sudo #{full_command.sub('knife', '/usr/bin/knife')} || sudo #{full_command.sub('knife', '/usr/local/bin/knife')}"
         # puts "DEBUG: About to execute: #{full_command_with_sudo}"
         
         shell = Mixlib::ShellOut.new(full_command_with_sudo)
@@ -155,7 +157,10 @@ cmds.each do |cmd, args|
         exit(1)
       end
     else
-      status = run_command(full_command)
+      # Original: status = run_command(full_command)
+      # Try multiple knife paths: /opt/opscode/bin/knife || /opt/opscode/embedded/bin/knife || /usr/bin/knife || /usr/local/bin/knife
+      multi_path_command = "#{full_command.sub('knife', '/opt/opscode/bin/knife')} || #{full_command.sub('knife', '/opt/opscode/embedded/bin/knife')} || #{full_command.sub('knife', '/usr/bin/knife')} || #{full_command.sub('knife', '/usr/local/bin/knife')}"
+      status = run_command(multi_path_command)
       exit status.exitstatus
     end
   end
