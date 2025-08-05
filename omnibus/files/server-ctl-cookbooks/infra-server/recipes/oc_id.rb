@@ -193,6 +193,9 @@ end
 
 component_runit_service 'oc_id' do
   package 'private_chef'
+  retries 10
+  retry_delay 1
+
 end
 
 if node['private_chef']['bootstrap']['enable']
