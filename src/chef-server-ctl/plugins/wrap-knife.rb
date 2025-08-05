@@ -16,11 +16,7 @@
 require "shellwords"
 require "chef-utils"
 
-# knife_config = ::ChefServerCtl::Config.knife_config_file
 knife_cmd    = "knife"
-  # puts "=== REVISION 8 - BACK TO WORKING SUDO + CHOWN WITH TRANSACTION ==="
-  # puts "DEBUG: Using knife from PATH:"
-  # puts "KNIFE PATH: #{`which knife`.strip}"
 cmd_args     = ARGV[1..-1]
 
 cmds = {
@@ -43,9 +39,7 @@ cmds.each do |cmd, args|
   description = args[2]
   add_command_under_category cmd, "organization-and-user-management", description, 2 do
     # Transform knife-opc arguments to native knife format
-    # puts "DEBUG: Input args: #{cmd_args.inspect}"
     transformed_args = transform_knife_opc_args(cmd_args, cmd, opc_noun, opc_cmd)
-    # puts "DEBUG: Transformed args: #{transformed_args.inspect}"
     
     server_url = get_server_url()
     
@@ -55,8 +49,6 @@ cmds.each do |cmd, args|
     auth_args << "--user" << "pivotal"
     auth_args << "--key" << "/etc/opscode/pivotal.pem"
     auth_args << "--config-option" << "ssl_verify_mode=verify_none"
-    
-    # puts "DEBUG: Auth args: #{auth_args.inspect}"
     
     # Build command args - don't escape config options with = signs
     all_args = transformed_args + auth_args
@@ -71,35 +63,21 @@ cmds.each do |cmd, args|
     
     # Use native knife
     full_command = "#{knife_cmd} #{opc_noun} #{opc_cmd} #{escaped_args}"
-    # puts "===== EXECUTING COMMAND: #{full_command} ====="
     
     # Special handling: for user-create capture key output and write to file
     if cmd == "user-create"
       require 'mixlib/shellout'
       
-      # Debug working directory and quote handling
-      # puts "DEBUG: Current working directory: #{`pwd`.strip}"
-      # puts "DEBUG: HOME environment variable: #{`echo $HOME`.strip}"
-      # puts "DEBUG: SUDO_USER environment variable: #{ENV['SUDO_USER'] || 'not set'}"
-      # puts "DEBUG: Raw ARGV: #{ARGV.inspect}"
-      # puts "DEBUG: cmd_args after processing: #{cmd_args.inspect}"
-      
       # Extract keyfile path for cleanup tracking (only if -f was specified)
       keyfile = nil
       if (idx = transformed_args.index('-f')) && transformed_args[idx+1]
         keyfile = transformed_args[idx+1]
-        # puts "DEBUG: Will create private key file: #{keyfile}"
-      else
-        # puts "DEBUG: No -f specified, private key will output to STDOUT"
       end
       
       begin
-        # Use Mixlib::ShellOut - the Chef-native way with sudo
-        # puts "DEBUG: Using Mixlib::ShellOut with sudo prefix"
         # Original: full_command_with_sudo = "sudo #{full_command}"
         # Try multiple knife paths: /opt/opscode/bin/knife || /opt/opscode/embedded/bin/knife || /usr/bin/knife || /usr/local/bin/knife
         full_command_with_sudo = "sudo #{full_command.sub('knife', '/opt/opscode/bin/knife')} || sudo #{full_command.sub('knife', '/opt/opscode/embedded/bin/knife')} || sudo #{full_command.sub('knife', '/usr/bin/knife')} || sudo #{full_command.sub('knife', '/usr/local/bin/knife')}"
-        # puts "DEBUG: About to execute: #{full_command_with_sudo}"
         
         shell = Mixlib::ShellOut.new(full_command_with_sudo)
         shell.run_command
@@ -112,46 +90,28 @@ cmds.each do |cmd, args|
         unless shell.error?
           # Check if knife wrote the file and fix ownership
           if keyfile && File.exist?(keyfile)
-            # puts "DEBUG: SUCCESS! Private key file was created: #{keyfile}"
-            # puts "DEBUG: File size: #{File.size(keyfile)} bytes"
             
             # Fix file ownership - change from root to original user
             original_user = ENV['SUDO_USER']
             if original_user
-              # puts "DEBUG: Changing ownership of #{keyfile} to #{original_user}"
+              # change ownership of #{keyfile} to #{original_user}"
               chown_result = system("chown #{original_user}:#{original_user} #{keyfile}")
-              # puts "DEBUG: chown result: #{chown_result}"
-              
-              unless chown_result
-                # puts "DEBUG: WARNING: chown failed but continuing..."
-              end
-            else
-              # puts "DEBUG: SUDO_USER not found, cannot change file ownership"
             end
-          elsif keyfile
-            # puts "DEBUG: ERROR! Private key file was not created: #{keyfile}"
-          else
-            # puts "DEBUG: No -f argument found in transformed args"
           end
         end
         
         exit(shell.exitstatus || 0)
         
       rescue Interrupt
-        # puts "DEBUG: Operation interrupted by user (Ctrl-C)"
         # Clean up any partial files
         if keyfile && File.exist?(keyfile)
-          # puts "DEBUG: Cleaning up partial key file: #{keyfile}"
           File.delete(keyfile) rescue nil
         end
         exit(130) # Standard exit code for SIGINT
         
       rescue => e
-        # puts "DEBUG: Error during user creation: #{e.message}"
-        # puts "DEBUG: #{e.class}: #{e.backtrace.first}"
         # Clean up any partial files
         if keyfile && File.exist?(keyfile)
-          # puts "DEBUG: Cleaning up partial key file due to error: #{keyfile}"
           File.delete(keyfile) rescue nil
         end
         exit(1)
@@ -253,11 +213,8 @@ def get_server_url()
   # Get server URL - use lb_url from ChefServerCtl::Config
   begin
     server_url = ::ChefServerCtl::Config.lb_url
-    # puts "DEBUG: Using server URL from config: #{server_url}"
   rescue => e
-    # puts "DEBUG: Failed to get lb_url from config: #{e.message}"
     server_url = "https://localhost"
-    # puts "DEBUG: Falling back to server URL: #{server_url}"
   end
   
   server_url
