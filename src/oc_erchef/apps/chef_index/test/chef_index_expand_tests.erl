@@ -3,17 +3,17 @@
 -include_lib("eunit/include/eunit.hrl").
 
 -define(ROLE,
-        {[{<<"name">>,<<"web_role">>},
-          {<<"description">>,<<"something something">>},
-          {<<"json_class">>,<<"Chef::Role">>},
-          {<<"chef_type">>,<<"role">>},
+        {[{<<"name">>, <<"web_role">>},
+          {<<"description">>, <<"something something">>},
+          {<<"json_class">>, <<"Chef::Role">>},
+          {<<"chef_type">>, <<"role">>},
           {<<"default_attributes">>,
-           {[{<<"test1">>,1},{<<"test2">>,<<"2">>}]}},
+           {[{<<"test1">>, 1}, {<<"test2">>, <<"2">>}]}},
           {<<"override_attributes">>,
-           {[{<<"test1">>,8},{<<"rideover">>,<<"10-4">>}]}},
-          {<<"run_list">>,[<<"apache2">>,<<"php">>]},
+           {[{<<"test1">>, 8}, {<<"rideover">>, <<"10-4">>}]}},
+          {<<"run_list">>, [<<"apache2">>, <<"php">>]},
           {<<"env_run_lists">>,
-           {[{<<"prod">>,[<<"nginx">>]}]}}]}).
+           {[{<<"prod">>, [<<"nginx">>]}]}}]}).
 
 -define(DB_ITEM,
         {[
@@ -372,7 +372,7 @@ es_api_test_() ->
 op_api_test_() ->
     MinItem = {[{<<"key1">>, <<"value1">>},
                 {<<"key2">>, <<"value-2">>}]},
-    JsonContentType = [{"Authorization","Basic YWRtaW46YWRtaW4="},{"Content-Type", "application/json"}],
+    JsonContentType = [{"Authorization","Basic YWRtaW46YWRtaW4="}, {"Content-Type", "application/json"}],
     {foreach,
      fun() ->
              application:set_env(chef_index, search_provider, opensearch),

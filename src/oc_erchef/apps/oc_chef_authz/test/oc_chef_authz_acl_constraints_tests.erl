@@ -79,7 +79,7 @@ check_acl_constraints_no_failures() ->
   AuthzId = <<"10000000000000000000000000000000">>,
   Type = group,
   AclPerm = <<"grant">>,
-  Ace = {[{<<"grant">>,{[{<<"actors">>,[<<"pivotal">>]},{<<"groups">>,[]}]}}]},
+  Ace = {[{<<"grant">>, {[{<<"actors">>, [<<"pivotal">>]}, {<<"groups">>, []}]}}]},
   AclChecks = [ fun(_OrgId, _AuthzId, _Type, _AclPerm, _Ace) -> false end ],
   [
     ?_assertEqual(ok, oc_chef_authz_acl_constraints:check_acl_constraints(?ORGID, AuthzId, Type, AclPerm, Ace, AclChecks))
@@ -92,7 +92,7 @@ check_acl_constraints_failures() ->
   AuthzId = <<"10000000000000000000000000000000">>,
   Type = group,
   AclPerm = <<"grant">>,
-  Ace = {[{<<"grant">>,{[{<<"actors">>,[<<"pivotal">>]},{<<"groups">>,[]}]}}]},
+  Ace = {[{<<"grant">>, {[{<<"actors">>, [<<"pivotal">>]}, {<<"groups">>, []}]}}]},
   AclChecks = [ fun(_OrgId, _AuthzId, _Type, _AclPerm, _Ace) -> {true, failure_message_here} end ],
   Test1 = ?_assertEqual([failure_message_here], oc_chef_authz_acl_constraints:check_acl_constraints(?ORGID, AuthzId, Type, AclPerm, Ace, AclChecks)),
   AclChecks2 = [
@@ -116,7 +116,7 @@ check_acl_constraints_not_grant_ace() ->
   AuthzId = <<"10000000000000000000000000000000">>,
   Type = organization,
   AclPerm = <<"create">>,
-  Ace = {[{<<"create">>,{[{<<"actors">>,[<<"pivotal">>]},{<<"groups">>,[]}]}}]},
+  Ace = {[{<<"create">>, {[{<<"actors">>, [<<"pivotal">>]}, {<<"groups">>, []}]}}]},
   [
     ?_assertEqual(ok, oc_chef_authz_acl_constraints:check_acl_constraints(?ORGID, AuthzId, Type, AclPerm, Ace, oc_chef_authz_acl_constraints:acl_checks()))
   ].

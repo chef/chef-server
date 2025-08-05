@@ -27,7 +27,7 @@ request(Path, Method, Body, Headers) ->
     EndTime = erlang:monotonic_time(),
     TimeTaken = EndTime - StartTime,
     TimeTakenInMicro = erlang:convert_time_unit(TimeTaken, native, microsecond),
-    TimeTakenInMillis = TimeTakenInMicro/1000.0,
+    TimeTakenInMillis = TimeTakenInMicro / 1000.0,
     prometheus_histogram:observe(chef_index_http_req_duration_ms, [Method], TimeTakenInMillis),
     case Response of
         {ok, "200", _Head, _RespBody} ->
@@ -122,8 +122,8 @@ get_headers() ->
         opensearch ->
             User = envy:get(chef_index, search_auth_username, "admin", string),
             Pass = envy:get(chef_index, search_auth_password, "admin", string),
-            Encoded = base64:encode_to_string(lists:append([User, ":" ,Pass])),
-            [{"Authorization","Basic " ++ Encoded}, {"Content-Type", "application/json"}];
+            Encoded = base64:encode_to_string(lists:append([User, ":" , Pass])),
+            [{"Authorization", "Basic " ++ Encoded}, {"Content-Type", "application/json"}];
         _ ->
             [{"Content-Type", "application/json"}]
     end.

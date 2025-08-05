@@ -36,7 +36,7 @@ start(_StartType, _StartArgs) ->
             SrcDir =  filename:join([Dir, "../../../../../..", "external-deps"]),
             EbinDir = filename:join([Dir, "../../../../../..", "external-deps/ebin"]),
             application:set_env(sync, src_dirs, {add, [{SrcDir,
-                                                        [{outdir,EbinDir}]}]}),
+                                                        [{outdir, EbinDir}]}]}),
             application:set_env(sync, sync_method, scanner),
             application:start(sync);
         _ -> ok

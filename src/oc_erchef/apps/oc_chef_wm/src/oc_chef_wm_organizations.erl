@@ -204,7 +204,7 @@ maybe_create_client(true, Req,
                                                                      id = OrgId,
                                                                      name = OrgName
                                                                     }} = ResourceState} = State) ->
-    ClientName = <<OrgName/binary,"-validator">>,
+    ClientName = <<OrgName/binary, "-validator">>,
     ClientEJson = {[{<<"name">>, ClientName},
                     {<<"create_key">>, true},
                     {<<"validator">>, true}]},

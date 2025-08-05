@@ -1,16 +1,23 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.10.41 -->
-## [15.10.41](https://github.com/chef/chef-server/tree/15.10.41) (2025-07-21)
+<!-- latest_release 15.10.48 -->
+## [15.10.48](https://github.com/chef/chef-server/tree/15.10.48) (2025-08-04)
 
 #### Merged Pull Requests
-- Temporary fix for asdf 16 upgrade warning. [#4029](https://github.com/chef/chef-server/pull/4029) ([sreepuramsudheer](https://github.com/sreepuramsudheer))
+- Bump webrick from 1.8.1 to 1.8.2 in /src/oc-id [#3945](https://github.com/chef/chef-server/pull/3945) ([dependabot[bot]](https://github.com/dependabot[bot]))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.10.33 -->
 ### Changes since 15.10.33 release
 
 #### Merged Pull Requests
+- Bump webrick from 1.8.1 to 1.8.2 in /src/oc-id [#3945](https://github.com/chef/chef-server/pull/3945) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.10.48 -->
+- Bump webrick from 1.7.0 to 1.8.2 in /src/chef-server-ctl [#3944](https://github.com/chef/chef-server/pull/3944) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.10.47 -->
+- Upgrade nokogiri to 1.18.9 [#4043](https://github.com/chef/chef-server/pull/4043) ([RoyShravani](https://github.com/RoyShravani)) <!-- 15.10.46 -->
+- Pin pg gem version &lt; 1.6 for older linux distros [#4041](https://github.com/chef/chef-server/pull/4041) ([RoyShravani](https://github.com/RoyShravani)) <!-- 15.10.45 -->
+- Updating the erlang version 26.2 [#4025](https://github.com/chef/chef-server/pull/4025) ([talktovikas](https://github.com/talktovikas)) <!-- 15.10.44 -->
+- [CHEF-23713] Update Ruby to 3.1.7 version [#4028](https://github.com/chef/chef-server/pull/4028) ([RoyShravani](https://github.com/RoyShravani)) <!-- 15.10.43 -->
+- upgrading the PG from 13.8 to 13.21 [#4023](https://github.com/chef/chef-server/pull/4023) ([talktovikas](https://github.com/talktovikas)) <!-- 15.10.42 -->
 - Temporary fix for asdf 16 upgrade warning. [#4029](https://github.com/chef/chef-server/pull/4029) ([sreepuramsudheer](https://github.com/sreepuramsudheer)) <!-- 15.10.41 -->
 - changing hardcoded date in test case. [#4024](https://github.com/chef/chef-server/pull/4024) ([sreepuramsudheer](https://github.com/sreepuramsudheer)) <!-- 15.10.40 -->
 - tweaking for linting [#4018](https://github.com/chef/chef-server/pull/4018) ([johnmccrae](https://github.com/johnmccrae)) <!-- 15.10.39 -->

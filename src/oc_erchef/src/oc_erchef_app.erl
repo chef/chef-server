@@ -22,7 +22,7 @@ start(_StartType, _StartArgs) ->
     %% See comment in app.src for details.
     { ok, AppList } =  application:get_key(oc_erchef, included_applications),
     [ application:ensure_all_started(App, permanent) || App <- AppList ],
-    {error,{already_started,_}} = application:start(chef_telemetry),
+    {error, {already_started, _}} = application:start(chef_telemetry),
     %% If we're in a dev vm environment, start the code sync & compile tools
     case os:getenv("DEVVM") of
         "1" ->
@@ -30,7 +30,7 @@ start(_StartType, _StartArgs) ->
             SrcDir =  filename:join([Dir, "../../../../../..", "external-deps"]),
             EbinDir = filename:join([Dir, "../../../../../..", "external-deps/ebin"]),
             application:set_env(sync, src_dirs, {add, [{SrcDir,
-                                                        [{outdir,EbinDir}]}]}),
+                                                        [{outdir, EbinDir}]}]}),
             application:set_env(sync, sync_method, scanner),
             application:start(sync);
         _ -> ok
@@ -41,7 +41,7 @@ start(_StartType, _StartArgs) ->
 stop(_State) ->
     ok.
 
--spec server_api_version(min|max|deprecated) -> {ok, api_version()}.
+-spec server_api_version(min | max | deprecated) -> {ok, api_version()}.
 server_api_version(min) ->
     {ok, ?API_MIN_VER};
 server_api_version(max) ->

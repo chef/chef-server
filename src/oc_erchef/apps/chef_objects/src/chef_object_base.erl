@@ -59,8 +59,8 @@ sql_date(now) ->
 
 sql_date(DateString) when is_binary(DateString) ->
     DateString;
-sql_date({_,_,_} = TS) ->
-    {{Year,Month,Day},{Hour,Minute,Second}} = calendar:now_to_universal_time(TS),
+sql_date({_, _, _} = TS) ->
+    {{Year, Month, Day}, {Hour, Minute, Second}} = calendar:now_to_universal_time(TS),
     iolist_to_binary(io_lib:format("~4w-~2..0w-~2..0w ~2..0w:~2..0w:~2..0w",
                   [Year, Month, Day, Hour, Minute, Second])).
 
@@ -71,9 +71,9 @@ sql_date({_,_,_} = TS) ->
 %% If given a JSON binary, it is assumed that the string represents ONLY a dependencies /
 %% constraint hash (i.e., it's just a mapping of name to constraint string).  It is assumed
 %% that the given input (either JSON or Environment) have been previously validated.
--spec depsolver_constraints(#chef_environment{serialized_object::binary()}
+-spec depsolver_constraints(#chef_environment{serialized_object :: binary()}
                             | binary()   % JSON string
-                            | {[{Name::binary(), ConstraintString::binary()}]}) %% EJson hash
+                            | {[{Name :: binary(), ConstraintString :: binary()}]}) %% EJson hash
                            -> [ chef_depsolver:raw_constraint() ].
 depsolver_constraints(#chef_environment{serialized_object=SerializedObject}) ->
     EJson = chef_db_compression:decompress_and_decode(SerializedObject),
@@ -133,7 +133,7 @@ make_org_prefix_id(OrgId) ->
     FakeName = crypto:strong_rand_bytes(32),  %% Picked 32 for the hell of it
     make_org_prefix_id(OrgId, FakeName).
 
--spec make_org_prefix_id(<<_:256>>, string()|binary()) -> <<_:256>>.
+-spec make_org_prefix_id(<<_:256>>, string() | binary()) -> <<_:256>>.
 %% @doc Create a guid with org-specific prefix
 %%
 %% We use the last 48 bits of the org guid as the prefix for the object guid.  The remainder
@@ -179,17 +179,17 @@ normalize_run_list(RunList) ->
 %% It is assumed that only legal run list items will be input to this function (i.e., the
 %% run lists they are part of have already been validated).
 %%
-%% NOTE: About the spec here, `<<_:40,_:_*8>>` is the notation for a binary string that is
+%% NOTE: About the spec here, `<<_:40, _:_*8>>` is the notation for a binary string that is
 %% at least 5 bytes long (8 bits * 5 = 40).  This comes from Dialyzer inferring that the
 %% smallest possible return value for this function would be <<"role[">>, which (while true)
 %% is rather unhelpful.  We can't specify a return value of `binary()`, however, because
 %% that is an underspecification, which conflicts with our Dialyzer setting of -Wunderspecs;
 %% we want to keep that because it's a generally useful setting... just not when dealing
 %% with Erlang's lack of a true string data type :(
--spec normalize_item(binary()) -> <<_:40,_:_*8>>.
-normalize_item(<<"role[",_Item/binary>>=Role) ->
+-spec normalize_item(binary()) -> <<_:40, _:_*8>>.
+normalize_item(<<"role[", _Item/binary>>=Role) ->
     Role;
-normalize_item(<<"recipe[",_Item/binary>>=Recipe) ->
+normalize_item(<<"recipe[", _Item/binary>>=Recipe) ->
     Recipe;
 normalize_item(Recipe) when is_binary(Recipe) ->
     <<"recipe[", Recipe/binary, "]">>.
@@ -203,7 +203,7 @@ normalize_item(Recipe) when is_binary(Recipe) ->
 %%
 %% TODO: This would be a good candidate for a 'chef_common' module function; it's copied
 %% from chef_wm_depsolver:remove_dups/1.
--spec deduplicate_run_list([<<_:40,_:_*8>>]) -> list().
+-spec deduplicate_run_list([<<_:40, _:_*8>>]) -> list().
 deduplicate_run_list(L) ->
     WithIdx = lists:zip(L, lists:seq(1, length(L))),
     [ Elt || {Elt, _} <- lists:ukeysort(2, lists:ukeysort(1, WithIdx)) ].
@@ -245,7 +245,7 @@ allowed_keys(_ValidKeys, []) ->
     ok;
 allowed_keys(ValidKeys, {List}) when is_list(List) ->
     allowed_keys(ValidKeys, List);
-allowed_keys(ValidKeys, [{Item, _}|Rest]) ->
+allowed_keys(ValidKeys, [{Item, _} | Rest]) ->
     case lists:member(Item, ValidKeys) of
         true -> allowed_keys(ValidKeys, Rest);
         _ ->
@@ -298,7 +298,7 @@ validate_date_field(EJ, FieldBinary) ->
 %        SafeTimestring = re:replace(ej:get({FieldBinary}, EJ), "Z", "",[global,{return,binary}]),
 %        ej:set({FieldBinary}, EJ, SafeTimestring)
     catch % if validation fails, throw proper date error
-        throw:{ej_invalid,string_match,FieldBinary,_,_,_,_} ->
+        throw:{ej_invalid, string_match, FieldBinary, _, _, _, _} ->
             throw({bad_date, FieldBinary});
         throw:{ec_date, {bad_date, _}} ->
             throw({bad_date, FieldBinary})
@@ -322,5 +322,5 @@ parse_date(Date) when is_binary(Date) ->
     %% Note: side effect - effect of stripping any timezone data provided, eg 10:00:00+0100 will be captured as
     %% 10:00:00.
     %% Longer term we will need to submit an upstream PR to get epgsql_?datetime to behave properly.
-    [Date2|_] = re:split(Date, "[Zz+]"),
+    [Date2 | _] = re:split(Date, "[Zz+]"),
     ec_date:parse(binary_to_list(Date2)).

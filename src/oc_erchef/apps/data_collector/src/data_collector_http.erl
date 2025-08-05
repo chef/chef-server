@@ -66,12 +66,12 @@ delete(Path, Body) ->
 delete(Path, Body, Headers) ->
     request_with_caught_errors(Path, delete, Body, Headers).
 
-request_with_caught_errors(Path, Method, Body, Headers) when is_list(Body)->
+request_with_caught_errors(Path, Method, Body, Headers) when is_list(Body) ->
     request_with_caught_errors(Path, Method, iolist_to_binary(Body), Headers);
 request_with_caught_errors(Path, Method, Body, Headers) ->
     try
         case request(Path, Method, Body, Headers) of
-            {ok, [$2|_], _Head, _RespBody} -> ok;
+            {ok, [$2 | _], _Head, _RespBody} -> ok;
             Error -> {error, Error}
         end
     catch

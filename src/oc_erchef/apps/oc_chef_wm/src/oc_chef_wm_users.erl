@@ -142,5 +142,5 @@ verbose_user(#chef_user{username = UserName, email = EMail, serialized_object = 
 conflict_message(_Name) ->
     {[{<<"error">>, [<<"Username or email address already in use.">>]}]}.
 
-malformed_request_message(Any, _Req, _state) ->
+malformed_request_message(Any, _Req, _State) ->
     error({unexpected_malformed_request_message, Any}).

@@ -47,7 +47,7 @@ content_types_provided(Req, State) ->
       % I think there is a bug in webmachine where it wont allow us to use
       % 'text/plain; version=0.0.4'.
       % TODO: Understand https://github.com/basho/webmachine/blob/develop/src/webmachine_util.erl#L140-L158
-      {{"text/plain",[{"version","0.0.4"}]}, to_text},
+      {{"text/plain", [{"version", "0.0.4"}]}, to_text},
       {"text/plain", to_text}],
     case wrq:get_qs_value("format", Req) of
         undefined ->
