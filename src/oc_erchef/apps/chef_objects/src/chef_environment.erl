@@ -138,7 +138,7 @@ validate_keys([]) ->
     ok;
 validate_keys({List}) when is_list(List) ->
     validate_keys(List);
-validate_keys([{Item, _}|Rest]) ->
+validate_keys([{Item, _} | Rest]) ->
     case lists:member(Item, ?VALID_KEYS) of
         true -> validate_keys(Rest);
         _ ->

@@ -107,10 +107,10 @@ test_notify_association() ->
                                               {"POST", 201, 'invite'}]].
 
 test_notify_client() ->
-    ResourceState = #client_state{client_data = {[{<<"name">>,<<"node-foo">>}]}},
+    ResourceState = #client_state{client_data = {[{<<"name">>, <<"node-foo">>}]}},
     ExpectedMsgData = {"client",
                        "node-foo",
-                       [{<<"data">>, {[{<<"name">>,<<"node-foo">>}]}}]},
+                       [{<<"data">>, {[{<<"name">>, <<"node-foo">>}]}}]},
     [ test_notify("client", ReqMethod, ResponseCode, ResourceState, ExpectedMsgData, Task)
       || {ReqMethod, ResponseCode, Task} <- [ {"PUT", 200, 'update'},
                                               {"PUT", 201, 'update'},
@@ -134,7 +134,7 @@ test_notify_cookbook() ->
 
 test_notify_environment() ->
     ResourceState = #environment_state{environment_data=entity_data()},
-    ExpectedMsgData = {"environment", "db", [{<<"data">>, {[{<<"name">>,<<"db">>}]}}]},
+    ExpectedMsgData = {"environment", "db", [{<<"data">>, {[{<<"name">>, <<"db">>}]}}]},
     [ test_notify("environment", ReqMethod, ResponseCode, ResourceState, ExpectedMsgData, Task)
       || {ReqMethod, ResponseCode, Task} <- [ {"PUT", 200, 'update'},
                                               {"PUT", 201, 'update'},
@@ -145,7 +145,7 @@ test_notify_group() ->
     ResourceState = #group_state{group_data=entity_data(),
                                  group_authz_id='11111',
                                  oc_chef_group = #oc_chef_group{}},
-    ExpectedMsgData = {"group", "db", [{<<"data">>, {[{<<"name">>,<<"db">>}]}}]},
+    ExpectedMsgData = {"group", "db", [{<<"data">>, {[{<<"name">>, <<"db">>}]}}]},
     [ test_notify("group", ReqMethod, ResponseCode, ResourceState, ExpectedMsgData, Task)
       || {ReqMethod, ResponseCode, Task} <- [ {"PUT", 200, 'update'},
                                               {"PUT", 201, 'update'},
@@ -154,7 +154,7 @@ test_notify_group() ->
 
 test_notify_node() ->
     ResourceState = #node_state{node_data=entity_data()},
-    ExpectedMsgData = {"node", "db", [{<<"data">>, {[{<<"name">>,<<"db">>}]}}]},
+    ExpectedMsgData = {"node", "db", [{<<"data">>, {[{<<"name">>, <<"db">>}]}}]},
     [ test_notify("node", ReqMethod, ResponseCode, ResourceState, ExpectedMsgData, Task)
       || {ReqMethod, ResponseCode, Task} <- [ {"PUT", 200, 'update'},
                                               {"PUT", 201, 'update'},
@@ -162,9 +162,9 @@ test_notify_node() ->
                                               {"DELETE", 200, 'delete'}]].
 
 test_notify_organization() ->
-    ResourceState = #organization_state{organization_data = {[{<<"name">>,<<"cmwest">>}]},
+    ResourceState = #organization_state{organization_data = {[{<<"name">>, <<"cmwest">>}]},
                                         oc_chef_organization = #oc_chef_organization{name = <<"cmwest">>}},
-    ExpectedMsgData = {"organization", "cmwest", [{<<"data">>, {[{<<"name">>,<<"cmwest">>}]}}]},
+    ExpectedMsgData = {"organization", "cmwest", [{<<"data">>, {[{<<"name">>, <<"cmwest">>}]}}]},
     [ test_notify("organization", ReqMethod, ResponseCode, ResourceState, ExpectedMsgData, Task)
       || {ReqMethod, ResponseCode, Task} <- [ {"PUT", 200, 'update'},
                                               {"PUT", 201, 'update'},
@@ -173,7 +173,7 @@ test_notify_organization() ->
 
 test_notify_role() ->
     ResourceState = #role_state{role_data=entity_data()},
-    ExpectedMsgData = {"role", "db", [{<<"data">>, {[{<<"name">>,<<"db">>}]}}]},
+    ExpectedMsgData = {"role", "db", [{<<"data">>, {[{<<"name">>, <<"db">>}]}}]},
     [ test_notify("role", ReqMethod, ResponseCode, ResourceState, ExpectedMsgData, Task)
       || {ReqMethod, ResponseCode, Task} <- [ {"PUT", 200, 'update'},
                                               {"PUT", 201, 'update'},
@@ -182,7 +182,7 @@ test_notify_role() ->
 
 test_notify_user() ->
     ResourceState = #user_state{user_data=entity_data()},
-    ExpectedMsgData = {"user", "db", [{<<"data">>, {[{<<"name">>,<<"db">>}]}}]},
+    ExpectedMsgData = {"user", "db", [{<<"data">>, {[{<<"name">>, <<"db">>}]}}]},
     [ test_notify("user", ReqMethod, ResponseCode, ResourceState, ExpectedMsgData, Task)
       || {ReqMethod, ResponseCode, Task} <- [ {"PUT", 200, 'update'},
                                               {"PUT", 201, 'update'},
@@ -204,7 +204,7 @@ test_notify_key() ->
                                               {"POST", 201, 'create'},
                                               {"DELETE", 200, 'delete'}]].
 test_notify_policy() ->
-    ResourceState = #policy_state{policy_data= {[{<<"name">>,<<"expected_policy_name">>}]}},
+    ResourceState = #policy_state{policy_data= {[{<<"name">>, <<"expected_policy_name">>}]}},
     ExpectedMsgData = {"policy",
                        "expected_policy_name",
                         [{<<"parent_type">>, <<"policy_group">>},

@@ -64,7 +64,7 @@ init([]) ->
     Services1 = case chef_cbv_cache:enabled() of
                     true ->
                         [{chef_cbv_cache, {chef_cbv_cache, start_link, []},
-                         permanent, 5000, worker, [chef_cvb_cache]}| Services];
+                         permanent, 5000, worker, [chef_cvb_cache]} | Services];
                     false ->
                         Services
                 end,
@@ -88,8 +88,8 @@ dispatch_table() ->
 maybe_add_default_org_routes(Dispatch) ->
     case oc_chef_wm_routes:default_orgname() of
        DefaultOrgName when is_binary(DefaultOrgName),
-                           byte_size(DefaultOrgName) > 0->
-           add_default_org_routes(Dispatch,DefaultOrgName);
+                           byte_size(DefaultOrgName) > 0 ->
+           add_default_org_routes(Dispatch, DefaultOrgName);
        _ ->
            Dispatch
     end.
@@ -184,7 +184,7 @@ default_resource_init() ->
                ],
     case envy:get(oc_chef_wm, request_tracing, undefined, boolean) of
         true ->
-            [{trace, true}|Defaults];
+            [{trace, true} | Defaults];
         _ ->
             Defaults
     end.

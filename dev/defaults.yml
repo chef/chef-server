@@ -200,7 +200,7 @@ projects:
         # itself at this time.
         source_path: ../../src/chef-server-ctl/plugins
         # TODO - the gem version will eventually change, we need a good way to keep it in sync with our ruby version
-        dest_path: /opt/opscode/embedded/lib/ruby/gems/3.1.6/gems/chef-server-ctl-1.1.0/plugins
+        dest_path: /opt/opscode/embedded/lib/ruby/gems/3.1.7/gems/chef-server-ctl-1.1.0/plugins
         reconfigure_on_load: false
       upgrades:
         source_path: private-chef-upgrades

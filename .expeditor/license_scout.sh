@@ -20,12 +20,20 @@ if [[ "${BUILDKITE:-false}" == "true" ]]; then
   #
   # Since we don't use any software from this repository in our tests,
   # we can temporarily remove it from our sources.
-  rm /etc/apt/sources.list.d/microsoft-prod.list
+  rm -f /etc/apt/sources.list.d/microsoft-prod.list
+  # Remove problematic PostgreSQL repository if it exists
+  rm -f /etc/apt/sources.list.d/pgdg.list
   wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
   apt-get clean
   apt-get autoremove 
   apt-get update
-  apt-get install -y libpq-dev libsqlite3-dev libyaml-dev
+  # Install packages with dependency resolution, allowing downgrades if needed
+  apt-get install -y --allow-downgrades libpq-dev libsqlite3-dev libyaml-dev || \
+    (apt-get remove -y libpq5 libpq-dev && apt-get install -y libpq-dev libsqlite3-dev libyaml-dev)
+  asdf plugin add erlang
+  asdf install erlang 26.2.5.14
+  asdf local erlang 26.2.5.14
+  export PATH=/opt/asdf/shims:$PATH
 fi
 
 bundle_install_dirs=(
