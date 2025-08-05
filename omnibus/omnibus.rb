@@ -23,6 +23,7 @@ fetcher_read_timeout 120
 
 fatal_transitive_dependency_licensing_warnings true
 
+# note, this is statically set in the omnibus-buildkite-plugin, you are always going to be forced to use internal sources. If you dont want internal sources, you must enable this to false. 
 # use_internal_sources ENV.fetch("OMNIBUS_USE_INTERNAL_SOURCES", true)
 
 # Build in FIPS compatability mode
