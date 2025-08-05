@@ -1,3 +1,14 @@
+GIT
+  remote: https://github.com/chef/knife-ec-backup
+  revision: 18ed3718ff54673434176d72f36fa3c71aeaed81
+  branch: CHEF-23857-security-fix-test-ruby-3.1.7
+  specs:
+    knife-ec-backup (3.0.3)
+      chef (~> 18.0)
+      pg
+      sequel (~> 5.9)
+      veil
+
 PATH
   remote: .
   specs:
@@ -43,8 +54,8 @@ GEM
       mixlib-shellout (>= 2.0, < 4.0)
     ast (2.4.3)
     aws-eventstream (1.4.0)
-    aws-partitions (1.1140.0)
-    aws-sdk-core (3.228.0)
+    aws-partitions (1.1141.0)
+    aws-sdk-core (3.229.0)
       aws-eventstream (~> 1, >= 1.3.0)
       aws-partitions (~> 1, >= 1.992.0)
       aws-sigv4 (~> 1.9)
@@ -52,14 +63,14 @@ GEM
       bigdecimal
       jmespath (~> 1, >= 1.6.1)
       logger
-    aws-sdk-kms (1.109.0)
+    aws-sdk-kms (1.110.0)
       aws-sdk-core (~> 3, >= 3.228.0)
       aws-sigv4 (~> 1.5)
-    aws-sdk-s3 (1.195.0)
+    aws-sdk-s3 (1.196.0)
       aws-sdk-core (~> 3, >= 3.228.0)
       aws-sdk-kms (~> 1)
       aws-sigv4 (~> 1.5)
-    aws-sdk-secretsmanager (1.118.0)
+    aws-sdk-secretsmanager (1.119.0)
       aws-sdk-core (~> 3, >= 3.228.0)
       aws-sigv4 (~> 1.5)
     aws-sigv4 (1.12.1)
@@ -283,14 +294,7 @@ GEM
       tty-prompt (~> 0.21)
       tty-screen (~> 0.6)
       tty-table (~> 0.11)
-    knife-ec-backup (3.0.1)
-      chef (>= 11.8)
-      knife-tidy
-      pg
-      sequel (~> 5.9)
-      veil
     knife-opc (0.4.8)
-    knife-tidy (2.1.6)
     libyajl2 (2.1.0)
     license-acceptance (2.1.13)
       pastel (~> 0.7)
@@ -393,7 +397,7 @@ GEM
       redis-client (>= 0.22.0)
     redis-client (0.25.1)
       connection_pool
-    regexp_parser (2.10.0)
+    regexp_parser (2.11.0)
     rest-client (2.1.0)
       http-accept (>= 1.7.0, < 2.0)
       http-cookie (>= 1.0.2, < 2.0)
@@ -516,6 +520,7 @@ DEPENDENCIES
   chef (~> 18.7.10)
   chef-server-ctl!
   chefstyle
+  knife-ec-backup!
   rake
   rspec
   toml
