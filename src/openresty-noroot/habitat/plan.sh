@@ -17,7 +17,7 @@ pkg_deps=(
   core/libxml2
   core/libxslt
   core/openssl
-  core/pcre
+  core/pcre2
   core/perl
   core/zlib
 )
