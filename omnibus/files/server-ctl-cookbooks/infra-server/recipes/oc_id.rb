@@ -156,6 +156,10 @@ link database_file do
   to "#{node['private_chef']['oc_id']['dir']}/config/database.yml"
 end
 
+# Ensure log files are owned by opscode. In Chef 12.14 the svlogd
+# service was changed to run as opscode rather than root. This is done
+# as an execute to avoid issues with the `current` file not being
+# there on the first run.
 execute "chown -R #{OmnibusHelper.new(node).ownership['owner']}:#{OmnibusHelper.new(node).ownership['group']} #{oc_id_log_dir}" do
   only_if do
     begin
