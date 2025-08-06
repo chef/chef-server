@@ -1,4 +1,13 @@
 GIT
+  remote: https://github.com/talktovikas/chef_secrets.git
+  revision: 98c1eea7e8ec67ff10ee9c3057af1e881aa6dd13
+  branch: vikas/debug
+  specs:
+    veil (0.3.14)
+      bcrypt (~> 3.1)
+      pbkdf2
+
+GIT
   remote: https://github.com/talktovikas/omniauth-chef.git
   revision: 536049fb8ac310f95197bddd60741a49ec999c1e
   branch: vikas/chef-upgrade
@@ -438,6 +447,8 @@ GEM
     net-ssh (7.3.0)
     netrc (0.11.0)
     nio4r (2.7.4)
+    nokogiri (1.18.9-arm64-darwin)
+      racc (~> 1.4)
     nokogiri (1.18.9-x86_64-linux-gnu)
       racc (~> 1.4)
     nori (2.7.0)
@@ -612,6 +623,7 @@ GEM
       actionpack (>= 6.1)
       activesupport (>= 6.1)
       sprockets (>= 3.0.0)
+    sqlite3 (2.7.3-arm64-darwin)
     sqlite3 (2.7.3-x86_64-linux-gnu)
     sqlite3-ruby (1.3.3)
       sqlite3 (>= 1.3.3)
@@ -688,9 +700,6 @@ GEM
     uuidtools (2.2.0)
     vault (0.18.2)
       aws-sigv4
-    veil (0.3.11)
-      bcrypt (~> 3.1)
-      pbkdf2
     webrick (1.9.1)
     websocket (1.2.11)
     websocket-driver (0.8.0)
@@ -704,6 +713,7 @@ GEM
     zeitwerk (2.6.18)
 
 PLATFORMS
+  arm64-darwin-24
   x86_64-linux
 
 DEPENDENCIES
@@ -743,7 +753,7 @@ DEPENDENCIES
   tzinfo-data
   uglifier (~> 4.2)
   unicorn-rails!
-  veil (~> 0.3.11)
+  veil (~> 0.3.11)!
 
 BUNDLED WITH
    2.4.19
