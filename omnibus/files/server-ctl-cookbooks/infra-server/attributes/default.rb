@@ -25,16 +25,14 @@ default['enterprise']['name'] = 'private_chef'
 
 # TODO: we don't seem to reference removed_services anywhere.
 default['private_chef']['removed_services'] = %w(
-opscode-webui
-opscode-solr
-couchdb
-opscode-account
-opscode-org-creator
-opscode-certificate
-opscode-chef-mover
-)
-
-###
+  opscode-webui
+  opscode-solr
+  couchdb
+  opscode-account
+  opscode-org-creator
+  opscode-certificate
+  opscode-chef-mover
+)###
 # High level options
 ###
 default['private_chef']['api_version'] = '12.0.0'
@@ -894,7 +892,7 @@ default['private_chef']['data_collector']['ibrowse_options'] = '[{connect_timeou
 # Select whether data_collector affects overall status in _status endpoint
 default['private_chef']['data_collector']['health_check'] = true
 
-default['private_chef']['ctl_command'] = "#{ChefUtils::Dist::Server::SERVER_CTL}"
+default['private_chef']['ctl_command'] = ChefUtils::Dist::Server::SERVER_CTL.to_s
 default['private_chef']['running_filepath'] = "/etc/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/#{ChefUtils::Dist::Server::SERVER}-running.json"
 ##
 # Compliance Profiles

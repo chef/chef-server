@@ -13,8 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require_relative './warnings'
-require_relative './pgversion'
+require_relative 'warnings'
+require_relative 'pgversion'
 
 class PostgresqlPreflightValidator < PreflightValidator
   # This check used to verify that the external PG version matches the version
@@ -187,7 +187,7 @@ class PostgresqlPreflightValidator < PreflightValidator
   def backend_verify_postgres_version(connection)
     # Make sure the server is a supported version.
     r = connection.exec('SHOW server_version;')
-    v = PgVersion.new /^([0-9\.]+)/.match(r[0]['server_version'])[0]
+    v = PgVersion.new /^([0-9\.]+)/.match(r.first['server_version']).first
 
     # Note that we're looking for the same major, and using our minor as the minimum version
     # This provides compatibility with external databases that use < 13 before we make use
