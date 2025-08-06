@@ -77,7 +77,7 @@ authenticate(User, Password) ->
     Result.
 
 maybe_ssl_options(simple_tls, Options) ->
-    Options ++ [{ssl, true}];
+    Options ++ [{ssl, true}, {ssl_opts, [{verify, verify_none}]}];
 maybe_ssl_options(_, Options) ->
     Options.
 
