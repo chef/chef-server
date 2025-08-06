@@ -26,6 +26,9 @@ module OcId
     # config.i18n.default_locale = :de
 
     I18n.enforce_available_locales = true
+    
+    # Fix Rails 7.1 cache format version deprecation warning
+    config.active_support.cache_format_version = 7.0
 
     config.to_prepare do
       Doorkeeper::ApplicationController.layout 'application'

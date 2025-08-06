@@ -78,4 +78,17 @@ OcId::Application.configure do
 
   # Use default logging formatter so that PID and timestamp are not suppressed.
   config.log_formatter = ::Logger::Formatter.new
+  
+  # Rails 7.1 specific configurations
+  # Disable host authorization for internal services
+  config.hosts.clear
+  
+  # Handle SSL termination at load balancer
+  config.force_ssl = false
+  
+  # Ensure proper handling of database connections
+  config.active_record.verify_foreign_keys_for_fixtures = false if Rails.version >= '7.1'
+  
+  # Handle potential deprecation warnings
+  config.active_support.remove_deprecated_time_with_zone_name = false if Rails.version >= '7.1'
 end

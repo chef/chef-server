@@ -4,16 +4,29 @@ postgres: &postgres
   pool: 16
   template: template0
   host: localhost
+  # Rails 7.1 requires explicit timeout settings
+  connect_timeout: 30
+  checkout_timeout: 5
+  # Disable prepared statements for better compatibility
+  prepared_statements: false
 
 development:
   <<: *postgres
   database: oc_id_development
+  # No password needed for development
 
 test:
   <<: *postgres
   database: oc_id_test
+  # No password needed for test
 
 production:
   <<: *postgres
   database: oc_id
   username: oc_id
+  # Try multiple environment variables for password
+  password: <%= ENV['SQL_PASSWORD'] || ENV['OC_ID_SQL_PASSWORD'] || ENV['POSTGRESQL_PASSWORD'] || '' %>
+  # Rails 7.1 specific settings
+  variables:
+    statement_timeout: 30s
+    lock_timeout: 10s

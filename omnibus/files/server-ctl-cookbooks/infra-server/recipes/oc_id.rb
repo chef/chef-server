@@ -186,9 +186,17 @@ execute 'oc_id_schema' do
   # Also set the RAILS_ENV as is needed.
   environment('RAILS_ENV' => 'production',
               'VERSION' => `ls -1 /opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/embedded/service/oc_id/db/migrate | tail -n 1 | sed -e "s/_.*//g"`.chomp,
-              'PATH' => "/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/embedded/bin")
+              'PATH' => "/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/embedded/bin",
+              'SQL_PASSWORD' => PrivateChef.credentials.get('oc_id', 'sql_password'),
+              'PGPASSWORD' => PrivateChef.credentials.get('oc_id', 'sql_password'),
+              'PGUSER' => PrivateChef.credentials.get('oc_id', 'sql_connection_user'),
+              'PGHOST' => 'localhost',
+              'PGDATABASE' => 'oc_id')
+              
   # sensitive true
   only_if { is_data_master? }
+  retries 10
+  retry_delay 1
 end
 
 component_runit_service 'oc_id' do
