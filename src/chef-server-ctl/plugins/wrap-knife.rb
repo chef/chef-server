@@ -46,9 +46,9 @@ cmds.each do |cmd, args|
     
     # Build authentication arguments
     auth_args = []
-    auth_args << "--server-url" << server_url
+    # auth_args << "--server-url" << server_url
     auth_args << "-c" << knife_config
-    auth_args << "--config-option" << "ssl_verify_mode=verify_none"
+    # auth_args << "--config-option" << "ssl_verify_mode=verify_none"
     
     # Build command args - don't escape config options with = signs
     all_args = transformed_args + auth_args
