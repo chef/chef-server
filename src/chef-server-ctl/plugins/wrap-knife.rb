@@ -16,6 +16,7 @@
 require "shellwords"
 require "chef-utils"
 
+knife_config = ::ChefServerCtl::Config.knife_config_file
 knife_cmd    = "knife"
 cmd_args     = ARGV[1..-1]
 
@@ -46,7 +47,7 @@ cmds.each do |cmd, args|
     # Build authentication arguments
     auth_args = []
     auth_args << "--server-url" << server_url
-    auth_args << "-c" << ChefServerCtl::Config.knife_config_file
+    auth_args << "-c" << knife_config
     auth_args << "--config-option" << "ssl_verify_mode=verify_none"
     
     # Build command args - don't escape config options with = signs
