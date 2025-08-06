@@ -1,3 +1,21 @@
+GIT
+  remote: https://github.com/talktovikas/omniauth-chef.git
+  revision: 536049fb8ac310f95197bddd60741a49ec999c1e
+  branch: vikas/chef-upgrade
+  specs:
+    omniauth-chef (0.4.1)
+      chef (~> 18.7, >= 18.7.10)
+      omniauth (~> 2.0, >= 2.0.4)
+
+GIT
+  remote: https://github.com/talktovikas/unicorn-rails.git
+  revision: 28921e6f2f7a1e6dc406b0f1e6b4a51b96542b4e
+  branch: vikas/rack
+  specs:
+    unicorn-rails (2.2.1)
+      rack
+      unicorn
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -122,6 +140,7 @@ GEM
       rack-test (>= 0.6.3)
       regexp_parser (>= 1.5, < 3.0)
       xpath (~> 3.2)
+    cgi (0.5.0)
     chef (18.7.10)
       addressable
       aws-sdk-s3 (~> 1.91)
@@ -262,7 +281,8 @@ GEM
       dry-initializer (~> 3.2)
       dry-schema (~> 1.14)
       zeitwerk (~> 2.6)
-    erb (5.0.2)
+    erb (4.0.4)
+      cgi (>= 0.3.3)
     erubi (1.13.1)
     erubis (2.7.0)
     eventmachine (1.2.7)
@@ -393,8 +413,6 @@ GEM
     mixlib-shellout (3.3.9)
       chef-utils
     multi_json (1.17.0)
-    multi_xml (0.7.2)
-      bigdecimal (~> 3.1)
     multipart-post (2.4.1)
     mustermann (3.0.3)
       ruby2_keywords (~> 0.0.1)
@@ -424,14 +442,6 @@ GEM
       racc (~> 1.4)
     nori (2.7.0)
       bigdecimal
-    oauth2 (2.0.12)
-      faraday (>= 0.17.3, < 4.0)
-      jwt (>= 1.0, < 4.0)
-      logger (~> 1.2)
-      multi_xml (~> 0.5)
-      rack (>= 1.2, < 4)
-      snaky_hash (~> 2.0, >= 2.0.3)
-      version_gem (>= 1.1.8, < 3)
     ohai (18.2.6)
       chef-config (>= 14.12, < 19)
       chef-utils (>= 16.0, < 19)
@@ -449,12 +459,6 @@ GEM
       hashie (>= 3.4.6)
       rack (>= 2.2.3)
       rack-protection
-    omniauth-chef-oauth2 (1.1.0)
-      omniauth (>= 1.9, < 3)
-      omniauth-oauth2 (~> 1.0)
-    omniauth-oauth2 (1.8.0)
-      oauth2 (>= 1.4, < 3)
-      omniauth (~> 2.0)
     parallel (1.27.0)
     parslet (1.8.2)
     pastel (0.8.0)
@@ -597,9 +601,6 @@ GEM
     skinny (0.2.2)
       eventmachine (~> 1.0)
       thin
-    snaky_hash (2.0.3)
-      hashie (>= 0.1.0, < 6)
-      version_gem (>= 1.1.8, < 3)
     spring (4.3.0)
     spring-commands-rspec (1.0.4)
       spring (>= 0.9.1)
@@ -683,9 +684,6 @@ GEM
     unicorn (6.1.0)
       kgio (~> 2.6)
       raindrops (~> 0.7)
-    unicorn-rails (2.2.1)
-      rack
-      unicorn
     uri (1.0.3)
     uuidtools (2.2.0)
     vault (0.18.2)
@@ -693,7 +691,6 @@ GEM
     veil (0.3.11)
       bcrypt (~> 3.1)
       pbkdf2
-    version_gem (1.1.8)
     webrick (1.9.1)
     websocket (1.2.11)
     websocket-driver (0.8.0)
@@ -704,7 +701,7 @@ GEM
     wmi-lite (1.0.7)
     xpath (3.2.0)
       nokogiri (~> 1.8)
-    zeitwerk (2.7.3)
+    zeitwerk (2.6.18)
 
 PLATFORMS
   x86_64-linux
@@ -725,9 +722,10 @@ DEPENDENCIES
   mailcatcher
   mixlib-authentication (>= 2.1, < 4)
   nokogiri (>= 1.15.6)
-  omniauth-chef-oauth2 (~> 1.1.0)
+  omniauth-chef (~> 0.4.1)!
   pg (>= 0.18, < 1.6)
   pry-byebug
+  rack (> 3.0)
   rails (~> 7.1.0)
   rails-controller-testing
   rb-readline (~> 0.5.2)
@@ -744,7 +742,7 @@ DEPENDENCIES
   turbolinks (~> 5)
   tzinfo-data
   uglifier (~> 4.2)
-  unicorn-rails (~> 2.2, >= 2.2.1)
+  unicorn-rails!
   veil (~> 0.3.11)
 
 BUNDLED WITH

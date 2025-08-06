@@ -28,7 +28,9 @@ gem 'veil', '~> 0.3.11'
 
 gem 'rack', '> 3.0'
 
-gem 'omniauth-chef-oauth2', '~> 1.1.0'
+gem 'omniauth-chef', '~> 0.4.1',
+    git: "https://github.com/talktovikas/omniauth-chef.git",
+    branch: "vikas/chef-upgrade"
 gem 'tzinfo-data'
 
 
