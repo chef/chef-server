@@ -43,14 +43,15 @@ pipelines:
       trigger: default
   - omnibus/release:
       env:
-        - IGNORE_CACHE: true # caching causes constant build failures
-        - OMNIBUS_BUILDKITE_PLUGIN_VERSION: 065a32e7298e4998340d119fd5c72e3f7ed0411b
+        - IGNORE_CACHE: true
+        - OMNIBUS_BUILDKITE_PLUGIN_VERSION: 8291538da3f3ab8f037ff7a56d77e1ab02c4bbf9
         - OMNIBUS_USE_INTERNAL_SOURCES: true
   - omnibus/adhoc:
       definition: .expeditor/release.omnibus.yml
       env:
         - ADHOC: true
-        - OMNIBUS_BUILDKITE_PLUGIN_VERSION: 065a32e7298e4998340d119fd5c72e3f7ed0411b
+        - IGNORE_CACHE: true
+        - OMNIBUS_BUILDKITE_PLUGIN_VERSION: 8291538da3f3ab8f037ff7a56d77e1ab02c4bbf9
         - OMNIBUS_USE_INTERNAL_SOURCES: true
   - post-promote:
       description: "Generate and upload release manifest"
