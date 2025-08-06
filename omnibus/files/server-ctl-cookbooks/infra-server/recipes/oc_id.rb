@@ -172,7 +172,7 @@ end
 
 veil_helper_args = "--use-file -f /etc/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/private-#{ChefUtils::Dist::Infra::SHORT}-secrets.json -s chef-server.webui_key -s oc_id.sql_password -s oc_id.secret_key_base"
 execute 'oc_id_schema' do
-  command "veil-env-helper #{veil_helper_args} -- bundle exec --keep-file-descriptors rake db:migrate"
+  command "bundle exec --keep-file-descriptors rake db:migrate"
   cwd "/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/embedded/service/oc_id"
 
   # There are other recipes that depend on having a VERSION environment
@@ -184,9 +184,16 @@ execute 'oc_id_schema' do
   # date prefix of the latest file in the db/migrate directory.
   #
   # Also set the RAILS_ENV as is needed.
-  environment('RAILS_ENV' => 'production',
-              'VERSION' => `ls -1 /opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/embedded/service/oc_id/db/migrate | tail -n 1 | sed -e "s/_.*//g"`.chomp,
-              'PATH' => "/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/embedded/bin")
+  environment({
+    'RAILS_ENV' => 'production',
+    'VERSION' => `ls -1 /opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/embedded/service/oc_id/db/migrate | tail -n 1 | sed -e "s/_.*//g"`.chomp,
+    'PATH' => "/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/embedded/bin",
+    # Set database password directly in environment - bypasses veil entirely
+    'DATABASE_PASSWORD' => PrivateChef.credentials.get('oc_id', 'sql_password'),
+    'OC_ID_SQL_PASSWORD' => PrivateChef.credentials.get('oc_id', 'sql_password'),
+    'OC_ID_SECRET_KEY_BASE' => PrivateChef.credentials.get('oc_id', 'secret_key_base'),
+    'CHEF_SERVER_WEBUI_KEY' => PrivateChef.credentials.get('chef-server', 'webui_key')
+  })
   # sensitive true
   only_if { is_data_master? }
 end
