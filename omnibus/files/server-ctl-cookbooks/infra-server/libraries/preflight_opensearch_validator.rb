@@ -13,8 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require_relative './preflight_checks'
-require_relative './opensearch'
+require_relative 'preflight_checks'
+require_relative 'opensearch'
 
 class OpensearchPreflightValidator < PreflightValidator
   # This check used to verify that the external PG version matches the version
@@ -171,7 +171,7 @@ class OpensearchPreflightValidator < PreflightValidator
 
   def verify_external_url
     if cfg_opensearch_attr['external'] && !cfg_opensearch_attr['external_url']
-      fail_with err_OPENSEARCH007_bad_external_config()
+      fail_with err_OPENSEARCH007_bad_external_config
     end
   end
 
