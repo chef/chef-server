@@ -17,4 +17,3 @@ production:
   <<: *postgres
   database: oc_id
   username: oc_id
-  password: <%= Secrets.get("oc_id", "sql_password") %>

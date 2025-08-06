@@ -12,7 +12,7 @@ require "sprockets/railtie"
 Bundler.require(:default, Rails.env)
 
 # Load secrets early to make them available during database configuration
-require_relative 'initializers/00_secrets'
+# require_relative 'initializers/00_secrets'
 
 module OcId
   class Application < Rails::Application

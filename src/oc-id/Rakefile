@@ -4,13 +4,9 @@ require 'chef-utils/dist'
 # for example lib/tasks/capistrano.rake, and they will automatically be available to Rake.
 if ENV['CHEF_SECRETS_FD'].nil?
   ENV['CHEF_SECRETS_DATA'] ||= File.read(File.expand_path("../config/private-#{ChefUtils::Dist::Infra::SHORT}-secrets.json", __FILE__))
-else
-  # If CHEF_SECRETS_FD is set, ensure we have a fallback in case the FD becomes invalid
-  # This can happen when rake is executed in a subprocess where the FD is not properly inherited
 end
 
 require_relative 'config/application'
-
 
 OcId::Application.load_tasks
 
