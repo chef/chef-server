@@ -465,9 +465,9 @@ GEM
     omniauth-chef-oauth2 (1.1.0)
       omniauth (>= 1.9, < 3)
       omniauth-oauth2 (~> 1.0)
-    omniauth-oauth2 (1.8.0)
+    omniauth-oauth2 (1.7.3)
       oauth2 (>= 1.4, < 3)
-      omniauth (~> 2.0)
+      omniauth (>= 1.9, < 3)
     parallel (1.27.0)
     parslet (1.8.2)
     pastel (0.8.0)
@@ -736,7 +736,9 @@ DEPENDENCIES
   mailcatcher
   mixlib-authentication (>= 2.1, < 4)
   nokogiri (= 1.18.9)
-  omniauth-chef-oauth2 (~> 1.1.0)
+  omniauth (~> 2.1.1)
+  omniauth-chef-oauth2
+  omniauth-oauth2 (~> 1.7.3)
   pg (>= 0.18, < 1.6)
   pry-byebug
   rack (> 3.0)
