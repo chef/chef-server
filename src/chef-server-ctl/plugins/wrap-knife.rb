@@ -46,7 +46,7 @@ cmds.each do |cmd, args|
     # Build authentication arguments
     auth_args = []
     auth_args << "--server-url" << server_url
-    auth_args << "-c" << "/etc/opscode/pivotal.rb"
+    auth_args << "-c" << ChefServerCtl::Config.knife_config_file
     auth_args << "--config-option" << "ssl_verify_mode=verify_none"
     
     # Build command args - don't escape config options with = signs
