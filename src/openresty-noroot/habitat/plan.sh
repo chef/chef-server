@@ -54,7 +54,6 @@ do_build() {
     --error-log-path=stderr \
     --with-ipv6 \
     --with-debug \
-    --with-pcre2 \
     --with-md5-asm \
     --with-pcre-jit \
     --with-sha1-asm \
@@ -75,8 +74,8 @@ do_build() {
     --with-http_secure_link_module \
     --with-http_sub_module \
     --with-http_slice_module \
-    --with-cc-opt="$CFLAGS" \
-    --with-ld-opt="$LDFLAGS" \
+    --with-cc-opt="$CFLAGS -I$(pkg_path_for core/pcre2)/include" \
+    --with-ld-opt="$LDFLAGS -L$(pkg_path_for core/pcre2)/lib -lpcre2-8" \
     --without-http_ssi_module \
     --without-mail_smtp_module \
     --without-mail_imap_module \
