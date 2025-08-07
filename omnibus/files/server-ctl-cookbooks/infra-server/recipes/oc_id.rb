@@ -189,9 +189,10 @@ execute 'oc_id_schema' do
               'PATH' => "/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/embedded/bin",
               'SQL_PASSWORD' => PrivateChef.credentials.get('oc_id', 'sql_password'),
               'PGPASSWORD' => PrivateChef.credentials.get('oc_id', 'sql_password'),
-              'PGUSER' => PrivateChef.credentials.get('oc_id', 'sql_connection_user'),
-              'PGHOST' => 'localhost',
-              'PGDATABASE' => 'oc_id')
+              'PGUSER' => node['private_chef']['oc_id']['sql_connection_user'] || node['private_chef']['oc_id']['sql_user'],
+              'PGHOST' => node['private_chef']['postgresql']['vip'],
+              'PGPORT' => node['private_chef']['postgresql']['port'].to_s,
+              'PGDATABASE' => node['private_chef']['oc_id']['sql_database'])
               
   # sensitive true
   only_if { is_data_master? }
