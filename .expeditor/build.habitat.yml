@@ -12,6 +12,5 @@ studio_secrets:
   HAB_STUDIO_SECRET_HAB_FALLBACK_CHANNEL:
     value: "dev"
   HAB_FALLBACK_CHANNEL:
-    value: "dev"
-
+    value: "LTS-2024"
 
