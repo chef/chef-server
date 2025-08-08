@@ -15,10 +15,71 @@
 
 require "shellwords"
 require "chef-utils"
+require "mixlib/cli"
 
 knife_config = ::ChefServerCtl::Config.knife_config_file
 knife_cmd    = "knife"
 cmd_args     = ARGV[1..-1]
+
+# Argument parser using Mixlib::CLI to separate flags from positional args
+class KnifeArgumentParser
+  include Mixlib::CLI
+  
+  # Define options that knife user create supports
+  option :file,
+    short: "-f FILE",
+    long: "--file FILE",
+    description: "Write the private key to a file"
+    
+  option :filename,
+    long: "--filename FILE", 
+    description: "Write the private key to a file (knife-opc compatibility)"
+    
+  option :user_key,
+    long: "--user-key FILENAME",
+    description: "Set the initial default key for the user from a file"
+    
+  option :prevent_keygen,
+    short: "-k",
+    long: "--prevent-keygen",
+    description: "Prevent server from generating a default key pair",
+    boolean: true
+    
+  option :orgname,
+    long: "--orgname ORGNAME",
+    short: "-o ORGNAME", 
+    description: "Associate new user to an organization"
+    
+  option :passwordprompt,
+    long: "--prompt-for-password",
+    short: "-p",
+    description: "Prompt for user password",
+    boolean: true
+    
+  option :first_name,
+    long: "--first-name FIRST_NAME",
+    description: "First name for the user"
+    
+  option :last_name,
+    long: "--last-name LAST_NAME", 
+    description: "Last name for the user"
+    
+  option :email,
+    long: "--email EMAIL",
+    description: "Email for the user"
+    
+  option :password,
+    long: "--password PASSWORD",
+    description: "Password for the user"
+    
+  # Parse arguments and return separated positional args and config
+  def self.parse_args(args)
+    parser = new
+    # parse_options returns the positional arguments, config gets flags
+    name_args = parser.parse_options(args.dup)
+    { positional: name_args, config: parser.config }
+  end
+end
 
 cmds = {
   "org-create"      => ["create", "org", "Create an organization in the #{ChefUtils::Dist::Server::PRODUCT}."],
@@ -184,64 +245,62 @@ def transform_knife_opc_args(args, chef_server_ctl_cmd, _knife_noun, _knife_verb
     # Format 2: USERNAME FIRST_NAME [MIDDLE_NAME] LAST_NAME EMAIL PASSWORD --filename FILE  
     # native knife format: USERNAME --email EMAIL --password PASSWORD --first-name FIRST --last-name LAST --file FILE
     
-    if args.length >= 5 && !args[0].start_with?('-')
-      username = args[0]
+    # Use Mixlib::CLI to properly parse arguments (handles mixed flag/positional scenarios)
+    parsed = KnifeArgumentParser.parse_args(args)
+    positional_args = parsed[:positional]
+    config = parsed[:config]
+    
+    # Need at least 5 positional args for knife-opc format
+    if positional_args.length >= 5
+      username = positional_args[0]
       
-      # Detect format based on number of args before flags
-      non_flag_args = args.take_while { |arg| !arg.start_with?('-') }
-      
-      if non_flag_args.length == 5
+      if positional_args.length == 5
         # Format 1: USERNAME FIRST_NAME LAST_NAME EMAIL PASSWORD
-        first_name = args[1]
-        last_name = args[2]
-        email = args[3]
-        password = args[4]
-      elsif non_flag_args.length == 6
+        first_name = positional_args[1]
+        last_name = positional_args[2]
+        email = positional_args[3]
+        password = positional_args[4]
+      elsif positional_args.length == 6
         # Format 2: USERNAME FIRST_NAME MIDDLE_NAME LAST_NAME EMAIL PASSWORD  
         # Drop middle name - native knife doesn't support it
-        first_name = args[1]
-        # args[2] is middle_name - ignored
-        last_name = args[3]    
-        email = args[4]
-        password = args[5]
+        first_name = positional_args[1]
+        # positional_args[2] is middle_name - ignored
+        last_name = positional_args[3]    
+        email = positional_args[4]
+        password = positional_args[5]
       else
-        # Fallback to original args if format doesn't match
-        return transformed
+        # Too many positional args - fallback to original
+        return transform_flags_only(args)
       end
       
-      # Start with username (pass through as-is, let user control quoting)
+      # Build new argument list in modern knife format
       transformed = [username]
-      
-      # Add all supported fields - native knife supports first/last name
       transformed << "--email" << email
       transformed << "--password" << password
       transformed << "--first-name" << first_name
       transformed << "--last-name" << last_name
       
-      # Handle any additional flags (like --filename/-f)
-      remaining_args = args[non_flag_args.length..-1] || []
-      remaining_args.each do |arg|
-        case arg
-        when "--filename"
-          transformed << "-f"
-        else
-          # Pass through all other flags as-is (including -f)
-          transformed << arg
+      # Add parsed flags from config, converting --filename to -f
+      config.each do |key, value|
+        case key
+        when :filename
+          transformed << "-f" << value if value
+        when :file
+          transformed << "-f" << value if value
+        when :orgname
+          transformed << "--orgname" << value if value
+        when :user_key
+          transformed << "--user-key" << value if value
+        when :prevent_keygen
+          transformed << "--prevent-keygen" if value
+        when :passwordprompt
+          transformed << "--prompt-for-password" if value
+        # Skip :first_name, :last_name, :email, :password - we handle these above
         end
       end
-      
-      # DO NOT auto-add -f - let knife output to STDOUT if no file specified
-      # This matches chef-server-ctl official behavior: PEM to STDOUT unless -f/--filename provided
     else
-      # Handle --filename to -f conversion for other formats
-      transformed = args.map do |arg|
-        case arg
-        when "--filename"
-          "-f"
-        else
-          arg
-        end
-      end
+      # Not enough positional args for knife-opc format - just convert flags
+      transformed = transform_flags_only(args)
     end
     
   when "user-list"
@@ -253,6 +312,18 @@ def transform_knife_opc_args(args, chef_server_ctl_cmd, _knife_noun, _knife_verb
   end
   
   transformed
+end
+
+# Transform flags only (for non-opc format args) 
+def transform_flags_only(args)
+  args.map do |arg|
+    case arg
+    when "--filename"
+      "-f"
+    else
+      arg
+    end
+  end
 end
 
 # Get the Chef Server URL for knife commands
