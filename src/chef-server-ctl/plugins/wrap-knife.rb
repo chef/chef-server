@@ -15,148 +15,10 @@
 
 require "shellwords"
 require "chef-utils"
-require "mixlib/cli"
 
 knife_config = ::ChefServerCtl::Config.knife_config_file
 knife_cmd    = "knife"
 cmd_args     = ARGV[1..-1]
-
-# Argument parsers using Mixlib::CLI to separate flags from positional args
-# Based on official knife documentation from https://docs.chef.io/workstation/knife_user/ and https://docs.chef.io/workstation/knife_org/
-class KnifeUserArgumentParser
-  include Mixlib::CLI
-  
-  # Define options that knife user commands support (from official docs)
-  option :file,
-    short: "-f FILE",
-    long: "--file FILE",
-    description: "Save a private key to the specified file name"
-    
-  option :filename,
-    long: "--filename FILENAME", 
-    description: "Write private key to FILENAME rather than STDOUT (knife-opc compatibility)"
-    
-  option :user_key,
-    long: "--user-key FILENAME",
-    description: "The path to a file that contains the public key"
-    
-  option :prevent_keygen,
-    short: "-k",
-    long: "--prevent-keygen",
-    description: "Prevent Chef Infra Server from generating a default key pair",
-    boolean: true
-    
-  option :orgname,
-    long: "--orgname ORGNAME",
-    short: "-o ORGNAME", 
-    description: "Associate new user to an organization matching ORGNAME"
-    
-  option :passwordprompt,
-    long: "--prompt-for-password",
-    short: "-p",
-    description: "Prompt for user password",
-    boolean: true
-    
-  option :first_name,
-    long: "--first-name FIRST_NAME",
-    description: "First name for the user"
-    
-  option :last_name,
-    long: "--last-name LAST_NAME", 
-    description: "Last name for the user"
-    
-  option :email,
-    long: "--email EMAIL",
-    description: "Email for the user"
-    
-  option :password,
-    long: "--password PASSWORD",
-    description: "The user password"
-    
-  option :with_uri,
-    short: "-w",
-    long: "--with-uri",
-    description: "Show corresponding URIs",
-    boolean: true
-    
-  option :with_orgs,
-    short: "-l", 
-    long: "--with-orgs",
-    description: "Show the organizations of which the user is a member",
-    boolean: true
-    
-  option :no_disassociate_user,
-    short: "-d",
-    long: "--no-disassociate-user", 
-    description: "Don't disassociate the user first",
-    boolean: true
-    
-  option :remove_from_admin_groups,
-    short: "-R",
-    long: "--remove-from-admin-groups",
-    description: "If the user is a member of any org admin groups, attempt to remove from those groups",
-    boolean: true
-    
-  option :input,
-    short: "-i FILENAME",
-    long: "--input FILENAME",
-    description: "Name of file to use for PUT or POST"
-    
-  # Parse arguments and return separated positional args and config
-  def self.parse_args(args)
-    parser = new
-    # parse_options returns the positional arguments, config gets flags
-    name_args = parser.parse_options(args.dup)
-    { positional: name_args, config: parser.config }
-  end
-end
-
-class KnifeOrgArgumentParser
-  include Mixlib::CLI
-  
-  # Define options that knife org commands support (from official docs)
-  option :filename,
-    short: "-f FILENAME",
-    long: "--filename FILENAME",
-    description: "Write private key to FILENAME rather than STDOUT"
-    
-  option :association_user,
-    short: "-a USER_NAME",
-    long: "--association_user USER_NAME", 
-    description: "Associate USER_NAME with the organization after creation"
-    
-  option :with_uri,
-    short: "-w",
-    long: "--with-uri",
-    description: "Show corresponding URIs",
-    boolean: true
-    
-  option :all_orgs,
-    short: "-a",
-    long: "--all-orgs",
-    description: "Display auto-generated hidden orgs",
-    boolean: true
-    
-  option :admin,
-    short: "-a",
-    long: "--admin",
-    description: "Add user to admin group",
-    boolean: true
-    
-  option :force,
-    short: "-f",
-    long: "--force",
-    description: "Force removal of user from the organization's admins and billing-admins group",
-    boolean: true
-    
-  # Parse arguments and return separated positional args and config
-  def self.parse_args(args)
-    parser = new
-    # parse_options returns the positional arguments, config gets flags
-    name_args = parser.parse_options(args.dup)
-    { positional: name_args, config: parser.config }
-  end
-end
 
 cmds = {
   "org-create"      => ["create", "org", "Create an organization in the #{ChefUtils::Dist::Server::PRODUCT}."],
@@ -312,252 +174,85 @@ cmds.each do |cmd, args|
 end
 
 # Transform arguments from knife-opc format to native knife format
-# Based on official knife documentation from https://docs.chef.io/workstation/knife_user/ and https://docs.chef.io/workstation/knife_org/
 def transform_knife_opc_args(args, chef_server_ctl_cmd, _knife_noun, _knife_verb)
   transformed = args.dup
   
   case chef_server_ctl_cmd
   when "user-create"
-    # Official knife user create syntax: USERNAME DISPLAY_NAME FIRST_NAME LAST_NAME EMAIL PASSWORD (options)
-    # Handle knife-opc formats which may not include DISPLAY_NAME
+    # Handle knife-opc formats (based on official knife-opc banner):
+    # Format 1: USERNAME FIRST_NAME LAST_NAME EMAIL PASSWORD --filename FILE
+    # Format 2: USERNAME FIRST_NAME [MIDDLE_NAME] LAST_NAME EMAIL PASSWORD --filename FILE  
+    # native knife format: USERNAME --email EMAIL --password PASSWORD --first-name FIRST --last-name LAST --file FILE
     
-    # Use Mixlib::CLI to properly parse arguments (handles mixed flag/positional scenarios)
-    parsed = KnifeUserArgumentParser.parse_args(args)
-    positional_args = parsed[:positional]
-    config = parsed[:config]
-    
-    # knife-opc format: USERNAME FIRST_NAME LAST_NAME EMAIL PASSWORD
-    # native knife format: USERNAME DISPLAY_NAME FIRST_NAME LAST_NAME EMAIL PASSWORD
-    if positional_args.length >= 5
-      username = positional_args[0]
+    if args.length >= 5 && !args[0].start_with?('-')
+      username = args[0]
       
-      if positional_args.length == 5
-        # knife-opc format: USERNAME FIRST_NAME LAST_NAME EMAIL PASSWORD
-        first_name = positional_args[1]
-        last_name = positional_args[2]
-        email = positional_args[3]
-        password = positional_args[4]
-        # Generate display_name from first and last name
-        display_name = "#{first_name} #{last_name}"
-      elsif positional_args.length == 6
-        # Could be either:
-        # 1. Native knife format: USERNAME DISPLAY_NAME FIRST_NAME LAST_NAME EMAIL PASSWORD
-        # 2. knife-opc with middle name: USERNAME FIRST_NAME MIDDLE_NAME LAST_NAME EMAIL PASSWORD
-        
-        # Heuristic: if 2nd arg looks like an email or contains @ it's likely knife-opc with middle name
-        if positional_args[4].include?('@')
-          # knife-opc with middle name: USERNAME FIRST_NAME MIDDLE_NAME LAST_NAME EMAIL PASSWORD
-          first_name = positional_args[1]
-          # Skip middle name (positional_args[2])
-          last_name = positional_args[3]
-          email = positional_args[4]
-          password = positional_args[5]
-          display_name = "#{first_name} #{last_name}"
-        else
-          # Native knife format: USERNAME DISPLAY_NAME FIRST_NAME LAST_NAME EMAIL PASSWORD
-          # Pass through as-is
-          return args
-        end
+      # Detect format based on number of args before flags
+      non_flag_args = args.take_while { |arg| !arg.start_with?('-') }
+      
+      if non_flag_args.length == 5
+        # Format 1: USERNAME FIRST_NAME LAST_NAME EMAIL PASSWORD
+        first_name = args[1]
+        last_name = args[2]
+        email = args[3]
+        password = args[4]
+      elsif non_flag_args.length == 6
+        # Format 2: USERNAME FIRST_NAME MIDDLE_NAME LAST_NAME EMAIL PASSWORD  
+        # Drop middle name - native knife doesn't support it
+        first_name = args[1]
+        # args[2] is middle_name - ignored
+        last_name = args[3]    
+        email = args[4]
+        password = args[5]
       else
-        # Pass through as-is for other lengths
-        return args
+        # Fallback to original args if format doesn't match
+        return transformed
       end
       
-      # Build new argument list in native knife format: USERNAME DISPLAY_NAME FIRST_NAME LAST_NAME EMAIL PASSWORD
-      transformed = [username, display_name, first_name, last_name, email, password]
+      # Start with username (pass through as-is, let user control quoting)
+      transformed = [username]
       
-      # Add parsed flags from config, converting --filename to --file
-      config.each do |key, value|
-        case key
-        when :filename
-          transformed << "--file" << value if value
-        when :file
-          transformed << "--file" << value if value
-        when :orgname
-          transformed << "--orgname" << value if value
-        when :user_key
-          transformed << "--user-key" << value if value
-        when :prevent_keygen
-          transformed << "--prevent-keygen" if value
-        when :passwordprompt
-          transformed << "--prompt-for-password" if value
-        # Skip flags that are already in positional args
+      # Add all supported fields - native knife supports first/last name
+      transformed << "--email" << email
+      transformed << "--password" << password
+      transformed << "--first-name" << first_name
+      transformed << "--last-name" << last_name
+      
+      # Handle any additional flags (like --filename/-f)
+      remaining_args = args[non_flag_args.length..-1] || []
+      remaining_args.each do |arg|
+        case arg
+        when "--filename"
+          transformed << "-f"
+        else
+          # Pass through all other flags as-is (including -f)
+          transformed << arg
         end
       end
+      
+      # DO NOT auto-add -f - let knife output to STDOUT if no file specified
+      # This matches chef-server-ctl official behavior: PEM to STDOUT unless -f/--filename provided
     else
-      # Not enough positional args for knife-opc format - just convert flags
-      transformed = transform_flags_only(args)
+      # Handle --filename to -f conversion for other formats
+      transformed = args.map do |arg|
+        case arg
+        when "--filename"
+          "-f"
+        else
+          arg
+        end
+      end
     end
     
   when "user-list"
-    # Official syntax: knife user list (options)
-    parsed = KnifeUserArgumentParser.parse_args(args)
-    positional_args = parsed[:positional]
-    config = parsed[:config]
-    
-    transformed = positional_args.dup
-    
-    # Handle knife-opc specific options that don't exist in native knife
-    if args.include?("--all-info") || args.include?("-a")
-      # --all-info doesn't exist in native knife user list, use --with-uri instead
-      transformed << "--with-uri"
+    # Handle --all-info option (not supported in native knife)
+    # TODO: Revisit when suitable native knife option is found
+    if transformed.include?("--all-info") || transformed.include?("-a")
+      transformed = transformed.reject { |arg| %w[--all-info -a].include?(arg) }
     end
-    
-    # Add other valid flags
-    config.each do |key, value|
-      case key
-      when :with_uri
-        transformed << "--with-uri" if value
-      end
-    end
-    
-  when "user-show"
-    # Official syntax: knife user show USER_NAME (options)
-    parsed = KnifeUserArgumentParser.parse_args(args)
-    positional_args = parsed[:positional]
-    config = parsed[:config]
-    
-    transformed = positional_args.dup
-    
-    config.each do |key, value|
-      case key
-      when :with_orgs
-        transformed << "--with-orgs" if value
-      end
-    end
-    
-  when "user-delete"
-    # Official syntax: knife user delete USER_NAME
-    parsed = KnifeUserArgumentParser.parse_args(args)
-    positional_args = parsed[:positional]
-    config = parsed[:config]
-    
-    transformed = positional_args.dup
-    
-    config.each do |key, value|
-      case key
-      when :no_disassociate_user
-        transformed << "--no-disassociate-user" if value
-      when :remove_from_admin_groups
-        transformed << "--remove-from-admin-groups" if value
-      end
-    end
-    
-  when "user-edit"
-    # Official syntax: knife user edit USER_NAME
-    parsed = KnifeUserArgumentParser.parse_args(args)
-    positional_args = parsed[:positional]
-    config = parsed[:config]
-    
-    transformed = positional_args.dup
-    
-    config.each do |key, value|
-      case key
-      when :input
-        transformed << "--input" << value if value
-      when :filename
-        transformed << "--filename" << value if value
-      when :file
-        transformed << "--filename" << value if value  # Convert --file to --filename for user edit
-      end
-    end
-    
-  when "org-create"
-    # Official syntax: knife org create ORG_NAME ORG_FULL_NAME (options)
-    parsed = KnifeOrgArgumentParser.parse_args(args)
-    positional_args = parsed[:positional]
-    config = parsed[:config]
-    
-    # knife-opc might use: ORG_NAME FULL_NAME vs native knife: ORG_NAME ORG_FULL_NAME
-    transformed = positional_args.dup
-    
-    config.each do |key, value|
-      case key
-      when :filename
-        transformed << "--filename" << value if value
-      when :file
-        transformed << "--filename" << value if value  # Convert --file to --filename for org create
-      when :association_user
-        transformed << "--association_user" << value if value
-      end
-    end
-    
-  when "org-list"
-    # Official syntax: knife org list (options)
-    parsed = KnifeOrgArgumentParser.parse_args(args)
-    positional_args = parsed[:positional]
-    config = parsed[:config]
-    
-    transformed = positional_args.dup
-    
-    config.each do |key, value|
-      case key
-      when :with_uri
-        transformed << "--with-uri" if value
-      when :all_orgs
-        transformed << "--all-orgs" if value
-      end
-    end
-    
-  when "org-show"
-    # Official syntax: knife org show ORG_NAME
-    parsed = KnifeOrgArgumentParser.parse_args(args)
-    transformed = parsed[:positional].dup
-    
-  when "org-delete"
-    # Official syntax: knife org delete ORG_NAME
-    parsed = KnifeOrgArgumentParser.parse_args(args)
-    transformed = parsed[:positional].dup
-    
-  when "org-user-add"
-    # Official syntax: knife org user add ORG_NAME USER_NAME
-    parsed = KnifeOrgArgumentParser.parse_args(args)
-    positional_args = parsed[:positional]
-    config = parsed[:config]
-    
-    transformed = positional_args.dup
-    
-    config.each do |key, value|
-      case key
-      when :admin
-        transformed << "--admin" if value
-      end
-    end
-    
-  when "org-user-remove"
-    # Official syntax: knife org user remove ORG_NAME USER_NAME
-    parsed = KnifeOrgArgumentParser.parse_args(args)
-    positional_args = parsed[:positional]
-    config = parsed[:config]
-    
-    transformed = positional_args.dup
-    
-    config.each do |key, value|
-      case key
-      when :force
-        transformed << "--force" if value
-      end
-    end
-    
-  else
-    # For unknown commands, just do basic flag transformation
-    transformed = transform_flags_only(args)
   end
   
   transformed
-end
-
-# Transform flags only (for non-opc format args or fallback scenarios) 
-def transform_flags_only(args)
-  args.map do |arg|
-    case arg
-    when "--filename"
-      # For most commands, --filename converts to --file, except org create which uses --filename
-      "--file"  # Default conversion
-    else
-      arg
-    end
-  end
 end
 
 # Get the Chef Server URL for knife commands
