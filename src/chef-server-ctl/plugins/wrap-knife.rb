@@ -100,7 +100,7 @@ cmds.each do |cmd, args|
   opc_noun = args[1]
   description = args[2]
   add_command_under_category cmd, "organization-and-user-management", description, 2 do
-    # Transform knife-opc arguments to native knife format
+    # Transform knife-opc arguments to knife format
     transformed_args = transform_knife_opc_args(cmd_args, cmd, opc_noun, opc_cmd)
     
     server_url = get_server_url()
@@ -122,9 +122,6 @@ cmds.each do |cmd, args|
       end
     end.join(" ")
     
-    # Use native knife
-    full_command = "#{knife_cmd} #{opc_noun} #{opc_cmd} #{escaped_args}"
-    
     # Special handling: for user-create capture key output and write to file
     if cmd == "user-create"
       require 'mixlib/shellout'
@@ -140,7 +137,6 @@ cmds.each do |cmd, args|
       puts "DEBUG: keyfile = #{keyfile}"
       puts "DEBUG: transformed_args = #{transformed_args.inspect}"
       puts "DEBUG: auth_args = #{auth_args.inspect}"
-      puts "DEBUG: full_command = #{full_command}"
       
       # DEBUG: Check if config file exists and show contents
       if File.exist?(knife_config)
@@ -154,7 +150,8 @@ cmds.each do |cmd, args|
       begin
         # Original approach but with debugging
         # Try multiple knife paths: /opt/opscode/bin/knife || /opt/opscode/embedded/bin/knife || /usr/bin/knife || /usr/local/bin/knife
-        full_command_with_sudo = "sudo #{full_command.sub('knife', '/opt/opscode/bin/knife')} || sudo #{full_command.sub('knife', '/opt/opscode/embedded/bin/knife')} || sudo #{full_command.sub('knife', '/usr/bin/knife')} || sudo #{full_command.sub('knife', '/usr/local/bin/knife')}"
+        # full_command_with_sudo = "sudo #{full_command.sub('knife', '/opt/opscode/bin/knife')} || sudo #{full_command.sub('knife', '/opt/opscode/embedded/bin/knife')} || sudo #{full_command.sub('knife', '/usr/bin/knife')} || sudo #{full_command.sub('knife', '/usr/local/bin/knife')}"
+        full_command_with_sudo = "sudo /opt/opscode/bin/knife #{opc_noun} #{opc_cmd} #{escaped_args}"
         puts "DEBUG: Executing: #{full_command_with_sudo}"
         
         shell = Mixlib::ShellOut.new(full_command_with_sudo)
@@ -225,10 +222,11 @@ cmds.each do |cmd, args|
         exit(1)
       end
     else
-      # Original: status = run_command(full_command)
+      # Original: status = run_command("knife #{opc_noun} #{opc_cmd} #{escaped_args}")
       # Try multiple knife paths: /opt/opscode/bin/knife || /opt/opscode/embedded/bin/knife || /usr/bin/knife || /usr/local/bin/knife
-      multi_path_command = "#{full_command.sub('knife', '/opt/opscode/bin/knife')} || #{full_command.sub('knife', '/opt/opscode/embedded/bin/knife')} || #{full_command.sub('knife', '/usr/bin/knife')} || #{full_command.sub('knife', '/usr/local/bin/knife')}"
-      status = run_command(multi_path_command)
+      # multi_path_command = "#{full_command.sub('knife', '/opt/opscode/bin/knife')} || #{full_command.sub('knife', '/opt/opscode/embedded/bin/knife')} || #{full_command.sub('knife', '/usr/bin/knife')} || #{full_command.sub('knife', '/usr/local/bin/knife')}"
+      single_path_command = "/opt/opscode/bin/knife #{opc_noun} #{opc_cmd} #{escaped_args}"
+      status = run_command(single_path_command)
       exit status.exitstatus
     end
   end
