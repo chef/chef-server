@@ -5,5 +5,5 @@ gemspec
 gem "chef", "~> 18.7.10"
 gem "toml" # for habitat-land
 
-# Override knife-ec-backup to use specific GitHub branch instead of gem
+# Use latest commit from CHEF-23857-security-fix-test-ruby-3.1.7 branch for knife-ec-backup
 gem "knife-ec-backup", git: "https://github.com/chef/knife-ec-backup", branch: "CHEF-23857-security-fix-test-ruby-3.1.7"
