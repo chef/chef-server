@@ -245,8 +245,8 @@ GEM
       deep_merge (~> 1.2, >= 1.2.1)
       dry-validation (~> 1.0, >= 1.0.0)
     connection_pool (2.5.3)
-    cookstyle (8.3.0)
-      rubocop (= 1.79.1)
+    cookstyle (8.4.0)
+      rubocop (= 1.79.2)
     corefoundation (0.3.13)
       ffi (>= 1.15.0)
     crass (1.0.6)
@@ -417,7 +417,6 @@ GEM
       mime-types-data (~> 3.2025, >= 3.2025.0507)
     mime-types-data (3.2025.0805)
     mini_mime (1.1.5)
-    mini_portile2 (2.8.9)
     minitest (5.25.5)
     mixlib-archive (1.1.7)
       mixlib-log
@@ -593,7 +592,7 @@ GEM
       rspec-mocks (~> 3.13)
       rspec-support (~> 3.13)
     rspec-support (3.13.4)
-    rubocop (1.79.1)
+    rubocop (1.79.2)
       json (~> 2.3)
       language_server-protocol (~> 3.17.0.2)
       lint_roller (~> 1.1.0)
@@ -640,7 +639,7 @@ GEM
     skinny (0.2.2)
       eventmachine (~> 1.0)
       thin
-    spring (4.3.0)
+    spring (4.4.0)
     spring-commands-rspec (1.0.4)
       spring (>= 0.9.1)
     sprockets (4.2.2)
@@ -728,9 +727,6 @@ GEM
     uuidtools (2.2.0)
     vault (0.18.2)
       aws-sigv4
-    veil (0.3.11)
-      bcrypt (~> 3.1)
-      pbkdf2
     webrick (1.9.1)
     websocket (1.2.11)
     websocket-driver (0.8.0)
@@ -744,6 +740,7 @@ GEM
     zeitwerk (2.6.18)
 
 PLATFORMS
+  arm64-darwin-21
   arm64-darwin-24
   x86_64-linux
 
@@ -763,7 +760,7 @@ DEPENDENCIES
   mailcatcher
   mixlib-authentication (>= 2.1, < 4)
   nokogiri (= 1.18.9)
-  omniauth-chef (~> 0.4)
+  omniauth-chef (~> 0.4.1)!
   pg (>= 0.18, < 1.6)
   pry-byebug
   rack (> 3.0)
@@ -787,4 +784,4 @@ DEPENDENCIES
   veil (~> 0.3.11)!
 
 BUNDLED WITH
-   2.4.19
+   2.3.27
