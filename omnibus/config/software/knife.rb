@@ -15,7 +15,7 @@
 #
 
 name "knife"
-default_version "17.10.0"
+default_version "18.7.9"
 
 license "Apache-2.0"
 license_file "https://raw.githubusercontent.com/chef/chef/main/knife/LICENSE"
@@ -34,6 +34,7 @@ build do
       "install knife",
       v_opts,
       "--no-document",
+      "--force",
     ].compact.join(" "), env: env
   
     # confirm the install was successful
