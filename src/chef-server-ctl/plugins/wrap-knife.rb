@@ -139,8 +139,8 @@ cmds.each do |cmd, args|
       end
     end.join(" ")
     
-    # Special handling: for user-create capture key output and write to file
-    if cmd == "user-create"
+    # Special handling: for user-create and org-create capture key output and write to file
+    if cmd == "user-create" || cmd == "org-create"
       require 'mixlib/shellout'
       
       # Extract keyfile path for cleanup tracking (only if -f was specified)
@@ -149,77 +149,29 @@ cmds.each do |cmd, args|
         keyfile = transformed_args[idx+1]
       end
       
-      # DEBUG: Show what we're about to execute
-      puts "DEBUG: knife_config = #{knife_config}"
-      puts "DEBUG: keyfile = #{keyfile}"
-      puts "DEBUG: transformed_args = #{transformed_args.inspect}"
-      puts "DEBUG: auth_args = #{auth_args.inspect}"
-      
-      # DEBUG: Check if config file exists and show contents
-      if File.exist?(knife_config)
-        puts "DEBUG: Config file exists at #{knife_config}"
-        # puts "DEBUG: Config file contents:"
-        # puts File.read(knife_config)
-      else
-        puts "DEBUG: Config file does not exist at #{knife_config}"
-      end
-      
       begin
-        # Original approach but with debugging
-        # Try multiple knife paths: /opt/opscode/bin/knife || /opt/opscode/embedded/bin/knife || /usr/bin/knife || /usr/local/bin/knife
-        # full_command_with_sudo = "sudo #{full_command.sub('knife', '/opt/opscode/bin/knife')} || sudo #{full_command.sub('knife', '/opt/opscode/embedded/bin/knife')} || sudo #{full_command.sub('knife', '/usr/bin/knife')} || sudo #{full_command.sub('knife', '/usr/local/bin/knife')}"
         full_command_with_sudo = "sudo #{knife_cmd} #{opc_noun} #{opc_cmd} #{escaped_args}"
-        puts "DEBUG: Executing: #{full_command_with_sudo}"
         
         shell = Mixlib::ShellOut.new(full_command_with_sudo)
         shell.run_command
         
-        # DEBUG: Show command results
-        puts "DEBUG: Command exitstatus = #{shell.exitstatus}"
-        puts "DEBUG: Command stdout = #{shell.stdout.inspect}"
-        puts "DEBUG: Command stderr = #{shell.stderr.inspect}"
-        
-        # Show command output to user (without DEBUG prefix)
+        # Show command output to user
         print shell.stdout if shell.stdout && !shell.stdout.empty?
         print shell.stderr if shell.stderr && !shell.stderr.empty?
         
         # Only proceed with file operations if knife succeeded
         unless shell.error?
-          # DEBUG: Check if keyfile was supposed to be created
+          # Check if keyfile was supposed to be created
           if keyfile
-            puts "DEBUG: Looking for keyfile at #{keyfile}"
             if File.exist?(keyfile)
-              puts "DEBUG: Keyfile found, fixing ownership"
               # Fix file ownership - change from root to original user
               original_user = ENV['SUDO_USER']
               if original_user
                 # change ownership of #{keyfile} to #{original_user}"
                 chown_result = system("chown #{original_user}:#{original_user} #{keyfile}")
-                puts "DEBUG: chown result = #{chown_result}"
-              else
-                puts "DEBUG: No SUDO_USER found, skipping chown"
-              end
-            else
-              puts "DEBUG: Keyfile not found at expected location"
-              
-              # DEBUG: Test knife directly without shell escaping
-              puts "DEBUG: Testing knife command manually..."
-              keyfile_dir = File.dirname(keyfile)
-              simple_command = "#{knife_cmd} user create testmanual --email testmanual@example.com --password test123 --first-name Test --last-name Manual -f #{keyfile_dir}/testmanual.pem -c #{knife_config}"
-              puts "DEBUG: Manual command: #{simple_command}"
-              manual_result = system(simple_command)
-              puts "DEBUG: Manual knife result: #{manual_result}"
-              if File.exist?("#{keyfile_dir}/testmanual.pem")
-                puts "DEBUG: Manual knife created file successfully!"
-              else
-                puts "DEBUG: Manual knife also failed to create file"
               end
             end
-          else
-            puts "DEBUG: No keyfile specified (-f flag not used)"
           end
-        else
-          puts "DEBUG: Command failed with error"
         end
         
         exit(shell.exitstatus || 0)
@@ -239,11 +191,8 @@ cmds.each do |cmd, args|
         exit(1)
       end
     else
-      # Original: status = run_command("knife #{opc_noun} #{opc_cmd} #{escaped_args}")
-      # Try multiple knife paths: /opt/opscode/bin/knife || /opt/opscode/embedded/bin/knife || /usr/bin/knife || /usr/local/bin/knife
-      # multi_path_command = "#{full_command.sub('knife', '/opt/opscode/bin/knife')} || #{full_command.sub('knife', '/opt/opscode/embedded/bin/knife')} || #{full_command.sub('knife', '/usr/bin/knife')} || #{full_command.sub('knife', '/usr/local/bin/knife')}"
-      single_path_command = "#{knife_cmd} #{opc_noun} #{opc_cmd} #{escaped_args}"
-      status = run_command(single_path_command)
+      knife_command = "#{knife_cmd} #{opc_noun} #{opc_cmd} #{escaped_args}"
+      status = run_command(knife_command)
       exit status.exitstatus
     end
   end
@@ -320,7 +269,6 @@ def transform_knife_opc_args(args, chef_server_ctl_cmd, _knife_noun, _knife_verb
     
   when "user-list"
     # Handle --all-info option (not supported in native knife)
-    # TODO: Revisit when suitable native knife option is found
     if transformed.include?("--all-info") || transformed.include?("-a")
       transformed = transformed.reject { |arg| %w[--all-info -a].include?(arg) }
     end
