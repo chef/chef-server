@@ -77,7 +77,7 @@ authenticate(User, Password) ->
     Result.
 
 maybe_ssl_options(simple_tls, Options) ->
-    Options ++ [{ssl, true}];
+    Options ++ [{ssl, true}, {sslopts, [{verify, verify_none}]}];
 maybe_ssl_options(_, Options) ->
     Options.
 
@@ -151,7 +151,7 @@ maybe_encrypt_session(_Encryption, {error, Error}, _Timeout) ->
     lager:error("Failed to connect to ldap host or an error occurred during connection setup. Please check chef-server.rb for correct host, port, and encryption values: ~p", [Error]),
     error;
 maybe_encrypt_session(start_tls, {ok, Session}, Timeout) ->
-    case eldap:start_tls(Session, [], Timeout) of
+    case eldap:start_tls(Session, [{verify, verify_none}], Timeout) of
         ok -> % secure upgrade completed
             {ok, Session};
         {error, tls_already_started} ->

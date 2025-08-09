@@ -355,7 +355,7 @@ default['private_chef']['opscode-erchef']['solr_http_cull_interval'] = '{1, min}
 default['private_chef']['opscode-erchef']['solr_http_max_age'] = '{70, sec}'
 default['private_chef']['opscode-erchef']['solr_http_max_connection_duration'] = '{70,sec}'
 default['private_chef']['opscode-erchef']['solr_retry_on_conn_closed'] = true
-default['private_chef']['opscode-erchef']['solr_ibrowse_options'] = '[{connect_timeout, 10000}]'
+default['private_chef']['opscode-erchef']['solr_ibrowse_options'] = '[{connect_timeout, 10000}, {ssl_opts, [{verify, verify_none}]}]'
 # Default: generate signed URLs based upon Host: header. Override with a url, "http:// ..."
 default['private_chef']['opscode-erchef']['base_resource_url'] = :host_header
 default['private_chef']['opscode-erchef']['s3_bucket'] = 'bookshelf'
@@ -686,7 +686,7 @@ default['private_chef']['oc_chef_authz']['http_cull_interval'] = '{1, min}'
 default['private_chef']['oc_chef_authz']['http_max_age'] = '{70, sec}'
 default['private_chef']['oc_chef_authz']['http_max_connection_duration'] = '{70, sec}'
 default['private_chef']['oc_chef_authz']['http_retry_on_conn_closed'] = true
-default['private_chef']['oc_chef_authz']['ibrowse_options'] = '[{connect_timeout, 5000}]'
+default['private_chef']['oc_chef_authz']['ibrowse_options'] = '[{connect_timeout, 5000}, {ssl_opts, [{verify, verify_none}]}]'
 default['private_chef']['oc_chef_authz']['max_connection_request_limit'] = 100
 
 ####
@@ -890,7 +890,7 @@ default['private_chef']['data_collector']['http_max_connection_duration'] = '{70
 # Should the request be retried on a different connection incase of receving a sel_conn_closed
 default['private_chef']['data_collector']['http_retry_on_conn_closed'] = true
 # Options for the ibrowse connections (see ibrowse).
-default['private_chef']['data_collector']['ibrowse_options'] = '[{connect_timeout, 10000}]'
+default['private_chef']['data_collector']['ibrowse_options'] = '[{connect_timeout, 10000}, {ssl_opts, [{verify, verify_none}]}]'
 # Select whether data_collector affects overall status in _status endpoint
 default['private_chef']['data_collector']['health_check'] = true
 
