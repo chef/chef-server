@@ -18,8 +18,25 @@ require "chef-utils"
 require "mixlib/cli"
 
 knife_config = ::ChefServerCtl::Config.knife_config_file
-knife_cmd    = "knife"
 cmd_args     = ARGV[1..-1]
+
+# Determine knife binary path using precedence:
+# 1) CSC_KNIFE_BIN environment variable (for overriding in development/testing)
+# 2) Result of `which knife` command if available
+# 3) Default Chef Server knife path
+def resolve_knife_bin
+  # Check environment variable first (must be non-empty)
+  return ENV["CSC_KNIFE_BIN"] if ENV["CSC_KNIFE_BIN"]&.!empty?
+  
+  # Try to find knife in PATH
+  which_result = `which knife 2>/dev/null`.strip
+  return which_result unless which_result.empty?
+  
+  # Fall back to default
+  "/opt/opscode/bin/knife"
+end
+
+knife_cmd = resolve_knife_bin
 
 # Argument parser using Mixlib::CLI to separate flags from positional args
 class KnifeArgumentParser
@@ -151,7 +168,7 @@ cmds.each do |cmd, args|
         # Original approach but with debugging
         # Try multiple knife paths: /opt/opscode/bin/knife || /opt/opscode/embedded/bin/knife || /usr/bin/knife || /usr/local/bin/knife
         # full_command_with_sudo = "sudo #{full_command.sub('knife', '/opt/opscode/bin/knife')} || sudo #{full_command.sub('knife', '/opt/opscode/embedded/bin/knife')} || sudo #{full_command.sub('knife', '/usr/bin/knife')} || sudo #{full_command.sub('knife', '/usr/local/bin/knife')}"
-        full_command_with_sudo = "sudo /opt/opscode/bin/knife #{opc_noun} #{opc_cmd} #{escaped_args}"
+        full_command_with_sudo = "sudo #{knife_cmd} #{opc_noun} #{opc_cmd} #{escaped_args}"
         puts "DEBUG: Executing: #{full_command_with_sudo}"
         
         shell = Mixlib::ShellOut.new(full_command_with_sudo)
@@ -188,7 +205,7 @@ cmds.each do |cmd, args|
               # DEBUG: Test knife directly without shell escaping
               puts "DEBUG: Testing knife command manually..."
               keyfile_dir = File.dirname(keyfile)
-              simple_command = "/opt/opscode/bin/knife user create testmanual --email testmanual@example.com --password test123 --first-name Test --last-name Manual -f #{keyfile_dir}/testmanual.pem -c #{knife_config}"
+              simple_command = "#{knife_cmd} user create testmanual --email testmanual@example.com --password test123 --first-name Test --last-name Manual -f #{keyfile_dir}/testmanual.pem -c #{knife_config}"
               puts "DEBUG: Manual command: #{simple_command}"
               manual_result = system(simple_command)
               puts "DEBUG: Manual knife result: #{manual_result}"
@@ -225,7 +242,7 @@ cmds.each do |cmd, args|
       # Original: status = run_command("knife #{opc_noun} #{opc_cmd} #{escaped_args}")
       # Try multiple knife paths: /opt/opscode/bin/knife || /opt/opscode/embedded/bin/knife || /usr/bin/knife || /usr/local/bin/knife
       # multi_path_command = "#{full_command.sub('knife', '/opt/opscode/bin/knife')} || #{full_command.sub('knife', '/opt/opscode/embedded/bin/knife')} || #{full_command.sub('knife', '/usr/bin/knife')} || #{full_command.sub('knife', '/usr/local/bin/knife')}"
-      single_path_command = "/opt/opscode/bin/knife #{opc_noun} #{opc_cmd} #{escaped_args}"
+      single_path_command = "#{knife_cmd} #{opc_noun} #{opc_cmd} #{escaped_args}"
       status = run_command(single_path_command)
       exit status.exitstatus
     end
