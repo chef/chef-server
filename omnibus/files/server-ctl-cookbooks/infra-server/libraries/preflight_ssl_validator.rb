@@ -47,23 +47,23 @@ class SslPreflightValidator < PreflightValidator
 
   def openssl_version
     @openssl_version ||= begin
-                           `#{openssl_exe} version`
+                           `#{openssl_exe} list -providers`
                          rescue
                            'unknown'
                          end
   end
 
   def fips_supported_ssl?
-    case openssl_version
-    when /^unknown/
-      Chef::Log.warn('Failed to parse openssl version, assuming it would have supported FIPS')
-      # We could report false here if we wanted to be pessimistic
-      true
-    when /OpenSSL .*-fips/
-      true
-    else
-      false
-    end
+    output = openssl_version
+    return true if output =~ /^unknown/ # Handle unknown case
+
+    # Check for FIPS provider in multi-line output
+    return true if output =~ /OpenSSL FIPS Provider.*\n.*version: 3.2.4.*\n.*status: active/m
+
+    # Keep existing -fips check
+    return true if output =~ /OpenSSL .*-fips/
+
+    false
   end
 
   def verify_cert_pair

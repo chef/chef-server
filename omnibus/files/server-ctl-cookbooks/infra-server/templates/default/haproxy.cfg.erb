@@ -42,7 +42,8 @@ frontend elasticsearch
 
 backend chef_backend_postgresql
         mode tcp
-        option httpchk GET /leader HTTP/1.1\r\nHost:localhost:<%= @leaderl_healthcheck_port %>\r\n\r\n
+        option httpchk
+        http-check send meth GET uri /leader ver HTTP/1.1 hdr Host localhost:<%= @leaderl_healthcheck_port %>
         default-server inter 2s rise 1 fall 1 on-marked-down shutdown-sessions
         <% @chef_backend_members.each do |name, ip| -%>
         server <%= name %> <%= ip %>:<%= @remote_postgresql_port %> check port <%= @leaderl_healthcheck_port %>
@@ -50,7 +51,8 @@ backend chef_backend_postgresql
 
 backend chef_backend_elasticsearch
         mode tcp
-        option httpchk GET /leader HTTP/1.1\r\nHost:localhost:<%= @leaderl_healthcheck_port %>\r\n\r\n
+        option httpchk
+        http-check send meth GET uri /leader ver HTTP/1.1 hdr Host localhost:<%= @leaderl_healthcheck_port %>
         default-server inter 2s rise 1 fall 1
         <% @chef_backend_members.each do |name, ip| -%>
         server <%= name %> <%= ip %>:<%= @remote_elasticsearch_port %> check port <%= @leaderl_healthcheck_port %>
