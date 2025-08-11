@@ -225,5 +225,9 @@ exceptions:
       reason: Exception made by Chef Legal
     - name: core/mpfr 
       reason: Exception made by Chef Legal
+    - name: core/acl
+      reason: Exception made by Chef Legal
+    - name: core/ncurses
+      reason: Exception made by Chef Legal
       
 
