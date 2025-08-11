@@ -44,9 +44,13 @@ jobs:
       continue-on-error: true
       run: |
         brakeman -f sarif -o output.sarif.json src/oc-id --skip-files habitat/
+        # Ensure SARIF file exists even if no issues found
+        if [ ! -f output.sarif.json ]; then
+          echo '{"version":"2.1.0","$schema":"https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json","runs":[{"tool":{"driver":{"name":"Brakeman","version":"4.10"}},"results":[]}]}' > output.sarif.json
+        fi
 
     # Upload the SARIF file generated in the previous step
     - name: Upload SARIF
-      uses: github/codeql-action/upload-sarif@v1
+      uses: github/codeql-action/upload-sarif@v2
       with:
         sarif_file: output.sarif.json
