@@ -9,6 +9,9 @@ fips-platforms:
 builder-to-testers-map:
   rocky-9-x86_64:
     - rocky-9-x86_64
+  sles-12-x86_64:
+    - sles-12-x86_64
+    - sles-15-x86_64
   ubuntu-18.04-x86_64:
     - ubuntu-18.04-x86_64
     - ubuntu-20.04-x86_64
