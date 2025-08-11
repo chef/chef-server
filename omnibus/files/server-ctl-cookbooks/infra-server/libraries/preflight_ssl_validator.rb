@@ -56,13 +56,13 @@ class SslPreflightValidator < PreflightValidator
   def fips_supported_ssl?
     output = openssl_version
     return true if output =~ /^unknown/ # Handle unknown case
-    
+
     # Check for FIPS provider in multi-line output
     return true if output =~ /OpenSSL FIPS Provider.*\n.*version: 3.2.4.*\n.*status: active/m
-    
+
     # Keep existing -fips check
     return true if output =~ /OpenSSL .*-fips/
-    
+
     false
   end
 
