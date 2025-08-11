@@ -71,9 +71,9 @@ version "1.3.19" do
 end
 
 version "1.3.20" do
-  source url: "#{ENV['ARTIFACTORY_REPO_URL']}/#{name}/#{name}-#{version}.tuxcare.1-linux-x64.tar.gz",
+  source url: "#{ENV['ARTIFACTORY_REPO_URL']}/opensearch-1/#{name}-#{version}.tuxcare.1-linux-x64.tar.gz",
                   authorization: "X-JFrog-Art-Api:#{ENV['ARTIFACTORY_TOKEN']}",
-                  sha256: "bc2bee135feb6ff70b8526cbdf8302bd02c6bf1551dcf352a7b57e43a2a76869"
+                  sha256: "768676ae07cd3b3a9ff045e2fd3711aca70bb4ef11b8fa26c2eba96efded4633"
 end
 
 target_path = "#{install_dir}/embedded/opensearch"
