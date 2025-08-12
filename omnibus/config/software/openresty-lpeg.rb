@@ -34,7 +34,8 @@ end
 # This has an unofficial git mirror: https://github.com/luvit/lpeg
 # Project homepage: http://www.inf.puc-rio.br/~roberto/lpeg/
 source url: "http://www.inf.puc-rio.br/~roberto/lpeg/lpeg-#{version}.tar.gz"
-
+internal_source url: "#{ENV["ARTIFACTORY_REPO_URL"]}/lpeg/lpeg-#{version}.tar.gz",
+                authorization: "X-JFrog-Art-Api:#{ENV["ARTIFACTORY_TOKEN"]}"
 relative_path "lpeg-#{version}"
 
 build do

@@ -71,8 +71,11 @@ version "1.3.19" do
 end
 
 version "1.3.20" do
-  source url: "https://artifacts.opensearch.org/releases/bundle/opensearch/#{version}/opensearch-#{version}-linux-x64.tar.gz",
-         sha256: "a786fe52b4d25db85cc49f34df6118f19c434b25935f28bd98c0f874ae77ccc3"
+  source url: "#{ENV['ARTIFACTORY_REPO_URL']}/opensearch-1/#{name}-#{version}.tuxcare.1-linux-x64.tar.gz",
+                  authorization: "X-JFrog-Art-Api:#{ENV['ARTIFACTORY_TOKEN']}",
+                  sha256: "768676ae07cd3b3a9ff045e2fd3711aca70bb4ef11b8fa26c2eba96efded4633"
+internal_source url: "#{ENV["ARTIFACTORY_REPO_URL"]}/opensearch-1/#{name}-#{version}.tuxcare.1-linux-x64.tar.gz",
+                authorization: "X-JFrog-Art-Api:#{ENV["ARTIFACTORY_TOKEN"]}"
 end
 
 target_path = "#{install_dir}/embedded/opensearch"
@@ -87,12 +90,12 @@ build do
   delete "#{project_dir}/modules/x-pack-ml"
   delete "#{project_dir}/modules/ingest-geoip"
   mkdir  "#{project_dir}/plugins"
-  command "cd #{project_dir}/plugins; ls | grep -v opensearch-security| xargs rm -rf "
+  command "cd #{project_dir}/plugins; ls | grep -v opensearch-security | xargs rm -rf"
   # by default RPMs will not include empty directories in the final package
   # OpenSearch will fail to start if this dir is not present.
-  # touch  "#{project_dir}/plugins/.gitkeep"
+  # touch "#{project_dir}/plugins/.gitkeep"
 
-  sync   "#{project_dir}/", "#{target_path}"
+  sync "#{project_dir}/", "#{target_path}"
   command "chmod ugo+x #{project_dir}/plugins/opensearch-security/tools/*"
   command "chmod ugo+x #{target_path}/plugins/opensearch-security/tools/*"
   # Dropping a VERSION file here allows additional software definitions
