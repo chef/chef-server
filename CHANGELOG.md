@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.10.50 -->
-## [15.10.50](https://github.com/chef/chef-server/tree/15.10.50) (2025-08-11)
+<!-- latest_release 15.10.51 -->
+## [15.10.51](https://github.com/chef/chef-server/tree/15.10.51) (2025-08-12)
 
 #### Merged Pull Requests
-- Added openssl changes [#4038](https://github.com/chef/chef-server/pull/4038) ([jashaik](https://github.com/jashaik))
+- Upgrade webrick to 1.8.2 in oc-chef-pedant [#4049](https://github.com/chef/chef-server/pull/4049) ([RoyShravani](https://github.com/RoyShravani))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.10.33 -->
 ### Changes since 15.10.33 release
 
 #### Merged Pull Requests
+- Upgrade webrick to 1.8.2 in oc-chef-pedant [#4049](https://github.com/chef/chef-server/pull/4049) ([RoyShravani](https://github.com/RoyShravani)) <!-- 15.10.51 -->
 - Added openssl changes [#4038](https://github.com/chef/chef-server/pull/4038) ([jashaik](https://github.com/jashaik)) <!-- 15.10.50 -->
 - JDK update to 11.0.28+6 [#4050](https://github.com/chef/chef-server/pull/4050) ([talktovikas](https://github.com/talktovikas)) <!-- 15.10.49 -->
 - Bump webrick from 1.8.1 to 1.8.2 in /src/oc-id [#3945](https://github.com/chef/chef-server/pull/3945) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.10.48 -->
