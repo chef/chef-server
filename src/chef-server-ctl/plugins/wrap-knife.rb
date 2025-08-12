@@ -32,7 +32,11 @@ def resolve_knife_bin
   which_result = `which knife 2>/dev/null`.strip
   return which_result unless which_result.empty?
   
-  # Fall back to default
+  # Try the main bin directory first
+  main_knife_path = "/opt/opscode/bin/knife"
+  return main_knife_path if File.exist?(main_knife_path)
+  
+  # Fall back to embedded bin directory
   "/opt/opscode/embedded/bin/knife"
 end
 
