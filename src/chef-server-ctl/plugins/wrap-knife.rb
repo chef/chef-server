@@ -33,7 +33,7 @@ def resolve_knife_bin
   return which_result unless which_result.empty?
   
   # Fall back to default
-  "/opt/opscode/bin/knife"
+  "/opt/opscode/embedded/bin/knife"
 end
 
 knife_cmd = resolve_knife_bin
