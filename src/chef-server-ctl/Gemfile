@@ -2,8 +2,14 @@ source "https://rubygems.org"
 
 gemspec
 
+gem 'chef-bin', git: 'https://github.com/chef/chef.git', branch: 'chef-18', glob: 'chef-bin/chef-bin.gemspec'
+gem 'chef-utils', git: 'https://github.com/chef/chef.git', branch: 'chef-18', glob: 'chef-utils/chef-utils.gemspec'
+
 gem "chef", git: "https://github.com/chef/chef", branch: "chef-18"
 gem "toml" # for habitat-land
+
+gem 'knife', git: 'https://github.com/chef/chef.git', branch: 'chef-18', glob: 'knife/knife.gemspec'
+
 
 # Use latest commit from CHEF-23857-security-fix-test-ruby-3.1.7 branch for knife-ec-backup
 gem "knife-ec-backup", git: "https://github.com/chef/knife-ec-backup", branch: "CHEF-23857-security-fix-test-ruby-3.1.7"
