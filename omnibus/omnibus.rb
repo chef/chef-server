@@ -1,3 +1,7 @@
+
+# Set Omnibus Buildkite Plugin Version
+ENV['OMNIBUS_BUILDKITE_PLUGIN_VERSION'] = '8291538da3f3ab8f037ff7a56d77e1ab02c4bbf9'
+
 # Disable git caching
 # ------------------------------
 # use_git_caching false
