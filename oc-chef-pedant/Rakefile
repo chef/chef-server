@@ -27,7 +27,7 @@ def bundle_exec_with_chef(test_gem, commands)
       # TODO: one of workaround to fix verify pipeline failure
       # Could not found another way to update chef version without releasing new chef-zero  gem
       elsif line =~ /^\s*gem\s*['"]chef['"]\s*,?.*$/ # foodcritic      end
-        line = "gem \"chef\", \"17.10.0\""
+        line = "gem \"chef\", \"~> 18.8.9\""
       elsif line =~ /^\s*gem\s*['"]ohai['"]\s*,?.*$/ # foodcritic      end
         line = "gem \"ohai\", \"~> 17.0\""
       elsif line =~ /\s*gem\s*['"]#{test_gem}['"]/ # foodcritic      end
