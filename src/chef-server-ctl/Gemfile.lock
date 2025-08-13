@@ -1,9 +1,9 @@
 GIT
   remote: https://github.com/chef/knife-ec-backup
-  revision: 18ed3718ff54673434176d72f36fa3c71aeaed81
+  revision: f1ad8c7c6b2f56396971db210dcb23025fd6967f
   branch: CHEF-23857-security-fix-test-ruby-3.1.7
   specs:
-    knife-ec-backup (3.0.3)
+    knife-ec-backup (3.0.4)
       chef (~> 18.0)
       pg
       sequel (~> 5.9)
@@ -52,7 +52,7 @@ GEM
       mixlib-shellout (>= 2.0, < 4.0)
     ast (2.4.3)
     aws-eventstream (1.4.0)
-    aws-partitions (1.1143.0)
+    aws-partitions (1.1146.0)
     aws-sdk-core (3.229.0)
       aws-eventstream (~> 1, >= 1.3.0)
       aws-partitions (~> 1, >= 1.992.0)
@@ -308,7 +308,7 @@ GEM
     mime-types (3.7.0)
       logger
       mime-types-data (~> 3.2025, >= 3.2025.0507)
-    mime-types-data (3.2025.0805)
+    mime-types-data (3.2025.0812)
     minitar (1.0.2)
     minitest (5.25.5)
     mixlib-archive (1.1.7)
@@ -393,9 +393,9 @@ GEM
     rake (13.3.0)
     redis (5.4.1)
       redis-client (>= 0.22.0)
-    redis-client (0.25.1)
+    redis-client (0.25.2)
       connection_pool
-    regexp_parser (2.11.0)
+    regexp_parser (2.11.2)
     rest-client (2.1.0)
       http-accept (>= 1.7.0, < 2.0)
       http-cookie (>= 1.0.2, < 2.0)
@@ -452,7 +452,7 @@ GEM
       unicode_utils (~> 1.4)
     strings-ansi (0.2.0)
     syslog-logger (1.6.8)
-    thor (1.4.0)
+    thor (1.2.2)
     time (0.4.1)
       date
     timeout (0.4.3)
@@ -512,6 +512,7 @@ GEM
 
 PLATFORMS
   arm64-darwin-21
+  arm64-darwin-24
   x86_64-linux
 
 DEPENDENCIES
