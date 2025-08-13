@@ -168,7 +168,7 @@ create(ObjectRec0, #context{server_api_version = ApiVersion, reqid = ReqId}, Act
     case stats_hero:ctime(ReqId, {chef_sql, create_object},
                           fun() -> chef_sql:create_object(QueryName, Fields) end) of
         {ok, 1} -> ok;
-        {conflict, Msg}-> {conflict, Msg};
+        {conflict, Msg} -> {conflict, Msg};
         {error, Why} -> {error, Why}
     end.
 
@@ -312,7 +312,7 @@ fetch_requestor(Context, OrgId, ClientName) ->
 %% @doc fetches requestor records for all actors matching by name. Note that
 %% if orgid is undefined, it will only retrieve records corresponding to users,
 %% and not clients.
--spec fetch_requestors(#context{}, binary()|undefined, binary()) ->
+-spec fetch_requestors(#context{}, binary() | undefined, binary()) ->
                               [#chef_requestor{}]
                                   | not_found
                                   | {error, term()}.
@@ -350,7 +350,7 @@ make_sandbox(#context{}=Ctx, OrgId, ActorId, Checksums) ->
     end.
 
 -spec cookbook_exists(DbContext :: #context{},
-                      OrgId::object_id(),
+                      OrgId :: object_id(),
                       CookbookName :: binary()) ->
                              boolean() | {error, term()}.
 cookbook_exists(#context{reqid=ReqId}, OrgId, CookbookName) ->
@@ -358,14 +358,14 @@ cookbook_exists(#context{reqid=ReqId}, OrgId, CookbookName) ->
 
 %% @doc Given a list of cookbook names and versions, return a list of #chef_cookbook_version
 %% objects.  This is used by the depsolver endpoint.
--spec bulk_fetch_minimal_cookbook_versions(DbContext :: #context{}, OrgId:: object_id(), [versioned_cookbook()]) -> [#chef_cookbook_version{}] | {error, any()}.
+-spec bulk_fetch_minimal_cookbook_versions(DbContext :: #context{}, OrgId :: object_id(), [versioned_cookbook()]) -> [#chef_cookbook_version{}] | {error, any()}.
 bulk_fetch_minimal_cookbook_versions(#context{}, _OrgId, []) ->
     %% Avoid database calls in the case of an empty run_list
     [];
 bulk_fetch_minimal_cookbook_versions(#context{reqid = ReqID}, OrgId, VersionedCookbooks) ->
     ?SH_TIME(ReqID, chef_sql, bulk_fetch_minimal_cookbook_versions , (OrgId, VersionedCookbooks)).
 
--spec fetch_cookbook_versions(#context{},object_id()) -> [versioned_cookbook()] | {error, any()}.
+-spec fetch_cookbook_versions(#context{}, object_id()) -> [versioned_cookbook()] | {error, any()}.
 %% @doc Return a list of all cookbook names and versions in an org
 fetch_cookbook_versions(#context{} = Ctx, OrgId) ->
     fetch_objects(Ctx, fetch_cookbook_versions, OrgId).
@@ -384,9 +384,9 @@ fetch_cookbook_versions(#context{} = Ctx, OrgId, CookbookName) ->
 fetch_cookbook_version(#context{reqid = ReqId}, OrgId, VersionedCookbook) ->
     ?SH_TIME(ReqId, chef_sql, fetch_cookbook_version, (OrgId, VersionedCookbook)).
 
--spec fetch_latest_cookbook_version(Ctx::#context{},
-                                    OrgId::object_id(),
-                                    CookbookName::binary()) ->
+-spec fetch_latest_cookbook_version(Ctx :: #context{},
+                                    OrgId :: object_id(),
+                                    CookbookName :: binary()) ->
                                     #chef_cookbook_version{} |
                                     not_found |
                                     {error, term()}.
@@ -429,7 +429,7 @@ fetch_latest_cookbook_versions(#context{reqid=ReqId}, OrgId, NumberOfVersions) -
 %% @doc Retrieves the list of all recipes from the latest version of all an organization's
 %% cook}books and returns their cookbook-qualified names.
 -spec fetch_latest_cookbook_recipes(DbContext :: #context{},
-                                    OrgId::object_id()) ->
+                                    OrgId :: object_id()) ->
                                            [CookbookQualifiedRecipeName :: binary()] |
                                            {error, Reason :: term()}.
 fetch_latest_cookbook_recipes(#context{reqid=ReqId}, OrgId) ->
@@ -445,7 +445,7 @@ fetch_latest_cookbook_recipes(#context{reqid=ReqId}, OrgId) ->
 %%
 %% See the corresponding function in the chef_sql module for more information.
 -spec fetch_all_cookbook_version_dependencies(DbContext :: #context{},
-                                              OrgId::object_id()) -> [depsolver:dependency_set()] |
+                                              OrgId :: object_id()) -> [depsolver:dependency_set()] |
                                                                       {error, term()}.
 fetch_all_cookbook_version_dependencies(#context{reqid=ReqId}, OrgId) ->
     case ?SH_TIME(ReqId, chef_sql, fetch_all_cookbook_version_dependencies, (OrgId)) of
@@ -464,10 +464,10 @@ fetch_all_cookbook_version_dependencies(#context{reqid=ReqId}, OrgId) ->
 %% if it is a cookbook name (i.e., a binary), then information on just that cookbook will be
 %% returned.
 -spec fetch_environment_filtered_cookbook_versions(DbContext :: #context{},
-                                                   OrgId::object_id(),
+                                                   OrgId :: object_id(),
                                                    EnvName :: binary(),
                                                    CookbookName :: binary() | all,
-                                                   NumVersions :: all | non_neg_integer()) ->
+                                                   NumVersions  :: all | non_neg_integer()) ->
                                                           [{CookbookName :: binary(), [Version :: binary()]}] |
                                                           {error, term()}.
 fetch_environment_filtered_cookbook_versions(#context{reqid=ReqId}=DbContext, OrgId, EnvName, CookbookName, NumVersions) ->
@@ -571,7 +571,7 @@ is_user_in_org(#context{reqid = ReqId}, UserName, OrgName) ->
     ?SH_TIME(ReqId, chef_sql, is_user_in_org, (UserName, OrgName)).
 
 -spec bulk_get(#context{}, binary(), chef_type(), [binary()]) ->
-                      [binary()|ej:json_object()] | {error, _}.
+                      [binary() | ej:json_object()] | {error, _}.
 %% @doc Return a list of JSON/gzip'd JSON as binary corresponding to the specified list of
 %% IDs.
 bulk_get(#context{reqid = ReqId}, _, node, Ids) ->
@@ -673,7 +673,7 @@ create_object(#context{server_api_version = ApiVersion, reqid = ReqId}, Fun, Obj
     case stats_hero:ctime(ReqId, {chef_sql, Fun},
                           fun() -> chef_sql:Fun(Object2) end) of
         {ok, 1} -> ok;
-        {conflict, Msg}-> {conflict, Msg};
+        {conflict, Msg} -> {conflict, Msg};
         {error, Why} -> {error, Why}
     end.
 

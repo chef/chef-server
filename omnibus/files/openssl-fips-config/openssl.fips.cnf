@@ -1,8 +1,9 @@
-# An openssl config that enables FIPS by default
-openssl_conf = openssl_conf_section
+[openssl_init]
+providers = provider_sect
 
-[openssl_conf_section]
-alg_section             = evp_sect
+[provider_sect]
+fips = fips_sect
+default = default_sect
 
-[evp_sect]
-fips_mode = yes
+[fips_sect]
+activate = 1

@@ -327,7 +327,7 @@ environment_filtered_cookbooks_spec() ->
 
 environment_from_spec({Prefix, Properties}) ->
     make_environment(Prefix, Properties);
-environment_from_spec(Prefix) when is_binary(Prefix)->
+environment_from_spec(Prefix) when is_binary(Prefix) ->
     make_environment(Prefix, []).
 
 %% TODO: This doesn't handle the "_default" environment yet
@@ -360,7 +360,7 @@ make_environment(Prefix, Properties) ->
 
 process_environment_property(cookbook_versions=Property, Properties) ->
     case proplists:lookup(Property, Properties) of
-        {Property, Value} when is_list(Value)->
+        {Property, Value} when is_list(Value) ->
             %% Wrap for EJson
             {Value};
         none ->
@@ -373,4 +373,4 @@ environment_name_from_prefix(Prefix) ->
 %% TODO: Other places use this same date... they should use this
 %% function, instead
 default_date() ->
-    {datetime, {{2011,10,1},{16,47,46}}}.
+    {datetime, {{2011, 10, 1}, {16, 47, 46}}}.

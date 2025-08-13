@@ -77,7 +77,7 @@ authenticate(User, Password) ->
     Result.
 
 maybe_ssl_options(simple_tls, Options) ->
-    Options ++ [{ssl, true}];
+    Options ++ [{ssl, true}, {sslopts, [{verify, verify_none}]}];
 maybe_ssl_options(_, Options) ->
     Options.
 
@@ -96,7 +96,7 @@ find_and_authenticate_user(Session, User, Password, Config) ->
     GroupDN = proplists:get_value(group_dn, Config, ""),
     Filter = case GroupDN of
                  "" -> {filter, eldap:equalityMatch(LoginAttr, User)};
-                 _ -> {filter,eldap:'and'([eldap:equalityMatch(LoginAttr, User), eldap:equalityMatch("memberOf",GroupDN)])}
+                 _ -> {filter, eldap:'and'([eldap:equalityMatch(LoginAttr, User), eldap:equalityMatch("memberOf", GroupDN)])}
              end,
 
     % Auth so we can search for the user
@@ -151,7 +151,7 @@ maybe_encrypt_session(_Encryption, {error, Error}, _Timeout) ->
     lager:error("Failed to connect to ldap host or an error occurred during connection setup. Please check chef-server.rb for correct host, port, and encryption values: ~p", [Error]),
     error;
 maybe_encrypt_session(start_tls, {ok, Session}, Timeout) ->
-    case eldap:start_tls(Session, [], Timeout) of
+    case eldap:start_tls(Session, [{verify, verify_none}], Timeout) of
         ok -> % secure upgrade completed
             {ok, Session};
         {error, tls_already_started} ->
@@ -181,7 +181,7 @@ canonical_username(Username) ->
 result_to_user_ejson(_, UserName, []) ->
     lager:info("User ~p not found in LDAP", [UserName]),
     {error, unauthorized};
-result_to_user_ejson(LoginAttr, UserName, [{eldap_entry, CN, DataIn}|_]) ->
+result_to_user_ejson(LoginAttr, UserName, [{eldap_entry, CN, DataIn} | _]) ->
     % No guarantees on casing, so let's not make assumptions:
     Data = [ { string:to_lower(Key), Value} || {Key, Value} <- DataIn ],
 
@@ -192,7 +192,7 @@ result_to_user_ejson(LoginAttr, UserName, [{eldap_entry, CN, DataIn}|_]) ->
     % loginattr was used to find this record, so we know it must exist;
     % however, multiple LoginAttr fields may exist in the LDAP record, take
     % the first
-    [CanonicalUserName|_] = [ canonical_username(U) || U <- proplists:get_value(LCLoginAttr, Data) ],
+    [CanonicalUserName | _] = [ canonical_username(U) || U <- proplists:get_value(LCLoginAttr, Data) ],
 
     % If you are debugging an issue where a new user has authenticated successfully
     % via opscode-manage , but received an odd 400 message when trying to create a
@@ -231,7 +231,7 @@ close(_) ->
     ok.
 
 value_of(Key, Data, Default) ->
-    [R|_] = proplists:get_value(Key, Data, [Default]),
+    [R | _] = proplists:get_value(Key, Data, [Default]),
     characters_to_binary(R).
 
 characters_to_binary(Characters) when is_list(Characters) ->

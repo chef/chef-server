@@ -1,16 +1,24 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.10.43 -->
-## [15.10.43](https://github.com/chef/chef-server/tree/15.10.43) (2025-07-24)
+<!-- latest_release 15.10.51 -->
+## [15.10.51](https://github.com/chef/chef-server/tree/15.10.51) (2025-08-12)
 
 #### Merged Pull Requests
-- [CHEF-23713] Update Ruby to 3.1.7 version [#4028](https://github.com/chef/chef-server/pull/4028) ([RoyShravani](https://github.com/RoyShravani))
+- Upgrade webrick to 1.8.2 in oc-chef-pedant [#4049](https://github.com/chef/chef-server/pull/4049) ([RoyShravani](https://github.com/RoyShravani))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.10.33 -->
 ### Changes since 15.10.33 release
 
 #### Merged Pull Requests
+- Upgrade webrick to 1.8.2 in oc-chef-pedant [#4049](https://github.com/chef/chef-server/pull/4049) ([RoyShravani](https://github.com/RoyShravani)) <!-- 15.10.51 -->
+- Added openssl changes [#4038](https://github.com/chef/chef-server/pull/4038) ([jashaik](https://github.com/jashaik)) <!-- 15.10.50 -->
+- JDK update to 11.0.28+6 [#4050](https://github.com/chef/chef-server/pull/4050) ([talktovikas](https://github.com/talktovikas)) <!-- 15.10.49 -->
+- Bump webrick from 1.8.1 to 1.8.2 in /src/oc-id [#3945](https://github.com/chef/chef-server/pull/3945) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.10.48 -->
+- Bump webrick from 1.7.0 to 1.8.2 in /src/chef-server-ctl [#3944](https://github.com/chef/chef-server/pull/3944) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.10.47 -->
+- Upgrade nokogiri to 1.18.9 [#4043](https://github.com/chef/chef-server/pull/4043) ([RoyShravani](https://github.com/RoyShravani)) <!-- 15.10.46 -->
+- Pin pg gem version &lt; 1.6 for older linux distros [#4041](https://github.com/chef/chef-server/pull/4041) ([RoyShravani](https://github.com/RoyShravani)) <!-- 15.10.45 -->
+- Updating the erlang version 26.2 [#4025](https://github.com/chef/chef-server/pull/4025) ([talktovikas](https://github.com/talktovikas)) <!-- 15.10.44 -->
 - [CHEF-23713] Update Ruby to 3.1.7 version [#4028](https://github.com/chef/chef-server/pull/4028) ([RoyShravani](https://github.com/RoyShravani)) <!-- 15.10.43 -->
 - upgrading the PG from 13.8 to 13.21 [#4023](https://github.com/chef/chef-server/pull/4023) ([talktovikas](https://github.com/talktovikas)) <!-- 15.10.42 -->
 - Temporary fix for asdf 16 upgrade warning. [#4029](https://github.com/chef/chef-server/pull/4029) ([sreepuramsudheer](https://github.com/sreepuramsudheer)) <!-- 15.10.41 -->
