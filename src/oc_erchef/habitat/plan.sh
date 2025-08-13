@@ -14,6 +14,8 @@ pkg_deps=(
   core/gecode3
   core/libffi
   core/glibc
+  core/postgresql-client
+  core/bundler
 )
 pkg_build_deps=(core/make core/git core/gcc)
 pkg_bin_dirs=(bin)
@@ -91,16 +93,29 @@ do_build() {
 do_install() {
   export HOME="${pkg_prefix}"
   export GEM_HOME="${pkg_prefix}/vendor/bundle"
-
-  cp Gemfile_habitat ${pkg_prefix}/Gemfile
-  cp Gemfile_habitat.lock ${pkg_prefix}/Gemfile.lock
   
   # Set up proper Ruby environment for bundle install
   _ruby_dir="$(pkg_path_for core/ruby3_1)"
   export PATH="${_ruby_dir}/bin:${PATH}"
-  export GEM_PATH="${_ruby_dir}:${GEM_HOME}"
+  export GEM_PATH="${_ruby_dir}/lib/ruby/gems/3.1.0:${GEM_HOME}"
   
-  bundle install --gemfile ${pkg_prefix}/Gemfile --path "${pkg_prefix}/vendor/bundle" --deployment
+  # Copy only the Gemfile, not the lockfile
+  cp Gemfile_habitat ${pkg_prefix}/Gemfile
+  
+  # Move to the prefix directory for bundler operations
+  cd ${pkg_prefix}
+  
+  # Configure bundler
+  ${_ruby_dir}/bin/bundle config set --local path "${pkg_prefix}/vendor/bundle"
+  ${_ruby_dir}/bin/bundle config set --local without 'development test'
+  
+  # Install all gems from the Gemfile
+  ${_ruby_dir}/bin/bundle install --gemfile ${pkg_prefix}/Gemfile
+  
+  # Generate a new compatible lockfile
+  ${_ruby_dir}/bin/bundle lock
+  
+  # Copy the Erlang application files
   cp -r "_build/default/rel/oc_erchef/"* "${pkg_prefix}"
   fix_interpreter "${pkg_prefix}/bin/reindex-opc-organization" core/coreutils bin/env
   cp -R "$HAB_CACHE_SRC_PATH/$pkg_dirname/schema" "$pkg_prefix"
