@@ -24,6 +24,7 @@ dependency "erlang"
 dependency "gecode"
 dependency "sqitch"
 dependency "perl_pg_driver"
+dependency "postgresql13" # for libpq, needed for pg gem
 
 # RUBY DEPSOLVER - REMOVE FOR ROLLBACK #
 dependency "ruby"
@@ -34,6 +35,15 @@ build do
 
   env['USE_SYSTEM_GECODE'] = "1"
   env['REL_VERSION'] = "#{project.build_version}"
+
+  # Create bundle directory if it doesn't exist
+  mkdir ".bundle" unless File.exist?(".bundle")
+
+  # Configure bundle for Ruby gems
+  bundle "config set --local without development test doc", env: env
+  bundle "config build.pg --with-pg-config=#{install_dir}/embedded/bin/pg_config", env: env
+  bundle "install --gemfile=Gemfile_habitat" \
+         " --path=#{install_dir}/embedded/service/gem", env: env
 
   make "omnibus", env: env
 
