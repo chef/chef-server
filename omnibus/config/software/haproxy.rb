@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 name "haproxy"
-default_version "1.8.30"
+default_version "3.0.11"
 
 dependency "zlib"
 dependency "pcre"
@@ -25,8 +25,8 @@ license_file "LICENSE"
 skip_transitive_dependency_licensing true
 
 # HTTPS is available but certificate validation fails on OS X
-source url: "http://www.haproxy.org/download/1.8/src/haproxy-#{version}.tar.gz",
-       sha256: "066bfd9a0e5a3550fa621886a132379e5331d0c377e11f38bb6e8dfbec92be42"
+source url: "http://www.haproxy.org/download/3.0/src/haproxy-#{version}.tar.gz",
+       sha256: "a133e2d550c5fd9a849b5c7ab17bb945bcdad209ca140d41f45ebf31943ae783"
 
 relative_path "haproxy-#{version}"
 
@@ -47,7 +47,7 @@ build do
    # Required to resolve hostnames to IPv6 addresses
    # off-by-default because of prolems on older glibc's
    "USE_GETADDRINFO" => "1",
-   "TARGET" => "linux2628"
+   "TARGET" => "linux-glibc"
   }
 
   if intel?

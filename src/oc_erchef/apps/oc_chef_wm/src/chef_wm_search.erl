@@ -68,7 +68,7 @@ request_type() ->
     "search".
 
 allowed_methods(Req, State) ->
-    {['GET','POST'], Req, State}.
+    {['GET', 'POST'], Req, State}.
 
 -spec validate_request(chef_wm:http_verb(), wm_req(), chef_wm:base_state()) ->
                               {wm_req(), chef_wm:base_state()}.
@@ -418,7 +418,7 @@ fetch_result_rows({Ids, Rest}, BatchSize, BulkGetFun, {N, Acc}) ->
 %% a dangling comma and strip it out. Completely ugly since
 %% we're assuming the separator is a comma.
 %% FIXME Refactor into a more readable/understandable design
-encode_results([], [<<",">>|Acc]) ->
+encode_results([], [<<",">> | Acc]) ->
     Acc;
 encode_results([], Acc) ->
     Acc;
@@ -437,7 +437,7 @@ encode_results(Results, Prefix, Acc) ->
 %% This function knows how to deal with gzip binary from SQL and with EJSON data coming
 %% straight from couch. If the data has come from couch, this is where couch cruft keys _id
 %% and _rev are removed.
-encode_result_rows([Item|_Rest]=Items) when is_binary(Item) ->
+encode_result_rows([Item | _Rest]=Items) when is_binary(Item) ->
     ItemList = << <<(chef_db_compression:decompress(Bin))/binary, ",">> || Bin <- Items >>,
     %% remove trailing "," from binary
     binary:part(ItemList, {0, size(ItemList) - 1});
@@ -456,13 +456,13 @@ remove_couchdb_keys([]) ->
 remove_couchdb_keys(L) ->
     remove_couchdb_keys(L, 0).
 
-remove_couchdb_keys([{Key, _}|T], N) when Key =:= <<"_rev">>;
-                                          Key =:= <<"_id">> ->
-    remove_couchdb_keys(T, N+1);
+remove_couchdb_keys([{Key, _} | T], N) when Key =:= <<"_rev">>;
+                                            Key =:= <<"_id">> ->
+    remove_couchdb_keys(T, N + 1);
 remove_couchdb_keys(L, N) when N > 1 ->
     L;
-remove_couchdb_keys([H|T], N) ->
-    [H|remove_couchdb_keys(T, N)];
+remove_couchdb_keys([H | T], N) ->
+    [H | remove_couchdb_keys(T, N)];
 remove_couchdb_keys([], _) ->
     [].
 
@@ -484,7 +484,7 @@ search_result_start(Start, Total) ->
 
 search_result_finish(Result) ->
     %% Note that all we need here is an iolist not a flat binary.
-    lists:reverse([<<"]}">>|Result]).
+    lists:reverse([<<"]}">> | Result]).
 
 malformed_request_message(#ej_invalid{}, _Req, _State) ->
     Msg = <<"invalid partial search request body">>,

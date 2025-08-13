@@ -37,12 +37,12 @@ config_option_test_() ->
 		     application:set_env(TestApplication, TestOption, Value)
 	     end
      end,
-     fun(_,_) ->
+     fun(_, _) ->
 	     error_logger:tty(true),
 	     application:unset_env(TestApplication, TestOption)
      end,
      [{Value,
-       fun(_,_) ->
+       fun(_, _) ->
 	       {Description,
 		fun() ->
 			case {Value, ErrorState} of

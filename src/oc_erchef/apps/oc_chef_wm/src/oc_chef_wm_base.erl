@@ -89,15 +89,15 @@ service_available(Req, #base_state{reqid_header_name = HeaderName} = State) ->
                     {true, Req, State3};
                 _ ->
                     case chef_license_worker:get_license() of
-                        {valid_license, _, _, _, _, _,_} ->
+                        {valid_license, _, _, _, _, _, _} ->
                             {true, Req, State3};
-                        {commercial_grace_period, _, _, ExpDate, LicWarnMsg, _,_} ->
-                            XOps = binary_to_list(chef_json:encode({[{<<"licenseType">>, <<"commercial">>},{<<"expirationDateTime">>, list_to_binary(ExpDate)},
+                        {commercial_grace_period, _, _, ExpDate, LicWarnMsg, _, _} ->
+                            XOps = binary_to_list(chef_json:encode({[{<<"licenseType">>, <<"commercial">>}, {<<"expirationDateTime">>, list_to_binary(ExpDate)},
                                 {<<"warningMessage">>, list_to_binary(LicWarnMsg)}, {<<"gracePeriod">>, true}]})),
                             Req1 = wrq:set_resp_header("X-Ops-License", XOps, Req),
                             {true, Req1, State3};
-                        {_, Type, _, ExpDate, LicWarnMsg, _,_} ->
-                            XOps = binary_to_list(chef_json:encode({[{<<"licenseType">>, Type},{<<"expirationDateTime">>, list_to_binary(ExpDate)},
+                        {_, Type, _, ExpDate, LicWarnMsg, _, _} ->
+                            XOps = binary_to_list(chef_json:encode({[{<<"licenseType">>, Type}, {<<"expirationDateTime">>, list_to_binary(ExpDate)},
                                 {<<"warningMessage">>, list_to_binary(LicWarnMsg)}, {<<"gracePeriod">>, false}]})),
                             Req1 = wrq:set_resp_header("X-Ops-License", XOps, Req),
                             Req2 = chef_wm_util:set_json_body(Req1, {[{<<"error">>,  list_to_binary(LicWarnMsg)},
@@ -113,7 +113,7 @@ service_available(Req, #base_state{reqid_header_name = HeaderName} = State) ->
 %% and reply with it as or reply with error if it's not valid.
 %%
 %% If X-Ops-Server-API-Version is not sent, the server assumes an API version of 0.
--spec server_api_version(undefined|string()) -> api_version() | {error, string()}.
+-spec server_api_version(undefined | string()) -> api_version() | {error, string()}.
 server_api_version(undefined) ->
     0;
 server_api_version(RequestedVersion) ->
@@ -209,7 +209,7 @@ forbidden(Req, #base_state{resource_mod = Mod} = State) ->
                     {Req2, State2} = set_forbidden_msg(Req1, State1),
                     {true, Req2, State2}
             end;
-        {AuthTuples, Req1, State1} when is_list(AuthTuples)->
+        {AuthTuples, Req1, State1} when is_list(AuthTuples) ->
             MultiAuthResult = multi_auth_check(AuthTuples, Req1, State1),
             multi_auth_check_to_wm_response(MultiAuthResult);
         {authorized, Req1, State1} ->
@@ -264,7 +264,7 @@ multi_auth_check_to_wm_response({Error, {AuthzObjectType, AuthzId, Permission}, 
 multi_auth_check([], Req, State) ->
     %% Nothing left to check, must be OK
     {true, Req, State};
-multi_auth_check([CurrentTuple|Rest], Req, State) ->
+multi_auth_check([CurrentTuple | Rest], Req, State) ->
     case auth_check(CurrentTuple, Req, State) of
         {true, UpdatedReq, UpdatedState} ->
             %% That one checked out; check the rest
@@ -314,7 +314,7 @@ auth_check({actor, ObjectId, Permission}, Req, State) ->
 %% resource_state record using set_authz_id/3 (which knows how to deal
 %% with the different resource_state records).
 -spec create_in_container(container_name(), wm_req(), chef_wm:base_state()) ->
-                                 {true|false, wm_req(), chef_wm:base_state()}.
+                                 {true | false, wm_req(), chef_wm:base_state()}.
 create_in_container(client, Req, #base_state{chef_db_context = Ctx,
                                              organization_guid = OrgId,
                                              requestor = #chef_requestor{name = Name, type = <<"client">>}} = State) ->
@@ -378,7 +378,7 @@ create_in_container(Container, Req, #base_state{requestor_id = RequestorId} = St
                              wm_req(),
                              chef_wm:base_state(),
                              superuser |  object_id()) ->
-                                    {true|false,
+                                    {true | false,
                                      wm_req(),
                                      chef_wm:base_state()}.
 do_create_in_container(Container, Req,
@@ -455,7 +455,7 @@ is_authorized(Req, State) ->
 is_authorized(Req, State, Extractor) ->
     case verify_request_signature(Req, State, Extractor) of
         {true, Req1, State1} ->
-            case authorized_by_org_membership_check(Req1,State1) of
+            case authorized_by_org_membership_check(Req1, State1) of
                 {false, Req2, State2} ->
                     {{halt, 403}, Req2, State2};
                 {true, Req2, State2} ->
@@ -502,7 +502,7 @@ authorized_by_org_membership_check(Req, #base_state{organization_name = OrgName,
 
 -spec set_forbidden_msg(atom(), wm_req(), chef_wm:base_state()) ->
                                {wm_req(), chef_wm:base_state()}.
-set_forbidden_msg(Perm, Req, State) when is_atom(Perm)->
+set_forbidden_msg(Perm, Req, State) when is_atom(Perm) ->
     Msg = iolist_to_binary(["missing ", atom_to_binary(Perm, utf8), " permission"]),
     set_custom_forbidden_msg(Msg, Req, State).
 
@@ -529,7 +529,7 @@ delete_object(DbContext, Object, RequestorId) ->
 read_req_id(ReqHeaderName, Req) ->
     case wrq:get_req_header(ReqHeaderName, Req) of
         undefined ->
-            base64:encode(term_to_binary(make_ref()));
+            base64:encode(term_to_binary(make_ref(), [{minor_version, 1}]));
         HV ->
             iolist_to_binary(HV)
     end.
@@ -642,7 +642,7 @@ set_authz_id(Id, #user_state{} = U, user) ->
 -spec check_cookbook_authz(Cookbooks :: [#chef_cookbook_version{}],
                            Req :: wm_req(),
                            State :: #base_state{}) ->
-                                  ok | {error, {[any(),...]}}.
+                                  ok | {error, {[any(), ...]}}.
 check_cookbook_authz(Cookbooks, _Req, #base_state{reqid = ReqId,
                                                   requestor_id = RequestorId}) ->
     Resources = [{AuthzId, Name} || #chef_cookbook_version{name = Name, authz_id = AuthzId} <- Cookbooks],
@@ -683,7 +683,7 @@ is_user_in_org(Type, DbContext, Name, OrgName) ->
 %% @doc Given a `{Mod, Fun}' tuple, generate a stats hero metric with a prefix appropriate
 %% for stats_hero aggregation. An error is thrown if `Mod' is unknown. This is where we
 %% encode the mapping of module to upstream label.
--spec stats_hero_label({Mod::metric_module(), Fun::atom()}) -> <<_:16,_:_*8>>.
+-spec stats_hero_label({Mod :: metric_module(), Fun :: atom()}) -> <<_:16, _:_*8>>.
 stats_hero_label({chef_sql, Fun}) ->
     chef_metrics:label(rdbms, {chef_sql, Fun});
 stats_hero_label({oc_chef_authz, Fun}) ->
@@ -1045,8 +1045,8 @@ verify_request_signature(Req,
 
 -spec create_from_json(Req :: #wm_reqdata{},
                        State :: #base_state{},
-                       RecType :: chef_object_name()| chef_cookbook_version | oc_chef_cookbook_artifact_version,
-                       ContainerId :: object_id() | {authz_id, AuthzId::object_id() | undefined},
+                       RecType :: chef_object_name() | chef_cookbook_version | oc_chef_cookbook_artifact_version,
+                       ContainerId :: object_id() | {authz_id, AuthzId :: object_id() | undefined},
                        ObjectEjson :: ejson_term() |
                                 binary() |
                                 {binary(), ejson_term()} |
@@ -1099,7 +1099,7 @@ create_from_json(#wm_reqdata{} = Req,
             Uri = oc_chef_wm_routes:route(TypeName, Req, Args),
             BodyEJ0 = {[{<<"uri">>, Uri}]},
             BodyEJ1 = call_if_exported(ResourceMod, finalize_create_body, [Req, State, ObjectRec, BodyEJ0],
-                                       fun(_,_,_,EJ) -> EJ end),
+                                       fun(_, _, _, EJ) -> EJ end),
             Req1 = chef_wm_util:set_json_body(Req, BodyEJ1),
             {true, chef_wm_util:set_location_of_created_resource(Uri, Req1), State#base_state{log_msg = LogMsg}};
         What ->
@@ -1140,7 +1140,7 @@ update_from_json(#wm_reqdata{} = Req, #base_state{reqid=ReqId,
         true ->
             State1 = State#base_state{log_msg = ignore_update_for_duplicate},
             Body = call_if_exported(ResourceMod, finalize_update_body, [Req, State, ObjectEjson],
-                                   fun(_,_,EJ) -> EJ end),
+                                   fun(_, _, EJ) -> EJ end),
             {true, chef_wm_util:set_json_body(Req, Body), State1};
         false ->
             case chef_db:update(ObjectRec, DbContext, ActorId) of
@@ -1148,7 +1148,7 @@ update_from_json(#wm_reqdata{} = Req, #base_state{reqid=ReqId,
                     IsRename = chef_object:name(OrigObjectRec) =/= chef_object:name(ObjectRec),
                     Req1 = handle_rename(ObjectRec, Req, State, IsRename),
                     Body = call_if_exported(ResourceMod, finalize_update_body, [Req, State, ObjectEjson],
-                                           fun(_,_,EJ) -> EJ end),
+                                           fun(_, _, EJ) -> EJ end),
                     {true, chef_wm_util:set_json_body(Req1, Body), State};
                 not_found ->
                     %% We will get this if no rows were affected by the query. This could
@@ -1162,7 +1162,7 @@ update_from_json(#wm_reqdata{} = Req, #base_state{reqid=ReqId,
                     {{halt, 404}, Req1, State1};
                 {conflict, _} ->
                     Name = chef_object:name(ObjectRec),
-                    RecType = erlang:element(1,ObjectRec),
+                    RecType = erlang:element(1, ObjectRec),
                     LogMsg = {RecType, name_conflict, Name},
                     ConflictMsg = ResourceMod:conflict_message(Name),
                     {{halt, 409}, chef_wm_util:set_json_body(Req, ConflictMsg),
@@ -1204,7 +1204,7 @@ verify_request_message(error_finding_user_or_client, User, _Org) ->
     {[{<<"error">>, [Msg]}]};
 verify_request_message(bad_sig, User, _Org) ->
     Msg = iolist_to_binary([<<"Invalid signature for user or client '">>,
-                            User,<<"'">>]),
+                            User, <<"'">>]),
     {[{<<"error">>, [Msg]}]};
 verify_request_message(ErrorType, User, Org)  when
       ErrorType =:= not_associated_with_org orelse
@@ -1353,7 +1353,7 @@ call_if_exported(Mod, FunName, Args, DefaultFun) ->
 
 %% Default route_args consist of {TypeName, [{name, ObjectName}]
 % %unless overridden by a resource module.
-route_args(ObjectRec,_State) ->
+route_args(ObjectRec, _State) ->
     TypeName = chef_object:type_name(ObjectRec),
     {TypeName, [{name, chef_object:name(ObjectRec)}]}.
 

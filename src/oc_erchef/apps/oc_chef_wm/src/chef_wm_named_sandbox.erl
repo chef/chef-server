@@ -191,7 +191,7 @@ as_binary(B) when is_binary(B) ->
 
 timestamp(now) ->
     timestamp(os:timestamp());
-timestamp({_,_,_} = TS) ->
-    {{Year,Month,Day},{Hour,Minute,Second}} = calendar:now_to_universal_time(TS),
+timestamp({_, _, _} = TS) ->
+    {{Year, Month, Day}, {Hour, Minute, Second}} = calendar:now_to_universal_time(TS),
     iolist_to_binary(io_lib:format("~4w-~2..0w-~2..0wT~2..0w:~2..0w:~2..0w+00:00",
                   [Year, Month, Day, Hour, Minute, Second])).

@@ -24,7 +24,7 @@ Gem::Specification.new do |spec|
 
   spec.add_runtime_dependency "ffi-yajl", ">= 1.2.0"
 
-  spec.add_runtime_dependency "pg", "~> 1.2", ">= 1.2.3"
+  spec.add_runtime_dependency "pg", "~> 1.2", ">= 1.2.3", "< 1.6"
 
   spec.add_runtime_dependency "redis"
 

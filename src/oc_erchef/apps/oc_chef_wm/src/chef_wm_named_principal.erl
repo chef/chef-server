@@ -85,7 +85,7 @@ resource_exists(Req, #base_state{server_api_version = ?API_v0,
         {not_found, client} ->
             Req1 = chef_wm_util:set_json_body(Req, not_found_ejson(<<"principal">>, Name)),
             {false, Req1, State#base_state{log_msg = client_not_found}};
-        Response->
+        Response ->
             PrincipalState = make_principal_state(Response),
             {true, Req, State#base_state{resource_state = PrincipalState}}
     end;

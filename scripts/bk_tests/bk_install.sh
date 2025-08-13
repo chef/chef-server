@@ -9,7 +9,7 @@ set -e
 # The fix:
 # 1. Add `deb https://apt-archive.postgresql.org/pub/repos/apt bionic-pgdg main` to sources.list
 # 2. Remove /etc/apt/sources.list.d/pgdg.list
-sudo echo "deb https://apt.postgresql.org/pub/repos/apt/ focal-pgdg main 13">>/etc/apt/sources.list
+sudo echo "deb https://apt-archive.postgresql.org/pub/repos/apt/ focal-pgdg main 13">>/etc/apt/sources.list
 rm -f /etc/apt/sources.list.d/pgdg.list
 
 echo "Removing postgresql-9.3"
@@ -45,9 +45,9 @@ cp /workdir/scripts/bk_tests/pb_hba.conf /etc/postgresql/13/main/pg_hba.conf
 # the erlang software definition lives in: /omnibus-software/config/software/erlang.rb
 
 # this is needed until the erlang version is installed in the docker container
-echo "Installing erlang 24.3.2"
-asdf install erlang 24.3.2
-asdf local erlang 24.3.2
+echo "Installing erlang 26.2.5.14"
+asdf install erlang 26.2.5.14
+asdf local erlang 26.2.5.14
 erl -eval 'erlang:display(erlang:system_info(otp_release)), halt().' -noshell
 
 echo "Installing Bundler"

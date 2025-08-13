@@ -237,7 +237,7 @@ update_query(_ObjectRec) ->
 %% the policy_name and policy_group fields if they're not present, so we allow
 %% 'undefined' to pass through.
 fields_for_insert(Rec) ->
-    [_RecName, _ApiVersion|Tail] = tuple_to_list(Rec),
+    [_RecName, _ApiVersion | Tail] = tuple_to_list(Rec),
     Tail.
 
 fields_for_update(#chef_node{environment = Environment,
