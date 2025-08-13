@@ -14,7 +14,7 @@ pkg_deps=(
   core/gecode3
   core/libffi
   core/glibc
-  core/postgresql-client
+  core/postgresql13-client
   core/bundler
 )
 pkg_build_deps=(core/make core/git core/gcc)
