@@ -193,7 +193,7 @@ fully_read(Ref, Accum) ->
         {ok, eof} ->
             lists:reverse(Accum);
         {ok, Data} ->
-            fully_read(Ref, [Data|Accum]);
+            fully_read(Ref, [Data | Accum]);
         Error ->
             error_logger:error_msg("Error occurred during content download: ~p~n", [Error]),
             lists:reverse(Accum)

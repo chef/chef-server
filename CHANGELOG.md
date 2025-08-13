@@ -1,16 +1,31 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.10.36 -->
-## [15.10.36](https://github.com/chef/chef-server/tree/15.10.36) (2025-04-15)
+<!-- latest_release 15.10.51 -->
+## [15.10.51](https://github.com/chef/chef-server/tree/15.10.51) (2025-08-12)
 
 #### Merged Pull Requests
-- make pipelines public: habitat/test [#4002](https://github.com/chef/chef-server/pull/4002) ([jaymzh](https://github.com/jaymzh))
+- Upgrade webrick to 1.8.2 in oc-chef-pedant [#4049](https://github.com/chef/chef-server/pull/4049) ([RoyShravani](https://github.com/RoyShravani))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.10.33 -->
 ### Changes since 15.10.33 release
 
 #### Merged Pull Requests
+- Upgrade webrick to 1.8.2 in oc-chef-pedant [#4049](https://github.com/chef/chef-server/pull/4049) ([RoyShravani](https://github.com/RoyShravani)) <!-- 15.10.51 -->
+- Added openssl changes [#4038](https://github.com/chef/chef-server/pull/4038) ([jashaik](https://github.com/jashaik)) <!-- 15.10.50 -->
+- JDK update to 11.0.28+6 [#4050](https://github.com/chef/chef-server/pull/4050) ([talktovikas](https://github.com/talktovikas)) <!-- 15.10.49 -->
+- Bump webrick from 1.8.1 to 1.8.2 in /src/oc-id [#3945](https://github.com/chef/chef-server/pull/3945) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.10.48 -->
+- Bump webrick from 1.7.0 to 1.8.2 in /src/chef-server-ctl [#3944](https://github.com/chef/chef-server/pull/3944) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.10.47 -->
+- Upgrade nokogiri to 1.18.9 [#4043](https://github.com/chef/chef-server/pull/4043) ([RoyShravani](https://github.com/RoyShravani)) <!-- 15.10.46 -->
+- Pin pg gem version &lt; 1.6 for older linux distros [#4041](https://github.com/chef/chef-server/pull/4041) ([RoyShravani](https://github.com/RoyShravani)) <!-- 15.10.45 -->
+- Updating the erlang version 26.2 [#4025](https://github.com/chef/chef-server/pull/4025) ([talktovikas](https://github.com/talktovikas)) <!-- 15.10.44 -->
+- [CHEF-23713] Update Ruby to 3.1.7 version [#4028](https://github.com/chef/chef-server/pull/4028) ([RoyShravani](https://github.com/RoyShravani)) <!-- 15.10.43 -->
+- upgrading the PG from 13.8 to 13.21 [#4023](https://github.com/chef/chef-server/pull/4023) ([talktovikas](https://github.com/talktovikas)) <!-- 15.10.42 -->
+- Temporary fix for asdf 16 upgrade warning. [#4029](https://github.com/chef/chef-server/pull/4029) ([sreepuramsudheer](https://github.com/sreepuramsudheer)) <!-- 15.10.41 -->
+- changing hardcoded date in test case. [#4024](https://github.com/chef/chef-server/pull/4024) ([sreepuramsudheer](https://github.com/sreepuramsudheer)) <!-- 15.10.40 -->
+- tweaking for linting [#4018](https://github.com/chef/chef-server/pull/4018) ([johnmccrae](https://github.com/johnmccrae)) <!-- 15.10.39 -->
+- Update license_scout [#4020](https://github.com/chef/chef-server/pull/4020) ([marcparadise](https://github.com/marcparadise)) <!-- 15.10.38 -->
+- CHEF-20995 - Changes to not auto accept the license while using vagrant file [#4016](https://github.com/chef/chef-server/pull/4016) ([jashaik](https://github.com/jashaik)) <!-- 15.10.37 -->
 - make pipelines public: habitat/test [#4002](https://github.com/chef/chef-server/pull/4002) ([jaymzh](https://github.com/jaymzh)) <!-- 15.10.36 -->
 - Deprecation Note [#4005](https://github.com/chef/chef-server/pull/4005) ([dishanktiwari2501](https://github.com/dishanktiwari2501)) <!-- 15.10.35 -->
 - Upgrade actionmailer to 7.0.8.5 to address  CVE-2024-47889 in oc-id [#4001](https://github.com/chef/chef-server/pull/4001) ([RoyShravani](https://github.com/RoyShravani)) <!-- 15.10.34 -->

@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'pedant/rspec/cookbook_util'
+require "pedant/rspec/cookbook_util"
 
 # FIXME  We don't test GET /cookbooks/NAME/VERSION when we have
 # any files in the segments.  Thus we're not checking the creation
@@ -53,8 +53,8 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_read do
       let(:cookbook_collection_url) { api_url("/#{cookbook_url_base}") }
       let(:fetch_cookbook_collection_success_exact_response) do
         {
-          :status => 200,
-          :body_exact => fetched_cookbooks
+          status: 200,
+          body_exact: fetched_cookbooks,
         }
       end
 
@@ -66,7 +66,7 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_read do
         let(:expected_response) { fetch_cookbook_collection_success_exact_response }
 
         # Assert that there are no cookbooks
-        let(:fetched_cookbooks) { { } }
+        let(:fetched_cookbooks) { {} }
 
         # NOTE:  This test must the first one dealing with cookbooks
         # so that there are no cookbooks existing on the server
@@ -74,7 +74,7 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_read do
         should_respond_with 200, "and an empty collection"
 
         # Add test to check for empty case with different num_versions
-        context 'with a num_versions' do
+        context "with a num_versions" do
           let(:expected_response) { bad_request_response }
           let(:request_url) { api_url("/#{cookbook_url_base}?num_versions=#{num_versions}") }
           let(:error_message) { invalid_versions_msg }
@@ -86,9 +86,9 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_read do
             end
           end
 
-          expects_response_of_400_with "a negative num_versions", '-1'
-          expects_response_of_400_with "a missing num_versions", ''
-          expects_response_of_400_with "an invalid num_versions", 'foo'
+          expects_response_of_400_with "a negative num_versions", "-1"
+          expects_response_of_400_with "a missing num_versions", ""
+          expects_response_of_400_with "an invalid num_versions", "foo"
 
         end # when requesting with num_versions
       end # without existing cookbooks
@@ -107,12 +107,12 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_read do
           {
             cookbook_name => {
               version1 => [],
-              version2 => []
+              version2 => [],
             },
 
             cookbook_name2 => {
-              version1 => []
-            }
+              version1 => [],
+            },
           }
         end
 
@@ -124,12 +124,12 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_read do
           remove_cookbooks(cookbooks)
         end
 
-        context 'with num_versions set to 0' do
+        context "with num_versions set to 0" do
           let(:num_versions) { 0 }
           let(:cookbook_collection) do
             {
-              cookbook_name  => { "url" => cookbook_url(cookbook_name), "versions" => [] },
-              cookbook_name2 => { "url" => cookbook_url(cookbook_name2), "versions" => [] }
+              cookbook_name => { "url" => cookbook_url(cookbook_name), "versions" => [] },
+              cookbook_name2 => { "url" => cookbook_url(cookbook_name2), "versions" => [] },
             }
           end
 
@@ -143,35 +143,35 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_read do
               "url" => cookbook_url(cookbook_name),
               "versions" =>
               [{ "version" => version2,
-                 "url" => cookbook_version_url(cookbook_name,version2) }]},
+                 "url" => cookbook_version_url(cookbook_name, version2) }] },
             cookbook_name2 => {
                    "url" => cookbook_url(cookbook_name2),
                    "versions" =>
                  [{ "version" => version1,
-                    "url" => cookbook_version_url(cookbook_name2, version1) }]}
+                    "url" => cookbook_version_url(cookbook_name2, version1) }] },
           }
         end
 
-        context 'when num_versions is not set' do
+        context "when num_versions is not set" do
           let(:request_url) { cookbook_collection_url }
           let(:cookbook_collection) { cookbook_collection_with_one_version }
 
-          it 'should return cookbook collection with one version per cookbook' do
+          it "should return cookbook collection with one version per cookbook" do
             should look_like expected_response
           end
         end # without num_versions
 
-        context 'when num_versions is set to 1' do
+        context "when num_versions is set to 1" do
           let(:num_versions) { 1 }
           let(:cookbook_collection) { cookbook_collection_with_one_version }
 
-          it 'should return cookbook collection with one version per cookbook' do
+          it "should return cookbook collection with one version per cookbook" do
             should look_like expected_response
           end
         end
 
         context 'when num_versions is set to "all"' do
-          let(:num_versions) { 'all' }
+          let(:num_versions) { "all" }
           let(:cookbook_collection) do
             {
               cookbook_name => {
@@ -180,16 +180,16 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_read do
                   { "version" => version2,
                     "url" => cookbook_version_url(cookbook_name, version2) },
                 { "version" => version1,
-                  "url" => cookbook_version_url(cookbook_name, version1) } ]},
+                  "url" => cookbook_version_url(cookbook_name, version1) } ] },
               cookbook_name2 => {
                     "url" => cookbook_url(cookbook_name2),
                     "versions" => [
                       { "version" => version1,
-                        "url" => cookbook_version_url(cookbook_name2, version1) }]}
+                        "url" => cookbook_version_url(cookbook_name2, version1) }] },
             }
           end
 
-          it 'should respond with a cookbook collection containing all versions of each cookbook' do
+          it "should respond with a cookbook collection containing all versions of each cookbook" do
             should look_like expected_response
           end
 
@@ -204,37 +204,37 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_read do
         let(:cookbook_name) { "cookbook_name" }
         let(:cookbook_version) { "1.2.3" }
 
-        context 'with a single, existing cookbook' do
+        context "with a single, existing cookbook" do
           let(:cookbook_collection) do
             {
               cookbook_name => {
                 "url" => cookbook_url(cookbook_name),
                 "versions" => [
                   { "version" => cookbook_version,
-                    "url" => cookbook_version_url(cookbook_name, cookbook_version) }]}
+                    "url" => cookbook_version_url(cookbook_name, cookbook_version) }] },
             }
           end
 
-          it 'should respond with a single cookbook in the collection' do
+          it "should respond with a single cookbook in the collection" do
             make_cookbook(admin_user, cookbook_name, cookbook_version)
             should look_like expected_response
             delete_cookbook(admin_user, cookbook_name, cookbook_version)
           end
         end
 
-        context 'with multiple, existing cookbooks' do
+        context "with multiple, existing cookbooks" do
           let(:cookbook_collection) do
             {
               "cb1" => {
                 "url" => cookbook_url("cb1"),
                 "versions" => [
                   { "version" => "0.0.1",
-                    "url" => cookbook_version_url("cb1", "0.0.1") }]},
+                    "url" => cookbook_version_url("cb1", "0.0.1") }] },
               "cb2" => {
                       "url" => cookbook_url("cb2"),
                       "versions" => [
                         { "version" => "0.0.2",
-                          "url" => cookbook_version_url("cb2", "0.0.2") }]}
+                          "url" => cookbook_version_url("cb2", "0.0.2") }] },
             }
           end
 
@@ -264,16 +264,16 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_read do
       let(:recipe_content) { "hello-#{unique_suffix}" }
       let(:recipe_spec) do
         {
-          :name => recipe_name,
-          :content => recipe_content
+          name: recipe_name,
+          content: recipe_content,
         }
       end
 
       let(:cookbooks) do
         {
           cookbook_name => {
-            cookbook_version => [recipe_spec]
-          }
+            cookbook_version => [recipe_spec],
+          },
         }
       end
 
@@ -289,17 +289,17 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_read do
         # that the "recipes" key is an array of hashes with the correct
         # keys.
         retrieved_cookbook(cookbook_name,
-                           cookbook_version,
-                           :recipes => lambda{|recipes|
-                             recipes.is_a?(Array) &&
-                               recipes.all?{|recipe|
-                               recipe.is_a?(Hash) &&
-                                 recipe.keys.sort == ["name", "path", "checksum", "specificity", "url"].sort
-                             }
-                           })
+          cookbook_version,
+          recipes: lambda { |recipes|
+            recipes.is_a?(Array) &&
+              recipes.all? { |recipe|
+                recipe.is_a?(Hash) &&
+                  recipe.keys.sort == %w{name path checksum specificity url}.sort
+              }
+          })
       end
 
-      context 'as a normal user' do
+      context "as a normal user" do
         let(:expected_response) { fetch_cookbook_success_exact_response }
         let(:requestor) { normal_user }
 
@@ -333,21 +333,21 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_read do
 
       end # as a normal user
 
-      context 'as an admin user' do
+      context "as an admin user" do
         let(:expected_response) { fetch_cookbook_success_exact_response }
         let(:requestor) { admin_user }
 
         should_respond_with 200
       end # as an admin user
 
-      context 'as an user outside of the organization', :authorization do
+      context "as an user outside of the organization", :authorization do
         let(:expected_response) { unauthorized_access_credential_response }
         let(:requestor) { outside_user }
 
         should_respond_with 403
       end # as an outside user
 
-      context 'with invalid user', :authentication do
+      context "with invalid user", :authentication do
         let(:expected_response) { invalid_credential_exact_response }
         let(:requestor) { invalid_user }
 

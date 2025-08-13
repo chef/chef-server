@@ -71,7 +71,7 @@
          {<<"json_class">>, <<"Chef::Role">>},
          {<<"chef_type">>, <<"role">>},
          {<<"default_attributes">>,  ?EMPTY_EJSON_HASH},
-         {<<"override_attributes">>,?EMPTY_EJSON_HASH},
+         {<<"override_attributes">>, ?EMPTY_EJSON_HASH},
          {<<"run_list">>, []},
          {<<"env_run_lists">>, ?EMPTY_EJSON_HASH}
         ]).
@@ -96,7 +96,7 @@
          <<"env_run_lists">>, <<"json_class">>, <<"name">>, <<"override_attributes">>,
          <<"run_list">> ]).
 
--type role_action() :: create | { update, Name::binary() }.
+-type role_action() :: create | { update, Name :: binary() }.
 
 -spec name(#chef_role{}) -> binary().
 name(#chef_role{name = Name}) ->

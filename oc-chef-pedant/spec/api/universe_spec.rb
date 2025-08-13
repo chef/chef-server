@@ -13,25 +13,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'pedant/rspec/cookbook_util'
-describe 'Universe API Endpoint', :universe do
+require "pedant/rspec/cookbook_util"
+describe "Universe API Endpoint", :universe do
   let(:cookbook_url_base) { "cookbooks" }
   include Pedant::RSpec::CookbookUtil
 
-  let(:admin_requestor){ admin_user }
+  let(:admin_requestor) { admin_user }
 
-  let(:requestor){ admin_requestor }
+  let(:requestor) { admin_requestor }
 
-  let(:universe_url){ api_url("/universe") }
+  let(:universe_url) { api_url("/universe") }
 
-  let(:universe){ get(universe_url, requestor) }
+  let(:universe) { get(universe_url, requestor) }
 
-  let(:cb_one_name){ "foo" }
-  let(:cb_one_version){ "1.2.3" }
-  let(:cb_one_opts){{ dependencies: { "bar" => ">= 1.1.1" }}}
+  let(:cb_one_name) { "foo" }
+  let(:cb_one_version) { "1.2.3" }
+  let(:cb_one_opts) { { dependencies: { "bar" => ">= 1.1.1" } } }
 
-  let(:cb_two_name){ "bar" }
-  let(:cb_two_version){ "1.2.3" }
+  let(:cb_two_name) { "bar" }
+  let(:cb_two_version) { "1.2.3" }
 
   context "with no cookbooks" do
     it "returns an empty list" do
@@ -49,16 +49,16 @@ describe 'Universe API Endpoint', :universe do
           "1.2.3" => {
             "dependencies" => { "bar" => ">= 1.1.1" },
             "location_path" => api_url("cookbooks/foo/1.2.3"),
-            "location_type" => "chef_server"
-          }
+            "location_type" => "chef_server",
+          },
         },
         "bar" => {
           "1.2.3" => {
             "dependencies" => {},
             "location_path" => api_url("cookbooks/bar/1.2.3"),
-            "location_type" => "chef_server"
-          }
-        }
+            "location_type" => "chef_server",
+          },
+        },
       }
     end
     before do

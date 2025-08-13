@@ -1,4 +1,4 @@
-require 'pedant/rspec/common'
+require "pedant/rspec/common"
 
 # Captures behaviors introduced in server api v1 that are not easily
 # handled elsewhere.  As v1 becomes the min suppported version, we'll
@@ -16,30 +16,30 @@ describe "Server API v1 Behaviors", :api_v1 do
       end
     end
 
-    shared(:org_client_url){ "#{platform.server}/organizations/#{org_name}/clients" }
-    shared(:user_url){ "#{platform.server}/users" }
+    shared(:org_client_url) { "#{platform.server}/organizations/#{org_name}/clients" }
+    shared(:user_url) { "#{platform.server}/users" }
     shared(:client_name) { unique_name("api-v1-client") }
     shared(:user_name) { unique_name("api-v1-user") }
     shared(:named_client_url) { "#{org_client_url}/#{client_name}" }
     shared(:named_user_url) { "#{user_url}/#{user_name}" }
-    shared(:valid_pubkey) { @valid_pubkey ||= platform.gen_rsa_key("client-v1-test")[:public]}
+    shared(:valid_pubkey) { @valid_pubkey ||= platform.gen_rsa_key("client-v1-test")[:public] }
     shared(:default_client_payload) {
       {
           "name" => client_name,
           "clientname" => client_name,
           "orgname" => org_name,
-          "validator" => false
+          "validator" => false,
       }
     }
     shared(:default_user_payload) {
-        {
-          "username" => user_name,
-          "email" => "#{user_name}@chef.io",
-          "first_name" => user_name,
-          "last_name" => user_name,
-          "display_name" => user_name,
-          "password" => "the panther strikes at midnight"
-        }
+      {
+        "username" => user_name,
+        "email" => "#{user_name}@chef.io",
+        "first_name" => user_name,
+        "last_name" => user_name,
+        "display_name" => user_name,
+        "password" => "the panther strikes at midnight",
+      }
     }
     before(:all) do
       # Note that a client is created by the server during org creation,
@@ -58,24 +58,24 @@ describe "Server API v1 Behaviors", :api_v1 do
       platform.reset_server_api_version
     end
     context "org creation", :organizations do
-      let (:test_org_name) { unique_name("apiv1-org-create-test") }
-      let (:org_payload)  {
-          {
-          "name" => test_org_name,
-          "full_name" => test_org_name,
-          "org_type" => "Business"
-          }
+      let(:test_org_name) { unique_name("apiv1-org-create-test") }
+      let(:org_payload) {
+        {
+        "name" => test_org_name,
+        "full_name" => test_org_name,
+        "org_type" => "Business",
+        }
       }
       after do
         platform.delete_org(test_org_name)
       end
       it "should have created a validator client with a default key, and provided the client key back to us" do
-        r = post("#{platform.server}/organizations", superuser, :payload => org_payload)
+        r = post("#{platform.server}/organizations", superuser, payload: org_payload)
         r.should look_like({ status: 201,
                              body: {
                                   "private_key" => privkey_regex,
-                                  "clientname" => "#{test_org_name}-validator"
-                             }})
+                                  "clientname" => "#{test_org_name}-validator",
+                             } })
 
         @clientname = parse(r)["clientname"]
         get("#{platform.server}/organizations/#{test_org_name}/clients/#{@clientname}/keys/default", superuser).should have_status_code 200
@@ -103,37 +103,37 @@ describe "Server API v1 Behaviors", :api_v1 do
       # client_util.rb, via clients/complete_endpoint_spec.rb, and so is not covered here.
       it "should allow create_key: true and give a proper valid key in response" do
         result = post(resource_url, superuser,
-                      payload: create_payload.with('create_key', true))
-        result.should look_like({status: 201,
+          payload: create_payload.with("create_key", true))
+        result.should look_like({ status: 201,
                                  body_exact: { "uri" => named_resource_url,
-                                                "chef_key" => { "uri" => "#{named_resource_url}/keys/default",
-                                                                "name" => "default",
-                                                                "private_key" => privkey_regex,
-                                                                "public_key" => pubkey_regex,
-                                                                "expiration_date" => "infinity" }  } })
+                                               "chef_key" => { "uri" => "#{named_resource_url}/keys/default",
+                                                               "name" => "default",
+                                                               "private_key" => privkey_regex,
+                                                               "public_key" => pubkey_regex,
+                                                               "expiration_date" => "infinity" } } })
         get("#{named_resource_url}/keys/default", superuser).should have_status_code 200
       end
 
       it "should allow allow public_key to be provided and respond with its location" do
         result = post(resource_url, superuser,
-                      payload: create_payload.with('public_key', valid_pubkey))
-        result.should look_like({status: 201,
+          payload: create_payload.with("public_key", valid_pubkey))
+        result.should look_like({ status: 201,
                                  body_exact: { "uri" => named_resource_url,
                                                "chef_key" => { "uri" => "#{named_resource_url}/keys/default",
                                                                "name" => "default",
                                                                "public_key" => pubkey_regex,
-                                                               "expiration_date" => "infinity" }  } })
+                                                               "expiration_date" => "infinity" } } })
       end
 
       it "should reply with an error if both create_key:true and public_key are specified", :validation do
         result = post(resource_url, superuser,
-                      payload: create_payload.with('public_key', valid_pubkey).with("create_key", true))
+          payload: create_payload.with("public_key", valid_pubkey).with("create_key", true))
         result.should have_status_code 400
       end
 
       it "should accept the public key if both create_key:false and public_key are specified" do
         result = post(resource_url, superuser,
-                      payload: create_payload.with('public_key', valid_pubkey).with("create_key", false))
+          payload: create_payload.with("public_key", valid_pubkey).with("create_key", false))
         result.should have_status_code 201
 
       end
@@ -141,14 +141,14 @@ describe "Server API v1 Behaviors", :api_v1 do
       it "should reply with an error if private_key:true is specified for key generation", :validation do
         # TODO error message check?
         result = post(resource_url, superuser,
-                      payload: create_payload.with('private_key', true))
+          payload: create_payload.with("private_key", true))
         result.should have_status_code 400
       end
 
       it "when neither create_key nor public_key is specified, the operation should succeed and no default key is created" do
         result = post(resource_url, superuser, payload: create_payload)
         result.should have_status_code 201
-        expect(parse(result).has_key?("chef_key")).to eq false
+        expect(parse(result).key?("chef_key")).to eq false
         get("#{named_resource_url}/keys/default", superuser).should have_status_code 404
       end
 
@@ -167,14 +167,14 @@ describe "Server API v1 Behaviors", :api_v1 do
       end
 
       it "should not allow create_key:true", :validation do
-        put(named_resource_url, superuser, payload: create_payload.with('create_key', true)).should have_status_code 400
+        put(named_resource_url, superuser, payload: create_payload.with("create_key", true)).should have_status_code 400
       end
 
       it "should not allow public_key to be provided", :validation do
-        put(named_resource_url, superuser, payload: create_payload.with('public_key', valid_pubkey)).should have_status_code 400
+        put(named_resource_url, superuser, payload: create_payload.with("public_key", valid_pubkey)).should have_status_code 400
       end
       it "should not allow private_key:true to be specified", :validation do
-        put(named_resource_url, superuser, payload: create_payload.with('private_key', true)).should have_status_code 400
+        put(named_resource_url, superuser, payload: create_payload.with("private_key", true)).should have_status_code 400
       end
     end
 
@@ -210,10 +210,9 @@ describe "Server API v1 Behaviors", :api_v1 do
         it_should_behave_like "actor update validation"
       end
       context "GET /organization/:org/clients/:name" do
-        let (:resource_url) { "#{org_client_url}/#{org_name}-validator" }
+        let(:resource_url) { "#{org_client_url}/#{org_name}-validator" }
         it_behaves_like "actor read validation"
       end
     end
   end
 end
-

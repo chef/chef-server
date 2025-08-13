@@ -111,7 +111,7 @@ to_json(Req, #base_state{chef_db_context = DbContext,
     RevisionsMap = build_revisions_map(Revisions, {[]}),
     {chef_json:encode(RevisionsMap), Req, State}.
 
-build_revisions_map([Revision|Rest],EJSON) ->
+build_revisions_map([Revision | Rest], EJSON) ->
     Updated = ej:set_p({"revisions", Revision}, EJSON, {[]}),
     build_revisions_map(Rest, Updated);
 build_revisions_map([], EJSON) ->

@@ -15,8 +15,8 @@
 
 module Pedant
   module ChefUtility
-    require 'erubis'
-    require 'pathname'
+    require "erubis" unless defined?(Erubis)
+    require "pathname" unless defined?(Pathname)
 
     # Generate a knife.rb file from a template for a given user.
     # Prefer calling +populate_dot_chef+ over calling this directly.
@@ -25,10 +25,10 @@ module Pedant
       # source file... seemed like the sanest place for it at the time
       template = File.read(Pathname.new(__FILE__).dirname.join("knife.rb.erb"))
       template = Erubis::Eruby.new(template)
-      File.open(destination, 'w') do |f|
+      File.open(destination, "w") do |f|
         f.write(template.result(knife_user: user_name,
-                                key_dir:    key_dir,
-                                server_url: server_url))
+          key_dir:    key_dir,
+          server_url: server_url))
       end
     end
 
@@ -36,7 +36,7 @@ module Pedant
     # writes that Requestor's key out as a PEM file.  The name of the
     # PEM file will be "USER_NAME.pem".
     def self.write_user_pem(user, key_dir)
-      File.open("#{key_dir}/#{user.name}.pem", 'w') {|f| f.write(user.signing_key)}
+      File.open("#{key_dir}/#{user.name}.pem", "w") { |f| f.write(user.signing_key) }
     end
 
     # Given a Pedant::Requestor creates a knife.rb file for that Requestor,
@@ -48,9 +48,9 @@ module Pedant
     # file, including the filename (e.g. /foo/bar/knife.rb).  This
     # allows for us to create multiple knife.rb files for different
     # users / testing scenarios.
-    def self.populate_dot_chef(user, server_url, dot_chef_dir, knife_rb_file_name="knife.rb")
-      self.generate_knife(user.name, server_url, dot_chef_dir, "#{dot_chef_dir}/#{knife_rb_file_name}")
-      self.write_user_pem(user, dot_chef_dir)
+    def self.populate_dot_chef(user, server_url, dot_chef_dir, knife_rb_file_name = "knife.rb")
+      generate_knife(user.name, server_url, dot_chef_dir, "#{dot_chef_dir}/#{knife_rb_file_name}")
+      write_user_pem(user, dot_chef_dir)
     end
   end
 end

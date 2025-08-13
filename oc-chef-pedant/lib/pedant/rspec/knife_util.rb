@@ -13,8 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'mixlib/shellout'
-require 'pathname'
+require "mixlib/shellout" unless defined?(Mixlib::ShellOut)
+require "pathname" unless defined?(Pathname)
 
 module Pedant
   module RSpec
@@ -24,7 +24,7 @@ module Pedant
       included do
         subject { knife_run }
         let(:knife_run) { run command }
-        let(:command)   { fail 'Define let(:command) in the spec' }
+        let(:command)   { raise "Define let(:command) in the spec" }
 
         # Default cwd for executing knife commands
         let(:cwd) { temp_repository }
@@ -37,7 +37,7 @@ module Pedant
         let(:temp_repository) { requestor.knife_dir }
 
         let(:assume_fixture_file!) do
-          File.open(fixture_file_path, 'w') do |f|
+          File.open(fixture_file_path, "w") do |f|
             f.write(fixture_file_content)
           end
         end
@@ -49,15 +49,15 @@ module Pedant
         let(:random_max)     { ->() { rand(7) + 3 } }
 
         # Override
-        let(:fixture_file_path)    { fail "Define :fixture_file_path" }
-        let(:fixture_file_content) { fail "Define :fixture_file_content" }
+        let(:fixture_file_path)    { raise "Define :fixture_file_path" }
+        let(:fixture_file_content) { raise "Define :fixture_file_content" }
 
         # The knife config file that everyone uses.  It is relative to
         # +repository+ (see above).
         #
         # TODO: In the future, have a knife config for each of multiple users
         let(:knife_config) { requestor.knife_rb_path }
-        let(:knife_config_for_normal_user) { knife_user.knife_rb_path}
+        let(:knife_config_for_normal_user) { knife_user.knife_rb_path }
         let(:knife_config_for_admin_user)  { knife_admin.knife_rb_path }
 
         # Override let(:requestor) for a different directory.
@@ -65,7 +65,8 @@ module Pedant
         # will fail.
         def knife_fixture(fixture)
           _path = Pathname.new(requestor.knife_dir).join(fixture)
-          return _path if File.exists?(_path)
+          return _path if File.exist?(_path)
+
           Dir.mkdir(_path)
           _path
         end
@@ -74,8 +75,8 @@ module Pedant
         # of a knife command in our test repository
         def shell_out(command_line)
           Mixlib::ShellOut.new(command_line,
-                                 'cwd' => cwd,
-                                 'env' => command_environment)
+            "cwd" => cwd,
+            "env" => command_environment)
         end
 
         # When running pedant in a standalone configuration, Bundler will
@@ -90,11 +91,11 @@ module Pedant
             {}
           else
             {
-              'BUNDLE_GEMFILE' => nil,
-              'BUNDLE_BIN_PATH' => nil,
-              'GEM_PATH' => nil,
-              'GEM_HOME' => nil,
-              'RUBYOPT' => nil
+              "BUNDLE_GEMFILE" => nil,
+              "BUNDLE_BIN_PATH" => nil,
+              "GEM_PATH" => nil,
+              "GEM_HOME" => nil,
+              "RUBYOPT" => nil,
             }
           end
         end
@@ -136,7 +137,7 @@ module Pedant
 
           let(:max_keys) { rand(7) + 3 }
           let(:item_name) { "item_#{rand(100000)}" }
-          let(:item) { random_hash.(max_keys) }
+          let(:item) { random_hash.call(max_keys) }
 
           let(:item_file_content) { ::JSON.generate(item.with(:id, item_name)) }
         end
@@ -154,21 +155,21 @@ module Pedant
 
           let(:node_data) do
             {
-              'name' => node_name,
-              'node_name' => node_name,
-              'override' => node_override,
-              'normal' => node_normal,
-              'default' => node_default,
-              'automatic' => node_automatic,
-              'run_list' => node_run_list
+              "name" => node_name,
+              "node_name" => node_name,
+              "override" => node_override,
+              "normal" => node_normal,
+              "default" => node_default,
+              "automatic" => node_automatic,
+              "run_list" => node_run_list,
             }
           end
 
-          let(:node_override)  { random_hash.(random_max.()) }
-          let(:node_normal)    { random_hash.(random_max.()) }
-          let(:node_default)   { random_hash.(random_max.()) }
-          let(:node_automatic) { random_hash.(random_max.()) }
-          let(:node_run_list)  { random_array.(random_max.()) }
+          let(:node_override)  { random_hash.call(random_max.call) }
+          let(:node_normal)    { random_hash.call(random_max.call) }
+          let(:node_default)   { random_hash.call(random_max.call) }
+          let(:node_automatic) { random_hash.call(random_max.call) }
+          let(:node_run_list)  { random_array.call(random_max.call) }
         end
       end
 
@@ -185,20 +186,20 @@ module Pedant
 
           let(:role_data) do
             {
-              'name' => role_name,
-              'description' => role_description,
-              'default_attributes' => role_default,
-              'override_attributes' => role_override,
-              'run_list' => role_run_list,
+              "name" => role_name,
+              "description" => role_description,
+              "default_attributes" => role_default,
+              "override_attributes" => role_override,
+              "run_list" => role_run_list,
             }
           end
 
-          let(:role_override)  { random_hash.(random_max.()) }
-          let(:role_default)   { random_hash.(random_max.()) }
-          let(:role_run_list)  { random_array.(random_max.()) }
+          let(:role_override)  { random_hash.call(random_max.call) }
+          let(:role_default)   { random_hash.call(random_max.call) }
+          let(:role_run_list)  { random_array.call(random_max.call) }
 
           # TODO: Make fake env_run_list data
-          #let(:role_env_run_lists)  { random_array.(random_max.()) }
+          # let(:role_env_run_lists)  { random_array.(random_max.()) }
         end
       end # Role
     end # KnifeUtil

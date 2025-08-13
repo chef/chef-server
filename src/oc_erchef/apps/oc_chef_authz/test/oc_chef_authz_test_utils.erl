@@ -39,7 +39,7 @@
 
 test_setup() ->
     application:set_env(oc_chef_authz, http_pool, [{oc_chef_authz_test_pool, ?pool_opts}]),
-    Server = {context,<<"test-req-id">>,{server,"localhost",5984,[],[]}},
+    Server = {context,<<"test-req-id">>, {server,"localhost",5984,[],[]}},
     Superuser = <<"cb4dcaabd91a87675a14ec4f4a00050d">>,
     {Server, Superuser}.
 

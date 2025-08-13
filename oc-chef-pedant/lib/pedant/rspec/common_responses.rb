@@ -13,8 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'pedant/concern'
-require 'pedant/core_ext/hash'
+require "pedant/concern"
+require "pedant/core_ext/hash"
 
 module Pedant
   module RSpec
@@ -61,7 +61,7 @@ module Pedant
         let(:http_201_response)        { { status: 201 } }
         let(:http_201_full_response)   { http_201_response.with(:body, created_resource) }
         let(:http_201_exact_response)  { http_201_response.with(:body_exact, created_resource) }
-        let(:created_resource)         { fail "Define created_resource this in your test" }
+        let(:created_resource)         { raise "Define created_resource this in your test" }
 
         let(:http_400_response)        { { status: 400 } }
         let(:http_400_exact_response)  { http_400_response.with(:body_exact, "error" => error_message) }
@@ -94,16 +94,16 @@ module Pedant
         let(:multi_tenant_user_not_associated_response) do
           {
             status: 403,
-            body_exact: { "error" => [multi_tenant_user_not_associated_text] }
+            body_exact: { "error" => [multi_tenant_user_not_associated_text] },
           }
         end
         # Cross-endpoint responses
         let(:unauthorized_access_credential_response) { multi_tenant_user_not_associated_response }
         let(:invalid_credential_error_message) { ["Failed to authenticate as 'invalid'. Ensure that your node_name and client key are correct."] }
         let(:invalid_credential_exact_response) { http_401_response.with(:body_exact, "error" => invalid_credential_error_message) }
-        let(:invalid_access_credential_exact_response) { fail 'Override this in response_bodies' }
+        let(:invalid_access_credential_exact_response) { raise "Override this in response_bodies" }
 
-        let(:forbidden_action_response) { http_403_response.with(:body_exact, "error"=> forbidden_action_error_message) }
+        let(:forbidden_action_response) { http_403_response.with(:body_exact, "error" => forbidden_action_error_message) }
         let(:forbidden_action_error_message) { ["missing delete permission"] }
 
         let(:sandbox_not_found_error_message) { ["Listing sandboxes not supported."] }

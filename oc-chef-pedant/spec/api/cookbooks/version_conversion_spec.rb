@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright: Copyright (c) 2018 Chef Software, Inc.
 # License: Apache License, Version 2.0
 #
@@ -55,14 +54,14 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_conversion do
           "name" => "default.rb",
           "path" => "recipes/default.rb",
           "checksum" => checksums[0],
-          "specificity" => "default"
+          "specificity" => "default",
         }],
         "root_files" => [{
           "name" => "CHANGELOG",
           "path" => "CHANGELOG",
           "checksum" => checksums[1],
           "specificity" => "default",
-        }]
+        }],
       }
     end
     let(:cb_v0) { new_cookbook_v0(cookbook_name, cookbook_version, payload: cookbook_payload) }

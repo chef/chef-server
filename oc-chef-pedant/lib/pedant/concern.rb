@@ -16,7 +16,7 @@
 # ActiveSupport::Concern is needed to help abstract out the boilerplate for creating includable modules
 # TODO: Consider embedding active_support/concern directly. The difference in license will have to be addressed.
 
-require 'active_support/concern'
+require "active_support/concern"
 
 module Pedant
   Concern = ActiveSupport::Concern
