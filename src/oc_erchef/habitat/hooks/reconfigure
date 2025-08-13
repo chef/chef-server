@@ -1,3 +1,5 @@
 #!/bin/bash
+export PATH={{pkgPathFor "core/ruby3_1"}}/bin:${PATH}
 export GEM_HOME="{{pkg.path}}/vendor/bundle"
+export GEM_PATH="{{pkgPathFor "core/ruby3_1"}}:{{pkg.path}}/vendor/bundle"
 cd {{pkg.path}} && bundle exec ruby "{{pkg.svc_config_path}}/chef_server_data_bootstrap.rb"
