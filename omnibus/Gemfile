@@ -1,5 +1,8 @@
 source 'https://rubygems.org'
 
+# Fix gem conflict with http-accept 1.7.0 by adding explicit dependency for version 2.1.1
+gem "http-accept", "2.1.1"
+
 # Install omnibus software
 group :omnibus do
   gem "omnibus", github: ENV.fetch("OMNIBUS_GITHUB_REPO", "chef/omnibus"), branch: ENV.fetch("OMNIBUS_GITHUB_BRANCH", "main")

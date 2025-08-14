@@ -1,6 +1,8 @@
 source 'https://rubygems.org'
 git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 
+# Fix gem conflict with http-accept 1.7.0 by adding explicit dependency for version 2.1.1
+gem 'http-accept', '2.1.1'
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
 gem 'rails', '~> 7.1.0'
 gem 'chef', '~> 18.8.9'

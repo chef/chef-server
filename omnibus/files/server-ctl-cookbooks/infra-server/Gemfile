@@ -1,5 +1,7 @@
 source 'https://rubygems.org'
 
+# Fix gem conflict with http-accept 1.7.0 by adding explicit dependency for version 2.1.1
+gem 'http-accept', '2.1.1'
 gem 'cookstyle'
 gem 'chefspec'
 gem 'veil'
