@@ -29,12 +29,17 @@ dependency "ncurses"
 dependency "libossp-uuid"
 dependency "config_guess"
 
-source url: "https://ftp.postgresql.org/pub/source/v#{version}/postgresql-#{version}.tar.bz2"
+# version_list: url=https://ftp.postgresql.org/pub/source/v#{version}/ filter=*.tar.bz2
+
 version("13.21") { source sha256: "dcda1294df45f033b0656cf7a8e4afbbc624c25e1b144aec79530f74d7ef4ab4" }
 version("13.18") { source sha256: "ceea92abee2a8c19408d278b68de6a78b6bd3dbb4fa2d653fa7ca745d666aab1" }
 version("13.14") { source sha256: "b8df078551898960bd500dc5d38a177e9905376df81fe7f2b660a1407fa6a5ed" }
 version("13.5") { source sha256: "9b81067a55edbaabc418aacef457dd8477642827499560b00615a6ea6c13f6b3" }
 version("13.6") { source sha256: "bafc7fa3d9d4da8fe71b84c63ba8bdfe8092935c30c0aa85c24b2c08508f67fc" }
+
+source url: "https://ftp.postgresql.org/pub/source/v#{version}/postgresql-#{version}.tar.bz2"
+internal_source url: "#{ENV["ARTIFACTORY_REPO_URL"]}/postgresql/postgresql-#{version}.tar.bz2",
+                authorization: "X-JFrog-Art-Api:#{ENV["ARTIFACTORY_TOKEN"]}"
 
 relative_path "postgresql-#{version}"
 
