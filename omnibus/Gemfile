@@ -8,8 +8,6 @@ group :omnibus do
   gem 'license_scout',   git: "https://github.com/chef/license_scout.git", branch: "1-stable"
 end
 
-gem "http-accept", "1.7.0"
-
 group :test do
   gem 'test-kitchen' # for Test Kitchen testing of the omnibus builds
   gem 'berkshelf', '~> 8.0.22' # depsolving the Test Kitchen suite

@@ -10,10 +10,10 @@ GIT
 
 GIT
   remote: https://github.com/chef/omnibus-software.git
-  revision: 50c78858b655f84c33d5cd89910561a77a421629
+  revision: a94ba5e5bbb1757d4dc05dee16fc26e86e56a218
   branch: main
   specs:
-    omnibus-software (25.8.342)
+    omnibus-software (25.8.340)
       omnibus (>= 9.0.0)
 
 GIT
@@ -502,7 +502,6 @@ DEPENDENCIES
   artifactory
   berkshelf (~> 8.0.22)
   chef (~> 18.8.9)
-  http-accept (= 1.7.0)
   license_scout!
   omnibus!
   omnibus-software!
