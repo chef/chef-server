@@ -8,6 +8,7 @@ gem 'jbuilder', '~> 2.11'
 gem 'jquery-rails'
 gem 'jwt' # For Zendesk SSO
 gem 'config', '~> 4.1' # Replacement of rails_config gem
+gem "http-accept", "1.7.0"
 gem 'rb-readline', '~> 0.5.2', require: false
 gem 'sass-rails', '>= 4.0.3'
 gem 'turbolinks', '~> 5'

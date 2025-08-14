@@ -31,7 +31,7 @@ GEM
     mime-types (3.7.0)
       logger
       mime-types-data (~> 3.2025, >= 3.2025.0507)
-    mime-types-data (3.2025.0715)
+    mime-types-data (3.2025.0812)
     minitest (5.25.5)
     mixlib-config (3.0.27)
       tomlrb
@@ -71,4 +71,4 @@ DEPENDENCIES
   veil
 
 BUNDLED WITH
-   2.6.9
+   2.3.27

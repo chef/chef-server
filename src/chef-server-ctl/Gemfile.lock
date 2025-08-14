@@ -501,6 +501,7 @@ DEPENDENCIES
   chef (~> 18.8.9)
   chef-server-ctl!
   chefstyle
+  http-accept (= 1.7.0)
   knife-ec-backup!
   rake
   rspec

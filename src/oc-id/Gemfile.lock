@@ -725,6 +725,7 @@ DEPENDENCIES
   config (~> 4.1)
   doorkeeper (~> 5.0)
   factory_girl_rails (~> 4.9.0)
+  http-accept (= 1.7.0)
   jbuilder (~> 2.11)
   jquery-rails
   jwt

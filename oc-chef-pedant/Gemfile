@@ -7,6 +7,8 @@ gem "pry-byebug"
 gem "pry-stack_explorer"
 gem "rake"
 
+gem "http-accept", "1.7.0"
+
 # We require chef internally to get the version in
 # lib/pedant/request.rb. It's really strange code and it should be
 # revisited.

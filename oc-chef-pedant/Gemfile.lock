@@ -405,6 +405,7 @@ PLATFORMS
 
 DEPENDENCIES
   chef (= 18.8.9)
+  http-accept (= 1.7.0)
   oc-chef-pedant!
   pry
   pry-byebug
