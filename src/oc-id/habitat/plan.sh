@@ -95,8 +95,15 @@ do_install() {
   export GEM_HOME="${pkg_prefix}/vendor/bundle"
   mkdir -p "$GEM_HOME"
 
-  { git ls-files; git ls-files --exclude-standard --others; } \
-      | _tar_pipe_app_cp_to "$HOME"
+  # Copy all files except excluded directories using find instead of git
+  find . -type f \
+    ! -path "./habitat/*" \
+    ! -path "./vendor/bundle/*" \
+    ! -path "./results/*" \
+    ! -path "./.git/*" \
+    ! -path "./.bundle/*" \
+    ! -name "*.hart" \
+    | _tar_pipe_app_cp_to "$HOME"
   bundle config path ${HOME}/vendor/bundle
   bundle config build.sqlite3 --with-sqlite3-lib=$(pkg_path_for core/sqlite)/lib
   bundle config build.nokogiri --with-xml2-include=$(pkg_path_for core/libxml2)/include/libxml2 \
