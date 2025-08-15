@@ -1,4 +1,4 @@
-require_relative './warnings'
+require_relative 'warnings'
 
 class NginxErb
   attr_reader :node
@@ -59,7 +59,7 @@ class NginxErb
 
   def local_ip_addresses
     ret = []
-    node['network']['interfaces'].each do |_name, iface|
+    node['network']['interfaces'].each_value do |iface|
       next unless iface['addresses'].respond_to?(:each)
 
       iface['addresses'].each do |addr, addr_info|

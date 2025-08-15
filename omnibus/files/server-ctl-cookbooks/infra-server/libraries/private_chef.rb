@@ -21,7 +21,7 @@ require 'chef/mash'
 require 'chef/json_compat'
 require 'chef/mixin/deep_merge'
 require 'veil'
-require_relative './warnings'
+require_relative 'warnings'
 
 module PrivateChef
   extend(Mixlib::Config)

@@ -13,8 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require_relative './preflight_checks'
-require_relative './opensearch'
+require_relative 'preflight_checks'
+require_relative 'opensearch'
 
 class OpensearchPreflightValidator < PreflightValidator
   # This check used to verify that the external PG version matches the version

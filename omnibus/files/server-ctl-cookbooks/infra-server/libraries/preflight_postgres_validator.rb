@@ -13,8 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require_relative './warnings'
-require_relative './pgversion'
+require_relative 'warnings'
+require_relative 'pgversion'
 
 class PostgresqlPreflightValidator < PreflightValidator
   # This check used to verify that the external PG version matches the version

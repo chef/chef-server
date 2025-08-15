@@ -21,7 +21,7 @@ class Statfs
   # See http://man7.org/linux/man-pages/man2/statvfs.2.html
   class Statvfs < FFI::Struct
     spec = [
-            :f_bsize,   :ulong,      # Filesystem block size
+      :f_bsize,   :ulong,      # Filesystem block size
             :f_frsize,  :ulong,      # Fragement size
             :f_blocks,  FSBLKCNT_T,  # Size of fs in f_frsize units
             :f_bfree,   FSBLKCNT_T,  # Number of free blocks
@@ -32,7 +32,7 @@ class Statfs
             :f_fsid,    :ulong,      # Filesystem ID
             :f_flag,    :ulong,      # Mount Flags
             :f_namemax, :ulong       # Max filename length
-           ]
+    ]
 
     # Linux has this at the end of the struct and if we don't include
     # it we end up getting a memory corruption error when th object
