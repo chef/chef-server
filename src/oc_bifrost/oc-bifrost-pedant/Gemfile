@@ -2,6 +2,8 @@ source 'https://rubygems.org'
 
 gemspec
 
+# Fix gem conflict with http-accept 1.7.0 by adding explicit dependency for version 2.1.1
+gem 'http-accept', '2.1.1'
 # TODO(ssd) 2017-03-15: This in in this gemfile because bifrost
 # expects it to be in the path
 gem 'veil'
