@@ -20,7 +20,7 @@ require_relative '../../libraries/helper'
 describe IndexingPreflightValidator do
   let(:indexing_preflight) do
     s = IndexingPreflightValidator.new('private_chef' => {
-      'opscode-erchef' => {
+                                         'opscode-erchef' => {
         'reindex_sleep_min_ms' => 500,
         'reindex_sleep_max_ms' => 2000,
       },

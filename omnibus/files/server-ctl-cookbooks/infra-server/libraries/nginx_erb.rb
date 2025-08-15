@@ -77,7 +77,7 @@ class NginxErb
     listen_opts = ''
     listen_port = case proto
                   when 'http'
-                    node['private_chef']['nginx']['non_ssl_port'].to_s || '80'
+                    (node['private_chef']['nginx']['non_ssl_port'] || '80').to_s
                   when 'https'
                     listen_opts << ' ssl'
                     node['private_chef']['nginx']['ssl_port'].to_s
