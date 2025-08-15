@@ -116,11 +116,11 @@ ruby_block 'set_lb_redis_values' do
                       port: redis_data['port'].to_i,
                       username: 'default',
                       password: PrivateChef.credentials.get('redis_lb', 'password').to_s)
-    
+
     # Convert all values to strings to avoid type issues
     xdl = node['private_chef']['lb']['xdl_defaults'].map { |k, v| [k, v.to_s] }.to_h
     xmaint_allowed_ips_list = node['private_chef']['lb']['xmaint_allowed_ips_list'].map(&:to_s)
-    
+
     redis.set('xdl_defaults', xdl.to_json)
     redis.set('xmaint_allowed_ips_list', xmaint_allowed_ips_list.to_json)
   end

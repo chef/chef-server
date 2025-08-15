@@ -22,16 +22,16 @@ class Statfs
   class Statvfs < FFI::Struct
     spec = [
       :f_bsize,   :ulong,      # Filesystem block size
-            :f_frsize,  :ulong,      # Fragement size
-            :f_blocks,  FSBLKCNT_T,  # Size of fs in f_frsize units
-            :f_bfree,   FSBLKCNT_T,  # Number of free blocks
-            :f_bavail,  FSBLKCNT_T,  # Number of free blocks for unpriviledged users
-            :f_files,   FSBLKCNT_T,  # Number of inodes
-            :f_ffree,   FSBLKCNT_T,  # Number of free inodes
-            :f_favail,  FSBLKCNT_T,  # Number of free inodes for unprivilged users
-            :f_fsid,    :ulong,      # Filesystem ID
-            :f_flag,    :ulong,      # Mount Flags
-            :f_namemax, :ulong       # Max filename length
+      :f_frsize,  :ulong,      # Fragement size
+      :f_blocks,  FSBLKCNT_T,  # Size of fs in f_frsize units
+      :f_bfree,   FSBLKCNT_T,  # Number of free blocks
+      :f_bavail,  FSBLKCNT_T,  # Number of free blocks for unpriviledged users
+      :f_files,   FSBLKCNT_T,  # Number of inodes
+      :f_ffree,   FSBLKCNT_T,  # Number of free inodes
+      :f_favail,  FSBLKCNT_T,  # Number of free inodes for unprivilged users
+      :f_fsid,    :ulong,      # Filesystem ID
+      :f_flag,    :ulong,      # Mount Flags
+      :f_namemax, :ulong       # Max filename length
     ]
 
     # Linux has this at the end of the struct and if we don't include
