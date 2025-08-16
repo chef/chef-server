@@ -8,7 +8,7 @@ require "highline/import"
 require "shellwords"
 
 knife_config = ::ChefServerCtl::Config.knife_config_file
-knife_cmd    = "#{::ChefServerCtl::Config.knife_bin} opc user password"
+knife_cmd    = "#{::ChefServerCtl::Config.knife_bin} user password"
 
 add_command_under_category "password", "organization-and-user-management", "Set a user's password or System Recovery Password.", 2 do
   # changed arg to turn on ldap to --enable-external-auth since that makes more sense to new users, but left in

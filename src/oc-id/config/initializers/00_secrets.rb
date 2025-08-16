@@ -1,4 +1,6 @@
 require 'singleton'
+require 'veil'
+
 class Secrets
   include Singleton
 

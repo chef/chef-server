@@ -35,7 +35,7 @@ class HAProxyStatus
 
   def transform_header(line)
     columns = line.split(',').map(&:strip)
-    columns[0] = columns[0].gsub('# ', '')
+    columns.first.gsub!('# ', '')
     columns
   end
 

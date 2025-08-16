@@ -47,7 +47,7 @@ action_class do
   def do_create(connection)
     user_info = connection.exec('select usesuper from pg_catalog.pg_user where usename = $1', [ new_resource.username ])
     if user_info.ntuples > 0
-      update_user(connection, user_info[0])
+      update_user(connection, user_info.first)
     else
       create_user(connection)
     end
@@ -66,7 +66,7 @@ action_class do
       # will be a no-op)
       pg_shadow_info = connection.exec('select passwd from pg_shadow where usename = $1', [ new_resource.username ])
       if pg_shadow_info.ntuples > 0
-        pg_shadow_info = pg_shadow_info[0]
+        pg_shadow_info = pg_shadow_info.first
         if new_resource.password && pg_shadow_info['passwd'] != ::PG::Connection.encrypt_password(new_resource.password, new_resource.username)
           changes << '  Update password'
           sql << " ENCRYPTED PASSWORD '#{connection.escape(new_resource.password)}'"

@@ -45,8 +45,8 @@ class PgVersion < Gem::Version
     @major ||=
       begin
         segments = self.segments
-        if segments[0].to_i >= 10
-          self.class.new segments[0].to_s
+        if segments.first.to_i >= 10
+          self.class.new segments.first.to_s
         else
           self.class.new segments[0..1].join('.')
         end
@@ -71,14 +71,14 @@ class PgVersion < Gem::Version
   # is at or greater than 8.2, otherwise, zero.
   def to_i
     segments = self.segments
-    if segments[0].to_i >= 10
+    if segments.first.to_i >= 10
       format('%<major>d%<minor>04d',
-             major: segments[0].to_i,
+             major: segments.first.to_i,
              minor: segments[1].to_i
             ).to_i
-    elsif segments[0].to_i == 9 || (segments[0].to_i == 8 && segments[1].to_i >= 2)
+    elsif segments.first.to_i == 9 || (segments.first.to_i == 8 && segments[1].to_i >= 2)
       format('%<major1>d%<major2>02d%<minor>02d',
-             major1: segments[0].to_i,
+             major1: segments.first.to_i,
              major2: segments[1].to_i,
              minor: segments[2].to_i
             ).to_i

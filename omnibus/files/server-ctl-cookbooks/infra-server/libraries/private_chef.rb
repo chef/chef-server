@@ -21,7 +21,7 @@ require 'chef/mash'
 require 'chef/json_compat'
 require 'chef/mixin/deep_merge'
 require 'veil'
-require_relative './warnings'
+require_relative 'warnings'
 
 module PrivateChef
   extend(Mixlib::Config)
@@ -132,7 +132,7 @@ module PrivateChef
 
       instance_eval(IO.read(filename), filename, 1)
     rescue
-      raise "Error loading file: #{$ERROR_INFO.backtrace[0]}: #{$ERROR_INFO.message}"
+      raise "Error loading file: #{$ERROR_INFO.backtrace.first}: #{$ERROR_INFO.message}"
     end
 
     def import_legacy_service_config(old_service_key, new_service_key, keys)
@@ -525,7 +525,7 @@ module PrivateChef
         end
       end
       if ldap_encryption
-        Chef::Log.warn("Please note that the ldap 'encryption' setting is deprecated as of #{ChefUtils::Dist::Server::PRODUCT} 12.0. Use either "\
+        Chef::Log.warn("Please note that the ldap 'encryption' setting is deprecated as of #{ChefUtils::Dist::Server::PRODUCT} 12.0. Use either " \
                        "ldap['ssl_enabled'] = true or ldap['tls_enabled'] = true.")
         case ldap_encryption.to_s
         when 'simple_tls'
@@ -535,7 +535,7 @@ module PrivateChef
         when 'none'
           Chef::Log.info('Configuring ldap without encryption.')
         else
-          raise "Invalid ldap configuration: unknown value #{ldap_encryption} for deprecated ldap['encryption'] option. "\
+          raise "Invalid ldap configuration: unknown value #{ldap_encryption} for deprecated ldap['encryption'] option. " \
                 "Please set ldap['ssl_enabled'] = true or ldap['tls_enabled'] = true instead"
         end
       elsif ssl_enabled && tls_enabled

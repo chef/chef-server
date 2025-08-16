@@ -14,7 +14,7 @@ describe 'Authentication' do
     it { should have_link 'Sign Up' }
 
     describe 'success' do
-      let(:user) { FactoryGirl.build(:user) }
+      let(:user) { FactoryBot.build(:user) }
 
       before do
         fill_in 'username', :with => user.username
@@ -36,7 +36,7 @@ describe 'Authentication' do
     end
 
     describe 'success with email' do
-      let(:user) { FactoryGirl.build(:user) }
+      let(:user) { FactoryBot.build(:user) }
 
       before do
         fill_in 'username', :with => user.email
@@ -58,7 +58,7 @@ describe 'Authentication' do
     end
 
     describe 'failure' do
-      let(:user) { FactoryGirl.build(:user) }
+      let(:user) { FactoryBot.build(:user) }
 
       before do
         fill_in 'username', :with => user.username
