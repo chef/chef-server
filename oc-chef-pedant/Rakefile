@@ -29,7 +29,7 @@ def bundle_exec_with_chef(test_gem, commands)
       elsif line =~ /^\s*gem\s*['"]chef['"]\s*,?.*$/ # foodcritic      end
         line = "gem \"chef\", \"~> 18.7.10\""
       elsif line =~ /^\s*gem\s*['"]ohai['"]\s*,?.*$/ # foodcritic      end
-        line = "gem \"ohai\", \"~> 17.0\""
+        line = "gem \"ohai\", \"~> 18.0\""
       elsif line =~ /\s*gem\s*['"]#{test_gem}['"]/ # foodcritic      end
         next
       end
