@@ -18,7 +18,7 @@ require "net/http" unless defined?(Net::HTTP)
 require "timeout" unless defined?(Timeout)
 
 module Net
-  class HTTP < Protocol
+  class HTTP
     def connect
       if proxy?
         conn_address = proxy_address
@@ -104,18 +104,10 @@ module Net
       end
     end
 
-    # This does not verify that the address is a
-    # valid ipv6 address. Rather, it assumes that any
-    # address string that contains a colon is an
-    # ipv6 address. Since colons are not allowed in
-    # domain names, it should fail on a name lookup.
-    # By the time this is called, the socket should be
-    # open, so whatever address is being used would
-    # technically be a valid one.
-    def ipv6_address?(addr)
-      return true if addr =~ /:/
+    private
 
-      false
+    def ipv6_address?(hostname)
+      hostname.include?(':')
     end
   end
 end
