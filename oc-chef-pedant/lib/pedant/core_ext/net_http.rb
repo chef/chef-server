@@ -18,7 +18,7 @@ require "net/http" unless defined?(Net::HTTP)
 require "timeout" unless defined?(Timeout)
 
 module Net
-  class HTTP < Protocol
+  class HTTP
     def connect
       if proxy?
         conn_address = proxy_address
