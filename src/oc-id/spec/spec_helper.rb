@@ -15,6 +15,8 @@ RSpec.configure do |config|
     rspec_configuration.syntax = :expect
   end
 
+  config.include FactoryBot::Syntax::Methods
+
   config.infer_spec_type_from_file_location!
   config.fixture_path = "#{::Rails.root}/spec/fixtures"
   config.use_transactional_fixtures = true

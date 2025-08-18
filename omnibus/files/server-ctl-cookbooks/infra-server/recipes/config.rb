@@ -44,7 +44,7 @@ chef_server_json_path = "/etc/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/chef-serv
 private_chef_path = "/etc/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/private-chef.rb"
 
 if File.exist?(chef_server_json_path) &&
-   !(File.exist?(private_chef_path) || File.exist?())
+   !(File.exist?(private_chef_path) || File.exist?(chef_server_path))
   Chef::Log.fatal("Configuration via #{chef_server_json_path} is not supported. Please use #{chef_server_path}")
   exit!(1)
 else
@@ -54,7 +54,7 @@ else
   chef_server_rb_exists = File.exist?(chef_server_path)
 
   if chef_server_rb_exists
-    chef_server_rb_not_empty = !File.zero?(chef_server_path)
+    chef_server_rb_not_empty = !File.empty?(chef_server_path)
   end
 
   # Things are a bit tricky here, because there are multiple scenarios.  But the

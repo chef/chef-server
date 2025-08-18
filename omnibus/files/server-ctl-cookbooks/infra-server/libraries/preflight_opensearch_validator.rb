@@ -13,8 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require_relative './preflight_checks'
-require_relative './opensearch'
+require_relative 'preflight_checks'
+require_relative 'opensearch'
 
 class OpensearchPreflightValidator < PreflightValidator
   # This check used to verify that the external PG version matches the version
@@ -78,12 +78,12 @@ class OpensearchPreflightValidator < PreflightValidator
 
   def search_engine_auth_header
     auth =
-    if !cfg_erchef_attr['search_auth_username'].nil? && !cfg_erchef_attr['search_auth_password'].nil?
-      Base64.strict_encode64("#{cfg_erchef_attr['search_auth_username']}:#{cfg_erchef_attr['search_auth_password']}")
-    else
-      Base64.strict_encode64("#{default_erchef_attr['search_auth_username']}:#{default_erchef_attr['search_auth_password']}")
-    end
-    { Authorization: "Basic #{auth}" }
+      if !cfg_erchef_attr['search_auth_username'].nil? && !cfg_erchef_attr['search_auth_password'].nil?
+        Base64.strict_encode64(cfg_erchef_attr['search_auth_username'].to_s + ':' + cfg_erchef_attr['search_auth_password'].to_s)
+      else
+        Base64.strict_encode64(default_erchef_attr['search_auth_username'].to_s + ':' + default_erchef_attr['search_auth_password'].to_s)
+      end
+    { Authorization: 'Basic ' + auth }
   end
 
   def search_engine_major_version(count)
@@ -171,7 +171,7 @@ class OpensearchPreflightValidator < PreflightValidator
 
   def verify_external_url
     if cfg_opensearch_attr['external'] && !cfg_opensearch_attr['external_url']
-      fail_with err_OPENSEARCH007_bad_external_config()
+      fail_with err_OPENSEARCH007_bad_external_config
     end
   end
 

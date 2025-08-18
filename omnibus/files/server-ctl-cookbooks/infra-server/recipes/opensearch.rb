@@ -41,11 +41,6 @@ logging_config_file = File.join(opensearch_conf_dir, 'logging.yml')
   end
 end
 
-execute 'sysctl-reload' do
-  command '/sbin/sysctl -p /etc/sysctl.conf || true'
-  action :nothing
-end
-
 # Just make sure the file is there, saves a round of error handling
 # when we open it up.
 file '/etc/sysctl.conf' do
@@ -55,6 +50,7 @@ end
 
 sysctl 'vm.max_map_count' do
   value MAX_MAP_COUNT.to_s
+  action :apply
   only_if do
     # This is fairly cautious. Because we have no guarantees around what
     # might already be in sysctl.conf, we'll assume multiple matches are
@@ -75,7 +71,6 @@ sysctl 'vm.max_map_count' do
     end
     highest_val < MAX_MAP_COUNT
   end
-  notifies :run, 'execute[sysctl-reload]', :immediately
 end
 
 # Remove the old env config to ensre it's not left over after an upgrade.
