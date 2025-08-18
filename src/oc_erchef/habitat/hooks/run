@@ -7,7 +7,7 @@ export VMARGS_PATH="{{pkg.svc_config_path}}/vm.args"
 export CHEF_SECRETS_DATA=$(cat {{pkg.svc_config_path}}/veil-secrets.json)
 # these are needed in order to make depselector start up
 export PATH={{pkgPathFor "core/ruby3_1"}}/bin:${PATH}
-export GEM_HOME={{pkg.path}}/vendor/bundle
+export GEM_HOME={{pkg.path}}/vendor/:{{pkg.path}}/vendor/bundle
 export GEM_PATH={{pkgPathFor "core/ruby3_1"}}:{{pkg.path}}/vendor/bundle
 
 {{#if cfg.fips_enabled ~}}
