@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
 <!-- latest_release 15.10.52 -->
-## [15.10.52](https://github.com/chef/chef-server/tree/15.10.52) (2025-08-13)
+## [15.10.52](https://github.com/chef/chef-server/tree/15.10.52) (2025-08-18)
 
 #### Merged Pull Requests
-- Bump thor to 1.4.0 in src/chef-server-ctl, src/oc-id and oc-pedant [#4052](https://github.com/chef/chef-server/pull/4052) ([RoyShravani](https://github.com/RoyShravani))
+- Final chef client + knife-ec-back upgrade and knife opc change [#4051](https://github.com/chef/chef-server/pull/4051) ([jashaik](https://github.com/jashaik))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.10.33 -->
 ### Changes since 15.10.33 release
 
 #### Merged Pull Requests
+- Final chef client + knife-ec-back upgrade and knife opc change [#4051](https://github.com/chef/chef-server/pull/4051) ([jashaik](https://github.com/jashaik)) <!-- 15.10.52 -->
 - Bump thor to 1.4.0 in src/chef-server-ctl, src/oc-id and oc-pedant [#4052](https://github.com/chef/chef-server/pull/4052) ([RoyShravani](https://github.com/RoyShravani)) <!-- 15.10.52 -->
 - Upgrade webrick to 1.8.2 in oc-chef-pedant [#4049](https://github.com/chef/chef-server/pull/4049) ([RoyShravani](https://github.com/RoyShravani)) <!-- 15.10.51 -->
 - Added openssl changes [#4038](https://github.com/chef/chef-server/pull/4038) ([jashaik](https://github.com/jashaik)) <!-- 15.10.50 -->
