@@ -1,6 +1,6 @@
 source "https://rubygems.org"
 
 gem 'berkshelf', '~> 8.0.22'
-gem 'vagrant', '~> 1.0.6'
+gem 'vagrant', '~> 2.4.8'
 # activesupport 8.x requires ruby 3.2, so pin activesupport to 7.2
 gem 'activesupport', '~> 7.2'
