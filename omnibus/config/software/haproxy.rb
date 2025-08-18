@@ -27,7 +27,8 @@ skip_transitive_dependency_licensing true
 # HTTPS is available but certificate validation fails on OS X
 source url: "http://www.haproxy.org/download/3.0/src/haproxy-#{version}.tar.gz",
        sha256: "a133e2d550c5fd9a849b5c7ab17bb945bcdad209ca140d41f45ebf31943ae783"
-
+internal_source url: "#{ENV["ARTIFACTORY_REPO_URL"]}/#{name}/#{name}-#{version}.tar.gz",
+                authorization: "X-JFrog-Art-Api:#{ENV["ARTIFACTORY_TOKEN"]}"
 relative_path "haproxy-#{version}"
 
 build do
