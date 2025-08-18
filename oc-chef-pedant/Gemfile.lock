@@ -59,12 +59,12 @@ GEM
       debug_inspector (>= 1.2.0)
     builder (3.3.0)
     byebug (12.0.0)
-    chef (18.7.10)
+    chef (18.8.11)
       addressable
       aws-sdk-s3 (~> 1.91)
       aws-sdk-secretsmanager (~> 1.46)
-      chef-config (= 18.7.10)
-      chef-utils (= 18.7.10)
+      chef-config (= 18.8.11)
+      chef-utils (= 18.8.11)
       chef-vault
       chef-zero (>= 15.0.17)
       corefoundation (~> 0.3.4)
@@ -93,9 +93,9 @@ GEM
       unf_ext (~> 0.0.8.2)
       uuidtools (>= 2.1.5, < 3.0)
       vault (~> 0.18.2)
-    chef-config (18.7.10)
+    chef-config (18.8.11)
       addressable
-      chef-utils (= 18.7.10)
+      chef-utils (= 18.8.11)
       fuzzyurl
       mixlib-config (>= 2.2.12, < 4.0)
       mixlib-shellout (>= 2.0, < 4.0)
@@ -106,7 +106,7 @@ GEM
     chef-telemetry (1.1.1)
       chef-config
       concurrent-ruby (~> 1.0)
-    chef-utils (18.7.10)
+    chef-utils (18.8.11)
       concurrent-ruby
     chef-vault (4.1.23)
     chef-winrm (2.3.12)
@@ -419,7 +419,7 @@ PLATFORMS
   x86_64-linux
 
 DEPENDENCIES
-  chef (= 18.7.10)
+  chef (= 18.8.11)
   oc-chef-pedant!
   pry
   pry-byebug
