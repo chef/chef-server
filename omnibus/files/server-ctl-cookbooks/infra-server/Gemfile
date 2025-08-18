@@ -3,4 +3,4 @@ source 'https://rubygems.org'
 gem 'cookstyle'
 gem 'chefspec'
 gem 'veil'
-gem 'chef', '~> 18.7.10' # Updated for chef 18.7.10 upgrade
+gem 'chef', '~> 18.8.11' # Updated for chef 18.8.11 upgrade
