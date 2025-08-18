@@ -41,6 +41,7 @@ dependency "preparation"
 dependency "server-complete"
 
 # THESE MUST BE LAST DO NOT MOVE
+dependency "shebang-cleanup"
 dependency "ruby-cleanup"
 dependency "cleanup"
 
