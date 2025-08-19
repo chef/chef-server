@@ -314,7 +314,7 @@ GEM
     ffi (1.16.3)
     ffi-libarchive (1.1.14)
       ffi (~> 1.0)
-    ffi-yajl (2.4.0)
+    ffi-yajl (2.6.0)
       libyajl2 (>= 1.2)
     fuzzyurl (0.9.0)
     globalid (1.2.1)
@@ -443,7 +443,7 @@ GEM
       net-protocol
     net-protocol (0.2.2)
       timeout
-    net-scp (4.0.0)
+    net-scp (4.1.0)
       net-ssh (>= 2.6.5, < 8.0.0)
     net-sftp (4.0.0)
       net-ssh (>= 5.0.0, < 8.0.0)
@@ -700,7 +700,7 @@ GEM
       tty-cursor (~> 0.7)
       tty-screen (~> 0.8)
       wisper (~> 2.0)
-    tty-screen (0.8.1)
+    tty-screen (0.8.2)
     tty-table (0.12.0)
       pastel (~> 0.8)
       strings (~> 0.2.0)
@@ -738,7 +738,6 @@ GEM
 
 PLATFORMS
   arm64-darwin-21
-  arm64-darwin-23
   arm64-darwin-24
   x86_64-linux
 
