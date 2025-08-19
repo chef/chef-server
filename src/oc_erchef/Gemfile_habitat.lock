@@ -25,6 +25,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  openssl
   pg (= 0.21.0)
   rest-client (= 2.1.0)
 

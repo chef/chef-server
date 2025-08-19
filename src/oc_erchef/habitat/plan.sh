@@ -11,6 +11,7 @@ pkg_deps=(
   core/gcc-libs
   core/ruby3_1/3.1.7
   core/sqitch
+  core/postgresql13-client
   core/gecode3
   core/libffi
   core/glibc
@@ -96,12 +97,6 @@ do_install() {
   cp Gemfile_habitat.lock ${pkg_prefix}/Gemfile.lock
   bundle install --gemfile ${pkg_prefix}/Gemfile --path "${pkg_prefix}/vendor/bundle" && bundle config path ${pkg_prefix}/vendor/bundle
 
-  # Set up proper Ruby environment for bundle install
-  # _ruby_dir="$(pkg_path_for core/ruby3_1)"
-  # export PATH="${_ruby_dir}/bin:${PATH}"
-  # export GEM_PATH="${_ruby_dir}:${GEM_HOME}"
-  
-  # bundle install --gemfile ${pkg_prefix}/Gemfile --path "${pkg_prefix}/vendor/bundle" --deployment
   cp -r "_build/default/rel/oc_erchef/"* "${pkg_prefix}"
   fix_interpreter "${pkg_prefix}/bin/reindex-opc-organization" core/coreutils bin/env
   cp -R "$HAB_CACHE_SRC_PATH/$pkg_dirname/schema" "$pkg_prefix"
