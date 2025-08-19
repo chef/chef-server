@@ -6,5 +6,4 @@ gem "chef", "~> 18.8.11"
 gem "toml" # for habitat-land
 
 gem "knife","~> 18.8.13"
-# Use latest commit from CHEF-23857-security-fix-test-ruby-3.1.7 branch for knife-ec-backup
-gem "knife-ec-backup", git: "https://github.com/chef/knife-ec-backup", branch: "CHEF-23857-security-fix-test-ruby-3.1.7"
+gem "knife-ec-backup", "~> 3.0.5"
