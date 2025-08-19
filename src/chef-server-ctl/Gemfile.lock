@@ -1,6 +1,6 @@
 GIT
   remote: https://github.com/chef/knife-ec-backup
-  revision: 3c9e8372ebb95bbcee26583ac6d5ef12b8ae9aee
+  revision: 9d4aee9e33d62eaf1661bc7626a319d7639a9040
   branch: CHEF-23857-security-fix-test-ruby-3.1.7
   specs:
     knife-ec-backup (3.0.4)
