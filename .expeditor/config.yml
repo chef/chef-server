@@ -82,12 +82,19 @@ subscriptions:
       - bash:.expeditor/announce-release.sh:
           post_commit: true
       - built_in:notify_chefio_slack_channels
+  - workload: artifact_published:LTS-2024:chef-server:{{version_constraint}}
+    actions:
+      - bash:.expeditor/promote_harts_and_containers.sh:
+          post_commit: true
+      - purge_packages_chef_io_fastly:{{target_channel}}/chef-server/latest
   - workload: schedule_triggered:chef/chef-server:main:nightly_build:*
     actions:
       - trigger_pipeline:omnibus/adhoc
   # Run these actions when the freshly built Habitat packages have been uploaded to Depot
   - workload: buildkite_hab_build_group_published:{{agent_id}}:*
     actions:
+      - built_in:promote_habitat_packages:
+          channel: LTS-2024
       - trigger_pipeline:post-promote:
           post_commit: true
   - workload: buildkite_build_passed:{{agent_id}}:post-promote:*
@@ -130,3 +137,4 @@ artifact_channels:
   - unstable
   - current
   - stable
+  - LTS-2024

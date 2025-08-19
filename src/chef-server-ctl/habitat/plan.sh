@@ -6,9 +6,9 @@ pkg_deps=(
   core/coreutils
   core/curl
   core/jq-static
-  core/ruby31/3.1.6/20250307064402
+  core/ruby3_1/3.1.7
   core/libffi
-  core/postgresql-client
+  core/postgresql13-client
   core/gcc-libs
   core/glibc
 )
@@ -114,7 +114,7 @@ EOF
 
   for i in chef-server-test knife chef-server-ctl; do
       sed -i "s#__PKG_PATH__#${pkg_prefix}#" $wrapper_bin_path/$i
-      sed -i "s#__RUBY_PATH__#$(pkg_path_for core/ruby31)#" $wrapper_bin_path/$i
+      sed -i "s#__RUBY_PATH__#$(pkg_path_for core/ruby3_1)#" $wrapper_bin_path/$i
   done
 }
 
