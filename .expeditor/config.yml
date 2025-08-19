@@ -82,6 +82,11 @@ subscriptions:
       - bash:.expeditor/announce-release.sh:
           post_commit: true
       - built_in:notify_chefio_slack_channels
+  - workload: artifact_published:LTS-2024:chef-server:{{version_constraint}}
+    actions:
+      - bash:.expeditor/promote_harts_and_containers.sh:
+          post_commit: true
+      - purge_packages_chef_io_fastly:{{target_channel}}/chef-server/latest
   - workload: schedule_triggered:chef/chef-server:main:nightly_build:*
     actions:
       - trigger_pipeline:omnibus/adhoc
