@@ -621,9 +621,11 @@ GEM
       tilt
     sdoc (2.6.1)
       rdoc (>= 5.0)
-    selenium-webdriver (4.7.1)
+    selenium-webdriver (4.35.0)
+      base64 (~> 0.2)
+      logger (~> 1.4)
       rexml (~> 3.2, >= 3.2.5)
-      rubyzip (>= 1.2.2, < 3.0)
+      rubyzip (>= 1.2.2, < 4.0)
       websocket (~> 1.0)
     semverse (3.0.2)
     sinatra (4.1.1)
@@ -768,7 +770,7 @@ DEPENDENCIES
   rspec-rails (~> 6.0)
   sass-rails (>= 4.0.3)
   sdoc
-  selenium-webdriver (~> 4.7.1)
+  selenium-webdriver (~> 4.35.0)
   spring
   spring-commands-rspec
   sprockets-rails (>= 3.4.2)
