@@ -1,15 +1,3 @@
-GIT
-  remote: https://github.com/chef/knife-ec-backup
-  revision: 3c9e8372ebb95bbcee26583ac6d5ef12b8ae9aee
-  branch: CHEF-23857-security-fix-test-ruby-3.1.7
-  specs:
-    knife-ec-backup (3.0.4)
-      chef (~> 18.0)
-      knife-tidy
-      pg
-      sequel (~> 5.9)
-      veil
-
 PATH
   remote: .
   specs:
@@ -34,15 +22,10 @@ PATH
 GEM
   remote: https://rubygems.org/
   specs:
-    activesupport (7.1.3.2)
-      base64
-      bigdecimal
+    activesupport (7.0.8.7)
       concurrent-ruby (~> 1.0, >= 1.0.2)
-      connection_pool (>= 2.2.5)
-      drb
       i18n (>= 1.6, < 2)
       minitest (>= 5.1)
-      mutex_m
       tzinfo (~> 2.0)
     addressable (2.8.7)
       public_suffix (>= 2.0.2, < 7.0)
@@ -51,7 +34,7 @@ GEM
       mixlib-shellout (>= 2.0, < 4.0)
     ast (2.4.3)
     aws-eventstream (1.4.0)
-    aws-partitions (1.1147.0)
+    aws-partitions (1.1148.0)
     aws-sdk-core (3.229.0)
       aws-eventstream (~> 1, >= 1.3.0)
       aws-partitions (~> 1, >= 1.992.0)
@@ -128,6 +111,8 @@ GEM
       uri (~> 1.0.3)
       uuidtools (>= 2.1.5, < 3.0)
       vault (~> 0.18.2)
+    chef-bin (18.8.11)
+      chef (= 18.8.11)
     chef-cleanroom (1.0.5)
     chef-config (18.8.11)
       addressable
@@ -139,6 +124,13 @@ GEM
     chef-gyoku (1.4.5)
       builder (>= 2.1.2)
       rexml (~> 3.4)
+    chef-licensing (1.0.4)
+      activesupport (~> 7.0, < 7.1)
+      chef-config (>= 15)
+      faraday (>= 1, < 3)
+      faraday-http-cache
+      tty-prompt (~> 0.23)
+      tty-spinner (~> 0.9.3)
     chef-telemetry (1.1.1)
       chef-config
       concurrent-ruby (~> 1.0)
@@ -200,7 +192,6 @@ GEM
     date (3.4.1)
     diff-lcs (1.5.1)
     domain_name (0.6.20240107)
-    drb (2.2.3)
     erubi (1.13.1)
     erubis (2.7.0)
     faraday (2.13.4)
@@ -209,6 +200,8 @@ GEM
       logger
     faraday-follow_redirects (0.3.0)
       faraday (>= 1, < 3)
+    faraday-http-cache (2.5.1)
+      faraday (>= 0.8)
     faraday-net_http (3.4.1)
       net-http (>= 0.5.0)
     ffi (1.16.3)
@@ -256,12 +249,15 @@ GEM
     ipaddress (0.8.3)
     jmespath (1.6.2)
     json (2.13.2)
-    knife (18.5.0)
+    knife (18.8.13)
       bcrypt_pbkdf (~> 1.1)
-      chef (>= 18)
-      chef-config (>= 18)
-      chef-utils (>= 18)
+      chef (~> 18.0)
+      chef-bin (~> 18.0)
+      chef-config (~> 18.0)
+      chef-licensing (~> 1.0)
+      chef-utils (~> 18.0)
       chef-vault
+      chef-zero (~> 15.0.21)
       erubis (~> 2.7)
       ffi (>= 1.15)
       ffi-yajl (~> 2.2)
@@ -275,11 +271,17 @@ GEM
       pastel
       proxifier2 (~> 1.1)
       train-core (~> 3.10)
-      train-winrm (>= 0.2.5)
+      train-winrm (~> 0.2.17)
       tty-prompt (~> 0.21)
       tty-screen (~> 0.6)
       tty-table (~> 0.11)
-    knife-tidy (2.1.6)
+    knife-ec-backup (3.0.5)
+      chef (~> 18.0)
+      knife-tidy
+      pg
+      sequel (~> 5.9)
+      veil
+    knife-tidy (2.3.0)
     libyajl2 (2.1.0)
     license-acceptance (2.1.13)
       pastel (~> 0.7)
@@ -404,7 +406,7 @@ GEM
     rspec-mocks (3.13.5)
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.13.0)
-    rspec-support (3.13.4)
+    rspec-support (3.13.5)
     rubocop (1.25.1)
       parallel (~> 1.10)
       parser (>= 3.1.0.0)
@@ -473,6 +475,8 @@ GEM
       tty-screen (~> 0.8)
       wisper (~> 2.0)
     tty-screen (0.8.2)
+    tty-spinner (0.9.3)
+      tty-cursor (~> 0.7)
     tty-table (0.12.0)
       pastel (~> 0.8)
       strings (~> 0.2.0)
@@ -503,7 +507,8 @@ DEPENDENCIES
   chef (~> 18.8.11)
   chef-server-ctl!
   chefstyle
-  knife-ec-backup!
+  knife (~> 18.8.13)
+  knife-ec-backup (~> 3.0.5)
   rake
   rspec
   toml
