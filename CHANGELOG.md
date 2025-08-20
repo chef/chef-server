@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.10.54 -->
-## [15.10.54](https://github.com/chef/chef-server/tree/15.10.54) (2025-08-19)
+<!-- latest_release 15.10.55 -->
+## [15.10.55](https://github.com/chef/chef-server/tree/15.10.55) (2025-08-20)
 
 #### Merged Pull Requests
-- Upgrade to LTS-2024 channel [#4065](https://github.com/chef/chef-server/pull/4065) ([RoyShravani](https://github.com/RoyShravani))
+- Updating knife(18.8.13), knife-tidy(2.3.0), and knife-ec-backup(3.5.0) [#4070](https://github.com/chef/chef-server/pull/4070) ([talktovikas](https://github.com/talktovikas))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.10.33 -->
 ### Changes since 15.10.33 release
 
 #### Merged Pull Requests
+- Updating knife(18.8.13), knife-tidy(2.3.0), and knife-ec-backup(3.5.0) [#4070](https://github.com/chef/chef-server/pull/4070) ([talktovikas](https://github.com/talktovikas)) <!-- 15.10.55 -->
 - Upgrade to LTS-2024 channel [#4065](https://github.com/chef/chef-server/pull/4065) ([RoyShravani](https://github.com/RoyShravani)) <!-- 15.10.54 -->
 - adding the latest client which is 18.8.11 [#4064](https://github.com/chef/chef-server/pull/4064) ([talktovikas](https://github.com/talktovikas)) <!-- 15.10.53 -->
 - Final chef client + knife-ec-back upgrade and knife opc change [#4051](https://github.com/chef/chef-server/pull/4051) ([jashaik](https://github.com/jashaik)) <!-- 15.10.52 -->
