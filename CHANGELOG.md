@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.10.55 -->
-## [15.10.55](https://github.com/chef/chef-server/tree/15.10.55) (2025-08-20)
+<!-- latest_release 15.10.56 -->
+## [15.10.56](https://github.com/chef/chef-server/tree/15.10.56) (2025-08-20)
 
 #### Merged Pull Requests
-- Updating knife(18.8.13), knife-tidy(2.3.0), and knife-ec-backup(3.5.0) [#4070](https://github.com/chef/chef-server/pull/4070) ([talktovikas](https://github.com/talktovikas))
+- Changes for ruby gems path for habitat build [#4069](https://github.com/chef/chef-server/pull/4069) ([sreepuramsudheer](https://github.com/sreepuramsudheer))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.10.33 -->
 ### Changes since 15.10.33 release
 
 #### Merged Pull Requests
+- Changes for ruby gems path for habitat build [#4069](https://github.com/chef/chef-server/pull/4069) ([sreepuramsudheer](https://github.com/sreepuramsudheer)) <!-- 15.10.56 -->
 - Updating knife(18.8.13), knife-tidy(2.3.0), and knife-ec-backup(3.5.0) [#4070](https://github.com/chef/chef-server/pull/4070) ([talktovikas](https://github.com/talktovikas)) <!-- 15.10.55 -->
 - Upgrade to LTS-2024 channel [#4065](https://github.com/chef/chef-server/pull/4065) ([RoyShravani](https://github.com/RoyShravani)) <!-- 15.10.54 -->
 - adding the latest client which is 18.8.11 [#4064](https://github.com/chef/chef-server/pull/4064) ([talktovikas](https://github.com/talktovikas)) <!-- 15.10.53 -->
