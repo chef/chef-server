@@ -5,7 +5,7 @@
 #===============================================================================
 
 git clone https://github.com/chef/automate-private.git
-cd automate
+cd automate-private
 if [ "${AUTOMATE_BRANCH}" != "" ]
 then
   git checkout "${AUTOMATE_BRANCH}"
