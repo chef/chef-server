@@ -20,7 +20,6 @@ GEM
       netrc (~> 0.8)
 
 PLATFORMS
-  arm64-darwin-21
   ruby
 
 DEPENDENCIES
