@@ -56,6 +56,13 @@ do_unpack() {
   cp -R "$PLAN_CONTEXT/../"* "$HAB_CACHE_SRC_PATH/$pkg_dirname"
 }
 
+do_setup_environment() {
+  export GEM_HOME="$pkg_prefix/vendor/bundle/ruby/3.1.0"
+  build_line "Setting GEM_HOME='$GEM_HOME'"
+  export GEM_PATH="$GEM_HOME"
+  build_line "Setting GEM_PATH='$GEM_PATH'"
+}
+
 do_prepare() {
   # The `/usr/bin/env` path is hardcoded in jiffy, so we'll add a symlink since fix_interpreter won't work.
   if [[ ! -r /usr/bin/env ]]; then
@@ -91,7 +98,7 @@ do_build() {
 
 do_install() {
   export HOME="${pkg_prefix}"
-  export GEM_HOME="${pkg_prefix}/vendor/bundle"
+  export GEM_HOME="${pkg_prefix}/vendor/bundle/ruby/3.1.0"
 
   cp Gemfile_habitat ${pkg_prefix}/Gemfile
   cp Gemfile_habitat.lock ${pkg_prefix}/Gemfile.lock

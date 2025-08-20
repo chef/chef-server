@@ -49,13 +49,20 @@ do_unpack() {
   return 0
 }
 
+do_setup_environment() {
+  export GEM_HOME="${pkg_prefix}/vendor/bundle/ruby/3.1.0"
+  build_line "Setting GEM_HOME='$GEM_HOME'"
+  export GEM_PATH="$GEM_HOME"
+  build_line "Setting GEM_PATH='$GEM_PATH'"
+}
+
 do_build() {
   return 0
 }
 
 do_install() {
   export HOME="${pkg_prefix}"
-  export RUBY_VENDOR="${pkg_prefix}/vendor/bundle"
+  export RUBY_VENDOR="$pkg_prefix/vendor/bundle/ruby/3.1.0"
   mkdir -p "$RUBY_VENDOR"
 
   export GEM_HOME="$RUBY_VENDOR"

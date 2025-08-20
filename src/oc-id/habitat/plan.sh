@@ -56,6 +56,13 @@ do_unpack() {
   cp -R "$PLAN_CONTEXT/../"* "$HAB_CACHE_SRC_PATH/$pkg_dirname"
 }
 
+do_setup_environment() {
+  export GEM_HOME="${pkg_prefix}/vendor/bundle/ruby/3.1.0"
+  build_line "Setting GEM_HOME='$GEM_HOME'"
+  export GEM_PATH="$GEM_HOME"
+  build_line "Setting GEM_PATH='$GEM_PATH'"
+}
+
 do_prepare() {
   # clean up any lingering bundle artifacts
   rm -rf $PLAN_CONTEXT/../.bundle
@@ -92,7 +99,7 @@ do_install() {
   export HOME="${pkg_prefix}/oc_id"
   mkdir $HOME
 
-  export GEM_HOME="${pkg_prefix}/vendor/bundle"
+  export GEM_HOME="${pkg_prefix}/vendor/bundle/ruby/3.1.0"
   mkdir -p "$GEM_HOME"
 
   # Copy all files except excluded directories using find instead of git
