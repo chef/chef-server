@@ -3,10 +3,11 @@ pkg_origin=chef
 pkg_maintainer="The Chef Server Maintainers <support@chef.io>"
 pkg_license=('Apache-2.0')
 pkg_deps=(
-  core/sqitch_pg
+  core/sqitch
+  core/postgresql13-client
   core/curl
-  core/node14
-  core/ruby31/3.1.6/20250307064402
+  core/node
+  core/ruby3_1/3.1.7
   core/rsync
   core/sed
   core/libffi
@@ -55,6 +56,13 @@ do_unpack() {
   cp -R "$PLAN_CONTEXT/../"* "$HAB_CACHE_SRC_PATH/$pkg_dirname"
 }
 
+do_setup_environment() {
+  export GEM_HOME="${pkg_prefix}/vendor/bundle/ruby/3.1.0"
+  build_line "Setting GEM_HOME='$GEM_HOME'"
+  export GEM_PATH="$GEM_HOME"
+  build_line "Setting GEM_PATH='$GEM_PATH'"
+}
+
 do_prepare() {
   # clean up any lingering bundle artifacts
   rm -rf $PLAN_CONTEXT/../.bundle
@@ -91,18 +99,28 @@ do_install() {
   export HOME="${pkg_prefix}/oc_id"
   mkdir $HOME
 
-  export GEM_HOME="${pkg_prefix}/vendor/bundle"
+  export GEM_HOME="${pkg_prefix}/vendor/bundle/ruby/3.1.0"
   mkdir -p "$GEM_HOME"
 
-  { git ls-files; git ls-files --exclude-standard --others; } \
-      | _tar_pipe_app_cp_to "$HOME"
+  # Copy all files except excluded directories using find instead of git
+  find . -type f \
+    ! -path "./habitat/*" \
+    ! -path "./vendor/bundle/*" \
+    ! -path "./results/*" \
+    ! -path "./.git/*" \
+    ! -path "./.bundle/*" \
+    ! -name "*.hart" \
+    | _tar_pipe_app_cp_to "$HOME"
   bundle config path ${HOME}/vendor/bundle
   bundle config build.sqlite3 --with-sqlite3-lib=$(pkg_path_for core/sqlite)/lib
   bundle config build.nokogiri --with-xml2-include=$(pkg_path_for core/libxml2)/include/libxml2 \
     --with-xml2-lib=$(pkg_path_for core/libxml2)/lib \
     --with-xslt-include=$(pkg_path_for core/libxslt)/include/libxslt \
     --with-xslt-lib=$(pkg_path_for core/libxslt)/lib
-  bundle install --path "${HOME}/vendor/bundle" --binstubs="${HOME}/bin" --shebang ruby --deployment
+  bundle config set path "${HOME}/vendor/bundle"
+  bundle config set deployment 'true'
+  bundle config set --local shebang 'ruby'
+  bundle install --binstubs="${HOME}/bin" 
   # fix tzdata location
   echo "Adding core/tzdata zoneinfo search path to tzinfo gem"
   grep -l DEFAULT_SEARCH_PATH $HOME/vendor/bundle/ruby/*/gems/tzinfo*/lib/tzinfo/zoneinfo_data_source.rb | while read -r f; do

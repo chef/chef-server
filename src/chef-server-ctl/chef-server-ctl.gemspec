@@ -18,7 +18,7 @@ Gem::Specification.new do |spec|
   spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
   spec.require_paths = ["lib"]
 
-  spec.required_ruby_version = ">= 2.7.0"
+  spec.required_ruby_version = ">= 3.0.3"
 
   spec.add_runtime_dependency "highline", ">= 1.6.9", "< 3.0"
 
@@ -29,7 +29,6 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency "redis"
 
   spec.add_runtime_dependency "rest-client"
-  spec.add_runtime_dependency "knife-opc"
   spec.add_runtime_dependency "mixlib-log"
 
   spec.add_runtime_dependency "uuidtools", "~> 2.1", ">= 2.1.3"
@@ -41,12 +40,12 @@ Gem::Specification.new do |spec|
 
   spec.add_runtime_dependency "appbundler"
 
-  spec.add_runtime_dependency "chef"
+  spec.add_runtime_dependency "chef", "~> 18.8.11"
   spec.add_runtime_dependency "knife"
 
   # tools we bundle in the chef-server install and include here so we can have a single Gemfile.lock
   # for the overall chef-server "app"
-  spec.add_runtime_dependency "knife-ec-backup"
+  # spec.add_runtime_dependency "knife-ec-backup" # overridden in Gemfile to use a specific branch
   spec.add_runtime_dependency "chef_fixie", ">= 1.0.3"
 
   # Used to resolve download urls
@@ -55,5 +54,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "chefstyle"
   spec.add_development_dependency "rake"
   spec.add_development_dependency "rspec"
-  spec.add_development_dependency "berkshelf" # needed for the berks install
+  spec.add_development_dependency "berkshelf", "~> 8.0.22" # needed for the berks install
 end

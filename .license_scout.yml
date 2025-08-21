@@ -15,7 +15,7 @@ habitat:
     - origin: chef
       channel: unstable
     - origin: core
-      channel: stable
+      channel: LTS-2024
 
 allowed_licenses:
   - Apache-1.0
@@ -205,8 +205,12 @@ exceptions:
       reason: Exception made by Chef Legal
     - name: core/rsync
       reason: Exception made by Chef Legal
-    - name: core/ruby
+    - name:  core/ruby31
       reason: Exception made by Chef Legal
+    - name: core/ruby3_1
+      reason: Ruby license
+    - name: core/ruby3_4
+      reason: Ruby license
     - name: core/sed
       reason: Exception made by Chef Legal
     - name: core/sqitch_pg
@@ -229,5 +233,13 @@ exceptions:
       reason: Exception made by Chef Legal
     - name: core/ncurses
       reason: Exception made by Chef Legal
-      
-
+    - name: core/cpanminus
+      reason: Exception made by Chef Legal
+    - name : core/ncurses
+      reason: Exception made by Chef Legal
+    - name: core/sqlite
+      reason: Exception made by Chef Legal
+    - name : core/tzdata
+      reason: Exception made by Chef Legal
+    - name: core/gawk
+      reason: Exception made by Chef Legal

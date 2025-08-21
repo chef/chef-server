@@ -6,9 +6,9 @@ pkg_deps=(
   core/coreutils
   core/curl
   core/jq-static
-  core/ruby31/3.1.6/20250307064402
+  core/ruby3_1/3.1.7
   core/libffi
-  core/postgresql-client
+  core/postgresql13-client
   core/gcc-libs
   core/glibc
 )
@@ -49,13 +49,20 @@ do_unpack() {
   return 0
 }
 
+do_setup_environment() {
+  export GEM_HOME="${pkg_prefix}/vendor/bundle/ruby/3.1.0"
+  build_line "Setting GEM_HOME='$GEM_HOME'"
+  export GEM_PATH="$GEM_HOME"
+  build_line "Setting GEM_PATH='$GEM_PATH'"
+}
+
 do_build() {
   return 0
 }
 
 do_install() {
   export HOME="${pkg_prefix}"
-  export RUBY_VENDOR="${pkg_prefix}/vendor/bundle"
+  export RUBY_VENDOR="$pkg_prefix/vendor/bundle/ruby/3.1.0"
   mkdir -p "$RUBY_VENDOR"
 
   export GEM_HOME="$RUBY_VENDOR"
@@ -76,16 +83,15 @@ do_install() {
   bundle config path ${RUBY_VENDOR}
   popd
 
-  # in chef dir bundle install
-  echo "====== BUILDING KNIFE-OPC ==== "
+  # in chef dir bundle install  
+  echo "====== BUILDING CHEF DEPENDENCIES ==== "
   export chef_dir="${pkg_prefix}"/chef
   mkdir $chef_dir
   pushd $chef_dir
 
   cat > Gemfile << EOF
 source 'https://rubygems.org'
-gem 'chef', '~>15.12.22'
-gem 'knife-opc'
+gem 'chef', '~> 18.8.11'
 EOF
 
   bundle install --path ${RUBY_VENDOR} --binstubs
@@ -115,7 +121,7 @@ EOF
 
   for i in chef-server-test knife chef-server-ctl; do
       sed -i "s#__PKG_PATH__#${pkg_prefix}#" $wrapper_bin_path/$i
-      sed -i "s#__RUBY_PATH__#$(pkg_path_for core/ruby31)#" $wrapper_bin_path/$i
+      sed -i "s#__RUBY_PATH__#$(pkg_path_for core/ruby3_1)#" $wrapper_bin_path/$i
   done
 }
 

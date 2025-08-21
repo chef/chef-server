@@ -37,6 +37,6 @@ bash 'dual ip4/ip6 portbind' do
     echo 'net.ipv6.bindv6only = 0' >> /etc/sysctl.conf
   EOF
   notifies :run, 'execute[sysctl-reload]', :immediately
-  not_if "egrep '^net\.ipv6\.bindv6only = 0' /etc/sysctl.conf"
+  not_if "egrep '^net.ipv6.bindv6only = 0' /etc/sysctl.conf"
   only_if { PrivateChef['use_ipv6'] == true }
 end

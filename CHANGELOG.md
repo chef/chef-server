@@ -1,16 +1,22 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.10.52 -->
-## [15.10.52](https://github.com/chef/chef-server/tree/15.10.52) (2025-08-13)
+<!-- latest_release 15.10.57 -->
+## [15.10.57](https://github.com/chef/chef-server/tree/15.10.57) (2025-08-21)
 
 #### Merged Pull Requests
-- Bump thor to 1.4.0 in src/chef-server-ctl, src/oc-id and oc-pedant [#4052](https://github.com/chef/chef-server/pull/4052) ([RoyShravani](https://github.com/RoyShravani))
+- Shahid/automate gem missing [#4071](https://github.com/chef/chef-server/pull/4071) ([jashaik](https://github.com/jashaik))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.10.33 -->
 ### Changes since 15.10.33 release
 
 #### Merged Pull Requests
+- Shahid/automate gem missing [#4071](https://github.com/chef/chef-server/pull/4071) ([jashaik](https://github.com/jashaik)) <!-- 15.10.57 -->
+- Changes for ruby gems path for habitat build [#4069](https://github.com/chef/chef-server/pull/4069) ([sreepuramsudheer](https://github.com/sreepuramsudheer)) <!-- 15.10.56 -->
+- Updating knife(18.8.13), knife-tidy(2.3.0), and knife-ec-backup(3.5.0) [#4070](https://github.com/chef/chef-server/pull/4070) ([talktovikas](https://github.com/talktovikas)) <!-- 15.10.55 -->
+- Upgrade to LTS-2024 channel [#4065](https://github.com/chef/chef-server/pull/4065) ([RoyShravani](https://github.com/RoyShravani)) <!-- 15.10.54 -->
+- adding the latest client which is 18.8.11 [#4064](https://github.com/chef/chef-server/pull/4064) ([talktovikas](https://github.com/talktovikas)) <!-- 15.10.53 -->
+- Final chef client + knife-ec-back upgrade and knife opc change [#4051](https://github.com/chef/chef-server/pull/4051) ([jashaik](https://github.com/jashaik)) <!-- 15.10.52 -->
 - Bump thor to 1.4.0 in src/chef-server-ctl, src/oc-id and oc-pedant [#4052](https://github.com/chef/chef-server/pull/4052) ([RoyShravani](https://github.com/RoyShravani)) <!-- 15.10.52 -->
 - Upgrade webrick to 1.8.2 in oc-chef-pedant [#4049](https://github.com/chef/chef-server/pull/4049) ([RoyShravani](https://github.com/RoyShravani)) <!-- 15.10.51 -->
 - Added openssl changes [#4038](https://github.com/chef/chef-server/pull/4038) ([jashaik](https://github.com/jashaik)) <!-- 15.10.50 -->

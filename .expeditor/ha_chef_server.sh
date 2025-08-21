@@ -4,7 +4,7 @@
 #Downloading the automate repo
 #===============================================================================
 
-git clone https://github.com/chef/automate.git
+git clone https://github.com/chef/automate-private.git
 cd automate
 if [ "${AUTOMATE_BRANCH}" != "" ]
 then

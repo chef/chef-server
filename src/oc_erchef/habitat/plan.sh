@@ -9,9 +9,10 @@ pkg_deps=(
   core/curl
   core/openssl
   core/gcc-libs
-  core/ruby31/3.1.6/20250307064402
-  core/sqitch_pg
-  core/gecode
+  core/ruby3_1/3.1.7
+  core/sqitch
+  core/postgresql13-client
+  core/gecode3
   core/libffi
   core/glibc
 )
@@ -55,6 +56,13 @@ do_unpack() {
   cp -R "$PLAN_CONTEXT/../"* "$HAB_CACHE_SRC_PATH/$pkg_dirname"
 }
 
+do_setup_environment() {
+  export GEM_HOME="$pkg_prefix/vendor/bundle/ruby/3.1.0"
+  build_line "Setting GEM_HOME='$GEM_HOME'"
+  export GEM_PATH="$GEM_HOME"
+  build_line "Setting GEM_PATH='$GEM_PATH'"
+}
+
 do_prepare() {
   # The `/usr/bin/env` path is hardcoded in jiffy, so we'll add a symlink since fix_interpreter won't work.
   if [[ ! -r /usr/bin/env ]]; then
@@ -75,14 +83,14 @@ do_prepare() {
 
 
 do_build() {
-  _ruby_dir="$(pkg_path_for core/ruby31)"
+  _ruby_dir="$(pkg_path_for core/ruby3_1)"
   export REL_VERSION=$pkg_version
   export USE_SYSTEM_GECODE=1
   export GEM_HOME="${pkg_path}/vendor/bundle"
   export GEM_PATH="${_ruby_dir}:${GEM_HOME}"
-  export LIBRARY_PATH="$(pkg_path_for core/gecode)/lib"
-  export LD_LIBRARY_PATH="$(pkg_path_for core/gecode)/lib"
-  export CPLUS_INCLUDE_PATH="$(pkg_path_for core/gecode)/include"
+  export LIBRARY_PATH="$(pkg_path_for core/gecode3)/lib"
+  export LD_LIBRARY_PATH="$(pkg_path_for core/gecode3)/lib"
+  export CPLUS_INCLUDE_PATH="$(pkg_path_for core/gecode3)/include"
   mkdir -p "$GEM_HOME"
 
   make omnibus
@@ -90,11 +98,18 @@ do_build() {
 
 do_install() {
   export HOME="${pkg_prefix}"
-  export GEM_HOME="${pkg_prefix}/vendor/bundle"
+  export GEM_HOME="${pkg_prefix}/vendor/bundle/ruby/3.1.0"
 
   cp Gemfile_habitat ${pkg_prefix}/Gemfile
   cp Gemfile_habitat.lock ${pkg_prefix}/Gemfile.lock
-  bundle install --gemfile ${pkg_prefix}/Gemfile --path "${pkg_prefix}/vendor/bundle" && bundle config path ${pkg_prefix}/vendor/bundle
+  # bundle install --gemfile ${pkg_prefix}/Gemfile --path "${pkg_prefix}/vendor/bundle" && bundle config path ${pkg_prefix}/vendor/bundle
+
+  _ruby_dir="$(pkg_path_for core/ruby3_1)"
+  export PATH="${_ruby_dir}/bin:${PATH}"
+  export GEM_PATH="${_ruby_dir}:${GEM_HOME}"
+
+  bundle install --gemfile ${pkg_prefix}/Gemfile --path "${pkg_prefix}/vendor/bundle" --deployment
+
   cp -r "_build/default/rel/oc_erchef/"* "${pkg_prefix}"
   fix_interpreter "${pkg_prefix}/bin/reindex-opc-organization" core/coreutils bin/env
   cp -R "$HAB_CACHE_SRC_PATH/$pkg_dirname/schema" "$pkg_prefix"

@@ -138,8 +138,8 @@ ruby_block 'wait for backend leader to stabilize' do
 
         # We expect the status checks to fail on all but 1 backend
         # (the current leader) thus we wait for that to be the case.
-        if active_servers['chef_backend_elasticsearch'].count == 1 &&
-           active_servers['chef_backend_postgresql'].count == 1
+        if active_servers['chef_backend_elasticsearch'].one? &&
+           active_servers['chef_backend_postgresql'].one?
           stable = true
           break
         else
