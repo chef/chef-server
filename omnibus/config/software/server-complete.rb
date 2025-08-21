@@ -38,6 +38,9 @@ dependency "opensearch" # used by search
 # moved earlier because it is external to this repo and pinned, so should change infrequently
 dependency "chef" # for embedded chef-client -z runs (built from main - build last)
 
+# fix knife shebang after chef is installed
+dependency "knife-shebang-fix"
+
 dependency "private-chef-ctl" # additional project-specific private-chef-ctl subcommands
 
 # download the gpg-key beforehand for rhel systems to
