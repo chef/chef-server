@@ -28,20 +28,6 @@ cmd_args     = ARGV[1..-1]
 def resolve_knife_bin
   # test if this works for both chef-server and automate
   return ::ChefServerCtl::Config.knife_bin
-
-# # Check environment variable first (must be non-empty)
-# return ENV["CSC_KNIFE_BIN"] if ENV["CSC_KNIFE_BIN"]&.!empty?
-# 
-# # Try to find knife in PATH
-# which_result = `which knife 2>/dev/null`.strip
-# return which_result unless which_result.empty?
-# 
-# # Try original Chef Server knife path
-# original_knife = "/opt/opscode/bin/knife"
-# return original_knife if File.executable?(original_knife)
-# 
-# # Fall back to embedded default
-# "/opt/opscode/embedded/bin/knife"
 end
 
 knife_cmd = resolve_knife_bin
