@@ -20,14 +20,9 @@ require "mixlib/cli"
 knife_config = ::ChefServerCtl::Config.knife_config_file
 cmd_args     = ARGV[1..-1]
 
-# Determine knife binary path using precedence:
-# 1) CSC_KNIFE_BIN environment variable (for overriding in development/testing)
-# 2) Result of `which knife` command if available
-# 3) Original Chef Server knife path (/opt/opscode/bin/knife)
-# 4) Default embedded knife path
+# knife path
 def resolve_knife_bin
-  # test if this works for both chef-server and automate
-  return ::ChefServerCtl::Config.knife_bin
+  ::ChefServerCtl::Config.knife_bin
 end
 
 knife_cmd = resolve_knife_bin
