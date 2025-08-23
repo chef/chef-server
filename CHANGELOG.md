@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.10.58 -->
-## [15.10.58](https://github.com/chef/chef-server/tree/15.10.58) (2025-08-22)
+<!-- latest_release 15.10.59 -->
+## [15.10.59](https://github.com/chef/chef-server/tree/15.10.59) (2025-08-23)
 
 #### Merged Pull Requests
-- Knife-ec-backup issue in standalone fresh installs [#4072](https://github.com/chef/chef-server/pull/4072) ([lbakerchef](https://github.com/lbakerchef))
+- Adding the knife in chef-server-ctl in habitat. [#4074](https://github.com/chef/chef-server/pull/4074) ([talktovikas](https://github.com/talktovikas))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.10.33 -->
 ### Changes since 15.10.33 release
 
 #### Merged Pull Requests
+- Adding the knife in chef-server-ctl in habitat. [#4074](https://github.com/chef/chef-server/pull/4074) ([talktovikas](https://github.com/talktovikas)) <!-- 15.10.59 -->
 - Knife-ec-backup issue in standalone fresh installs [#4072](https://github.com/chef/chef-server/pull/4072) ([lbakerchef](https://github.com/lbakerchef)) <!-- 15.10.58 -->
 - Shahid/automate gem missing [#4071](https://github.com/chef/chef-server/pull/4071) ([jashaik](https://github.com/jashaik)) <!-- 15.10.57 -->
 - Changes for ruby gems path for habitat build [#4069](https://github.com/chef/chef-server/pull/4069) ([sreepuramsudheer](https://github.com/sreepuramsudheer)) <!-- 15.10.56 -->
