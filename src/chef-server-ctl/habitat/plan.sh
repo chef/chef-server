@@ -92,6 +92,7 @@ do_install() {
   cat > Gemfile << EOF
 source 'https://rubygems.org'
 gem 'chef', '~> 18.8.11'
+gem 'knife', '~> 18.8.13'
 EOF
 
   bundle install --path ${RUBY_VENDOR} --binstubs
