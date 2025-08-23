@@ -15,7 +15,6 @@
 
 require "shellwords"
 require "chef-utils"
-require "mixlib/cli"
 
 knife_config = ::ChefServerCtl::Config.knife_config_file
 cmd_args     = ARGV[1..-1]
@@ -26,113 +25,6 @@ def resolve_knife_bin
 end
 
 knife_cmd = resolve_knife_bin
-
-# Argument parser using Mixlib::CLI to separate flags from positional args
-class KnifeArgumentParser
-  include Mixlib::CLI
-  
-  # Define options that knife user create supports
-  option :file,
-    short: "-f FILE",
-    long: "--file FILE",
-    description: "Write the private key to a file"
-    
-  option :filename,
-    long: "--filename FILE", 
-    description: "Write the private key to a file (knife-opc compatibility)"
-    
-  option :user_key,
-    long: "--user-key FILENAME",
-    description: "Set the initial default key for the user from a file"
-    
-  option :prevent_keygen,
-    short: "-k",
-    long: "--prevent-keygen",
-    description: "Prevent server from generating a default key pair",
-    boolean: true
-    
-  option :orgname,
-    long: "--orgname ORGNAME",
-    short: "-o ORGNAME", 
-    description: "Associate new user to an organization"
-    
-  option :passwordprompt,
-    long: "--prompt-for-password",
-    short: "-p",
-    description: "Prompt for user password",
-    boolean: true
-    
-  option :first_name,
-    long: "--first-name FIRST_NAME",
-    description: "First name for the user"
-    
-  option :last_name,
-    long: "--last-name LAST_NAME", 
-    description: "Last name for the user"
-    
-  option :email,
-    long: "--email EMAIL",
-    description: "Email for the user"
-    
-  option :password,
-    long: "--password PASSWORD",
-    description: "Password for the user"
-    
-  # Parse arguments and return separated positional args and config
-  def self.parse_args(args)
-    parser = new
-    # parse_options returns the positional arguments, config gets flags
-    name_args = parser.parse_options(args.dup)
-    { positional: name_args, config: parser.config }
-  end
-end
-
-cmds = {
-  "org-create"      => ["create", "org", "Create an organization in the #{ChefUtils::Dist::Server::PRODUCT}."],
-  "org-delete"      => ["delete", "org", "Delete an organization in the #{ChefUtils::Dist::Server::PRODUCT}."],
-  "org-list"        => ["list", "org", "List all organizations in the #{ChefUtils::Dist::Server::PRODUCT}."],
-  "org-show"        => ["show", "org", "Show an organization in the #{ChefUtils::Dist::Server::PRODUCT}."],
-  "org-user-add"    => ["add", "org user", "Associate a user with an organization."],
-  "org-user-remove" => ["remove", "org user", "Dissociate a user with an organization."],
-  "user-create"     => ["create", "user", "Create a user in the #{ChefUtils::Dist::Server::PRODUCT}."],
-  "user-delete"     => ["delete", "user", "Delete a user in the #{ChefUtils::Dist::Server::PRODUCT}."],
-  "user-edit"       => ["edit", "user", "Edit a user in the #{ChefUtils::Dist::Server::PRODUCT}."],
-  "user-list"       => ["list", "user", "List all users in the #{ChefUtils::Dist::Server::PRODUCT}."],
-  "user-show"       => ["show", "user", "Show a user in the #{ChefUtils::Dist::Server::PRODUCT}."],
-}
-
-cmds.each do |cmd, args|
-  opc_cmd = args[0]
-  opc_noun = args[1]
-  description = args[2]
-  add_command_under_category cmd, "organization-and-user-management", description, 2 do
-    # Transform knife-opc arguments to knife format
-    transformed_args = transform_knife_opc_args(cmd_args, cmd, opc_noun, opc_cmd)
-    
-    server_url = get_server_url()
-    
-    # Build authentication arguments
-    auth_args = []
-    # auth_args << "--server-url" << server_url
-    auth_args << "-c" << knife_config
-    # auth_args << "--config-option" << "ssl_verify_mode=verify_none"
-    
-    # Build command args - don't escape config options with = signs
-    all_args = transformed_args + auth_args
-    escaped_args = all_args.map do |arg|
-      # Don't escape arguments that contain = (like config options)
-      if arg.include?('=')
-        arg
-      else
-        Shellwords.escape(arg)
-      end
-    end.join(" ")
-    
-    knife_command = "#{knife_cmd} #{opc_noun} #{opc_cmd} #{escaped_args}"
-    status = run_command(knife_command)
-    exit status.exitstatus
-  end
-end
 
 # Transform arguments from knife-opc format to native knife format
 def transform_knife_opc_args(args, chef_server_ctl_cmd, _knife_noun, _knife_verb)
@@ -145,10 +37,48 @@ def transform_knife_opc_args(args, chef_server_ctl_cmd, _knife_noun, _knife_verb
     # Format 2: USERNAME FIRST_NAME [MIDDLE_NAME] LAST_NAME EMAIL PASSWORD --filename FILE  
     # native knife format: USERNAME --email EMAIL --password PASSWORD --first-name FIRST --last-name LAST --file FILE
     
-    # Use Mixlib::CLI to properly parse arguments (handles mixed flag/positional scenarios)
-    parsed = KnifeArgumentParser.parse_args(args)
-    positional_args = parsed[:positional]
-    config = parsed[:config]
+    # Simple argument parsing that separates flags from positional args
+    positional_args = []
+    flags = {}
+    i = 0
+    while i < args.length
+      arg = args[i]
+      case arg
+      when "--filename", "-f"
+        flags[:filename] = args[i + 1] if i + 1 < args.length
+        i += 2
+      when "--file"
+        flags[:file] = args[i + 1] if i + 1 < args.length
+        i += 2
+      when "--user-key"
+        flags[:user_key] = args[i + 1] if i + 1 < args.length
+        i += 2
+      when "--prevent-keygen", "-k"
+        flags[:prevent_keygen] = true
+        i += 1
+      when "--orgname", "-o"
+        flags[:orgname] = args[i + 1] if i + 1 < args.length
+        i += 2
+      when "--prompt-for-password", "-p"
+        flags[:passwordprompt] = true
+        i += 1
+      when "--first-name"
+        flags[:first_name] = args[i + 1] if i + 1 < args.length
+        i += 2
+      when "--last-name"
+        flags[:last_name] = args[i + 1] if i + 1 < args.length
+        i += 2
+      when "--email"
+        flags[:email] = args[i + 1] if i + 1 < args.length
+        i += 2
+      when "--password"
+        flags[:password] = args[i + 1] if i + 1 < args.length
+        i += 2
+      else
+        positional_args << arg
+        i += 1
+      end
+    end
     
     # Need at least 5 positional args for knife-opc format
     if positional_args.length >= 5
@@ -180,8 +110,8 @@ def transform_knife_opc_args(args, chef_server_ctl_cmd, _knife_noun, _knife_verb
       transformed << "--first-name" << first_name
       transformed << "--last-name" << last_name
       
-      # Add parsed flags from config, converting --filename to -f
-      config.each do |key, value|
+      # Add parsed flags, converting --filename to -f
+      flags.each do |key, value|
         case key
         when :filename
           transformed << "-f" << value if value
@@ -235,4 +165,51 @@ def get_server_url()
   end
   
   server_url
+end
+
+cmds = {
+  "org-create"      => ["create", "org", "Create an organization in the #{ChefUtils::Dist::Server::PRODUCT}."],
+  "org-delete"      => ["delete", "org", "Delete an organization in the #{ChefUtils::Dist::Server::PRODUCT}."],
+  "org-list"        => ["list", "org", "List all organizations in the #{ChefUtils::Dist::Server::PRODUCT}."],
+  "org-show"        => ["show", "org", "Show an organization in the #{ChefUtils::Dist::Server::PRODUCT}."],
+  "org-user-add"    => ["add", "org user", "Associate a user with an organization."],
+  "org-user-remove" => ["remove", "org user", "Dissociate a user with an organization."],
+  "user-create"     => ["create", "user", "Create a user in the #{ChefUtils::Dist::Server::PRODUCT}."],
+  "user-delete"     => ["delete", "user", "Delete a user in the #{ChefUtils::Dist::Server::PRODUCT}."],
+  "user-edit"       => ["edit", "user", "Edit a user in the #{ChefUtils::Dist::Server::PRODUCT}."],
+  "user-list"       => ["list", "user", "List all users in the #{ChefUtils::Dist::Server::PRODUCT}."],
+  "user-show"       => ["show", "user", "Show a user in the #{ChefUtils::Dist::Server::PRODUCT}."],
+}
+
+cmds.each do |cmd, args|
+  opc_cmd = args[0]
+  opc_noun = args[1]
+  description = args[2]
+  add_command_under_category cmd, "organization-and-user-management", description, 2 do
+    # Transform knife-opc arguments to knife format
+    transformed_args = transform_knife_opc_args(cmd_args, cmd, opc_noun, opc_cmd)
+    
+    server_url = get_server_url()
+    
+    # Build authentication arguments
+    auth_args = []
+    # auth_args << "--server-url" << server_url
+    auth_args << "-c" << knife_config
+    # auth_args << "--config-option" << "ssl_verify_mode=verify_none"
+    
+    # Build command args - don't escape config options with = signs
+    all_args = transformed_args + auth_args
+    escaped_args = all_args.map do |arg|
+      # Don't escape arguments that contain = (like config options)
+      if arg.include?('=')
+        arg
+      else
+        Shellwords.escape(arg)
+      end
+    end.join(" ")
+    
+    knife_command = "#{knife_cmd} #{opc_noun} #{opc_cmd} #{escaped_args}"
+    status = run_command(knife_command)
+    exit status.exitstatus
+  end
 end
