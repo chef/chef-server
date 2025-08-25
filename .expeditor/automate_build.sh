@@ -14,6 +14,7 @@ export HAB_FEAT_OFFLINE_INSTALL=true
 export HAB_BLDR_CHANNEL="LTS-2024"
 export HAB_STUDIO_SECRET_HAB_FALLBACK_CHANNEL="LTS-2024"
 export HAB_FALLBACK_CHANNEL="dev"
+export DEFAULT_AUTOMATE_REPO="https://github.com/chef/automate-private.git"
 
 curl https://raw.githubusercontent.com/habitat-sh/habitat/main/components/hab/install.sh | sudo bash
 
@@ -44,8 +45,16 @@ echo "generating package for nginx"
 openresty_hart=$(ls -1t results/*openresty*.hart | head -1)
 HAB_FEAT_OFFLINE_INSTALL=true HAB_FEAT_IGNORE_LOCAL=false HAB_ORIGIN=chef HAB_CACHE_KEY_PATH="$JOB_TEMP_ROOT/keys" DO_CHECK=true HAB_BLDR_CHANNEL=LTS-2024 HAB_REFRESH_CHANNEL=LTS-2024 hab studio run -D "set -e; hab pkg install $openresty_hart; export HAB_REFRESH_CHANNEL=LTS-2024; hab pkg build src/nginx"
 
-git clone https://github.com/chef/automate-private.git
-cd automate
+if [ -z "$AUTOMATE_REPO" ];
+then
+	AUTOMATE_REPO="$DEFAULT_AUTOMATE_REPO"
+fi
+
+git clone $AUTOMATE_REPO
+
+repo_dir=`basename -s .git $AUTOMATE_REPO`
+
+cd ${repo_dir}
 if [ "${AUTOMATE_BRANCH}" != "" ]
 then
   git checkout "${AUTOMATE_BRANCH}"
