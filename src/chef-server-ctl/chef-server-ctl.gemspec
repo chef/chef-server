@@ -45,7 +45,7 @@ Gem::Specification.new do |spec|
 
   # tools we bundle in the chef-server install and include here so we can have a single Gemfile.lock
   # for the overall chef-server "app"
-  # spec.add_runtime_dependency "knife-ec-backup" # overridden in Gemfile to use a specific branch
+  spec.add_runtime_dependency "knife-ec-backup"
   spec.add_runtime_dependency "chef_fixie", ">= 1.0.3"
 
   # Used to resolve download urls

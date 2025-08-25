@@ -20,20 +20,9 @@ require "mixlib/cli"
 knife_config = ::ChefServerCtl::Config.knife_config_file
 cmd_args     = ARGV[1..-1]
 
-# Determine knife binary path using precedence:
-# 1) CSC_KNIFE_BIN environment variable (for overriding in development/testing)
-# 2) Result of `which knife` command if available
-# 3) Default Chef Server knife path
+# knife path
 def resolve_knife_bin
-  # Check environment variable first (must be non-empty)
-  return ENV["CSC_KNIFE_BIN"] if ENV["CSC_KNIFE_BIN"]&.!empty?
-  
-  # Try to find knife in PATH
-  which_result = `which knife 2>/dev/null`.strip
-  return which_result unless which_result.empty?
-  
-  # Fall back to default
-  "/opt/opscode/embedded/bin/knife"
+  ::ChefServerCtl::Config.knife_bin
 end
 
 knife_cmd = resolve_knife_bin
