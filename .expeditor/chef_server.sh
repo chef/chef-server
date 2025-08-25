@@ -3,9 +3,19 @@
 #===============================================================================
 #Downloading the automate repo
 #===============================================================================
+export DEFAULT_AUTOMATE_REPO="https://github.com/chef/automate-private.git"
 
-git clone https://github.com/chef/automate-private.git
-cd automate
+if [ -z "$AUTOMATE_REPO" ];
+then
+	AUTOMATE_REPO="$DEFAULT_AUTOMATE_REPO"
+fi
+
+git clone $AUTOMATE_REPO
+
+repo_dir=`basename -s .git $AUTOMATE_REPO`
+
+cd ${repo_dir}
+
 if [ "${AUTOMATE_BRANCH}" != "" ]
 then
   git checkout "${AUTOMATE_BRANCH}"
