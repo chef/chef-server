@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.10.59 -->
-## [15.10.59](https://github.com/chef/chef-server/tree/15.10.59) (2025-08-23)
+<!-- latest_release 15.10.60 -->
+## [15.10.60](https://github.com/chef/chef-server/tree/15.10.60) (2025-08-25)
 
 #### Merged Pull Requests
-- Adding the knife in chef-server-ctl in habitat. [#4074](https://github.com/chef/chef-server/pull/4074) ([talktovikas](https://github.com/talktovikas))
+- Fix date format for actionview Rails +7 [#4076](https://github.com/chef/chef-server/pull/4076) ([RoyShravani](https://github.com/RoyShravani))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.10.33 -->
 ### Changes since 15.10.33 release
 
 #### Merged Pull Requests
+- Fix date format for actionview Rails +7 [#4076](https://github.com/chef/chef-server/pull/4076) ([RoyShravani](https://github.com/RoyShravani)) <!-- 15.10.60 -->
 - Adding the knife in chef-server-ctl in habitat. [#4074](https://github.com/chef/chef-server/pull/4074) ([talktovikas](https://github.com/talktovikas)) <!-- 15.10.59 -->
 - Knife-ec-backup issue in standalone fresh installs [#4072](https://github.com/chef/chef-server/pull/4072) ([lbakerchef](https://github.com/lbakerchef)) <!-- 15.10.58 -->
 - Shahid/automate gem missing [#4071](https://github.com/chef/chef-server/pull/4071) ([jashaik](https://github.com/jashaik)) <!-- 15.10.57 -->
