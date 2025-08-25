@@ -26,6 +26,7 @@ dependency "postgresql13"
 
 source url: "http://search.cpan.org/CPAN/authors/id/T/TU/TURNSTEP/DBD-Pg-#{version}.tar.gz",
        md5: "547de1382a47d66872912fe64282ff55"
+internal_source url: "http://search.cpan.org/CPAN/authors/id/T/TU/TURNSTEP/DBD-Pg-#{version}.tar.gz"
 
 relative_path "DBD-Pg-#{version}"
 

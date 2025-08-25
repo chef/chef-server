@@ -31,6 +31,7 @@ version "1.0.1" do
 end
 
 source url: "https://packages.chef.io/chef.asc"
+internal_source url: "https://packages.chef.io/chef.asc"
 
 build do
   mkdir "#{install_dir}/embedded/keys"
