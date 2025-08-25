@@ -16,7 +16,7 @@
       <% @applications.each do |application| %>
         <tr>
           <td><%= application.name %></td>
-          <td><%= application.created_at.to_s(:db) %></td>
+          <td><%= application.created_at.strftime('%Y-%m-%d %H:%M:%S') %></td>
           <td><%= delete_button('Revoke', oauth_authorized_application_path(application)) %></td>
         </tr>
       <% end %>
