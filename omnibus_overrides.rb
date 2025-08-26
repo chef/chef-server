@@ -18,4 +18,4 @@ override :logrotate, version: "3.19.0"
 override :openresty, version: "1.25.3.1"
 
 override :nokogiri, version: "1.18.9"
-override :openssl, version: "3.2.4", fips_version: "3.1.2"
+override :openssl, version: "3.3.3", fips_version: "3.1.2"
