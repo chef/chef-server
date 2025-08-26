@@ -100,6 +100,16 @@ This subcommand has the following syntax:
 chef-server-ctl help
 ```
 
+## notice
+
+The `notice` subcommand is used to display important notice and license information.
+
+This subcommand has the following syntax:
+
+```bash
+chef-server-ctl notice
+```
+
 ## install
 
 The `install` subcommand is used to install premium features of the Chef
