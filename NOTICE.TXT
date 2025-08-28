@@ -66,7 +66,7 @@ oc-chef-pedant |  | Apache-2.0
 ohai | 18.2.4 | Apache-2.0
 omniauth-chef | 0.4.1 | Apache-2.0
 omnibus-ctl | 4e968f4cf713a545bbb70ee13b8ff7ebd37f7f3e | Apache-2.0
-opensearch | 1.3.20 | Apache-2.0
+opensearch | 1.3.20 | Commercial License
 opscoderl_folsom | d493429f895a904e9fd86d12a68f7075dfa8e227 | Apache-2.0
 opscoderl_httpc | 3cdc661e55a48af321b7097941b9a03e8d7b113f | Apache-2.0
 opscoderl_wm | 6495dd0f97f64f363db1c05504436834cc1136cd | Apache-2.0
@@ -511,7 +511,6 @@ oc-chef-pedant,
 ohai v18.2.4,
 omniauth-chef v0.4.1,
 omnibus-ctl	v4e968f4cf713a545bbb70ee13b8ff7ebd37f7f3e,
-opensearch	v1.3.20,
 opscoderl_folsom	vd493429f895a904e9fd86d12a68f7075dfa8e227,
 opscoderl_httpc	v3cdc661e55a48af321b7097941b9a03e8d7b113f,
 opscoderl_wm v6495dd0f97f64f363db1c05504436834cc1136cd,
@@ -5669,7 +5668,9 @@ If you use the zlib library in a product, we would appreciate *not* receiving le
 
 If you redistribute modified sources, we would appreciate that you include in the file ChangeLog history information documenting your changes.  Please read the FAQ for more information on the distribution of modified source versions.
 
-2.	Special Notices Regarding Commercially Licensed Third-Party Components incorporated into the Product: NONE
+2.	Special Notices Regarding Commercially Licensed Third-Party Components incorporated into the Product: 
+
+Progress Chef Infra Server v15 incorporates OpenSearch 1.3.20 licensed from TuxCare.
 
 
 3.	Special Notices Regarding Progress Product Components incorporated into the Product:
@@ -5681,4 +5682,4 @@ ruby-cleanup v1.0.0, server-complete, and server-ctl-cookbooks from Progress Sof
 NOTICE FROM PROGRESS SOFTWARE CORPORATION: Additional notices may be included in the release notes or other documentation that accompanies updates received in connection with support of the Product.
 
 
-Updated 27.Aug.2025
+Updated 28.Aug.2025
