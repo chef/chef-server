@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.10.62 -->
-## [15.10.62](https://github.com/chef/chef-server/tree/15.10.62) (2025-08-28)
+<!-- latest_release 15.10.63 -->
+## [15.10.63](https://github.com/chef/chef-server/tree/15.10.63) (2025-08-29)
 
 #### Merged Pull Requests
-- Added notice command to chef-server-ctl [#4078](https://github.com/chef/chef-server/pull/4078) ([jashaik](https://github.com/jashaik))
+- Updated notice - [#4080](https://github.com/chef/chef-server/pull/4080) ([jashaik](https://github.com/jashaik))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.10.33 -->
 ### Changes since 15.10.33 release
 
 #### Merged Pull Requests
+- Updated notice - [#4080](https://github.com/chef/chef-server/pull/4080) ([jashaik](https://github.com/jashaik)) <!-- 15.10.63 -->
 - Added notice command to chef-server-ctl [#4078](https://github.com/chef/chef-server/pull/4078) ([jashaik](https://github.com/jashaik)) <!-- 15.10.62 -->
 - Update for Tuxcare build and Fix missing internal-src-url [#4066](https://github.com/chef/chef-server/pull/4066) ([kalroy](https://github.com/kalroy)) <!-- 15.10.61 -->
 - Fix date format for actionview Rails +7 [#4076](https://github.com/chef/chef-server/pull/4076) ([RoyShravani](https://github.com/RoyShravani)) <!-- 15.10.60 -->
