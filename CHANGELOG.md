@@ -1,50 +1,48 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.10.63 -->
-## [15.10.63](https://github.com/chef/chef-server/tree/15.10.63) (2025-08-29)
-
-#### Merged Pull Requests
-- Updated notice - [#4080](https://github.com/chef/chef-server/pull/4080) ([jashaik](https://github.com/jashaik))
+<!-- latest_release -->
 <!-- latest_release -->
 
-<!-- release_rollup since=15.10.33 -->
-### Changes since 15.10.33 release
-
-#### Merged Pull Requests
-- Updated notice - [#4080](https://github.com/chef/chef-server/pull/4080) ([jashaik](https://github.com/jashaik)) <!-- 15.10.63 -->
-- Added notice command to chef-server-ctl [#4078](https://github.com/chef/chef-server/pull/4078) ([jashaik](https://github.com/jashaik)) <!-- 15.10.62 -->
-- Update for Tuxcare build and Fix missing internal-src-url [#4066](https://github.com/chef/chef-server/pull/4066) ([kalroy](https://github.com/kalroy)) <!-- 15.10.61 -->
-- Fix date format for actionview Rails +7 [#4076](https://github.com/chef/chef-server/pull/4076) ([RoyShravani](https://github.com/RoyShravani)) <!-- 15.10.60 -->
-- Adding the knife in chef-server-ctl in habitat. [#4074](https://github.com/chef/chef-server/pull/4074) ([talktovikas](https://github.com/talktovikas)) <!-- 15.10.59 -->
-- Knife-ec-backup issue in standalone fresh installs [#4072](https://github.com/chef/chef-server/pull/4072) ([lbakerchef](https://github.com/lbakerchef)) <!-- 15.10.58 -->
-- Shahid/automate gem missing [#4071](https://github.com/chef/chef-server/pull/4071) ([jashaik](https://github.com/jashaik)) <!-- 15.10.57 -->
-- Changes for ruby gems path for habitat build [#4069](https://github.com/chef/chef-server/pull/4069) ([sreepuramsudheer](https://github.com/sreepuramsudheer)) <!-- 15.10.56 -->
-- Updating knife(18.8.13), knife-tidy(2.3.0), and knife-ec-backup(3.5.0) [#4070](https://github.com/chef/chef-server/pull/4070) ([talktovikas](https://github.com/talktovikas)) <!-- 15.10.55 -->
-- Upgrade to LTS-2024 channel [#4065](https://github.com/chef/chef-server/pull/4065) ([RoyShravani](https://github.com/RoyShravani)) <!-- 15.10.54 -->
-- adding the latest client which is 18.8.11 [#4064](https://github.com/chef/chef-server/pull/4064) ([talktovikas](https://github.com/talktovikas)) <!-- 15.10.53 -->
-- Final chef client + knife-ec-back upgrade and knife opc change [#4051](https://github.com/chef/chef-server/pull/4051) ([jashaik](https://github.com/jashaik)) <!-- 15.10.52 -->
-- Bump thor to 1.4.0 in src/chef-server-ctl, src/oc-id and oc-pedant [#4052](https://github.com/chef/chef-server/pull/4052) ([RoyShravani](https://github.com/RoyShravani)) <!-- 15.10.52 -->
-- Upgrade webrick to 1.8.2 in oc-chef-pedant [#4049](https://github.com/chef/chef-server/pull/4049) ([RoyShravani](https://github.com/RoyShravani)) <!-- 15.10.51 -->
-- Added openssl changes [#4038](https://github.com/chef/chef-server/pull/4038) ([jashaik](https://github.com/jashaik)) <!-- 15.10.50 -->
-- JDK update to 11.0.28+6 [#4050](https://github.com/chef/chef-server/pull/4050) ([talktovikas](https://github.com/talktovikas)) <!-- 15.10.49 -->
-- Bump webrick from 1.8.1 to 1.8.2 in /src/oc-id [#3945](https://github.com/chef/chef-server/pull/3945) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.10.48 -->
-- Bump webrick from 1.7.0 to 1.8.2 in /src/chef-server-ctl [#3944](https://github.com/chef/chef-server/pull/3944) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.10.47 -->
-- Upgrade nokogiri to 1.18.9 [#4043](https://github.com/chef/chef-server/pull/4043) ([RoyShravani](https://github.com/RoyShravani)) <!-- 15.10.46 -->
-- Pin pg gem version &lt; 1.6 for older linux distros [#4041](https://github.com/chef/chef-server/pull/4041) ([RoyShravani](https://github.com/RoyShravani)) <!-- 15.10.45 -->
-- Updating the erlang version 26.2 [#4025](https://github.com/chef/chef-server/pull/4025) ([talktovikas](https://github.com/talktovikas)) <!-- 15.10.44 -->
-- [CHEF-23713] Update Ruby to 3.1.7 version [#4028](https://github.com/chef/chef-server/pull/4028) ([RoyShravani](https://github.com/RoyShravani)) <!-- 15.10.43 -->
-- upgrading the PG from 13.8 to 13.21 [#4023](https://github.com/chef/chef-server/pull/4023) ([talktovikas](https://github.com/talktovikas)) <!-- 15.10.42 -->
-- Temporary fix for asdf 16 upgrade warning. [#4029](https://github.com/chef/chef-server/pull/4029) ([sreepuramsudheer](https://github.com/sreepuramsudheer)) <!-- 15.10.41 -->
-- changing hardcoded date in test case. [#4024](https://github.com/chef/chef-server/pull/4024) ([sreepuramsudheer](https://github.com/sreepuramsudheer)) <!-- 15.10.40 -->
-- tweaking for linting [#4018](https://github.com/chef/chef-server/pull/4018) ([johnmccrae](https://github.com/johnmccrae)) <!-- 15.10.39 -->
-- Update license_scout [#4020](https://github.com/chef/chef-server/pull/4020) ([marcparadise](https://github.com/marcparadise)) <!-- 15.10.38 -->
-- CHEF-20995 - Changes to not auto accept the license while using vagrant file [#4016](https://github.com/chef/chef-server/pull/4016) ([jashaik](https://github.com/jashaik)) <!-- 15.10.37 -->
-- make pipelines public: habitat/test [#4002](https://github.com/chef/chef-server/pull/4002) ([jaymzh](https://github.com/jaymzh)) <!-- 15.10.36 -->
-- Deprecation Note [#4005](https://github.com/chef/chef-server/pull/4005) ([dishanktiwari2501](https://github.com/dishanktiwari2501)) <!-- 15.10.35 -->
-- Upgrade actionmailer to 7.0.8.5 to address  CVE-2024-47889 in oc-id [#4001](https://github.com/chef/chef-server/pull/4001) ([RoyShravani](https://github.com/RoyShravani)) <!-- 15.10.34 -->
+<!-- release_rollup -->
 <!-- release_rollup -->
 
 <!-- latest_stable_release -->
+## [15.10.63](https://github.com/chef/chef-server/tree/15.10.63) (2025-08-29)
+
+#### Merged Pull Requests
+- Upgrade actionmailer to 7.0.8.5 to address  CVE-2024-47889 in oc-id [#4001](https://github.com/chef/chef-server/pull/4001) ([RoyShravani](https://github.com/RoyShravani))
+- Deprecation Note [#4005](https://github.com/chef/chef-server/pull/4005) ([dishanktiwari2501](https://github.com/dishanktiwari2501))
+- make pipelines public: habitat/test [#4002](https://github.com/chef/chef-server/pull/4002) ([jaymzh](https://github.com/jaymzh))
+- CHEF-20995 - Changes to not auto accept the license while using vagrant file [#4016](https://github.com/chef/chef-server/pull/4016) ([jashaik](https://github.com/jashaik))
+- Update license_scout [#4020](https://github.com/chef/chef-server/pull/4020) ([marcparadise](https://github.com/marcparadise))
+- tweaking for linting [#4018](https://github.com/chef/chef-server/pull/4018) ([johnmccrae](https://github.com/johnmccrae))
+- changing hardcoded date in test case. [#4024](https://github.com/chef/chef-server/pull/4024) ([sreepuramsudheer](https://github.com/sreepuramsudheer))
+- Temporary fix for asdf 16 upgrade warning. [#4029](https://github.com/chef/chef-server/pull/4029) ([sreepuramsudheer](https://github.com/sreepuramsudheer))
+- upgrading the PG from 13.8 to 13.21 [#4023](https://github.com/chef/chef-server/pull/4023) ([talktovikas](https://github.com/talktovikas))
+- [CHEF-23713] Update Ruby to 3.1.7 version [#4028](https://github.com/chef/chef-server/pull/4028) ([RoyShravani](https://github.com/RoyShravani))
+- Updating the erlang version 26.2 [#4025](https://github.com/chef/chef-server/pull/4025) ([talktovikas](https://github.com/talktovikas))
+- Pin pg gem version &lt; 1.6 for older linux distros [#4041](https://github.com/chef/chef-server/pull/4041) ([RoyShravani](https://github.com/RoyShravani))
+- Upgrade nokogiri to 1.18.9 [#4043](https://github.com/chef/chef-server/pull/4043) ([RoyShravani](https://github.com/RoyShravani))
+- Bump webrick from 1.7.0 to 1.8.2 in /src/chef-server-ctl [#3944](https://github.com/chef/chef-server/pull/3944) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump webrick from 1.8.1 to 1.8.2 in /src/oc-id [#3945](https://github.com/chef/chef-server/pull/3945) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- JDK update to 11.0.28+6 [#4050](https://github.com/chef/chef-server/pull/4050) ([talktovikas](https://github.com/talktovikas))
+- Added openssl changes [#4038](https://github.com/chef/chef-server/pull/4038) ([jashaik](https://github.com/jashaik))
+- Upgrade webrick to 1.8.2 in oc-chef-pedant [#4049](https://github.com/chef/chef-server/pull/4049) ([RoyShravani](https://github.com/RoyShravani))
+- Bump thor to 1.4.0 in src/chef-server-ctl, src/oc-id and oc-pedant [#4052](https://github.com/chef/chef-server/pull/4052) ([RoyShravani](https://github.com/RoyShravani))
+- Final chef client + knife-ec-back upgrade and knife opc change [#4051](https://github.com/chef/chef-server/pull/4051) ([jashaik](https://github.com/jashaik))
+- adding the latest client which is 18.8.11 [#4064](https://github.com/chef/chef-server/pull/4064) ([talktovikas](https://github.com/talktovikas))
+- Upgrade to LTS-2024 channel [#4065](https://github.com/chef/chef-server/pull/4065) ([RoyShravani](https://github.com/RoyShravani))
+- Updating knife(18.8.13), knife-tidy(2.3.0), and knife-ec-backup(3.5.0) [#4070](https://github.com/chef/chef-server/pull/4070) ([talktovikas](https://github.com/talktovikas))
+- Changes for ruby gems path for habitat build [#4069](https://github.com/chef/chef-server/pull/4069) ([sreepuramsudheer](https://github.com/sreepuramsudheer))
+- Shahid/automate gem missing [#4071](https://github.com/chef/chef-server/pull/4071) ([jashaik](https://github.com/jashaik))
+- Knife-ec-backup issue in standalone fresh installs [#4072](https://github.com/chef/chef-server/pull/4072) ([lbakerchef](https://github.com/lbakerchef))
+- Adding the knife in chef-server-ctl in habitat. [#4074](https://github.com/chef/chef-server/pull/4074) ([talktovikas](https://github.com/talktovikas))
+- Fix date format for actionview Rails +7 [#4076](https://github.com/chef/chef-server/pull/4076) ([RoyShravani](https://github.com/RoyShravani))
+- Update for Tuxcare build and Fix missing internal-src-url [#4066](https://github.com/chef/chef-server/pull/4066) ([kalroy](https://github.com/kalroy))
+- Added notice command to chef-server-ctl [#4078](https://github.com/chef/chef-server/pull/4078) ([jashaik](https://github.com/jashaik))
+- Updated notice - [#4080](https://github.com/chef/chef-server/pull/4080) ([jashaik](https://github.com/jashaik))
+<!-- latest_stable_release -->
+
 ## [15.10.33](https://github.com/chef/chef-server/tree/15.10.33) (2025-03-03)
 
 #### Merged Pull Requests
@@ -54,7 +52,6 @@
 - Bump rexml from 3.2.5 to 3.3.9 in /src/oc-id [#3932](https://github.com/chef/chef-server/pull/3932) ([dependabot[bot]](https://github.com/dependabot[bot]))
 - Bump rexml from 3.2.6 to 3.3.9 in /src/chef-server-ctl [#3933](https://github.com/chef/chef-server/pull/3933) ([dependabot[bot]](https://github.com/dependabot[bot]))
 - Fix for TLS verify_ca verify mode while connecting psql [#3974](https://github.com/chef/chef-server/pull/3974) ([jashaik](https://github.com/jashaik))
-<!-- latest_stable_release -->
 
 ## [15.10.27](https://github.com/chef/chef-server/tree/15.10.27) (2025-01-09)
 
