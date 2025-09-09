@@ -64,7 +64,7 @@
   1},
  {<<"sqerl">>,
   {git,"https://github.com/chef/sqerl",
-       {ref,"f9de1ba35aababbe31a542a3b72af1e866376e3e"}},
+       {branch,"shahid/cert-issue"}},
   0},
  {<<"stats_hero">>,
   {git,"https://github.com/chef/stats_hero",
