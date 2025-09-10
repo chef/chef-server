@@ -25,7 +25,13 @@ if [[ "${BUILDKITE:-false}" == "true" ]]; then
   rm -f /etc/apt/sources.list.d/pgdg.list
   # Remove problematic Helm repository if it exists
   rm -f /etc/apt/sources.list.d/helm-stable-debian.list
- 
+  
+  # Ensure Ubuntu main repositories are available
+  echo "deb http://archive.ubuntu.com/ubuntu focal main" | tee /etc/apt/sources.list.d/ubuntu-main.list
+  echo "deb http://archive.ubuntu.com/ubuntu focal-updates main" | tee -a /etc/apt/sources.list.d/ubuntu-main.list
+  echo "deb http://security.ubuntu.com/ubuntu focal-security main" | tee -a /etc/apt/sources.list.d/ubuntu-main.list
+  echo "deb http://archive.ubuntu.com/ubuntu focal universe" | tee -a /etc/apt/sources.list.d/ubuntu-universe.list
+
   # Add keys and update
   wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
   apt-get clean

@@ -36,6 +36,13 @@ echo "Removing packages.microsoft.com"
 rm -f /etc/apt/sources.list.d/microsoft-prod.list
 # Remove problematic Helm repository if it exists
 rm -f /etc/apt/sources.list.d/helm-stable-debian.list
+
+# Ensure Ubuntu main repositories are available
+echo "deb http://archive.ubuntu.com/ubuntu focal main" | tee /etc/apt/sources.list.d/ubuntu-main.list
+echo "deb http://archive.ubuntu.com/ubuntu focal-updates main" | tee -a /etc/apt/sources.list.d/ubuntu-main.list
+echo "deb http://security.ubuntu.com/ubuntu focal-security main" | tee -a /etc/apt/sources.list.d/ubuntu-main.list
+echo "deb http://archive.ubuntu.com/ubuntu focal universe" | tee -a /etc/apt/sources.list.d/ubuntu-universe.list
+
 echo  "Installing test dependencies"
 apt-get install -y lua5.1 luarocks postgresql-13 libsqlite3-dev
 
