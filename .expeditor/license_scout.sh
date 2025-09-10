@@ -32,8 +32,9 @@ if [[ "${BUILDKITE:-false}" == "true" ]]; then
   # Add keys and update
   wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
   apt-get clean
-  apt-get autoremove 
-  # apt-get update
+  apt-get autoremove
+  apt-get update
+  
   # Install packages with dependency resolution, allowing downgrades if needed
   apt-get install -y --allow-downgrades libpq-dev libsqlite3-dev libyaml-dev || \
     (apt-get remove -y libpq5 libpq-dev && apt-get install -y libpq-dev libsqlite3-dev libyaml-dev)
