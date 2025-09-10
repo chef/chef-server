@@ -1,9 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release -->
+<!-- latest_release 15.10.64 -->
+## [15.10.64](https://github.com/chef/chef-server/tree/15.10.64) (2025-09-10)
+
+#### Merged Pull Requests
+- Updated sqerl library to accept some cert extensions [#4081](https://github.com/chef/chef-server/pull/4081) ([jashaik](https://github.com/jashaik))
 <!-- latest_release -->
 
-<!-- release_rollup -->
+<!-- release_rollup since=15.10.63 -->
+### Changes since 15.10.63 release
+
+#### Merged Pull Requests
+- Updated sqerl library to accept some cert extensions [#4081](https://github.com/chef/chef-server/pull/4081) ([jashaik](https://github.com/jashaik)) <!-- 15.10.64 -->
 <!-- release_rollup -->
 
 <!-- latest_stable_release -->
