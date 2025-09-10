@@ -23,6 +23,13 @@ if [[ "${BUILDKITE:-false}" == "true" ]]; then
   rm -f /etc/apt/sources.list.d/microsoft-prod.list
   # Remove problematic PostgreSQL repository if it exists
   rm -f /etc/apt/sources.list.d/pgdg.list
+  
+  # Ensure Ubuntu main repositories are available
+  echo "deb http://archive.ubuntu.com/ubuntu focal main" | tee /etc/apt/sources.list.d/ubuntu-main.list
+  echo "deb http://archive.ubuntu.com/ubuntu focal-updates main" | tee -a /etc/apt/sources.list.d/ubuntu-main.list
+  echo "deb http://security.ubuntu.com/ubuntu focal-security main" | tee -a /etc/apt/sources.list.d/ubuntu-main.list
+  
+  # Add keys and update
   wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
   apt-get clean
   apt-get autoremove 
