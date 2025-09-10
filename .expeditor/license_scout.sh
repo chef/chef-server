@@ -23,6 +23,8 @@ if [[ "${BUILDKITE:-false}" == "true" ]]; then
   rm -f /etc/apt/sources.list.d/microsoft-prod.list
   # Remove problematic PostgreSQL repository if it exists
   rm -f /etc/apt/sources.list.d/pgdg.list
+  # Remove problematic Helm repository if it exists
+  rm -f /etc/apt/sources.list.d/helm-stable-debian.list
   
   # Ensure Ubuntu main repositories are available
   echo "deb http://archive.ubuntu.com/ubuntu focal main" | tee /etc/apt/sources.list.d/ubuntu-main.list
