@@ -43,6 +43,7 @@ echo "deb http://archive.ubuntu.com/ubuntu focal-updates main" | tee -a /etc/apt
 echo "deb http://security.ubuntu.com/ubuntu focal-security main" | tee -a /etc/apt/sources.list.d/ubuntu-main.list
 echo "deb http://archive.ubuntu.com/ubuntu focal universe" | tee -a /etc/apt/sources.list.d/ubuntu-universe.list
 
+apt-get update
 echo  "Installing test dependencies"
 apt-get install -y lua5.1 luarocks postgresql-13 libsqlite3-dev
 

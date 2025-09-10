@@ -31,6 +31,7 @@ if [[ "${BUILDKITE:-false}" == "true" ]]; then
   echo "deb http://archive.ubuntu.com/ubuntu focal-updates main" | tee -a /etc/apt/sources.list.d/ubuntu-main.list
   echo "deb http://security.ubuntu.com/ubuntu focal-security main" | tee -a /etc/apt/sources.list.d/ubuntu-main.list
   echo "deb http://archive.ubuntu.com/ubuntu focal universe" | tee -a /etc/apt/sources.list.d/ubuntu-universe.list
+  apt-get update
 
   # Add keys and update
   wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
