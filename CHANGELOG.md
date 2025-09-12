@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.10.65 -->
-## [15.10.65](https://github.com/chef/chef-server/tree/15.10.65) (2025-09-12)
+<!-- latest_release 15.10.66 -->
+## [15.10.66](https://github.com/chef/chef-server/tree/15.10.66) (2025-09-12)
 
 #### Merged Pull Requests
-- updating and removing apt-get updates [#4083](https://github.com/chef/chef-server/pull/4083) ([sean-sype-simmons](https://github.com/sean-sype-simmons))
+- Updated ibrowse version to fix the ssl options passing to ssl:connect [#4084](https://github.com/chef/chef-server/pull/4084) ([jashaik](https://github.com/jashaik))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.10.63 -->
 ### Changes since 15.10.63 release
 
 #### Merged Pull Requests
+- Updated ibrowse version to fix the ssl options passing to ssl:connect [#4084](https://github.com/chef/chef-server/pull/4084) ([jashaik](https://github.com/jashaik)) <!-- 15.10.66 -->
 - updating and removing apt-get updates [#4083](https://github.com/chef/chef-server/pull/4083) ([sean-sype-simmons](https://github.com/sean-sype-simmons)) <!-- 15.10.65 -->
 - Updated sqerl library to accept some cert extensions [#4081](https://github.com/chef/chef-server/pull/4081) ([jashaik](https://github.com/jashaik)) <!-- 15.10.64 -->
 <!-- release_rollup -->
