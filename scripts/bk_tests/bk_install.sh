@@ -34,9 +34,11 @@ echo "Removing packages.microsoft.com"
 # Since we don't use any software from this repository in our tests,
 # we can temporarily remove it from our sources.
 rm -f /etc/apt/sources.list.d/microsoft-prod.list
+# Remove problematic Helm repository if it exists
+rm -f /etc/apt/sources.list.d/helm-stable-debian.list
 
+apt-get update
 echo  "Installing test dependencies"
-apt-get update -y
 apt-get install -y lua5.1 luarocks postgresql-13 libsqlite3-dev
 
 echo "Configuring postgresql"

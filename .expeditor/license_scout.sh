@@ -23,10 +23,21 @@ if [[ "${BUILDKITE:-false}" == "true" ]]; then
   rm -f /etc/apt/sources.list.d/microsoft-prod.list
   # Remove problematic PostgreSQL repository if it exists
   rm -f /etc/apt/sources.list.d/pgdg.list
+  # Remove problematic Helm repository if it exists
+  rm -f /etc/apt/sources.list.d/helm-stable-debian.list
+  
+  # Ensure Ubuntu main repositories are available
+  echo "deb http://archive.ubuntu.com/ubuntu focal main" | tee /etc/apt/sources.list.d/ubuntu-main.list
+  echo "deb http://archive.ubuntu.com/ubuntu focal-updates main" | tee -a /etc/apt/sources.list.d/ubuntu-main.list
+  echo "deb http://security.ubuntu.com/ubuntu focal-security main" | tee -a /etc/apt/sources.list.d/ubuntu-main.list
+  echo "deb http://archive.ubuntu.com/ubuntu focal universe" | tee -a /etc/apt/sources.list.d/ubuntu-universe.list
+  apt-get update
+
+  # Add keys and update
   wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
   apt-get clean
-  apt-get autoremove 
-  apt-get update
+  apt-get autoremove
+  
   # Install packages with dependency resolution, allowing downgrades if needed
   apt-get install -y --allow-downgrades libpq-dev libsqlite3-dev libyaml-dev || \
     (apt-get remove -y libpq5 libpq-dev && apt-get install -y libpq-dev libsqlite3-dev libyaml-dev)
