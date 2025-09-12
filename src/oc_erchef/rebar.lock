@@ -76,7 +76,7 @@
   1},
  {<<"ibrowse">>,
   {git,"https://github.com/chef/ibrowse",
-       {ref,"d541f7190894734e2b69f4763c3664fb4d6bb9db"}},
+       {branch,"shahid/data_collector-issue"}},
   0},
  {<<"jiffy">>,
   {git,"https://github.com/davisp/jiffy",
