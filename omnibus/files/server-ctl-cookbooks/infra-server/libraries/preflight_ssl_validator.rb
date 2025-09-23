@@ -63,6 +63,9 @@ class SslPreflightValidator < PreflightValidator
     # Keep existing -fips check
     return true if output =~ /OpenSSL .*-fips/
 
+    # Check for system-level FIPS (Amazon Linux 2, RHEL)
+    return true if File.exist?("/proc/sys/crypto/fips_enabled") && File.read("/proc/sys/crypto/fips_enabled").strip == "1"
+
     false
   end
 
