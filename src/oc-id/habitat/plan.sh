@@ -11,7 +11,7 @@ pkg_deps=(
   core/rsync
   core/sed
   core/libffi
-  core/sqlite
+  core/sqlite/3.50.4
   core/tzdata
   core/openssl
   core/gcc-libs
