@@ -27,7 +27,7 @@ OcId::Application.configure do
   # number of complex assets.
   config.assets.debug = true
 
-  # MailCatcher for SMTP
+  # Letter Opener for email preview in development
   if Rails.const_defined?(:Server)
     config.action_mailer.default_url_options = {
       :host => "localhost:#{Rails::Server.new.options[:Port]}",
@@ -35,6 +35,6 @@ OcId::Application.configure do
     }
   end
 
-  config.action_mailer.delivery_method = :smtp
-  config.action_mailer.smtp_settings = { :address => "localhost", :port => 1025 }
+  config.action_mailer.delivery_method = :letter_opener
+  config.action_mailer.perform_deliveries = true
 end
