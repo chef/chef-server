@@ -1,4 +1,20 @@
 GIT
+  remote: https://github.com/chef/chef-zero.git
+  revision: a408f3313a981f49e3180aa7739424d4b03286ee
+  branch: main
+  specs:
+    chef-zero (15.0.22)
+      activesupport (>= 7, < 8.1)
+      ffi-yajl (>= 2.2, < 4.0)
+      hashie (>= 2.0, < 6.0)
+      mixlib-log (>= 2.0, < 4.0)
+      rack (~> 3.1, >= 3.1.16)
+      rackup (~> 2.2, >= 2.2.1)
+      unf_ext (~> 0.0.8)
+      uuidtools (~> 2.1)
+      webrick
+
+GIT
   remote: https://github.com/chef/chef.git
   revision: b9e01559e28dc9d0ccefecbe7da64e5ddd19f289
   branch: chef-18
@@ -194,16 +210,6 @@ GEM
       erubi (>= 1.7)
       logging (>= 1.6.1, < 3.0)
       rubyzip (~> 2.0)
-    chef-zero (15.0.21)
-      activesupport (>= 7, < 8.1)
-      ffi-yajl (>= 2.2, < 4.0)
-      hashie (>= 2.0, < 6.0)
-      mixlib-log (>= 2.0, < 4.0)
-      rack (~> 3.1, >= 3.1.16)
-      rackup (~> 2.2, >= 2.2.1)
-      unf_ext (~> 0.0.8)
-      uuidtools (~> 2.1)
-      webrick
     coderay (1.1.3)
     concurrent-ruby (1.3.5)
     connection_pool (2.5.4)
@@ -498,6 +504,7 @@ PLATFORMS
 
 DEPENDENCIES
   chef!
+  chef-zero!
   oc-chef-pedant!
   pry
   pry-byebug
