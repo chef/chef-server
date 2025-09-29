@@ -16,6 +16,7 @@ pkg_deps=(
   core/openssl
   core/gcc-libs
   core/glibc
+  core/libyaml
 )
 pkg_build_deps=(
   core/git
@@ -26,6 +27,10 @@ pkg_build_deps=(
   core/coreutils
   core/libxml2
   core/libxslt
+  core/libyaml
+  core/glibc
+  core/binutils
+  core/diffutils
 )
 pkg_binds_optional=(
   [database]="port"
@@ -69,10 +74,26 @@ do_prepare() {
 }
 
 do_build() {
-  export LD_LIBRARY_PATH="$(pkg_path_for core/libffi)/lib:$(pkg_path_for core/sqlite)/lib"
+  export LD_LIBRARY_PATH="$(pkg_path_for core/libffi)/lib:$(pkg_path_for core/sqlite)/lib:$(pkg_path_for core/libyaml)/lib:$(pkg_path_for core/postgresql13-client)/lib"
   export USE_SYSTEM_LIBFFI=1
-  export C_INCLUDE_PATH="$(pkg_path_for core/sqlite)/include"
+  export C_INCLUDE_PATH="$(pkg_path_for core/sqlite)/include:$(pkg_path_for core/libyaml)/include:$(pkg_path_for core/postgresql13-client)/include"
   export BUNDLE_SILENCE_ROOT_WARNING=1
+  
+  # Set conservative compiler flags to avoid architecture-specific instructions
+  # that can cause "Illegal instruction" errors on different CPUs
+  export CFLAGS="-march=x86-64 -mtune=generic -O2"
+  export CXXFLAGS="-march=x86-64 -mtune=generic -O2"
+  export CPPFLAGS="-I$(pkg_path_for core/libffi)/include -I$(pkg_path_for core/sqlite)/include -I$(pkg_path_for core/libyaml)/include -I$(pkg_path_for core/postgresql13-client)/include"
+  export LDFLAGS="-L$(pkg_path_for core/libffi)/lib -L$(pkg_path_for core/sqlite)/lib -L$(pkg_path_for core/libyaml)/lib -L$(pkg_path_for core/postgresql13-client)/lib"
+  
+  # Force Ruby platform for gems to avoid native compilation issues
+  # Commented out due to platform conflict with Gemfile.lock
+  # export BUNDLE_FORCE_RUBY_PLATFORM=true
+  
+  build_line "Setting CFLAGS='$CFLAGS'"
+  build_line "Setting CXXFLAGS='$CXXFLAGS'"
+  build_line "Setting CPPFLAGS='$CPPFLAGS'"
+  build_line "Setting LDFLAGS='$LDFLAGS'"
 }
 
 _tar_pipe_app_cp_to() {
@@ -111,12 +132,37 @@ do_install() {
     ! -path "./.bundle/*" \
     ! -name "*.hart" \
     | _tar_pipe_app_cp_to "$HOME"
+    
+  # Ensure build tools are available in PATH during gem installation
+  export PATH="$(pkg_path_for core/gcc)/bin:$(pkg_path_for core/make)/bin:$(pkg_path_for core/pkg-config)/bin:$PATH"
+  
+  # Re-export build environment variables for gem compilation
+  export LD_LIBRARY_PATH="$(pkg_path_for core/libffi)/lib:$(pkg_path_for core/sqlite)/lib:$(pkg_path_for core/libyaml)/lib:$(pkg_path_for core/postgresql13-client)/lib"
+  export CFLAGS="-march=x86-64 -mtune=generic -O2"
+  export CXXFLAGS="-march=x86-64 -mtune=generic -O2"
+  export CPPFLAGS="-I$(pkg_path_for core/libffi)/include -I$(pkg_path_for core/sqlite)/include -I$(pkg_path_for core/libyaml)/include -I$(pkg_path_for core/postgresql13-client)/include"
+  export LDFLAGS="-L$(pkg_path_for core/libffi)/lib -L$(pkg_path_for core/sqlite)/lib -L$(pkg_path_for core/libyaml)/lib -L$(pkg_path_for core/postgresql13-client)/lib"
+  
   bundle config path ${HOME}/vendor/bundle
   bundle config build.sqlite3 --with-sqlite3-lib=$(pkg_path_for core/sqlite)/lib
   bundle config build.nokogiri --with-xml2-include=$(pkg_path_for core/libxml2)/include/libxml2 \
     --with-xml2-lib=$(pkg_path_for core/libxml2)/lib \
     --with-xslt-include=$(pkg_path_for core/libxslt)/include/libxslt \
     --with-xslt-lib=$(pkg_path_for core/libxslt)/lib
+  # Configure gems with native extensions to use conservative compiler flags and system libraries
+  bundle config build.ffi --with-cflags="$CFLAGS" --with-ldflags="$LDFLAGS"
+  bundle config build.psych --with-cflags="$CFLAGS" --with-ldflags="$LDFLAGS" \
+    --with-libyaml-include=$(pkg_path_for core/libyaml)/include \
+    --with-libyaml-lib=$(pkg_path_for core/libyaml)/lib
+  bundle config build.io-console --with-cflags="$CFLAGS" --with-ldflags="$LDFLAGS"
+  bundle config build.kgio --with-cflags="$CFLAGS" --with-ldflags="$LDFLAGS"
+  bundle config build.pg --with-cflags="$CFLAGS" --with-ldflags="$LDFLAGS" \
+    --with-pg-config=$(pkg_path_for core/postgresql13-client)/bin/pg_config \
+    --with-pg-include=$(pkg_path_for core/postgresql13-client)/include \
+    --with-pg-lib=$(pkg_path_for core/postgresql13-client)/lib
+  # Force ruby platform for gems to avoid architecture issues
+  # Commented out due to platform conflict with Gemfile.lock
+  # bundle config set --local force_ruby_platform true
   bundle config set path "${HOME}/vendor/bundle"
   bundle config set deployment 'true'
   bundle config set --local shebang 'ruby'
