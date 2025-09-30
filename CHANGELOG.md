@@ -1,16 +1,28 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.10.67 -->
+<!-- latest_release 15.10.68 -->
+## [15.10.68](https://github.com/chef/chef-server/tree/15.10.68) (2025-09-30)
+
+#### Security Updates
+- **PostgreSQL Updated to 13.22** - Addresses CVE-2025-8713 (CVSS 8.8) - PostgreSQL optimizer statistics vulnerability that allowed unauthorized access to view data and bypassing row security policies. This high-severity security fix prevents users from crafting malicious operators to bypass access control lists and row security policies in partitioned tables.
+
+#### Merged Pull Requests
+- Updated PostgreSQL to 13.22 to address CVE-2025-8713 [#CHEF-25684](https://progresssoftware.atlassian.net/browse/CHEF-25684) ([jashaik](https://github.com/jashaik))
+<!-- latest_release -->
+
 ## [15.10.67](https://github.com/chef/chef-server/tree/15.10.67) (2025-09-30)
 
 #### Merged Pull Requests
 - Added copilot instructions file [#4092](https://github.com/chef/chef-server/pull/4092) ([jashaik](https://github.com/jashaik))
-<!-- latest_release -->
 
 <!-- release_rollup since=15.10.66 -->
 ### Changes since 15.10.66 release
 
+#### Security Updates
+- **PostgreSQL Updated to 13.22** - Addresses CVE-2025-8713 (CVSS 8.8) - PostgreSQL optimizer statistics vulnerability that allowed unauthorized access to view data and bypassing row security policies. This high-severity security fix prevents users from crafting malicious operators to bypass access control lists and row security policies in partitioned tables. <!-- 15.10.68 -->
+
 #### Merged Pull Requests
+- Updated PostgreSQL to 13.22 to address CVE-2025-8713 [#CHEF-25684](https://progresssoftware.atlassian.net/browse/CHEF-25684) ([jashaik](https://github.com/jashaik)) <!-- 15.10.68 -->
 - Added copilot instructions file [#4092](https://github.com/chef/chef-server/pull/4092) ([jashaik](https://github.com/jashaik)) <!-- 15.10.67 -->
 <!-- release_rollup -->
 
