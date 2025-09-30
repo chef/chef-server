@@ -1,9 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release -->
+<!-- latest_release 15.10.67 -->
+## [15.10.67](https://github.com/chef/chef-server/tree/15.10.67) (2025-09-30)
+
+#### Merged Pull Requests
+- Added copilot instructions file [#4092](https://github.com/chef/chef-server/pull/4092) ([jashaik](https://github.com/jashaik))
 <!-- latest_release -->
 
-<!-- release_rollup -->
+<!-- release_rollup since=15.10.66 -->
+### Changes since 15.10.66 release
+
+#### Merged Pull Requests
+- Added copilot instructions file [#4092](https://github.com/chef/chef-server/pull/4092) ([jashaik](https://github.com/jashaik)) <!-- 15.10.67 -->
 <!-- release_rollup -->
 
 <!-- latest_stable_release -->
