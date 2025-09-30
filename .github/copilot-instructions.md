@@ -683,6 +683,7 @@ git commit -m "feat: descriptive commit message"
 - **Architecture**: Update architecture diagrams for significant changes
 - **Troubleshooting**: Add common issues to troubleshooting guides
 - **Examples**: Provide working code examples for complex features
+- **Release Notes**: Always update both CHANGELOG.md and the [Pending Release Notes](https://github.com/chef/chef-server/wiki/Pending-Release-Notes) wiki page for any significant changes, bug fixes, security updates, or new features
 
 ## Onboarding New Team Members
 
