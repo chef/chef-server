@@ -195,7 +195,7 @@ ruby_block 'wait_for_opensearch_ready' do
     attempt = 0
     opensearch_ready = false
     opensearch_port = node['private_chef']['opensearch']['port'] || 9200
-    
+
     Chef::Log.info("Waiting for OpenSearch to become ready on port #{opensearch_port}...")
 
     while attempt < max_attempts && !opensearch_ready
@@ -211,7 +211,7 @@ ruby_block 'wait_for_opensearch_ready' do
 
           request = Net::HTTP::Get.new(uri)
           response = http.request(request)
-          
+
           if response.code == '200' || response.code == '401'
             # 200 = OK, 401 = Unauthorized but service is running
             begin
