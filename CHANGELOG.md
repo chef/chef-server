@@ -1,16 +1,19 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.10.68 -->
-## [15.10.68](https://github.com/chef/chef-server/tree/15.10.68) (2025-09-30)
+<!-- latest_release 15.10.71 -->
+## [15.10.71](https://github.com/chef/chef-server/tree/15.10.71) (2025-10-21)
 
 #### Merged Pull Requests
-- adding coding practices for copilot.md [#4094](https://github.com/chef/chef-server/pull/4094) ([talktovikas](https://github.com/talktovikas))
+- Fix for fips amazon 2 issue [#4095](https://github.com/chef/chef-server/pull/4095) ([jashaik](https://github.com/jashaik))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.10.66 -->
 ### Changes since 15.10.66 release
 
 #### Merged Pull Requests
+- Fix for fips amazon 2 issue [#4095](https://github.com/chef/chef-server/pull/4095) ([jashaik](https://github.com/jashaik)) <!-- 15.10.71 -->
+- Updated omnibus-software for jdk 17 update. [#4096](https://github.com/chef/chef-server/pull/4096) ([sreepuramsudheer](https://github.com/sreepuramsudheer)) <!-- 15.10.70 -->
+- Updating pg version to 13.22. [#4101](https://github.com/chef/chef-server/pull/4101) ([sreepuramsudheer](https://github.com/sreepuramsudheer)) <!-- 15.10.69 -->
 - adding coding practices for copilot.md [#4094](https://github.com/chef/chef-server/pull/4094) ([talktovikas](https://github.com/talktovikas)) <!-- 15.10.68 -->
 - Added copilot instructions file [#4092](https://github.com/chef/chef-server/pull/4092) ([jashaik](https://github.com/jashaik)) <!-- 15.10.67 -->
 <!-- release_rollup -->
