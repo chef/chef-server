@@ -464,7 +464,7 @@ GEM
     unf_ext (0.0.8.2)
     unicode-display_width (2.6.0)
     unicode_utils (1.4.0)
-    uri (1.0.3)
+    uri (1.0.4)
     uuidtools (2.2.0)
     vault (0.18.2)
       aws-sigv4
@@ -493,6 +493,7 @@ GEM
     zhexdump (0.3.0)
 
 PLATFORMS
+  arm64-darwin-21
   arm64-darwin-23
   arm64-darwin-24
   x86_64-linux
