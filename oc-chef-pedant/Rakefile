@@ -7,6 +7,8 @@ require "openssl"
 CURRENT_GEM_NAME = "oc-chef-pedant".freeze
 CURRENT_GEM_PATH = File.expand_path("..", __dir__)
 
+task default: [:chef_zero_spec]
+
 task :chef_zero_spec do
   populate_secrets_env
   bundle_exec_with_chef("chef-zero", "rake pedant")
