@@ -720,7 +720,7 @@ GEM
     unicorn (6.1.0)
       kgio (~> 2.6)
       raindrops (~> 0.7)
-    uri (1.0.3)
+    uri (1.0.4)
     uuidtools (2.2.0)
     vault (0.18.2)
       aws-sigv4
