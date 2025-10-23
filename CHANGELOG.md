@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.10.74 -->
-## [15.10.74](https://github.com/chef/chef-server/tree/15.10.74) (2025-10-23)
+<!-- latest_release 15.10.75 -->
+## [15.10.75](https://github.com/chef/chef-server/tree/15.10.75) (2025-10-23)
 
 #### Merged Pull Requests
-- [CHEF-26124] Fix dependabot issues [#4100](https://github.com/chef/chef-server/pull/4100) ([RoyShravani](https://github.com/RoyShravani))
+- Updated rack to 3.2.3 [#4106](https://github.com/chef/chef-server/pull/4106) ([jashaik](https://github.com/jashaik))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.10.66 -->
 ### Changes since 15.10.66 release
 
 #### Merged Pull Requests
+- Updated rack to 3.2.3 [#4106](https://github.com/chef/chef-server/pull/4106) ([jashaik](https://github.com/jashaik)) <!-- 15.10.75 -->
 - [CHEF-26124] Fix dependabot issues [#4100](https://github.com/chef/chef-server/pull/4100) ([RoyShravani](https://github.com/RoyShravani)) <!-- 15.10.74 -->
 - Updated uri gem to 1.0.4 [#4105](https://github.com/chef/chef-server/pull/4105) ([jashaik](https://github.com/jashaik)) <!-- 15.10.73 -->
 - Updated openresty to 1.27.1.2 [#4103](https://github.com/chef/chef-server/pull/4103) ([jashaik](https://github.com/jashaik)) <!-- 15.10.72 -->
