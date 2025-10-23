@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.10.72 -->
-## [15.10.72](https://github.com/chef/chef-server/tree/15.10.72) (2025-10-23)
+<!-- latest_release 15.10.73 -->
+## [15.10.73](https://github.com/chef/chef-server/tree/15.10.73) (2025-10-23)
 
 #### Merged Pull Requests
-- Updated openresty to 1.27.1.2 [#4103](https://github.com/chef/chef-server/pull/4103) ([jashaik](https://github.com/jashaik))
+- Updated uri gem to 1.0.4 [#4105](https://github.com/chef/chef-server/pull/4105) ([jashaik](https://github.com/jashaik))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.10.66 -->
 ### Changes since 15.10.66 release
 
 #### Merged Pull Requests
+- Updated uri gem to 1.0.4 [#4105](https://github.com/chef/chef-server/pull/4105) ([jashaik](https://github.com/jashaik)) <!-- 15.10.73 -->
 - Updated openresty to 1.27.1.2 [#4103](https://github.com/chef/chef-server/pull/4103) ([jashaik](https://github.com/jashaik)) <!-- 15.10.72 -->
 - Fix for fips amazon 2 issue [#4095](https://github.com/chef/chef-server/pull/4095) ([jashaik](https://github.com/jashaik)) <!-- 15.10.71 -->
 - Updated omnibus-software for jdk 17 update. [#4096](https://github.com/chef/chef-server/pull/4096) ([sreepuramsudheer](https://github.com/sreepuramsudheer)) <!-- 15.10.70 -->
