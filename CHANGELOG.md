@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.10.76 -->
-## [15.10.76](https://github.com/chef/chef-server/tree/15.10.76) (2025-10-23)
+<!-- latest_release 15.10.77 -->
+## [15.10.77](https://github.com/chef/chef-server/tree/15.10.77) (2025-10-24)
 
 #### Merged Pull Requests
-- removing activesupport direct dependency [#4104](https://github.com/chef/chef-server/pull/4104) ([sreepuramsudheer](https://github.com/sreepuramsudheer))
+- Updated http-accept 2.1.1. [#4107](https://github.com/chef/chef-server/pull/4107) ([sreepuramsudheer](https://github.com/sreepuramsudheer))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.10.66 -->
 ### Changes since 15.10.66 release
 
 #### Merged Pull Requests
+- Updated http-accept 2.1.1. [#4107](https://github.com/chef/chef-server/pull/4107) ([sreepuramsudheer](https://github.com/sreepuramsudheer)) <!-- 15.10.77 -->
 - removing activesupport direct dependency [#4104](https://github.com/chef/chef-server/pull/4104) ([sreepuramsudheer](https://github.com/sreepuramsudheer)) <!-- 15.10.76 -->
 - Updated rack to 3.2.3 [#4106](https://github.com/chef/chef-server/pull/4106) ([jashaik](https://github.com/jashaik)) <!-- 15.10.75 -->
 - [CHEF-26124] Fix dependabot issues [#4100](https://github.com/chef/chef-server/pull/4100) ([RoyShravani](https://github.com/RoyShravani)) <!-- 15.10.74 -->
