@@ -215,7 +215,7 @@ GEM
       ffi (>= 1.0.1)
     hashie (5.0.0)
     highline (2.1.0)
-    http-accept (1.7.0)
+    http-accept (2.1.1)
     http-cookie (1.0.8)
       domain_name (~> 0.5)
     httpclient (2.9.0)
@@ -386,7 +386,7 @@ GEM
       connection_pool
     regexp_parser (2.11.2)
     rest-client (2.1.0)
-      http-accept (>= 1.7.0, < 2.0)
+      http-accept (~> 2.1.0)
       http-cookie (>= 1.0.2, < 2.0)
       mime-types (>= 1.16, < 4.0)
       netrc (~> 0.8)
