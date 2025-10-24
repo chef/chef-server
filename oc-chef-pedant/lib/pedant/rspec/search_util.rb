@@ -728,8 +728,15 @@ module Pedant
         url = "#{Pedant::Config.search_server}#{Pedant::Config.search_url_fmt}" % { type: CGI.escape(type), query: CGI.escape(query) }
         headers = get_search_headers
         sleep Pedant::Config.direct_solr_query_sleep_time
-        r = RestClient.send :get, url, headers
-        parse(r)
+        
+        conn = Faraday.new do |f|
+          f.request :json
+          f.response :json
+          f.adapter Faraday.default_adapter
+        end
+        
+        r = conn.get(url, nil, headers)
+        parse(r.body)
       end
 
       def get_response_count(r)
@@ -754,7 +761,14 @@ module Pedant
         url = "#{Pedant::Config.search_server}#{Pedant::Config.search_commit_url}"
         body = ""
         headers = get_search_headers
-        RestClient.send :post, url, body, headers
+        
+        conn = Faraday.new do |f|
+          f.request :json
+          f.response :json
+          f.adapter Faraday.default_adapter
+        end
+        
+        conn.post(url, body, headers)
       end
 
       # Intelligently execute search requests, taking into account the lag

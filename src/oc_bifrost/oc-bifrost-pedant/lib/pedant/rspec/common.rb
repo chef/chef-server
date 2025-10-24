@@ -14,7 +14,7 @@
 # limitations under the License.
 
 require 'json'
-require 'rest_client'
+require 'faraday'
 require 'pedant/concern'
 
 module Pedant
@@ -370,7 +370,7 @@ module Pedant
         #
         # Finally, a block can be supplied to this method.  This block will
         # receive a single argument, the HTTP response (as a
-        # RestClient::Response object).  Testing methods should use this to
+        # Faraday::Response object).  Testing methods should use this to
         # carry out any validation tests of the response.
         def bifrost_request(method, url_fragment, requestor, opts={})
 
@@ -403,12 +403,16 @@ module Pedant
                       payload_raw
                     end
 
-          response_handler = lambda{|response, request, result| response}
+          conn = Faraday.new do |f|
+            f.request :json
+            f.response :json
+            f.adapter Faraday.default_adapter
+          end
 
           if [:PUT, :POST].include? method
-            RestClient.send method.downcase, url, payload, headers, &response_handler
+            conn.send(method.downcase, url, payload, headers)
           else
-            RestClient.send method.downcase, url, headers, &response_handler
+            conn.send(method.downcase, url, nil, headers)
           end
         end
 

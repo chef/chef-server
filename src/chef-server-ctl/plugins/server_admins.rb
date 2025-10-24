@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 
-require "restclient"
+require "faraday"
 require "json"
 require "pg"
 require "chef-utils"
@@ -37,17 +37,20 @@ add_command_under_category "grant-server-admin-permissions", "server-admins", "G
   user_authz_id = get_user_authz_id(db, username)
 
   # put the user in the server-admins authz group
-  req_params = {
-    method: :put,
-    url: "#{::ChefServerCtl::Config.bifrost_url}/groups/#{server_admins_authz_id}/actors/#{user_authz_id}",
-    body: "{}",
-    headers: {
-      :content_type => :json,
-      :accept => :json,
-      "X-Ops-Requesting-Actor-Id" => ::ChefServerCtl::Config.bifrost_superuser_id,
-    },
-  }.merge(::ChefServerCtl::Config.ssl_params)
-  RestClient::Request.execute(req_params)
+  headers = {
+    'Content-Type' => 'application/json',
+    'Accept' => 'application/json',
+    "X-Ops-Requesting-Actor-Id" => ::ChefServerCtl::Config.bifrost_superuser_id,
+  }
+  
+  ssl_config = ::ChefServerCtl::Config.ssl_params
+  conn = Faraday.new(url: ::ChefServerCtl::Config.bifrost_url, ssl: ssl_config) do |f|
+    f.request :json
+    f.response :json
+    f.adapter Faraday.default_adapter
+  end
+  
+  conn.put("/groups/#{server_admins_authz_id}/actors/#{user_authz_id}", "{}", headers)
 
   puts "User #{username} was added to server-admins. This user can now list, read, create, and delete users (even for orgs they are not members of) for this #{ChefUtils::Dist::Server::PRODUCT}."
 end
@@ -74,16 +77,21 @@ add_command_under_category "remove-server-admin-permissions", "server-admins", "
   user_authz_id = get_user_authz_id(db, username)
 
   # put the user in the server-admins authz group
-  req_params = {
-    method: :get,
-    url: "#{::ChefServerCtl::Config.bifrost_url}/groups/#{server_admins_authz_id}",
-    headers: {
-      :content_type => :json,
-      :accept => :json,
-      "X-Ops-Requesting-Actor-Id" => ::ChefServerCtl::Config.bifrost_superuser_id,
-    },
-  }.merge(::ChefServerCtl::Config.ssl_params)
-  results = JSON.parse(RestClient::Request.execute(req_params))
+  headers = {
+    'Content-Type' => 'application/json',
+    'Accept' => 'application/json',
+    "X-Ops-Requesting-Actor-Id" => ::ChefServerCtl::Config.bifrost_superuser_id,
+  }
+  
+  ssl_config = ::ChefServerCtl::Config.ssl_params
+  conn = Faraday.new(url: ::ChefServerCtl::Config.bifrost_url, ssl: ssl_config) do |f|
+    f.request :json
+    f.response :json
+    f.adapter Faraday.default_adapter
+  end
+  
+  response = conn.get("/groups/#{server_admins_authz_id}", nil, headers)
+  results = response.body
 
   users = db.exec_params("SELECT * from USERS WHERE authz_id IN #{create_sql_collection_string(results["actors"])}")
   user_found = false
@@ -100,9 +108,7 @@ add_command_under_category "remove-server-admin-permissions", "server-admins", "
     raise SystemExit.new(1, msg)
   end
 
-  req_params[:method] = :delete
-  req_params[:url] = "#{::ChefServerCtl::Config.bifrost_url}/groups/#{server_admins_authz_id}/actors/#{user_authz_id}"
-  RestClient::Request.execute(req_params)
+  conn.delete("/groups/#{server_admins_authz_id}/actors/#{user_authz_id}", nil, headers)
 
   puts "User #{username} was removed from the server-admins group. This user can no longer list, read, create, and delete users for this #{ChefUtils::Dist::Server::PRODUCT} except for where they have default permissions (such as within an org)."
 
@@ -120,16 +126,21 @@ add_command_under_category "list-server-admins", "server-admins", "List users th
   server_admins_authz_id = get_server_admins_authz_id(db)
 
   # get all the user authz_ids for all members of the server-admins authz group
-  req_params = {
-    method: :get,
-    url: "#{::ChefServerCtl::Config.bifrost_url}/groups/#{server_admins_authz_id}",
-    headers: {
-      :content_type => :json,
-      :accept => :json,
-      "X-Ops-Requesting-Actor-Id" => ::ChefServerCtl::Config.bifrost_superuser_id,
-    },
-  }.merge(::ChefServerCtl::Config.ssl_params)
-  results = JSON.parse(RestClient::Request.execute(req_params))
+  headers = {
+    'Content-Type' => 'application/json',
+    'Accept' => 'application/json',
+    "X-Ops-Requesting-Actor-Id" => ::ChefServerCtl::Config.bifrost_superuser_id,
+  }
+  
+  ssl_config = ::ChefServerCtl::Config.ssl_params
+  conn = Faraday.new(url: ::ChefServerCtl::Config.bifrost_url, ssl: ssl_config) do |f|
+    f.request :json
+    f.response :json
+    f.adapter Faraday.default_adapter
+  end
+  
+  response = conn.get("/groups/#{server_admins_authz_id}", nil, headers)
+  results = response.body
 
   # get the user's authz id
   users = db.exec_params("SELECT * from USERS WHERE authz_id IN #{create_sql_collection_string(results["actors"])}")
