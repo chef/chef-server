@@ -6,6 +6,7 @@ gem "pry"
 gem "pry-byebug"
 gem "pry-stack_explorer"
 gem "rake"
+gem "rest-client", git: "https://github.com/chef/rest-client", branch: "jfm/ucrt_update1"
 
 # We require chef internally to get the version in
 # lib/pedant/request.rb. It's really strange code and it should be

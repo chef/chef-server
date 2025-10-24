@@ -1,3 +1,16 @@
+GIT
+  remote: https://github.com/chef/rest-client
+  revision: 5b3bb34ea536e5207388b84c5dd6360ea3fc2799
+  branch: jfm/ucrt_update1
+  specs:
+    rest-client (2.1.0)
+      base64
+      fiddle
+      http-accept (~> 2.1.0)
+      http-cookie (>= 1.0.2, < 2.0)
+      mime-types (>= 1.16, < 4.0)
+      netrc (~> 0.8)
+
 PATH
   remote: .
   specs:
@@ -210,13 +223,14 @@ GEM
       ffi (~> 1.0)
     ffi-yajl (2.6.0)
       libyajl2 (>= 1.2)
+    fiddle (1.1.8)
     fuzzyurl (0.9.0)
     gssapi (1.3.1)
       ffi (>= 1.0.1)
     hashie (5.0.0)
     highline (2.1.0)
-    http-accept (1.7.0)
-    http-cookie (1.0.8)
+    http-accept (2.1.1)
+    http-cookie (1.1.0)
       domain_name (~> 0.5)
     httpclient (2.9.0)
       mutex_m
@@ -298,7 +312,7 @@ GEM
     mime-types (3.7.0)
       logger
       mime-types-data (~> 3.2025, >= 3.2025.0507)
-    mime-types-data (3.2025.0812)
+    mime-types-data (3.2025.0924)
     minitar (1.0.2)
     minitest (5.25.5)
     mixlib-archive (1.1.7)
@@ -385,11 +399,6 @@ GEM
     redis-client (0.25.2)
       connection_pool
     regexp_parser (2.11.2)
-    rest-client (2.1.0)
-      http-accept (>= 1.7.0, < 2.0)
-      http-cookie (>= 1.0.2, < 2.0)
-      mime-types (>= 1.16, < 4.0)
-      netrc (~> 0.8)
     retryable (3.0.5)
     rexml (3.4.1)
     rspec (3.13.1)
@@ -512,6 +521,7 @@ DEPENDENCIES
   knife (~> 18.8.13)
   knife-ec-backup (~> 3.0.5)
   rake
+  rest-client!
   rspec
   toml
 
