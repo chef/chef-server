@@ -2,6 +2,8 @@ source "https://rubygems.org"
 
 gemspec
 
+gem "rest-client", git: "https://github.com/chef/rest-client", branch: "jfm/ucrt_update1"
+
 gem "chef", "~> 18.8.46"
 gem "toml" # for habitat-land
 
