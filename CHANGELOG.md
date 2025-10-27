@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.10.78 -->
-## [15.10.78](https://github.com/chef/chef-server/tree/15.10.78) (2025-10-27)
+<!-- latest_release 15.10.79 -->
+## [15.10.79](https://github.com/chef/chef-server/tree/15.10.79) (2025-10-27)
 
 #### Merged Pull Requests
-- updating tuxcare version [#4109](https://github.com/chef/chef-server/pull/4109) ([sean-sype-simmons](https://github.com/sean-sype-simmons))
+- Update opensearch cookbook to check when OpenSearch is up [#4085](https://github.com/chef/chef-server/pull/4085) ([kalroy](https://github.com/kalroy))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.10.66 -->
 ### Changes since 15.10.66 release
 
 #### Merged Pull Requests
+- Update opensearch cookbook to check when OpenSearch is up [#4085](https://github.com/chef/chef-server/pull/4085) ([kalroy](https://github.com/kalroy)) <!-- 15.10.79 -->
 - updating tuxcare version [#4109](https://github.com/chef/chef-server/pull/4109) ([sean-sype-simmons](https://github.com/sean-sype-simmons)) <!-- 15.10.78 -->
 - Updated http-accept 2.1.1. [#4107](https://github.com/chef/chef-server/pull/4107) ([sreepuramsudheer](https://github.com/sreepuramsudheer)) <!-- 15.10.77 -->
 - removing activesupport direct dependency [#4104](https://github.com/chef/chef-server/pull/4104) ([sreepuramsudheer](https://github.com/sreepuramsudheer)) <!-- 15.10.76 -->
