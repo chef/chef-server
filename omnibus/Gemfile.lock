@@ -392,7 +392,7 @@ GEM
     reline (0.6.2)
       io-console (~> 0.5)
     retryable (3.0.5)
-    rexml (3.4.1)
+    rexml (3.4.2)
     rspec (3.13.2)
       rspec-core (~> 3.13.0)
       rspec-expectations (~> 3.13.0)
