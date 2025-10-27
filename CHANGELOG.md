@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.10.79 -->
-## [15.10.79](https://github.com/chef/chef-server/tree/15.10.79) (2025-10-27)
+<!-- latest_release 15.10.80 -->
+## [15.10.80](https://github.com/chef/chef-server/tree/15.10.80) (2025-10-27)
 
 #### Merged Pull Requests
-- Update opensearch cookbook to check when OpenSearch is up [#4085](https://github.com/chef/chef-server/pull/4085) ([kalroy](https://github.com/kalroy))
+- resolving dependabot alerts [#4110](https://github.com/chef/chef-server/pull/4110) ([RoyShravani](https://github.com/RoyShravani))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.10.66 -->
 ### Changes since 15.10.66 release
 
 #### Merged Pull Requests
+- resolving dependabot alerts [#4110](https://github.com/chef/chef-server/pull/4110) ([RoyShravani](https://github.com/RoyShravani)) <!-- 15.10.80 -->
 - Update opensearch cookbook to check when OpenSearch is up [#4085](https://github.com/chef/chef-server/pull/4085) ([kalroy](https://github.com/kalroy)) <!-- 15.10.79 -->
 - updating tuxcare version [#4109](https://github.com/chef/chef-server/pull/4109) ([sean-sype-simmons](https://github.com/sean-sype-simmons)) <!-- 15.10.78 -->
 - Updated http-accept 2.1.1. [#4107](https://github.com/chef/chef-server/pull/4107) ([sreepuramsudheer](https://github.com/sreepuramsudheer)) <!-- 15.10.77 -->
