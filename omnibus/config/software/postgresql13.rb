@@ -32,7 +32,7 @@ dependency "config_guess"
 # version_list: url=https://ftp.postgresql.org/pub/source/v#{version}/ filter=*.tar.bz2
 
 version("13.22") do
-  source url: "#{ENV['ARTIFACTORY_REPO_URL']}/postgresql/#{name}-#{version}.tuxcare.1.0.0.tar.bz2",
+  source url: "#{ENV['ARTIFACTORY_REPO_URL']}/postgresql13/#{name}-#{version}.tuxcare.1.0.0.tar.bz2",
          authorization: "X-JFrog-Art-Api:#{ENV['ARTIFACTORY_TOKEN']}",
          sha256: "d36d83dc89e625502cf6fb1d0529642ba1266bd614b4e4a41cefd1dddcf09080"
 end
