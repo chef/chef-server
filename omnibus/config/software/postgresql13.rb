@@ -44,7 +44,7 @@ version("13.5") { source sha256: "9b81067a55edbaabc418aacef457dd8477642827499560
 version("13.6") { source sha256: "bafc7fa3d9d4da8fe71b84c63ba8bdfe8092935c30c0aa85c24b2c08508f67fc" }
 
 source url: "https://ftp.postgresql.org/pub/source/v#{version}/postgresql-#{version}.tar.bz2"
-internal_source url: "#{ENV["ARTIFACTORY_REPO_URL"]}/postgresql/#{name}-#{version}.tuxcare.1.0.0.tar.bz2",
+internal_source url: "#{ENV["ARTIFACTORY_REPO_URL"]}/postgresql13/#{name}-#{version}.tuxcare.1.0.0.tar.bz2",
                 authorization: "X-JFrog-Art-Api:#{ENV["ARTIFACTORY_TOKEN"]}"
 
 relative_path "postgresql-#{version}"
