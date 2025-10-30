@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.10.80 -->
-## [15.10.80](https://github.com/chef/chef-server/tree/15.10.80) (2025-10-27)
+<!-- latest_release 15.10.81 -->
+## [15.10.81](https://github.com/chef/chef-server/tree/15.10.81) (2025-10-30)
 
 #### Merged Pull Requests
-- resolving dependabot alerts [#4110](https://github.com/chef/chef-server/pull/4110) ([RoyShravani](https://github.com/RoyShravani))
+- updating notice.txt per instructions [#4113](https://github.com/chef/chef-server/pull/4113) ([sean-sype-simmons](https://github.com/sean-sype-simmons))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.10.66 -->
 ### Changes since 15.10.66 release
 
 #### Merged Pull Requests
+- updating notice.txt per instructions [#4113](https://github.com/chef/chef-server/pull/4113) ([sean-sype-simmons](https://github.com/sean-sype-simmons)) <!-- 15.10.81 -->
 - resolving dependabot alerts [#4110](https://github.com/chef/chef-server/pull/4110) ([RoyShravani](https://github.com/RoyShravani)) <!-- 15.10.80 -->
 - Update opensearch cookbook to check when OpenSearch is up [#4085](https://github.com/chef/chef-server/pull/4085) ([kalroy](https://github.com/kalroy)) <!-- 15.10.79 -->
 - updating tuxcare version [#4109](https://github.com/chef/chef-server/pull/4109) ([sean-sype-simmons](https://github.com/sean-sype-simmons)) <!-- 15.10.78 -->
