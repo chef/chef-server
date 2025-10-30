@@ -5671,7 +5671,7 @@ If you redistribute modified sources, we would appreciate that you include in th
 2.	Special Notices Regarding Commercially Licensed Third-Party Components incorporated into the Product: 
 
 Progress Chef Infra Server v15 incorporates OpenSearch 1.3.20 licensed from TuxCare.
-
+Progress Chef Infra Server v15 incorporates PostgreSQL 13.22 licensed from TuxCare.
 
 3.	Special Notices Regarding Progress Product Components incorporated into the Product:
 
