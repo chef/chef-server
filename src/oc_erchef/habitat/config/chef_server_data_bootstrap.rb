@@ -1,5 +1,5 @@
 require 'fileutils'
-require 'restclient'
+require 'faraday'
 require 'json'
 
 class EcPostgres
@@ -339,20 +339,29 @@ class ChefServerDataBootstrap
   #
   def bifrost_request(method, rel_path, body, requestor_id)
     headers = {
-      :content_type => :json,
-      :accept => :json,
+      'Content-Type' => 'application/json',
+      'Accept' => 'application/json',
       'X-Ops-Requesting-Actor-Id' => requestor_id
     }
     retries = 5
     begin
       bifrost = load_bifrost
-      if method == :get
-        RestClient.get("http://#{bifrost['vip']}:#{bifrost['port']}/#{rel_path}", headers)
-      else
-        RestClient.send(method, "http://#{bifrost['vip']}:#{bifrost['port']}/#{rel_path}",  body, headers)
+      base_url = "http://#{bifrost['vip']}:#{bifrost['port']}"
+      conn = Faraday.new(url: base_url) do |f|
+        f.request :json
+        f.response :json
+        f.adapter Faraday.default_adapter
       end
-    rescue RestClient::Exception, Errno::ECONNREFUSED => e
-      error = e.respond_to?(:response) ? e.response.chomp : e.message
+      
+      response = if method == :get
+        conn.get(rel_path, nil, headers)
+      else
+        conn.send(method, rel_path, body, headers)
+      end
+      
+      response.body
+    rescue Faraday::Error, Errno::ECONNREFUSED => e
+      error = e.respond_to?(:response_body) ? e.response_body.to_s.chomp : e.message
       if retries > 0
         sleep_time = 2**((5 - retries))
         retries -= 1

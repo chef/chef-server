@@ -28,7 +28,7 @@ Gem::Specification.new do |spec|
 
   spec.add_runtime_dependency "redis"
 
-  spec.add_runtime_dependency "rest-client"
+  spec.add_runtime_dependency "faraday", "~> 2.0"
   spec.add_runtime_dependency "mixlib-log"
 
   spec.add_runtime_dependency "uuidtools", "~> 2.1", ">= 2.1.3"

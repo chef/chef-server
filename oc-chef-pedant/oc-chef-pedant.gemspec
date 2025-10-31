@@ -17,7 +17,7 @@ Gem::Specification.new do |s|
   s.add_dependency("mixlib-authentication", "> 1.4", "< 4.0")
   s.add_dependency("mixlib-config", ">= 2", "< 4")
   s.add_dependency("mixlib-shellout", ">= 1.1")
-  s.add_dependency("rest-client", ">= 1.6")
+  s.add_dependency("faraday", "~> 2.0")
   s.add_dependency("rspec_junit_formatter", "~> 0.2")
   s.add_dependency("net-http-spy", "~> 0.2")
   s.add_dependency("uuidtools", "~> 2.0")

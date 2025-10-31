@@ -19,7 +19,7 @@ module Pedant
   # URL Generation and Authorized HTTP Request Helpers
   ################################################################################
   module Request
-    require "rest_client"
+    require "faraday"
     require "mixlib/shellout" unless defined?(Mixlib::ShellOut)
     require "uuidtools"
     include Pedant::JSON
@@ -104,7 +104,7 @@ module Pedant
     #
     # Finally, a block can be supplied to this method.  This block will
     # receive a single argument, the HTTP response (as a
-    # RestClient::Response object).  Testing methods should use this to
+    # Faraday::Response object).  Testing methods should use this to
     # carry out any validation tests of the response.
     def authenticated_request(method, url, requestor, opts = {}, &validator)
       headers, payload = construct_request(method, url, requestor, opts)
@@ -161,28 +161,36 @@ module Pedant
     end
 
     def do_request_with_retry(method, url, final_headers, payload, retries_left, &validator)
-      response_handler = lambda { |response, request, result| response }
-
       begin
         request_time = Time.now.utc
-        response = RestClient::Request.execute(method: method,
-                                               url: url,
-                                               payload: %i{PUT POST}.include?(method) ? payload : nil,
-                                               headers: final_headers,
-                                               ssl_version: Pedant::Config.ssl_version,
-                                               verify_ssl: false,
-                                               open_timeout: 300,
-                                               ssl_client_cert: Pedant::Config.ssl_client_cert,
-                                               ssl_client_key: Pedant::Config.ssl_client_key,
-                                               ssl_ca_file: Pedant::Config.ssl_ca_file,
-          &response_handler)
+        
+        ssl_options = {
+          verify: false,
+          version: Pedant::Config.ssl_version,
+          client_cert: Pedant::Config.ssl_client_cert,
+          client_key: Pedant::Config.ssl_client_key,
+          ca_file: Pedant::Config.ssl_ca_file
+        }.compact
+        
+        conn = Faraday.new(ssl: ssl_options) do |f|
+          f.request :json
+          f.response :json
+          f.adapter Faraday.default_adapter
+          f.options.timeout = 300
+          f.options.open_timeout = 300
+        end
+
+        response = conn.send(method.downcase, url) do |req|
+          final_headers.each { |k, v| req.headers[k] = v }
+          req.body = payload if %i{PUT POST}.include?(method.upcase)
+        end
 
         if block_given?
           yield(response)
         else
           response
         end
-      rescue RestClient::Exceptions::OpenTimeout, RestClient::Exceptions::ReadTimeout => e
+      rescue Faraday::TimeoutError, Faraday::ConnectionFailed => e
         orig = e.original_exception
         req_id = final_headers["X-REMOTE-REQUEST-ID"] || "id missing"
         puts "#{e.class} error from request started #{request_time} took #{Time.now.utc - request_time} with method #{method} to #{url} #{req_id}\n"
