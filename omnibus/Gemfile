@@ -6,12 +6,14 @@ group :omnibus do
   gem "omnibus-software", github: ENV.fetch("OMNIBUS_SOFTWARE_GITHUB_REPO", "chef/omnibus-software"), branch: ENV.fetch("OMNIBUS_SOFTWARE_GITHUB_BRANCH", "main")
   gem 'artifactory'
   gem 'license_scout',   git: "https://github.com/chef/license_scout.git", branch: "1-stable"
+  gem "rest-client", git: "https://github.com/chef/rest-client", branch: "jfm/ucrt_update1"
 end
 
 group :test do
   gem 'test-kitchen' # for Test Kitchen testing of the omnibus builds
   gem 'berkshelf', '~> 8.0.22' # depsolving the Test Kitchen suite
   gem 'archive-tar-minitar' # required by berkshelf for packaging
-  gem 'chef', '~> 18.8.11'
+  gem 'chef', '~> 18.8.46'
   gem 'rake'
+  gem "rest-client", git: "https://github.com/chef/rest-client", branch: "jfm/ucrt_update1"
 end

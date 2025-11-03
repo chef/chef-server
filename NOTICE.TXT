@@ -11,59 +11,59 @@ ComponentName | VersionName | LicenseType
 
 addressable | 2.8.7 | Apache-2.0
 appbundler | 0.13.4 | Apache-2.0
-aws-eventstream | 1.3.0 | Apache-2.0
-aws-partitions | 1.981.0 | Apache-2.0
-aws-sdk-core | 3.209.1 | Apache-2.0
-aws-sdk-kms | 1.94.0 | Apache-2.0
-aws-sdk-s3 | 1.166.0 | Apache-2.0
-aws-sdk-secretsmanager | 1.108.0 | Apache-2.0
+aws-eventstream | 1.4.0 | Apache-2.0
+aws-partitions | 1.1174.0 | Apache-2.0
+aws-sdk-core | 3.234.0 | Apache-2.0
+aws-sdk-kms | 1.115.0 | Apache-2.0
+aws-sdk-s3 | 1.201.0 | Apache-2.0
+aws-sdk-secretsmanager | 1.121.0 | Apache-2.0
 bear | 119234548783af19b8ec75c879c5062676b92571 | Apache-2.0
-bookshelf | TBD | Apache-2.0 
-Capture-Tiny | 0.5 | Apache-2.0
-chef | 2deeb1a31ea1c2e7f590ea5858ca86bf1e7f496f | Apache-2.0
+bookshelf | | Apache-2.0 
+Capture-Tiny | 0.50 | Apache-2.0
+chef | 18.8.46 | Apache-2.0
 chef_authn | 57ae954ab231e4cd24740315eddc932aaf5515fc | Apache-2.0
 chef_secrets | a690fb9f92718bee1249605ebd6718058f38ab32 | Apache-2.0
-chef-bin | 18.6.1 | Apache-2.0
-chef-config | 18.6.1 | Apache-2.0
+chef-bin | 18.8.46 | Apache-2.0
+chef-config | 18.8.46 | Apache-2.0
 cheffish | 17.1.7 | Apache-2.0
 chefstyle | 2.2.3 | Apache-2.0
 chef-telemetry | 1.1.1 | Apache-2.0
-chef-utils | 18.6.1 | Apache-2.0
-chef-vault | 4.1.11 | Apache-2.0
+chef-utils | 18.8.46 | Apache-2.0
+chef-vault | 4.2.5 | Apache-2.0
 chef-winrm | 2.3.12 | Apache-2.0
 chef-winrm-elevated | 1.2.5 | Apache-2.0
 chef-winrm-fs | 1.3.7 | Apache-2.0
-chef-zero | 15.0.11 | Apache-2.0
-cookstyle | 7.32.8 | Apache-2.0
+chef-zero | 15.0.21 | Apache-2.0
+cookstyle | 8.5.0 | Apache-2.0
 darklaunch | 33a4f070eede8b7e71fceab1ed1e30ef6ddea3fb | Apache-2.0
 efast_xs | c2a6b925ed94ab8a28ff49375782834033919190 | Apache-2.0
 eini | 511a94254d6eecc9331da31cd4fa08ff64b4d2e2 | Apache-2.0
 ej | f0425c1b8894acddb6e687fe3acbc9c1eafbd3e0 | Apache-2.0
 envy | 0148fb4b7ed0e188511578e98b42d6e7dde0ebd1 | Apache-2.0
 erlang | 26.2.5.14 | Apache-2.0
-ffi-libarchive | 1.1.3 | Apache-2.0
+ffi-libarchive | 1.1.14 | Apache-2.0
 folsom | 38e2cce7c64ce1f0a3a918d90394cfc0a940b1ba | Apache-2.0
 folsom_graphite | 6898a51a6478767b45b9e568274c9ade7d71908d | Apache-2.0
-inspec-core | 5.22.58 | Apache-2.0
+inspec-core | 5.23.6 | Apache-2.0
 inspec-core-bin | 5.22.58 | Apache-2.0
 jmespath | 1.6.2 | Apache-2.0
 lager | a140ea935eae9149bb35234bb40f6acf1c69caa1 | Apache-2.0
 libyajl2 | 2.1.0 | Apache-2.0
 license-acceptance | 2.1.13 | Apache-2.0
-List-MoreUtils | 0.43 | Apache-2.0
+List-MoreUtils | 0.430 | Apache-2.0
 mini_s3 | aa206d4d5a8380aff68629b46c15b87931e5c801 | Apache-2.0
 mixer | d5f58392be09f5823ab21aa3664d7be97e9aa3bc | Apache-2.0
 mixlib-archive | 1.1.7 | Apache-2.0
 mixlib-authentication | 3.0.10 | Apache-2.0
 mixlib-cli | 2.1.8 | Apache-2.0
 mixlib-config | 3.0.27 | Apache-2.0
-mixlib-log | 3.0.9 | Apache-2.0
-mixlib-shellout | 3.2.8 | Apache-2.0
+mixlib-log | 3.1.2.1 | Apache-2.0
+mixlib-shellout | 3.3.9 | Apache-2.0
 oc_bifrost |  | Apache-2.0
 oc_erchef |  | Apache-2.0
 oc_id |  | Apache-2.0
 oc-chef-pedant |  | Apache-2.0
-ohai | 18.2.4 | Apache-2.0
+ohai | 18.2.6 | Apache-2.0
 omniauth-chef | 0.4.1 | Apache-2.0
 omnibus-ctl | 4e968f4cf713a545bbb70ee13b8ff7ebd37f7f3e | Apache-2.0
 opensearch | 1.3.20 | Commercial License
@@ -74,28 +74,28 @@ pooler | bf52b40d666625769c5b612545c2de5ae7a42b0d | Apache-2.0
 semverse | 3.0.2 | Apache-2.0
 sqerl | f9de1ba35aababbe31a542a3b72af1e866376e3e | Apache-2.0
 stats_hero | 4fbca5e2fcb4d464eab458025f7933f5c53f6330 | Apache-2.0
-train-core | 3.12.7 | Apache-2.0
+train-core | 3.13.4 | Apache-2.0
 train-rest | 0.5.0 | Apache-2.0
-train-winrm | 0.2.13 | Apache-2.0
+train-winrm | 0.2.19 | Apache-2.0
 uuidtools | 2.2.0 | Apache-2.0
-veil | 0.3.14 | Apache-2.0
+veil | 0.3.11 | Apache-2.0
 webmachine | 8e3141994826a731d8d68ceaac45e80a7ff9f7fa | Apache-2.0
 websocket-driver | 0.8.0 | Apache-2.0
 websocket-extensions | 0.1.5 | Apache-2.0
-winrm | 2.3.9 | Apache-2.0
+winrm | 2.3.8 | Apache-2.0
 winrm-elevated | 1.2.3 | Apache-2.0
 winrm-fs | 1.3.5 | Apache-2.0
 wmi-lite | 1.0.7 | Apache-2.0
 Algorithm-Diff | 1.201 | Artistic-1.0
 Any-Moose | 0.27 | Artistic-1.0
 B-Hooks-EndOfScope | 0.28 | Artistic-1.0
-Class-Data-Inheritable | 0.1 | Artistic-1.0
+Class-Data-Inheritable | 0.10 | Artistic-1.0
 Class-Inspector | 1.36 | Artistic-1.0
 Class-Load | 0.25 | Artistic-1.0
 Class-Method-Modifiers | 2.15 | Artistic-1.0
 Class-Singleton | 1.6 | Artistic-1.0
 Clone | 0.47 | Artistic-1.0
-Clone-Choose | 0.01 | Artistic-1.0
+Clone-Choose | 0.010 | Artistic-1.0
 Clone-PP | 1.08 | Artistic-1.0
 Config-GitLike | 1.18 | Artistic-1.0
 Data-OptList | 0.114 | Artistic-1.0
@@ -110,7 +110,7 @@ Dist-CheckConflicts | 0.11 | Artistic-1.0
 Eval-Closure | 0.14 | Artistic-1.0
 Exception-Class | 1.45 | Artistic-1.0
 Exporter-Tiny | 1.006002 | Artistic-1.0
-ExtUtils-Config | 0.01 | Artistic-1.0
+ExtUtils-Config | 0.010 | Artistic-1.0
 ExtUtils-Helpers | 0.028 | Artistic-1.0
 ExtUtils-InstallPaths | 0.014 | Artistic-1.0
 File-HomeDir | 1.006 | Artistic-1.0
@@ -118,15 +118,15 @@ File-ShareDir | 1.118 | Artistic-1.0
 File-ShareDir-Install | 0.14 | Artistic-1.0
 File-Which | 1.27 | Artistic-1.0
 Hash-Merge | 0.302 | Artistic-1.0
-IO-Pager | 2.1 | Artistic-1.0
-IPC-System-Simple | 1.3 | Artistic-1.0
+IO-Pager | 2.10 | Artistic-1.0
+IPC-System-Simple | 1.30 | Artistic-1.0
 MIME-Base32 | 1.303 | Artistic-1.0
 Module-Build-Tiny | 0.052 | Artistic-1.0
 Module-Build-XSUtil | 0.19 | Artistic-1.0
 Module-Runtime | 0.018 | Artistic-1.0
 Module-Runtime-Conflicts | 0.003 | Artistic-1.0
 Moo | 2.005005 | Artistic-1.0
-Moose | 2.4 | Artistic-1.0
+Moose | 2.4000 | Artistic-1.0
 MooseX-Role-Parameterized | 1.11 | Artistic-1.0
 MooX-Types-MooseLike | 0.29 | Artistic-1.0
 Mouse | v2.5.11 | Artistic-1.0
@@ -136,16 +136,16 @@ MouseX-Types-Path-Class | 0.07 | Artistic-1.0
 MRO-Compat | 0.15 | Artistic-1.0
 namespace-autoclean | 0.31 | Artistic-1.0
 namespace-clean | 0.27 | Artistic-1.0
-Package-Stash | 0.4 | Artistic-1.0
-Package-Stash-XS | 0.3 | Artistic-1.0
+Package-Stash | 0.40 | Artistic-1.0
+Package-Stash-XS | 0.30 | Artistic-1.0
 Params-Util | 1.102 | Artistic-1.0
 Path-Class | 0.37 | Artistic-1.0
-PerlIO-utf8_strict | 0.01 | Artistic-1.0
+PerlIO-utf8_strict | 0.010 | Artistic-1.0
 Pod-Parser | 1.67 | Artistic-1.0
 Role-HasMessage | 0.007 | Artistic-1.0
 Role-Identifiable | 0.009 | Artistic-1.0
 Role-Tiny | 2.002004 | Artistic-1.0
-Scalar-List-Utils | 1.7 | Artistic-1.0
+Scalar-List-Utils | 1.70 | Artistic-1.0
 String-Errf | 0.009 | Artistic-1.0
 String-ShellQuote | 1.04 | Artistic-1.0
 Sub-Exporter | 0.991 | Artistic-1.0
@@ -153,7 +153,7 @@ Sub-Exporter-Progressive | 0.001013 | Artistic-1.0
 Sub-Identify | 0.14 | Artistic-1.0
 Sub-Install | 0.929 | Artistic-1.0
 Sub-Quote | 2.006009 | Artistic-1.0
-Sub-Uplevel | 0.28 | Artistic-1.0
+Sub-Uplevel | 0.2800 | Artistic-1.0
 SUPER | 1.20190531 | Artistic-1.0
 Template-Tiny | 1.16 | Artistic-1.0
 Test-Deep | 1.205 | Artistic-1.0
@@ -164,9 +164,9 @@ Test-File-Contents | 0.242 | Artistic-1.0
 Test-UseAllModules | 0.17 | Artistic-1.0
 Text-Diff | 1.45 | Artistic-1.0
 Throwable | 1.001 | Artistic-1.0
-uri | 0.13.1 | Artistic-1.0
+uri | 1.0.4 | Artistic-1.0
 XString | 0.005 | Artistic-1.0
-Class-Load-XS | 0.1 | Artistic-2.0
+Class-Load-XS | 0.10 | Artistic-2.0
 cpanminus | 1.7046 | Artistic-2.0
 DateTime | 1.66 | Artistic-2.0
 Devel-StackTrace | 2.05 | Artistic-2.0
@@ -179,27 +179,27 @@ Specio | 0.52 | Artistic-2.0
 Test-File | 1.995 | Artistic-2.0
 IPC-Run3 | 0.049 | BSD
 pg | 1.5.9 | BSD
-rb-readline | 9fba246073f78831b7c7129c76cc07d8476a8892 | BSD
-rubyzip | 2.3.2 | BSD 2-Clause
+rb-readline | 0.5.5 | BSD
+rubyzip | 2.4.1 | BSD 2-Clause
 base16 | f78918e7b593fbdc35ec9bcc349aa50f47f45a8b | BSD-2-Clause
-bigdecimal | 3.1.8 | BSD-2-Clause
-byebug | 11.1.3 | BSD-2-Clause
+bigdecimal | 3.2.2 | BSD-2-Clause
+byebug | 12.0.0 | BSD-2-Clause
 bzip2 | 1.0.8 | BSD-2-Clause
-date | 3.3.4 | BSD-2-Clause
+date | 3.4.1 | BSD-2-Clause
 domain_name | 0.6.20240107 | BSD-2-Clause
 erlcloud | 398d67ecfe6d398a444d42ab9e94e8b1df0171a5 | BSD-2-Clause
 ibrowse | d541f7190894734e2b69f4763c3664fb4d6bb9db | BSD-2-Clause
 libarchive | 3.6.2 | BSD-2-Clause
-logger | 1.5.3 | BSD-2-Clause
+logger | 1.7.0 | BSD-2-Clause
 net-protocol | 0.2.2 | BSD-2-Clause
-openresty | 1.25.3.1 | BSD-2-Clause
+openresty | 1.27.1.2 | BSD-2-Clause
 pcre | 8.45 | BSD-2-Clause
 quickrand | c7eca718faa0d52c097155263dea6c25067396f7 | BSD-2-Clause
-rexml | 3.3.8 | BSD-2-Clause
+rexml | 3.4.2 | BSD-2-Clause
 ruby | 3.1.7 | BSD-2-Clause
-stringio | 3.0.1.1 | BSD-2-Clause
-time | 0.4.0 | BSD-2-Clause 
-timeout | 0.4.1 | BSD-2-Clause
+stringio | 3.1.7 | BSD-2-Clause
+time | 0.4.1 | BSD-2-Clause 
+timeout | 0.4.3 | BSD-2-Clause
 unicode_utils | 1.4.0 | BSD-2-Clause
 uuid | 41c3725fe87a11f7d2e77463dcff72eb11fcdee0 | MIT
 cf | 2bcf00402db9ca5a4790de7f82c8139baaf8856c | BSD-3-Clause
@@ -213,7 +213,7 @@ runit | 2.1.1 | BSD-3-Clause
 String-Formatter | 1.235 | gpl_2
 haproxy | 3.0.11 | GPL-2.0
 logrotate | 3.19.0 | GPL-2.0
-server-open-jre | 11.0.28+6 | GPL-2.0 (with the Classpath Exception)
+server-open-jre | 17.0.9+9 | GPL-2.0 (with the Classpath Exception)
 config_guess | 84f04b02a7e2fc8eaa9d52deee5f6d57b06fe447 | GPL-3.0 (with exception)
 fs | 936ba9dcf88186250ecc5995e25154bde44252a1 | ISC
 goldrush | 8f1b715d36b650ec1e1f5612c00e28af6ab0de82 | ISC
@@ -225,20 +225,20 @@ libuuid | 2.21 | LGPL-2.1
 kgio | 2.11.4 | LGPL-2.1+
 raindrops | 0.20.1 | LGPL-2.1+
 erlsom | 131e660ee39254a58b75075e07dfd742f445bfce | LGPL-3.0
-actioncable | 7.1.3.2 | MIT
-actionmailbox | 7.1.3.2 | MIT
-actionmailer | 7.1.3.2 | MIT
-actionpack | 7.1.3.2 | MIT
-actiontext | 7.1.3.2 | MIT
-actionview | 7.1.3.2 | MIT
-activejob | 7.1.3.2 | MIT
-activemodel | 7.1.3.2 | MIT
-activerecord | 7.1.3.2 | MIT
-activestorage | 7.1.3.2 | MIT
-activesupport | 7.1.3.2 | MIT
-ast | 2.4.2 | MIT
-aws-sigv4 | 1.10.0 | MIT
-bcrypt | 564b39e2f86a0e3d8ca08dcd1aae924acffe1408 | MIT
+actioncable | 7.1.5.2 | MIT
+actionmailbox | 7.1.5.2 | MIT
+actionmailer | 7.1.5.2 | MIT
+actionpack | 7.1.5.2 | MIT
+actiontext | 7.1.5.2 | MIT
+actionview | 7.1.5.2 | MIT
+activejob | 7.1.5.2 | MIT
+activemodel | 7.1.5.2 | MIT
+activerecord | 7.1.5.2 | MIT
+activestorage | 7.1.5.2 | MIT
+activesupport | 7.1.5.2 | MIT
+ast | 2.4.3 | MIT
+aws-sigv4 | 1.12.1 | MIT
+bcrypt | 3.1.20 | MIT
 binding_of_caller | 1.0.1 | MIT
 builder | 3.3.0 | MIT
 bundler | 2.3.27 | MIT
@@ -247,9 +247,9 @@ coderay | 1.1.3 | Public Domain
 coffee-rails | 5.0.0 | MIT
 coffee-script | 2.4.1 | MIT
 coffee-script-source | 1.12.2 | MIT
-concurrent-ruby | 1.3.4 | MIT
+concurrent-ruby | 1.3.5 | MIT
 config | 4.2.1 | MIT
-connection_pool | 2.5.3 | MIT
+connection_pool | 2.5.4 | MIT
 corefoundation | 0.3.13 | MIT
 crass | 1.0.6 | MIT
 curl | 8.4.0 | MIT
@@ -265,23 +265,23 @@ dry-logic | 1.6.0 | MIT
 dry-schema | 1.14.1 | MIT
 dry-types | 1.8.3 | MIT
 dry-validation | 1.11.1 | MIT
-ed25519 | 1.3.0 | MIT
+ed25519 | 1.4.0 | MIT
 erlware_commons | f511ed875bea87212ba9ee40ade1c9f53498ce79 | MIT
-erubi | 1.13.0 | MIT
+erubi | 1.13.1 | MIT
 erubis | 2.7.0 | MIT
 execjs | 2.10.0 | MIT
-faraday | 2.12.0 | MIT
-faraday-follow_redirects | 0.3.0 | MIT
-faraday-net_http | 3.3.0 | MIT
+faraday | 2.13.4 | MIT
+faraday-follow_redirects | 0.4.0 | MIT
+faraday-net_http | 3.4.1 | MIT
 ffi-yajl | 2.6.0 | MIT
 fuzzyurl | 0.9.0 | MIT
 gecode | 3.7.3 | MIT
-globalid | 1.2.1 | MIT
+globalid | 1.3.0 | MIT
 gssapi | 1.3.1 | MIT
 gyoku | 1.4.0 | MIT
-hashie | 4.1.0 | MIT
-http-accept | 1.7.0 | MIT
-http-cookie | 1.0.7 | MIT
+hashie | 5.0.0 | MIT
+http-accept | 2.1.1 | MIT
+http-cookie | 1.1.0 | MIT
 i18n | 1.14.7 | MIT
 iniparse | 1.5.0 | MIT
 ipaddress | 0.8.3 | MIT
@@ -303,68 +303,68 @@ little-plugger | 1.1.4 | MIT
 logging | 2.4.0 | MIT
 loofah | 2.24.1 | MIT
 mail | 2.8.1 | MIT
-marcel | 1.0.4 | MIT
+marcel | 1.1.0 | MIT
 method_source | 1.1.0 | MIT
-mime-types | 3.5.2 | MIT
-mime-types-data | 3.2024.0903 | MIT
+mime-types | 3.7.0 | MIT
+mime-types-data | 3.2025.0924 | MIT
 mini_mime | 1.1.5 | MIT
 mini_portile2 | 2.8.9 | MIT
 minitest | 5.25.5 | MIT
 mochiweb | 666ac57d5cad8da0341e53db884855ee9a9805b0 | MIT
-multi_json | 1.15.0 | MIT
+multi_json | 1.17.0 | MIT
 multipart-post | 2.4.1 | MIT
 ncurses | 6.4 | MIT
 neotoma | 760928ec8870da02eb11bccb501e2700925d06c6 | MIT
 netrc | 0.11.0 | MIT
-net-scp | 4.0.0 | MIT
+net-scp | 4.1.0 | MIT
 net-sftp | 4.0.0 | MIT
-net-ssh | 7.2.3 | MIT
+net-ssh | 7.3.0 | MIT
 nio4r | 2.7.4 | MIT
-nokogiri | 1.18.9 | MIT
-nori | 2.7.1 | MIT
+nokogiri | 1.18.9-x86_64-linux-gnu | MIT
+nori | 2.7.0 | MIT
 observer_cli | baa70569bccc5508e9839e20768540ef3cdca016 | MIT
 omniauth | 2.1.3 | MIT
 openresty-lpeg | 1.0.1 | MIT
-parallel | 1.26.3 | MIT
-parser | 3.3.5.0 | MIT
+parallel | 1.27.0 | MIT
+parser | 3.3.9.0 | MIT
 parslet | 2.0.0 | MIT
 pastel | 0.8.0 | MIT
 pbkdf2 | 0.1.0 | MIT
-plist | 3.7.1 | MIT
+plist | 3.7.2 | MIT
 popt | 1.19 | MIT
-prism | 1.4.0 | MIT
+prism | 1.6.0 | MIT
 prometheus | f8619006f945eeaeb1725206209ec89a1409575c | MIT
 proxifier2 | 1.1.0 | MIT
-pry | 0.13.0 | MIT
-pry-byebug | 3.10.1 | MIT
+pry | 0.15.2 | MIT
+pry-byebug | 3.11.0 | MIT
 pry-stack_explorer | 0.6.1 | MIT
-psych | 4.0.2 | MIT
-public_suffix | 6.0.1 | MIT
-rack | 2.2.9 | MIT
-rack-protection | 4.1.1 | MIT
+psych | 5.2.6 | MIT
+public_suffix | 6.0.2 | MIT
+rack | 3.2.3 | MIT
+rack-protection | 4.2.1 | MIT
 rack-session | 2.1.1 | MIT
 rack-test | 2.2.0 | MIT
 rackup | 2.2.1 | MIT
-rails | 7.1.3.2 | MIT
+rails | 7.1.5.2 | MIT
 rails-dom-testing | 2.3.0 | MIT
 rails-html-sanitizer | 1.6.2 | MIT
-railties | 7.1.3.2 | MIT
+railties | 7.1.5.2 | MIT
 rainbow | 3.1.1 | MIT
 rake | 13.3.0 | MIT
 redis-gem | 3.3.3 | MIT
-regexp_parser | 2.9.2 | MIT
-responders | 3.1.1 | MIT
+regexp_parser | 2.11.3 | MIT
+responders | 3.2.0 | MIT
 rest-client | 2.1.0 | MIT
-rspec | 3.12.0 | MIT
+rspec | 3.13.2 | MIT
 rspec_junit_formatter | 0.6.0 | MIT
-rspec-core | 3.12.3 | MIT
-rspec-expectations | 3.12.4 | MIT
-rspec-its | 1.3.0 | MIT
-rspec-mocks | 3.12.7 | MIT
+rspec-core | 3.13.6 | MIT
+rspec-expectations | 3.13.5 | MIT
+rspec-its | 2.0.0 | MIT
+rspec-mocks | 3.13.6 | MIT
 rspec-rerun | 1.1.0 | MIT
-rspec-support | 3.12.2 | MIT
-rubocop | 1.25.1 | MIT
-rubocop-ast | 1.32.3 | MIT
+rspec-support | 3.13.6 | MIT
+rubocop | 1.81.0 | MIT
+rubocop-ast | 1.47.1 | MIT
 rubyntlm | 0.6.5 | MIT
 ruby-progressbar | 1.13.0 | MIT
 sassc | 2.4.0 | MIT
@@ -399,11 +399,11 @@ unicode-display_width | 2.6.0 | MIT
 unicorn-rails | 2.2.1 | MIT
 wisper | 2.0.1 | MIT
 zeitwerk | 2.6.18 | MIT
-cacerts | 11/10/2022 | MPL-2.0
+cacerts | 2022-10-11 | MPL-2.0
 sslshake | 1.3.1 | MPL-2.0
 vault | 0.18.2 | MPL-2.0
 TermReadKey | 2.38 | Public Domain 
-postgresql13 | 13.21 | PostgreSQL
+postgresql13 | 13.22 | Commercial License
 postgresql96-bin | 9.6.23 | PostgreSQL
 chef-server-ctl |  | Proprietary
 cleanup | 1.0.0 | Proprietary
@@ -420,28 +420,28 @@ server-ctl-cookbooks |  | Proprietary
 ruby-shadow | 2.5.0 | Public Domain 
 liblzma | 5.2.10 | Public-Domain
 net-http-spy | 0.2.1 | Public-Domain
-base64 | 0.2.0 | Ruby
+base64 | 0.3.0 | Ruby
 cgi | 0.5.0 | Ruby
 drb | 2.2.3 | Ruby
 erb | 4.0.4 | Ruby
-httpclient | 2.8.3 | Ruby
+httpclient | 2.9.0 | Ruby
 io-console | 0.8.1 | Ruby
 irb | 1.15.2 | Ruby
-json | 2.7.2 | Ruby
+json | 2.13.2 | Ruby
 mutex_m | 0.3.0 | Ruby
-net-ftp | 0.3.7 | Ruby
-net-http | 0.4.1 | Ruby
+net-ftp | 0.3.8 | Ruby
+net-http | 0.6.0 | Ruby
 net-imap | 0.5.9 | Ruby
 net-pop | 0.1.2 | Ruby
 net-smtp | 0.5.1 | Ruby
 openssl | 3.2.4 | Ruby
-pp | 0.6.2 | Ruby
+pp | 0.6.3 | Ruby
 prettyprint | 0.2.0 | Ruby
 racc | 1.8.1 | Ruby
-rdoc | 6.4.1.1 | Ruby
+rdoc | 6.15.0 | Ruby
 reline | 0.6.2 | Ruby
 unicorn | 6.1.0 | Ruby
-webrick | 1.8.2 | Ruby
+webrick | 1.9.1 | Ruby
 zlib | 1.2.13 | Zlib
 
 
@@ -464,15 +464,15 @@ aws-sdk-secretsmanager	v1.108.0,
 bear	v119234548783af19b8ec75c879c5062676b92571,
 bookshelf,
 Capture-Tiny v0.5,
-chef	v2deeb1a31ea1c2e7f590ea5858ca86bf1e7f496f,
+chef	v18.8.46,
 chef_authn	v57ae954ab231e4cd24740315eddc932aaf5515fc,
 chef_secrets va690fb9f92718bee1249605ebd6718058f38ab32,
-chef-bin v18.6.1,
-chef-config	v18.6.1,
+chef-bin v18.8.46,
+chef-config	v18.8.46,
 cheffish v17.1.7,
 chefstyle	v2.2.3,
 chef-telemetry v1.1.1,
-chef-utils	v18.6.1,
+chef-utils	v18.8.46,
 chef-vault	v4.1.11,
 chef-winrm	v2.3.12,
 chef-winrm-elevated v1.2.5,
@@ -1383,7 +1383,7 @@ END OF TERMS AND CONDITIONS
 
 (6) GNU General Public License, version 2, with the Classpath Exception
 
-Progress Chef Infra Server v15 incorporates server-open-jre v11.0.28+6.  Such technology is subject to the following terms and conditions:
+Progress Chef Infra Server v15 incorporates server-open-jre v17.0.9+9.  Such technology is subject to the following terms and conditions:
 
 GNU GENERAL PUBLIC LICENSE
 Version 2, June 1991
@@ -5534,7 +5534,7 @@ Exhibit B - "Incompatible With Secondary Licenses" Notice
 
 (13) PostgreSQL License:
 
-Progress Chef Infra Server v15 incorporates postgresql13 v13.21 and postgresql96-bin	v9.6.23.  Such technology is subject to the following terms and conditions:
+Progress Chef Infra Server v15 incorporates postgresql96-bin	v9.6.23.  Such technology is subject to the following terms and conditions:
 
 PostgreSQL is released under the PostgreSQL License, a liberal Open Source license, similar to the BSD or MIT licenses.
 
@@ -5671,7 +5671,7 @@ If you redistribute modified sources, we would appreciate that you include in th
 2.	Special Notices Regarding Commercially Licensed Third-Party Components incorporated into the Product: 
 
 Progress Chef Infra Server v15 incorporates OpenSearch 1.3.20 licensed from TuxCare.
-
+Progress Chef Infra Server v15 incorporates PostgreSQL 13.22 licensed from TuxCare.
 
 3.	Special Notices Regarding Progress Product Components incorporated into the Product:
 

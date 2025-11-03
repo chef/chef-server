@@ -1,16 +1,28 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.10.71 -->
-## [15.10.71](https://github.com/chef/chef-server/tree/15.10.71) (2025-10-21)
+<!-- latest_release 15.10.83 -->
+## [15.10.83](https://github.com/chef/chef-server/tree/15.10.83) (2025-11-03)
 
 #### Merged Pull Requests
-- Fix for fips amazon 2 issue [#4095](https://github.com/chef/chef-server/pull/4095) ([jashaik](https://github.com/jashaik))
+- update notice.txt to update Postgres versions correctly [#4116](https://github.com/chef/chef-server/pull/4116) ([kalroy](https://github.com/kalroy))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.10.66 -->
 ### Changes since 15.10.66 release
 
 #### Merged Pull Requests
+- update notice.txt to update Postgres versions correctly [#4116](https://github.com/chef/chef-server/pull/4116) ([kalroy](https://github.com/kalroy)) <!-- 15.10.83 -->
+- update activesupport in oc-chef-pedant [#4112](https://github.com/chef/chef-server/pull/4112) ([RoyShravani](https://github.com/RoyShravani)) <!-- 15.10.82 -->
+- updating notice.txt per instructions [#4113](https://github.com/chef/chef-server/pull/4113) ([sean-sype-simmons](https://github.com/sean-sype-simmons)) <!-- 15.10.81 -->
+- resolving dependabot alerts [#4110](https://github.com/chef/chef-server/pull/4110) ([RoyShravani](https://github.com/RoyShravani)) <!-- 15.10.80 -->
+- Update opensearch cookbook to check when OpenSearch is up [#4085](https://github.com/chef/chef-server/pull/4085) ([kalroy](https://github.com/kalroy)) <!-- 15.10.79 -->
+- updating tuxcare version [#4109](https://github.com/chef/chef-server/pull/4109) ([sean-sype-simmons](https://github.com/sean-sype-simmons)) <!-- 15.10.78 -->
+- Updated http-accept 2.1.1. [#4107](https://github.com/chef/chef-server/pull/4107) ([sreepuramsudheer](https://github.com/sreepuramsudheer)) <!-- 15.10.77 -->
+- removing activesupport direct dependency [#4104](https://github.com/chef/chef-server/pull/4104) ([sreepuramsudheer](https://github.com/sreepuramsudheer)) <!-- 15.10.76 -->
+- Updated rack to 3.2.3 [#4106](https://github.com/chef/chef-server/pull/4106) ([jashaik](https://github.com/jashaik)) <!-- 15.10.75 -->
+- [CHEF-26124] Fix dependabot issues [#4100](https://github.com/chef/chef-server/pull/4100) ([RoyShravani](https://github.com/RoyShravani)) <!-- 15.10.74 -->
+- Updated uri gem to 1.0.4 [#4105](https://github.com/chef/chef-server/pull/4105) ([jashaik](https://github.com/jashaik)) <!-- 15.10.73 -->
+- Updated openresty to 1.27.1.2 [#4103](https://github.com/chef/chef-server/pull/4103) ([jashaik](https://github.com/jashaik)) <!-- 15.10.72 -->
 - Fix for fips amazon 2 issue [#4095](https://github.com/chef/chef-server/pull/4095) ([jashaik](https://github.com/jashaik)) <!-- 15.10.71 -->
 - Updated omnibus-software for jdk 17 update. [#4096](https://github.com/chef/chef-server/pull/4096) ([sreepuramsudheer](https://github.com/sreepuramsudheer)) <!-- 15.10.70 -->
 - Updating pg version to 13.22. [#4101](https://github.com/chef/chef-server/pull/4101) ([sreepuramsudheer](https://github.com/sreepuramsudheer)) <!-- 15.10.69 -->

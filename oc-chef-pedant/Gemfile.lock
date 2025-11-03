@@ -1,3 +1,16 @@
+GIT
+  remote: https://github.com/chef/rest-client
+  revision: 5b3bb34ea536e5207388b84c5dd6360ea3fc2799
+  branch: jfm/ucrt_update1
+  specs:
+    rest-client (2.1.0)
+      base64
+      fiddle
+      http-accept (~> 2.1.0)
+      http-cookie (>= 1.0.2, < 2.0)
+      mime-types (>= 1.16, < 4.0)
+      netrc (~> 0.8)
+
 PATH
   remote: .
   specs:
@@ -18,7 +31,7 @@ PATH
 GEM
   remote: https://rubygems.org/
   specs:
-    activesupport (7.1.3.2)
+    activesupport (7.1.5.2)
       base64
       bigdecimal
       concurrent-ruby (~> 1.0, >= 1.0.2)
@@ -59,13 +72,13 @@ GEM
       debug_inspector (>= 1.2.0)
     builder (3.3.0)
     byebug (12.0.0)
-    chef (18.8.11)
-      activesupport (>= 4.2.7.1, <= 7.1.3.2)
+    chef (18.8.46)
+      activesupport (>= 4.2.7.1, <= 7.1.5.2)
       addressable
       aws-sdk-s3 (~> 1.91)
       aws-sdk-secretsmanager (~> 1.46)
-      chef-config (= 18.8.11)
-      chef-utils (= 18.8.11)
+      chef-config (= 18.8.46)
+      chef-utils (= 18.8.46)
       chef-vault
       chef-zero (>= 15.0.21)
       corefoundation (~> 0.3.4)
@@ -88,64 +101,16 @@ GEM
       plist (~> 3.2)
       proxifier2 (~> 1.1)
       syslog-logger (~> 1.6)
-      train-core (~> 3.10, <= 3.12.13)
+      train-core (~> 3.13, >= 3.13.4)
       train-rest (>= 0.4.1)
       train-winrm (~> 0.2.17)
       unf_ext (~> 0.0.8.2)
       uri (~> 1.0.3)
       uuidtools (>= 2.1.5, < 3.0)
       vault (~> 0.18.2)
-    chef (18.8.11-universal-mingw-ucrt)
-      activesupport (>= 4.2.7.1, <= 7.1.3.2)
+    chef-config (18.8.46)
       addressable
-      aws-sdk-s3 (~> 1.91)
-      aws-sdk-secretsmanager (~> 1.46)
-      chef-config (= 18.8.11)
-      chef-powershell (~> 18.1.0)
-      chef-utils (= 18.8.11)
-      chef-vault
-      chef-zero (>= 15.0.21)
-      corefoundation (~> 0.3.4)
-      diff-lcs (>= 1.2.4, < 1.6.0, != 1.4.0)
-      erubis (~> 2.7)
-      ffi (>= 1.15.5, <= 1.16.3)
-      ffi-libarchive (~> 1.0, >= 1.0.3)
-      ffi-yajl (~> 2.2)
-      iniparse (~> 1.4)
-      inspec-core (>= 5, < 6)
-      iso8601 (>= 0.12.1, < 0.14)
-      license-acceptance (>= 1.0.5, < 3)
-      mixlib-archive (>= 0.4, < 2.0)
-      mixlib-authentication (>= 2.1, < 4)
-      mixlib-cli (>= 2.1.1, < 3.0)
-      mixlib-log (>= 2.0.3, < 3.2)
-      mixlib-shellout (>= 3.1.1, < 4.0)
-      net-ftp
-      net-sftp (>= 2.1.2, < 5.0)
-      ohai (~> 18.0)
-      plist (~> 3.2)
-      proxifier2 (~> 1.1)
-      syslog-logger (~> 1.6)
-      train-core (~> 3.10, <= 3.12.13)
-      train-rest (>= 0.4.1)
-      train-winrm (~> 0.2.17)
-      unf_ext (~> 0.0.8.2)
-      uri (~> 1.0.3)
-      uuidtools (>= 2.1.5, < 3.0)
-      vault (~> 0.18.2)
-      win32-api (~> 1.10.0)
-      win32-certstore (~> 0.6.15)
-      win32-event (~> 0.6.1)
-      win32-eventlog (= 0.6.3)
-      win32-mmap (~> 0.4.1)
-      win32-mutex (~> 0.4.2)
-      win32-process (~> 0.9)
-      win32-service (>= 2.1.5, < 3.0)
-      win32-taskscheduler (~> 2.0)
-      wmi-lite (~> 1.0)
-    chef-config (18.8.11)
-      addressable
-      chef-utils (= 18.8.11)
+      chef-utils (= 18.8.46)
       fuzzyurl
       mixlib-config (>= 2.2.12, < 4.0)
       mixlib-shellout (>= 2.0, < 4.0)
@@ -159,7 +124,7 @@ GEM
     chef-telemetry (1.1.1)
       chef-config
       concurrent-ruby (~> 1.0)
-    chef-utils (18.8.11)
+    chef-utils (18.8.46)
       concurrent-ruby
     chef-vault (4.2.5)
       syslog (~> 0.3)
@@ -223,11 +188,12 @@ GEM
       ffi
     ffi-yajl (2.6.0)
       libyajl2 (>= 1.2)
+    fiddle (1.1.8)
     fuzzyurl (0.9.0)
     gssapi (1.3.1)
       ffi (>= 1.0.1)
     hashie (5.0.0)
-    http-accept (1.7.0)
+    http-accept (2.1.1)
     http-cookie (1.1.0)
       domain_name (~> 0.5)
     httpclient (2.9.0)
@@ -235,7 +201,7 @@ GEM
     i18n (1.14.7)
       concurrent-ruby (~> 1.0)
     iniparse (1.5.0)
-    inspec-core (5.22.95)
+    inspec-core (5.23.6)
       addressable (~> 2.4)
       chef-telemetry (~> 1.0, >= 1.0.8)
       cookstyle
@@ -256,7 +222,7 @@ GEM
       sslshake (~> 1.2)
       thor (>= 0.20, < 1.5.0)
       tomlrb (>= 1.2, < 2.1)
-      train-core (~> 3.12.13)
+      train-core (~> 3.13, >= 3.13.4)
       tty-prompt (~> 0.17)
       tty-table (~> 0.10)
     ipaddress (0.8.3)
@@ -358,11 +324,6 @@ GEM
     rainbow (3.1.1)
     rake (13.3.0)
     regexp_parser (2.11.3)
-    rest-client (2.1.0)
-      http-accept (>= 1.7.0, < 2.0)
-      http-cookie (>= 1.0.2, < 2.0)
-      mime-types (>= 1.16, < 4.0)
-      netrc (~> 0.8)
     rexml (3.4.4)
     rspec (3.13.2)
       rspec-core (~> 3.13.0)
@@ -409,7 +370,6 @@ GEM
       unicode-display_width (>= 1.5, < 3.0)
       unicode_utils (~> 1.4)
     strings-ansi (0.2.0)
-    structured_warnings (0.4.0)
     syslog (0.3.0)
       logger
     syslog-logger (1.6.8)
@@ -418,9 +378,9 @@ GEM
       date
     timeout (0.4.3)
     tomlrb (1.3.0)
-    train-core (3.12.13)
+    train-core (3.13.4)
       addressable (~> 2.5)
-      ffi (!= 1.13.0)
+      ffi (~> 1.16.0)
       json (>= 1.8, < 3.0)
       mixlib-shellout (>= 2.0, < 4.0)
       net-scp (>= 1.2, < 5.0)
@@ -493,12 +453,13 @@ PLATFORMS
   x86_64-linux
 
 DEPENDENCIES
-  chef (= 18.8.11)
+  chef (= 18.8.46)
   oc-chef-pedant!
   pry
   pry-byebug
   pry-stack_explorer
   rake
+  rest-client!
 
 BUNDLED WITH
    2.6.9
