@@ -15,12 +15,21 @@
 
 require "pedant/request"
 require "rspec/core/shared_context"
-require "active_support/core_ext/hash/keys"
 require "pedant/concern"
+
+# Simple hash helper to replace ActiveSupport's stringify_keys
+module HashStringifyKeys
+  refine Hash do
+    def stringify_keys
+      transform_keys(&:to_s)
+    end
+  end
+end
 
 module Pedant
   module RSpec
     module RoleUtil
+      using HashStringifyKeys
       extend ::RSpec::Core::SharedContext
       extend ::Pedant::Concern
 

@@ -13,16 +13,30 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# ActiveSupport::Concern is needed to help abstract out the boilerplate for creating includable modules
-# TODO: Consider embedding active_support/concern directly. The difference in license will have to be addressed.
-
-require "active_support/concern"
+# Minimal implementation of the Concern pattern to replace ActiveSupport::Concern
+# This provides the 'included' hook functionality needed by Pedant modules
 
 module Pedant
-  Concern = ActiveSupport::Concern
+  module Concern
+    def self.extended(base)
+      base.instance_variable_set(:@_dependencies, [])
+    end
 
-  # This is a trick passed on by Dan Deleo. This creates a module Pedant::Concern that
-  # is exactly ActiveSupport::Concern. We can then reference Pedant::Concern instead of
-  # ActiveSupport::Concern. If we want to embed ActiveSupport::Concern, we can fill out
-  # Pedant::Concern without having to do a massive refactor.
+    def included(base = nil, &block)
+      if base.nil?
+        raise ArgumentError, "Missing argument: `included' expects a block or a base module" unless block_given?
+
+        @_included_block = block
+      else
+        super
+      end
+    end
+
+    def append_features(base)
+      if instance_variable_defined?(:@_included_block)
+        base.class_eval(&@_included_block)
+      end
+      super
+    end
+  end
 end
