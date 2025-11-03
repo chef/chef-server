@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.10.82 -->
-## [15.10.82](https://github.com/chef/chef-server/tree/15.10.82) (2025-10-31)
+<!-- latest_release 15.10.83 -->
+## [15.10.83](https://github.com/chef/chef-server/tree/15.10.83) (2025-11-03)
 
 #### Merged Pull Requests
-- update activesupport in oc-chef-pedant [#4112](https://github.com/chef/chef-server/pull/4112) ([RoyShravani](https://github.com/RoyShravani))
+- update notice.txt to update Postgres versions correctly [#4116](https://github.com/chef/chef-server/pull/4116) ([kalroy](https://github.com/kalroy))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.10.66 -->
 ### Changes since 15.10.66 release
 
 #### Merged Pull Requests
+- update notice.txt to update Postgres versions correctly [#4116](https://github.com/chef/chef-server/pull/4116) ([kalroy](https://github.com/kalroy)) <!-- 15.10.83 -->
 - update activesupport in oc-chef-pedant [#4112](https://github.com/chef/chef-server/pull/4112) ([RoyShravani](https://github.com/RoyShravani)) <!-- 15.10.82 -->
 - updating notice.txt per instructions [#4113](https://github.com/chef/chef-server/pull/4113) ([sean-sype-simmons](https://github.com/sean-sype-simmons)) <!-- 15.10.81 -->
 - resolving dependabot alerts [#4110](https://github.com/chef/chef-server/pull/4110) ([RoyShravani](https://github.com/RoyShravani)) <!-- 15.10.80 -->
