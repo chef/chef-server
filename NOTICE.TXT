@@ -403,7 +403,7 @@ cacerts | 2022-10-11 | MPL-2.0
 sslshake | 1.3.1 | MPL-2.0
 vault | 0.18.2 | MPL-2.0
 TermReadKey | 2.38 | Public Domain 
-postgresql13 | 13.22 | PostgreSQL
+postgresql13 | 13.22 | Commercial License
 postgresql96-bin | 9.6.23 | PostgreSQL
 chef-server-ctl |  | Proprietary
 cleanup | 1.0.0 | Proprietary
@@ -464,7 +464,7 @@ aws-sdk-secretsmanager	v1.108.0,
 bear	v119234548783af19b8ec75c879c5062676b92571,
 bookshelf,
 Capture-Tiny v0.5,
-chef	v2deeb1a31ea1c2e7f590ea5858ca86bf1e7f496f,
+chef	v18.8.46,
 chef_authn	v57ae954ab231e4cd24740315eddc932aaf5515fc,
 chef_secrets va690fb9f92718bee1249605ebd6718058f38ab32,
 chef-bin v18.8.46,
@@ -5534,7 +5534,7 @@ Exhibit B - "Incompatible With Secondary Licenses" Notice
 
 (13) PostgreSQL License:
 
-Progress Chef Infra Server v15 incorporates postgresql13 v13.21 and postgresql96-bin	v9.6.23.  Such technology is subject to the following terms and conditions:
+Progress Chef Infra Server v15 incorporates postgresql96-bin	v9.6.23.  Such technology is subject to the following terms and conditions:
 
 PostgreSQL is released under the PostgreSQL License, a liberal Open Source license, similar to the BSD or MIT licenses.
 

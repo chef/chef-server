@@ -411,7 +411,7 @@ cacerts | 2022-10-11 | MPL-2.0
 sslshake | 1.3.1 | MPL-2.0
 vault | 0.18.2 | MPL-2.0
 TermReadKey | 2.38 | Public Domain 
-postgresql13 | 13.22 | PostgreSQL
+postgresql13 | 13.22 | Commercial License
 postgresql96-bin | 9.6.23 | PostgreSQL
 chef-server-ctl |  | Proprietary
 cleanup | 1.0.0 | Proprietary
@@ -1390,7 +1390,7 @@ END OF TERMS AND CONDITIONS
 
 (6) GNU General Public License, version 2, with the Classpath Exception
 
-Progress Chef Infra Server v15 incorporates server-open-jre v11.0.28+6.  Such technology is subject to the following terms and conditions:
+Progress Chef Infra Server v15 incorporates server-open-jre v17.0.9+9.  Such technology is subject to the following terms and conditions:
 
 GNU GENERAL PUBLIC LICENSE
 Version 2, June 1991
@@ -5541,7 +5541,7 @@ Exhibit B - "Incompatible With Secondary Licenses" Notice
 
 (13) PostgreSQL License:
 
-Progress Chef Infra Server v15 incorporates postgresql13 v13.21 and postgresql96-bin	v9.6.23.  Such technology is subject to the following terms and conditions:
+Progress Chef Infra Server v15 incorporates postgresql96-bin	v9.6.23.  Such technology is subject to the following terms and conditions:
 
 PostgreSQL is released under the PostgreSQL License, a liberal Open Source license, similar to the BSD or MIT licenses.
 
@@ -5678,7 +5678,7 @@ If you redistribute modified sources, we would appreciate that you include in th
 2.	Special Notices Regarding Commercially Licensed Third-Party Components incorporated into the Product: 
 
 Progress Chef Infra Server v15 incorporates OpenSearch 1.3.20 licensed from TuxCare.
-
+Progress Chef Infra Server v15 incorporates PostgreSQL 13.22 licensed from TuxCare.
 
 3.	Special Notices Regarding Progress Product Components incorporated into the Product:
 
