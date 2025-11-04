@@ -155,6 +155,7 @@ steps:
           - PEDANT_OPTS="--skip-oc_id"
           - BUNDLE_GEMFILE=/workdir/oc-chef-pedant/Gemfile
           - IS_AUTOMATE=false
+          - CHEF_VERSION="18.8.46"
 
 - label: With ChefFS=1
   command:
