@@ -14,7 +14,7 @@
 # limitations under the License.
 
 # Minimal implementation of the Concern pattern to replace ActiveSupport::Concern
-# This provides the 'included' hook functionality needed by Pedant modules
+# This provides the 'included' hook functionality and ClassMethods extension needed by Pedant modules
 
 module Pedant
   module Concern
@@ -33,9 +33,17 @@ module Pedant
     end
 
     def append_features(base)
+      # Execute the included block in the context of the base class
       if instance_variable_defined?(:@_included_block)
         base.class_eval(&@_included_block)
       end
+      
+      # Automatically extend base with ClassMethods if it exists
+      # This is the key feature of ActiveSupport::Concern
+      if const_defined?(:ClassMethods)
+        base.extend const_get(:ClassMethods)
+      end
+      
       super
     end
   end

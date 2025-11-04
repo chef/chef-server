@@ -18,6 +18,11 @@ require "pedant/rspec/validations"
 
 describe "Client API endpoint", :clients do
   include Pedant::RSpec::ClientUtil
+  # Explicitly extend client util class-level macros to ensure availability in nested contexts.
+  # In some CI environments ActiveSupport::Concern did not attach ClassMethods early enough,
+  # leading to NameError: undefined method `should_create_public_key`. This safeguard makes
+  # the macro definitions (e.g., should_create_public_key, should_update_public_key) available.
+  extend Pedant::RSpec::ClientUtil::ClassMethods unless respond_to?(:should_create_public_key)
 
   # Just until we rename the requestors
   let(:admin_requestor)  { org_admin }
