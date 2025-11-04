@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+require "pedant/concern"
 require "mixlib/shellout" unless defined?(Mixlib::ShellOut)
 require "pathname" unless defined?(Pathname)
 

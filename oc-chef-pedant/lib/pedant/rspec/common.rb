@@ -301,11 +301,11 @@ module Pedant
 
         # Timestamp suffixes
         # Suffix unique between runs. Timestamp is generated once per pedant run
-        shared(:pedant_suffix) { suffix_for_names.call(platform.pedant_run_timestamp) }
+        let(:pedant_suffix) { suffix_for_names.call(platform.pedant_run_timestamp) }
 
         # Suffix unique to the example, bound to a let().
-        shared(:unique_suffix) { suffix_for_names.call(platform.timestamp) }
-        shared(:suffix_for_names) { ->(t) { "#{t.to_i}-#{t.nsec}-#{Process.pid}" } }
+        let(:unique_suffix) { suffix_for_names.call(platform.timestamp) }
+        let(:suffix_for_names) { ->(t) { "#{t.to_i}-#{t.nsec}-#{Process.pid}" } }
 
         # The suffix is unique for Pedant runs, but not within each pedant run.
         # For a unique timestamp within a Pedant run, use platform.timestamp

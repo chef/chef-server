@@ -23,7 +23,11 @@ module Pedant
       mock_platform = Object.new
       def mock_platform.before_configure_rspec; end
       def mock_platform.configure_rspec; end
+      def mock_platform.setup; end
+      def mock_platform.cleanup; end
       def mock_platform.pedant_run_timestamp; Time.now.to_i; end
+      def mock_platform.stats_password; 'mock_password'; end
+      def mock_platform.webui_key; nil; end  # OSS specs check for this
       
       # Set the platform before configure_rspec is called
       Pedant.config.define_singleton_method(:pedant_platform) { mock_platform }
