@@ -29,6 +29,7 @@ require "pedant/request"
 require "pedant/platform"
 require "pedant/config"
 require "pedant/utility"
+require "pedant/hash_stringify_keys" # Provide Hash#stringify_keys globally (replaces refinement usage)
 require "pedant/sandbox"
 require "pedant/chef_utility"
 require "pedant/command_line"
