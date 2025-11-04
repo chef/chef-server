@@ -22,6 +22,7 @@ module Pedant
     require "rest_client"
     require "mixlib/shellout" unless defined?(Mixlib::ShellOut)
     require "uuidtools"
+    require "pedant/json"
     include Pedant::JSON
 
     # TODO: alternative suggestions?
@@ -34,28 +35,8 @@ module Pedant
       $server_api_version
     end
 
-    # Grab the the version of Chef / Knife that's on the box in order
-    # to properly set the X-Chef-Version header
-    KNIFE_VERSION = begin
-                      # Historically we've not included chef in our Gemfile/lock, so this always fails.
-                      require "chef/version"
-                      Chef::VERSION
-                    rescue LoadError
-                      # This apparently is needed in some cases for pedant to work. We should
-                      # explore whether we can simplify this mess
-                      #
-                      # Don't want Bundler to poison the shelling out :(
-                      cmd = Mixlib::ShellOut.new("knife --version", environment: {
-                                                   "BUNDLE_GEMFILE" => nil,
-                                                   "BUNDLE_BIN_PATH" => nil,
-                                                   "GEM_PATH" => nil,
-                                                   "GEM_HOME" => nil,
-                                                   "RUBYOPT" => nil,
-                                                 })
-                      cmd.run_command
-                      cmd.stdout =~ /^Chef(?:\s+Infra Client)?: (.*)$/
-                      $1 || raise("Cannot determine Chef version from output of `knife --version`: '#{cmd.stdout}'")
-                    end
+    KNIFE_VERSION = "18.8.46" # Hardcoded for now since we removed chef from the Gemfile. Why on earth would we need the entire chef gem just to get a version number?
+    # FYI, this must be a valid, shipping version of Chef, or the server will reject requests.
 
     # Headers that are added to all requests
     def standard_headers
