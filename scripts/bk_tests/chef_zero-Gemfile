@@ -2,7 +2,7 @@ source 'https://rubygems.org'
 
 # Path is relative to this Gemfile location (scripts/bk_tests/)
 # Go up 2 levels to repo root, then into oc-chef-pedant
-gemspec path: File.expand_path('../../oc-chef-pedant', __dir__)
+gem 'oc-chef-pedant', path: File.expand_path('../../oc-chef-pedant', __dir__)
 # For debugging in dvm
 gem 'pry'
 gem 'pry-byebug'
