@@ -400,10 +400,146 @@ dvm start <project_name>    # Start service
 - Use **Elvis** for Erlang style checking
 - Follow existing code formatting patterns
 
-#### Error Handling
-- Use proper error tuples in Erlang: `{ok, Result}` | `{error, Reason}`
-- Implement comprehensive logging for debugging
-- Handle database connection failures gracefully
+## Task Implementation Workflow
+
+### IMPORTANT: All tasks must be prompt-based and interactive
+
+When implementing any task, follow this complete workflow:
+
+### 1. Jira Integration & Requirements Gathering
+- **When a Jira ID is provided**: Use the MCP server to fetch Jira issue details
+- Read and understand the story requirements thoroughly
+- **IMMEDIATELY**: Update Jira ticket status to "In Development" to indicate work has started
+- **Set Product Module**: Update Jira ticket to set the product module to "Courier" for proper categorization
+  - **Field**: Use `customfield_10111` ("Product - Module")
+  - **Format**: `{"customfield_10111": {"value": "Courier"}}`
+  - **Tool**: `mcp_atlassian-mcp_editJiraIssue`
+- Provide summary of requirements and ask for confirmation before proceeding
+
+### 2. Analysis & Planning
+- Analyze the codebase to understand impact areas
+- Identify files that need modification
+- Plan the implementation approach
+- **Prompt**: "Analysis complete. Implementation plan: [summary]. Shall I proceed with implementation?"
+
+### 3. Implementation
+- Create/modify source code following established patterns
+- Ensure all changes follow the coding standards and patterns outlined below
+- **Never modify prohibited files** (build configs, CI files, etc. without explicit permission)
+- **Prompt after each major change**: "Implemented [component]. Summary: [details]. Next step: [next action]. Continue?"
+
+### 4. Unit Testing (MANDATORY)
+- Create comprehensive unit test cases for all new functionality
+- Ensure test coverage remains **> 85%** at all times
+- Use EUnit for Erlang tests, RSpec for Ruby tests
+- Run tests locally to verify functionality
+- **Prompt**: "Unit tests implemented. Coverage verified > 85%. Shall I proceed with final testing?"
+
+### 5. Final Validation
+- Run complete test suite: `make all` for Erlang services, `bundle exec rspec` for Ruby
+- Verify code style compliance: `make elvis` or `bundle exec rubocop`
+- Ensure no regressions in existing functionality
+- **Prompt**: "All tests passed. Code validated. Ready for PR creation?"
+
+### 6. Pull Request Creation & AI Compliance
+- **MANDATORY STEP**: After implementation and testing completion, create PR immediately
+- **Use GitHub CLI** for all Git operations
+- **CRITICAL**: Always use `get_terminal_output` to read command results before proceeding
+- **Step 6.1**: Check git status and verify current branch: `git status`
+- **Step 6.2**: Create branch using Jira ID as branch name (if not already created): `git checkout -b [JIRA_ID]`
+- **Step 6.3**: Add and commit changes with descriptive messages including Jira reference: `git add .` then `git commit -m "[JIRA_ID] - Description"`
+- **Step 6.4**: Push changes: `git push origin [JIRA_ID]` (use `git push -u origin [JIRA_ID]` for first push)
+- **Step 6.5**: Create PR using GitHub CLI with HTML-formatted description including:
+  - `<h3>Summary</h3>` - Brief description of changes
+  - `<h3>Jira Ticket</h3>` - Link to Jira issue with AI assistance note
+  - `<h3>Changes Made</h3>` - Detailed list of modifications
+  - `<h3>Testing</h3>` - Test coverage and validation details
+  - **REQUIRED**: "This work was completed with AI assistance following Progress AI policies"
+- **Step 6.6**: Add `ai-assisted` label to PR (create label if doesn't exist)
+- **Step 6.7**: IMMEDIATELY update Jira ticket custom field `customfield_11170` to "Yes"
+- **Step 6.8**: Add comprehensive work summary comment to Jira ticket including:
+  - Summary of implementation approach
+  - Key changes made and files modified
+  - Testing approach and coverage details
+  - PR link and completion status
+- **Step 6.9**: Verify both PR labels and Jira field updates succeeded
+- **Use ~/.profile for authentication setup**
+- **ALWAYS READ TERMINAL OUTPUT**: Use `get_terminal_output` after each command to verify success
+- **Prompt**: "PR created successfully with AI compliance. Summary: [PR details]. All compliance requirements met?"
+
+### 7. Final Summary & Continuation
+- Provide complete summary of all work performed including PR creation
+- Confirm all AI compliance requirements are met
+- List any remaining tasks or follow-up actions
+- **Always ask**: "Task completed with PR created. Do you want to continue with the next step or task?"
+
+### AI Compliance Requirements
+
+#### 1. AI-Assisted Development & Compliance
+- ✅ Create PR with `ai-assisted` label (if label doesn't exist, create it with description "Work completed with AI assistance following Progress AI policies" and color "9A4DFF")
+- ✅ Include "This work was completed with AI assistance following Progress AI policies" in PR description
+
+#### 2. Jira Ticket Updates (MANDATORY)
+- ✅ **IMMEDIATELY after PR creation**: Update Jira ticket custom field `customfield_11170` ("Does this Work Include AI Assisted Code?") to "Yes"
+- ✅ Use atlassian-mcp tools to update the Jira field programmatically
+- ✅ **CRITICAL**: Use correct field format: `{"customfield_11170": {"value": "Yes"}}`
+- ✅ Verify the field update was successful
+
+#### 3. Documentation Requirements
+- ✅ Reference AI assistance in commit messages where appropriate
+- ✅ Document any AI-generated code patterns or approaches in PR description
+- ✅ Maintain transparency about which parts were AI-assisted vs manual implementation
+
+### Jira Field Specifications
+To avoid confusion, here are the exact field specifications for mandatory Jira updates:
+
+#### Product Module Field (customfield_10111)
+- **Field Name**: "Product - Module"
+- **Field Type**: `option-with-child` (cascading select)
+- **Required Format**: `{"customfield_10111": {"value": "Courier"}}`
+- **Usage**: Set during Step 1 (Jira Integration & Requirements Gathering)
+- **Purpose**: Categorizes work under the Courier product module for proper project tracking
+
+#### AI Assistance Field (customfield_11170)
+- **Field Name**: "Does this Work Include AI Assisted Code?"
+- **Field Type**: `option` (select)
+- **Required Format**: `{"customfield_11170": {"value": "Yes"}}`
+- **Usage**: Set during Step 6 (Pull Request Creation & AI Compliance)
+- **Purpose**: Mandatory compliance field for Progress AI governance and audit trail
+
+### Critical Requirements
+- **Step 1**: IMMEDIATELY update Jira status to "In Development" when starting work
+- **Step 1**: Set product module to "Courier" for proper project categorization
+- **Never skip Step 6** - PR creation is mandatory after implementation
+- **Never skip Jira field updates** - This is required for Progress AI governance
+- **Always add work summary to Jira** - Document implementation approach and changes
+- **Always verify updates succeeded** - Check response from atlassian-mcp tools
+- **Treat as atomic operation** - PR creation and Jira updates should happen together
+- **Double-check before final summary** - Confirm all AI compliance items are completed
+
+### Interactive Development Rules
+
+1. **All tasks are prompt-based** - Always provide status updates and ask for continuation
+2. **Step-by-step progression** - Never skip ahead without user confirmation
+3. **Clear summaries** - After each major step, summarize what was done and what's next
+4. **Explicit continuation** - Always ask "Do you want to continue with the next step?"
+5. **No autonomous changes** - All modifications require user awareness and approval
+6. **Terminal Output Reading** - ALWAYS use `get_terminal_output` after running terminal commands to read and verify results before proceeding
+
+### Terminal Usage Guidelines
+
+- **CRITICAL**: Always use `get_terminal_output` tool after running any terminal command
+- **Verify Success**: Read terminal output to confirm commands executed successfully
+- **Error Handling**: If commands fail, read the error output and address issues before continuing
+- **Command Sequence**: Never run multiple commands without reading output from previous commands
+- **Authentication**: Use `~/.profile` for GitHub CLI and git authentication setup
+
+### Audit Trail
+All AI-assisted work must be traceable through:
+1. GitHub PR labels (`ai-assisted`)
+2. Jira custom field (`customfield_11170` = "Yes") 
+3. PR descriptions mentioning AI assistance
+4. Commit messages where relevant
 
 ## Specific Patterns & Conventions
 
@@ -446,29 +582,25 @@ dvm start <project_name>    # Start service
 
 %% Test fixtures
 setup() ->
-    application:start(crypto),
-    application:start(chef_db),
+    %% Setup code
     ok.
 
 teardown(_) ->
-    application:stop(chef_db),
-    application:stop(crypto).
+    %% Cleanup code
+    ok.
 
 %% Test descriptions
 user_creation_with_valid_data_succeeds_test() ->
-    User = valid_user_data(),
-    ?assertEqual({ok, user_created}, user_manager:create_user(User)).
+    %% Test implementation
+    ok.
 
 user_creation_with_invalid_email_returns_validation_error_test() ->
-    User = invalid_user_data_email(),
-    ?assertMatch({error, {validation_error, invalid_email}}, 
-                 user_manager:create_user(User)).
+    %% Test implementation
+    ?assertEqual({error, invalid_email}, validate_email("not-an-email")).
 
 %% Test data helpers
 valid_user_data() ->
-    #{username => <<"testuser">>,
-      email => <<"test@example.com">>,
-      password => <<"SecurePass123!">>}.
+    #{name => <<"test_user">>, email => <<"test@example.com">>}.
 
 invalid_user_data_email() ->
     (valid_user_data())#{email => <<"not-an-email">>}.
@@ -478,20 +610,22 @@ invalid_user_data_email() ->
 ```erlang
 %% Use meck for external dependencies
 setup_mocks() ->
-    meck:new(chef_db, [unstick]),
-    meck:expect(chef_db, fetch_user, fun(_) -> {ok, mock_user()} end),
-    ok.
+    meck:new(external_service, [non_strict]),
+    meck:expect(external_service, call, fun(_) -> {ok, success} end).
 
 teardown_mocks() ->
-    meck:unload(chef_db).
+    meck:unload(external_service).
 
 %% Verify mock interactions
 test_with_mocks() ->
     setup_mocks(),
-    Result = user_manager:authenticate_user(<<"testuser">>, <<"password">>),
-    ?assert(meck:called(chef_db, fetch_user, ['_'])),
-    ?assertEqual({ok, authenticated}, Result),
-    teardown_mocks().
+    try
+        Result = my_module:function_that_calls_external_service(),
+        ?assertEqual({ok, success}, Result),
+        ?assert(meck:called(external_service, call, ['_']))
+    after
+        teardown_mocks()
+    end.
 ```
 
 #### Ruby Testing Standards
@@ -505,35 +639,16 @@ test_with_mocks() ->
 ```ruby
 # Test organization
 RSpec.describe UserManager do
-  describe '#authenticate_user' do
-    context 'when user exists and password is correct' do
-      let(:user) { create(:user, password: 'SecurePass123!') }
-      
-      it 'returns success with user data' do
-        result = described_class.authenticate_user(user.username, 'SecurePass123!')
-        
-        expect(result).to be_success
-        expect(result.user).to eq(user)
+  describe '#create_user' do
+    context 'with valid user data' do
+      it 'creates a new user successfully' do
+        # Test implementation
       end
     end
     
-    context 'when user does not exist' do
-      it 'returns authentication error' do
-        result = described_class.authenticate_user('nonexistent', 'password')
-        
-        expect(result).to be_failure
-        expect(result.error).to eq('user_not_found')
-      end
-    end
-    
-    context 'when password is incorrect' do
-      let(:user) { create(:user, password: 'SecurePass123!') }
-      
-      it 'returns authentication error' do
-        result = described_class.authenticate_user(user.username, 'wrong_password')
-        
-        expect(result).to be_failure
-        expect(result.error).to eq('invalid_credentials')
+    context 'with invalid email' do
+      it 'returns validation error' do
+        # Test implementation
       end
     end
   end
@@ -542,17 +657,8 @@ end
 # Factory definitions
 FactoryBot.define do
   factory :user do
-    sequence(:username) { |n| "user#{n}" }
-    sequence(:email) { |n| "user#{n}@example.com" }
-    password { 'SecurePass123!' }
-    
-    trait :admin do
-      admin { true }
-    end
-    
-    trait :inactive do
-      active { false }
-    end
+    name { "Test User" }
+    email { "test@example.com" }
   end
 end
 ```
@@ -570,28 +676,20 @@ suite() ->
     [{timetrap, {seconds, 30}}].
 
 init_per_suite(Config) ->
-    application:start(chef_db),
-    setup_test_database(),
+    %% Setup test database
     Config.
 
 end_per_suite(_Config) ->
-    cleanup_test_database(),
-    application:stop(chef_db),
+    %% Cleanup test database
     ok.
 
 init_per_testcase(_TestCase, Config) ->
-    clean_database_tables(),
+    %% Setup for each test
     Config.
 
 test_user_creation_and_retrieval(_Config) ->
-    UserData = #{username => <<"integration_test_user">>,
-                 email => <<"test@integration.com">>},
-    
-    {ok, UserId} = chef_db:create_user(UserData),
-    {ok, RetrievedUser} = chef_db:fetch_user(UserId),
-    
-    ?assertEqual(maps:get(username, UserData), 
-                 maps:get(username, RetrievedUser)).
+    %% Test database operations
+    ok.
 ```
 
 #### API Integration Tests
@@ -607,21 +705,13 @@ test_user_creation_and_retrieval(_Config) ->
 ```erlang
 %% Performance test using basho_bench patterns
 performance_test_user_creation() ->
-    StartTime = erlang:system_time(microsecond),
-    
-    Results = [create_test_user() || _ <- lists:seq(1, 1000)],
-    
-    EndTime = erlang:system_time(microsecond),
-    Duration = EndTime - StartTime,
-    
-    SuccessCount = length([ok || {ok, _} <- Results]),
-    FailureCount = length(Results) - SuccessCount,
-    
-    ?assert(SuccessCount > 950), % 95% success rate
-    ?assert(Duration < 10000000), % Under 10 seconds
-    
-    ct:log("Created ~p users in ~p microseconds (~p success, ~p failures)",
-           [length(Results), Duration, SuccessCount, FailureCount]).
+    %% Measure performance of user creation
+    StartTime = os:timestamp(),
+    Result = create_user(test_user_data()),
+    EndTime = os:timestamp(),
+    Duration = timer:now_diff(EndTime, StartTime),
+    ?assert(Duration < 1000000), % Less than 1 second
+    Result.
 ```
 
 ### Test Data Management
@@ -642,21 +732,21 @@ bundle exec parallel_rspec spec/  # Parallel test execution
 ```ruby
 # Complex test data scenarios
 RSpec.describe CookbookUploadService do
-  let(:organization) { create(:organization, :with_admin_user) }
-  let(:cookbook_data) { build(:cookbook_data, :with_recipes, :with_metadata) }
-  let(:uploader) { organization.admin_users.first }
-  
-  before do
-    stub_external_storage_service
-    setup_test_organization_permissions(organization)
+  let(:organization) { create(:organization) }
+  let(:user) { create(:user, organization: organization) }
+  let(:cookbook_data) do
+    {
+      name: 'apache2',
+      version: '1.0.0',
+      metadata: build(:cookbook_metadata),
+      recipes: [build(:recipe)]
+    }
   end
   
-  it 'processes cookbook upload with all components' do
-    result = described_class.new(organization).upload(cookbook_data, uploader)
-    
+  it 'processes cookbook upload successfully' do
+    service = described_class.new(organization)
+    result = service.upload(cookbook_data, user)
     expect(result).to be_success
-    expect(result.cookbook.version).to eq(cookbook_data.version)
-    expect(result.cookbook.recipes.count).to eq(cookbook_data.recipes.count)
   end
 end
 ```
@@ -770,20 +860,8 @@ docker-compose exec chef-server-ctl chef-server-test  # Run tests
 -spec authenticate_user(Username :: binary(), Password :: binary()) ->
     {ok, auth_token()} | {error, auth_error()}.
 authenticate_user(Username, Password) ->
-    %% Validate input parameters
-    case validate_credentials(Username, Password) of
-        ok ->
-            %% Lookup user in database
-            case user_db:find_by_username(Username) of
-                {ok, User} ->
-                    %% Verify password hash
-                    verify_password_and_generate_token(User, Password);
-                {error, not_found} ->
-                    {error, {auth_error, user_not_found}}
-            end;
-        {error, Reason} ->
-            {error, {validation_error, Reason}}
-    end.
+    %% Implementation details
+    {ok, auth_token}.
 ```
 
 #### Ruby Documentation Standards
@@ -800,62 +878,10 @@ authenticate_user(Username, Password) ->
 # @author Chef Software Inc.
 # @since 2.0.0
 class CookbookUploadService
-  include Logging
-  
-  # Creates a new cookbook upload service for the specified organization
-  #
-  # @param organization [Organization] The organization context for uploads
-  # @param options [Hash] Configuration options
-  # @option options [Integer] :max_size Maximum cookbook size in bytes
-  # @option options [Boolean] :validate_syntax Whether to validate Ruby syntax
-  def initialize(organization, options = {})
+  # Initializes the service with an organization context
+  # @param organization [Organization] The organization for cookbook operations
+  def initialize(organization)
     @organization = organization
-    @options = default_options.merge(options)
-    @validator = CookbookValidator.new(@options)
-  end
-  
-  # Uploads and processes a cookbook within the organization context
-  #
-  # This method performs comprehensive validation of cookbook structure,
-  # metadata, and content before storing in the configured backend.
-  # It also updates search indexes and notifies relevant services.
-  #
-  # @param cookbook_data [Hash] The cookbook data structure
-  # @param uploader [User] The user performing the upload
-  # @return [UploadResult] Result object containing success/failure status
-  # @raise [ValidationError] If cookbook data is invalid
-  # @raise [AuthorizationError] If user lacks upload permissions
-  # @raise [StorageError] If backend storage fails
-  def upload(cookbook_data, uploader)
-    validate_upload_permissions!(uploader)
-    
-    # Validate cookbook structure and content
-    validation_result = @validator.validate(cookbook_data)
-    return validation_result unless validation_result.success?
-    
-    # Process and store cookbook
-    storage_result = store_cookbook(validation_result.processed_data)
-    return storage_result unless storage_result.success?
-    
-    # Update search indexes and notify services
-    update_indexes(storage_result.cookbook)
-    notify_upload_completion(storage_result.cookbook, uploader)
-    
-    UploadResult.success(storage_result.cookbook)
-  rescue StandardError => e
-    log_error("Cookbook upload failed", error: e, cookbook: cookbook_data)
-    UploadResult.failure(e.message)
-  end
-  
-  private
-  
-  # Validates that the user has permission to upload cookbooks
-  # @param user [User] The user to validate
-  # @raise [AuthorizationError] If user lacks permissions
-  def validate_upload_permissions!(user)
-    unless @organization.user_can_upload?(user)
-      raise AuthorizationError, "User #{user.username} cannot upload cookbooks"
-    end
   end
 end
 ```
@@ -955,8 +981,6 @@ end
 
 ## Team Collaboration & Best Practices
 
-## Team Collaboration & Best Practices
-
 ### Code Review Guidelines
 - **Before Submitting**: Review the CODE_REVIEW_CHECKLIST.md
 - **Commit Messages**: Use clear, descriptive commit messages following conventional commits
@@ -1007,20 +1031,27 @@ authenticate_and_authorize(User) ->
 # Avoid: God classes with too many responsibilities
 class UserController
   def create
-    # 100+ lines of user creation, validation, email sending, logging, etc.
+    # User creation logic
+  end
+  
+  def authenticate
+    # Authentication logic
+  end
+  
+  def send_email
+    # Email sending logic
+  end
+  
+  def generate_report
+    # Reporting logic
   end
 end
 
 # Prefer: Single responsibility with service objects
 class UserController
   def create
-    result = UserCreationService.new(user_params).call
-    
-    if result.success?
-      render json: result.user, status: :created
-    else
-      render json: { errors: result.errors }, status: :unprocessable_entity
-    end
+    service = UserCreationService.new(user_params)
+    service.call
   end
 end
 
@@ -1067,11 +1098,11 @@ git push origin feature/descriptive-name
 ```json
 {
   "error": {
-    "code": "RESOURCE_NOT_FOUND",
-    "message": "The requested cookbook could not be found",
+    "code": "ERROR_CODE",
+    "message": "Human readable error message",
     "details": {
-      "cookbook_name": "missing-cookbook",
-      "version": "1.0.0"
+      "field": "specific_field",
+      "reason": "Detailed reason for the error"
     }
   }
 }
@@ -1081,14 +1112,13 @@ git push origin feature/descriptive-name
 ```erlang
 %% Always validate authentication first
 case chef_authn:authenticate_request(Req) of
-    {ok, User} ->
-        case chef_authz:is_authorized(User, Action, Resource) of
+    {ok, #user{} = User} ->
+        case chef_authz:is_authorized(User, Resource, Permission) of
             true -> process_request(Req, User);
             false -> {error, forbidden}
         end;
-    {error, Reason} ->
-        {error, unauthorized}
-end
+    {error, Reason} -> {error, {authentication_failed, Reason}}
+end.
 ```
 
 ## Performance & Scalability
@@ -1104,670 +1134,36 @@ end
 ```erlang
 %% Cache frequently accessed data
 case ets:lookup(cache_table, Key) of
-    [{Key, Value, Timestamp}] ->
-        case is_cache_valid(Timestamp) of
-            true -> {ok, Value};
-            false -> fetch_and_cache(Key)
-        end;
     [] ->
-        fetch_and_cache(Key)
-end
+        Value = expensive_operation(Key),
+        ets:insert(cache_table, {Key, Value, timestamp()}),
+        Value;
+    [{Key, Value, Timestamp}] ->
+        case is_cache_expired(Timestamp) of
+            true ->
+                NewValue = expensive_operation(Key),
+                ets:insert(cache_table, {Key, NewValue, timestamp()}),
+                NewValue;
+            false ->
+                Value
+        end
+end.
 
 %% Cache with TTL management
 -spec cache_with_ttl(Key :: term(), Value :: term(), TTL :: integer()) -> ok.
 cache_with_ttl(Key, Value, TTL) ->
-    ExpiryTime = erlang:system_time(second) + TTL,
+    ExpiryTime = timestamp() + TTL,
     ets:insert(cache_table, {Key, Value, ExpiryTime}),
     ok.
 
 %% Bulk cache operations for performance
 -spec cache_bulk_data(Data :: [{term(), term()}], TTL :: integer()) -> ok.
 cache_bulk_data(Data, TTL) ->
-    ExpiryTime = erlang:system_time(second) + TTL,
-    CacheEntries = [{K, V, ExpiryTime} || {K, V} <- Data],
+    ExpiryTime = timestamp() + TTL,
+    CacheEntries = [{Key, Value, ExpiryTime} || {Key, Value} <- Data],
     ets:insert(cache_table, CacheEntries),
     ok.
 ```
 
 ### Memory Management
 - Monitor memory usage in long-running Erlang processes
-- Use appropriate data structures for large datasets
-- Implement garbage collection strategies where needed
-- Profile memory usage during development
-
-#### Memory Optimization Patterns
-```erlang
-%% Use binary data for large text processing
--spec process_large_text(Text :: binary()) -> binary().
-process_large_text(Text) when is_binary(Text) ->
-    %% Process in chunks to avoid memory spikes
-    ChunkSize = 64000, % 64KB chunks
-    process_text_chunks(Text, ChunkSize, <<>>).
-
-process_text_chunks(<<>>, _Size, Acc) ->
-    Acc;
-process_text_chunks(Text, Size, Acc) when byte_size(Text) =< Size ->
-    ProcessedChunk = process_chunk(Text),
-    <<Acc/binary, ProcessedChunk/binary>>;
-process_text_chunks(Text, Size, Acc) ->
-    <<Chunk:Size/binary, Rest/binary>> = Text,
-    ProcessedChunk = process_chunk(Chunk),
-    process_text_chunks(Rest, Size, <<Acc/binary, ProcessedChunk/binary>>).
-
-%% Efficient list processing
--spec process_large_list(List :: [term()]) -> [term()].
-process_large_list(List) ->
-    %% Use tail recursion to avoid stack overflow
-    process_list_tail(List, []).
-
-process_list_tail([], Acc) ->
-    lists:reverse(Acc);
-process_list_tail([H|T], Acc) ->
-    ProcessedItem = process_item(H),
-    process_list_tail(T, [ProcessedItem|Acc]).
-```
-
-### Concurrency & Process Management
-```erlang
-%% Worker pool pattern for parallel processing
--spec parallel_process(Items :: [term()], WorkerCount :: integer()) -> [term()].
-parallel_process(Items, WorkerCount) ->
-    ChunkSize = max(1, length(Items) div WorkerCount),
-    Chunks = chunk_list(Items, ChunkSize),
-    
-    Workers = [spawn_monitor(fun() -> process_chunk(Chunk) end) || Chunk <- Chunks],
-    collect_results(Workers, []).
-
-collect_results([], Results) ->
-    lists:flatten(lists:reverse(Results));
-collect_results([{Pid, Ref}|Rest], Results) ->
-    receive
-        {'DOWN', Ref, process, Pid, normal} ->
-            collect_results(Rest, Results);
-        {'DOWN', Ref, process, Pid, {result, Result}} ->
-            collect_results(Rest, [Result|Results]);
-        {'DOWN', Ref, process, Pid, Error} ->
-            ?LOG_ERROR("Worker process failed: ~p", [Error]),
-            collect_results(Rest, Results)
-    after 30000 ->
-        ?LOG_ERROR("Worker timeout for process ~p", [Pid]),
-        collect_results(Rest, Results)
-    end.
-```
-
-### Ruby Performance Optimization
-```ruby
-# Efficient database queries with includes
-class CookbookService
-  def load_cookbooks_with_recipes(organization_id)
-    # Avoid N+1 queries
-    Cookbook.joins(:recipes)
-            .includes(:recipes, :dependencies)
-            .where(organization_id: organization_id)
-            .order(:name)
-  end
-  
-  # Batch processing for large datasets
-  def process_large_cookbook_set(cookbooks)
-    cookbooks.find_in_batches(batch_size: 1000) do |batch|
-      process_cookbook_batch(batch)
-    end
-  end
-  
-  # Memory-efficient file processing
-  def process_large_cookbook_file(file_path)
-    File.open(file_path, 'r') do |file|
-      file.each_line.lazy.each_slice(1000) do |lines|
-        process_lines(lines)
-      end
-    end
-  end
-  
-  private
-  
-  def process_cookbook_batch(batch)
-    # Bulk operations instead of individual saves
-    updates = batch.map { |cookbook| prepare_update(cookbook) }
-    Cookbook.upsert_all(updates)
-  end
-end
-```
-
-### Performance Monitoring & Profiling
-```erlang
-%% Performance monitoring with timing
--spec timed_operation(Fun :: fun(), Context :: string()) -> {ok, term()} | {error, term()}.
-timed_operation(Fun, Context) ->
-    StartTime = erlang:system_time(microsecond),
-    
-    Result = try
-        Fun()
-    catch
-        Class:Reason:Stacktrace ->
-            ?LOG_ERROR("Operation ~s failed: ~p:~p", [Context, Class, Reason]),
-            {error, {Class, Reason, Stacktrace}}
-    end,
-    
-    EndTime = erlang:system_time(microsecond),
-    Duration = EndTime - StartTime,
-    
-    case Duration > 1000000 of % Log slow operations (>1s)
-        true -> ?LOG_WARNING("Slow operation ~s took ~p microseconds", [Context, Duration]);
-        false -> ?LOG_DEBUG("Operation ~s completed in ~p microseconds", [Context, Duration])
-    end,
-    
-    Result.
-
-%% Memory usage monitoring
--spec monitor_memory_usage(Process :: pid()) -> ok.
-monitor_memory_usage(Process) ->
-    {memory, Memory} = erlang:process_info(Process, memory),
-    case Memory > 100000000 of % 100MB threshold
-        true -> 
-            ?LOG_WARNING("High memory usage in process ~p: ~p bytes", [Process, Memory]),
-            garbage_collect(Process);
-        false -> 
-            ok
-    end.
-```
-
-### Performance Testing & Benchmarking
-```bash
-# Performance testing commands
-rebar3 proper --numtests=10000     # Property-based performance testing
-basho_bench benchmarks/config     # Load testing with basho_bench
-
-# Ruby performance testing
-bundle exec ruby-prof script.rb   # Profile Ruby code
-bundle exec benchmark-ips         # Benchmark Ruby methods
-```
-
-### Circuit Breaker & Rate Limiting
-```erlang
-%% Circuit breaker for external services
--record(circuit_breaker, {
-    failures = 0 :: integer(),
-    last_failure = undefined :: undefined | integer(),
-    state = closed :: closed | open | half_open
-}).
-
--spec call_with_circuit_breaker(Fun :: fun(), BreakerState :: #circuit_breaker{}) -> 
-    {ok, term(), #circuit_breaker{}} | {error, circuit_open, #circuit_breaker{}}.
-call_with_circuit_breaker(Fun, #circuit_breaker{state = open, last_failure = LastFailure} = Breaker) ->
-    Now = erlang:system_time(second),
-    case Now - LastFailure > 60 of % 60 second timeout
-        true ->
-            call_with_circuit_breaker(Fun, Breaker#circuit_breaker{state = half_open});
-        false ->
-            {error, circuit_open, Breaker}
-    end;
-call_with_circuit_breaker(Fun, Breaker) ->
-    try
-        Result = Fun(),
-        {ok, Result, Breaker#circuit_breaker{failures = 0, state = closed}}
-    catch
-        _:_ ->
-            NewFailures = Breaker#circuit_breaker.failures + 1,
-            NewState = case NewFailures >= 5 of
-                true -> open;
-                false -> closed
-            end,
-            {error, external_service_failure, 
-             Breaker#circuit_breaker{
-                failures = NewFailures,
-                last_failure = erlang:system_time(second),
-                state = NewState
-             }}
-    end.
-```
-
-## Troubleshooting & Debugging
-
-### Common Issues & Solutions
-
-#### Erlang Services
-```bash
-# Check if service is running
-ps aux | grep beam.smp
-
-# Connect to running Erlang node
-erl -name debug@127.0.0.1 -setcookie <cookie> -remsh <node>
-
-# Check memory usage
-observer:start().
-
-# Enable debug logging
-lager:set_loglevel(lager_console_backend, debug).
-```
-
-#### Database Issues
-```bash
-# Check database connections
-chef-server-ctl psql opscode_chef -c "SELECT count(*) FROM pg_stat_activity;"
-
-# Monitor slow queries
-chef-server-ctl psql opscode_chef -c "SELECT query, mean_time FROM pg_stat_statements ORDER BY mean_time DESC LIMIT 10;"
-
-# Database migration status
-cd src/oc_erchef/schema && sqitch status
-```
-
-#### Performance Debugging
-```bash
-# Check system resources
-top -p $(pgrep beam.smp)
-iostat -x 1
-
-# Monitor HTTP responses
-tail -f /var/log/opscode/nginx/access.log | grep "5[0-9][0-9]"
-
-# Database query monitoring
-tail -f /var/log/opscode/postgresql/current | grep "LOG:"
-```
-
-### Logging Best Practices
-```erlang
-%% Include context in log messages
-?LOG_INFO("Processing cookbook upload: ~s version ~s for org ~s", 
-          [CookbookName, Version, OrgName]),
-
-%% Use structured logging for metrics
-?LOG_INFO("Request completed: method=~s path=~s status=~p duration=~pms", 
-          [Method, Path, Status, Duration]),
-
-%% Log errors with full context
-?LOG_ERROR("Database operation failed: operation=~s error=~p context=~p", 
-           [Operation, Error, Context])
-```
-
-## Environment-Specific Considerations
-
-### Development Environment
-- Use DVM for consistent development setup
-- Keep development dependencies separate
-- Use test databases for integration testing
-- Enable debug logging for troubleshooting
-
-### Production Considerations
-- Monitor system metrics (CPU, memory, disk, network)
-- Implement proper log rotation
-- Use connection pooling for database access
-- Configure appropriate timeouts for external services
-- Implement circuit breakers for external dependencies
-
-### Security Best Practices
-- Never commit secrets or credentials to version control
-- Use environment variables for sensitive configuration
-- Implement proper SSL/TLS configuration
-- Validate all user input thoroughly
-- Use parameterized queries to prevent SQL injection
-- Follow the principle of least privilege for service accounts
-- Regularly update dependencies to patch security vulnerabilities
-
-#### Input Validation Patterns
-```erlang
-%% Validate all user inputs before processing
--spec validate_cookbook_name(Name :: binary()) -> {ok, binary()} | {error, invalid_name}.
-validate_cookbook_name(Name) when is_binary(Name) ->
-    case re:run(Name, "^[a-zA-Z0-9_-]+$") of
-        {match, _} when byte_size(Name) =< 255 -> {ok, Name};
-        {match, _} -> {error, name_too_long};
-        nomatch -> {error, invalid_characters}
-    end;
-validate_cookbook_name(_) ->
-    {error, invalid_type}.
-
-%% Sanitize SQL parameters
--spec safe_sql_query(Query :: string(), Params :: [term()]) -> {ok, term()} | {error, term()}.
-safe_sql_query(Query, Params) ->
-    case validate_sql_params(Params) of
-        ok -> sqerl:select(Query, Params);
-        {error, Reason} -> {error, {invalid_params, Reason}}
-    end.
-```
-
-```ruby
-# Strong parameter validation in Rails
-class CookbooksController < ApplicationController
-  private
-  
-  def cookbook_params
-    params.require(:cookbook).permit(:name, :version, :description, metadata: {})
-  end
-  
-  def validate_cookbook_name!(name)
-    unless name.match?(/\A[a-zA-Z0-9_-]+\z/) && name.length <= 255
-      raise ValidationError, "Invalid cookbook name: #{name}"
-    end
-  end
-  
-  # Prevent mass assignment vulnerabilities
-  def safe_user_update
-    user_params = params.require(:user).permit(:email, :display_name)
-    # Never permit sensitive fields like :admin, :api_key directly
-    current_user.update!(user_params)
-  end
-end
-```
-
-#### Authentication & Session Security
-```erlang
-%% Secure token generation
-generate_api_token() ->
-    Bytes = crypto:strong_rand_bytes(32),
-    base64:encode(Bytes).
-
-%% Constant-time password comparison to prevent timing attacks
--spec secure_compare(A :: binary(), B :: binary()) -> boolean().
-secure_compare(A, B) when byte_size(A) =:= byte_size(B) ->
-    crypto:hash_equals(A, B);
-secure_compare(_, _) ->
-    false.
-```
-
-```ruby
-# Secure session management
-class ApplicationController < ActionController::Base
-  # Enable CSRF protection
-  protect_from_forgery with: :exception
-  
-  # Secure session configuration
-  before_action :configure_permitted_parameters, if: :devise_controller?
-  before_action :validate_session_token
-  
-  private
-  
-  def validate_session_token
-    if session[:user_id] && session[:token]
-      unless secure_compare(session[:token], expected_token)
-        reset_session
-        redirect_to login_path, alert: 'Session invalid'
-      end
-    end
-  end
-  
-  def secure_compare(a, b)
-    return false unless a.bytesize == b.bytesize
-    
-    ActiveSupport::SecurityUtils.secure_compare(a, b)
-  end
-end
-```
-
-#### Data Protection & Encryption
-```erlang
-%% Encrypt sensitive data before storage
--spec encrypt_sensitive_data(Data :: binary(), Key :: binary()) -> binary().
-encrypt_sensitive_data(Data, Key) ->
-    IV = crypto:strong_rand_bytes(16),
-    {ok, Ciphertext} = crypto:crypto_one_time(aes_256_cbc, Key, IV, Data, true),
-    <<IV/binary, Ciphertext/binary>>.
-
--spec decrypt_sensitive_data(EncryptedData :: binary(), Key :: binary()) -> {ok, binary()} | {error, term()}.
-decrypt_sensitive_data(<<IV:16/binary, Ciphertext/binary>>, Key) ->
-    try
-        {ok, crypto:crypto_one_time(aes_256_cbc, Key, IV, Ciphertext, false)}
-    catch
-        error:Reason -> {error, {decryption_failed, Reason}}
-    end.
-```
-
-#### Authorization Patterns
-```erlang
-%% Role-based access control
--spec check_permission(User :: user(), Action :: atom(), Resource :: term()) -> boolean().
-check_permission(User, Action, Resource) ->
-    case get_user_permissions(User) of
-        {ok, Permissions} ->
-            case lists:member({Action, Resource}, Permissions) of
-                true -> true;
-                false -> check_inherited_permissions(User, Action, Resource)
-            end;
-        {error, _} -> false
-    end.
-```
-
-#### Security Testing Requirements
-- **Authentication Tests**: Verify all authentication mechanisms
-- **Authorization Tests**: Test access controls for all resources
-- **Input Validation Tests**: Test with malicious input patterns
-- **Encryption Tests**: Verify data encryption/decryption workflows
-- **Session Security Tests**: Test session management and timeout
-- **Vulnerability Scanning**: Regular dependency vulnerability scans
-
-## Maintenance & Operations
-
-### Dependency Management
-```bash
-# Update Erlang dependencies
-make bump_rebars
-
-# Update Ruby dependencies  
-bundle update
-
-# Check for security vulnerabilities
-bundle audit
-```
-
-### Database Maintenance
-```bash
-# Run database migrations
-cd src/oc_erchef/schema && sqitch deploy
-
-# Backup database
-chef-server-ctl backup-data
-
-# Restore database
-chef-server-ctl restore-data backup.tar.gz
-```
-
-### Monitoring & Alerting
-- Monitor service health endpoints
-- Set up alerts for error rates and response times
-- Monitor database performance metrics
-- Track resource utilization trends
-- Implement proper log aggregation and analysis
-
-## Common Coding Patterns & Examples
-
-### Erlang Service Module Pattern
-```erlang
--module(my_service).
--behaviour(gen_server).
-
-%% API
--export([start_link/0, process_request/1]).
-
-%% gen_server callbacks
--export([init/1, handle_call/3, handle_cast/2, handle_info/2]).
-
--include("my_service.hrl").
-
-%% API Functions
--spec start_link() -> {ok, pid()} | {error, term()}.
-start_link() ->
-    gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
-
--spec process_request(Request :: term()) -> {ok, term()} | {error, term()}.
-process_request(Request) ->
-    gen_server:call(?MODULE, {process, Request}).
-
-%% gen_server callbacks
-init([]) ->
-    ?LOG_INFO("Starting ~p", [?MODULE]),
-    {ok, #state{}}.
-
-handle_call({process, Request}, _From, State) ->
-    case validate_request(Request) of
-        {ok, ValidRequest} ->
-            Result = do_process(ValidRequest),
-            {reply, {ok, Result}, State};
-        {error, Reason} ->
-            ?LOG_ERROR("Invalid request: ~p", [Reason]),
-            {reply, {error, invalid_request}, State}
-    end.
-```
-
-### Ruby Service Class Pattern
-```ruby
-class ChefServerService
-  include Logging
-  
-  def initialize(config = {})
-    @config = config
-    @client = setup_client
-  end
-  
-  def process_request(request)
-    validate_request!(request)
-    
-    result = with_retry(max_attempts: 3) do
-      perform_operation(request)
-    end
-    
-    log_success(request, result)
-    result
-  rescue ValidationError => e
-    log_error("Request validation failed", error: e, request: request)
-    raise
-  rescue StandardError => e
-    log_error("Unexpected error processing request", error: e, request: request)
-    raise ServiceError, "Failed to process request"
-  end
-  
-  private
-  
-  def validate_request!(request)
-    raise ValidationError, "Request cannot be nil" if request.nil?
-    # Additional validation logic
-  end
-  
-  def perform_operation(request)
-    # Core business logic
-  end
-end
-```
-
-### Database Access Pattern (Erlang)
-```erlang
-%% Using sqerl for database operations
--spec fetch_user_by_id(UserId :: binary()) -> {ok, user()} | {error, term()}.
-fetch_user_by_id(UserId) ->
-    case sqerl:select(fetch_user_by_id, [UserId]) of
-        {ok, []} ->
-            {error, not_found};
-        {ok, [Row]} ->
-            {ok, row_to_user(Row)};
-        {error, Reason} ->
-            ?LOG_ERROR("Database error fetching user ~s: ~p", [UserId, Reason]),
-            {error, database_error}
-    end.
-
-%% Prepared statement in SQL file
-%% -- name: fetch_user_by_id
-%% SELECT id, username, email, created_at
-%% FROM users
-%% WHERE id = $1;
-```
-
-### Configuration Management Pattern
-```erlang
-%% Environment-specific configuration
-get_config(Key) ->
-    case application:get_env(my_app, Key) of
-        {ok, Value} -> Value;
-        undefined -> 
-            ?LOG_WARNING("Missing configuration for ~p, using default", [Key]),
-            get_default_config(Key)
-    end.
-
-get_default_config(database_pool_size) -> 10;
-get_default_config(request_timeout) -> 30000;
-get_default_config(_) -> undefined.
-```
-
-## Development Best Practices Summary
-
-### Code Quality Checklist
-- [ ] **Readability**: Code is self-documenting with clear variable and function names
-- [ ] **Error Handling**: All error cases are handled appropriately
-- [ ] **Logging**: Appropriate log levels with sufficient context
-- [ ] **Testing**: Comprehensive tests covering happy path and edge cases
-- [ ] **Documentation**: Complex logic is documented
-- [ ] **Security**: No hardcoded secrets, proper input validation
-- [ ] **Performance**: Efficient algorithms and data structures
-- [ ] **Maintainability**: Code follows established patterns and conventions
-
-### Pre-Commit Checklist
-```bash
-# Run before committing
-make all                    # Build and test
-./scripts/elvis rock        # Style check (Erlang)
-bundle exec rubocop         # Style check (Ruby)
-git add -A && git status    # Review changes
-git commit -m "feat: descriptive commit message"
-```
-
-### Testing Strategy
-1. **Unit Tests**: Test individual functions/modules in isolation
-2. **Integration Tests**: Test service interactions and database operations  
-3. **API Tests**: Test REST endpoints with oc-chef-pedant
-4. **Performance Tests**: Benchmark critical paths
-5. **Security Tests**: Validate authentication and authorization
-
-### Documentation Standards
-- **API Changes**: Update OpenAPI specs and documentation
-- **Configuration**: Document new settings in README files
-- **Architecture**: Update architecture diagrams for significant changes
-- **Troubleshooting**: Add common issues to troubleshooting guides
-- **Examples**: Provide working code examples for complex features
-
-## Onboarding New Team Members
-
-### Getting Started
-1. **Repository Setup**: Clone repo, follow dev/README.md setup
-2. **Development Environment**: Set up DVM with `vagrant up`
-3. **Build Verification**: Ensure all services build successfully
-4. **Test Execution**: Run test suites to verify environment
-5. **Documentation Review**: Read architecture and API documentation
-
-### Learning Path
-1. **Week 1**: Understand architecture, set up development environment
-2. **Week 2**: Make small bug fixes to learn codebase patterns
-3. **Week 3**: Implement small features with mentorship
-4. **Week 4**: Participate in code reviews and testing processes
-
-### Mentorship Guidelines
-- **Buddy System**: Assign experienced team member as mentor
-- **Regular Check-ins**: Weekly one-on-ones for first month
-- **Code Review Focus**: Provide detailed feedback on first PRs
-- **Documentation**: Encourage questions and documentation improvements
-
-## IDE and Tool Recommendations
-
-### Recommended Extensions/Plugins
-- **Erlang**: erlang-ls (Language Server), elvis (Linting)
-- **Ruby**: Solargraph (Language Server), RuboCop (Linting)
-- **Git**: GitLens for enhanced Git integration
-- **Testing**: Test coverage visualization extensions
-- **Database**: PostgreSQL client extensions
-
-### Useful Tools
-```bash
-# Erlang tools
-observer:start().          # GUI for process monitoring
-recon:info(Pid).          # Process information
-lager:set_loglevel(lager_console_backend, debug).
-
-# Ruby tools  
-pry                       # Interactive debugger
-bundle exec rails console # Rails console
-bundle audit              # Security vulnerability scanning
-
-# System tools
-htop                      # Process monitoring
-iotop                     # I/O monitoring  
-tcpdump                   # Network packet analysis
-```
-
-This comprehensive instruction set provides GitHub Copilot with deep context about Chef Server development practices, enabling it to generate more accurate, consistent, and helpful code suggestions for all team members regardless of their experience level with the codebase.
