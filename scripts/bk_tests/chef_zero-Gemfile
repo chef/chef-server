@@ -17,6 +17,8 @@ gem 'pry'
 gem 'pry-byebug'
 gem 'pry-stack_explorer'
 gem 'rake'
+# rest-client fork with UCRT Windows support
+gem 'rest-client', git: 'https://github.com/chef/rest-client', branch: 'jfm/ucrt_update1'
 
 # Chef gem not needed - chef-zero now uses ENV['CHEF_VERSION'] instead of Chef::VERSION
 # gem 'chef',  "~> 18.8.46"
