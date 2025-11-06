@@ -1,5 +1,6 @@
+require "pedant/rspec/common"
 
-context "Server API Versioning", :server_api_version, :smoke do
+describe "Server API Versioning", :server_api_version, :smoke do
   it "GET /server_api_version should respond with valid current server api version data" do
     r = get("#{platform.server}/server_api_version", superuser)
     r.should look_like(status_for_json: 200)
@@ -26,7 +27,7 @@ context "Server API Versioning", :server_api_version, :smoke do
 
   context "any request should validate requested server api version" do
     before(:all) do
-      r = get("#{platform.server}/server_api_version", superuser)
+      r = get("#{Pedant::Config.pedant_platform.server}/server_api_version", superuser)
       data = JSON.parse(r)
       @min_version = data["min_api_version"]
       @max_version = data["max_api_version"]
@@ -58,7 +59,7 @@ context "Server API Versioning", :server_api_version, :smoke do
     end
 
     it "and accepts when it's in valid range of what's supported" do
-      # Note that until we rev api versiona gain, this is the same as exactly maximum...
+      # Note that until we rev api version again, this is the same as exactly maximum...
       get("#{platform.server}/license", superuser, api_version: @min_version + 1).should have_status_code 200
     end
 

@@ -440,11 +440,11 @@ describe "opscode-account groups", :groups do
 
     before(:all) do
       @test_orgname2 = "test-org-#{rand_id}"
-      platform.create_org(@test_orgname2) if Pedant.config[:org][:create_me]
+      Pedant::Config.pedant_platform.create_org(@test_orgname2) if Pedant.config[:org][:create_me]
     end
 
     after(:all) do
-      platform.delete_org(@test_orgname2) if Pedant.config[:org][:create_me]
+      Pedant::Config.pedant_platform.delete_org(@test_orgname2) if Pedant.config[:org][:create_me]
     end
 
     before :each do

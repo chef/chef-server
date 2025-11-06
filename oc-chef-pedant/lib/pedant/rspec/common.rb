@@ -37,6 +37,18 @@ module Pedant
         include Pedant::JSON
         include Pedant::Request
         include Pedant::RSpec::CommonResponses
+        
+        # NOTE: Previously we defined class-level helpers `platform` and `api_url` so they
+        # could be called from before(:all)/after(:all). This encouraged mixing example-
+        # scoped state into group-level hooks and produced large waves of WrongScope style
+        # failures under RSpec 3 when helpers were (indirectly) used during example group
+        # definition. We intentionally remove those singleton methods; only instance-level
+        # helpers remain. For before(:all)/after(:all) use
+        #   Pedant::Config.pedant_platform
+        # or
+        #   Pedant::Config.pedant_platform.api_url("/path")
+        # explicitly. This makes scope usage explicit and prevents accidental memoization
+        # leakage across examples.
 
 
         # Request/Response
@@ -405,20 +417,22 @@ module Pedant
           Pedant::OncePerRun.once_per_run(key, &block)
         end
 
+        # platform and api_url helper methods
+        # These instance-level helpers are accessible from examples, let blocks,
+        # before(:each), and after(:each). In before(:all)/after(:all) blocks, use
+        # Pedant::Config.pedant_platform directly to avoid RSpec scope issues.
         def platform
           Pedant::Config.pedant_platform
         end
 
+        def api_url(path_fragment)
+          Pedant::Config.pedant_platform.api_url(path_fragment)
+        end
+        
         ## TODO: Remove this method; we probably don't need to access it directly
         def server
-          platform.server
+          platform
         end
-
-        # construct a complete API URL based on the pre-configured server information
-        def api_url(path_fragment)
-          platform.api_url(path_fragment)
-        end
-
         # Given a response object, verify the HTTP status is in the
         # 200-ish success range and raise an error if it is not. This
         # is intended to be used in helper/util modules where we want
@@ -469,21 +483,21 @@ module Pedant
         ################################################################################
 
         # If these are referenced in before(:all) blocks, use shared() instead of let()
-        shared(:organization)     { platform.test_org }
-        shared(:org)              { platform.test_org.name }
+        shared(:organization)     { Pedant::Config.pedant_platform.test_org }
+        shared(:org)              { Pedant::Config.pedant_platform.test_org.name }
         # TODO look at how these are set up - is accurate?
-        shared(:admin_user)       { platform.admin_user }
-        shared(:org_admin)        { platform.admin_user }
-        shared(:normal_user)      { platform.non_admin_user }
+        shared(:admin_user)       { Pedant::Config.pedant_platform.admin_user }
+        shared(:org_admin)        { Pedant::Config.pedant_platform.admin_user }
+        shared(:normal_user)      { Pedant::Config.pedant_platform.non_admin_user }
 
-        shared(:outside_user)     { platform.bad_user }
+        shared(:outside_user)     { Pedant::Config.pedant_platform.bad_user }
 
         # TODO no such thing - eliminate tests referring to it!
-        shared(:admin_client)     { platform.admin_client }
+        shared(:admin_client)     { Pedant::Config.pedant_platform.admin_client }
         # TODO all non-validator clients are normal clients.
-        shared(:normal_client)    { platform.non_admin_client }
-        shared(:outside_client)   { platform.bad_client }
-        shared(:validator_client) { platform.validator_client }
+        shared(:normal_client)    { Pedant::Config.pedant_platform.non_admin_client }
+        shared(:outside_client)   { Pedant::Config.pedant_platform.bad_client }
+        shared(:validator_client) { Pedant::Config.pedant_platform.validator_client }
 
         shared(:knife_admin)      { admin_user }
         shared(:knife_user)       { normal_user }
@@ -492,18 +506,18 @@ module Pedant
         # away, and all tasks that require its use become methods on the
         # Platform object
 
-        shared(:superuser) { platform.superuser }
-        shared(:superuser_key) { platform.superuser_key }
-        shared(:webui_key) { platform.webui_key }
+        shared(:superuser) { Pedant::Config.pedant_platform.superuser }
+        shared(:superuser_key) { Pedant::Config.pedant_platform.superuser_key }
+        shared(:webui_key) { Pedant::Config.pedant_platform.webui_key }
 
         # Given a requestor, create a new one with the same name, but
         # with the web UI's private key for 'impersonation' tests
         def impersonate(requestor_to_impersonate)
-          Pedant::Requestor.new(requestor_to_impersonate.name, platform.webui_key)
+          Pedant::Requestor.new(requestor_to_impersonate.name, Pedant::Config.pedant_platform.webui_key)
         end
 
         # Need a well-formed yet invalid key for a requestor to test authentiction
-        shared(:bogus_key) { platform.bogus_key }
+        shared(:bogus_key) { Pedant::Config.pedant_platform.bogus_key }
         shared(:invalid_user) { Pedant::Requestor.new("invalid", bogus_key, bogus: true) }
 
         ################################################################################

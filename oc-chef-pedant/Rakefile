@@ -15,7 +15,7 @@ task :chef_zero_spec do
 end
 
 def bundle_exec_with_chef(test_gem, commands)
-  gem_path = Bundler.environment.specs[test_gem].first.full_gem_path
+  gem_path = Bundler.load.specs[test_gem].first.full_gem_path
   @gemfile_path = File.join(gem_path, "Gemfile.#{CURRENT_GEM_NAME}-external-test")
   gemfile = File.open(@gemfile_path, "w")
   begin

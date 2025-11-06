@@ -44,18 +44,18 @@ describe "Server API v1 Behaviors", :api_v1 do
     before(:all) do
       # Note that a client is created by the server during org creation,
       # so we'll want to set our api version from the start.
-      platform.use_max_server_api_version
+      Pedant::Config.pedant_platform.use_max_server_api_version
 
       if Pedant.config[:org][:create_me]
-        platform.create_org(org_name)
+        Pedant::Config.pedant_platform.create_org(org_name)
       end
     end
 
     after(:all) do
       if Pedant.config[:org][:create_me]
-        platform.delete_org(org_name)
+        Pedant::Config.pedant_platform.delete_org(org_name)
       end
-      platform.reset_server_api_version
+      Pedant::Config.pedant_platform.reset_server_api_version
     end
     context "org creation", :organizations do
       let(:test_org_name) { unique_name("apiv1-org-create-test") }

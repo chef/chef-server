@@ -17,11 +17,11 @@ describe "ACL API", :acl do
 
   before(:all) do
     @test_orgname2 = "test-org-#{rand_id}"
-    platform.create_org(@test_orgname2) if Pedant.config[:org][:create_me]
+    Pedant::Config.pedant_platform.create_org(@test_orgname2) if Pedant.config[:org][:create_me]
   end
 
   after(:all) do
-    platform.delete_org(@test_orgname2) if Pedant.config[:org][:create_me]
+    Pedant::Config.pedant_platform.delete_org(@test_orgname2) if Pedant.config[:org][:create_me]
   end
 
   context "/users/<name>/_acl endpoint" do
@@ -1283,11 +1283,11 @@ describe "ACL API", :acl do
 
             context "PUT /#{type}/<name>/_acl/#{permission}" do
               before(:all) do
-                @client_with_dot = platform.create_client("test-client.#{rand_id}")
+                @client_with_dot = Pedant::Config.pedant_platform.create_client("test-client.#{rand_id}")
               end
 
               after(:all) do
-                platform.delete_client(@client_with_dot)
+                Pedant::Config.pedant_platform.delete_client(@client_with_dot)
               end
 
 

@@ -343,10 +343,10 @@ describe "Principals API Endpoint", :principals do
 
     context "[current] v > 0", :api_v1 do
       before(:all) do
-        platform.use_max_server_api_version
+        Pedant::Config.pedant_platform.use_max_server_api_version
       end
       after(:all) do
-        platform.reset_server_api_version
+        Pedant::Config.pedant_platform.reset_server_api_version
       end
       let(:versioned_client_body) { { "principals" => [ client_body ] } }
       let(:versioned_user_body) { { "principals" => [ user_body ] } }

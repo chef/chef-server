@@ -108,7 +108,7 @@ describe "Client keys endpoint", :keys, :client_keys do
         org_admin org_user org_client
         other_org_client other_org_user
       }.each do |name|
-        @keys[name] = platform.gen_rsa_key(name)
+        @keys[name] = Pedant::Config.pedant_platform.gen_rsa_key(name)
       end
     rescue Exception => e
       puts "Error creating keys: #{e.message}"
@@ -117,15 +117,15 @@ describe "Client keys endpoint", :keys, :client_keys do
 
     # orgs static in the tests, only create once
     if Pedant.config[:org][:create_me]
-      @test_org = platform.create_org(org_name)
+      @test_org = Pedant::Config.pedant_platform.create_org(org_name)
     else
-      @test_org = platform.org_from_config
+      @test_org = Pedant::Config.pedant_platform.org_from_config
     end
   end
 
   after(:all) do
     if Pedant.config[:org][:create_me] && Pedant.config[:delete_org]
-      platform.delete_org(org_name)
+      Pedant::Config.pedant_platform.delete_org(org_name)
     end
   end
 
@@ -419,23 +419,23 @@ describe "Client keys endpoint", :keys, :client_keys do
       unless Pedant::Config[:tags].include?("~multiuser")
         # This user is used in more tests than not, so create it for the full context.
         # Leave it up to the tests to determine if they need it associated
-        platform.create_min_user(org_user_name, overrides: org_user_payload).should look_like(status: 201 )
-        platform.create_min_user(org_admin_name, overrides: org_admin_payload).should look_like(status: 201 )
-        platform.associate_user_with_org(org_name, org_admin_user)
-        platform.add_user_to_group(org_name, org_admin_user, "admins")
-        platform.create_org(other_org_name)
-        platform.create_min_user(other_org_user_name, overrides: other_org_user_payload).should look_like(status: 201)
-        platform.associate_user_with_org(other_org_name, other_org_user)
+        Pedant::Config.pedant_platform.create_min_user(org_user_name, overrides: org_user_payload).should look_like(status: 201 )
+        Pedant::Config.pedant_platform.create_min_user(org_admin_name, overrides: org_admin_payload).should look_like(status: 201 )
+        Pedant::Config.pedant_platform.associate_user_with_org(org_name, org_admin_user)
+        Pedant::Config.pedant_platform.add_user_to_group(org_name, org_admin_user, "admins")
+        Pedant::Config.pedant_platform.create_org(other_org_name)
+        Pedant::Config.pedant_platform.create_min_user(other_org_user_name, overrides: other_org_user_payload).should look_like(status: 201)
+        Pedant::Config.pedant_platform.associate_user_with_org(other_org_name, other_org_user)
       end
     end
 
     after :all do
       unless Pedant::Config[:tags].include?("~multiuser")
-        platform.remove_user_from_group(org_name, org_admin_user, "admins", superuser)
-        platform.delete_user(org_admin_user)
-        platform.delete_user(org_user)
-        platform.delete_user(other_org_user)
-        platform.delete_org(other_org_name)
+        Pedant::Config.pedant_platform.remove_user_from_group(org_name, org_admin_user, "admins", superuser)
+        Pedant::Config.pedant_platform.delete_user(org_admin_user)
+        Pedant::Config.pedant_platform.delete_user(org_user)
+        Pedant::Config.pedant_platform.delete_user(other_org_user)
+        Pedant::Config.pedant_platform.delete_org(other_org_name)
       end
     end
 
@@ -844,13 +844,13 @@ describe "Client keys endpoint", :keys, :client_keys do
           before(:all) do
             @client_name_1 = "pedant_test_client_#{rand_id}"
             @client_name_2 = "pedant_test_client_2_#{rand_id}"
-            @client_1 = platform.create_client(@client_name_1, @test_org)
-            @client_2 = platform.create_client(@client_name_2, @test_org)
+            @client_1 = Pedant::Config.pedant_platform.create_client(@client_name_1, @test_org)
+            @client_2 = Pedant::Config.pedant_platform.create_client(@client_name_2, @test_org)
           end
 
           after(:all) do
-            platform.delete_client(@client_1, @test_org)
-            platform.delete_client(@client_2, @test_org)
+            Pedant::Config.pedant_platform.delete_client(@client_1, @test_org)
+            Pedant::Config.pedant_platform.delete_client(@client_2, @test_org)
           end
 
           context "when the first client is making requests with an unmodified public_key_read_access group" do
@@ -878,15 +878,15 @@ describe "Client keys endpoint", :keys, :client_keys do
 
           context "when there are multiple users associated to the org", :multiuser do
             before(:all) do
-              @user_1 = platform.create_user("pedant_test_user_#{rand_id}")
-              @user_2 = platform.create_user("pedant_test_user_2_#{rand_id}")
-              platform.associate_user_with_org(org_name, @user_1)
-              platform.associate_user_with_org(org_name, @user_2)
+              @user_1 = Pedant::Config.pedant_platform.create_user("pedant_test_user_#{rand_id}")
+              @user_2 = Pedant::Config.pedant_platform.create_user("pedant_test_user_2_#{rand_id}")
+              Pedant::Config.pedant_platform.associate_user_with_org(org_name, @user_1)
+              Pedant::Config.pedant_platform.associate_user_with_org(org_name, @user_2)
             end
 
             after(:all) do
-              platform.delete_user(@user_1)
-              platform.delete_user(@user_2)
+              Pedant::Config.pedant_platform.delete_user(@user_1)
+              Pedant::Config.pedant_platform.delete_user(@user_2)
             end
 
             context "when the user client is making requests with an unmodified public_key_read_access group" do
