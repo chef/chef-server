@@ -53,7 +53,7 @@ asdf local erlang 26.2.5.14
 erl -eval 'erlang:display(erlang:system_info(otp_release)), halt().' -noshell
 
 echo "Installing Bundler"
-gem install bundler --version '~> 2.1' --no-document
+gem install bundler --version '2.5.23' --no-document
 
 echo "Installing Lua"
 export LUALIB=~/.luarocks/lib/lua/5.2
