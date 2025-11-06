@@ -1,8 +1,17 @@
 source 'https://rubygems.org'
 
-# Path is relative to this Gemfile location (scripts/bk_tests/)
-# Go up 2 levels to repo root, then into oc-chef-pedant
-gem 'oc-chef-pedant', path: File.expand_path('../../oc-chef-pedant', __dir__)
+# Path resolution for sibling oc-chef-pedant:
+# We support multiple checkout layouts (repo at /workdir/chef-server or flattened at /).
+# Try candidates and pick the first that actually contains the gemspec.
+_oc_pedant_candidates = [
+  File.expand_path('../../oc-chef-pedant', __dir__), # typical Windows/local: /workdir/chef-server/scripts/bk_tests -> /workdir/chef-server/oc-chef-pedant
+  File.expand_path('../oc-chef-pedant', __dir__),    # flattened CI: /scripts/bk_tests -> /oc-chef-pedant
+  File.expand_path('../../../oc-chef-pedant', __dir__) # nested scenarios
+].uniq
+_oc_pedant_path = _oc_pedant_candidates.find { |p| File.exist?(File.join(p, 'oc-chef-pedant.gemspec')) }
+raise "Cannot locate oc-chef-pedant gemspec. Tried: #{_oc_pedant_candidates.join(', ')}" unless _oc_pedant_path
+
+gem 'oc-chef-pedant', path: _oc_pedant_path
 # For debugging in dvm
 gem 'pry'
 gem 'pry-byebug'
