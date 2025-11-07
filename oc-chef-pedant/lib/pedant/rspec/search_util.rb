@@ -32,6 +32,11 @@ module Pedant
 
       module ClassMethods
 
+        # Helper for api_url usable from example group scope (not limited to example lets)
+        def util_api_url(path)
+          Pedant::Config.pedant_platform.api_url(path)
+        end
+
         # Given a cookbook name and a version string (e.g., "1.0.0"), generate the legal
         # variants of how the recipe can be represented in a run list
         #
@@ -112,7 +117,7 @@ module Pedant
               admin_user => ["read"]
 
             # A little bit of confirmation that the ACL has applied correctly
-            n = get(api_url("/#{object_type}s/#{base_object_name}_3"), normal_user)
+            n = get(util_api_url("/#{object_type}s/#{base_object_name}_3"), normal_user)
             n.should look_like({ status: 403 })
 
             with_search_polling do
@@ -131,7 +136,7 @@ module Pedant
             let(:search_result_items) { [] }
 
             it "should have multiple #{object_type}s on the system (for our search to ignore)" do
-              r = get(api_url("/#{object_type}s"), requestor)
+              r = get(util_api_url("/#{object_type}s"), requestor)
               r.should have_status_code 200 # basic check
               parsed_body = parse(r)
 
@@ -280,7 +285,7 @@ module Pedant
 
             # This is just a basic check
             it "should have more than just the target of our #{object_type} search on the system" do
-              r = get(api_url("/#{object_type}s"), requestor)
+              r = get(util_api_url("/#{object_type}s"), requestor)
               r.should have_status_code 200 # basic check
               parsed_body = parse(r)
 
@@ -308,7 +313,7 @@ module Pedant
 
             # Another basic check
             it "should have more than just the targets of our #{object_type} search on the system" do
-              r = get(api_url("/#{object_type}s"), requestor)
+              r = get(util_api_url("/#{object_type}s"), requestor)
               r.should have_status_code 200 # basic check
               parsed_body = parse(r)
 

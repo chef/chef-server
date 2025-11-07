@@ -50,7 +50,7 @@ module Pedant
       end
 
       def delete_user(user_name, requestor = superuser)
-        delete(api_url("/users/#{user_name}"), requestor)
+        delete(util_api_url("/users/#{user_name}"), requestor)
       end
 
 
@@ -58,18 +58,18 @@ module Pedant
       # time we run a test?  Check out the groups of the org!
 
       def group_in_org(group_name)
-        response = get(api_url("/groups/#{group_name}"), superuser)
+        response = get(util_api_url("/groups/#{group_name}"), superuser)
         response.code == 200
       end
 
       def member_of_group(user, group_name)
-        response = get(api_url("/groups/#{group_name}"), superuser)
+        response = get(util_api_url("/groups/#{group_name}"), superuser)
         group_info = parse(response)
         group_info["actors"].include?(user.name)
       end
 
       def associated_with_org(user)
-        response = get(api_url("/users"), superuser)
+        response = get(util_api_url("/users"), superuser)
         user_info = parse(response)
 
         # here's what should come back:
@@ -83,6 +83,11 @@ module Pedant
       end
 
       module ClassMethods
+
+        # Helper to access api_url outside example scope (e.g., before(:all)/after(:all))
+        def util_api_url(path)
+          Pedant::Config.pedant_platform.api_url(path)
+        end
 
         def validates_name
           context "when validating 'name' field" do
