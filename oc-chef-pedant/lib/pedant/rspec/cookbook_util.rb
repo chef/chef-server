@@ -32,7 +32,7 @@ module Pedant
       # Returns the entire sandbox JSON as a Ruby hash
       def create_sandbox(files)
         payload = Pedant::Sandbox.create_payload(files)
-        parse(ensure_2xx(post(api_url.call("/sandboxes"),
+        parse(ensure_2xx.call(post(api_url.call("/sandboxes"),
           admin_user,
           payload: payload)))
       end
@@ -53,7 +53,7 @@ module Pedant
           # functions that make use of Tempfile. Since we want the
           # entire contents, rewind before read.
           file.rewind
-          ensure_2xx(put(upload_url, admin_user, payload: file.read,
+          ensure_2xx.call(put(upload_url, admin_user, payload: file.read,
             headers: headers))
         else
           true
@@ -61,7 +61,7 @@ module Pedant
       end
 
       def commit_sandbox(sandbox)
-        ensure_2xx(put(sandbox["uri"],
+        ensure_2xx.call(put(sandbox["uri"],
           admin_user,
           payload: { "is_completed" => true }))
       end
@@ -355,7 +355,7 @@ module Pedant
 
       def make_cookbook(requestor, name, version, opts = {})
         payload = new_cookbook(name, version, opts)
-        ensure_2xx(upload_cookbook(requestor, name, version, payload))
+        ensure_2xx.call(upload_cookbook(requestor, name, version, payload))
       end
 
       def upload_cookbook(requestor, name, version, payload)

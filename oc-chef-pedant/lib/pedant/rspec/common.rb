@@ -422,21 +422,23 @@ module Pedant
         let (:platform) { Pedant::Config.pedant_platform }
 
         let (:api_url) { ->(path_fragment) { Pedant::Config.pedant_platform.api_url(path_fragment) } }
-        
-        ## TODO: Remove this method; we probably don't need to access it directly
-        def server
-          platform
-        end
+
         # Given a response object, verify the HTTP status is in the
         # 200-ish success range and raise an error if it is not. This
         # is intended to be used in helper/util modules where we want
         # to ensure the success of setup and teardown operations.
-        def ensure_2xx(response)
-          if response.code > 299
-            raise "bad response code #{response.code} in response: #{response}"
+        let (:ensure_2xx) do
+          ->(response) do
+            if response.code > 299
+              raise "bad response code #{response.code} in response: #{response}"
+            end
+            response
           end
-
-          response
+        end
+        
+        ## TODO: Remove this method; we probably don't need to access it directly
+        def server
+          platform
         end
 
         ################################################################################
