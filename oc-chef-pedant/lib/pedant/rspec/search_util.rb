@@ -790,7 +790,7 @@ module Pedant
         user = options[:user] || admin_user
         results = options[:results]
         with_search_polling do
-          get(api_url("/search/#{options[:type]}?q=#{options[:query]}"), user) do |response|
+          get(Pedant::Config.pedant_platform.api_url("/search/#{options[:type]}?q=#{options[:query]}"), user) do |response|
             response.should look_like({
                                         status: 200,
                                         body: {
@@ -803,7 +803,7 @@ module Pedant
       end
 
       def search_result(index, query)
-        search_url = api_url(Addressable::URI.encode("/search/#{index}?q=#{query}"))
+        search_url = Pedant::Config.pedant_platform.api_url(Addressable::URI.encode("/search/#{index}?q=#{query}"))
         get(search_url, admin_user)
       end
 
@@ -895,7 +895,7 @@ module Pedant
 
       def should_not_find_any(type)
         with_search_polling do
-          result = authenticated_request(:GET, api_url("/search/#{type}"), requestor, {})
+          result = authenticated_request(:GET, Pedant::Config.pedant_platform.api_url("/search/#{type}"), requestor, {})
           result.should have_status_code 200
           total = parse(result)["total"]
           total.should eq(0)
@@ -903,7 +903,7 @@ module Pedant
       end
 
       def do_paginated_search(type, start = 0, page_size = 1000, rows_accum = [])
-        result = authenticated_request(:GET, api_url("/search/#{type}?start=#{start}&rows=#{page_size}"), requestor, {})
+        result = authenticated_request(:GET, Pedant::Config.pedant_platform.api_url("/search/#{type}?start=#{start}&rows=#{page_size}"), requestor, {})
         result.should have_status_code 200
 
         parsed_result = parse(result)
