@@ -4,7 +4,7 @@ describe "opscode-account groups", :groups do
   let(:org)        { platform.test_org.name }
 
   context "/groups endpoint" do
-    let(:request_url) { api_url("groups") }
+    let(:request_url) { api_url.call("groups") }
     context "GET /groups" do
       # This is only a partial body -- there are other groups as well, but these
       # should all exist for an organization:
@@ -99,7 +99,7 @@ describe "opscode-account groups", :groups do
 
       after :each do
 
-        delete(api_url("/groups/#{new_group}"), platform.admin_user)
+        delete(api_url.call("/groups/#{new_group}"), platform.admin_user)
       rescue
         # Swallow errors attempting to delete the invalid groups we try to create;
         # those tests should either fail before they get here or never actually
@@ -434,7 +434,7 @@ describe "opscode-account groups", :groups do
   end # context /groups endpoint
 
   context "/groups/<name> endpoint" do
-    let(:request_url) { api_url("groups/#{test_group}") }
+    let(:request_url) { api_url.call("groups/#{test_group}") }
     let(:test_group) { "test-group" }
     let(:test_orgname2) { "test-org-#{rand_id}-#{Process.pid}" }
 
@@ -448,7 +448,7 @@ describe "opscode-account groups", :groups do
     end
 
     before :each do
-      post(api_url("groups"), platform.admin_user,
+      post(api_url.call("groups"), platform.admin_user,
         payload: { "id" => test_group }).should look_like({ status: 201 })
     end
 
@@ -511,7 +511,7 @@ describe "opscode-account groups", :groups do
 
       context "normal user without read ACE returns 403", :authorization do
         it "can't read group" do
-          put(api_url("groups/#{test_group}/_acl/read"), platform.admin_user,
+          put(api_url.call("groups/#{test_group}/_acl/read"), platform.admin_user,
             payload: { "read" => {
                 "actors" => [platform.admin_user.name],
                 "groups" => [],
@@ -528,7 +528,7 @@ describe "opscode-account groups", :groups do
       context "normal user without any ACE returns 403", :authorization do
         it "can't read group" do
           %w{read grant update create delete}.each do |permission|
-            put(api_url("groups/#{test_group}/_acl/#{permission}"), platform.admin_user,
+            put(api_url.call("groups/#{test_group}/_acl/#{permission}"), platform.admin_user,
               payload: { permission => {
                   "actors" => [platform.admin_user.name],
                   # Leave admins in the groups, as per ACL policy
@@ -574,10 +574,10 @@ describe "opscode-account groups", :groups do
         let(:missing_group) { "missing-group" }
 
         before(:each) do
-          post(api_url("groups"), platform.admin_user,
+          post(api_url.call("groups"), platform.admin_user,
             payload: { "id" => missing_group }).should look_like({ status: 201 })
           platform.add_group_to_group(org, missing_group, test_group, platform.admin_user)
-          delete(api_url("groups/#{missing_group}"), platform.admin_user)
+          delete(api_url.call("groups/#{missing_group}"), platform.admin_user)
         end
 
         it "can get group", :validation do
@@ -775,7 +775,7 @@ describe "opscode-account groups", :groups do
 
         context "normal user with update ACE" do
           it "can update group", :smoke do
-            put(api_url("groups/#{test_group}/_acl/update"), platform.admin_user,
+            put(api_url.call("groups/#{test_group}/_acl/update"), platform.admin_user,
               payload: { "update" => {
                   "actors" => [platform.non_admin_user.name,
                     platform.admin_user.name, "pivotal"],
@@ -811,7 +811,7 @@ describe "opscode-account groups", :groups do
               # table this for now; it's uncertain under what conditions we
               # would prevent users from removing themselves (or perhaps the
               # last user in a group), so this may not be used at all
-              put(api_url("groups/#{test_group}/_acl/update"), platform.admin_user,
+              put(api_url.call("groups/#{test_group}/_acl/update"), platform.admin_user,
                 payload: { "update" => {
                     "actors" => [platform.non_admin_user.name,
                       platform.admin_user.name, "pivotal"],
@@ -941,7 +941,7 @@ describe "opscode-account groups", :groups do
           }
 
           after :each do
-            delete(api_url("groups/#{new_group_name}"), platform.admin_user)
+            delete(api_url.call("groups/#{new_group_name}"), platform.admin_user)
           end
 
           it "will rename group" do
@@ -952,7 +952,7 @@ describe "opscode-account groups", :groups do
             get(request_url, platform.admin_user).should look_like({
                 status: 404,
               })
-            get(api_url("groups/#{new_group_name}"),
+            get(api_url.call("groups/#{new_group_name}"),
               platform.admin_user).should look_like({
                 status: 200,
                 body_exact: modified_group_body,
@@ -960,7 +960,7 @@ describe "opscode-account groups", :groups do
           end
 
           it "will not overwrite existing group" do
-            post(api_url("groups"), platform.admin_user,
+            post(api_url.call("groups"), platform.admin_user,
               payload: { "id" => new_group_name }).should look_like({ status: 201 })
 
             put(request_url, platform.admin_user,
@@ -971,7 +971,7 @@ describe "opscode-account groups", :groups do
                 status: 200,
                 body_exact: default_group_body,
               })
-            get(api_url("groups/#{new_group_name}"),
+            get(api_url.call("groups/#{new_group_name}"),
               platform.admin_user).should look_like({
                 status: 200,
               })

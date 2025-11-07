@@ -16,11 +16,11 @@ describe "Org Creation", :org_creation do
   let(:request_method) { :GET }
 
   context "when validating default groups" do
-    let(:request_url)    { api_url("/groups") }
+    let(:request_url)    { api_url.call("/groups") }
 
     let(:default_groups) { %w{admins billing-admins clients users} }
     let(:default_group_hash) { Hash[*default_groups.map(&group_to_url).flatten] }
-    let(:group_to_url) { ->(x) { [x, platform.api_url("/groups/#{x}", org)] } }
+    let(:group_to_url) { ->(x) { [x, platform.api_url.call("/groups/#{x}", org)] } }
 
     it "should have default groups" do
       expect(parsed_response).to loosely_match default_group_hash
@@ -29,7 +29,7 @@ describe "Org Creation", :org_creation do
     def self.should_have_group_for(resource, &additional_examples)
       resource = resource.to_s
       context "for #{resource} group" do
-        let(:request_url)       { api_url("/groups/#{resource}") }
+        let(:request_url)       { api_url.call("/groups/#{resource}") }
         let(:expected_response) { ok_exact_response }
         let(:success_message) do
           { "actors" => [superuser_name, owner_name],

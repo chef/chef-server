@@ -32,7 +32,7 @@ describe "Environments API Endpoint", :environments do
   describe "access control" do
     context "GET /environments" do
       it 'returns a 401 ("Unauthorized") for invalid user', :authentication do
-        get(api_url("/environments"),
+        get(api_url.call("/environments"),
           invalid_user) do |response|
             response
               .should look_like({
@@ -45,7 +45,7 @@ describe "Environments API Endpoint", :environments do
       end
 
       it 'returns a 403 ("Forbidden") for outside user', :authorization do
-        get(api_url("/environments"),
+        get(api_url.call("/environments"),
           outside_user) do |response|
             response.should look_like({
                                         status: 403,
@@ -59,16 +59,16 @@ describe "Environments API Endpoint", :environments do
 
     context "GET /environments/<name>" do
       before(:each) do
-        post(api_url("/environments"), admin_user,
+        post(api_url.call("/environments"), admin_user,
           payload: full_environment(new_environment_name))
       end
 
       after(:each) do
-        delete(api_url("/environments/#{new_environment_name}"), admin_user)
+        delete(api_url.call("/environments/#{new_environment_name}"), admin_user)
       end
 
       it 'returns a 200 ("OK") for admin' do
-        get(api_url("/environments/#{new_environment_name}"),
+        get(api_url.call("/environments/#{new_environment_name}"),
           admin_user) do |response|
             response.should look_like({
                                         status: 200,
@@ -78,7 +78,7 @@ describe "Environments API Endpoint", :environments do
       end
 
       it 'returns a 200 ("OK") for normal user' do
-        get(api_url("/environments/#{new_environment_name}"),
+        get(api_url.call("/environments/#{new_environment_name}"),
           normal_user) do |response|
             response.should look_like({
                                         status: 200,
@@ -88,7 +88,7 @@ describe "Environments API Endpoint", :environments do
       end
 
       it 'returns a 401 ("Unauthorized") for invalid user', :authentication do
-        get(api_url("/environments/#{new_environment_name}"),
+        get(api_url.call("/environments/#{new_environment_name}"),
           invalid_user) do |response|
             response.should look_like({
                                         status: 401,
@@ -100,7 +100,7 @@ describe "Environments API Endpoint", :environments do
       end
 
       it 'returns a 403 ("Forbidden") for outside user', :authorization do
-        get(api_url("/environments/#{new_environment_name}"),
+        get(api_url.call("/environments/#{new_environment_name}"),
           outside_user) do |response|
             response.should look_like({
                                         status: 403,
@@ -113,7 +113,7 @@ describe "Environments API Endpoint", :environments do
 
       it 'returns a 404 ("Not Found") for missing environment for admin' do
 
-        get(api_url("/environments/#{non_existent_environment_name}"),
+        get(api_url.call("/environments/#{non_existent_environment_name}"),
           admin_user) do |response|
             response.should look_like({
                                         status: 404,
@@ -126,7 +126,7 @@ describe "Environments API Endpoint", :environments do
 
       it 'returns a 404 ("Not Found") for missing environment for normal user' do
 
-        get(api_url("/environments/#{non_existent_environment_name}"),
+        get(api_url.call("/environments/#{non_existent_environment_name}"),
           normal_user) do |response|
             response.should look_like({
                                         status: 404,
@@ -140,11 +140,11 @@ describe "Environments API Endpoint", :environments do
 
     context "POST /environments" do
       after(:each) do
-        delete(api_url("/environments/#{new_environment_name}"), admin_user)
+        delete(api_url.call("/environments/#{new_environment_name}"), admin_user)
       end
 
       it 'returns a 401 ("Unauthorized") for invalid user', :authentication do
-        post(api_url("/environments"), invalid_user,
+        post(api_url.call("/environments"), invalid_user,
           payload: new_environment(new_environment_name)) do |response|
             response.should look_like({
                                         status: 401,
@@ -156,7 +156,7 @@ describe "Environments API Endpoint", :environments do
 
         # Verify that environment is not created
 
-        get(api_url("/environments/#{new_environment_name}"),
+        get(api_url.call("/environments/#{new_environment_name}"),
           normal_user) do |response|
             response.should look_like({
                                         status: 404,
@@ -168,19 +168,19 @@ describe "Environments API Endpoint", :environments do
       end
 
       it 'returns a 201 ("Created") for normal user' do
-        post(api_url("/environments"), normal_user,
+        post(api_url.call("/environments"), normal_user,
           payload: new_environment(new_environment_name)) do |response|
             response.should look_like({
                                         status: 201,
                                         body: {
-                                          "uri" => api_url("/environments/#{new_environment_name}"),
+                                          "uri" => api_url.call("/environments/#{new_environment_name}"),
                                         },
                                       })
           end
       end
 
       it 'returns a 403 ("Forbidden") for outside user', :authorization do
-        post(api_url("/environments"), outside_user,
+        post(api_url.call("/environments"), outside_user,
           payload: new_environment(new_environment_name)) do |response|
             response.should look_like({
                                         status: 403,
@@ -192,7 +192,7 @@ describe "Environments API Endpoint", :environments do
 
         # Verify that environment is not created
 
-        get(api_url("/environments/#{new_environment_name}"),
+        get(api_url.call("/environments/#{new_environment_name}"),
           normal_user) do |response|
             response.should look_like({
                                         status: 404,
@@ -204,13 +204,13 @@ describe "Environments API Endpoint", :environments do
       end
 
       it 'returns a 201 ("Created") for admin user' do
-        post(api_url("/environments"),
+        post(api_url.call("/environments"),
           admin_user,
           payload: new_environment(new_environment_name)) do |response|
             response.should look_like({
                                         status: 201,
                                         body: {
-                                          "uri" => api_url("/environments/#{new_environment_name}"),
+                                          "uri" => api_url.call("/environments/#{new_environment_name}"),
                                         },
                                       })
           end
@@ -220,7 +220,7 @@ describe "Environments API Endpoint", :environments do
         environment_to_duplicate = new_environment(new_environment_name)
         add_environment(admin_user, environment_to_duplicate)
 
-        post(api_url("/environments"),
+        post(api_url.call("/environments"),
           admin_user,
           payload: environment_to_duplicate) do |response|
             response.should look_like({
@@ -235,16 +235,16 @@ describe "Environments API Endpoint", :environments do
 
     context "PUT /environments/<name>" do
       before(:each) do
-        post(api_url("/environments"), admin_user,
+        post(api_url.call("/environments"), admin_user,
           payload: full_environment(new_environment_name))
       end
 
       after(:each) do
-        delete(api_url("/environments/#{new_environment_name}"), admin_user)
+        delete(api_url.call("/environments/#{new_environment_name}"), admin_user)
       end
 
       it 'returns a 200 ("OK") for admin' do
-        put(api_url("/environments/#{new_environment_name}"),
+        put(api_url.call("/environments/#{new_environment_name}"),
           admin_user, payload: full_environment(new_environment_name)) do |response|
             response.should look_like({
                                         status: 200,
@@ -257,7 +257,7 @@ describe "Environments API Endpoint", :environments do
         update = full_environment(new_environment_name)
         update["description"] = "something different"
 
-        put(api_url("/environments/#{new_environment_name}"), invalid_user,
+        put(api_url.call("/environments/#{new_environment_name}"), invalid_user,
           payload: update) do |response|
             response.should look_like({
                                         status: 401,
@@ -269,7 +269,7 @@ describe "Environments API Endpoint", :environments do
 
         # Verify that environment is not modified
 
-        get(api_url("/environments/#{new_environment_name}"),
+        get(api_url.call("/environments/#{new_environment_name}"),
           admin_user) do |response|
             response
               .should look_like({
@@ -280,7 +280,7 @@ describe "Environments API Endpoint", :environments do
       end
 
       it 'returns a 200 ("OK") for normal user' do
-        put(api_url("/environments/#{new_environment_name}"),
+        put(api_url.call("/environments/#{new_environment_name}"),
           normal_user, payload: full_environment(new_environment_name)) do |response|
             response.should look_like({
                                         status: 200,
@@ -293,7 +293,7 @@ describe "Environments API Endpoint", :environments do
         update = full_environment(new_environment_name)
         update["description"] = "something different"
 
-        put(api_url("/environments/#{new_environment_name}"), outside_user,
+        put(api_url.call("/environments/#{new_environment_name}"), outside_user,
           payload: update) do |response|
             response.should look_like({
                                         status: 403,
@@ -305,7 +305,7 @@ describe "Environments API Endpoint", :environments do
 
         # Verify that environment is not modified
 
-        get(api_url("/environments/#{new_environment_name}"),
+        get(api_url.call("/environments/#{new_environment_name}"),
           admin_user) do |response|
             response
               .should look_like({
@@ -316,7 +316,7 @@ describe "Environments API Endpoint", :environments do
       end
 
       it 'returns a 404 ("Not Found") when PUTting missing environment' do
-        put(api_url("/environments/#{non_existent_environment_name}"),
+        put(api_url.call("/environments/#{non_existent_environment_name}"),
           admin_user, payload: full_environment(new_environment_name)) do |response|
             response.should look_like({
                                         status: 404,
@@ -330,16 +330,16 @@ describe "Environments API Endpoint", :environments do
 
     context "DELETE /environments/<name>" do
       before(:each) do
-        post(api_url("/environments"), admin_user,
+        post(api_url.call("/environments"), admin_user,
           payload: full_environment(new_environment_name))
       end
 
       after(:each) do
-        delete(api_url("/environments/#{new_environment_name}"), admin_user)
+        delete(api_url.call("/environments/#{new_environment_name}"), admin_user)
       end
 
       it 'returns a 200 ("OK") as admin' do
-        delete(api_url("/environments/#{new_environment_name}"),
+        delete(api_url.call("/environments/#{new_environment_name}"),
           admin_user) do |response|
             response.should look_like({
                                         status: 200,
@@ -349,7 +349,7 @@ describe "Environments API Endpoint", :environments do
       end
 
       it 'returns a 200 ("OK") as user' do
-        delete(api_url("/environments/#{new_environment_name}"),
+        delete(api_url.call("/environments/#{new_environment_name}"),
           normal_user) do |response|
             response.should look_like({
                                         status: 200,
@@ -359,7 +359,7 @@ describe "Environments API Endpoint", :environments do
       end
 
       it 'returns a 401 ("Unauthorized") for invalid user', :authentication do
-        delete(api_url("/environments/#{new_environment_name}"),
+        delete(api_url.call("/environments/#{new_environment_name}"),
           invalid_user) do |response|
             response.should look_like({
                                         status: 401,
@@ -371,7 +371,7 @@ describe "Environments API Endpoint", :environments do
 
         # Verify that environment is not deleted
 
-        get(api_url("/environments/#{new_environment_name}"),
+        get(api_url.call("/environments/#{new_environment_name}"),
           admin_user) do |response|
             response.should look_like({
                                         status: 200,
@@ -381,7 +381,7 @@ describe "Environments API Endpoint", :environments do
       end
 
       it 'returns a 403 ("Forbidden") for outside user', :authorization do
-        delete(api_url("/environments/#{new_environment_name}"),
+        delete(api_url.call("/environments/#{new_environment_name}"),
           outside_user) do |response|
             response.should look_like({
                                         status: 403,
@@ -393,7 +393,7 @@ describe "Environments API Endpoint", :environments do
 
         # Verify that environment is not deleted
 
-        get(api_url("/environments/#{new_environment_name}"),
+        get(api_url.call("/environments/#{new_environment_name}"),
           admin_user) do |response|
             response.should look_like({
                                         status: 200,
@@ -404,7 +404,7 @@ describe "Environments API Endpoint", :environments do
 
       it 'returns a 404 ("Not Found") when DELETEing missing environment' do
 
-        delete(api_url("/environments/#{non_existent_environment_name}"),
+        delete(api_url.call("/environments/#{non_existent_environment_name}"),
           admin_user) do |response|
             response.should look_like({
                                         status: 404,

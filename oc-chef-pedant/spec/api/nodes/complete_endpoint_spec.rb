@@ -26,7 +26,7 @@ describe "Testing the Nodes API endpoint", :nodes do
 
   context "GET /nodes" do
     let(:request_method) { :GET }
-    let(:request_url)    { api_url("/nodes") }
+    let(:request_url)    { api_url.call("/nodes") }
 
     context "with no nodes on the server" do
       it "returns a 200 with an empty hash" do
@@ -38,7 +38,7 @@ describe "Testing the Nodes API endpoint", :nodes do
     (1..max_number_of_nodes).each do |num|
       context "with #{num} nodes on the server" do
         let(:nodes) do
-          (1..num).map { |i| new_node(unique_name("pedant_node_list_test_#{i}")) }
+          (1..num).map { |i| new_node(unique_name.call("pedant_node_list_test_#{i}")) }
         end
 
         before :each do
@@ -67,7 +67,7 @@ describe "Testing the Nodes API endpoint", :nodes do
 
   context "GET /nodes/<name>" do
     let(:request_method) { :GET }
-    let(:request_url)    { api_url("/nodes/#{node_name}") }
+    let(:request_url)    { api_url.call("/nodes/#{node_name}") }
 
     context "for a nonexistent node" do
       let(:node_name) { nonexistent_node_name }
@@ -86,7 +86,7 @@ describe "Testing the Nodes API endpoint", :nodes do
 
   context "HEAD /nodes/<name>" do
     let(:request_method) { :HEAD }
-    let(:request_url)    { api_url("/nodes/#{node_name}") }
+    let(:request_url)    { api_url.call("/nodes/#{node_name}") }
 
     context "for a nonexistent node" do
       let(:node_name) { nonexistent_node_name }
@@ -105,7 +105,7 @@ describe "Testing the Nodes API endpoint", :nodes do
 
   context "GET /environments/<environment_name>/nodes" do
     let(:request_method) { :GET }
-    let(:request_url)    { api_url("/environments/#{environment_name}/nodes") }
+    let(:request_url)    { api_url.call("/environments/#{environment_name}/nodes") }
 
     let(:environment_name) { "_default" }
 
@@ -120,12 +120,12 @@ describe "Testing the Nodes API endpoint", :nodes do
     include Pedant::RSpec::Validations::Create
 
     let(:request_method) { :POST }
-    let(:request_url) { api_url "/nodes" }
+    let(:request_url) { api_url.call "/nodes" }
     let(:node) { raise 'Must define a "node" for POST tests!' }
     let(:request_payload) { node }
-    let(:node_name) { unique_name("testing_node" ) }
+    let(:node_name) { unique_name.call("testing_node" ) }
 
-    let(:resource_url) { api_url "/nodes/#{node_name}" }
+    let(:resource_url) { api_url.call "/nodes/#{node_name}" }
     let(:default_resource_attributes) { new_node(node_name) }
     let(:persisted_resource_response) { get(resource_url, platform.admin_client) }
 
@@ -135,7 +135,7 @@ describe "Testing the Nodes API endpoint", :nodes do
 
     context "when validating" do
       after(:each) { delete_node platform.admin_user, resource_name }
-      let(:resource_url) { api_url "/nodes/#{resource_name}" }
+      let(:resource_url) { api_url.call "/nodes/#{resource_name}" }
 
       context "when validating 'name' field" do
         let(:validate_attribute) { "name" }
@@ -402,8 +402,8 @@ describe "Testing the Nodes API endpoint", :nodes do
     include Pedant::RSpec::Validations::Update
 
     let(:request_method)  { :PUT }
-    let(:request_url)     { api_url "/nodes/#{node_name}" }
-    let(:resource_url)    { api_url "/nodes/#{node_name}" }
+    let(:request_url)     { api_url.call "/nodes/#{node_name}" }
+    let(:resource_url)    { api_url.call "/nodes/#{node_name}" }
     let(:node_name)       { "pedant_node_test" }
 
     let(:minimal_node_update) do
@@ -715,7 +715,7 @@ describe "Testing the Nodes API endpoint", :nodes do
 
   context "using DELETE" do
     let(:request_method) { :DELETE }
-    let(:request_url)    { api_url("/nodes/#{node_name}") }
+    let(:request_url)    { api_url.call("/nodes/#{node_name}") }
 
     context "to a node that already exists" do
       include_context "with temporary testing node"

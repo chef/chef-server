@@ -34,7 +34,7 @@ describe "Environments API Endpoint", :environments do
 
     context "PUT /environments" do
       let(:request_method) { :PUT }
-      let(:request_url)    { api_url "/environments" }
+      let(:request_url)    { api_url.call "/environments" }
 
       let(:expected_response) { method_not_allowed_response }
       should_respond_with 405
@@ -42,7 +42,7 @@ describe "Environments API Endpoint", :environments do
 
     context "PUT /environments/<name>" do
       let(:request_method)  { :PUT }
-      let(:request_url)     { api_url "/environments/#{environment_name}" }
+      let(:request_url)     { api_url.call "/environments/#{environment_name}" }
       let(:request_payload) { full_environment(environment_name) }
 
       context "with a non-existent environment" do
@@ -71,7 +71,7 @@ describe "Environments API Endpoint", :environments do
 
     describe "PUT /environments/<name>" do
       let(:request_method) { :PUT }
-      let(:request_url)    { api_url "/environments/#{environment_name}" }
+      let(:request_url)    { api_url.call "/environments/#{environment_name}" }
       let(:request_payload) { new_environment(environment_name) }
       let(:environment_name) { new_environment_name }
 
@@ -405,12 +405,12 @@ describe "Environments API Endpoint", :environments do
         let(:updated_environment) { full_environment(updated_name) }
         let(:updated_name)        { "different_name" }
 
-        after(:each) { delete(api_url("/environments/#{updated_name}"), admin_user) }
+        after(:each) { delete(api_url.call("/environments/#{updated_name}"), admin_user) }
 
         should_respond_with 201, "and the updated environment"
         should_respond_with 201, "and renames the environment" do
-          get(api_url("/environments/#{new_environment_name}"), admin_user).should look_like resource_not_found_response
-          get(api_url("/environments/different_name"), admin_user).should look_like ok_exact_response
+          get(api_url.call("/environments/#{new_environment_name}"), admin_user).should look_like resource_not_found_response
+          get(api_url.call("/environments/different_name"), admin_user).should look_like ok_exact_response
         end
       end
 
@@ -422,9 +422,9 @@ describe "Environments API Endpoint", :environments do
         let(:existing_environment_name) { "existing_environment" }
         let(:existing_environment) { full_environment(existing_environment_name).with(:description, "Existing Environment") }
 
-        let(:assume_existing_environment!) { post(api_url("/environments"), admin_user, payload: existing_environment) }
+        let(:assume_existing_environment!) { post(api_url.call("/environments"), admin_user, payload: existing_environment) }
         let(:create_existing_environment_response) do
-          created_response.with(:body_exact, "uri" => api_url("/environments/#{existing_environment_name}"))
+          created_response.with(:body_exact, "uri" => api_url.call("/environments/#{existing_environment_name}"))
         end
 
         before(:each) do
@@ -437,12 +437,12 @@ describe "Environments API Endpoint", :environments do
 
         # Do not memoize in a let()
         def existing_environment_should_be_untouched
-          get(api_url("/environments/#{existing_environment_name}"), admin_user)
+          get(api_url.call("/environments/#{existing_environment_name}"), admin_user)
             .should look_like ok_response.with(body_exact: existing_environment)
         end
 
         def updated_environment_should_be_untouched
-          get(api_url("/environments/#{new_environment_name}"), admin_user)
+          get(api_url.call("/environments/#{new_environment_name}"), admin_user)
             .should look_like ok_response.with(body_exact: full_environment(new_environment_name))
         end
 
@@ -467,15 +467,15 @@ describe "Environments API Endpoint", :environments do
 
         before(:each) do
           # Verify that _default environment is sane
-          get(api_url("/environments/_default"), admin_user).should look_like ok_response.with(:body_exact, default_environment)
+          get(api_url.call("/environments/_default"), admin_user).should look_like ok_response.with(:body_exact, default_environment)
         end
 
         after(:each) do
           # Verify _default did not change
-          get(api_url("/environments/_default"), admin_user).should look_like ok_response.with(:body_exact, default_environment)
+          get(api_url.call("/environments/_default"), admin_user).should look_like ok_response.with(:body_exact, default_environment)
 
           # Verify that the resource did not change
-          get(api_url("/environments/#{new_environment_name}"), admin_user).should look_like verify_original_response
+          get(api_url.call("/environments/#{new_environment_name}"), admin_user).should look_like verify_original_response
         end
 
 

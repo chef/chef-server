@@ -51,7 +51,7 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
       include Pedant::RSpec::Validations::Create
 
       let(:request_method) { :PUT }
-      let(:request_url) { api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_identifier}") }
+      let(:request_url) { api_url.call("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_identifier}") }
       shared(:requestor) { admin_user }
 
       let(:cookbook_artifact_to_create) { new_cookbook_artifact(cookbook_name, cookbook_identifier) }
@@ -72,7 +72,7 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
           expect(create_response.code.to_s).to eq("201")
 
           # list:
-          list_response = get(api_url("/#{cookbook_url_base}/#{cookbook_name}"), requestor)
+          list_response = get(api_url.call("/#{cookbook_url_base}/#{cookbook_name}"), requestor)
 
           list_data = parse(list_response)
           expect(list_data).to have_key("pedant_basic")
@@ -93,7 +93,7 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
         let(:cookbook_name) { "cookbook_name" }
         let(:cookbook_identifier) { "1111111111111111111111111111111111111111" }
 
-        let(:resource_url) { api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_identifier}") }
+        let(:resource_url) { api_url.call("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_identifier}") }
         let(:persisted_resource_response) { get(resource_url, requestor) }
 
         after(:each) { delete_cookbook_artifact(requestor, cookbook_name, cookbook_identifier) }
@@ -349,7 +349,7 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
             new_cookbook_artifact(cookbook_name, "ffffffffffffffffffffffffffffffffffffffff")
           end
 
-          let(:request_url) { api_url("/#{cookbook_url_base}/#{cookbook_name}/#{default_cookbook_id}") }
+          let(:request_url) { api_url.call("/#{cookbook_url_base}/#{cookbook_name}/#{default_cookbook_id}") }
 
           it "responds with a 400" do
             put(request_url, requestor, payload: payload) do |response|
@@ -366,7 +366,7 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
 
         context "when the cookbook name in the URL doesn't match the payload" do
           let(:payload) { new_cookbook_artifact("foobar", cookbook_version) }
-          let(:request_url) { api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}") }
+          let(:request_url) { api_url.call("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}") }
 
           it "mismatched cookbook_name is a 400" do
             put(request_url, requestor, payload: payload) do |response|
@@ -489,24 +489,24 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
 
       after :each do
         [cookbook_id_1, cookbook_id_2].each do |v|
-          delete(api_url("/#{cookbook_url_base}/#{cookbook_name}/#{v}"), admin_user)
+          delete(api_url.call("/#{cookbook_url_base}/#{cookbook_name}/#{v}"), admin_user)
         end
       end
 
       it "allows us to create 2 revisions of the same cookbook" do
-        put(api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_id_1}"),
+        put(api_url.call("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_id_1}"),
           admin_user,
           payload: cookbook_1_payload) do |response|
             expect(response.code).to eq(201)
           end
 
-        put(api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_id_2}"),
+        put(api_url.call("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_id_2}"),
           admin_user,
           payload: cookbook_2_payload) do |response|
             expect(response.code).to eq(201)
           end
 
-        get(api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_id_1}"),
+        get(api_url.call("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_id_1}"),
           admin_user) do |response|
             response.should look_like({
               status: 200,
@@ -514,7 +514,7 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
             })
           end
 
-        get(api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_id_2}"),
+        get(api_url.call("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_id_2}"),
           admin_user) do |response|
             response.should look_like({
               status: 200,

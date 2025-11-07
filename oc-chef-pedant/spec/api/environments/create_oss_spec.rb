@@ -32,11 +32,11 @@ describe "Environments API Endpoint", :environments do
 
   context "POST /environments" do
     let(:request_method)  { :POST }
-    let(:request_url)     { api_url "/environments" }
+    let(:request_url)     { api_url.call "/environments" }
     let(:request_payload) { full_environment(new_environment_name) }
 
     let(:expected_response) { resource_created_exact_response }
-    let(:created_resource)  { { "uri" => api_url("/environments/#{new_environment_name}") } }
+    let(:created_resource)  { { "uri" => api_url.call("/environments/#{new_environment_name}") } }
     let(:persisted_resource) { get_environment requestor, new_environment_name }
 
     respects_maximum_payload_size
@@ -78,7 +78,7 @@ describe "Environments API Endpoint", :environments do
               .should look_like({
               status: 201,
               body_exact: {
-              "uri" => api_url("/environments/#{new_environment_name}"),
+              "uri" => api_url.call("/environments/#{new_environment_name}"),
             },
             })
           end
@@ -181,7 +181,7 @@ describe "Environments API Endpoint", :environments do
           let(:new_environment_name) { "ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz-0123456789" }
           let(:request_payload) { default_payload }
           let(:expected_response) { created_response }
-          let(:created_resource) { { "uri" => api_url("/environments/#{new_environment_name}") } }
+          let(:created_resource) { { "uri" => api_url.call("/environments/#{new_environment_name}") } }
 
           should_respond_with 201, "and the environment url"
         end

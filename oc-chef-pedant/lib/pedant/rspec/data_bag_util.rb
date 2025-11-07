@@ -76,9 +76,9 @@ module Pedant
         {
           status: 200,
           body_exact: {
-            data_bag_1_name => api_url("/data/#{data_bag_1_name}"),
+            data_bag_1_name => api_url.call("/data/#{data_bag_1_name}"),
 
-            data_bag_2_name => api_url("/data/#{data_bag_2_name}"),
+            data_bag_2_name => api_url.call("/data/#{data_bag_2_name}"),
           },
         }
       end
@@ -100,16 +100,16 @@ module Pedant
         {
           status: 200,
           body_exact: {
-            data_bag_item_1_id => api_url("/data/#{data_bag_name}/#{data_bag_item_1_id}"),
-            data_bag_item_2_id => api_url("/data/#{data_bag_name}/#{data_bag_item_2_id}"),
-            data_bag_item_3_id => api_url("/data/#{data_bag_name}/#{data_bag_item_3_id}"),
+            data_bag_item_1_id => api_url.call("/data/#{data_bag_name}/#{data_bag_item_1_id}"),
+            data_bag_item_2_id => api_url.call("/data/#{data_bag_name}/#{data_bag_item_2_id}"),
+            data_bag_item_3_id => api_url.call("/data/#{data_bag_name}/#{data_bag_item_3_id}"),
           },
         }
       end
 
       let(:data_bag_not_found_response) { http_404_response.with(:body_exact, "error" => ["Cannot load data bag #{data_bag_name}"] ) }
 
-      let(:create_data_bag_success_response) { http_201_response.with(:body_exact, "uri" => api_url("/data/#{data_bag_name}")) }
+      let(:create_data_bag_success_response) { http_201_response.with(:body_exact, "uri" => api_url.call("/data/#{data_bag_name}")) }
       let(:create_data_bag_no_name_failure_response) { http_400_response.with(:body_exact, "error" => ["Field 'name' missing"]) }
       let(:create_data_bag_bad_name_failure_response) { http_400_response.with(:body_exact, "error" => ["Field 'name' invalid"]) }
       let(:create_data_bag_conflict_response) { http_409_response.with(:body_Exact, "error" => ["Data bag already exists"]) }
@@ -351,7 +351,7 @@ module Pedant
       def create_data_bag_item(user, bag_name, item)
         should_be_string(bag_name)
         should_be_hash(item)
-        post(api_url("/data/#{bag_name}"),
+        post(api_url.call("/data/#{bag_name}"),
           user,
           payload: item)
       end
@@ -360,7 +360,7 @@ module Pedant
         should_be_string(bag_name)
         should_be_string(item_id)
         begin
-          delete(api_url("/data/#{bag_name}/#{item_id}"), user)
+          delete(api_url.call("/data/#{bag_name}/#{item_id}"), user)
         rescue URI::InvalidURIError
           # ok
         end
@@ -368,14 +368,14 @@ module Pedant
 
       def create_data_bag(user, bag)
         should_be_hash(bag)
-        post(api_url("/data"),
+        post(api_url.call("/data"),
           user,
           payload: bag)
       end
 
       def delete_data_bag(user, name)
         should_be_string(name)
-        delete(api_url("/data/#{name}"),
+        delete(api_url.call("/data/#{name}"),
           user)
       end
 

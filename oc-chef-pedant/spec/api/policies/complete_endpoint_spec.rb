@@ -52,11 +52,11 @@ describe "Policies API endpoint", :policies do
 
   let(:requestor) { admin_requestor }
 
-  let(:policies_url) { api_url("/policies") }
+  let(:policies_url) { api_url.call("/policies") }
 
-  let(:policy_groups_url) { api_url("/policy_groups") }
+  let(:policy_groups_url) { api_url.call("/policy_groups") }
 
-  let(:static_named_policy_url) { api_url("/policy_groups/some_policy_group/policies/some_policy_name") }
+  let(:static_named_policy_url) { api_url.call("/policy_groups/some_policy_group/policies/some_policy_name") }
 
   let(:minimum_valid_policy_payload) do
     <<-PAYLOAD
@@ -164,7 +164,7 @@ describe "Policies API endpoint", :policies do
       let(:expected_policies_list) do
         {
           "some_policy_name" => {
-            "uri" => api_url("policies/some_policy_name"),
+            "uri" => api_url.call("policies/some_policy_name"),
             "revisions" => {
               "909c26701e291510eacdc6c06d626b9fa5350d25" => {},
             },
@@ -175,7 +175,7 @@ describe "Policies API endpoint", :policies do
       let(:expected_policy_group_list) do
         {
           "some_policy_group" => {
-            "uri" => api_url("policy_groups/some_policy_group"),
+            "uri" => api_url.call("policy_groups/some_policy_group"),
             "policies" => {
               "some_policy_name" => {
                 "revision_id" => "909c26701e291510eacdc6c06d626b9fa5350d25",
@@ -205,7 +205,7 @@ describe "Policies API endpoint", :policies do
       let(:expected_policy_list) do
         {
           "some_policy_name" => {
-            "uri" => api_url("policies/some_policy_name"),
+            "uri" => api_url.call("policies/some_policy_name"),
             "revisions" => {
               "909c26701e291510eacdc6c06d626b9fa5350d25" => {},
             },
@@ -216,7 +216,7 @@ describe "Policies API endpoint", :policies do
       let(:expected_policy_group_list) do
         {
           "some_policy_group" => {
-            "uri" => api_url("policy_groups/some_policy_group"),
+            "uri" => api_url.call("policy_groups/some_policy_group"),
           },
         }
       end
@@ -245,7 +245,7 @@ describe "Policies API endpoint", :policies do
 
       def assoc(policy_data, policy_group)
         policy_name = name_of(policy_data)
-        url = api_url("policy_groups/#{policy_group}/policies/#{policy_name}")
+        url = api_url.call("policy_groups/#{policy_group}/policies/#{policy_name}")
         {
           url: url,
           policy_name: policy_name,
@@ -290,13 +290,13 @@ describe "Policies API endpoint", :policies do
       let(:expected_policies_list) do
         {
           "some_policy_name" => {
-            "uri" => api_url("policies/some_policy_name"),
+            "uri" => api_url.call("policies/some_policy_name"),
             "revisions" => {
               "909c26701e291510eacdc6c06d626b9fa5350d25" => {},
             },
           },
           "appserver" => {
-            "uri" => api_url("policies/appserver"),
+            "uri" => api_url.call("policies/appserver"),
             "revisions" => {
               "1111111111111111111111111111111111111111" => {},
               "2222222222222222222222222222222222222222" => {},
@@ -304,7 +304,7 @@ describe "Policies API endpoint", :policies do
             },
           },
           "db" => {
-            "uri" => api_url("policies/db"),
+            "uri" => api_url.call("policies/db"),
             "revisions" => {
               "6666666666666666666666666666666666666666" => {},
               "7777777777777777777777777777777777777777" => {},
@@ -312,7 +312,7 @@ describe "Policies API endpoint", :policies do
             },
           },
           "cache" => {
-            "uri" => api_url("policies/cache"),
+            "uri" => api_url.call("policies/cache"),
             "revisions" => {
               "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" => {},
               "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb" => {},
@@ -323,7 +323,7 @@ describe "Policies API endpoint", :policies do
 
       let(:expected_dev_group_data) do
         {
-          "uri" => api_url("policy_groups/dev"),
+          "uri" => api_url.call("policy_groups/dev"),
           "policies" => {
             "db" => { "revision_id" => "6666666666666666666666666666666666666666" },
             "appserver" => { "revision_id" => "1111111111111111111111111111111111111111" },
@@ -334,7 +334,7 @@ describe "Policies API endpoint", :policies do
 
       let(:expected_test_group_data) do
         {
-          "uri" => api_url("policy_groups/test"),
+          "uri" => api_url.call("policy_groups/test"),
           "policies" => {
             "db" => { "revision_id" => "7777777777777777777777777777777777777777" },
             "appserver" => { "revision_id" => "2222222222222222222222222222222222222222" },
@@ -345,7 +345,7 @@ describe "Policies API endpoint", :policies do
 
       let(:expected_prod_group_data) do
         {
-          "uri" => api_url("policy_groups/prod"),
+          "uri" => api_url.call("policy_groups/prod"),
           "policies" => {
             "db" => { "revision_id" => "8888888888888888888888888888888888888888" },
             "appserver" => { "revision_id" => "3333333333333333333333333333333333333333" },
@@ -400,7 +400,7 @@ describe "Policies API endpoint", :policies do
 
   describe "Named Policy Groups endpoint /policy_groups/:policy_group_name" do
 
-    let(:named_policy_group_url) { api_url("/policy_groups/example-policy-group") }
+    let(:named_policy_group_url) { api_url.call("/policy_groups/example-policy-group") }
 
     context "when the named group doesn't exist" do
 
@@ -430,7 +430,7 @@ describe "Policies API endpoint", :policies do
 
         let(:expected_body) do
           {
-            "uri" => api_url("policy_groups/example-policy-group"),
+            "uri" => api_url.call("policy_groups/example-policy-group"),
             "policies" => {},
           }
         end
@@ -458,7 +458,7 @@ describe "Policies API endpoint", :policies do
 
         let(:expected_body) do
           {
-            "uri" => api_url("policy_groups/example-policy-group"),
+            "uri" => api_url.call("policy_groups/example-policy-group"),
             "policies" => {
               "some_policy_name" => { "revision_id" => "909c26701e291510eacdc6c06d626b9fa5350d25" },
             },
@@ -492,9 +492,9 @@ describe "Policies API endpoint", :policies do
 
   describe "Named policy endpoint /policies/:policy_name" do
 
-    let(:named_policy_url) { api_url("/policies/example-policy") }
+    let(:named_policy_url) { api_url.call("/policies/example-policy") }
 
-    let(:named_policy_revisions_url) { api_url("/policies/example-policy/revisions") }
+    let(:named_policy_revisions_url) { api_url.call("/policies/example-policy/revisions") }
 
     let(:payload) do
       <<-PAYLOAD
@@ -618,11 +618,11 @@ describe "Policies API endpoint", :policies do
 
   describe "Named policy revision endpoint /policies/:policy_name/revisions/:revision_id" do
 
-    let(:named_policy_url) { api_url("/policies/example-policy") }
+    let(:named_policy_url) { api_url.call("/policies/example-policy") }
 
-    let(:named_revision_url) { api_url("/policies/example-policy/revisions/909c26701e291510eacdc6c06d626b9fa5350d25") }
+    let(:named_revision_url) { api_url.call("/policies/example-policy/revisions/909c26701e291510eacdc6c06d626b9fa5350d25") }
 
-    let(:named_policy_revisions_url) { api_url("/policies/example-policy/revisions") }
+    let(:named_policy_revisions_url) { api_url.call("/policies/example-policy/revisions") }
 
     let(:payload) do
       <<-PAYLOAD
@@ -663,7 +663,7 @@ describe "Policies API endpoint", :policies do
         to_json(data)
       end
 
-      let(:other_revision_url) { api_url("/policies/example-policy/revisions/1111111111111111111111111111111111111111") }
+      let(:other_revision_url) { api_url.call("/policies/example-policy/revisions/1111111111111111111111111111111111111111") }
 
       before do
         expect(post(named_policy_revisions_url, requestor, payload: other_revision).code).to eq(201)
@@ -746,7 +746,7 @@ describe "Policies API endpoint", :policies do
 
   describe "Policy Group Revision Association Endpoint /policy_groups/:policy_group/policies/:policy_name", :policy_group_assoc do
 
-    let(:static_named_policy_url) { api_url("/policy_groups/some_policy_group/policies/some_policy_name") }
+    let(:static_named_policy_url) { api_url.call("/policy_groups/some_policy_group/policies/some_policy_name") }
 
     let(:request_url) { static_named_policy_url }
 
@@ -857,7 +857,7 @@ describe "Policies API endpoint", :policies do
 
           it "PUT /policy_groups/:group_name/policies/:policy_name returns 201" do
             expect(response.code).to eq(201)
-            response = get(api_url("/policies/some_policy_name/revisions/cf0885f3f2f5edaa44bf8d5e5de4c4d0efa51411"), requestor)
+            response = get(api_url.call("/policies/some_policy_name/revisions/cf0885f3f2f5edaa44bf8d5e5de4c4d0efa51411"), requestor)
             expect(parse(response.body)).to eq(parse(canonical_payload_response))
           end
 
@@ -870,7 +870,7 @@ describe "Policies API endpoint", :policies do
 
           it "PUT /policy_groups/:group_name/policies/:policy_name returns 201" do
             expect(response.code).to eq(201)
-            response = get(api_url("/policies/some_policy_name/revisions/909c26701e291510eacdc6c06d626b9fa5350d25"), requestor)
+            response = get(api_url.call("/policies/some_policy_name/revisions/909c26701e291510eacdc6c06d626b9fa5350d25"), requestor)
             expect(parse(response.body)).to eq(parse(minimum_payload_response))
           end
 
@@ -883,7 +883,7 @@ describe "Policies API endpoint", :policies do
 
             # Have to override the URL or else we will hit validation that name in
             # document matches the one in URL
-            let(:static_named_policy_url) { api_url("/policy_groups/some_policy_group/policies/#{name_with_all_valid_chars}") }
+            let(:static_named_policy_url) { api_url.call("/policy_groups/some_policy_group/policies/#{name_with_all_valid_chars}") }
 
             let(:request_payload) do
               mutate_json(minimum_valid_policy_payload) { |p| p["name"] = name_with_all_valid_chars }
@@ -902,7 +902,7 @@ describe "Policies API endpoint", :policies do
 
             # Have to override the URL or else we will hit validation that name in
             # document matches the one in URL
-            let(:static_named_policy_url) { api_url("/policy_groups/some_policy_group/policies/#{max_size_name}") }
+            let(:static_named_policy_url) { api_url.call("/policy_groups/some_policy_group/policies/#{max_size_name}") }
 
             let(:request_payload) do
               mutate_json(minimum_valid_policy_payload) { |p| p["name"] = max_size_name }
@@ -1100,7 +1100,7 @@ describe "Policies API endpoint", :policies do
 
             # Have to override the URL or else we might only hit validation that
             # name in document matches the one in URL
-            let(:static_named_policy_url) { api_url("/policy_groups/some_policy_group/policies/#{long_name_is_long}") }
+            let(:static_named_policy_url) { api_url.call("/policy_groups/some_policy_group/policies/#{long_name_is_long}") }
 
             let(:request_payload) do
               mutate_json(minimum_valid_policy_payload) { |p| p["name"] = long_name_is_long }
@@ -1121,7 +1121,7 @@ describe "Policies API endpoint", :policies do
 
               # Have to override the URL or else we might only hit validation that
               # name in document matches the one in URL
-              let(:static_named_policy_url) { api_url("/policy_groups/some_policy_group/policies/#{encoded_invalid_name}") }
+              let(:static_named_policy_url) { api_url.call("/policy_groups/some_policy_group/policies/#{encoded_invalid_name}") }
 
               let(:request_payload) do
                 mutate_json(minimum_valid_policy_payload) { |p| p["name"] = invalid_policy_name }
@@ -1327,7 +1327,7 @@ describe "Policies API endpoint", :policies do
 
       context "PUT (add to another policy group)" do
 
-        let(:other_named_policy_url) { api_url("/policy_groups/other_policy_group/policies/some_policy_name") }
+        let(:other_named_policy_url) { api_url.call("/policy_groups/other_policy_group/policies/some_policy_name") }
 
         let(:canonical_payload_response) do
           <<-PAYLOAD
@@ -1383,7 +1383,7 @@ describe "Policies API endpoint", :policies do
         it "PUT /policy_groups/:group/policies/:name returns 201" do
           response = put(other_named_policy_url, requestor, payload: canonical_policy_payload)
           expect(response.code).to eq(201)
-          response = get(api_url("/policies/some_policy_name/revisions/cf0885f3f2f5edaa44bf8d5e5de4c4d0efa51411"), requestor)
+          response = get(api_url.call("/policies/some_policy_name/revisions/cf0885f3f2f5edaa44bf8d5e5de4c4d0efa51411"), requestor)
           expect(parse(response.body)).to eq(parse(canonical_payload_response))
         end
 

@@ -37,15 +37,15 @@ describe "Environments API Endpoint", :environments do
 
     context "with no additional environments" do
       context "GET /environments" do
-        let(:request_url) { api_url "/environments" }
+        let(:request_url) { api_url.call "/environments" }
         let(:expected_response) { ok_exact_response }
-        let(:success_message) { { "_default" => api_url("/environments/_default") } }
+        let(:success_message) { { "_default" => api_url.call("/environments/_default") } }
 
         should_respond_with 200
       end
 
       context "GET /environments/_default" do
-        let(:request_url) { api_url "/environments/_default" }
+        let(:request_url) { api_url.call "/environments/_default" }
         let(:expected_response) { ok_exact_response }
         let(:success_message) do
           {
@@ -66,7 +66,7 @@ describe "Environments API Endpoint", :environments do
 
 
       context "with a non-existant environment" do
-        let(:request_url) { api_url "/environments/#{non_existent_environment_name}" }
+        let(:request_url) { api_url.call "/environments/#{non_existent_environment_name}" }
         let(:expected_response) { resource_not_found_exact_response }
         let(:not_found_error_message) { cannot_load_nonexistent_env_msg }
 
@@ -85,43 +85,43 @@ describe "Environments API Endpoint", :environments do
         let(:other_env) { "other_testing_environment" }
 
         before(:each) do
-          delete(api_url("/environments/#{new_environment_name}"), admin_user)
-          delete(api_url("/environments/#{other_env}"), admin_user)
-          post(api_url("/environments"), admin_user,
+          delete(api_url.call("/environments/#{new_environment_name}"), admin_user)
+          delete(api_url.call("/environments/#{other_env}"), admin_user)
+          post(api_url.call("/environments"), admin_user,
             payload: default_payload) do |response|
               response
                 .should look_like({
                 status: 201,
                 body_exact: {
-                "uri" => api_url("/environments/#{new_environment_name}"),
+                "uri" => api_url.call("/environments/#{new_environment_name}"),
               } })
             end
-          post(api_url("/environments"), admin_user,
+          post(api_url.call("/environments"), admin_user,
             payload: make_payload("name" => other_env)) do |response|
               response
                 .should look_like({
                 status: 201,
                 body_exact: {
-                "uri" => api_url("/environments/#{other_env}"),
+                "uri" => api_url.call("/environments/#{other_env}"),
               } })
             end
         end
 
         after(:each) do
-          delete(api_url("/environments/#{other_env}"), admin_user)
+          delete(api_url.call("/environments/#{other_env}"), admin_user)
         end
 
         shared_context "successfully GETs" do
           it "GET /environments succeeds" do
-            response = get(api_url("/environments"), user)
+            response = get(api_url.call("/environments"), user)
             response
               .should look_like({
               status: 200,
               body_exact: {
-              "_default" => api_url("/environments/_default"),
+              "_default" => api_url.call("/environments/_default"),
               new_environment_name =>
-            api_url("/environments/#{new_environment_name}"),
-              "#{other_env}" => api_url("/environments/#{other_env}"),
+            api_url.call("/environments/#{new_environment_name}"),
+              "#{other_env}" => api_url.call("/environments/#{other_env}"),
             } })
           end
         end
@@ -147,7 +147,7 @@ describe "Environments API Endpoint", :environments do
             it "returns 403", :authorization do
               restrict_permissions_to("/containers/environments",
                 normal_user => %w{create update delete grant})
-              response = get(api_url("/environments"), normal_user)
+              response = get(api_url.call("/environments"), normal_user)
               response.should look_like({ status: 403 })
             end
           end
@@ -159,7 +159,7 @@ describe "Environments API Endpoint", :environments do
             # TODO we really should make this person admin of another org, for maximum
             # effectiveness.
             it "returns 403", :authorization do
-              response = get(api_url("/environments"), outside_user)
+              response = get(api_url.call("/environments"), outside_user)
               response.should look_like({ status: 403 })
             end
           end
@@ -168,7 +168,7 @@ describe "Environments API Endpoint", :environments do
 
       context "GET /environments/<name>" do
         let(:request_method) { :GET }
-        let(:request_url)    { api_url "/environments/#{environment_name}" }
+        let(:request_url)    { api_url.call "/environments/#{environment_name}" }
 
         let(:environment_name) { new_environment_name }
 
@@ -204,7 +204,7 @@ describe "Environments API Endpoint", :environments do
             it "returns 403", :authorization do
               restrict_permissions_to("/environments/#{new_environment_name}",
                 normal_user => %w{create update delete grant})
-              response = get(api_url("/environments/#{new_environment_name}"), normal_user)
+              response = get(api_url.call("/environments/#{new_environment_name}"), normal_user)
               response.should look_like({ status: 403 })
             end
 

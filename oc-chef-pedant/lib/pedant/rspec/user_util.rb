@@ -27,8 +27,8 @@ module Pedant
       include Pedant::JSON
       include Pedant::Request
 
-      let(:user_collection_url) { api_url "/users" }
-      let(:authenticate_user_url) { api_url "/authenticate_user" }
+      let(:user_collection_url) { api_url.call "/users" }
+      let(:authenticate_user_url) { api_url.call "/authenticate_user" }
       let(:default_user_password) { "opensesame123" }
       let(:default_user_attributes) do
         {
@@ -50,7 +50,7 @@ module Pedant
       end
 
       def delete_user(user_name, requestor = superuser)
-        delete(api_url("/users/#{user_name}"), requestor)
+        delete(api_url.call("/users/#{user_name}"), requestor)
       end
 
 
@@ -58,18 +58,18 @@ module Pedant
       # time we run a test?  Check out the groups of the org!
 
       def group_in_org(group_name)
-        response = get(api_url("/groups/#{group_name}"), superuser)
+        response = get(api_url.call("/groups/#{group_name}"), superuser)
         response.code == 200
       end
 
       def member_of_group(user, group_name)
-        response = get(api_url("/groups/#{group_name}"), superuser)
+        response = get(api_url.call("/groups/#{group_name}"), superuser)
         group_info = parse(response)
         group_info["actors"].include?(user.name)
       end
 
       def associated_with_org(user)
-        response = get(api_url("/users"), superuser)
+        response = get(api_url.call("/users"), superuser)
         user_info = parse(response)
 
         # here's what should come back:

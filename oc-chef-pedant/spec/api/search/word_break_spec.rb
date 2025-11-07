@@ -12,7 +12,7 @@ describe "Search API endpoint", :search do
 
   context "word break handling" do
     let(:request_method) { :GET }
-    let(:request_url) { api_url("/search/node") }
+    let(:request_url) { api_url.call("/search/node") }
     SPECIAL_CHARS = '!"$%&()*+,-:;<=>?@[\]%_`{|}~\'\\'.freeze
     PERMITTED_QUERY_CHARS = '[]\\"!(){}^~*?:'.freeze
 

@@ -32,11 +32,11 @@ describe "Environments API Endpoint", :environments do
   let(:non_existent_environment_name) { "pedant_dummy_environment" }
   context "POST /environments" do
     let(:request_method)  { :POST }
-    let(:request_url)     { api_url "/environments" }
+    let(:request_url)     { api_url.call "/environments" }
     let(:request_payload) { full_environment(new_environment_name) }
 
     let(:expected_response) { resource_created_exact_response }
-    let(:created_resource)  { { "uri" => api_url("/environments/#{new_environment_name}") } }
+    let(:created_resource)  { { "uri" => api_url.call("/environments/#{new_environment_name}") } }
     let(:persisted_resource) { get_environment requestor, new_environment_name }
 
 
@@ -74,7 +74,7 @@ describe "Environments API Endpoint", :environments do
               normal_user => ["create"])
           end
           after(:each) do
-            delete(api_url("/environments/#{new_environment_name}"), normal_user)
+            delete(api_url.call("/environments/#{new_environment_name}"), normal_user)
           end
 
           let(:requestor) { normal_user }
@@ -93,7 +93,7 @@ describe "Environments API Endpoint", :environments do
 
             it "should create a child with restricted permissions" do
               response.should have_status_code 201
-              get(api_url("/environments/#{new_environment_name}/_acl"), superuser).should look_like acl_response
+              get(api_url.call("/environments/#{new_environment_name}/_acl"), superuser).should look_like acl_response
             end
           end
         end
@@ -141,7 +141,7 @@ describe "Environments API Endpoint", :environments do
               .should look_like({
               status: 201,
               body_exact: {
-              "uri" => api_url("/environments/#{new_environment_name}"),
+              "uri" => api_url.call("/environments/#{new_environment_name}"),
             },
             })
           end

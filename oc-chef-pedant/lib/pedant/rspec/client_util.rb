@@ -59,7 +59,7 @@ module Pedant
         end
         let(:test_client_requestor) { Pedant::Client.new(test_client, test_client_private_key, platform: platform, preexisting: false) }
 
-        let(:client_url) { api_url("/clients/#{client_name}") }
+        let(:client_url) { api_url.call("/clients/#{client_name}") }
 
         let(:persisted_resource_response) { get(resource_url, platform.admin_user) }
         let(:default_resource_attributes) { default_client_attributes }
@@ -69,9 +69,9 @@ module Pedant
       let(:pedant_nonexistent_client_name) { "non-existent" }
 
       # These will be used all over the place
-      let(:clients_url) { api_url("/clients") }
+      let(:clients_url) { api_url.call("/clients") }
       let(:client_name) { raise "Please specify a 'client_name' first" }
-      let(:named_client_url) { api_url("/clients/#{client_name}") }
+      let(:named_client_url) { api_url.call("/clients/#{client_name}") }
 
       let(:client_not_found_response) { resource_not_found_response }
 
@@ -164,7 +164,7 @@ module Pedant
       end
 
       def add_client(requestor, client)
-        post(api_url("/clients"), requestor, payload: client)
+        post(api_url.call("/clients"), requestor, payload: client)
       end
 
       def create_client(requestor, client)
@@ -172,7 +172,7 @@ module Pedant
       end
 
       def delete_client(requestor, client_name)
-        delete(api_url("/clients/#{client_name}"), requestor)
+        delete(api_url.call("/clients/#{client_name}"), requestor)
       end
 
       module ClassMethods

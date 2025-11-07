@@ -11,7 +11,7 @@ require "pedant/rspec/node_util"
 
 describe "Controls API Endpoint", :controls do
   it "a POST to controls endpoint returns 410" do
-    post(api_url("/controls"), platform.superuser, payload: {} ) do |response|
+    post(api_url.call("/controls"), platform.superuser, payload: {} ) do |response|
       response.should look_like({
                                   status: 410, body_exact: { "error" => /\A/ }
                                 })
@@ -19,7 +19,7 @@ describe "Controls API Endpoint", :controls do
   end
 
   it "a GET to controls endpoint returns 410" do
-    get(api_url("/controls"), platform.superuser) do |response|
+    get(api_url.call("/controls"), platform.superuser) do |response|
       response.should look_like({
                                   status: 410, body_exact: { "error" => /\A/ }
                                 })

@@ -32,7 +32,7 @@ describe "Environments API Endpoint", :environments do
 
     describe "DELETE /environments/<name>" do
       let(:request_method) { :DELETE }
-      let(:request_url)    { api_url "/environments/#{environment_name}" }
+      let(:request_url)    { api_url.call "/environments/#{environment_name}" }
 
       let(:environment_name) { new_environment_name }
 

@@ -55,7 +55,7 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
       # for respects_maximum_payload_size
       let(:request_method) { :PUT }
       let(:requestor) { admin_user }
-      let(:request_url) { api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_identifier}") }
+      let(:request_url) { api_url.call("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_identifier}") }
       let(:cookbook_name) { "cookbook-to-be-modified" }
       let(:cookbook_identifier) { "1111111111111111111111111111111111111111" }
       let(:default_version) { "1.2.3" }

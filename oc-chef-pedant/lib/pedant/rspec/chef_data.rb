@@ -32,9 +32,9 @@ module Pedant
         #   client 'x', '{ "name": "x" }'
         def self.client(name, client)
           before(:each) do
-            post(api_url("clients/#{name}"), admin_user, payload: client).should look_like({ status: 201 })
+            post(api_url.call("clients/#{name}"), admin_user, payload: client).should look_like({ status: 201 })
           end
-          after(:each) { delete(api_url("clients/#{name}"), admin_user) }
+          after(:each) { delete(api_url.call("clients/#{name}"), admin_user) }
         end
 
         # Puts a data bag, with items, into the Chef server before the test, and
@@ -47,16 +47,16 @@ module Pedant
         #     'item2' => '{ "id": "item2" }'
         def self.data_bag(name, data_bag)
           before(:each) do
-            post(api_url("data"), admin_user, payload: "{ \"name\": \"#{name}\" }").should look_like({ status: 201 })
+            post(api_url.call("data"), admin_user, payload: "{ \"name\": \"#{name}\" }").should look_like({ status: 201 })
             data_bag.each do |item_name, item|
-              post(api_url("data/#{name}"), admin_user, payload: item).should look_like({ status: 201 })
+              post(api_url.call("data/#{name}"), admin_user, payload: item).should look_like({ status: 201 })
             end
           end
           after(:each) do
             data_bag.each do |item_name, item|
-              delete(api_url("data/#{name}/#{item_name}"), admin_user)
+              delete(api_url.call("data/#{name}/#{item_name}"), admin_user)
             end
-            delete(api_url("data/#{name}"), admin_user)
+            delete(api_url.call("data/#{name}"), admin_user)
           end
         end
 
@@ -67,9 +67,9 @@ module Pedant
         #   environment 'x', '{ "name": "x" }'
         def self.environment(name, environment)
           before(:each) do
-            post(api_url("environments"), admin_user, payload: environment).should look_like({ status: 201 })
+            post(api_url.call("environments"), admin_user, payload: environment).should look_like({ status: 201 })
           end
-          after(:each) { delete(api_url("environments/#{name}"), admin_user) }
+          after(:each) { delete(api_url.call("environments/#{name}"), admin_user) }
         end
 
         # Puts a node into the Chef server before the test, and deletes it at the end.
@@ -79,9 +79,9 @@ module Pedant
         #   node 'x', '{ "name": "x" }'
         def self.node(name, node)
           before(:each) do
-            post(api_url("nodes"), admin_user, payload: node).should look_like({ status: 201 })
+            post(api_url.call("nodes"), admin_user, payload: node).should look_like({ status: 201 })
           end
-          after(:each) { delete(api_url("nodes/#{name}"), admin_user) }
+          after(:each) { delete(api_url.call("nodes/#{name}"), admin_user) }
         end
 
         # Puts a role into the Chef server before the test, and deletes it at the end.
@@ -91,9 +91,9 @@ module Pedant
         #   role 'x', '{ "name": "x" }'
         def self.role(name, role)
           before(:each) do
-            post(api_url("roles"), admin_user, payload: role).should look_like({ status: 201 })
+            post(api_url.call("roles"), admin_user, payload: role).should look_like({ status: 201 })
           end
-          after(:each) { delete(api_url("roles/#{name}"), admin_user) }
+          after(:each) { delete(api_url.call("roles/#{name}"), admin_user) }
         end
       end
     end

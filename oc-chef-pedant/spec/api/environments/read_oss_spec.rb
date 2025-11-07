@@ -34,7 +34,7 @@ describe "Environments API Endpoint", :environments do
   let(:request_method) { :GET }
 
   context "GET /environments" do
-    let(:request_url) { api_url "/environments" }
+    let(:request_url) { api_url.call "/environments" }
 
     context "with an operational server", :smoke do
       it { should look_like ok_response }
@@ -42,14 +42,14 @@ describe "Environments API Endpoint", :environments do
 
     context "with no additional environments" do
       let(:expected_response) { ok_exact_response }
-      let(:success_message) { { "_default" => api_url("/environments/_default") } }
+      let(:success_message) { { "_default" => api_url.call("/environments/_default") } }
 
       should_respond_with 200
 
       it "should respond to cookbook versions"
 
       context "with a non-existant environment" do
-        let(:request_url) { api_url "/environments/#{non_existent_environment_name}" }
+        let(:request_url) { api_url.call "/environments/#{non_existent_environment_name}" }
         let(:expected_response) { resource_not_found_exact_response }
         let(:not_found_error_message) { cannot_load_nonexistent_env_msg }
 
@@ -64,8 +64,8 @@ describe "Environments API Endpoint", :environments do
       let(:expected_response) { ok_exact_response }
       let(:success_message) do
         {
-          "_default" => api_url("/environments/_default"),
-          new_environment_name => api_url("/environments/#{new_environment_name}"),
+          "_default" => api_url.call("/environments/_default"),
+          new_environment_name => api_url.call("/environments/#{new_environment_name}"),
         }
       end
 
@@ -77,7 +77,7 @@ describe "Environments API Endpoint", :environments do
 
 
   context "GET /environments/_default" do
-    let(:request_url) { api_url "/environments/_default" }
+    let(:request_url) { api_url.call "/environments/_default" }
 
     context "with an operational server", :smoke do
       it { should look_like ok_response }
@@ -102,7 +102,7 @@ describe "Environments API Endpoint", :environments do
   end
 
   context "GET /environments/<name>" do
-    let(:request_url) { api_url "/environments/#{environment_name}" }
+    let(:request_url) { api_url.call "/environments/#{environment_name}" }
 
     before(:each) { add_environment(admin_user, full_environment(new_environment_name)) }
     after(:each)  { delete_environment(admin_user, new_environment_name) }
@@ -146,7 +146,7 @@ describe "Environments API Endpoint", :environments do
   context "search" do
     before(:each) do
       # Create the environment
-      @response = post(api_url("/environments"),
+      @response = post(api_url.call("/environments"),
         admin_user,
         payload: full_environment(new_environment_name))
     end

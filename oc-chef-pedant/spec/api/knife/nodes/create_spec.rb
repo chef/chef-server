@@ -42,7 +42,7 @@ describe "knife", :knife do
             pending "CHEF-982: `knife node create` does not report name conflicts"
             # Create a node with the same name
             # knife "node create #{node_name} -c #{knife_config} --disable-editing"
-            post(api_url("/nodes"), platform.admin_user, payload: { "name" => node_name })
+            post(api_url.call("/nodes"), platform.admin_user, payload: { "name" => node_name })
 
             # Run knife a second time
             should have_outcome status: 0, stderr: /Node #{node_name} already exists/

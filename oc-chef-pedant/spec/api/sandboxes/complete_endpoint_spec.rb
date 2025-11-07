@@ -18,7 +18,7 @@ require "pedant/rspec/cookbook_util"
 describe "Sandboxes API Endpoint", :sandboxes do
   include Pedant::RSpec::CookbookUtil
 
-  let(:request_url)    { api_url "/sandboxes" }
+  let(:request_url)    { api_url.call "/sandboxes" }
   let(:requestor)      { admin_user }
 
   let(:files) { (1..2).to_a.map { Pedant::Utility.new_random_file } }
@@ -51,7 +51,7 @@ describe "Sandboxes API Endpoint", :sandboxes do
         {
           "sandbox_id" => sandbox_id,
           # Sandbox URIs are always in terms of our API
-          "uri" => api_url("/sandboxes/#{sandbox_id}"),
+          "uri" => api_url.call("/sandboxes/#{sandbox_id}"),
           "checksums" => {
             checksums[0] => {
               # URLs might be for local
@@ -118,7 +118,7 @@ describe "Sandboxes API Endpoint", :sandboxes do
       let(:created_resource) do
         {
           "sandbox_id" => sandbox_id,
-          "uri" => api_url("/sandboxes/#{sandbox_id}"),
+          "uri" => api_url.call("/sandboxes/#{sandbox_id}"),
           "checksums" => {
             new_file_checksum => {
               "url" => url_regex,
@@ -153,7 +153,7 @@ describe "Sandboxes API Endpoint", :sandboxes do
 
     it "should actually require checksums to create a sandbox", :cleanup do
       pending "Fix this in Erchef"
-      post(api_url("/sandboxes"),
+      post(api_url.call("/sandboxes"),
         admin_user,
         payload: { "checksums" => {} }) do |response|
           response.should look_like({
@@ -165,7 +165,7 @@ describe "Sandboxes API Endpoint", :sandboxes do
 
     it "should require valid checksums to create a sandbox", :cleanup do
       pending "Fix this in Erchef"
-      post(api_url("/sandboxes"),
+      post(api_url.call("/sandboxes"),
         admin_user,
         payload: {
           "checksums" => {

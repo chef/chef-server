@@ -421,7 +421,7 @@ module Pedant
         # Pedant::Config.pedant_platform directly to avoid RSpec scope issues.
         let (:platform) { Pedant::Config.pedant_platform }
 
-        let (:api_url) { |path_fragment| Pedant::Config.pedant_platform.api_url(path_fragment) }
+        let (:api_url) { ->(path_fragment) { Pedant::Config.pedant_platform.api_url(path_fragment) } }
         
         ## TODO: Remove this method; we probably don't need to access it directly
         def server
@@ -525,11 +525,11 @@ module Pedant
         # by parameterizing on the container name.
 
         def add_chef_object(container_name, requestor, object_json)
-          post(api_url("/#{container_name}"), requestor, payload: object_json)
+          post(api_url.call("/#{container_name}"), requestor, payload: object_json)
         end
 
         def delete_chef_object(container_name, requestor, object_name)
-          delete(api_url("/#{container_name}/#{object_name}"), requestor)
+          delete(api_url.call("/#{container_name}/#{object_name}"), requestor)
         end
 
         # DSL helpers

@@ -24,10 +24,10 @@ describe "Testing the Roles API endpoint", :roles do
   let(:admin_requestor) { admin_user }
   let(:requestor) { admin_requestor }
 
-  let(:nonexistent_role_name) { unique_name("nonexistent_pedant_role") }
+  let(:nonexistent_role_name) { unique_name.call("nonexistent_pedant_role") }
 
   context "making a request to /roles" do
-    let(:request_url) { api_url("/roles") }
+    let(:request_url) { api_url.call("/roles") }
 
     context "using GET" do
       let(:request_method) { :GET }
@@ -41,7 +41,7 @@ describe "Testing the Roles API endpoint", :roles do
 
       context "with roles" do
         include_context "with temporary testing role"
-        let(:roles) { { role_name => api_url("/roles/#{role_name}") } }
+        let(:roles) { { role_name => api_url.call("/roles/#{role_name}") } }
         it "returns a 200 and a hash of name -> url" do
           should look_like fetch_roles_list_response
         end
@@ -52,10 +52,10 @@ describe "Testing the Roles API endpoint", :roles do
       include Pedant::RSpec::Validations::Create
       let(:request_method) { :POST }
 
-      let(:role_name) { unique_name("pedant_testing_role") }
+      let(:role_name) { unique_name.call("pedant_testing_role") }
       let(:role) { new_role(role_name) }
       let(:request_payload) { role }
-      let(:fetched_resource_response) { get(api_url("/roles/#{role_name}"), requestor) }
+      let(:fetched_resource_response) { get(api_url.call("/roles/#{role_name}"), requestor) }
 
       after :each do
         delete_role(admin_requestor, role_name)
@@ -66,7 +66,7 @@ describe "Testing the Roles API endpoint", :roles do
       end
 
       context "when validating" do
-        let(:resource_url) { api_url("/roles/#{resource_name}") }
+        let(:resource_url) { api_url.call("/roles/#{resource_name}") }
         let(:default_resource_attributes) { new_role(role_name) }
         let(:persisted_resource_response) { get(resource_url, requestor) }
 
@@ -193,7 +193,7 @@ describe "Testing the Roles API endpoint", :roles do
   end # /roles
 
   context "making a request to /roles/<role>" do
-    let(:request_url) { api_url("/roles/#{role_name}") }
+    let(:request_url) { api_url.call("/roles/#{role_name}") }
 
     context "using GET" do
       let(:request_method) { :GET }
@@ -289,7 +289,7 @@ describe "Testing the Roles API endpoint", :roles do
   end # /roles/<role>
 
   context "making a request to /roles/<role>/environments" do
-    let(:request_url) { api_url("/roles/#{role_name}/environments") }
+    let(:request_url) { api_url.call("/roles/#{role_name}/environments") }
     include_context "with temporary testing environment"
 
     let(:role_environment_names) { raise "Please specify which environments the role should be in" }
@@ -344,7 +344,7 @@ describe "Testing the Roles API endpoint", :roles do
         let(:role_environment_names) { ["_default", environment_name, nonexistent_environment_name] }
         it "returns multiple environments, even if some do not exist" do
           # Ensure that the environment really doesn't exist
-          get(api_url("/environments/#{nonexistent_environment_name}"), requestor).should look_like resource_not_found_response
+          get(api_url.call("/environments/#{nonexistent_environment_name}"), requestor).should look_like resource_not_found_response
 
           # Then perform the request we're actually testing
           should look_like fetch_role_environment_success_response
@@ -355,7 +355,7 @@ describe "Testing the Roles API endpoint", :roles do
   end # /roles/<role>/environments
 
   context "making a request to /roles/<role>/environments/<environment>", :environments do
-    let(:request_url) { api_url("/roles/#{role_name}/environments/#{environment_name}") }
+    let(:request_url) { api_url.call("/roles/#{role_name}/environments/#{environment_name}") }
 
     context "using GET" do
       let(:request_method) { :GET }

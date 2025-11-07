@@ -99,26 +99,26 @@ describe "Principals API Endpoint", :principals do
     context "GET /principals" do
       # No client supplied = 404
       it 'returns a 404 ("Not Found") for admin' do
-        get(api_url("/principals/"), admin_user) do |response|
+        get(api_url.call("/principals/"), admin_user) do |response|
           response
             .should look_like({ status: 404 })
         end
       end
       it 'returns a 404 ("Not Found") for normal user' do
-        get(api_url("/principals/"), normal_user) do |response|
+        get(api_url.call("/principals/"), normal_user) do |response|
           response
             .should look_like({ status: 404 })
         end
       end
       it 'returns a 404 ("Not Found") for invalid user' do
-        get(api_url("/principals/"), invalid_user) do |response|
+        get(api_url.call("/principals/"), invalid_user) do |response|
           response
             .should look_like({ status: 404 })
         end
       end
 
       it 'returns a 404 ("Not Found") for outside user' do
-        get(api_url("/principals/"), outside_user) do |response|
+        get(api_url.call("/principals/"), outside_user) do |response|
           response.should look_like({ status: 404 })
         end
       end
@@ -127,7 +127,7 @@ describe "Principals API Endpoint", :principals do
     shared_context "GET /principals/<name>" do
       context "when requesting a client" do
         it 'returns a 200 ("OK") for admin' do
-          get(api_url("/principals/#{principal_client_name}"), admin_user) do |response|
+          get(api_url.call("/principals/#{principal_client_name}"), admin_user) do |response|
             response.should look_like({
                 status: 200,
                 body_exact: versioned_client_body,
@@ -136,7 +136,7 @@ describe "Principals API Endpoint", :principals do
         end
 
         it 'returns a 200 ("OK") for normal user' do
-          get(api_url("/principals/#{principal_client_name}"), normal_user) do |response|
+          get(api_url.call("/principals/#{principal_client_name}"), normal_user) do |response|
             response.should look_like({
                 status: 200,
                 body_exact: versioned_client_body,
@@ -148,7 +148,7 @@ describe "Principals API Endpoint", :principals do
           # Currently, there is no auth on this endpoint at all; in the future,
           # these tests will have to change
 
-          get(api_url("/principals/#{principal_client_name}"), invalid_user) do |response|
+          get(api_url.call("/principals/#{principal_client_name}"), invalid_user) do |response|
             response.should look_like({
                 status: 200,
                 body_exact: versioned_client_body,
@@ -157,7 +157,7 @@ describe "Principals API Endpoint", :principals do
         end
 
         it 'returns a 200 ("OK") for outside user' do
-          get(api_url("/principals/#{principal_client_name}"), outside_user) do |response|
+          get(api_url.call("/principals/#{principal_client_name}"), outside_user) do |response|
             response.should look_like({
                 status: 200,
                 body_exact: versioned_client_body,
@@ -168,7 +168,7 @@ describe "Principals API Endpoint", :principals do
 
       context "when requesting a user" do
         it 'returns a 200 ("OK") for admin' do
-          get(api_url("/principals/#{principal_user_name}"), admin_user) do |response|
+          get(api_url.call("/principals/#{principal_user_name}"), admin_user) do |response|
             response.should look_like({
                 status: 200,
                 body_exact: versioned_user_body,
@@ -177,7 +177,7 @@ describe "Principals API Endpoint", :principals do
         end
 
         it 'returns a 200 ("OK") for normal user' do
-          get(api_url("/principals/#{principal_user_name}"), normal_user) do |response|
+          get(api_url.call("/principals/#{principal_user_name}"), normal_user) do |response|
             response.should look_like({
                 status: 200,
                 body_exact: versioned_user_body,
@@ -186,7 +186,7 @@ describe "Principals API Endpoint", :principals do
         end
 
         it 'returns a 200 ("OK") for invalid user' do
-          get(api_url("/principals/#{principal_user_name}"), invalid_user) do |response|
+          get(api_url.call("/principals/#{principal_user_name}"), invalid_user) do |response|
             response.should look_like({
                 status: 200,
                 body_exact: versioned_user_body,
@@ -195,7 +195,7 @@ describe "Principals API Endpoint", :principals do
         end
 
         it 'returns a 200 ("OK") for outside user' do
-          get(api_url("/principals/#{principal_user_name}"), outside_user) do |response|
+          get(api_url.call("/principals/#{principal_user_name}"), outside_user) do |response|
             response.should look_like({
                 status: 200,
                 body_exact: versioned_user_body,
@@ -217,7 +217,7 @@ describe "Principals API Endpoint", :principals do
         }
 
         it 'returns a 200 ("OK") for admin' do
-          get(api_url("/principals/#{principal_user_name}"), admin_user) do |response|
+          get(api_url.call("/principals/#{principal_user_name}"), admin_user) do |response|
             response.should look_like({
                 status: 200,
                 body_exact: versioned_user_body,
@@ -226,7 +226,7 @@ describe "Principals API Endpoint", :principals do
         end
 
         it 'returns a 200 ("OK") for normal user' do
-          get(api_url("/principals/#{principal_user_name}"), normal_user) do |response|
+          get(api_url.call("/principals/#{principal_user_name}"), normal_user) do |response|
             response.should look_like({
                 status: 200,
                 body_exact: versioned_user_body,
@@ -235,7 +235,7 @@ describe "Principals API Endpoint", :principals do
         end
 
         it 'returns a 200 ("OK") for invalid user' do
-          get(api_url("/principals/#{principal_user_name}"), invalid_user) do |response|
+          get(api_url.call("/principals/#{principal_user_name}"), invalid_user) do |response|
             response.should look_like({
                 status: 200,
                 body_exact: versioned_user_body,
@@ -244,7 +244,7 @@ describe "Principals API Endpoint", :principals do
         end
 
         it 'returns a 200 ("OK") for outside user' do
-          get(api_url("/principals/#{principal_user_name}"), outside_user) do |response|
+          get(api_url.call("/principals/#{principal_user_name}"), outside_user) do |response|
             response.should look_like({
                 status: 200,
                 body_exact: versioned_user_body,
@@ -260,7 +260,7 @@ describe "Principals API Endpoint", :principals do
         }
 
         it 'returns a 404 ("Not Found") for admin' do
-          get(api_url("/principals/#{principal_client_name}"), admin_user) do |response|
+          get(api_url.call("/principals/#{principal_client_name}"), admin_user) do |response|
             response.should look_like({
                 status: 404,
                 body_exact: {
@@ -272,7 +272,7 @@ describe "Principals API Endpoint", :principals do
         end
 
         it 'returns a 404 ("Not Found") for normal user' do
-          get(api_url("/principals/#{principal_client_name}"), normal_user) do |response|
+          get(api_url.call("/principals/#{principal_client_name}"), normal_user) do |response|
             response.should look_like({
                 status: 404,
                 body_exact: {
@@ -284,7 +284,7 @@ describe "Principals API Endpoint", :principals do
         end
 
         it 'returns a 404 ("Not Found") for invalid user' do
-          get(api_url("/principals/#{principal_client_name}"), invalid_user) do |response|
+          get(api_url.call("/principals/#{principal_client_name}"), invalid_user) do |response|
             response.should look_like({
                 status: 404,
                 body_exact: {
@@ -296,7 +296,7 @@ describe "Principals API Endpoint", :principals do
         end
 
         it 'returns a 404 ("Not Found") for outside user' do
-          get(api_url("/principals/#{principal_client_name}"), outside_user) do |response|
+          get(api_url.call("/principals/#{principal_client_name}"), outside_user) do |response|
             response.should look_like({
                 status: 404,
                 body_exact: {
@@ -309,7 +309,7 @@ describe "Principals API Endpoint", :principals do
       end
 
       it 'returns a 404 ("Not Found") for missing principal for admin' do
-        get(api_url("/principals/#{non_existent_principal_name}"),
+        get(api_url.call("/principals/#{non_existent_principal_name}"),
           admin_user) do |response|
             response.should look_like({
                 status: 404,
@@ -323,7 +323,7 @@ describe "Principals API Endpoint", :principals do
 
       it 'returns a 404 ("Not Found") for missing principal for normal user' do
 
-        get(api_url("/principals/#{non_existent_principal_name}"), normal_user) do |response|
+        get(api_url.call("/principals/#{non_existent_principal_name}"), normal_user) do |response|
           response.should look_like({
               status: 404,
               body_exact: {

@@ -1552,7 +1552,7 @@ describe "users", :users do
             org_user = Pedant::User.new(username, new_private_key, { associate: true,
                                                                     preexisting: true })
             platform.make_user(org_user, platform.test_org)
-            get(api_url("users"), org_user).should look_like({
+            get(api_url.call("users"), org_user).should look_like({
                 status: 200,
             })
           end

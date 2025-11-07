@@ -73,7 +73,7 @@ describe "Depsolver API endpoint", :depsolver do
 
       it "returns 400 with an empty payload", :validation do
         payload = ""
-        post(api_url("/environments/#{env}/cookbook_versions"), admin_user,
+        post(api_url.call("/environments/#{env}/cookbook_versions"), admin_user,
           payload: payload) do |response|
             response.should look_like({
                                        status: 400,
@@ -86,7 +86,7 @@ describe "Depsolver API endpoint", :depsolver do
 
       it "returns 400 with an non-json payload", :validation do
         payload = "this_is_not_json"
-        post(api_url("/environments/#{env}/cookbook_versions"), admin_user,
+        post(api_url.call("/environments/#{env}/cookbook_versions"), admin_user,
           payload: payload) do |response|
             response.should look_like({
                                        status: 400,
@@ -101,7 +101,7 @@ describe "Depsolver API endpoint", :depsolver do
 
       it "returns 404 with an invalid environment" do
         payload = "{\"run_list\":[]}"
-        post(api_url("/environments/#{environment_name}/cookbook_versions"), normal_user,
+        post(api_url.call("/environments/#{environment_name}/cookbook_versions"), normal_user,
           payload: payload) do |response|
             response.should look_like environment_not_found_response
           end
@@ -109,7 +109,7 @@ describe "Depsolver API endpoint", :depsolver do
 
       it "returns 400 with non-Array as run_list value", :validation do
         payload = "{\"run_list\":\"#{cookbook_name}\"}"
-        post(api_url("/environments/#{env}/cookbook_versions"), admin_user,
+        post(api_url.call("/environments/#{env}/cookbook_versions"), admin_user,
           payload: payload) do |response|
             response.should look_like({
                                        status: 400,
@@ -122,7 +122,7 @@ describe "Depsolver API endpoint", :depsolver do
 
       it "returns 400 with malformed JSON", :validation do
         payload = "{\"run_list\": "
-        post(api_url("/environments/#{env}/cookbook_versions"), admin_user,
+        post(api_url.call("/environments/#{env}/cookbook_versions"), admin_user,
           payload: payload) do |response|
             response.should look_like({
                                         status: 400,
@@ -135,7 +135,7 @@ describe "Depsolver API endpoint", :depsolver do
 
       it "returns Error with an malformed item in run_list (int)", :validation do
         payload = "{\"run_list\": [12]}"
-        post(api_url("/environments/#{env}/cookbook_versions"), admin_user,
+        post(api_url.call("/environments/#{env}/cookbook_versions"), admin_user,
           payload: payload) do |response|
             response.should look_like({
                                         status: 400,
@@ -148,7 +148,7 @@ describe "Depsolver API endpoint", :depsolver do
 
       it "returns 200 with an empty run_list" do
         payload = "{\"run_list\":[]}"
-        post(api_url("/environments/#{env}/cookbook_versions"), admin_user,
+        post(api_url.call("/environments/#{env}/cookbook_versions"), admin_user,
           payload: payload) do |response|
             response.should look_like({
                                        status: 200,
@@ -166,7 +166,7 @@ describe "Depsolver API endpoint", :depsolver do
           "non_existent_cookbooks" => [ not_exist ],
           "cookbooks_with_no_versions" => [],
         }
-        post(api_url("/environments/_default/cookbook_versions"), admin_user,
+        post(api_url.call("/environments/_default/cookbook_versions"), admin_user,
           payload: payload) do |response|
             response.should look_like({
                                         status: 412,
@@ -185,7 +185,7 @@ describe "Depsolver API endpoint", :depsolver do
           "non_existent_cookbooks" => [ not_exist ],
           "cookbooks_with_no_versions" => [],
         }
-        post(api_url("/environments/#{env}/cookbook_versions"), admin_user,
+        post(api_url.call("/environments/#{env}/cookbook_versions"), admin_user,
           payload: payload) do |response|
             response.should look_like({
                                         status: 412,
@@ -203,7 +203,7 @@ describe "Depsolver API endpoint", :depsolver do
           "non_existent_cookbooks" => [],
           "cookbooks_with_no_versions" => ["(foo >= 0.0.0)"],
         }
-        post(api_url("/environments/#{no_cookbooks_env}/cookbook_versions"), admin_user,
+        post(api_url.call("/environments/#{no_cookbooks_env}/cookbook_versions"), admin_user,
           payload: payload) do |response|
             response.should look_like({
                                         status: 412,
@@ -223,7 +223,7 @@ describe "Depsolver API endpoint", :depsolver do
           "non_existent_cookbooks" => [ not_exist1, not_exist2 ],
           "cookbooks_with_no_versions" => [],
         }
-        post(api_url("/environments/#{env}/cookbook_versions"), admin_user,
+        post(api_url.call("/environments/#{env}/cookbook_versions"), admin_user,
           payload: payload) do |response|
             response.should look_like({
                                         status: 412,
@@ -241,7 +241,7 @@ describe "Depsolver API endpoint", :depsolver do
           "non_existent_cookbooks" => [],
           "cookbooks_with_no_versions" => ["(#{cookbook_name} = #{cookbook_version2})"],
         }
-        post(api_url("/environments/#{env}/cookbook_versions"), admin_user,
+        post(api_url.call("/environments/#{env}/cookbook_versions"), admin_user,
           payload: missing_version_payload) do |response|
             response.should look_like({
                                         status: 412,
@@ -263,7 +263,7 @@ describe "Depsolver API endpoint", :depsolver do
           "non_existent_cookbooks" => [ not_exist ],
           "cookbooks_with_no_versions" => [],
         }
-        post(api_url("/environments/#{env}/cookbook_versions"), admin_user,
+        post(api_url.call("/environments/#{env}/cookbook_versions"), admin_user,
           payload: payload) do |response|
             response.should look_like({
                                         status: 412,
@@ -300,7 +300,7 @@ describe "Depsolver API endpoint", :depsolver do
           "non_existent_cookbooks" => ["this_does_not_exist"],
           "most_constrained_cookbooks" => [],
         }
-        post(api_url("/environments/#{env}/cookbook_versions"), admin_user,
+        post(api_url.call("/environments/#{env}/cookbook_versions"), admin_user,
           payload: payload) do |response|
             response.should look_like({
                                         status: 412,
@@ -331,7 +331,7 @@ describe "Depsolver API endpoint", :depsolver do
           "non_existent_cookbooks" => [],
           "cookbooks_with_no_versions" => ["(foo = 3.0.0)"],
         }
-        post(api_url("/environments/#{env}/cookbook_versions"), admin_user,
+        post(api_url.call("/environments/#{env}/cookbook_versions"), admin_user,
           payload: missing_version_payload) do |response|
             response.should look_like({
                                         status: 412,
@@ -356,7 +356,7 @@ describe "Depsolver API endpoint", :depsolver do
           "non_existent_cookbooks" => [],
           "most_constrained_cookbooks" => ["bar = 2.0.0 -> []"],
         }
-        post(api_url("/environments/#{env}/cookbook_versions"), admin_user,
+        post(api_url.call("/environments/#{env}/cookbook_versions"), admin_user,
           payload: payload) do |response|
             response.should look_like({
                                         status: 412,
@@ -381,7 +381,7 @@ describe "Depsolver API endpoint", :depsolver do
           "non_existent_cookbooks" => [],
           "most_constrained_cookbooks" => ["bar = 2.0.0 -> [(foo > 3.0.0)]"],
         }
-        post(api_url("/environments/#{env}/cookbook_versions"), admin_user,
+        post(api_url.call("/environments/#{env}/cookbook_versions"), admin_user,
           payload: payload) do |response|
             response.should look_like({
                                         status: 412,
@@ -414,7 +414,7 @@ describe "Depsolver API endpoint", :depsolver do
         meta.delete("long_description")
         cb["metadata"] = meta
 
-        post(api_url("/environments/#{env}/cookbook_versions"), normal_user,
+        post(api_url.call("/environments/#{env}/cookbook_versions"), normal_user,
           payload: payload) do |response|
             response.should look_like({
                                         status: 200,
@@ -442,7 +442,7 @@ describe "Depsolver API endpoint", :depsolver do
         end
 
         it "returns dependencies" do
-          post(api_url("/environments/_default/cookbook_versions"), normal_user,
+          post(api_url.call("/environments/_default/cookbook_versions"), normal_user,
             payload: { "run_list" => ["quux"] }) do |response|
 
               response.should have_status_code 200
@@ -473,7 +473,7 @@ describe "Depsolver API endpoint", :depsolver do
         end
 
         it "returns the correct solution" do
-          post(api_url("/environments/datestamp_env/cookbook_versions"), admin_user,
+          post(api_url.call("/environments/datestamp_env/cookbook_versions"), admin_user,
             payload: { "run_list" => ["datestamp"] }) do |response|
               response.should have_status_code 200
             end

@@ -21,9 +21,9 @@ describe "Data Bag API endpoint", :data_bags do
   let(:admin_requestor) { admin_user }
 
   let(:requestor) { admin_requestor }
-  let(:data_bags_url) { api_url("/data") }
-  let(:named_data_bag_url) { api_url("/data/#{data_bag_name}") }
-  let(:data_bag_item_url) { api_url("/data/#{data_bag_name}/#{data_bag_item_id}") }
+  let(:data_bags_url) { api_url.call("/data") }
+  let(:named_data_bag_url) { api_url.call("/data/#{data_bag_name}") }
+  let(:data_bag_item_url) { api_url.call("/data/#{data_bag_name}/#{data_bag_item_id}") }
 
   context "with no data bags" do
     context "a request to /data" do
@@ -35,8 +35,8 @@ describe "Data Bag API endpoint", :data_bags do
       context "POST" do
         let(:request_method) { :POST }
 
-        let(:data_bag_name) { unique_name("testbag") }
-        let(:data_bag_url) { api_url("/data/#{data_bag_name}") }
+        let(:data_bag_name) { unique_name.call("testbag") }
+        let(:data_bag_url) { api_url.call("/data/#{data_bag_name}") }
         let(:request_url) { data_bag_url }
         let(:data_bag) { new_data_bag(data_bag_name) }
 
@@ -137,7 +137,7 @@ describe "Data Bag API endpoint", :data_bags do
     end # request to /data
 
     context "a request to /data/<bag>" do
-      let(:data_bag_name) { unique_name("no_bag") }
+      let(:data_bag_name) { unique_name.call("no_bag") }
       context "GET" do
         it "fails because there is no bag" do
           get(named_data_bag_url, requestor).should look_like data_bag_not_found_response
@@ -163,8 +163,8 @@ describe "Data Bag API endpoint", :data_bags do
       end
     end #  'a request to /data/<bag>'
     context "a request to /data/<bag>/<item>" do
-      let(:data_bag_name) { unique_name("no_bag") }
-      let(:data_bag_item_id) { unique_name("no_item") }
+      let(:data_bag_name) { unique_name.call("no_bag") }
+      let(:data_bag_item_id) { unique_name.call("no_item") }
       context "GET" do
         it "fails because there is no bag" do
           get(data_bag_item_url, requestor).should look_like data_bag_item_not_found_no_bag_response
@@ -190,8 +190,8 @@ describe "Data Bag API endpoint", :data_bags do
     end #  'a request to /data/<bag>'
   end # with no data bags
   context "with data bags" do
-    let(:data_bag_1_name) { unique_name("bag1") }
-    let(:data_bag_2_name) { unique_name("bag2") }
+    let(:data_bag_1_name) { unique_name.call("bag1") }
+    let(:data_bag_2_name) { unique_name.call("bag2") }
     let(:data_bag_1) { new_data_bag(data_bag_1_name) }
     let(:data_bag_2) { new_data_bag(data_bag_2_name) }
     before :each do
@@ -229,8 +229,8 @@ describe "Data Bag API endpoint", :data_bags do
         end
         context "POST" do
           let(:request_method) { :POST }
-          let(:data_bag_item_id) { unique_name("item") }
-          let(:request_url) { api_url("/data/#{data_bag_name}") }
+          let(:data_bag_item_id) { unique_name.call("item") }
+          let(:request_url) { api_url.call("/data/#{data_bag_name}") }
 
           after :each do
             delete_data_bag_item(admin_requestor, data_bag_name, data_bag_item_id)
@@ -291,13 +291,13 @@ describe "Data Bag API endpoint", :data_bags do
             # it's not there anymore
             get(named_data_bag_url, requestor).should look_like data_bag_not_found_response
             # the other bag is fine
-            get(api_url("/data/#{data_bag_2_name}"), requestor).should look_like ok_response
+            get(api_url.call("/data/#{data_bag_2_name}"), requestor).should look_like ok_response
           end
         end
       end
       context "a request to /data/<bag>/<item>" do
         let(:data_bag_name) { data_bag_1_name }
-        let(:data_bag_item_id) { unique_name("no_item") }
+        let(:data_bag_item_id) { unique_name.call("no_item") }
         context "GET" do
           it "fails because there is no item" do
             get(data_bag_item_url, requestor).should look_like data_bag_item_not_found_response
@@ -318,9 +318,9 @@ describe "Data Bag API endpoint", :data_bags do
       end # request to /data/<bag>/<item>
     end # that have no items
     context "that have items" do
-      let(:data_bag_item_1_id) { unique_name("item1") }
-      let(:data_bag_item_2_id) { unique_name("item2") }
-      let(:data_bag_item_3_id) { unique_name("item3") }
+      let(:data_bag_item_1_id) { unique_name.call("item1") }
+      let(:data_bag_item_2_id) { unique_name.call("item2") }
+      let(:data_bag_item_3_id) { unique_name.call("item3") }
 
       let(:data_bag_item_1) { new_data_bag_item(data_bag_item_1_id) }
       let(:data_bag_item_2) { new_data_bag_item(data_bag_item_2_id) }
@@ -373,10 +373,10 @@ describe "Data Bag API endpoint", :data_bags do
             # it's not there anymore
             get(named_data_bag_url, requestor).should look_like data_bag_not_found_response
             # the other bag is fine
-            get(api_url("/data/#{data_bag_2_name}"), requestor).should look_like ok_response
+            get(api_url.call("/data/#{data_bag_2_name}"), requestor).should look_like ok_response
             # All the items are gone now
             [data_bag_item_1_id, data_bag_item_2_id, data_bag_item_3_id].each do |i|
-              get(api_url("/data/#{data_bag_name}/#{i}"), requestor).should look_like resource_not_found_response
+              get(api_url.call("/data/#{data_bag_name}/#{i}"), requestor).should look_like resource_not_found_response
             end
           end
         end
@@ -438,14 +438,14 @@ describe "Data Bag API endpoint", :data_bags do
             get(data_bag_item_url, requestor).should look_like resource_not_found_response
             # other items are left alone
             [data_bag_item_2_id, data_bag_item_3_id].each do |i|
-              get(api_url("/data/#{data_bag_name}/#{i}"), requestor).should look_like ok_response
+              get(api_url.call("/data/#{data_bag_name}/#{i}"), requestor).should look_like ok_response
             end
             # and the data bag itself looks sane
             get(named_data_bag_url, requestor).should look_like({
                                                                   status: 200,
                                                                   body_exact: {
-                                                                    data_bag_item_2_id => api_url("/data/#{data_bag_name}/#{data_bag_item_2_id}"),
-                                                                    data_bag_item_3_id => api_url("/data/#{data_bag_name}/#{data_bag_item_3_id}"),
+                                                                    data_bag_item_2_id => api_url.call("/data/#{data_bag_name}/#{data_bag_item_2_id}"),
+                                                                    data_bag_item_3_id => api_url.call("/data/#{data_bag_name}/#{data_bag_item_3_id}"),
                                                                   },
                                                                 })
           end

@@ -141,17 +141,17 @@ module Pedant
       end
 
       def add_environment(requestor, environment)
-        post(api_url("/environments"), requestor, payload: environment)
+        post(api_url.call("/environments"), requestor, payload: environment)
       end
 
       def delete_environment(requestor, environment_name)
-        delete(api_url("/environments/#{environment_name}"), requestor)
+        delete(api_url.call("/environments/#{environment_name}"), requestor)
       end
 
       # The functionality of this is tested already; this is just here for
       # making subsequent tests less verbose
       def get_environment(requestor, environment_name)
-        get(api_url("/environments/#{environment_name}"), requestor)
+        get(api_url.call("/environments/#{environment_name}"), requestor)
       end
     end
 
@@ -213,10 +213,10 @@ module Pedant
         else
           it "with #{variable} = #{value} it reports 400", :validation do
             if existing_environment
-              response = put(api_url("/environments/#{new_environment_name}"), admin_user,
+              response = put(api_url.call("/environments/#{new_environment_name}"), admin_user,
                 payload: make_payload(variable => value))
             else
-              response = post(api_url("/environments"), admin_user,
+              response = post(api_url.call("/environments"), admin_user,
                 payload: make_payload(variable => value))
             end
             response.should have_error(400, expected_error)
@@ -233,7 +233,7 @@ module Pedant
         else
           it "with #{variable} = #{value} it succeeds" do
             if existing_environment
-              response = put(api_url("/environments/#{new_environment_name}"), admin_user,
+              response = put(api_url.call("/environments/#{new_environment_name}"), admin_user,
                 payload: make_payload(variable => value))
               response.should look_like({
                                           status: 200,
@@ -241,17 +241,17 @@ module Pedant
                                             :skip_delete => true),
                                         })
             else
-              response = post(api_url("/environments"), admin_user,
+              response = post(api_url.call("/environments"), admin_user,
                 payload: make_payload(variable => value))
               response.should look_like({
                                           status: 201,
                                           body_exact: {
-                                            "uri" => api_url("/environments/" +
+                                            "uri" => api_url.call("/environments/" +
                                                              "#{new_environment_name}"),
                                           } })
             end
 
-            response = get(api_url("/environments/#{new_environment_name}"), admin_user)
+            response = get(api_url.call("/environments/#{new_environment_name}"), admin_user)
             response.should look_like({
                                         status: 200,
                                         body_exact: make_payload(variable => value,

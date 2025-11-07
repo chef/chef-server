@@ -35,14 +35,14 @@ module Pedant
           it "should respond with 201 and the correct path" do
             request_method.should
             request_url.should
-            api_url("/nodes")
+            api_url.call("/nodes")
             should look_like create_node_success_response
           end
           it "should persist the node#{message ? " " + message : ""}" do
             request_payload["name"].should
             node_name
             response.should look_like created_response
-            get(api_url("/nodes/#{node_name}"), requestor).should look_like fetch_node_success_response
+            get(api_url.call("/nodes/#{node_name}"), requestor).should look_like fetch_node_success_response
           end
         end
 
@@ -174,7 +174,7 @@ module Pedant
         {
           status: 201,
           body_exact: {
-            "uri" => api_url("/nodes/#{node_name}"),
+            "uri" => api_url.call("/nodes/#{node_name}"),
           },
         }
       end
@@ -232,11 +232,11 @@ module Pedant
       end
 
       def add_node(requestor, node)
-        post(api_url("/nodes"), requestor, payload: node)
+        post(api_url.call("/nodes"), requestor, payload: node)
       end
 
       def delete_node(requestor, name)
-        delete(api_url("/nodes/#{name}"), requestor)
+        delete(api_url.call("/nodes/#{name}"), requestor)
       end
 
       def new_node(name, opts = {})
@@ -254,7 +254,7 @@ module Pedant
       end
 
       def node_list_response(names)
-        names.inject({}) { |h, name| h[name] = api_url("/nodes/#{name}"); h }
+        names.inject({}) { |h, name| h[name] = api_url.call("/nodes/#{name}"); h }
       end
 
     end

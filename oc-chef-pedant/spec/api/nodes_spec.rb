@@ -19,8 +19,8 @@ describe "Private Chef Nodes API endpoint", :nodes do
 
   context "updating a node" do
     ## TODO: Consider pulling up to node util
-    let(:nodes_url) { api_url("/nodes") }
-    let(:named_node_url) { api_url("/nodes/#{node_name}") }
+    let(:nodes_url) { api_url.call("/nodes") }
+    let(:named_node_url) { api_url.call("/nodes/#{node_name}") }
 
     let(:node_name) { "putter" }
     let(:requestor) { admin_user }

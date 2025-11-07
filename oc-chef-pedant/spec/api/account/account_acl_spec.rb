@@ -298,7 +298,7 @@ describe "ACL API", :acl do
   end
 
   context "/organizations/_acl endpoint" do
-    let(:request_url) { api_url("organizations/_acl") }
+    let(:request_url) { api_url.call("organizations/_acl") }
 
     context "GET /organizations/_acl" do
       let(:actors) { ["pivotal"] }
@@ -457,8 +457,8 @@ describe "ACL API", :acl do
         smoketest = :notsmoke
       end
 
-      let(:acl_url) { api_url("organizations/_acl") }
-      let(:request_url) { api_url("organizations/_acl/#{permission}") }
+      let(:acl_url) { api_url.call("organizations/_acl") }
+      let(:request_url) { api_url.call("organizations/_acl/#{permission}") }
 
       context "PUT /organizations/_acl/#{permission}" do
         let(:actors) { ["pivotal"] }
@@ -807,7 +807,7 @@ describe "ACL API", :acl do
     let(:admin_requestor) { admin_user }
     let(:requestor) { admin_requestor }
     let(:shared_name) { "pedant-acl-#{rand_id}" }
-    let(:request_url) { api_url("/clients/#{shared_name}/_acl/read") }
+    let(:request_url) { api_url.call("/clients/#{shared_name}/_acl/read") }
     let(:acl_request_body) {
       { read: { actors: ["pivotal", shared_name],
                 groups: ["admins"] } }
@@ -847,7 +847,7 @@ describe "ACL API", :acl do
 
           # Verify that the returned list contains this actor twice (once
           # as client and once as user), since we don't separate them in the GET.
-          res = get(api_url("/clients/#{shared_name}/_acl"), platform.admin_user)
+          res = get(api_url.call("/clients/#{shared_name}/_acl"), platform.admin_user)
           read_ace = JSON.parse(res.body)["read"]
           expect(read_ace["actors"].sort).to eq [shared_name, shared_name, "pivotal"]
         end
@@ -872,9 +872,9 @@ describe "ACL API", :acl do
       context "for #{type} type" do
 
         let(:new_object) { "new-object" }
-        let(:creation_url) { api_url(type) }
-        let(:deletion_url) { api_url("#{type}/#{new_object}") }
-        let(:request_url) { api_url("#{type}/#{new_object}/_acl") }
+        let(:creation_url) { api_url.call(type) }
+        let(:deletion_url) { api_url.call("#{type}/#{new_object}") }
+        let(:request_url) { api_url.call("#{type}/#{new_object}/_acl") }
 
         let(:setup_user) { platform.admin_user }
 
@@ -978,7 +978,7 @@ describe "ACL API", :acl do
          let(:read_groups) { %w{users clients admins} }
         when "cookbooks"
           let(:version) { "1.0.0" }
-          let(:creation_url) { api_url("#{type}/#{new_object}/#{version}") }
+          let(:creation_url) { api_url.call("#{type}/#{new_object}/#{version}") }
           let(:deletion_url) { creation_url }
           let(:creation_body) {
             {
@@ -1006,7 +1006,7 @@ describe "ACL API", :acl do
           let(:groups) { %w{users admins} }
           let(:read_groups) { %w{users clients admins} }
         when "policies"
-          let(:creation_url) { api_url("#{type}/#{new_object}/revisions") }
+          let(:creation_url) { api_url.call("#{type}/#{new_object}/revisions") }
           let(:creation_body) {
             {
            "revision_id" => "909c26701e291510eacdc6c06d626b9fa5350d25",
@@ -1024,7 +1024,7 @@ describe "ACL API", :acl do
           let(:read_groups) { %w{users clients admins} }
         when "policy_groups"
           let(:creation_url) {
-            api_url("#{type}/#{new_object}/policies/acl_test_policy")
+            api_url.call("#{type}/#{new_object}/policies/acl_test_policy")
           }
           let(:creation_body) {
             {
@@ -1042,9 +1042,9 @@ describe "ACL API", :acl do
           let(:groups) { %w{users admins} }
           let(:read_groups) { %w{users clients admins} }
         when "cookbook_artifacts"
-          let(:creation_url) { api_url("#{type}/#{new_object}/1111111111111111111111111111111111111111") }
+          let(:creation_url) { api_url.call("#{type}/#{new_object}/1111111111111111111111111111111111111111") }
           let(:creation_body) { new_cookbook_artifact("new-object", "1111111111111111111111111111111111111111", version: "1") }
-          let(:deletion_url) { api_url("#{type}/#{new_object}/1111111111111111111111111111111111111111") }
+          let(:deletion_url) { api_url.call("#{type}/#{new_object}/1111111111111111111111111111111111111111") }
           let(:groups) { %w{admins users} }
           let(:read_groups) { %w{admins clients users} }
           let(:update_groups) { %w{admins users} }
@@ -1070,7 +1070,7 @@ describe "ACL API", :acl do
           if type == "policy_groups"
             # Policy groups are only created indirectly when we create policies;
             # deleting the group doesn't delete the policy so we do it explicitly
-            delete(api_url("policies/acl_test_policy"),
+            delete(api_url.call("policies/acl_test_policy"),
               platform.admin_user).should look_like({
                 status: 200,
               })
@@ -1203,7 +1203,7 @@ describe "ACL API", :acl do
 
             before(:each) do
               # create the groups
-              post(api_url("groups"), platform.admin_user,
+              post(api_url.call("groups"), platform.admin_user,
                 payload: { "id" => missing_group }).should look_like({ status: 201 })
 
               # add the group to the read ace
@@ -1212,11 +1212,11 @@ describe "ACL API", :acl do
                 payload: { "read" => updated_read }).should look_like(status: 200)
 
               # delete the group
-              delete(api_url("groups/#{missing_group}"), platform.admin_user)
+              delete(api_url.call("groups/#{missing_group}"), platform.admin_user)
             end
 
             after(:each) do
-              delete(api_url("groups/#{missing_group}"), platform.admin_user)
+              delete(api_url.call("groups/#{missing_group}"), platform.admin_user)
             end
 
             it "should return the acl", :validation do

@@ -8,13 +8,13 @@ describe "Required Recipe Endpoint", :required_recipe do
     describe "when required_recipe is enabled" do
       describe "with a valid client" do
         it "POST to /required_recipe returns 405" do
-          post(api_url("/required_recipe"), normal_client, payload: {}) do |response|
+          post(api_url.call("/required_recipe"), normal_client, payload: {}) do |response|
             response.should look_like(status: 405)
           end
         end
 
         it "GET to /required_recipe returns 200" do
-          get(api_url("/required_recipe"), normal_client) do |response|
+          get(api_url.call("/required_recipe"), normal_client) do |response|
             response.should look_like(status: 200)
           end
         end
@@ -22,13 +22,13 @@ describe "Required Recipe Endpoint", :required_recipe do
 
       describe "with an invalid client" do
         it "POST to /required_recipe returns 405" do
-          post(api_url("/required_recipe"), platform.bad_client, payload: {}) do |response|
+          post(api_url.call("/required_recipe"), platform.bad_client, payload: {}) do |response|
             response.should look_like(status: 405)
           end
         end
 
         it "GET to /required_recipe returns 401" do
-          get(api_url("/required_recipe"), platform.bad_client, {}) do |response|
+          get(api_url.call("/required_recipe"), platform.bad_client, {}) do |response|
             response.should look_like(status: 401)
           end
         end
@@ -36,13 +36,13 @@ describe "Required Recipe Endpoint", :required_recipe do
 
       describe "with a bad request" do
         it "POST to /required_recipe returns 405" do
-          do_request(:POST, api_url("/required_recipe"), {}, payload: {}) do |response|
+          do_request(:POST, api_url.call("/required_recipe"), {}, payload: {}) do |response|
             response.should look_like(status: 405)
           end
         end
 
         it "GET to /required_recipe returns 400" do
-          do_request(:GET, api_url("/required_recipe"), {}, {}) do |response|
+          do_request(:GET, api_url.call("/required_recipe"), {}, {}) do |response|
             response.should look_like(status: 400)
           end
         end
@@ -52,13 +52,13 @@ describe "Required Recipe Endpoint", :required_recipe do
     describe "when required_recipe is disabled" do
       describe "with a valid client" do
         it "POST to /required_recipe returns 404" do
-          post(api_url("/required_recipe"), normal_client, payload: {}) do |response|
+          post(api_url.call("/required_recipe"), normal_client, payload: {}) do |response|
             response.should look_like(status: 404)
           end
         end
 
         it "GET to /required_recipe returns 404" do
-          get(api_url("/required_recipe"), normal_client, {}) do |response|
+          get(api_url.call("/required_recipe"), normal_client, {}) do |response|
             response.should look_like(status: 404)
           end
         end
@@ -66,13 +66,13 @@ describe "Required Recipe Endpoint", :required_recipe do
 
       describe "with an invalid client" do
         it "POST to /required_recipe returns 404" do
-          post(api_url("/required_recipe"), platform.bad_client, payload: {}) do |response|
+          post(api_url.call("/required_recipe"), platform.bad_client, payload: {}) do |response|
             response.should look_like(status: 404)
           end
         end
 
         it "GET to /required_recipe returns 404" do
-          get(api_url("/required_recipe"), platform.bad_client, {}) do |response|
+          get(api_url.call("/required_recipe"), platform.bad_client, {}) do |response|
             response.should look_like(status: 404)
           end
         end
@@ -80,13 +80,13 @@ describe "Required Recipe Endpoint", :required_recipe do
 
       describe "with a bad request" do
         it "POST to /required_recipe returns 404" do
-          do_request(:POST, api_url("/required_recipe"), {}, {}) do |response|
+          do_request(:POST, api_url.call("/required_recipe"), {}, {}) do |response|
             response.should look_like(status: 404)
           end
         end
 
         it "GET to /required_recipe returns 404" do
-          do_request(:GET, api_url("/required_recipe"), {}, {}) do |response|
+          do_request(:GET, api_url.call("/required_recipe"), {}, {}) do |response|
             response.should look_like(status: 404)
           end
         end

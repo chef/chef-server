@@ -42,7 +42,7 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
 
     context "DELETE /cookbook_artifacts/<name>/<version>" do
       let(:request_method) { :DELETE }
-      let(:request_url) { api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_identifier}") }
+      let(:request_url) { api_url.call("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_identifier}") }
       let(:requestor) { admin_user }
 
       let(:cookbook_identifier) { "1111111111111111111111111111111111111111" }
@@ -79,7 +79,7 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
 
         context "when deleting non-existent version of an existing cookbook" do
           let(:non_existing_identifier) { "ffffffffffffffffffffffffffffffffffffffff" }
-          let(:non_existing_version_url) { api_url("/#{cookbook_url_base}/#{cookbook_name}/#{non_existing_identifier}") }
+          let(:non_existing_version_url) { api_url.call("/#{cookbook_url_base}/#{cookbook_name}/#{non_existing_identifier}") }
 
           before(:each) { make_cookbook_artifact(admin_user, cookbook_name, cookbook_identifier) }
           after(:each) { delete_cookbook(admin_user, cookbook_name, cookbook_identifier) }

@@ -32,7 +32,7 @@ module Pedant
       # Returns the entire sandbox JSON as a Ruby hash
       def create_sandbox(files)
         payload = Pedant::Sandbox.create_payload(files)
-        parse(ensure_2xx(post(api_url("/sandboxes"),
+        parse(ensure_2xx(post(api_url.call("/sandboxes"),
           admin_user,
           payload: payload)))
       end
@@ -111,7 +111,7 @@ module Pedant
       # module ClassMethods
 
 
-      let(:named_cookbook_url) { api_url(named_cookbook_path) }
+      let(:named_cookbook_url) { api_url.call(named_cookbook_path) }
       let(:named_cookbook_path) { "/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}" }
 
       let(:cookbook_version_not_found_exact_response) do
@@ -268,13 +268,13 @@ module Pedant
       end
 
       def delete_cookbook_artifact(requestor, name, identifier)
-        res = delete(api_url("/#{cookbook_url_base}/#{name}/#{identifier}"),
+        res = delete(api_url.call("/#{cookbook_url_base}/#{name}/#{identifier}"),
           requestor)
         expect(%w{200 404}).to include(res.code.to_s)
       end
 
       def make_cookbook_artifact(requestor, name, identifier, opts = {})
-        url = api_url("/#{cookbook_url_base}/#{name}/#{identifier}")
+        url = api_url.call("/#{cookbook_url_base}/#{name}/#{identifier}")
         payload = new_cookbook_artifact(name, identifier, opts)
         res = put(url, requestor, payload: payload)
         expect(res.code).to eq(201)
@@ -341,15 +341,15 @@ module Pedant
       end
 
       def cookbook_url(cookbook_name)
-        api_url("/#{cookbook_url_base}/#{cookbook_name}")
+        api_url.call("/#{cookbook_url_base}/#{cookbook_name}")
       end
 
       def cookbook_version_url(cookbook_name, cookbook_version)
-        api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}")
+        api_url.call("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}")
       end
 
       def delete_cookbook(requestor, name, version)
-        delete(api_url("/#{cookbook_url_base}/#{name}/#{version}"),
+        delete(api_url.call("/#{cookbook_url_base}/#{name}/#{version}"),
           requestor)
       end
 
@@ -359,7 +359,7 @@ module Pedant
       end
 
       def upload_cookbook(requestor, name, version, payload)
-        put(api_url("/#{cookbook_url_base}/#{name}/#{version}"),
+        put(api_url.call("/#{cookbook_url_base}/#{name}/#{version}"),
           requestor, payload: payload)
       end
 
@@ -641,7 +641,7 @@ module Pedant
       end
 
       def checksums_for_segment_type(segment_type, cb_version = cookbook_version)
-        get(api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cb_version}"), admin_user) do |response|
+        get(api_url.call("/#{cookbook_url_base}/#{cookbook_name}/#{cb_version}"), admin_user) do |response|
           segment_contents = parse(response)[segment_type.to_s] || []
           segment_contents.inject({}) do |return_hash, segment_member|
             return_hash[segment_member["checksum"]] = segment_member["url"]
@@ -651,7 +651,7 @@ module Pedant
       end
 
       def checksums_for_all_files(type, cb_version = cookbook_version)
-        get(api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cb_version}"), admin_user) do |response|
+        get(api_url.call("/#{cookbook_url_base}/#{cookbook_name}/#{cb_version}"), admin_user) do |response|
           extract_segment(parse(response), type).each_with_object({}) { |file, acc| acc[file["checksum"]] = file["url"] }
         end
       end
@@ -717,7 +717,7 @@ module Pedant
             else
               payload[key] = value
             end
-            put(api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}"),
+            put(api_url.call("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}"),
               admin_user, payload: payload) do |response|
                 if ignores_value
                   payload[key] = actual_value
@@ -730,7 +730,7 @@ module Pedant
               end
 
             # Verified change (or creation) happened
-            get(api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}"), admin_user) do |response|
+            get(api_url.call("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}"), admin_user) do |response|
               response
                 .should look_like({
                 status: 200,
@@ -774,7 +774,7 @@ module Pedant
             else
               payload[key] = value
             end
-            put(api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}"),
+            put(api_url.call("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}"),
               admin_user, payload: payload) do |response|
                 if server_error
                   response.should =~ %r{^HTTP/1.1 500 Internal Server Error}
@@ -791,14 +791,14 @@ module Pedant
 
             # Verified change (or creation) did not happen
             if create
-              get(api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}"), admin_user) do |response|
+              get(api_url.call("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}"), admin_user) do |response|
                 response
                   .should look_like({
                   status: 404,
                 })
               end
             else
-              get(api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}"),
+              get(api_url.call("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}"),
                 admin_user) do |response|
                   payload = new_cookbook(cookbook_name, cookbook_version)
                   response
@@ -854,14 +854,14 @@ module Pedant
             end
             put_payload["metadata"] = put_metadata
 
-            put(api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}"), admin_user,
+            put(api_url.call("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}"), admin_user,
               payload: put_payload) do |response|
                 # The PUT response returns the payload exactly as it was sent
                 response.should look_like({ status: _expected_status, body_exact: put_payload })
               end
 
             # Verified change (or creation) happened
-            get(api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}"), admin_user) do |response|
+            get(api_url.call("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}"), admin_user) do |response|
               get_response = cookbook.dup
               if new_value
                 get_metadata = get_response["metadata"]
@@ -912,7 +912,7 @@ module Pedant
               metadata[key] = value
             end
             payload["metadata"] = metadata
-            put(api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}"),
+            put(api_url.call("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}"),
               admin_user, payload: payload) do |response|
                 if server_error
                   response.should =~ %r{^HTTP/1.1 500 Internal Server Error}
@@ -929,7 +929,7 @@ module Pedant
 
             # Verified change (or creation) did not happen
             if create
-              get(api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}"),
+              get(api_url.call("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}"),
                 admin_user) do |response|
                   response
                     .should look_like({
@@ -937,7 +937,7 @@ module Pedant
                   })
                 end
             else
-              get(api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}"),
+              get(api_url.call("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}"),
                 admin_user) do |response|
                   payload = new_cookbook(cookbook_name, cookbook_version)
                   response
