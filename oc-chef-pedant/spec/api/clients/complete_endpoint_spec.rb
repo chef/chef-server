@@ -41,7 +41,7 @@ describe "Client API endpoint", :clients do
     let(:request_url)    { clients_url }
 
     let(:clients_collection) { pedant_clients.inject({}, &client_name_to_url) }
-    let(:client_name_to_url) { ->(body, name) { body.with!(name, api_url("/clients/#{name}")) } }
+    let(:client_name_to_url) { ->(body, name) { body.with!(name, api_url.call("/clients/#{name}")) } }
 
     context "as an admin user" do
       let(:requestor) { admin_requestor }
@@ -67,7 +67,7 @@ describe "Client API endpoint", :clients do
     let(:request_url)     { clients_url }
     let(:request_payload) { default_client_attributes }
 
-    let(:client_name) { unique_name("testclient") }
+    let(:client_name) { unique_name.call("testclient") }
     let(:default_client_attributes) do
       {
         "name" => client_name,
@@ -77,7 +77,7 @@ describe "Client API endpoint", :clients do
 
     # useful for checking the result of a create operation
     # TODO: Refactor to resource_url
-    let(:client_url) { api_url("/clients/#{client_name}") }
+    let(:client_url) { api_url.call("/clients/#{client_name}") }
 
     let(:expected_response) { resource_created_full_response }
     let(:created_resource) { { "uri" => resource_url } }
@@ -198,7 +198,7 @@ describe "Client API endpoint", :clients do
     let(:request_url)    { named_client_url }
 
     context "without an existing client" do
-      let(:request_url) { api_url "/clients/#{pedant_nonexistent_client_name}" }
+      let(:request_url) { api_url.call "/clients/#{pedant_nonexistent_client_name}" }
       it { should look_like not_found_response }
     end
 
@@ -267,7 +267,7 @@ describe "Client API endpoint", :clients do
     let(:required_attributes) { required_client_attributes }
 
     context "modifying a non-existent client" do
-      let(:request_url) { api_url "/clients/#{pedant_nonexistent_client_name}" }
+      let(:request_url) { api_url.call "/clients/#{pedant_nonexistent_client_name}" }
       let(:request_payload) { { "name" => pedant_nonexistent_client_name } }
 
       it { should look_like client_not_found_response }
@@ -317,7 +317,7 @@ describe "Client API endpoint", :clients do
         let(:request_payload) { { "name" => new_name } }
         let(:persisted_renamed_client_response) { get renamed_client_url, admin_user }
         let(:original_client_response) { persisted_resource_response }
-        let(:renamed_client_url) { api_url "/clients/#{new_name}" }
+        let(:renamed_client_url) { api_url.call "/clients/#{new_name}" }
         let(:renamed_client_attributes) { original_resource_attributes.with("name", new_name) }
         let(:fobidden_action_error_message) { ["missing update permission"] }
 
@@ -348,7 +348,7 @@ describe "Client API endpoint", :clients do
         let(:request_payload) { { "name" => new_name } }
         let(:persisted_renamed_client_response) { get renamed_client_url, admin_user }
         let(:original_client_response) { persisted_resource_response }
-        let(:renamed_client_url) { api_url "/clients/#{new_name}" }
+        let(:renamed_client_url) { api_url.call "/clients/#{new_name}" }
         let(:renamed_client_attributes) { original_resource_attributes.with("name", new_name) }
 
         # TODO: This test will probably break legacy code that uses couchdb
@@ -489,7 +489,7 @@ describe "Client API endpoint", :clients do
 
     context "without an existing client" do
       let(:requestor) { admin_requestor }
-      let(:request_url) { api_url "/clients/#{pedant_nonexistent_client_name}" }
+      let(:request_url) { api_url.call "/clients/#{pedant_nonexistent_client_name}" }
 
       it { should look_like client_not_found_response }
     end

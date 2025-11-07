@@ -40,7 +40,7 @@ describe "Environments API Endpoint", :environments, :roles do
   describe "GET /environments/<name>/roles" do
     let(:request_method) { :GET }
     let(:requestor)      { admin_user }
-    let(:request_url) { api_url("/environments/#{environment_name}/roles/#{role_name}") }
+    let(:request_url) { api_url.call("/environments/#{environment_name}/roles/#{role_name}") }
 
     let(:environment_name) { new_environment_name }
     let(:role_name) { new_role_name }
@@ -78,7 +78,7 @@ describe "Environments API Endpoint", :environments, :roles do
       end
 
       context "without an existing role" do
-        let(:request_url) { api_url("/environments/_default/roles/#{role_name}") }
+        let(:request_url) { api_url.call("/environments/_default/roles/#{role_name}") }
         let(:expected_response) { resource_not_found_exact_response }
         let(:not_found_error_message) { ["Cannot load role #{role_name}"] }
         let(:role_name) { "not_a_role" }

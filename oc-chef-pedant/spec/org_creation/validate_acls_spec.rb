@@ -50,7 +50,7 @@ describe "Org Creation", :org_creation do
     def self.should_have_default_acls_for(endpoint, *tags, &additional_examples)
       _url = "#{endpoint}/_acl"
       context "for /ORG#{_url}", *tags do
-        let(:request_url) { api_url(_url) }
+        let(:request_url) { api_url.call(_url) }
 
         instance_eval(&additional_examples) if additional_examples
         should_respond_with 200, "and have default acl settings"

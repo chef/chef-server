@@ -31,7 +31,7 @@ describe "Environments API Endpoint", :environments do
 
     context "PUT /environments/<name>" do
       let(:request_method)  { :PUT }
-      let(:request_url)     { api_url "/environments/#{environment_name}" }
+      let(:request_url)     { api_url.call "/environments/#{environment_name}" }
       let(:request_payload) { full_environment(environment_name) }
 
       context "with a non-existent organization" do
@@ -51,7 +51,7 @@ describe "Environments API Endpoint", :environments do
 
     describe "PUT /environments/<name>" do
       let(:request_method) { :PUT }
-      let(:request_url)    { api_url "/environments/#{environment_name}" }
+      let(:request_url)    { api_url.call "/environments/#{environment_name}" }
       let(:request_payload) { new_environment(environment_name) }
       let(:environment_name) { new_environment_name }
 
@@ -63,13 +63,13 @@ describe "Environments API Endpoint", :environments do
 
         shared_context "successfully PUTs" do
           it "updates description = blah" do
-            response = put(api_url("/environments/#{new_environment_name}"), requestor,
+            response = put(api_url.call("/environments/#{new_environment_name}"), requestor,
               payload: modified_env)
             response.should look_like({
                                         status: 200,
                                         body_exact: modified_env,
                                       })
-            get(api_url("/environments/#{new_environment_name}"), requestor)
+            get(api_url.call("/environments/#{new_environment_name}"), requestor)
               .should look_like({
                                  status: 200,
                                  body_exact: modified_env,
@@ -88,14 +88,14 @@ describe "Environments API Endpoint", :environments do
           it "updates description = blah" do
             restrict_permissions_to("/environments/#{new_environment_name}",
               normal_user => ["update"])
-            response = put(api_url("/environments/#{new_environment_name}"), normal_user,
+            response = put(api_url.call("/environments/#{new_environment_name}"), normal_user,
               payload: modified_env)
             response.should look_like({
                                         status: 200,
                                         body_exact: modified_env,
                                       })
             unrestrict_permissions
-            response = get(api_url("/environments/#{new_environment_name}"), normal_user)
+            response = get(api_url.call("/environments/#{new_environment_name}"), normal_user)
             response.should look_like({
                                         status: 200,
                                         body_exact: modified_env,
@@ -106,14 +106,14 @@ describe "Environments API Endpoint", :environments do
           it "returns 403", :authorization do
             restrict_permissions_to("/environments/#{new_environment_name}",
               normal_user => %w{create read delete grant})
-            response = put(api_url("/environments/#{new_environment_name}"), normal_user,
+            response = put(api_url.call("/environments/#{new_environment_name}"), normal_user,
               payload: modified_env)
             response.should look_like({ status: 403 })
           end
         end
         context "with a client" do
           it "returns 403", :authorization do
-            response = put(api_url("/environments/#{new_environment_name}"),
+            response = put(api_url.call("/environments/#{new_environment_name}"),
               platform.non_admin_client,
               payload: modified_env)
             response.should look_like({ status: 403 })
@@ -123,7 +123,7 @@ describe "Environments API Endpoint", :environments do
           # TODO we really should make this person admin of another org, for maximum
           # effectiveness.
           it "returns 403", :authorization do
-            response = put(api_url("/environments/#{new_environment_name}"), outside_user,
+            response = put(api_url.call("/environments/#{new_environment_name}"), outside_user,
               payload: modified_env)
             response.should look_like({ status: 403 })
           end

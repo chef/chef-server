@@ -62,7 +62,7 @@ describe "license", :license do
 
     context "with nodes" do
       let(:nodes) do
-        (1..node_count).map { |i| new_node(unique_name("pedant_node_list_test_#{i}")) }
+        (1..node_count).map { |i| new_node(unique_name.call("pedant_node_list_test_#{i}")) }
       end
 
       before :each do

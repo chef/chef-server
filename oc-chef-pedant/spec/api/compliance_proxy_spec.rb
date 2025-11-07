@@ -67,14 +67,14 @@ describe "Compliance Proxy Tests", :compliance_proxy_tests do
     let(:response) { get(request_url, admin_user) }
 
     context "GET /organizations/ORG/owners/OWNER/compliance" do
-      let(:request_url) { api_url("owners/foobar/compliance") }
+      let(:request_url) { api_url.call("owners/foobar/compliance") }
       it "returns 200" do
         expect(response.code).to eq(200)
       end
     end
 
     context "GET /organizations/ORG/owners/OWNER/compliance/PROFILE" do
-      let(:request_url) { api_url("owners/foobar/compliance/testprofile") }
+      let(:request_url) { api_url.call("owners/foobar/compliance/testprofile") }
       it "returns 200" do
         expect(response.code).to eq(200)
       end

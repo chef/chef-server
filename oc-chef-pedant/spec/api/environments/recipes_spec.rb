@@ -26,7 +26,7 @@ describe "/environments/ENVIRONMENT/recipes API endpoint", :environments do
   let(:cookbook_url_base) { "cookbooks" }
 
   let(:request_method)   { :GET }
-  let(:request_url)      { api_url "/environments/#{environment_name}/recipes" }
+  let(:request_url)      { api_url.call "/environments/#{environment_name}/recipes" }
   let(:requestor)        { admin_user }
   let(:environment_name) { env }
 
@@ -129,18 +129,18 @@ describe "/environments/ENVIRONMENT/recipes API endpoint", :environments do
 
         before :each do
           # Add constraints to environment
-          put(api_url("/environments/#{env}"), admin_user,
+          put(api_url.call("/environments/#{env}"), admin_user,
             payload: make_payload("cookbook_versions" => constraint_hash))
         end
 
         after :each do
           # Remove constraints from the environment
-          put(api_url("/environments/#{env}"), admin_user,
+          put(api_url.call("/environments/#{env}"), admin_user,
             payload: make_payload("cookbook_versions" => {}))
         end
 
         it "retrieves appropriate recipes" do
-          get(api_url("/environments/#{env}/recipes"), admin_user) do |response|
+          get(api_url.call("/environments/#{env}/recipes"), admin_user) do |response|
             response.should have_status_code 200
             parse(response).should =~ expected_recipes
           end

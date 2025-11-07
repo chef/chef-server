@@ -29,7 +29,7 @@ describe "/environments/ENVIRONMENT/cookbooks API endpoint", :environments, :coo
 
   let(:cookbook_url_base) { "cookbooks" }
   let(:request_method)   { :GET }
-  let(:request_url)      { api_url "/environments/#{environment_name}/cookbooks" }
+  let(:request_url)      { api_url.call "/environments/#{environment_name}/cookbooks" }
   let(:requestor)        { admin_user }
   let(:environment_name) { env }
 
@@ -45,7 +45,7 @@ describe "/environments/ENVIRONMENT/cookbooks API endpoint", :environments, :coo
   context "with no cookbooks" do
 
     context 'when fetching cookbooks from "_default" environment' do
-      let(:request_url)       { api_url "/environments/#{default}/cookbooks" }
+      let(:request_url)       { api_url.call "/environments/#{default}/cookbooks" }
       let(:expected_response) { ok_exact_response }
       let(:success_message)   { {} } # No cookbooks
       should_respond_with 200, "and no cookbooks"
@@ -68,7 +68,7 @@ describe "/environments/ENVIRONMENT/cookbooks API endpoint", :environments, :coo
 
     ["all", 0, 1, 2, 30].each do |num|
       context "when fetching cookbooks with num_version=#{num}" do
-        let(:request_url)       { api_url "/environments/#{environment_name}/cookbooks?num_versions=#{num}" }
+        let(:request_url)       { api_url.call "/environments/#{environment_name}/cookbooks?num_versions=#{num}" }
         let(:expected_response) { ok_exact_response }
         let(:success_message)   { {} } # No cookbooks
         should_respond_with 200, "and no cookbooks"
@@ -76,7 +76,7 @@ describe "/environments/ENVIRONMENT/cookbooks API endpoint", :environments, :coo
     end
 
     context 'when num_versions is not "all" or a number', :validation do
-      let(:request_url)       { api_url "/environments/#{environment_name}/cookbooks?num_versions=skittles" }
+      let(:request_url)       { api_url.call "/environments/#{environment_name}/cookbooks?num_versions=skittles" }
       let(:expected_response) { bad_request_exact_response }
       let(:error_message)     { ["You have requested an invalid number of versions (x >= 0 || 'all')"] }
       should_respond_with 400
@@ -119,10 +119,10 @@ describe "/environments/ENVIRONMENT/cookbooks API endpoint", :environments, :coo
       latest.inject({}) do |body, cookbook_spec|
         name, version_specs = cookbook_spec
         body[name] = {
-          "url" => api_url("/cookbooks/#{name}"),
+          "url" => api_url.call("/cookbooks/#{name}"),
           "versions" => version_specs.map do |version_string, recipe_names|
             {
-              "url" => api_url("/cookbooks/#{name}/#{version_string}"),
+              "url" => api_url.call("/cookbooks/#{name}/#{version_string}"),
               "version" => version_string,
             }
           end,
@@ -141,7 +141,7 @@ describe "/environments/ENVIRONMENT/cookbooks API endpoint", :environments, :coo
 
         ["all", 1, 2, 3, 30].each do |num|
           context "when fetching cookbooks with num_version=#{num}" do
-            let(:request_url)       { api_url "/environments/#{environment_name}/cookbooks?num_versions=#{num}" }
+            let(:request_url)       { api_url.call "/environments/#{environment_name}/cookbooks?num_versions=#{num}" }
             let(:expected_response) { ok_exact_response }
             let(:success_message)   { expected_for_cookbooks(cookbooks, num) }
             should_respond_with 200, "and #{num} latest versions of cookbooks"
@@ -151,7 +151,7 @@ describe "/environments/ENVIRONMENT/cookbooks API endpoint", :environments, :coo
 
       context "from the _default environment" do
         context "when fetching cookbooks in the _default environment" do
-          let(:request_url)       { api_url "/environments/#{default}/cookbooks" }
+          let(:request_url)       { api_url.call "/environments/#{default}/cookbooks" }
           let(:expected_response) { ok_exact_response }
           let(:success_message)   { expected_for_cookbooks(cookbooks, 1) }
           should_respond_with 200, "and latest versions of ALL cookbooks"
@@ -159,7 +159,7 @@ describe "/environments/ENVIRONMENT/cookbooks API endpoint", :environments, :coo
 
         ["all", 1, 2, 3, 30].each do |num|
           context "when fetching cookbooks with num_version=#{num}" do
-            let(:request_url)       { api_url "/environments/#{default}/cookbooks?num_versions=#{num}" }
+            let(:request_url)       { api_url.call "/environments/#{default}/cookbooks?num_versions=#{num}" }
             let(:expected_response) { ok_exact_response }
             let(:success_message)   { expected_for_cookbooks(cookbooks, num) }
             should_respond_with 200, "and #{num} latest versions of cookbooks"
@@ -175,13 +175,13 @@ describe "/environments/ENVIRONMENT/cookbooks API endpoint", :environments, :coo
 
         before :each do
           # Add constraints to environment
-          put(api_url("/environments/#{env}"), admin_user,
+          put(api_url.call("/environments/#{env}"), admin_user,
             payload: make_payload("cookbook_versions" => constraint_hash))
         end
 
         after :each do
           # Remove constraints from the environment
-          put(api_url("/environments/#{env}"), admin_user,
+          put(api_url.call("/environments/#{env}"), admin_user,
             payload: make_payload("cookbook_versions" => {}))
         end
 
@@ -193,10 +193,10 @@ describe "/environments/ENVIRONMENT/cookbooks API endpoint", :environments, :coo
           spec.inject({}) do |body, kv|
             cookbook, allowed_versions = kv
             body[cookbook] = {
-              "url" => api_url("/cookbooks/#{cookbook}"),
+              "url" => api_url.call("/cookbooks/#{cookbook}"),
               "versions" => allowed_versions.map do |version|
                 {
-                  "url" => api_url("/cookbooks/#{cookbook}/#{version}"),
+                  "url" => api_url.call("/cookbooks/#{cookbook}/#{version}"),
                   "version" => version,
                 }
               end,
@@ -207,9 +207,9 @@ describe "/environments/ENVIRONMENT/cookbooks API endpoint", :environments, :coo
 
         it "retrieves appropriate cookbooks#{num_versions ? " with num_versions=" + num_versions.to_s : ""}" do
           url = if num_versions
-                  api_url("/environments/#{env}/cookbooks?num_versions=#{num_versions}")
+                  api_url.call("/environments/#{env}/cookbooks?num_versions=#{num_versions}")
                 else
-                  api_url("/environments/#{env}/cookbooks")
+                  api_url.call("/environments/#{env}/cookbooks")
                 end
           get(url, admin_user) do |response|
             response.should look_like({

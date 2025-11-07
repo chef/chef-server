@@ -32,7 +32,7 @@ describe "Environments API Endpoint", :environments do
 
     context "DELETE /environments" do
       let(:request_method) { :DELETE }
-      let(:request_url)    { api_url "/environments" }
+      let(:request_url)    { api_url.call "/environments" }
 
       let(:expected_response) { method_not_allowed_response }
       should_respond_with 405
@@ -40,7 +40,7 @@ describe "Environments API Endpoint", :environments do
 
     describe "DELETE /environments/<name>" do
       let(:request_method) { :DELETE }
-      let(:request_url)    { api_url "/environments/#{environment_name}" }
+      let(:request_url)    { api_url.call "/environments/#{environment_name}" }
 
       context 'with "_default" environment' do
         let(:environment_name) { "_default" }
@@ -67,7 +67,7 @@ describe "Environments API Endpoint", :environments do
 
     describe "DELETE /environments/<name>" do
       let(:request_method) { :DELETE }
-      let(:request_url)    { api_url "/environments/#{environment_name}" }
+      let(:request_url)    { api_url.call "/environments/#{environment_name}" }
 
       let(:environment_name) { new_environment_name }
 

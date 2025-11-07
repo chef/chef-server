@@ -10,8 +10,8 @@ describe "Groups ACL", :acl do
       context "for #{test_group}" do
         let(:admin_username) { platform.admin_user.name }
         let(:acl_url) { "#{platform.server}/groups/#{test_group}/_acl" }
-        let(:read_acl_url) { api_url("groups/#{test_group}/_acl") }
-        let(:write_acl_url) { api_url("groups/#{test_group}/_acl/grant") }
+        let(:read_acl_url) { api_url.call("groups/#{test_group}/_acl") }
+        let(:write_acl_url) { api_url.call("groups/#{test_group}/_acl/grant") }
 
         let(:actors) { ["pivotal"] }
         let(:groups) { [] }
@@ -74,8 +74,8 @@ describe "Groups ACL", :acl do
         context "for #{test_group}" do
           let(:admin_username) { platform.admin_user.name }
           let(:acl_url) { "#{platform.server}/groups/#{test_group}/_acl" }
-          let(:read_acl_url) { api_url("groups/#{test_group}/_acl") }
-          let(:write_acl_url) { api_url("groups/#{test_group}/_acl/read") }
+          let(:read_acl_url) { api_url.call("groups/#{test_group}/_acl") }
+          let(:write_acl_url) { api_url.call("groups/#{test_group}/_acl/read") }
 
           let(:actors) { ["pivotal"] }
           let(:groups) { [] }

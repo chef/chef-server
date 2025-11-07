@@ -37,7 +37,7 @@ describe "Search API endpoint", :search do
   shared(:requestor) { admin_requestor }
 
   context "/search" do
-    let(:request_url) { util_api_url("/search") }
+    let(:request_url) { api_url.call("/search") }
     context "GET" do
       let(:request_method) { :GET }
       context "with no data bags" do
@@ -57,7 +57,7 @@ describe "Search API endpoint", :search do
   end # /search
 
   context "/search/environment" do
-    let(:request_url) { util_api_url("/search/environment") }
+    let(:request_url) { api_url.call("/search/environment") }
 
     setup_multiple_objects :environment
 
@@ -88,7 +88,7 @@ describe "Search API endpoint", :search do
   end
 
   context "/search/node" do
-    let(:request_url) { util_api_url("/search/node") }
+    let(:request_url) { api_url.call("/search/node") }
 
     setup_multiple_objects :node
 
@@ -116,15 +116,15 @@ describe "Search API endpoint", :search do
 
       context "with a node that has policyfile attributes" do
 
-      let(:maximum_search_time) { Pedant::Config.maximum_search_time }
+        let(:maximum_search_time) { Pedant::Config.maximum_search_time }
 
-      let(:node_name) { unique_name("testing_node" ) }
+        let(:node_name) { unique_name.call("testing_node" ) }
 
-      let(:nodes_container) { util_api_url("/nodes") }
+        let(:nodes_container) { api_url.call("/nodes") }
 
-      let(:resource_url) { util_api_url "/nodes/#{node_name}" }
+        let(:resource_url) { api_url.call "/nodes/#{node_name}" }
 
-      let(:node) do
+        let(:node) do
           new_node(node_name).tap do |n|
             n["policy_name"] = "example-policy-name"
             n["policy_group"] = "example-policy-group"
@@ -327,7 +327,7 @@ describe "Search API endpoint", :search do
   end # /search/node
 
   context "/search/role" do
-    let(:request_url) { util_api_url("/search/role") }
+    let(:request_url) { api_url.call("/search/role") }
 
     setup_multiple_objects :role
 
@@ -356,12 +356,12 @@ describe "Search API endpoint", :search do
   end # /search/role
 
   context "/search/client" do
-    let(:request_url) { util_api_url("/search/client") }
+    let(:request_url) { api_url.call("/search/client") }
     # let(:requestor){superuser}
 
     # Utility methods to help populate search result bodies
     def fetch_client(name)
-      parse(get(util_api_url("/clients/#{name}"), admin_requestor))
+      parse(get(api_url.call("/clients/#{name}"), admin_requestor))
     end
 
     def fetch_clients(names)
@@ -401,13 +401,13 @@ describe "Search API endpoint", :search do
   end
 
   context "/search/<data_bag>" do
-    let(:request_url) { util_api_url("/search/#{data_bag_name}") }
+    let(:request_url) { api_url.call("/search/#{data_bag_name}") }
 
     context "using GET" do
       let(:request_method) { :GET }
 
       context "for a nonexistent data bag" do
-        let(:data_bag_name) { unique_name("no_bag") }
+        let(:data_bag_name) { unique_name.call("no_bag") }
         let(:request_query_parameters) { "q=id:no_such_item" }
         it "should fail" do
           should look_like search_data_bag_no_data_bag_response
@@ -468,7 +468,7 @@ describe "Search API endpoint", :search do
             admin_user => %w{read delete}
 
           with_search_polling do
-            r = get(api_url("/search/#{data_bag_name}?q=id:*"), normal_user)
+            r = get(api_url.call("/search/#{data_bag_name}?q=id:*"), normal_user)
             parse(r)["rows"].should eq([])
           end
         end
@@ -484,7 +484,7 @@ describe "Search API endpoint", :search do
       end
 
       context "for an existing data bag" do
-        let(:data_bag_item_name) { unique_name("pedant_data_bag_item") }
+        let(:data_bag_item_name) { unique_name.call("pedant_data_bag_item") }
         include_context "with testing data bag"
         include_context "with testing data bag items" do
           let(:items) { [new_data_bag_item(data_bag_item_name)] }
@@ -493,7 +493,7 @@ describe "Search API endpoint", :search do
           let(:request_payload) { { "foo" => ["foo"] } }
           let(:search_result_items) {
             [{
-                                       "url" => api_url("/data/#{data_bag_name}/#{data_bag_item_name}"),
+                                       "url" => api_url.call("/data/#{data_bag_name}/#{data_bag_item_name}"),
                                        "data" => {
                                          "foo" => "bar",
                                        },
@@ -513,7 +513,7 @@ describe "Search API endpoint", :search do
             let(:request_payload) { { "private_key" => %w{ssh private_key}, "public_key" => %w{ssh public_key} } }
             let(:search_result_items) do
               [ {
-                  "url" => api_url("/data/#{data_bag_name}/#{alice["id"]}"),
+                  "url" => api_url.call("/data/#{data_bag_name}/#{alice["id"]}"),
                   "data" => {
                     "private_key" => alice["ssh"]["private_key"],
                     "public_key" => alice["ssh"]["public_key"],
@@ -669,7 +669,7 @@ describe "Search API endpoint", :search do
               "goal" => %w{override_attributes top mid bottom},
             }
 
-            post(api_url("/search/role?q=description:#{description}"), admin_user,
+            post(api_url.call("/search/role?q=description:#{description}"), admin_user,
               payload: payload) do |response|
                 want_result = {
                   "url" => /roles/,
@@ -726,11 +726,11 @@ describe "Search API endpoint", :search do
             payload = {
               "we_found_default" => %w{is default},
             }
-            post(api_url("/search/node?q=name:#{node_name}"), admin_user,
+            post(api_url.call("/search/node?q=name:#{node_name}"), admin_user,
               payload: payload) do |response|
                 response.should look_like({ status: 200,
                                             body: {
-                                             "rows" => [{ "url" => api_url("/nodes/#{node_name}"),
+                                             "rows" => [{ "url" => api_url.call("/nodes/#{node_name}"),
                                                           "data" => {
                                                             "we_found_default" => true,
                                                           } }] } })
@@ -743,11 +743,11 @@ describe "Search API endpoint", :search do
             payload = {
               "we_found_normal" => %w{is normal},
             }
-            post(api_url("/search/node?q=name:#{node_name}"), admin_user,
+            post(api_url.call("/search/node?q=name:#{node_name}"), admin_user,
               payload: payload) do |response|
                 response.should look_like({ status: 200,
                                            body: {
-                                             "rows" => [{ "url" => api_url("/nodes/#{node_name}"),
+                                             "rows" => [{ "url" => api_url.call("/nodes/#{node_name}"),
                                                           "data" => {
                                                             "we_found_normal" => true,
                                                           } }] } })
@@ -760,11 +760,11 @@ describe "Search API endpoint", :search do
             payload = {
               "goal" => %w{top mid bottom},
             }
-            post(api_url("/search/node?q=name:#{node_name}"), admin_user,
+            post(api_url.call("/search/node?q=name:#{node_name}"), admin_user,
               payload: payload) do |response|
                 response.should look_like({ status: 200,
                                            body: {
-                                             "rows" => [{ "url" => api_url("/nodes/#{node_name}"),
+                                             "rows" => [{ "url" => api_url.call("/nodes/#{node_name}"),
                                                           "data" => {
                                                             "goal" => "found_it_normal",
                                                           } }] } })

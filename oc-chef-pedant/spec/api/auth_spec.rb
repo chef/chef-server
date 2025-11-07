@@ -12,17 +12,17 @@ describe "chef server authorization checks", :authorization do
   def self.authorization_tests(resource_type)
     context "without starting resource" do
       before :each do
-        delete(api_url("/#{resource_type}/#{new_name}"), admin_user)
+        delete(api_url.call("/#{resource_type}/#{new_name}"), admin_user)
       end
 
       after :each do
-        delete(api_url("/#{resource_type}/#{new_name}"), admin_user)
+        delete(api_url.call("/#{resource_type}/#{new_name}"), admin_user)
       end
 
       context "POST /#{resource_type}" do
         shared_context "successful POST auth for #{resource_type}" do
           before(:each) do
-            @response = post(api_url("/#{resource_type}"),
+            @response = post(api_url.call("/#{resource_type}"),
               user,
               payload: new_resource)
           end
@@ -33,14 +33,14 @@ describe "chef server authorization checks", :authorization do
                                  status: 201,
                                  body_exact: {
                                    "uri" =>
-                                   api_url("/#{resource_type}/#{new_name}"),
+                                   api_url.call("/#{resource_type}/#{new_name}"),
                                  },
                                })
           end
 
           it "creates the resource" do
             # Verify that it comes back properly
-            get(api_url("/#{resource_type}/#{new_name}"), user)
+            get(api_url.call("/#{resource_type}/#{new_name}"), user)
               .should look_like({
                                  status: 200,
                                  body_exact: new_resource,
@@ -65,14 +65,14 @@ describe "chef server authorization checks", :authorization do
           end
 
           after(:each) do
-            delete(api_url("/#{resource_type}/#{new_name}"), normal_user)
+            delete(api_url.call("/#{resource_type}/#{new_name}"), normal_user)
           end
 
           let(:user) { normal_user }
 
           it_behaves_like "successful POST auth for #{resource_type}" do
             it "creates a child with restricted permissions" do
-              get(api_url("/#{resource_type}/#{new_name}/_acl"), superuser)
+              get(api_url.call("/#{resource_type}/#{new_name}/_acl"), superuser)
                 .should look_like({
                                    status: 200,
                                    body_exact: {
@@ -101,7 +101,7 @@ describe "chef server authorization checks", :authorization do
           it "returns 403", :authorization do
             restrict_permissions_to("/containers/#{resource_type}",
               normal_user => %w{read update delete grant})
-            response = post(api_url("/#{resource_type}"),
+            response = post(api_url.call("/#{resource_type}"),
               normal_user,
               payload: new_resource)
             response.should look_like({ status: 403 })
@@ -110,7 +110,7 @@ describe "chef server authorization checks", :authorization do
 
         context "with a client", :pending do
           it "returns 403", :authorization do
-            response = post(api_url("/#{resource_type}/"),
+            response = post(api_url.call("/#{resource_type}/"),
               client,
               payload: new_resource)
             response.should look_like({ status: 403 })
@@ -121,7 +121,7 @@ describe "chef server authorization checks", :authorization do
           # TODO we really should make this person admin of another org, for maximum
           # effectiveness.
           it "returns 403", :authorization do
-            response = post(api_url("/#{resource_type}/"),
+            response = post(api_url.call("/#{resource_type}/"),
               outside_user,
               payload: new_resource)
             response.should look_like({ status: 403 })
@@ -132,23 +132,23 @@ describe "chef server authorization checks", :authorization do
 
     context "with starting resource" do
       before :each do
-        post(api_url("/#{resource_type}"), admin_user, payload: new_resource)
+        post(api_url.call("/#{resource_type}"), admin_user, payload: new_resource)
       end
 
       after :each do
-        delete(api_url("/#{resource_type}/#{new_name}"), admin_user)
+        delete(api_url.call("/#{resource_type}/#{new_name}"), admin_user)
       end
 
       context "PUT /#{resource_type}/<name>" do
         shared_context "successful PUT auth for #{resource_type}" do
           it "updates resource" do
-            response = put(api_url("/#{resource_type}/#{new_name}"), user,
+            response = put(api_url.call("/#{resource_type}/#{new_name}"), user,
               payload: modified_resource)
             response.should look_like({
                                         status: 200,
                                         body_exact: modified_resource,
                                       })
-            get(api_url("/#{resource_type}/#{new_name}"), user)
+            get(api_url.call("/#{resource_type}/#{new_name}"), user)
               .should look_like({
                                  status: 200,
                                  body_exact: modified_resource,
@@ -170,14 +170,14 @@ describe "chef server authorization checks", :authorization do
           it "updates resource" do
             restrict_permissions_to("/#{resource_type}/#{new_name}",
               normal_user => ["update"])
-            response = put(api_url("/#{resource_type}/#{new_name}"), normal_user,
+            response = put(api_url.call("/#{resource_type}/#{new_name}"), normal_user,
               payload: modified_resource)
             response.should look_like({
                                         status: 200,
                                         body_exact: modified_resource,
                                       })
             unrestrict_permissions
-            response = get(api_url("/#{resource_type}/#{new_name}"), normal_user)
+            response = get(api_url.call("/#{resource_type}/#{new_name}"), normal_user)
             response.should look_like({
                                         status: 200,
                                         body_exact: modified_resource,
@@ -189,7 +189,7 @@ describe "chef server authorization checks", :authorization do
           it "returns 403", :authorization do
             restrict_permissions_to("/#{resource_type}/#{new_name}",
               normal_user => %w{create read delete grant})
-            response = put(api_url("/#{resource_type}/#{new_name}"), normal_user,
+            response = put(api_url.call("/#{resource_type}/#{new_name}"), normal_user,
               payload: modified_resource)
             response.should look_like({ status: 403 })
           end
@@ -197,7 +197,7 @@ describe "chef server authorization checks", :authorization do
 
         context "with a client", :pending do
           it "returns 403", :authorization do
-            response = put(api_url("/#{resource_type}/#{new_name}"),
+            response = put(api_url.call("/#{resource_type}/#{new_name}"),
               client,
               payload: modified_resource)
             response.should look_like({ status: 403 })
@@ -208,7 +208,7 @@ describe "chef server authorization checks", :authorization do
           # TODO we really should make this person admin of another org, for maximum
           # effectiveness.
           it "returns 403", :authorization do
-            response = put(api_url("/#{resource_type}/#{new_name}"), outside_user,
+            response = put(api_url.call("/#{resource_type}/#{new_name}"), outside_user,
               payload: modified_resource)
             response.should look_like({ status: 403 })
           end
@@ -218,11 +218,11 @@ describe "chef server authorization checks", :authorization do
       context "DELETE /#{resource_type}/<name>" do
         shared_context "successful DELETE auth for #{resource_type}" do
           it "DELETE /#{resource_type}/<name> succeeds" do
-            response = delete(api_url("/#{resource_type}/#{new_name}"), user)
+            response = delete(api_url.call("/#{resource_type}/#{new_name}"), user)
             response.should look_like({ status: 200,
                                         body: new_resource,
                                       })
-            response = get(api_url("/#{resource_type}/#{new_name}"), user)
+            response = get(api_url.call("/#{resource_type}/#{new_name}"), user)
             response.should look_like({ status: 404 })
           end
         end # shared_context "successful DELETE auth for #{resource_type}"
@@ -252,7 +252,7 @@ describe "chef server authorization checks", :authorization do
           it "returns 403", :authorization do
             restrict_permissions_to("/#{resource_type}/#{new_name}",
               normal_user => %w{create read update grant})
-            response = delete(api_url("/#{resource_type}/#{new_name}"),
+            response = delete(api_url.call("/#{resource_type}/#{new_name}"),
               normal_user)
             response.should look_like({ status: 403 })
           end
@@ -260,7 +260,7 @@ describe "chef server authorization checks", :authorization do
 
         context "with a client", :pending do
           it "returns 403", :authorization do
-            response = delete(api_url("/#{resource_type}/#{new_name}"),
+            response = delete(api_url.call("/#{resource_type}/#{new_name}"),
               client)
             response.should look_like({ status: 403 })
           end
@@ -270,7 +270,7 @@ describe "chef server authorization checks", :authorization do
           # TODO we really should make this person admin of another org, for maximum
           # effectiveness.
           it "returns 403", :authorization do
-            response = delete(api_url("/#{resource_type}/#{new_name}"),
+            response = delete(api_url.call("/#{resource_type}/#{new_name}"),
               outside_user)
             response.should look_like({ status: 403 })
           end
@@ -279,35 +279,35 @@ describe "chef server authorization checks", :authorization do
 
       context "GET /#{resource_type}" do
         before(:each) do
-          delete(api_url("/#{resource_type}/#{new_name}"), admin_user)
-          delete(api_url("/#{resource_type}/#{other_name}"), admin_user)
-          post(api_url("/#{resource_type}"), admin_user,
+          delete(api_url.call("/#{resource_type}/#{new_name}"), admin_user)
+          delete(api_url.call("/#{resource_type}/#{other_name}"), admin_user)
+          post(api_url.call("/#{resource_type}"), admin_user,
             payload: new_resource) do |response|
               response
                 .should look_like({
                                    status: 201,
                                    body_exact: {
-                                     "uri" => api_url("/#{resource_type}/#{new_name}"),
+                                     "uri" => api_url.call("/#{resource_type}/#{new_name}"),
                                    } })
             end
-          post(api_url("/#{resource_type}"), admin_user,
+          post(api_url.call("/#{resource_type}"), admin_user,
             payload: modified_resource2) do |response|
               response
                 .should look_like({
                                    status: 201,
                                    body_exact: {
-                                     "uri" => api_url("/#{resource_type}/#{other_name}"),
+                                     "uri" => api_url.call("/#{resource_type}/#{other_name}"),
                                    } })
             end
         end
 
         after(:each) do
-          delete(api_url("/#{resource_type}/#{other_name}"), admin_user)
+          delete(api_url.call("/#{resource_type}/#{other_name}"), admin_user)
         end
 
         shared_context "successful GET list auth for #{resource_type}" do
           it "GET /#{resource_type} succeeds" do
-            response = get(api_url("/#{resource_type}"), user)
+            response = get(api_url.call("/#{resource_type}"), user)
             response
               .should look_like({
                                  status: 200,
@@ -339,7 +339,7 @@ describe "chef server authorization checks", :authorization do
           it "returns 403", :authorization do
             restrict_permissions_to("/containers/#{resource_type}",
               normal_user => %w{create update delete grant})
-            response = get(api_url("/#{resource_type}"), normal_user)
+            response = get(api_url.call("/#{resource_type}"), normal_user)
             response.should look_like({ status: 403 })
           end
         end # context "with a user with all permissions EXCEPT read"
@@ -353,7 +353,7 @@ describe "chef server authorization checks", :authorization do
           # TODO we really should make this person admin of another org, for maximum
           # effectiveness.
           it "returns 403", :authorization do
-            response = get(api_url("/#{resource_type}"), outside_user)
+            response = get(api_url.call("/#{resource_type}"), outside_user)
             response.should look_like({ status: 403 })
           end
         end # context "with an outside user (admin of another org)"
@@ -362,7 +362,7 @@ describe "chef server authorization checks", :authorization do
       context "GET /#{resource_type}/<name>" do
         shared_context "successful GET auth for #{resource_type}" do
           it "GET /#{resource_type}/<name> succeeds" do
-            response = get(api_url("/#{resource_type}/#{new_name}"), user)
+            response = get(api_url.call("/#{resource_type}/#{new_name}"), user)
             response
               .should look_like({
                                  status: 200,
@@ -393,7 +393,7 @@ describe "chef server authorization checks", :authorization do
           it "returns 403", :authorization do
             restrict_permissions_to("/#{resource_type}/#{new_name}",
               normal_user => %w{create update delete grant})
-            response = get(api_url("/#{resource_type}/#{new_name}"), normal_user)
+            response = get(api_url.call("/#{resource_type}/#{new_name}"), normal_user)
             response.should look_like({ status: 403 })
           end
         end # context "with a user with all permissions EXCEPT read"
@@ -407,7 +407,7 @@ describe "chef server authorization checks", :authorization do
           # TODO we really should make this person admin of another org, for maximum
           # effectiveness.
           it "returns 403", :authorization do
-            response = get(api_url("/#{resource_type}/#{new_name}"), outside_user)
+            response = get(api_url.call("/#{resource_type}/#{new_name}"), outside_user)
             response.should look_like({ status: 403 })
           end
         end # context "with an outside user (admin of another org)"
@@ -444,8 +444,8 @@ describe "chef server authorization checks", :authorization do
 
     let(:default_list) {
       {
-        new_name => api_url("/#{resource_type}/#{new_name}"),
-        "#{other_name}" => api_url("/#{resource_type}/#{other_name}"),
+        new_name => api_url.call("/#{resource_type}/#{new_name}"),
+        "#{other_name}" => api_url.call("/#{resource_type}/#{other_name}"),
       }
     }
 
@@ -483,9 +483,9 @@ describe "chef server authorization checks", :authorization do
 
     let(:default_list) {
       {
-        "_default" => api_url("/#{resource_type}/_default"),
-        new_name => api_url("/#{resource_type}/#{new_name}"),
-        "#{other_name}" => api_url("/#{resource_type}/#{other_name}"),
+        "_default" => api_url.call("/#{resource_type}/_default"),
+        new_name => api_url.call("/#{resource_type}/#{new_name}"),
+        "#{other_name}" => api_url.call("/#{resource_type}/#{other_name}"),
       }
     }
 
@@ -519,8 +519,8 @@ describe "chef server authorization checks", :authorization do
 
     let(:default_list) {
       {
-        new_name => api_url("/#{resource_type}/#{new_name}"),
-        "#{other_name}" => api_url("/#{resource_type}/#{other_name}"),
+        new_name => api_url.call("/#{resource_type}/#{new_name}"),
+        "#{other_name}" => api_url.call("/#{resource_type}/#{other_name}"),
       }
     }
 

@@ -326,9 +326,7 @@ module Pedant
         # - Prefixes "pedant_" for the name
         # - Appends a suffix unique for the entire Pedant run
         # - Useful for things like names for roles, nodes, etc.
-        def unique_name(name)
-          "pedant_#{name}_#{pedant_suffix}"
-        end
+        let(:unique_name) { ->(name) { "pedant_#{name}_#{pedant_suffix}" } }
 
         # Helper method for helper methods; useful for ensuring that
         # parameters are the correct data type
@@ -340,9 +338,11 @@ module Pedant
 
         # Helper method for helper methods; useful for ensuring that
         # parameters are the correct data type
-        def should_be_string(data)
-          if data.class != String
-            raise "Data needs to be a string; you passed in a #{data.class}: #{data}"
+        let(:should_be_string) do
+          ->(data) do
+            if data.class != String
+              raise "Data needs to be a string; you passed in a #{data.class}: #{data}"
+            end
           end
         end
 
@@ -421,28 +421,26 @@ module Pedant
         # These instance-level helpers are accessible from examples, let blocks,
         # before(:each), and after(:each). In before(:all)/after(:all) blocks, use
         # Pedant::Config.pedant_platform directly to avoid RSpec scope issues.
-        def platform
-          Pedant::Config.pedant_platform
-        end
+        let (:platform) { Pedant::Config.pedant_platform }
 
-        def api_url(path_fragment)
-          Pedant::Config.pedant_platform.api_url(path_fragment)
+        let (:api_url) { ->(path_fragment) { Pedant::Config.pedant_platform.api_url(path_fragment) } }
+
+        # Given a response object, verify the HTTP status is in the
+        # 200-ish success range and raise an error if it is not. This
+        # is intended to be used in helper/util modules where we want
+        # to ensure the success of setup and teardown operations.
+        let (:ensure_2xx) do
+          ->(response) do
+            if response.code > 299
+              raise "bad response code #{response.code} in response: #{response}"
+            end
+            response
+          end
         end
         
         ## TODO: Remove this method; we probably don't need to access it directly
         def server
           platform
-        end
-        # Given a response object, verify the HTTP status is in the
-        # 200-ish success range and raise an error if it is not. This
-        # is intended to be used in helper/util modules where we want
-        # to ensure the success of setup and teardown operations.
-        def ensure_2xx(response)
-          if response.code > 299
-            raise "bad response code #{response.code} in response: #{response}"
-          end
-
-          response
         end
 
         ################################################################################
@@ -531,11 +529,11 @@ module Pedant
         # by parameterizing on the container name.
 
         def add_chef_object(container_name, requestor, object_json)
-          post(api_url("/#{container_name}"), requestor, payload: object_json)
+          post(api_url.call("/#{container_name}"), requestor, payload: object_json)
         end
 
         def delete_chef_object(container_name, requestor, object_name)
-          delete(api_url("/#{container_name}/#{object_name}"), requestor)
+          delete(api_url.call("/#{container_name}/#{object_name}"), requestor)
         end
 
         # DSL helpers

@@ -50,7 +50,7 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_read do
       let(:request_method) { :GET }
       let(:requestor) { admin_user }
 
-      let(:cookbook_collection_url) { api_url("/#{cookbook_url_base}") }
+      let(:cookbook_collection_url) { api_url.call("/#{cookbook_url_base}") }
       let(:fetch_cookbook_collection_success_exact_response) do
         {
           status: 200,
@@ -76,7 +76,7 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_read do
         # Add test to check for empty case with different num_versions
         context "with a num_versions" do
           let(:expected_response) { bad_request_response }
-          let(:request_url) { api_url("/#{cookbook_url_base}?num_versions=#{num_versions}") }
+          let(:request_url) { api_url.call("/#{cookbook_url_base}?num_versions=#{num_versions}") }
           let(:error_message) { invalid_versions_msg }
 
           def self.expects_response_of_400_with(message, _value)
@@ -95,7 +95,7 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_read do
 
       context "with existing cookbooks and multiple versions" do
         let(:expected_response) { fetch_cookbook_collection_success_exact_response }
-        let(:request_url) { api_url("/#{cookbook_url_base}?num_versions=#{num_versions}") }
+        let(:request_url) { api_url.call("/#{cookbook_url_base}?num_versions=#{num_versions}") }
 
         let(:fetched_cookbooks) { cookbook_collection }
 
@@ -198,7 +198,7 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_read do
 
       context "with varying numbers of existing cookbooks" do
         let(:expected_response) { fetch_cookbook_success_exact_response }
-        let(:request_url) { api_url("/#{cookbook_url_base}?num_versions=all") }
+        let(:request_url) { api_url.call("/#{cookbook_url_base}?num_versions=all") }
 
         let(:fetched_cookbook) { cookbook_collection }
         let(:cookbook_name) { "cookbook_name" }

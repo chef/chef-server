@@ -32,11 +32,6 @@ module Pedant
 
       module ClassMethods
 
-        # Helper for api_url usable from example group scope (not limited to example lets)
-        def util_api_url(path)
-          Pedant::Config.pedant_platform.api_url(path)
-        end
-
         # Given a cookbook name and a version string (e.g., "1.0.0"), generate the legal
         # variants of how the recipe can be represented in a run list
         #
@@ -117,7 +112,7 @@ module Pedant
               admin_user => ["read"]
 
             # A little bit of confirmation that the ACL has applied correctly
-            n = get(util_api_url("/#{object_type}s/#{base_object_name}_3"), normal_user)
+            n = get(api_url.call("/#{object_type}s/#{base_object_name}_3"), normal_user)
             n.should look_like({ status: 403 })
 
             with_search_polling do
@@ -136,7 +131,7 @@ module Pedant
             let(:search_result_items) { [] }
 
             it "should have multiple #{object_type}s on the system (for our search to ignore)" do
-              r = get(util_api_url("/#{object_type}s"), requestor)
+              r = get(api_url.call("/#{object_type}s"), requestor)
               r.should have_status_code 200 # basic check
               parsed_body = parse(r)
 
@@ -227,7 +222,7 @@ module Pedant
           object_add_method_symbol = "add_#{object_type}".to_sym
           object_delete_method_symbol = "delete_#{object_type}".to_sym
 
-          let(:base_object_name) { unique_name("multiple_#{object_type}") }
+          let(:base_object_name) { unique_name.call("multiple_#{object_type}") }
           let(:object_names) { (1..number_to_create).map { |n| "#{base_object_name}_#{n}" } }
           # TODO: come up with a way to pass in name/body pairs for more flexibility?
           let(:objects) { object_names.map { |n| send(object_creator_method_symbol, n) } }
@@ -285,7 +280,7 @@ module Pedant
 
             # This is just a basic check
             it "should have more than just the target of our #{object_type} search on the system" do
-              r = get(util_api_url("/#{object_type}s"), requestor)
+              r = get(api_url.call("/#{object_type}s"), requestor)
               r.should have_status_code 200 # basic check
               parsed_body = parse(r)
 
@@ -313,7 +308,7 @@ module Pedant
 
             # Another basic check
             it "should have more than just the targets of our #{object_type} search on the system" do
-              r = get(util_api_url("/#{object_type}s"), requestor)
+              r = get(api_url.call("/#{object_type}s"), requestor)
               r.should have_status_code 200 # basic check
               parsed_body = parse(r)
 
@@ -438,7 +433,7 @@ module Pedant
           # object, this is what we expect to get back.
           let(:single_search_expected_results) do
             [{
-               "url" => util_api_url("/#{object_type}s/#{send(object_name_symbol)}"),
+               "url" => api_url.call("/#{object_type}s/#{send(object_name_symbol)}"),
                "data" => {
                  # This is getting the value from the JSON as posted
                  # to create the object, which is not necessarily the
@@ -462,7 +457,7 @@ module Pedant
             single_search_expected_results +
               objects.map { |o|
                 {
-                  "url" => util_api_url("/#{object_type}s/#{o["name"]}"),
+                  "url" => api_url.call("/#{object_type}s/#{o["name"]}"),
                   "data" => {
                     # This is getting the value from the JSON as posted
                     # to create the object, which is not necessarily the
@@ -538,7 +533,7 @@ module Pedant
         # and it's easy to check.
         #
         # Must be executed in a context where `request_method` is set
-        # to :POST and `request_url` is set to api_url("/search/node")
+        # to :POST and `request_url` is set to api_url.call("/search/node")
         #
         # `message` is a descriptive string, which will be
         # incorporated into the test example's description
@@ -578,7 +573,7 @@ module Pedant
             end
             let(:search_result_items) do
               [{
-                 "url" => util_api_url("/nodes/#{node_name}"),
+                 "url" => api_url.call("/nodes/#{node_name}"),
                  "data" => {
                    "target" => expected_result,
                  },
@@ -642,7 +637,7 @@ module Pedant
         {
           status: 200,
           body_exact: index_names.inject({}) { |acc, i|
-            acc[i] = util_api_url("/search/#{i}")
+            acc[i] = api_url.call("/search/#{i}")
             acc
           },
         }
@@ -790,7 +785,7 @@ module Pedant
         user = options[:user] || admin_user
         results = options[:results]
         with_search_polling do
-          get(Pedant::Config.pedant_platform.api_url("/search/#{options[:type]}?q=#{options[:query]}"), user) do |response|
+          get(api_url.call("/search/#{options[:type]}?q=#{options[:query]}"), user) do |response|
             response.should look_like({
                                         status: 200,
                                         body: {
@@ -803,7 +798,7 @@ module Pedant
       end
 
       def search_result(index, query)
-        search_url = Pedant::Config.pedant_platform.api_url(Addressable::URI.encode("/search/#{index}?q=#{query}"))
+        search_url = api_url.call(Addressable::URI.encode("/search/#{index}?q=#{query}"))
         get(search_url, admin_user)
       end
 
@@ -895,7 +890,7 @@ module Pedant
 
       def should_not_find_any(type)
         with_search_polling do
-          result = authenticated_request(:GET, Pedant::Config.pedant_platform.api_url("/search/#{type}"), requestor, {})
+          result = authenticated_request(:GET, api_url.call("/search/#{type}"), requestor, {})
           result.should have_status_code 200
           total = parse(result)["total"]
           total.should eq(0)
@@ -903,7 +898,7 @@ module Pedant
       end
 
       def do_paginated_search(type, start = 0, page_size = 1000, rows_accum = [])
-        result = authenticated_request(:GET, Pedant::Config.pedant_platform.api_url("/search/#{type}?start=#{start}&rows=#{page_size}"), requestor, {})
+        result = authenticated_request(:GET, api_url.call("/search/#{type}?start=#{start}&rows=#{page_size}"), requestor, {})
         result.should have_status_code 200
 
         parsed_result = parse(result)

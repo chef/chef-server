@@ -22,7 +22,7 @@ describe "Universe API Endpoint", :universe do
 
   let(:requestor) { admin_requestor }
 
-  let(:universe_url) { api_url("/universe") }
+  let(:universe_url) { api_url.call("/universe") }
 
   let(:universe) { get(universe_url, requestor) }
 
@@ -48,14 +48,14 @@ describe "Universe API Endpoint", :universe do
         "foo" => {
           "1.2.3" => {
             "dependencies" => { "bar" => ">= 1.1.1" },
-            "location_path" => api_url("cookbooks/foo/1.2.3"),
+            "location_path" => api_url.call("cookbooks/foo/1.2.3"),
             "location_type" => "chef_server",
           },
         },
         "bar" => {
           "1.2.3" => {
             "dependencies" => {},
-            "location_path" => api_url("cookbooks/bar/1.2.3"),
+            "location_path" => api_url.call("cookbooks/bar/1.2.3"),
             "location_type" => "chef_server",
           },
         },

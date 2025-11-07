@@ -70,7 +70,7 @@ describe "Cookbooks API endpoint", :cookbooks, :cookbooks_delete do
           let(:expected_response) { cookbook_version_not_found_exact_response }
           let(:cookbook_version_not_found_error_message) { ["Cannot find a cookbook named #{cookbook_name} with version #{non_existing_version}"] }
           let(:non_existing_version) { "99.99.99" }
-          let(:non_existing_version_url) { api_url("/#{cookbook_url_base}/#{cookbook_name}/#{non_existing_version}") }
+          let(:non_existing_version_url) { api_url.call("/#{cookbook_url_base}/#{cookbook_name}/#{non_existing_version}") }
           let(:fetched_cookbook) { original_cookbook }
 
           before(:each) { make_cookbook(admin_user, cookbook_name, cookbook_version) }

@@ -48,7 +48,7 @@ module Pedant
           it "should respond with 201 and the correct path" do
             request_method.should
             request_url.should
-            api_url("/roles")
+            api_url.call("/roles")
             should look_like create_role_success_response
           end
           it "should persist the role#{message ? " " + message : ""}" do
@@ -56,7 +56,7 @@ module Pedant
             request_payload["name"].should
             role_name
             response.should look_like created_response # this saves it again
-            get(api_url("/roles/#{role_name}"), requestor).should look_like fetch_role_success_response
+            get(api_url.call("/roles/#{role_name}"), requestor).should look_like fetch_role_success_response
           end
         end
 
@@ -74,14 +74,14 @@ module Pedant
           it {
             request_method.should
             request_url.should
-            api_url("/roles")
+            api_url.call("/roles")
             should have_error code, message
           }
           it "should not actually create a role" do
             # This attempts the creation again (this is a separate `it` block)
             response.should look_like bad_request_response
             begin
-              get(api_url("/roles/#{role_name}"), requestor).should look_like resource_not_found_response
+              get(api_url.call("/roles/#{role_name}"), requestor).should look_like resource_not_found_response
             rescue URI::InvalidURIError
               # Means we tried to create with a bogus, non-URL-safe
               # role_name; this is OK
@@ -102,13 +102,13 @@ module Pedant
           it "should respond with 201 and the deleted role body" do
             request_method.should
             request_url.should
-            api_url("/roles/#{role_name}")
+            api_url.call("/roles/#{role_name}")
             response.should look_like delete_role_success_response
           end
           it "should actually delete the role" do
             # This deletes the role again (this is a separate `it` block)
             response.should look_like ok_response
-            get(api_url("/roles/#{role_name}"), requestor).should look_like role_not_found_response
+            get(api_url.call("/roles/#{role_name}"), requestor).should look_like role_not_found_response
           end
         end
 
@@ -126,7 +126,7 @@ module Pedant
           it {
             request_method.should
             request_url.should
-            api_url("/roles/#{role_name}")
+            api_url.call("/roles/#{role_name}")
             response.should have_error code, message
           }
           # Compare the role before and after the failed update to
@@ -160,7 +160,7 @@ module Pedant
           it "should respond with 200 and the updated role body" do
             request_method.should
             request_url.should
-            api_url("/roles/#{role_name}")
+            api_url.call("/roles/#{role_name}")
             response.should look_like update_role_success_response
           end
           it "should actually update the role" do
@@ -207,7 +207,7 @@ module Pedant
       # of the testing role, and 'role' is set to the Ruby Hash of the
       # actual role
       shared_context "with temporary testing role" do
-        let(:role_name) { unique_name("temporary_role") }
+        let(:role_name) { unique_name.call("temporary_role") }
         let(:role_description) { "blah" }
         let(:role_override_attributes) { {} }
         let(:role_default_attributes) { {} }
@@ -258,7 +258,7 @@ module Pedant
       let(:create_role_success_response) do
         {
           status: 201,
-          body: { "uri" => api_url("/roles/#{role_name}") },
+          body: { "uri" => api_url.call("/roles/#{role_name}") },
         }
       end
 
@@ -315,19 +315,14 @@ module Pedant
         role
       end
 
-      # Helper to get api_url that works in both example and example group scope
-      def util_api_url(path)
-        Pedant::Config.pedant_platform.api_url(path)
-      end
-
       def add_role(requestor, role)
-        post(util_api_url("/roles"),
+        post(api_url.call("/roles"),
           requestor,
           payload: role)
       end
 
       def delete_role(requestor, name)
-        delete(util_api_url("/roles/#{name}"),
+        delete(api_url.call("/roles/#{name}"),
           requestor)
       rescue URI::InvalidURIError
         # OK, don't fail

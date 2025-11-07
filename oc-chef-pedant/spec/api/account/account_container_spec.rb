@@ -16,7 +16,7 @@ describe "opscode-account containers", :containers do
   end
 
   context "/containers endpoint" do
-    let(:request_url) { api_url("containers") }
+    let(:request_url) { api_url.call("containers") }
 
     context "GET /containers" do
       # This is only a partial body -- there are other containers as well, but these
@@ -138,7 +138,7 @@ describe "opscode-account containers", :containers do
 
       after :each do
 
-        delete(api_url("/containers/#{new_container}"), platform.admin_user)
+        delete(api_url.call("/containers/#{new_container}"), platform.admin_user)
       rescue
         # Swallow errors attempting to delete the invalid containers we try to create;
         # those tests should either fail before they get here or never actually
@@ -480,11 +480,11 @@ describe "opscode-account containers", :containers do
   end # context /containers endpoint
 
   context "/containers/<name> endpoint" do
-    let(:request_url) { api_url("containers/#{test_container}") }
+    let(:request_url) { api_url.call("containers/#{test_container}") }
     let(:test_container) { "test-container" }
 
     before :each do
-      post(api_url("containers"), platform.admin_user,
+      post(api_url.call("containers"), platform.admin_user,
         payload: { "id" => test_container,
                    "containerpath" => "/" }).should look_like({ status: 201 })
     end

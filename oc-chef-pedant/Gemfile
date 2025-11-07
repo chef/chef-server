@@ -6,7 +6,7 @@ gem "pry"
 gem "pry-byebug"
 gem "pry-stack_explorer"
 gem "rake"
-gem "rest-client", git: "https://github.com/chef/rest-client", branch: "jfm/ucrt_update1"
+gem "rest-client", git: "https://github.com/chef/rest-client.git", branch: "jfm/ucrt_update1"
 
 # We require chef internally to get the version in
 # lib/pedant/request.rb. It's really strange code and it should be
@@ -15,7 +15,7 @@ gem "rest-client", git: "https://github.com/chef/rest-client", branch: "jfm/ucrt
 
 # For "rake chef_zero_spec"
 # PR #352 merged to main but not released yet - use main branch
-gem 'chef-zero', github: 'chef/chef-zero', branch: 'main'
+gem 'chef-zero', git: "https://github.com/chef/chef-zero.git", branch: "main"
 
 # If you want to load debugging tools into the bundle exec sandbox,
 # # add these additional dependencies into Gemfile.local

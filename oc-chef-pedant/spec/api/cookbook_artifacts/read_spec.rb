@@ -46,11 +46,11 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
     include Pedant::RSpec::CookbookUtil
 
     def cookbook_artifact_version_url(name, identifier)
-      api_url("/#{cookbook_url_base}/#{name}/#{identifier}")
+      api_url.call("/#{cookbook_url_base}/#{name}/#{identifier}")
     end
 
     context "GET /cookbook_artifacts" do
-      let(:request_url) { api_url("/#{cookbook_url_base}/") }
+      let(:request_url) { api_url.call("/#{cookbook_url_base}/") }
       let(:requestor) { admin_user }
 
       context "with no cookbook artifacts on the server", :smoke do
@@ -64,7 +64,7 @@ describe "Cookbook Artifacts API endpoint", :cookbook_artifacts, :cookbook_artif
 
       context "with existing cookbook_artifacts and multiple versions" do
 
-        let(:request_url) { api_url("/#{cookbook_url_base}") }
+        let(:request_url) { api_url.call("/#{cookbook_url_base}") }
 
         let(:fetched_cookbook_artifacts) { cookbook_collection }
 

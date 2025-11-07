@@ -3,7 +3,7 @@
 # Copyright:: Copyright (c) 2014 Chef, Inc.
 
 describe "Headers", :headers do
-  let(:request_url) { api_url("users") }
+  let(:request_url) { api_url.call("users") }
   let(:requestor) { platform.admin_user }
 
   context "Request Headers" do

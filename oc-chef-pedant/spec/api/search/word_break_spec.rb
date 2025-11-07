@@ -12,7 +12,7 @@ describe "Search API endpoint", :search do
 
   context "word break handling" do
     let(:request_method) { :GET }
-    let(:request_url) { util_api_url("/search/node") }
+    let(:request_url) { api_url.call("/search/node") }
     SPECIAL_CHARS = '!"$%&()*+,-:;<=>?@[\]%_`{|}~\'\\'.freeze
     PERMITTED_QUERY_CHARS = '[]\\"!(){}^~*?:'.freeze
 
@@ -20,18 +20,20 @@ describe "Search API endpoint", :search do
     # we want to validate.
     before :all do
       # confirm 201 status as a basic check
+      # Use Pedant::Config.pedant_platform.admin_user directly instead of admin_requestor
+      # because let/shared declarations cannot be accessed in before(:all)/before(:context) hooks
       n = new_node("search_supernode").tap do |node|
         SPECIAL_CHARS.each_char do |c|
           node["default"]["attrtest#{SPECIAL_CHARS.index(c)}"] = "hello#{c}world"
           node["default"]["key#{c}abc"] = "dlrowolleh#{SPECIAL_CHARS.index(c)}"
         end
       end
-      add_node(admin_requestor, n).should look_like({ status: 201 })
+      add_node(Pedant::Config.pedant_platform.admin_user, n).should look_like({ status: 201 })
       force_solr_commit
     end
 
     after :all do
-      delete_node(admin_requestor, "search_supernode")
+      delete_node(Pedant::Config.pedant_platform.admin_user, "search_supernode")
     end
 
     def wb_node_found_result

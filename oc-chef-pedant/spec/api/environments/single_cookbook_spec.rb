@@ -71,7 +71,7 @@ describe "/environments/ENVIRONMENT/cookbooks/COOKBOOK API endpoint", :environme
       non_existent_environment = "bad_env"
       non_existent_environment.should_not eq env
 
-      get(api_url("/environments/#{non_existent_environment}/cookbooks/fake_cookbook_doesnt_matter"), admin_user) do |response|
+      get(api_url.call("/environments/#{non_existent_environment}/cookbooks/fake_cookbook_doesnt_matter"), admin_user) do |response|
         response.should look_like(
           {
             status: 404,
@@ -89,12 +89,12 @@ describe "/environments/ENVIRONMENT/cookbooks/COOKBOOK API endpoint", :environme
 
         # Verify the cookbook doesn't exist
         # (searching for the _latest version as a way to query for existence of the cookbook)
-        get(api_url("/cookbooks/#{non_existent_cookbook}/_latest"), admin_user) do |response|
+        get(api_url.call("/cookbooks/#{non_existent_cookbook}/_latest"), admin_user) do |response|
           # Ruby bombs out when checking for a non-existent cookbook
           response.should have_status_code(404)
         end
 
-        get(api_url("/environments/#{environment}/cookbooks/#{non_existent_cookbook}"), admin_user) do |response|
+        get(api_url.call("/environments/#{environment}/cookbooks/#{non_existent_cookbook}"), admin_user) do |response|
           response.should look_like(
             {
               status: 404,
@@ -127,10 +127,10 @@ describe "/environments/ENVIRONMENT/cookbooks/COOKBOOK API endpoint", :environme
 
         if name == cookbook_name
           body[name] = {
-            "url" => api_url("/cookbooks/#{name}"),
+            "url" => api_url.call("/cookbooks/#{name}"),
             "versions" => version_specs.map do |version_string, recipe_names|
               {
-                "url" => api_url("/cookbooks/#{name}/#{version_string}"),
+                "url" => api_url.call("/cookbooks/#{name}/#{version_string}"),
                 "version" => version_string,
               }
             end,
@@ -154,9 +154,9 @@ describe "/environments/ENVIRONMENT/cookbooks/COOKBOOK API endpoint", :environme
 
             it description do
               url = if num_versions
-                      api_url("/environments/#{environment}/cookbooks/#{cookbook}?num_versions=#{num_versions}")
+                      api_url.call("/environments/#{environment}/cookbooks/#{cookbook}?num_versions=#{num_versions}")
                     else
-                      api_url("/environments/#{environment}/cookbooks/#{cookbook}")
+                      api_url.call("/environments/#{environment}/cookbooks/#{cookbook}")
                     end
               get(url, admin_user) do |response|
                 response.should look_like({
@@ -183,13 +183,13 @@ describe "/environments/ENVIRONMENT/cookbooks/COOKBOOK API endpoint", :environme
 
         before :each do
           # Add constraints to environment
-          put(api_url("/environments/#{env}"), admin_user,
+          put(api_url.call("/environments/#{env}"), admin_user,
             payload: make_payload("cookbook_versions" => constraint_hash))
         end
 
         after :each do
           # Remove constraints from the environment
-          put(api_url("/environments/#{env}"), admin_user,
+          put(api_url.call("/environments/#{env}"), admin_user,
             payload: make_payload("cookbook_versions" => {}))
         end
 
@@ -200,10 +200,10 @@ describe "/environments/ENVIRONMENT/cookbooks/COOKBOOK API endpoint", :environme
         def expected_filtered_response(cookbook, allowed_versions)
           body = {}
           body[cookbook] = {
-            "url" => api_url("/cookbooks/#{cookbook}"),
+            "url" => api_url.call("/cookbooks/#{cookbook}"),
             "versions" => allowed_versions.map do |version|
               {
-                "url" => api_url("/cookbooks/#{cookbook}/#{version}"),
+                "url" => api_url.call("/cookbooks/#{cookbook}/#{version}"),
                 "version" => version,
               }
             end,
@@ -213,7 +213,7 @@ describe "/environments/ENVIRONMENT/cookbooks/COOKBOOK API endpoint", :environme
 
         expected_results_for_num_versions.each do |num_versions, v|
           it "retrieves appropriate cookbook versions of '#{cookbook}' with num_versions=#{num_versions}" do
-            get(api_url("/environments/#{env}/cookbooks/#{cookbook}?num_versions=#{num_versions}"), admin_user) do |response|
+            get(api_url.call("/environments/#{env}/cookbooks/#{cookbook}?num_versions=#{num_versions}"), admin_user) do |response|
               response.should look_like({
                                           status: 200,
                                           body_exact: expected_filtered_response(cookbook, v),
@@ -223,7 +223,7 @@ describe "/environments/ENVIRONMENT/cookbooks/COOKBOOK API endpoint", :environme
 
           if num_versions == "all"
             it "retrieves all appropriate cookbook versions of '#{cookbook}' without 'num_versions'" do
-              get(api_url("/environments/#{env}/cookbooks/#{cookbook}"), admin_user) do |response|
+              get(api_url.call("/environments/#{env}/cookbooks/#{cookbook}"), admin_user) do |response|
                 response.should look_like({
                                             status: 200,
                                             body_exact: expected_filtered_response(cookbook, v),
