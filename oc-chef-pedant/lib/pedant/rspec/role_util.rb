@@ -174,7 +174,7 @@ module Pedant
             # Now, compare to earlier value w/r/t updated_fields
 
             # All the updated fields should be changed
-            should_be_hash(updated_fields)
+            should_be_hash.call(updated_fields)
             updated_fields.each do |field, value|
               if value == :DELETE
                 # With our update helper function, a value of :DELETE

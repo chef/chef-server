@@ -330,9 +330,11 @@ module Pedant
 
         # Helper method for helper methods; useful for ensuring that
         # parameters are the correct data type
-        def should_be_hash(data)
-          if data.class != Hash
-            raise "Data needs to be a hash, you passed in a #{data.class}: #{data}"
+        let(:should_be_hash) do
+          ->(data) do
+            if data.class != Hash
+              raise "Data needs to be a hash, you passed in a #{data.class}: #{data}"
+            end
           end
         end
 
@@ -353,8 +355,8 @@ module Pedant
         # object.
         def update_object(object, updates)
           # Verify types
-          should_be_hash(object)
-          should_be_hash(updates)
+          should_be_hash.call(object)
+          should_be_hash.call(updates)
 
           # Pull out all update fields that are targeted for deletion
           fields_to_delete = updates.inject([]) do |acc, element|

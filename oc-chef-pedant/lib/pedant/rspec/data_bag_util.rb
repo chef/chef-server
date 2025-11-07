@@ -323,7 +323,7 @@ module Pedant
       ################################################################################
 
       def with_extra_data_bag_item_fields(data_bag_item)
-        should_be_hash(data_bag_item)
+        should_be_hash.call(data_bag_item)
         i = data_bag_item.clone
         i["chef_type"] = "data_bag_item"
         i["data_bag"] = data_bag_name
@@ -350,7 +350,7 @@ module Pedant
 
       def create_data_bag_item(user, bag_name, item)
         should_be_string.call(bag_name)
-        should_be_hash(item)
+        should_be_hash.call(item)
         post(api_url.call("/data/#{bag_name}"),
           user,
           payload: item)
@@ -367,7 +367,7 @@ module Pedant
       end
 
       def create_data_bag(user, bag)
-        should_be_hash(bag)
+        should_be_hash.call(bag)
         post(api_url.call("/data"),
           user,
           payload: bag)
