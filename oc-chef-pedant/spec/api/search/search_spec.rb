@@ -37,7 +37,7 @@ describe "Search API endpoint", :search do
   shared(:requestor) { admin_requestor }
 
   context "/search" do
-    let(:request_url) { api_url("/search") }
+    let(:request_url) { util_api_url("/search") }
     context "GET" do
       let(:request_method) { :GET }
       context "with no data bags" do
@@ -57,7 +57,7 @@ describe "Search API endpoint", :search do
   end # /search
 
   context "/search/environment" do
-    let(:request_url) { api_url("/search/environment") }
+    let(:request_url) { util_api_url("/search/environment") }
 
     setup_multiple_objects :environment
 
@@ -88,7 +88,7 @@ describe "Search API endpoint", :search do
   end
 
   context "/search/node" do
-    let(:request_url) { api_url("/search/node") }
+    let(:request_url) { util_api_url("/search/node") }
 
     setup_multiple_objects :node
 
@@ -116,15 +116,15 @@ describe "Search API endpoint", :search do
 
       context "with a node that has policyfile attributes" do
 
-        let(:maximum_search_time) { Pedant::Config.maximum_search_time }
+      let(:maximum_search_time) { Pedant::Config.maximum_search_time }
 
-        let(:node_name) { unique_name("testing_node" ) }
+      let(:node_name) { unique_name("testing_node" ) }
 
-        let(:nodes_container) { api_url("/nodes") }
+      let(:nodes_container) { util_api_url("/nodes") }
 
-        let(:resource_url) { api_url "/nodes/#{node_name}" }
+      let(:resource_url) { util_api_url "/nodes/#{node_name}" }
 
-        let(:node) do
+      let(:node) do
           new_node(node_name).tap do |n|
             n["policy_name"] = "example-policy-name"
             n["policy_group"] = "example-policy-group"
@@ -327,7 +327,7 @@ describe "Search API endpoint", :search do
   end # /search/node
 
   context "/search/role" do
-    let(:request_url) { api_url("/search/role") }
+    let(:request_url) { util_api_url("/search/role") }
 
     setup_multiple_objects :role
 
@@ -356,12 +356,12 @@ describe "Search API endpoint", :search do
   end # /search/role
 
   context "/search/client" do
-    let(:request_url) { api_url("/search/client") }
+    let(:request_url) { util_api_url("/search/client") }
     # let(:requestor){superuser}
 
     # Utility methods to help populate search result bodies
     def fetch_client(name)
-      parse(get(api_url("/clients/#{name}"), admin_requestor))
+      parse(get(util_api_url("/clients/#{name}"), admin_requestor))
     end
 
     def fetch_clients(names)
@@ -401,7 +401,7 @@ describe "Search API endpoint", :search do
   end
 
   context "/search/<data_bag>" do
-    let(:request_url) { api_url("/search/#{data_bag_name}") }
+    let(:request_url) { util_api_url("/search/#{data_bag_name}") }
 
     context "using GET" do
       let(:request_method) { :GET }
