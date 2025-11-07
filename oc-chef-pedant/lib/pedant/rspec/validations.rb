@@ -30,9 +30,9 @@ module Pedant
 
         # Acceptance / Rejection macros
         def rejects_with_400(options)
-          let(:request_payload) { instance_eval_if_proc(options[:payload]) }
-          let(:expected_response) { bad_request_exact_response }
-          let(:error_message) { Array(instance_eval_if_proc(options[:error_message])) }
+          let(:request_payload) { instance_eval_if_proc.call(options[:payload]) }
+          let(:expected_response) { bad_request_response }
+          let(:error_message) { Array(instance_eval_if_proc.call(options[:error_message])) }
 
           if options[:skip_persistance_test]
             should_respond_with 400
@@ -51,7 +51,7 @@ module Pedant
         end
 
         def rejects_with_403(options)
-          let(:request_payload) { instance_eval_if_proc(options[:payload]) }
+          let(:request_payload) { instance_eval_if_proc.call(options[:payload]) }
           let(:expected_response) { forbidden_response }
 
           should_respond_with 403, "and not persist the resource" do
@@ -60,7 +60,7 @@ module Pedant
         end
 
         def accepts_with_201(options, &additional_expectations)
-          let(:request_payload) { instance_eval_if_proc(options[:payload]) }
+          let(:request_payload) { instance_eval_if_proc.call(options[:payload]) }
           let(:expected_response) { created_response }
 
           should_respond_with 201, "and persist the resource" do
@@ -69,7 +69,7 @@ module Pedant
         end
 
         def accepts_with_200(options, &additional_expectations)
-          let(:request_payload) { instance_eval_if_proc(options[:payload]) }
+          let(:request_payload) { instance_eval_if_proc.call(options[:payload]) }
           let(:expected_response) { ok_response }
 
           should_respond_with 200, "and persist the resource" do

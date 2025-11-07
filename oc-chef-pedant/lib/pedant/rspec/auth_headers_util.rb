@@ -379,14 +379,14 @@ module Pedant
             end
 
             context "impersonating successful user" do
-              let(:user) { impersonate(success_user) }
+              let(:user) { impersonate.call(success_user) }
               it "succeeds" do
                 response_should_be_successful
               end
             end
 
             context "impersonating failed user", :authentication do
-              let(:user) { impersonate(failure_user) }
+              let(:user) { impersonate.call(failure_user) }
               it "fails" do
                 response.should look_like forbidden_response
               end

@@ -352,7 +352,7 @@ module Pedant
 
         def rejects_public_key_on_create_with(adjective, _options = {})
           context "with a #{adjective} public key" do
-            let(:public_key) { instance_eval_if_proc(_options[:public_key]) }
+            let(:public_key) { instance_eval_if_proc.call(_options[:public_key]) }
             let(:expected_response) { bad_request_response }
 
             should_respond_with 400, "and does not create the user" do
@@ -368,7 +368,7 @@ module Pedant
 
         def rejects_public_key_on_update_with(adjective, _options = {})
           context "with a #{adjective} public key" do
-            let(:public_key) { instance_eval_if_proc(_options[:public_key]) }
+            let(:public_key) { instance_eval_if_proc.call(_options[:public_key]) }
             let(:expected_response) { bad_request_response }
 
             should_respond_with 400, "and does not update the user" do

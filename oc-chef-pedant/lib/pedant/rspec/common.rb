@@ -510,8 +510,10 @@ module Pedant
 
         # Given a requestor, create a new one with the same name, but
         # with the web UI's private key for 'impersonation' tests
-        def impersonate(requestor_to_impersonate)
-          Pedant::Requestor.new(requestor_to_impersonate.name, Pedant::Config.pedant_platform.webui_key)
+        let(:impersonate) do
+          ->(requestor_to_impersonate) do
+            Pedant::Requestor.new(requestor_to_impersonate.name, Pedant::Config.pedant_platform.webui_key)
+          end
         end
 
         # Need a well-formed yet invalid key for a requestor to test authentiction
@@ -537,8 +539,8 @@ module Pedant
         end
 
         # DSL helpers
-        def instance_eval_if_proc(object)
-          Proc === object ? instance_eval(&object) : object
+        let(:instance_eval_if_proc) do
+          ->(object) { Proc === object ? instance_eval(&object) : object }
         end
 
         # Debugging
