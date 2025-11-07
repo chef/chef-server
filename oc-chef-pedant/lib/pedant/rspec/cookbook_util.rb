@@ -32,7 +32,7 @@ module Pedant
       # Returns the entire sandbox JSON as a Ruby hash
       def create_sandbox(files)
         payload = Pedant::Sandbox.create_payload(files)
-        parse(ensure_2xx(post(api_url("/sandboxes"),
+        parse(ensure_2xx(post(util_api_url("/sandboxes"),
           admin_user,
           payload: payload)))
       end
@@ -267,14 +267,19 @@ module Pedant
         expect(got["metadata"]).to match(hash_including(metadata))
       end
 
+      # Helper to get api_url that works in both example and example group scope
+      def util_api_url(path)
+        Pedant::Config.pedant_platform.api_url(path)
+      end
+
       def delete_cookbook_artifact(requestor, name, identifier)
-        res = delete(api_url("/#{cookbook_url_base}/#{name}/#{identifier}"),
+        res = delete(util_api_url("/#{cookbook_url_base}/#{name}/#{identifier}"),
           requestor)
         expect(%w{200 404}).to include(res.code.to_s)
       end
 
       def make_cookbook_artifact(requestor, name, identifier, opts = {})
-        url = api_url("/#{cookbook_url_base}/#{name}/#{identifier}")
+        url = util_api_url("/#{cookbook_url_base}/#{name}/#{identifier}")
         payload = new_cookbook_artifact(name, identifier, opts)
         res = put(url, requestor, payload: payload)
         expect(res.code).to eq(201)
@@ -341,15 +346,15 @@ module Pedant
       end
 
       def cookbook_url(cookbook_name)
-        api_url("/#{cookbook_url_base}/#{cookbook_name}")
+        util_api_url("/#{cookbook_url_base}/#{cookbook_name}")
       end
 
       def cookbook_version_url(cookbook_name, cookbook_version)
-        api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}")
+        util_api_url("/#{cookbook_url_base}/#{cookbook_name}/#{cookbook_version}")
       end
 
       def delete_cookbook(requestor, name, version)
-        delete(api_url("/#{cookbook_url_base}/#{name}/#{version}"),
+        delete(util_api_url("/#{cookbook_url_base}/#{name}/#{version}"),
           requestor)
       end
 
@@ -359,7 +364,7 @@ module Pedant
       end
 
       def upload_cookbook(requestor, name, version, payload)
-        put(api_url("/#{cookbook_url_base}/#{name}/#{version}"),
+        put(util_api_url("/#{cookbook_url_base}/#{name}/#{version}"),
           requestor, payload: payload)
       end
 

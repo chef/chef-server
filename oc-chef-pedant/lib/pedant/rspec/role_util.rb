@@ -315,14 +315,19 @@ module Pedant
         role
       end
 
+      # Helper to get api_url that works in both example and example group scope
+      def util_api_url(path)
+        Pedant::Config.pedant_platform.api_url(path)
+      end
+
       def add_role(requestor, role)
-        post(api_url("/roles"),
+        post(util_api_url("/roles"),
           requestor,
           payload: role)
       end
 
       def delete_role(requestor, name)
-        delete(api_url("/roles/#{name}"),
+        delete(util_api_url("/roles/#{name}"),
           requestor)
       rescue URI::InvalidURIError
         # OK, don't fail

@@ -140,18 +140,23 @@ module Pedant
         }
       end
 
+      # Helper to get api_url that works in both example and example group scope
+      def util_api_url(path)
+        Pedant::Config.pedant_platform.api_url(path)
+      end
+
       def add_environment(requestor, environment)
-        post(api_url("/environments"), requestor, payload: environment)
+        post(util_api_url("/environments"), requestor, payload: environment)
       end
 
       def delete_environment(requestor, environment_name)
-        delete(api_url("/environments/#{environment_name}"), requestor)
+        delete(util_api_url("/environments/#{environment_name}"), requestor)
       end
 
       # The functionality of this is tested already; this is just here for
       # making subsequent tests less verbose
       def get_environment(requestor, environment_name)
-        get(api_url("/environments/#{environment_name}"), requestor)
+        get(util_api_url("/environments/#{environment_name}"), requestor)
       end
     end
 

@@ -351,16 +351,21 @@ module Pedant
       def create_data_bag_item(user, bag_name, item)
         should_be_string(bag_name)
         should_be_hash(item)
-        post(api_url("/data/#{bag_name}"),
+        post(util_api_url("/data/#{bag_name}"),
           user,
           payload: item)
+      end
+
+      # Helper to get api_url that works in both example and example group scope
+      def util_api_url(path)
+        Pedant::Config.pedant_platform.api_url(path)
       end
 
       def delete_data_bag_item(user, bag_name, item_id)
         should_be_string(bag_name)
         should_be_string(item_id)
         begin
-          delete(api_url("/data/#{bag_name}/#{item_id}"), user)
+          delete(util_api_url("/data/#{bag_name}/#{item_id}"), user)
         rescue URI::InvalidURIError
           # ok
         end
@@ -368,14 +373,14 @@ module Pedant
 
       def create_data_bag(user, bag)
         should_be_hash(bag)
-        post(api_url("/data"),
+        post(util_api_url("/data"),
           user,
           payload: bag)
       end
 
       def delete_data_bag(user, name)
         should_be_string(name)
-        delete(api_url("/data/#{name}"),
+        delete(util_api_url("/data/#{name}"),
           user)
       end
 

@@ -163,8 +163,13 @@ module Pedant
         }
       end
 
+      # Helper to get api_url that works in both example and example group scope
+      def util_api_url(path)
+        Pedant::Config.pedant_platform.api_url(path)
+      end
+
       def add_client(requestor, client)
-        post(api_url("/clients"), requestor, payload: client)
+        post(util_api_url("/clients"), requestor, payload: client)
       end
 
       def create_client(requestor, client)
@@ -172,7 +177,7 @@ module Pedant
       end
 
       def delete_client(requestor, client_name)
-        delete(api_url("/clients/#{client_name}"), requestor)
+        delete(util_api_url("/clients/#{client_name}"), requestor)
       end
 
       module ClassMethods

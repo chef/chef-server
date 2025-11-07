@@ -231,12 +231,17 @@ module Pedant
         node
       end
 
+      # Helper to get api_url that works in both example and example group scope
+      def util_api_url(path)
+        Pedant::Config.pedant_platform.api_url(path)
+      end
+
       def add_node(requestor, node)
-        post(api_url("/nodes"), requestor, payload: node)
+        post(util_api_url("/nodes"), requestor, payload: node)
       end
 
       def delete_node(requestor, name)
-        delete(api_url("/nodes/#{name}"), requestor)
+        delete(util_api_url("/nodes/#{name}"), requestor)
       end
 
       def new_node(name, opts = {})
