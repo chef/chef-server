@@ -90,7 +90,7 @@ module Pedant
       # When you include this context, 'cookbook_name' and
       # 'cookbook_version' are set for the new testing cookbook
       shared_context "with temporary testing cookbook" do
-        let(:temporary_cookbook_name) { unique_name("testing_cookbook") }
+        let(:temporary_cookbook_name) { unique_name.call("testing_cookbook") }
         let(:temporary_cookbook_version) { "1.2.3" }
 
         # TODO: expose individual cookbook options as let blocks?

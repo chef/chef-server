@@ -222,7 +222,7 @@ module Pedant
           object_add_method_symbol = "add_#{object_type}".to_sym
           object_delete_method_symbol = "delete_#{object_type}".to_sym
 
-          let(:base_object_name) { unique_name("multiple_#{object_type}") }
+          let(:base_object_name) { unique_name.call("multiple_#{object_type}") }
           let(:object_names) { (1..number_to_create).map { |n| "#{base_object_name}_#{n}" } }
           # TODO: come up with a way to pass in name/body pairs for more flexibility?
           let(:objects) { object_names.map { |n| send(object_creator_method_symbol, n) } }

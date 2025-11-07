@@ -25,7 +25,7 @@ module Pedant
       #
       # TODO: find clean way to have multiple testing data bags, and ones with items in them
       shared_context "with testing data bag" do
-        let(:temporary_data_bag_name) { unique_name("temporary_bag") }
+        let(:temporary_data_bag_name) { unique_name.call("temporary_bag") }
 
         before :each do
           create_data_bag(admin_requestor, new_data_bag(temporary_data_bag_name))

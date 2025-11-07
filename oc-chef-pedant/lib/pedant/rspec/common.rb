@@ -326,9 +326,7 @@ module Pedant
         # - Prefixes "pedant_" for the name
         # - Appends a suffix unique for the entire Pedant run
         # - Useful for things like names for roles, nodes, etc.
-        def unique_name(name)
-          "pedant_#{name}_#{pedant_suffix}"
-        end
+        let(:unique_name) { ->(name) { "pedant_#{name}_#{pedant_suffix}" } }
 
         # Helper method for helper methods; useful for ensuring that
         # parameters are the correct data type
@@ -421,13 +419,9 @@ module Pedant
         # These instance-level helpers are accessible from examples, let blocks,
         # before(:each), and after(:each). In before(:all)/after(:all) blocks, use
         # Pedant::Config.pedant_platform directly to avoid RSpec scope issues.
-        def platform
-          Pedant::Config.pedant_platform
-        end
+        let (:platform) { Pedant::Config.pedant_platform }
 
-        def api_url(path_fragment)
-          Pedant::Config.pedant_platform.api_url(path_fragment)
-        end
+        let (:api_url) { |path_fragment| Pedant::Config.pedant_platform.api_url(path_fragment) }
         
         ## TODO: Remove this method; we probably don't need to access it directly
         def server

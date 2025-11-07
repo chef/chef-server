@@ -35,7 +35,7 @@ module Pedant
 
         end
 
-        let(:client_name)         { unique_name("temporary_client") }
+        let(:client_name)         { unique_name.call("temporary_client") }
         let(:client_is_admin)     { false }
         let(:client_is_validator) { false }
 

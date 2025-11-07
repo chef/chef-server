@@ -207,7 +207,7 @@ module Pedant
       # of the testing role, and 'role' is set to the Ruby Hash of the
       # actual role
       shared_context "with temporary testing role" do
-        let(:role_name) { unique_name("temporary_role") }
+        let(:role_name) { unique_name.call("temporary_role") }
         let(:role_description) { "blah" }
         let(:role_override_attributes) { {} }
         let(:role_default_attributes) { {} }

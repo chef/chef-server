@@ -69,7 +69,7 @@ module Pedant
       # When you include this context, 'environment_name' is set to the
       # name of the testing environment
       shared_context "with temporary testing environment" do
-        let(:environment_name) { unique_name("temporary_environment") }
+        let(:environment_name) { unique_name.call("temporary_environment") }
         let(:environment_description) { "A Pedant Environment" }
         let(:environment_cookbook_versions) { {} }
         let(:environment_cookbook_versions) { {} }
