@@ -1,5 +1,20 @@
 GIT
-  remote: https://github.com/chef/rest-client
+  remote: https://github.com/chef/chef-zero.git
+  revision: b174ed09388129f36f508e806d7fbe39841ea828
+  branch: main
+  specs:
+    chef-zero (15.0.27)
+      ffi-yajl (>= 2.2, < 4.0)
+      hashie (>= 2.0, < 6.0)
+      mixlib-log (>= 2.0, < 4.0)
+      rack (~> 3.1, >= 3.1.16)
+      rackup (~> 2.2, >= 2.2.1)
+      unf_ext (~> 0.0.8)
+      uuidtools (~> 2.1)
+      webrick
+
+GIT
+  remote: https://github.com/chef/rest-client.git
   revision: 4725c8b5ae09b3f6b968831beae27503f1261ea9
   branch: jfm/ucrt_update1
   specs:
@@ -45,12 +60,17 @@ GEM
     diff-lcs (1.6.2)
     domain_name (0.6.20240107)
     erubis (2.7.0)
+    ffi (1.17.2-arm64-darwin)
     ffi (1.17.2-x64-mingw-ucrt)
     ffi-win32-extensions (1.0.4)
       ffi
+    ffi-yajl (3.0.0)
+      libyajl2 (>= 1.2)
+    hashie (5.0.0)
     http-accept (2.1.1)
     http-cookie (1.1.0)
       domain_name (~> 0.5)
+    libyajl2 (2.1.0)
     logger (1.7.0)
     method_source (1.1.0)
     mime-types (3.7.0)
@@ -60,6 +80,10 @@ GEM
     mixlib-authentication (3.0.10)
     mixlib-config (3.0.27)
       tomlrb
+    mixlib-log (3.2.3)
+      ffi (>= 1.15.5)
+    mixlib-shellout (3.3.9)
+      chef-utils
     mixlib-shellout (3.3.9-x64-mingw-ucrt)
       chef-utils
       ffi-win32-extensions (~> 1.0.3)
@@ -77,6 +101,9 @@ GEM
       binding_of_caller (~> 1.0)
       pry (~> 0.13)
     public_suffix (6.0.2)
+    rack (3.2.4)
+    rackup (2.2.1)
+      rack (>= 3)
     rake (13.3.1)
     rspec (3.13.2)
       rspec-core (~> 3.13.0)
@@ -96,15 +123,19 @@ GEM
     rspec_junit_formatter (0.6.0)
       rspec-core (>= 2, < 4, != 2.12.0)
     tomlrb (2.0.3)
+    unf_ext (0.0.9.1)
     uuidtools (2.2.0)
+    webrick (1.9.1)
     win32-process (0.10.0)
       ffi (>= 1.0.0)
     wmi-lite (1.0.7)
 
 PLATFORMS
+  arm64-darwin-23
   x64-mingw-ucrt
 
 DEPENDENCIES
+  chef-zero!
   oc-chef-pedant!
   pry
   pry-byebug
@@ -113,4 +144,4 @@ DEPENDENCIES
   rest-client!
 
 BUNDLED WITH
-   2.7.2
+   2.5.23
