@@ -331,7 +331,7 @@ module Pedant
       end
 
       def new_data_bag(name)
-        should_be_string(name)
+        should_be_string.call(name)
         {
           "name" => name,
           "json_class" => "Chef::DataBag",
@@ -340,7 +340,7 @@ module Pedant
       end
 
       def new_data_bag_item(id)
-        should_be_string(id)
+        should_be_string.call(id)
         {
           "id" => id,
           "foo" => "bar",
@@ -349,7 +349,7 @@ module Pedant
       end
 
       def create_data_bag_item(user, bag_name, item)
-        should_be_string(bag_name)
+        should_be_string.call(bag_name)
         should_be_hash(item)
         post(api_url.call("/data/#{bag_name}"),
           user,
@@ -357,8 +357,8 @@ module Pedant
       end
 
       def delete_data_bag_item(user, bag_name, item_id)
-        should_be_string(bag_name)
-        should_be_string(item_id)
+        should_be_string.call(bag_name)
+        should_be_string.call(item_id)
         begin
           delete(api_url.call("/data/#{bag_name}/#{item_id}"), user)
         rescue URI::InvalidURIError
@@ -374,7 +374,7 @@ module Pedant
       end
 
       def delete_data_bag(user, name)
-        should_be_string(name)
+        should_be_string.call(name)
         delete(api_url.call("/data/#{name}"),
           user)
       end

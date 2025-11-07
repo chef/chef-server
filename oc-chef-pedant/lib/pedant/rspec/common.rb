@@ -338,9 +338,11 @@ module Pedant
 
         # Helper method for helper methods; useful for ensuring that
         # parameters are the correct data type
-        def should_be_string(data)
-          if data.class != String
-            raise "Data needs to be a string; you passed in a #{data.class}: #{data}"
+        let(:should_be_string) do
+          ->(data) do
+            if data.class != String
+              raise "Data needs to be a string; you passed in a #{data.class}: #{data}"
+            end
           end
         end
 
