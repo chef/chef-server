@@ -232,11 +232,15 @@ module Pedant
       end
 
       def add_node(requestor, node)
-        post(api_url.call("/nodes"), requestor, payload: node)
+        # Use Pedant::Config.pedant_platform.api_url directly to support calls from before(:context)/before(:all) hooks
+        # where let declarations like api_url are not available
+        post(Pedant::Config.pedant_platform.api_url("/nodes"), requestor, payload: node)
       end
 
       def delete_node(requestor, name)
-        delete(api_url.call("/nodes/#{name}"), requestor)
+        # Use Pedant::Config.pedant_platform.api_url directly to support calls from before(:context)/before(:all) hooks
+        # where let declarations like api_url are not available
+        delete(Pedant::Config.pedant_platform.api_url("/nodes/#{name}"), requestor)
       end
 
       def new_node(name, opts = {})
