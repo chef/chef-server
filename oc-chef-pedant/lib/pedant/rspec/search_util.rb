@@ -824,7 +824,7 @@ module Pedant
         let(:deletion_identifier) { item_name } # default to item_name; override this for data bag items
 
         after :each do
-          delete_chef_object(container, requestor, item_name)
+          delete_chef_object.call(container, requestor, item_name)
         end
 
         let(:index_name) { raise 'Must specify an :index_name! (e.g., a search index like "node", "role", or "data")' }
@@ -838,7 +838,7 @@ module Pedant
           num_before_add.should eq 0
 
           # Now add the item and force a Solr commit
-          add_chef_object(container, requestor, item)
+          add_chef_object.call(container, requestor, item)
           force_solr_commit
 
           # Verify that it is now searchable
@@ -848,7 +848,7 @@ module Pedant
           force_solr_commit
 
           # Now delete the object and force a Solr commit
-          delete_chef_object(container, requestor, deletion_identifier)
+          delete_chef_object.call(container, requestor, deletion_identifier)
           force_solr_commit
 
           # Searching for the object should retrieve no results from Solr

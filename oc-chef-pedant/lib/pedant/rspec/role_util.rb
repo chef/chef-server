@@ -316,13 +316,14 @@ module Pedant
       end
 
       def add_role(requestor, role)
-        post(api_url.call("/roles"),
+        # Use platform.api_url directly to allow invocation in before(:context) without accessing let(:api_url)
+        post(Pedant::Config.pedant_platform.api_url("/roles"),
           requestor,
           payload: role)
       end
 
       def delete_role(requestor, name)
-        delete(api_url.call("/roles/#{name}"),
+        delete(Pedant::Config.pedant_platform.api_url("/roles/#{name}"),
           requestor)
       rescue URI::InvalidURIError
         # OK, don't fail
