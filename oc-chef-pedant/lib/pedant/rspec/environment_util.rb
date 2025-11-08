@@ -141,17 +141,18 @@ module Pedant
       end
 
       def add_environment(requestor, environment)
-        post(api_url.call("/environments"), requestor, payload: environment)
+        # Use platform.api_url directly to allow invocation in before(:all)/after(:all) without accessing let(:api_url)
+        post(Pedant::Config.pedant_platform.api_url("/environments"), requestor, payload: environment)
       end
 
       def delete_environment(requestor, environment_name)
-        delete(api_url.call("/environments/#{environment_name}"), requestor)
+        delete(Pedant::Config.pedant_platform.api_url("/environments/#{environment_name}"), requestor)
       end
 
       # The functionality of this is tested already; this is just here for
       # making subsequent tests less verbose
       def get_environment(requestor, environment_name)
-        get(api_url.call("/environments/#{environment_name}"), requestor)
+        get(Pedant::Config.pedant_platform.api_url("/environments/#{environment_name}"), requestor)
       end
     end
 

@@ -513,7 +513,7 @@ describe "User keys endpoint", :keys, :user_keys do
         # Note that the key used doesn't matter below - by using impersonate we'll be substituting the webui
         # public key.
         get("#{org_base_url}/users/#{org_user_name}",
-          impersonate(requestor(org_user_name, colliding_client["private_key"])),
+          impersonate.call(requestor(org_user_name, colliding_client["private_key"])),
           headers: { "X-Ops-Request-Source" => "web" }).should look_like(status: 200)
       end
     end
