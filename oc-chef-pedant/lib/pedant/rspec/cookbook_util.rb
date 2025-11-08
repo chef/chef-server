@@ -248,7 +248,7 @@ module Pedant
       end
 
       def new_cookbook_artifact(name, identifier, opts = {})
-        if platform.server_api_version >= 2
+        if Pedant::Config.pedant_platform.server_api_version >= 2
           new_cookbook_artifact_v2(name, identifier, opts)
         else
           new_cookbook_artifact_v0(name, identifier, opts)
@@ -442,7 +442,7 @@ module Pedant
       end
 
       def new_cookbook(name, version, opts = {})
-        if platform.server_api_version >= 2
+        if Pedant::Config.pedant_platform.server_api_version >= 2
           new_cookbook_v2(name, version, opts)
         else
           new_cookbook_v0(name, version, opts)
@@ -523,7 +523,7 @@ module Pedant
       # the API because it's not used by the client and wastes
       # bandwidth
       def retrieved_cookbook(name, version, opts = {})
-        if platform.server_api_version >= 2
+        if Pedant::Config.pedant_platform.server_api_version >= 2
           retrieved_cookbook_v2(name, version, opts)
         else
           retrieved_cookbook_v0(name, version, opts)
@@ -633,7 +633,7 @@ module Pedant
       #
 
       def checksums_for_type(type, cb_version = cookbook_version)
-        if platform.server_api_version >= 2
+        if Pedant::Config.pedant_platform.server_api_version >= 2
           checksums_for_all_files(type, cb_version)
         else
           checksums_for_segment_type(type, cb_version)
@@ -657,7 +657,7 @@ module Pedant
       end
 
       def extract_segment(cbv, segment)
-        if platform.server_api_version >= 2
+        if Pedant::Config.pedant_platform.server_api_version >= 2
           files = cbv["all_files"] || []
           files.select do |f|
             seg, name = f["name"].split("/")
@@ -670,7 +670,7 @@ module Pedant
       end
 
       def select_segment(segment)
-        if platform.server_api_version >= 2
+        if Pedant::Config.pedant_platform.server_api_version >= 2
           "all_files"
         else
           segment
