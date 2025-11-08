@@ -349,17 +349,24 @@ module Pedant
       end
 
       def delete_cookbook(requestor, name, version)
-        delete(api_url.call("/#{cookbook_url_base}/#{name}/#{version}"),
+        # Use direct platform.api_url for after(:all) compatibility
+        delete(Pedant::Config.pedant_platform.api_url("/#{cookbook_url_base}/#{name}/#{version}"),
           requestor)
       end
 
       def make_cookbook(requestor, name, version, opts = {})
         payload = new_cookbook(name, version, opts)
-        ensure_2xx.call(upload_cookbook(requestor, name, version, payload))
+        response = upload_cookbook(requestor, name, version, payload)
+        # Inline ensure_2xx logic for before(:all) compatibility
+        if response.code > 299
+          raise "bad response code #{response.code} in response: #{response}"
+        end
+        response
       end
 
       def upload_cookbook(requestor, name, version, payload)
-        put(api_url.call("/#{cookbook_url_base}/#{name}/#{version}"),
+        # Use direct platform.api_url for before(:all) compatibility
+        put(Pedant::Config.pedant_platform.api_url("/#{cookbook_url_base}/#{name}/#{version}"),
           requestor, payload: payload)
       end
 
