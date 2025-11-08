@@ -441,9 +441,7 @@ module Pedant
         end
         
         ## TODO: Remove this method; we probably don't need to access it directly
-        def server
-          platform
-        end
+        let(:server) { platform.server }
 
         ################################################################################
         # Logging
