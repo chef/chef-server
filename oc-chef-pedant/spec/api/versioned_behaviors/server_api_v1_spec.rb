@@ -19,7 +19,7 @@ describe "Server API v1 Behaviors", :api_v1 do
     shared(:org_client_url) { "#{platform.server}/organizations/#{org_name}/clients" }
     shared(:user_url) { "#{platform.server}/users" }
     shared(:client_name) { unique_name.call("api-v1-client") }
-    shared(:user_name) { unique_name.call(call("api-v1-user") }
+    shared(:user_name) { unique_name.call("api-v1-user") }
     shared(:named_client_url) { "#{org_client_url}/#{client_name}" }
     shared(:named_user_url) { "#{user_url}/#{user_name}" }
     shared(:valid_pubkey) { @valid_pubkey ||= platform.gen_rsa_key("client-v1-test")[:public] }
