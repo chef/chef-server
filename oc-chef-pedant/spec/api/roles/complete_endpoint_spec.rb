@@ -230,7 +230,7 @@ describe "Testing the Roles API endpoint", :roles do
 
         let(:updated_fields) { raise "supply 'updated_fields' in the form of a hash.  They will be merged with the existing role body to form a PUT payload" }
         # updated_role needed for update_role_success_response
-        let(:updated_role) { update_object(role, updated_fields) }
+        let(:updated_role) { update_object.call(role, updated_fields) }
         let(:request_payload) { updated_role }
 
         context "with canonical payload", :smoke do

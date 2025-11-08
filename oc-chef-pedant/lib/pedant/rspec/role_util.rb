@@ -302,13 +302,13 @@ module Pedant
       # Ensure that all run lists in a role have been normalized.
       def normalize_role(role)
         run_list = role["run_list"] || []
-        role["run_list"] = normalize_run_list(run_list)
+        role["run_list"] = normalize_run_list.call(run_list)
 
         env_run_lists = role["env_run_lists"] || {}
         normalized = env_run_lists.inject({}) { |acc, item|
           env = item.first
           list = item.last
-          acc[env] = normalize_run_list(list)
+          acc[env] = normalize_run_list.call(list)
           acc
         }
         role["env_run_lists"] = normalized

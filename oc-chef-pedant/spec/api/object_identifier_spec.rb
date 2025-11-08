@@ -26,7 +26,7 @@ describe "Private Chef Nodes API endpoint", :'object-identifiers' do
   let(:request_method) { :GET }
   context "retrieving object identifiers" do
     let(:object_guid)    { /^[0-9A-Fa-f]{32}$/ }
-    let(:request_url)    { internal_api_url("/nodes/#{node_name}/_identifiers") }
+    let(:request_url)    { internal_api_url.call("/nodes/#{node_name}/_identifiers") }
 
     context "for nodes" do
       context "that exist" do
@@ -58,7 +58,7 @@ describe "Private Chef Nodes API endpoint", :'object-identifiers' do
     end
 
     context "for an unsupported object type" do
-      let(:request_url) { internal_api_url("/search/bad_object/_identifiers") }
+      let(:request_url) { internal_api_url.call("/search/bad_object/_identifiers") }
       it "returns a 404" do
         should look_like(
           { status: 404,

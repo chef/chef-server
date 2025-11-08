@@ -21,8 +21,10 @@ module Pedant
       extend Pedant::Concern
       included do
         # As api_url, but reference the internal server address.
-        def internal_api_url(path_fragment)
-          platform.internal_api_url(path_fragment)
+        let(:internal_api_url) do
+          ->(path_fragment) do
+            platform.internal_api_url(path_fragment)
+          end
         end
       end
     end

@@ -227,7 +227,7 @@ module Pedant
       # Ensure that the node's run list has been normalized
       def normalize_node(node)
         run_list = node["run_list"] || []
-        node["run_list"] = normalize_run_list(run_list)
+        node["run_list"] = normalize_run_list.call(run_list)
         node
       end
 

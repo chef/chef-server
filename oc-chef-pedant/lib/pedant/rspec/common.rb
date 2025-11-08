@@ -353,44 +353,48 @@ module Pedant
         # object, returning the updated object.  Any updated field
         # with a value of :DELETE will be removed from the updated
         # object.
-        def update_object(object, updates)
-          # Verify types
-          should_be_hash.call(object)
-          should_be_hash.call(updates)
+        let(:update_object) do
+          ->(object, updates) do
+            # Verify types
+            should_be_hash.call(object)
+            should_be_hash.call(updates)
 
-          # Pull out all update fields that are targeted for deletion
-          fields_to_delete = updates.inject([]) do |acc, element|
-            field = element.first
-            value = element.last
-            value == :DELETE ? acc.push(field) : acc
+            # Pull out all update fields that are targeted for deletion
+            fields_to_delete = updates.inject([]) do |acc, element|
+              field = element.first
+              value = element.last
+              value == :DELETE ? acc.push(field) : acc
+            end
+
+            # Perform the initial merge.  Fields targeted for deletion are still present.
+            updated_object = object.merge(updates)
+
+            # Remove all fields targeted for deletion, if any
+            fields_to_delete.each do |field|
+              updated_object.delete(field)
+            end
+
+            # We're done here
+            updated_object
           end
-
-          # Perform the initial merge.  Fields targeted for deletion are still present.
-          updated_object = object.merge(updates)
-
-          # Remove all fields targeted for deletion, if any
-          fields_to_delete.each do |field|
-            updated_object.delete(field)
-          end
-
-          # We're done here
-          updated_object
         end
 
         # Ensure that all elements of a run list are explicitly tagged
         # as either a recipe or a role.  Also filters out duplicates
         # once everything has been normalized.
-        def normalize_run_list(run_list)
-          run_list.map { |item|
-            case item
-            when /^recipe\[.*\]$/
-              item # explicit recipe
-            when /^role\[.*\]$/
-              item # explicit role
-            else
-              "recipe[#{item}]"
-            end
-          }.uniq
+        let(:normalize_run_list) do
+          ->(run_list) do
+            run_list.map { |item|
+              case item
+              when /^recipe\[.*\]$/
+                item # explicit recipe
+              when /^role\[.*\]$/
+                item # explicit role
+              else
+                "recipe[#{item}]"
+              end
+            }.uniq
+          end
         end
 
         # Use this to wrap a group of examples into a focused context
