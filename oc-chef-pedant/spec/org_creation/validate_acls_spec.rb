@@ -135,7 +135,7 @@ describe "Org Creation", :org_creation do
     end
 
     context "[default clients]" do
-      should_have_default_acls_for "/clients/#{Pedant::Config.pedant_platform.test_org.name}-validator" do
+      should_have_default_acls_for "/clients/#{validator_name}" do
         let(:create_groups) { admin_groups }
         let(:read_groups)   { user_groups }
         let(:update_groups) { admin_groups }
