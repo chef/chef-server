@@ -22,35 +22,21 @@ module Pedant
       base.instance_variable_set(:@_dependencies, [])
     end
 
-    # This method is called in two ways:
-    # 1. included do ... end - to register a block to be executed when the module is included
-    # 2. included(base) - called by Ruby when the module is actually included (via super)
+    # Evaluate given block in context of base class, so that you can write class macros here.
+    # When base is nil, stores the block to be executed later when the module is included.
+    # When base is provided, calls super to maintain Ruby's module inclusion chain.
     def included(base = nil, &block)
-      if block_given?
-        # Store the block to be executed later when module is included
+      if base.nil?
         @_included_block = block
       else
-        # This is the actual inclusion - super will call Module#included
-        super if base
+        super
       end
     end
 
     def append_features(base)
-      # First, add the module's features (methods, constants, etc.)
       super
-
-      # Then execute any included block in the context of the base class
-      # instance_exec evaluates the block with self as base, and passes base as arg
-      # This supports both: included do ... end  AND  included do |base| ... end
-      if instance_variable_defined?(:@_included_block) && @_included_block
-        base.instance_exec(base, &@_included_block)
-      end
-
-      # Automatically extend base with ClassMethods if it exists
-      # This is the key feature of ActiveSupport::Concern
-      if const_defined?(:ClassMethods)
-        base.extend const_get(:ClassMethods)
-      end
+      base.class_eval(&@_included_block) if instance_variable_defined?(:@_included_block)
+      base.extend const_get(:ClassMethods) if const_defined?(:ClassMethods)
     end
   end
 end
