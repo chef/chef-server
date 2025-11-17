@@ -35,7 +35,7 @@ module Pedant
       $server_api_version
     end
 
-    KNIFE_VERSION = "18.8.46" # Hardcoded for now since we removed chef from the Gemfile. Why on earth would we need the entire chef gem just to get a version number?
+    KNIFE_VERSION = "18.8.46" # This version should be updated manually to point to valid chef release. We've removed chef gem from the Gemfile. Why on earth would we need the entire chef gem just to get a version number?
     # FYI, this must be a valid, shipping version of Chef, or the server will reject requests.
 
     # Headers that are added to all requests

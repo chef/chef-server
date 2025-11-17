@@ -8,11 +8,6 @@ gem "pry-stack_explorer"
 gem "rake"
 gem "rest-client", git: "https://github.com/chef/rest-client.git", branch: "jfm/ucrt_update1"
 
-# We require chef internally to get the version in
-# lib/pedant/request.rb. It's really strange code and it should be
-# revisited.
-# gem "chef", "18.8.46" - commmenting this out to get past loading that enormous gem to only get a version number.
-
 # For "rake chef_zero_spec"
 # PR #352 merged to main but not released yet - use main branch
 gem 'chef-zero', git: "https://github.com/chef/chef-zero.git", branch: "main"

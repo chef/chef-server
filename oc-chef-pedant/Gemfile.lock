@@ -60,6 +60,7 @@ GEM
     diff-lcs (1.6.2)
     domain_name (0.6.20240107)
     erubis (2.7.0)
+    ffi (1.17.2)
     ffi (1.17.2-arm64-darwin)
     ffi (1.17.2-x64-mingw-ucrt)
     ffi-win32-extensions (1.0.4)
@@ -131,6 +132,7 @@ GEM
     wmi-lite (1.0.7)
 
 PLATFORMS
+  ruby
   arm64-darwin-23
   x64-mingw-ucrt
 
