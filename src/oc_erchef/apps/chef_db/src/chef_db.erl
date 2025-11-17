@@ -317,7 +317,15 @@ fetch_requestor(Context, OrgId, ClientName) ->
                                   | not_found
                                   | {error, term()}.
 fetch_requestors(#context{reqid = ReqId}, OrgId, Name) ->
-    ?SH_TIME(ReqId, chef_sql, fetch_actors_by_name, (OrgId, Name)).
+    %% Backward compatibility: call with same name for both parameters
+    fetch_requestors(#context{reqid = ReqId}, OrgId, Name, Name).
+
+-spec fetch_requestors(#context{}, binary() | undefined, binary(), binary()) ->
+                              [#chef_requestor{}]
+                                  | not_found
+                                  | {error, term()}.
+fetch_requestors(#context{reqid = ReqId}, OrgId, Name, OriginalName) ->
+    ?SH_TIME(ReqId, chef_sql, fetch_actors_by_name, (OrgId, Name, OriginalName)).
 
 %% @doc Saves sandbox information for a new sandbox in the database, and returns a
 %% chef_sandbox record representing the new sandbox.  This is a different pattern from other

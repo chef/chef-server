@@ -1017,8 +1017,14 @@ verify_request_signature(Req,
                                      auth_skew = AuthSkew,
                                      chef_db_context = DbContext}=State,
                          Extractor) ->
+    %% CHEF-27821: Get both X-Ops-UserId and X-Ops-Original-UserId
+    %% Pass both to fetch_requestors which will OR them in the query
     Name = wrq:get_req_header("x-ops-userid", Req),
-    case chef_db:fetch_requestors(DbContext, OrgId, Name) of
+    OriginalName = case wrq:get_req_header("x-ops-original-userid", Req) of
+        undefined -> Name;  %% Use same name if no original header
+        OName -> OName
+    end,
+    case chef_db:fetch_requestors(DbContext, OrgId, Name, OriginalName) of
         not_found ->
             NotFoundMsg = verify_request_message(user_or_client_not_found, Name, OrgName),
             {false, wrq:set_resp_body(chef_json:encode(NotFoundMsg), Req),

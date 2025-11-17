@@ -199,8 +199,14 @@ list_common_orgs_for_users(User1Id, User2Id) ->
 fetch_actors_by_name(undefined, Name) ->
     fetch_actors_by_name(global, Name);
 fetch_actors_by_name(OrgId, Name) ->
+    %% Backward compatibility: call with same name for both parameters
+    fetch_actors_by_name(OrgId, Name, Name).
+
+fetch_actors_by_name(undefined, Name, OriginalName) ->
+    fetch_actors_by_name(global, Name, OriginalName);
+fetch_actors_by_name(OrgId, Name, OriginalName) ->
     Transform = {rows_as_records, [chef_requestor, record_info(fields, chef_requestor)]},
-    Result = sqerl:select(fetch_requestors_by_name, [OrgId, Name], Transform),
+    Result = sqerl:select(fetch_requestors_by_name, [OrgId, Name, OriginalName], Transform),
     match_result(Result).
 
 
