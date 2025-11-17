@@ -16,7 +16,7 @@
   0},
  {<<"chef_authn">>,
   {git,"https://github.com/chef/chef_authn",
-       {ref,"57ae954ab231e4cd24740315eddc932aaf5515fc"}},
+       {branch,"CHEF-27821-experimental"}},
   0},
  {<<"chef_secrets">>,
   {git,"https://github.com/chef/chef_secrets",
