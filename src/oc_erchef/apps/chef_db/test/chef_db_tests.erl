@@ -201,3 +201,145 @@ stats_hero_config() ->
      {request_id, ?REQ_ID},
      {label_fun, {chef_db_test_utils, stats_hero_label}},
      {upstream_prefixes, [<<"rdbms">>, <<"couchdb">>, <<"solr">>]}].
+
+%% CHEF-27821: Tests for fetch_requestors/4 with OR query support
+fetch_requestors_with_or_query_test_() ->
+    {foreach,
+     fun() ->
+             meck:new(chef_sql),
+             meck:new(stats_hero),
+             meck:expect(stats_hero, ctime, fun(_, _) -> ok end),
+             meck:expect(stats_hero, etime, fun(_, _) -> ok end),
+             set_app_env()
+     end,
+     fun(_) ->
+             meck:unload([chef_sql, stats_hero])
+     end,
+     [
+      {"fetch_requestors with same name (backward compatibility)",
+       fun() ->
+               %% Test: When Name and OriginalName are the same
+               %% Should find the user/client with that name
+               User = #chef_user{
+                   server_api_version = ?API_MIN_VER,
+                   id = <<"user-id-123">>,
+                   authz_id = <<"authz-id-456">>,
+                   username = <<"testuser">>,
+                   public_key = <<"key data">>,
+                   hashed_password = <<"abc123xyz">>,
+                   salt = <<"pepper">>,
+                   hash_type = <<"bcrypt">>,
+                   external_authentication_uid = <<"">>,
+                   recovery_authentication_enabled = <<"0">>
+               },
+               
+               meck:expect(chef_sql, fetch_actors_by_name, 
+                           fun(_, <<"mock-org-id">>, <<"testuser">>, <<"testuser">>) -> 
+                               [User] 
+                           end),
+               
+               Context = chef_db:make_context(?API_MIN_VER, ?REQ_ID),
+               Result = chef_db:fetch_requestors(Context, <<"mock-org-id">>, <<"testuser">>, <<"testuser">>),
+               
+               ?assertEqual(User, Result)
+       end},
+       
+      {"fetch_requestors finds user by original name in OR query",
+       fun() ->
+               %% Test: Gateway scenario - should find user by OriginalName
+               User = #chef_user{
+                   server_api_version = ?API_MIN_VER,
+                   id = <<"user-id-123">>,
+                   authz_id = <<"authz-id-456">>,
+                   username = <<"testuser">>,  % Original username
+                   public_key = <<"key data">>,
+                   hashed_password = <<"abc123xyz">>,
+                   salt = <<"pepper">>,
+                   hash_type = <<"bcrypt">>,
+                   external_authentication_uid = <<"">>,
+                   recovery_authentication_enabled = <<"0">>
+               },
+               
+               %% SQL: WHERE (name = 'tenant1_testuser' OR name = 'testuser')
+               %% Matches on OriginalName = 'testuser'
+               meck:expect(chef_sql, fetch_actors_by_name,
+                           fun(_, <<"mock-org-id">>, <<"tenant1_testuser">>, <<"testuser">>) ->
+                               [User]
+                           end),
+               
+               Context = chef_db:make_context(?API_MIN_VER, ?REQ_ID),
+               Result = chef_db:fetch_requestors(Context, <<"mock-org-id">>, 
+                                                 <<"tenant1_testuser">>, <<"testuser">>),
+               
+               ?assertEqual(User, Result)
+       end},
+       
+      {"fetch_requestors finds client by gateway-modified name",
+       fun() ->
+               %% Test: User found by gateway-modified name
+               Client = #chef_client{
+                   server_api_version = ?API_MIN_VER,
+                   id = <<"client-id-123">>,
+                   authz_id = <<"authz-id-789">>,
+                   org_id = <<"mock-org-id">>,
+                   name = <<"tenant1_apiclient">>,
+                   pubkey_version = 1,
+                   public_key = <<"key data">>
+               },
+               
+               meck:expect(chef_sql, fetch_actors_by_name,
+                           fun(_, <<"mock-org-id">>, <<"tenant1_apiclient">>, <<"apiclient">>) ->
+                               [Client]
+                           end),
+               
+               Context = chef_db:make_context(?API_MIN_VER, ?REQ_ID),
+               Result = chef_db:fetch_requestors(Context, <<"mock-org-id">>,
+                                                 <<"tenant1_apiclient">>, <<"apiclient">>),
+               
+               ?assertEqual(Client, Result)
+       end},
+       
+      {"fetch_requestors returns not_found when no match",
+       fun() ->
+               %% Test: Neither name matches
+               meck:expect(chef_sql, fetch_actors_by_name,
+                           fun(_, <<"mock-org-id">>, <<"nonexistent">>, <<"alsonothere">>) ->
+                               []
+                           end),
+               
+               Context = chef_db:make_context(?API_MIN_VER, ?REQ_ID),
+               Result = chef_db:fetch_requestors(Context, <<"mock-org-id">>,
+                                                 <<"nonexistent">>, <<"alsonothere">>),
+               
+               ?assertEqual(not_found, Result)
+       end},
+       
+      {"fetch_requestor/3 calls fetch_requestors/4 with same name (backward compat)",
+       fun() ->
+               %% Test: 3-parameter wrapper uses same name for both parameters
+               User = #chef_user{
+                   server_api_version = ?API_MIN_VER,
+                   id = <<"user-id">>,
+                   authz_id = <<"authz-id">>,
+                   username = <<"alice">>,
+                   public_key = <<"key">>,
+                   hashed_password = <<"hash">>,
+                   salt = <<"salt">>,
+                   hash_type = <<"bcrypt">>,
+                   external_authentication_uid = <<"">>,
+                   recovery_authentication_enabled = <<"0">>
+               },
+               
+               %% Should call with Name for both parameters
+               meck:expect(chef_sql, fetch_actors_by_name,
+                           fun(_, <<"mock-org-id">>, <<"alice">>, <<"alice">>) ->
+                               [User]
+                           end),
+               
+               Context = chef_db:make_context(?API_MIN_VER, ?REQ_ID),
+               Result = chef_db:fetch_requestor(Context, <<"mock-org-id">>, <<"alice">>),
+               
+               ?assertEqual(User, Result)
+       end}
+     ]
+    }.

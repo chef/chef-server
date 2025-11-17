@@ -190,7 +190,8 @@ verify_request_signature_test_() ->
        fun() ->
                Req = make_req_data(),
                State = make_base_state(),
-               meck:expect(chef_db, fetch_requestors, fun(_Context, _OrgId, _Name) ->
+               %% CHEF-27821: Updated to mock fetch_requestors/4 with Name and OriginalName
+               meck:expect(chef_db, fetch_requestors, fun(_Context, _OrgId, _Name, _OriginalName) ->
                                                               {error, no_connections}
                                                       end),
                Extractor = fun oc_chef_wm_base:authorization_data_extractor/3,
@@ -202,7 +203,8 @@ verify_request_signature_test_() ->
        fun() ->
                Req = make_req_data(),
                State = make_base_state(),
-               meck:expect(chef_db, fetch_requestors, fun(_Context, _OrgId, _Name) ->
+               %% CHEF-27821: Updated to mock fetch_requestors/4 with Name and OriginalName
+               meck:expect(chef_db, fetch_requestors, fun(_Context, _OrgId, _Name, _OriginalName) ->
                                                               {error, uh_oh}
                                                       end),
                Extractor = fun oc_chef_wm_base:authorization_data_extractor/3,
@@ -214,7 +216,8 @@ verify_request_signature_test_() ->
        fun() ->
                Req = make_req_data(),
                State = make_base_state(),
-               meck:expect(chef_db, fetch_requestors, fun(_Context, _OrgId, _Name) ->
+               %% CHEF-27821: Updated to mock fetch_requestors/4 with Name and OriginalName
+               meck:expect(chef_db, fetch_requestors, fun(_Context, _OrgId, _Name, _OriginalName) ->
                                                               not_found
                                                       end),
                Extractor = fun oc_chef_wm_base:authorization_data_extractor/3,
@@ -496,3 +499,50 @@ make_base_state() ->
        auth_skew = 900,
        chef_authz_context = mock_authz_context
       }.
+
+%% CHEF-27821: Tests for authorization_data_extractor with X-Ops-Original-URL
+authorization_data_extractor_standard_path_test() ->
+    %% Test: Standard request without X-Ops-Original-URL header
+    %% Should return the path from wrq:path(Req)
+    meck:new(wrq, [passthrough]),
+    meck:expect(wrq, get_req_header, fun("x-ops-original-url", _) -> undefined end),
+    meck:expect(wrq, path, fun(_Req) -> "/organizations/testorg/nodes" end),
+    
+    Req = make_req_data(),
+    State = make_base_state(),
+    Path = oc_chef_wm_base:authorization_data_extractor(path, Req, State),
+    
+    %% Should return the path from wrq:path since no X-Ops-Original-URL
+    ?assertEqual(<<"/organizations/testorg/nodes">>, Path),
+    meck:unload(wrq).
+
+authorization_data_extractor_with_original_url_test() ->
+    %% Test: Request with X-Ops-Original-URL header
+    %% Should use X-Ops-Original-URL instead of wrq:path
+    meck:new(wrq, [passthrough]),
+    OriginalURL = "/organizations/original/nodes",
+    meck:expect(wrq, get_req_header, fun("x-ops-original-url", _) -> OriginalURL end),
+    meck:expect(wrq, path, fun(_Req) -> "/tenant1/organizations/testorg/nodes" end),
+    
+    Req = make_req_data(),
+    State = make_base_state(),
+    Path = oc_chef_wm_base:authorization_data_extractor(path, Req, State),
+    
+    %% Should use X-Ops-Original-URL, not the gateway-modified path
+    ?assertEqual(list_to_binary(OriginalURL), Path),
+    meck:unload(wrq).
+
+authorization_data_extractor_with_query_string_test() ->
+    %% Test: X-Ops-Original-URL with query string should be preserved
+    meck:new(wrq, [passthrough]),
+    OriginalURL = "/organizations/testorg/search/node?q=platform:ubuntu",
+    meck:expect(wrq, get_req_header, fun("x-ops-original-url", _) -> OriginalURL end),
+    meck:expect(wrq, path, fun(_Req) -> "/tenant1/organizations/testorg/search/node" end),
+    
+    Req = make_req_data(),
+    State = make_base_state(),
+    Path = oc_chef_wm_base:authorization_data_extractor(path, Req, State),
+    
+    %% Should preserve query string from X-Ops-Original-URL
+    ?assertEqual(list_to_binary(OriginalURL), Path),
+    meck:unload(wrq).
