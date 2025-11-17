@@ -1018,45 +1018,20 @@ verify_request_signature(Req,
                                      chef_db_context = DbContext}=State,
                          Extractor) ->
     Name = wrq:get_req_header("x-ops-userid", Req),
-    %% CHEF-27821: Try fetching requestor with potentially modified name first
-    %% If not found, fallback to original name (gateway may have added tenant suffix)
-    {Requestors, FinalName} = case chef_db:fetch_requestors(DbContext, OrgId, Name) of
+    case chef_db:fetch_requestors(DbContext, OrgId, Name) of
         not_found ->
-            %% Fallback to X-Ops-Original-UserId if present
-            case wrq:get_req_header("x-ops-original-userid", Req) of
-                undefined ->
-                    %% No fallback available
-                    {not_found, Name};
-                OriginalName ->
-                    %% Try with original name (without tenant suffix)
-                    case chef_db:fetch_requestors(DbContext, OrgId, OriginalName) of
-                        not_found ->
-                            %% Still not found - use original name for error message
-                            {not_found, OriginalName};
-                        Result ->
-                            %% Found using original name
-                            {Result, OriginalName}
-                    end
-            end;
-        Result ->
-            %% Found using modified name
-            {Result, Name}
-    end,
-    
-    case Requestors of
-        not_found ->
-            NotFoundMsg = verify_request_message(user_or_client_not_found, FinalName, OrgName),
+            NotFoundMsg = verify_request_message(user_or_client_not_found, Name, OrgName),
             {false, wrq:set_resp_body(chef_json:encode(NotFoundMsg), Req),
              State#base_state{log_msg = {not_found, user_or_client}}};
         {error, no_connections=Error} ->
-            Msg = verify_request_message(error_finding_user_or_client, FinalName, OrgName),
+            Msg = verify_request_message(error_finding_user_or_client, Name, OrgName),
             {{halt, 503}, wrq:set_resp_body(chef_json:encode(Msg), Req),
              State#base_state{log_msg = {error_finding_user_or_client, Error}}};
         {error, Error} ->
-            Msg = verify_request_message(error_finding_user_or_client, FinalName, OrgName),
+            Msg = verify_request_message(error_finding_user_or_client, Name, OrgName),
             {{halt, 500}, wrq:set_resp_body(chef_json:encode(Msg), Req),
              State#base_state{log_msg = {error_finding_user_or_client, Error}}};
-        _ ->
+        Requestors ->
             %% If the request originated from the webui, we do authn using the webui public
             %% key, not the user's key.
             PublicKey = select_user_or_webui_key(Req, Requestors),
@@ -1071,7 +1046,7 @@ verify_request_signature(Req,
                     {true, Req, State1#base_state{requestor_id = authz_id(Requestor),
                                                   requestor = Requestor}};
                 {no_authn, Reason} ->
-                    Msg = verify_request_message(Reason, FinalName, OrgName),
+                    Msg = verify_request_message(Reason, Name, OrgName),
                     Json = chef_json:encode(Msg),
                     Req1 = wrq:set_resp_body(Json, Req),
                     {false, Req1, State1#base_state{log_msg = Reason}}
