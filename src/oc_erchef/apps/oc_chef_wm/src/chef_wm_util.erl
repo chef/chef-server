@@ -269,14 +269,19 @@ object_name(policy_group_asoc_name, Req) ->
 
 
 
-%% @doc Private utility function to extract a path element as a binary.  Returns the atom
-%% `undefined' if no such value exists.
+%% @doc Private utility function to extract a path element as a binary. Returns the atom
+%% `undefined' if no such value exists. URL-decodes the path segment per RFC 3986.
 extract_from_path(PathKey, Req) ->
     case wrq:path_info(PathKey, Req) of
         undefined ->
             undefined;
         Value ->
-            list_to_binary(Value)
+            %% URL-decode the path segment to handle RFC 5322 characters
+            %% (spaces, @, +, etc.) that are percent-encoded in URLs.
+            %% Uses uri_string:unquote/1 (OTP 21+), the modern replacement
+            %% for the deprecated http_uri:decode/1.
+            DecodedValue = uri_string:unquote(Value),
+            list_to_binary(DecodedValue)
     end.
 
 %% @doc Utility function to process the `num_versions' parameter that is common to several

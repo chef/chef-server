@@ -69,8 +69,10 @@
 %% Policy names are similar to data bags et al., but are limited to 255 Chars.
 -define(NAME_REGEX_MAX_255, "[.[:alnum:]_\:-]{1,255}").
 
-%% Username validation regex
--define(USERNAME_REGEX, "[a-z0-9\-_]+").
+%% Username validation regex - relaxed to allow RFC 5322 special characters and whitespace
+%% Allows: a-z, 0-9, and special chars: ! # $ % & ' * + , - . / : ; < = > ? @ [ \ ] ^ _ ` { | } ~
+%% Also allows: quote ("), tab (\t), and space
+-define(USERNAME_REGEX, "[a-z0-9!#$%&'*+,\\-./:;<=>?@\\[\\\\\\]^_`{|}~\" \\t]+").
 
 %% Validation regex for various names
 -define(REQUIRED_NAME_REGEX, "[[:word:][:digit:]!'. -]+").
@@ -173,7 +175,7 @@ regex_for(policy_fully_qualified_recipe) ->
 
 regex_for(user_name) ->
    generate_regex_msg_tuple(?ANCHOR_REGEX(?USERNAME_REGEX),
-                            <<"Malformed user name. Must only contain a-z, 0-9, _, or -">>);
+                            <<"Malformed user name. Must only contain a-z, 0-9, or special characters: ! # $ % & ' * + , - . / : ; < = > ? @ [ \\ ] ^ _ ` { | } ~">>);
 regex_for(first_name) ->
    generate_regex_msg_tuple(?ANCHOR_REGEX(?OPTIONAL_NAME_REGEX),
                             <<"Denied first_name. Must only contain word characters, digits, ', or .">>, [unicode, ucp]);
