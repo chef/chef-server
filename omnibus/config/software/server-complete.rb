@@ -31,7 +31,7 @@ dependency "openssl-fips-config" if fips_mode?
 # the backend
 dependency "postgresql96-bin" # for upgrading 9.6 -> 13
 dependency "postgresql13"
-dependency "keydb" # dynamic routing controls
+dependency "valkey" # dynamic routing controls
 dependency "haproxy"
 dependency "opensearch" # used by search
 
