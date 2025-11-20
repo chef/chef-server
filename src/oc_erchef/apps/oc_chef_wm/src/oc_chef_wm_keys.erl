@@ -117,7 +117,15 @@ to_json(Req, #base_state{ chef_db_context = DbContext,
 
 -spec from_json(wm_req(), chef_wm:base_state()) -> term().
 from_json(Req, #base_state{resource_state = #key_state{key_data = EJ}} = State) ->
-    chef_key_base:maybe_generate_key_pair(EJ, fun(Result) -> handle_keypair(Req, State, Result) end).
+    %% If both public_key and create_key are missing, auto-generate by injecting create_key: true
+    %% This matches v0 API behavior where omitting public_key triggers automatic key generation
+    EJ2 = case {ej:get({<<"public_key">>}, EJ), ej:get({<<"create_key">>}, EJ)} of
+        {undefined, undefined} ->
+            ej:set({<<"create_key">>}, EJ, true);
+        _ ->
+            EJ
+    end,
+    chef_key_base:maybe_generate_key_pair(EJ2, fun(Result) -> handle_keypair(Req, State, Result) end).
 
 % Callback from create_from_json, which allows us to customize our body response.
 -spec finalize_create_body(wm_req(), chef_wm:base_state(), chef_key(), ejson_term()) -> ejson_term().

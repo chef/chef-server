@@ -192,7 +192,7 @@ parse_binary_json(Bin, update) ->
 parse_binary_json(Bin, create) ->
   EJ = chef_json:decode(Bin),
   validate_name(req, EJ),
-  chef_key_base:validate_public_key_fields(req, EJ, key, create),
+  chef_key_base:validate_public_key_fields(opt, EJ, key, create),
   validate_expiration_date(req, EJ).
 
 validate_expiration_date(Required, EJ) ->
