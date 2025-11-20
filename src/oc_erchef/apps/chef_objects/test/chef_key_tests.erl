@@ -221,6 +221,15 @@ parse_binary_json_create_test_() ->
 	      Key = example_key(<<"infinity">>, <<"-----BEGIN PUBLIC KEY-----\ninvalid_key\n-----END PUBLIC KEY-----">>),
 	      EncodedKey = chef_json:encode(Key),
 	      ?assertThrow({ej_invalid, fun_match, _, _, _, _, _}, chef_key:parse_binary_json(EncodedKey, create))
+      end},
+     {"check that key creation with neither public_key nor create_key is accepted (CHEF-27826)",
+      fun() ->
+          %% Test that when both public_key and create_key are omitted, validation passes
+          %% The webmachine layer will auto-inject create_key:true for auto-generation
+          Key = {[{<<"name">>, ?KEY_NAME}, {<<"expiration_date">>, ?DEFAULT_EXPIRATION}]},
+          EncodedKey = chef_json:encode(Key),
+          %% Should not throw - validation allows both fields to be missing
+          ?assertEqual(Key, chef_key:parse_binary_json(EncodedKey, create))
       end}
     ].
 

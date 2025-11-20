@@ -96,7 +96,7 @@ module Pedant
           "when date is empty" => { replace: { "expiration_date" => "" } },
           "when date is missing" => { delete:  [ "expiration_date" ] },
           "when public key is not a valid key" => { replace: { "public_key" => "Nope." } },
-          "when public key is missing" => { delete: [ "public_key" ] },
+          # Note: "when public key is missing" is no longer an error (CHEF-27826) - it auto-generates
           "when both a public_key and create_key are present" => { replace: { "create_key" => true } },
         }.each do |desc, setup|
           it "#{desc} it responds with 400", :validation do
@@ -159,6 +159,17 @@ module Pedant
           it "when 'create_key' : true is specified in lieu of public key it should generate a new private key and reply with it in the body" do
             key_payload["create_key"] = true
             key_payload.delete("public_key")
+            expected_location = "#{key_url}/#{key_payload["name"]}"
+            response = post(key_url, superuser, payload: key_payload)
+            response.should look_like(status: 201,
+              body_exact: { "uri" => expected_location,
+                            "private_key" => /.*BEGIN (RSA )?PRIVATE.*/ })
+          end
+
+          it "when both 'public_key' and 'create_key' are omitted it should auto-generate a new private key (CHEF-27826)" do
+            # Test the new behavior: when neither field is present, auto-generate keypair
+            key_payload.delete("public_key")
+            key_payload.delete("create_key")
             expected_location = "#{key_url}/#{key_payload["name"]}"
             response = post(key_url, superuser, payload: key_payload)
             response.should look_like(status: 201,
