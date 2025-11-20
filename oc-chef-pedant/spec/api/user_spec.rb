@@ -732,6 +732,56 @@ describe "users", :users do
           end
         end
 
+        context "with email-like username (@ sign)" do
+          let(:username) { "user#{Process.pid}@example.com" }
+          let(:request_body) do
+            {
+              "username" => username,
+              "email" => "#{username}",
+              "first_name" => "User",
+              "last_name" => "Name",
+              "display_name" => "User Name",
+              "password" => "badger badger",
+            }
+          end
+
+          it "returns 201 (RFC 5322 characters allowed per CHEF-27822)", :validation do
+            post(request_url, platform.superuser,
+              payload: request_body).should look_like({
+                   status: 201,
+                 })
+          end
+
+          after do
+            delete("#{request_url}/#{username}", platform.superuser)
+          end
+        end
+
+        context "with special characters in username" do
+          let(:username) { "user.name+tag#{Process.pid}" }
+          let(:request_body) do
+            {
+              "username" => username,
+              "email" => "#{username}@chef.io",
+              "first_name" => "User",
+              "last_name" => "Name",
+              "display_name" => "User Name",
+              "password" => "badger badger",
+            }
+          end
+
+          it "returns 201 (RFC 5322 special chars allowed per CHEF-27822)", :validation do
+            post(request_url, platform.superuser,
+              payload: request_body).should look_like({
+                   status: 201,
+                 })
+          end
+
+          after do
+            delete("#{request_url}/#{username}", platform.superuser)
+          end
+        end
+
         context "with space in username" do
           let(:username) { "test #{Time.now.to_i}-#{Process.pid}" }
           let(:request_body) do
