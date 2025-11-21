@@ -1819,6 +1819,8 @@ describe "users", :users do
 
         context "changing username with spaces" do
           let(:new_name) { "test #{Time.now.to_i}-#{Process.pid}" }
+          let(:encoded_new_name) { CGI.escape(new_name).gsub('+', '%20') }
+          let(:new_request_url_with_spaces) { "#{platform.server}/users/#{encoded_new_name}" }
 
           let(:request_body) do
             {
@@ -1831,12 +1833,20 @@ describe "users", :users do
             }
           end
 
-          it "returns 201", :validation do
+          after :each do
+            delete("#{platform.server}/users/#{encoded_new_name}", platform.superuser)
+          end
+
+          it "returns 201 and updates the username", :validation do
             put(request_url, platform.superuser, payload: request_body).should look_like({
                 status: 201,
               })
-            # Verify the username change was processed
+            # Verify the user is no longer available at the old username
             get(request_url, platform.superuser).should look_like({
+                status: 404,
+              })
+            # Verify the user is available at the new username (with spaces)
+            get(new_request_url_with_spaces, platform.superuser).should look_like({
                 status: 200,
               })
           end
