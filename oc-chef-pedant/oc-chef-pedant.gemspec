@@ -24,4 +24,5 @@ Gem::Specification.new do |s|
   s.add_dependency("erubis", "~> 2.7")
   s.add_dependency("rspec-rerun", "~> 1.0")
   s.add_dependency("addressable")
+  s.add_dependency("activesupport", ">= 7.0", "< 8.0")  # Explicitly add ActiveSupport to ensure it's available
 end
