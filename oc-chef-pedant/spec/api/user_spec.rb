@@ -1,4 +1,5 @@
 require "pedant/rspec/common"
+require 'cgi'
 
 describe "users", :users do
 
@@ -310,11 +311,10 @@ describe "users", :users do
       end
 
       after :each do
-        # For the test with a space: we can't create it -- but also can't delete it,
-        # ne?  No naked spaces allowed in URLs.
-        if username !~ / /
-          delete("#{platform.server}/users/#{username}", platform.superuser)
-        end
+        # URL-encode username to handle special characters (spaces, @, +, etc.)
+        # per RFC 3986 - see CHEF-27822
+        encoded_username = CGI.escape(username).gsub('+', '%20')
+        delete("#{platform.server}/users/#{encoded_username}", platform.superuser)
       end
 
       context "superuser" do
@@ -751,10 +751,6 @@ describe "users", :users do
                    status: 201,
                  })
           end
-
-          after do
-            delete("#{request_url}/#{username}", platform.superuser)
-          end
         end
 
         context "with special characters in username" do
@@ -775,10 +771,6 @@ describe "users", :users do
               payload: request_body).should look_like({
                    status: 201,
                  })
-          end
-
-          after do
-            delete("#{request_url}/#{username}", platform.superuser)
           end
         end
 
