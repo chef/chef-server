@@ -22,7 +22,7 @@
 -include("oc_chef_wm.hrl").
 -include_lib("eunit/include/eunit.hrl").
 
--define(GLOBAL_PLACEHOLDER_ORG_ID, <<"00000000000000000000000000000000">>).
+%% GLOBAL_PLACEHOLDER_ORG_ID is defined in chef_types.hrl (included via oc_chef_wm.hrl)
 -define(SERVER_ADMINS_GROUP_NAME, <<"server-admins">>).
 -define(SERVER_ADMINS_AUTHZ_ID, <<"11111111111111111111111111111111">>).
 
