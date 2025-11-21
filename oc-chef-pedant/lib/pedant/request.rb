@@ -22,6 +22,7 @@ module Pedant
     require "rest_client"
     require "mixlib/shellout" unless defined?(Mixlib::ShellOut)
     require "uuidtools"
+    require "pedant/config"
     include Pedant::JSON
 
     # TODO: alternative suggestions?
@@ -36,8 +37,7 @@ module Pedant
 
     # Grab the the version of Chef / Knife that's on the box in order
     # to properly set the X-Chef-Version header
-    KNIFE_VERSION = "18.8.46" # This version should be updated manually to point to valid chef release.
-    # FYI, this must be a valid, shipping version of Chef, or the server will reject requests.
+    KNIFE_VERSION = Pedant::Config.knife_version
 
     # Headers that are added to all requests
     def standard_headers

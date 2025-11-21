@@ -204,3 +204,6 @@ role "<%= @role %>"
 
 include_version_in_status <%= node['private_chef']['opscode-erchef']['include_version_in_status'] %>
 include_x_ops_api_info <%= node['private_chef']['opscode-erchef']['include_x_ops_api_info'] %>
+
+# Chef/knife version number required in request.rb
+knife_version "18.8.46" # Bump this as needed
