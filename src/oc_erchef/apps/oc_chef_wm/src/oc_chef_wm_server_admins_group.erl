@@ -48,8 +48,7 @@
          request_type/0,
          validate_request/3]).
 
-%% Global placeholder org ID for server-admins group
--define(GLOBAL_PLACEHOLDER_ORG_ID, <<"00000000000000000000000000000000">>).
+%% GLOBAL_PLACEHOLDER_ORG_ID is defined in chef_types.hrl (included via oc_chef_wm.hrl)
 -define(SERVER_ADMINS_GROUP_NAME, <<"server-admins">>).
 
 init(Config) ->
@@ -96,15 +95,18 @@ auth_info(Req, #base_state{chef_db_context = DbContext,
     end.
 
 %% Only allow pivotal/superuser to access this endpoint
-forbidden(Req, #base_state{requestor = #chef_requestor{superuser = true}} = State) ->
-    %% Superuser (pivotal) is allowed
-    {false, Req, State};
 forbidden(Req, State) ->
-    %% All other users are forbidden
-    Message = chef_wm_util:error_message_envelope(
-        <<"Access to server-admins group is restricted to superuser only">>),
-    Req1 = chef_wm_util:set_json_body(Req, Message),
-    {{halt, 403}, Req1, State#base_state{log_msg = server_admins_forbidden}}.
+    case oc_chef_wm_base:is_superuser(Req) of
+        true ->
+            %% Superuser (pivotal) is allowed
+            {false, Req, State};
+        false ->
+            %% All other users are forbidden
+            Message = chef_wm_util:error_message_envelope(
+                <<"Access to server-admins group is restricted to superuser only">>),
+            Req1 = chef_wm_util:set_json_body(Req, Message),
+            {{halt, 403}, Req1, State#base_state{log_msg = server_admins_forbidden}}
+    end.
 
 resource_exists(Req, State) ->
     {true, Req, State}.

@@ -66,14 +66,15 @@ validate_request_sets_correct_group_parameters_test() ->
 
 forbidden_allows_superuser_test() ->
     {foreach,
-     fun() -> meck:new(chef_wm_util) end,
+     fun() ->
+         meck:new(oc_chef_wm_base),
+         meck:expect(oc_chef_wm_base, is_superuser, fun(_Req) -> true end)
+     end,
      fun(_) -> meck:unload() end,
      [
       {"superuser is allowed",
        fun() ->
-           State = #base_state{
-               requestor = #chef_requestor{superuser = true}
-           },
+           State = #base_state{},
            Req = mock_request(),
            {Result, _Req1, _State1} = oc_chef_wm_server_admins_group:forbidden(Req, State),
            ?assertEqual(false, Result)
@@ -83,7 +84,9 @@ forbidden_allows_superuser_test() ->
 forbidden_blocks_non_superuser_test() ->
     {foreach,
      fun() ->
+         meck:new(oc_chef_wm_base),
          meck:new(chef_wm_util),
+         meck:expect(oc_chef_wm_base, is_superuser, fun(_Req) -> false end),
          meck:expect(chef_wm_util, error_message_envelope, fun(_Msg) -> {[{<<"error">>, <<"forbidden">>}]} end),
          meck:expect(chef_wm_util, set_json_body, fun(Req, _Body) -> Req end)
      end,
@@ -91,9 +94,7 @@ forbidden_blocks_non_superuser_test() ->
      [
       {"non-superuser is forbidden",
        fun() ->
-           State = #base_state{
-               requestor = #chef_requestor{superuser = false}
-           },
+           State = #base_state{},
            Req = mock_request(),
            {Result, _Req1, State1} = oc_chef_wm_server_admins_group:forbidden(Req, State),
            ?assertMatch({{halt, 403}, _, _}, {Result, Req, State1}),
