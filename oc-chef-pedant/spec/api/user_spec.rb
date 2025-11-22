@@ -277,7 +277,7 @@ describe "users", :users do
     end # context PUT /users
 
     context "POST /users" do
-      let(:username) { "post-test-#{Time.now.to_i}-#{Process.pid}" }
+      let(:username) { "test-#{Process.pid}" }
       let(:user_url) { "#{request_url}/#{username}" }
       let(:request_body) do
         {
@@ -929,7 +929,7 @@ describe "users", :users do
     end # context GET /users/<name>
 
     context "PUT /users/<name> when user created w/ external auth enabled" do
-      let(:username) { "extauth-test-#{Time.now.to_i}-#{Process.pid}" }
+      let(:username) { "test-#{Process.pid}" }
       let(:request_body) do
         {
           "username" => username,
@@ -974,7 +974,7 @@ describe "users", :users do
       end
     end
     context "PUT /users/<name>" do
-      let(:username) { "put-test-#{Time.now.to_i}-#{Process.pid}" }
+      let(:username) { "test-#{Process.pid}" }
       let(:password) { "badger badger" }
 
       let(:request_body) do
@@ -1927,7 +1927,7 @@ describe "users", :users do
     end # context POST /users/<name>
 
     context "DELETE /users/<name>" do
-      let(:username) { "del-test-#{Time.now.to_i}-#{Process.pid}" }
+      let(:username) { "test-#{Process.pid}" }
 
       before :each do
         post("#{platform.server}/users", platform.superuser,
