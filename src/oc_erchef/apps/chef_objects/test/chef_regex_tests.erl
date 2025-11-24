@@ -93,3 +93,106 @@ regex_for_names_test_() ->
              ?assertEqual(ok, match(<<"foo::foo_bar-123.a">>, Regex))
          end}
     ].
+
+%% Username validation tests - CHEF-27822
+%% Tests for relaxed username validation allowing RFC 5322 special characters and whitespace
+regex_for_user_name_test_() ->
+    Regex = chef_regex:regex_for(user_name),
+    [
+        {"Username validation - original allowed characters still work",
+         fun() ->
+             %% Lowercase letters, digits, hyphen, underscore
+             ?assertEqual(ok, match(<<"alice">>, Regex)),
+             ?assertEqual(ok, match(<<"bob123">>, Regex)),
+             ?assertEqual(ok, match(<<"user-name">>, Regex)),
+             ?assertEqual(ok, match(<<"user_name">>, Regex)),
+             ?assertEqual(ok, match(<<"a1b2c3">>, Regex))
+         end},
+        
+        {"Username validation - RFC 5322 special characters allowed",
+         fun() ->
+             %% @ sign (email-like)
+             ?assertEqual(ok, match(<<"user@example.com">>, Regex)),
+             ?assertEqual(ok, match(<<"first.last@domain">>, Regex)),
+             
+             %% Period
+             ?assertEqual(ok, match(<<"user.name">>, Regex)),
+             ?assertEqual(ok, match(<<"first.middle.last">>, Regex)),
+             
+             %% Plus sign
+             ?assertEqual(ok, match(<<"user+tag">>, Regex)),
+             ?assertEqual(ok, match(<<"email+filter@domain">>, Regex)),
+             
+             %% Other special characters from RFC 5322
+             ?assertEqual(ok, match(<<"user!name">>, Regex)),
+             ?assertEqual(ok, match(<<"user#name">>, Regex)),
+             ?assertEqual(ok, match(<<"user$name">>, Regex)),
+             ?assertEqual(ok, match(<<"user%name">>, Regex)),
+             ?assertEqual(ok, match(<<"user&name">>, Regex)),
+             ?assertEqual(ok, match(<<"user'name">>, Regex)),
+             ?assertEqual(ok, match(<<"user*name">>, Regex)),
+             ?assertEqual(ok, match(<<"user,name">>, Regex)),
+             ?assertEqual(ok, match(<<"user/name">>, Regex)),
+             ?assertEqual(ok, match(<<"user:name">>, Regex)),
+             ?assertEqual(ok, match(<<"user;name">>, Regex)),
+             ?assertEqual(ok, match(<<"user<name">>, Regex)),
+             ?assertEqual(ok, match(<<"user=name">>, Regex)),
+             ?assertEqual(ok, match(<<"user>name">>, Regex)),
+             ?assertEqual(ok, match(<<"user?name">>, Regex)),
+             ?assertEqual(ok, match(<<"user[name">>, Regex)),
+             ?assertEqual(ok, match(<<"user\\name">>, Regex)),
+             ?assertEqual(ok, match(<<"user]name">>, Regex)),
+             ?assertEqual(ok, match(<<"user^name">>, Regex)),
+             ?assertEqual(ok, match(<<"user`name">>, Regex)),
+             ?assertEqual(ok, match(<<"user{name">>, Regex)),
+             ?assertEqual(ok, match(<<"user|name">>, Regex)),
+             ?assertEqual(ok, match(<<"user}name">>, Regex)),
+             ?assertEqual(ok, match(<<"user~name">>, Regex))
+         end},
+        
+        {"Username validation - whitespace and quote characters allowed",
+         fun() ->
+             %% Spaces allowed
+             ?assertEqual(ok, match(<<" ">>, Regex)),
+             ?assertEqual(ok, match(<<"user name">>, Regex)),
+             ?assertEqual(ok, match(<<" user">>, Regex)),
+             ?assertEqual(ok, match(<<"user ">>, Regex)),
+             ?assertEqual(ok, match(<<"first last">>, Regex)),
+             
+             %% Tab allowed
+             ?assertEqual(ok, match(<<"user\tname">>, Regex)),
+             ?assertEqual(ok, match(<<"\tuser">>, Regex)),
+             ?assertEqual(ok, match(<<"user\t">>, Regex)),
+             
+             %% Quote allowed
+             ?assertEqual(ok, match(<<"user\"name">>, Regex)),
+             ?assertEqual(ok, match(<<"\"user\"">>, Regex)),
+             ?assertEqual(ok, match(<<"\"quoted username\"">>, Regex))
+         end},
+        
+        {"Username validation - complex real-world examples",
+         fun() ->
+             ?assertEqual(ok, match(<<"user.name+tag@domain">>, Regex)),
+             ?assertEqual(ok, match(<<"admin!#$%">>, Regex)),
+             ?assertEqual(ok, match(<<"test_user-123@company.com">>, Regex)),
+             ?assertEqual(ok, match(<<"first.last+filter@example.org">>, Regex)),
+             ?assertEqual(ok, match(<<"user name">>, Regex)),
+             ?assertEqual(ok, match(<<"user\ttab">>, Regex)),
+             ?assertEqual(ok, match(<<"\"quoted\"">>, Regex))
+         end},
+        
+        {"Username validation - invalid characters still rejected",
+         fun() ->
+             %% Empty string
+             ?assertEqual(nomatch, match(<<"">>, Regex)),
+             
+             %% Newline
+             ?assertEqual(nomatch, match(<<"user\nname">>, Regex)),
+             
+             %% Uppercase letters not allowed
+             ?assertEqual(nomatch, match(<<"Alice">>, Regex)),
+             ?assertEqual(nomatch, match(<<"BOB">>, Regex)),
+             ?assertEqual(nomatch, match(<<"userNAME">>, Regex)),
+             ?assertEqual(nomatch, match(<<"User Name">>, Regex))
+         end}
+    ].
