@@ -1,4 +1,5 @@
 require "pedant/rspec/common"
+require 'cgi'
 
 describe "users", :users do
 
@@ -310,11 +311,10 @@ describe "users", :users do
       end
 
       after :each do
-        # For the test with a space: we can't create it -- but also can't delete it,
-        # ne?  No naked spaces allowed in URLs.
-        if username !~ / /
-          delete("#{platform.server}/users/#{username}", platform.superuser)
-        end
+        # URL-encode username to handle special characters (spaces, @, +, etc.)
+        # per RFC 3986 - see CHEF-27822
+        encoded_username = CGI.escape(username).gsub('+', '%20')
+        delete("#{platform.server}/users/#{encoded_username}", platform.superuser)
       end
 
       context "superuser" do
@@ -728,6 +728,48 @@ describe "users", :users do
             post(request_url, platform.superuser,
               payload: request_body).should look_like({
                    status: 400,
+                 })
+          end
+        end
+
+        context "with email-like username (@ sign)" do
+          let(:username) { "user#{Process.pid}@example.com" }
+          let(:request_body) do
+            {
+              "username" => username,
+              "email" => username,
+              "first_name" => "User",
+              "last_name" => "Name",
+              "display_name" => "User Name",
+              "password" => "badger badger",
+            }
+          end
+
+          it "returns 201 (RFC 5322 characters allowed per CHEF-27822)", :validation do
+            post(request_url, platform.superuser,
+              payload: request_body).should look_like({
+                   status: 201,
+                 })
+          end
+        end
+
+        context "with special characters in username" do
+          let(:username) { "user.name+tag#{Process.pid}" }
+          let(:request_body) do
+            {
+              "username" => username,
+              "email" => "#{username}@chef.io",
+              "first_name" => "User",
+              "last_name" => "Name",
+              "display_name" => "User Name",
+              "password" => "badger badger",
+            }
+          end
+
+          it "returns 201 (RFC 5322 special chars allowed per CHEF-27822)", :validation do
+            post(request_url, platform.superuser,
+              payload: request_body).should look_like({
+                   status: 201,
                  })
           end
         end
@@ -1777,6 +1819,8 @@ describe "users", :users do
 
         context "changing username with spaces" do
           let(:new_name) { "test #{Time.now.to_i}-#{Process.pid}" }
+          let(:encoded_new_name) { URI.encode_uri_component(new_name) }
+          let(:new_request_url_with_spaces) { "#{platform.server}/users/#{encoded_new_name}" }
 
           let(:request_body) do
             {
@@ -1789,12 +1833,20 @@ describe "users", :users do
             }
           end
 
-          it "returns 400", :validation do
+          after :each do
+            delete(new_request_url_with_spaces, platform.superuser)
+          end
+
+          it "returns 201 and updates the username", :validation do
             put(request_url, platform.superuser, payload: request_body).should look_like({
-                status: 400,
+                status: 201,
               })
-            # it "does not process any change to username" do
+            # Verify the user is no longer available at the old username
             get(request_url, platform.superuser).should look_like({
+                status: 404,
+              })
+            # Verify the user is available at the new username (with spaces)
+            get(new_request_url_with_spaces, platform.superuser).should look_like({
                 status: 200,
               })
           end
