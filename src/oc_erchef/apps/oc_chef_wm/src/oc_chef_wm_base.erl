@@ -1033,8 +1033,16 @@ verify_request_signature(Req,
                                                       Path, Body, PublicKey,
                                                       AuthSkew) of
                 {name, _UserId, Requestor} ->
-                    {true, Req, State1#base_state{requestor_id = authz_id(Requestor),
-                                                  requestor = Requestor}};
+                    %% Check if user is disabled (applies to user requestors only)
+                    case Requestor of
+                        #chef_requestor{type = <<"user">>, disabled = true} ->
+                            DisabledMsg = {[{<<"error">>, <<"user_disabled">>}]},
+                            {{halt, 403}, wrq:set_resp_body(chef_json:encode(DisabledMsg), Req),
+                             State1#base_state{log_msg = user_disabled}};
+                        _ ->
+                            {true, Req, State1#base_state{requestor_id = authz_id(Requestor),
+                                                          requestor = Requestor}}
+                    end;
                 {no_authn, Reason} ->
                     Msg = verify_request_message(Reason, Name, OrgName),
                     Json = chef_json:encode(Msg),

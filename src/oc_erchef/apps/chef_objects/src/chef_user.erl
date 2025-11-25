@@ -145,6 +145,7 @@ common_new_record(ApiVersion, AuthzId, Data) ->
     Email = value_or_null({<<"email">>}, UserData),
     ExtAuthUid = value_or_null({<<"external_authentication_uid">>}, UserData),
     EnableRecovery = ej:get({<<"recovery_authentication_enabled">>}, UserData) =:= true,
+    % Disabled field is ignored on create - always defaults to false
     SerializedObject = { whitelisted_values(UserData, ?JSON_SERIALIZABLE) },
     #chef_user{server_api_version = ApiVersion,
                username = Name,
@@ -155,6 +156,7 @@ common_new_record(ApiVersion, AuthzId, Data) ->
                hash_type = HashType,
                external_authentication_uid = ExtAuthUid,
                recovery_authentication_enabled = EnableRecovery,
+               disabled = false,
                serialized_object = chef_json:encode(SerializedObject)
     }.
 
@@ -202,6 +204,7 @@ user_spec(create) ->
 user_spec(update) ->
     {[ {{opt, <<"password">>},  password_validator()},
        {{opt, <<"recovery_authentication_enabled">>}, boolean },
+       {{opt, <<"disabled">>}, boolean },
        {{opt, <<"private_key">>}, boolean } ]}.
 
 local_auth_user_spec(common) ->
@@ -259,6 +262,7 @@ assemble_user_ejson(User, _OrgId) ->
 
 common_user_ejson(#chef_user{username = Name,
                              email = Email,
+                             disabled = Disabled,
                              serialized_object = SerializedObject}) ->
     EJ = chef_json:decode(SerializedObject),
     % Where external auth is enable, email may be null/undefined
@@ -267,7 +271,7 @@ common_user_ejson(#chef_user{username = Name,
         null -> <<"">>;
         _ -> Email
     end,
-    User1 = [{<<"username">>, Name}, {<<"email">>, Email2}],
+    User1 = [{<<"username">>, Name}, {<<"email">>, Email2}, {<<"disabled">>, Disabled}],
     User2 = whitelisted_values(EJ, ?JSON_SERIALIZABLE ++
                                [ <<"recovery_authentication_enabled">>, <<"external_authentication_uid">>] ),
     User1 ++ User2.
@@ -420,6 +424,9 @@ update_from_ejson_common(User, UserEJson) ->
     RecoveryAuthenticationEnabled = value_or_existing({<<"recovery_authentication_enabled">>},
                                                       UserEJson,
                                                       User#chef_user.recovery_authentication_enabled) =:= true,
+    Disabled = value_or_existing({<<"disabled">>},
+                                UserEJson,
+                                User#chef_user.disabled) =:= true,
     SerializedObject0 = { whitelisted_values(UserEJson, ?JSON_SERIALIZABLE) },
     SerializedObject1 = merge_user_data(chef_json:decode(User1#chef_user.serialized_object),
                                         SerializedObject0),
@@ -427,6 +434,7 @@ update_from_ejson_common(User, UserEJson) ->
                    email = Email,
                    external_authentication_uid = ExternalAuthenticationUid,
                    recovery_authentication_enabled = RecoveryAuthenticationEnabled,
+                   disabled = Disabled,
                    serialized_object = chef_json:encode(SerializedObject1)}.
 
 
@@ -521,12 +529,16 @@ fields_for_update(#chef_user{server_api_version = ?API_v0,
                              serialized_object = SerializedObject,
                              external_authentication_uid = ExternalAuthenticationUid,
                              recovery_authentication_enabled = RecoveryAuthEnabled,
+                             disabled        = Disabled,
                              email           = Email,
                              username        = UserName,
                              id              = Id }) ->
+     %% v0 update: 14 args matching update_user_by_id_v0 SQL
+     %% Now includes disabled field (was previously hardcoded to false)
+     DisabledBool = Disabled =:= true,
      [PublicKeyVersion, PublicKey, HashedPassword, Salt,
       HashType, SerializedObject, ExternalAuthenticationUid, RecoveryAuthEnabled =:= true,
-      Email, UserName,  LastUpdatedBy, UpdatedAt, Id];
+      Email, UserName,  LastUpdatedBy, UpdatedAt, DisabledBool, Id];
 fields_for_update(#chef_user{last_updated_by = LastUpdatedBy,
                              updated_at      = UpdatedAt,
                              hashed_password = HashedPassword,
@@ -535,24 +547,46 @@ fields_for_update(#chef_user{last_updated_by = LastUpdatedBy,
                              serialized_object = SerializedObject,
                              external_authentication_uid = ExternalAuthenticationUid,
                              recovery_authentication_enabled = RecoveryAuthEnabled,
+                             disabled        = Disabled,
                              email           = Email,
                              username        = UserName,
                              id              = Id }) ->
+     %% v1 update: 12 args matching update_user_by_id SQL
+     %% SQL: update_user(0, 'this_is_not_a_key', $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, false, $11, $12)
+     %% Parameters must be in this exact order to match SQL placeholders
+     DisabledBool = Disabled =:= true,
      [HashedPassword, Salt, HashType, SerializedObject,
      ExternalAuthenticationUid, RecoveryAuthEnabled =:= true,
-     Email, UserName,  LastUpdatedBy, UpdatedAt, Id].
+     Email, UserName,  LastUpdatedBy, UpdatedAt, DisabledBool, Id].
 
-fields_for_insert(#chef_user{server_api_version = ?API_v0} = User) ->
-    chef_object_default_callbacks:fields_for_insert(User);
+fields_for_insert(#chef_user{server_api_version = ?API_v0,
+                             id = Id, authz_id = AuthzId, username = UserName,
+                             email = Email, public_key = PublicKey, pubkey_version = PubkeyVersion,
+                             hashed_password = HashedPassword, salt = Salt, hash_type = HashType,
+                             last_updated_by = LUB, created_at = CreatedAt, updated_at = UpdatedAt,
+                             external_authentication_uid = ExtAuthUID,
+                             recovery_authentication_enabled = RecAuthEnabled,
+                             serialized_object = SerializedObject}) ->
+    %% v0 insert: 15 args matching insert_user_v0 SQL which has 2 hardcoded booleans
+    %% (admin=false, disabled=false)
+    Fields = [Id, AuthzId, UserName, Email, PublicKey, PubkeyVersion,
+              HashedPassword, Salt, HashType, LUB, CreatedAt, UpdatedAt,
+              ExtAuthUID, RecAuthEnabled, SerializedObject],
+    case lists:any(fun chef_object_default_callbacks:is_undefined/1, Fields) of
+          true -> error({undefined_in_record, fields_for_insert});
+          false -> ok
+    end,
+    Fields;
 fields_for_insert(#chef_user{id = Id, authz_id = AuthzId, username = UserName,
                              email = Email, hashed_password = HashedPassword,
                              salt = Salt, hash_type = HashType, last_updated_by = LUB,
                              created_at = CreatedAt, updated_at = UpdatedAt,
                              external_authentication_uid = ExtAuthUID,
                              recovery_authentication_enabled = RecAuthEnabled,
+                             disabled = Disabled,
                              serialized_object = SerializedObject} = User) ->
     Fields = [Id, AuthzId, UserName, Email, HashedPassword, Salt, HashType,
-              LUB, CreatedAt, UpdatedAt, ExtAuthUID, RecAuthEnabled, SerializedObject],
+              LUB, CreatedAt, UpdatedAt, ExtAuthUID, RecAuthEnabled, SerializedObject, Disabled],
     case lists:any(fun chef_object_default_callbacks:is_undefined/1, Fields) of
           true -> error({undefined_in_record, User});
           false -> ok

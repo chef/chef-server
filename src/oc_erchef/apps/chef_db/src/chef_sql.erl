@@ -1011,7 +1011,7 @@ create_object(insert_cookbook_artifact_version = QueryName, Args) when is_list(A
 create_object(QueryName, Args) when QueryName =:= insert_user;
                                     QueryName =:= insert_user_v0,
                                     is_list(Args)  ->
-   case sqerl:select(QueryName, Args, first_as_scalar, [add_user]) of
+    case sqerl:select(QueryName, Args, first_as_scalar, [add_user]) of
         {ok, 1} -> {ok, 1};
         {ok, 0} -> {error, <<"Record not created '", (term_to_binary(QueryName, [{minor_version, 1}]))/binary, "'.">>};
         Error -> Error

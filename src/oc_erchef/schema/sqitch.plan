@@ -86,3 +86,6 @@ keys_update_trigger [keys_update_trigger@users_email_functional_index] 2017-08-2
 @sentinel_public_key_for_users 2017-08-24T14:32:04Z Prajakta Purohit <prajakta@chef.io> # public_key only updated in the keys table
 
 telemetry 2024-08-01T08:37:30Z Sreepuram Sudheer <ssudheer@mcblrssudheer> # Adding telemetry to chef-server.
+users_add_disabled [users] 2025-11-25T20:00:00Z GitHub Copilot <copilot@github.com> # Add disabled column to users table
+users_add_disabled_functions [users_add_disabled create_and_update_users] 2025-11-25T20:01:00Z GitHub Copilot <copilot@github.com> # Update add_user and update_user functions for disabled field
+keys_by_name_add_disabled [users_add_disabled multiple_keys] 2025-11-25T20:02:00Z GitHub Copilot <copilot@github.com> # Add disabled column to keys_by_name view

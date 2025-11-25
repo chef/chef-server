@@ -220,6 +220,7 @@
         'updated_at',                       %% time updated at
         'external_authentication_uid',      %% External UID, such as LDAP - nullable
         'recovery_authentication_enabled',  %%
+        'disabled' = false :: boolean(),    %% true if user account is disabled
         'serialized_object'                 %%
        }).
 
@@ -233,7 +234,8 @@
           'type' ,
           'key_name',
           'public_key',
-          'key_version' :: ?KEY_VERSION | ?CERT_VERSION | undefined
+          'key_version' :: ?KEY_VERSION | ?CERT_VERSION | undefined,
+          'disabled' = false :: boolean()
          }
        ).
 
