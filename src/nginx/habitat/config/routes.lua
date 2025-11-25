@@ -75,6 +75,7 @@ local p_policyfile = P"policies"
 local p_policy_groups = P"policy_groups"
 local p_cookbook_artifacts = P"cookbook_artifacts"
 local p_universe = P"universe"
+local p_server_admins = P"server-admins"
 
 
 -- Composite patterns
@@ -142,13 +143,15 @@ local p_keys_route = ((p_named_org_prefix * p_clients * p_sep * p_identifier * p
 
 local p_license_route = (p_sep * Cendpoint(p_license) * p_trailing_sep)
 local p_server_api_version_route = (p_sep * Cendpoint(p_api_version) * p_trailing_sep)
+local p_server_admins_route = (p_sep * p_groups * p_sep * Cendpoint(p_server_admins) * p_trailing_sep)
 
 -- Everything that gets sent to erchef
 local p_erchef = p_keys_route +
                  (p_named_org_prefix * p_erchef_direct) +
                  p_erchef_users +
                  p_license_route +
-                 p_server_api_version_route
+                 p_server_api_version_route +
+                 p_server_admins_route
 
 -- erchef routing rules for chef_internal, which includes an additional
 -- principals endpoint not exposed via the api rules
