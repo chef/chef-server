@@ -46,6 +46,7 @@ describe "authenticate_user", :users, :ldap do
           "display_name" => platform.non_admin_user.name,
           "email" => platform.non_admin_user.name + "@chef.io",
           "username" => platform.non_admin_user.name,
+          "disabled" => false,
         },
       }
     end

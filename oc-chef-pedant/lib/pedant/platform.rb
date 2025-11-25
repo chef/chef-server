@@ -397,12 +397,18 @@ module Pedant
       if options.key?(:overrides)
         payload = payload.merge(options[:overrides])
       end
+      puts "\nCHEF-27823 DEBUG: create_min_user payload: #{payload.inspect}"
       users_url = "#{@server}/users"
+      puts "CHEF-27823 DEBUG: Posting to URL: #{users_url}"
       post(users_url, @superuser, payload: payload)
     end
 
     def create_user(username, options = {})
+      puts "\n=== CHEF-27823 DEBUG: Creating user #{username} with options: #{options.inspect} ==="
       r = create_min_user(username, options)
+      puts "CHEF-27823 DEBUG: Response code: #{r.code}"
+      puts "CHEF-27823 DEBUG: Response body: #{r.body}"
+      puts "CHEF-27823 DEBUG: Response headers: #{r.headers.inspect}"
       raise "Could not create user #{username}: #{r}" unless r.code == 201
 
       if server_api_version == 0

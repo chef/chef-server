@@ -808,6 +808,7 @@ describe "users", :users do
           "email" => "#{username}@chef.io",
           "username" => username,
           "public_key" => public_key_regex,
+          "disabled" => false,
         }
       end
 
@@ -968,16 +969,17 @@ describe "users", :users do
         }
       end
 
-      let(:modified_user) do
-        {
-          "username" => username,
-          "email" => "#{username}@chef.io",
-          "first_name" => username,
-          "last_name" => username,
-          "display_name" => "new name",
-          "public_key" => public_key_regex,
-        }
-      end
+          let(:modified_user) do
+            {
+              "username" => username,
+              "email" => "#{username}@chef.io",
+              "disabled" => false,
+              "first_name" => username,
+              "last_name" => username,
+              "display_name" => "new name",
+              "public_key" => public_key_regex,
+            }
+          end
 
       let(:input_public_key) do
         <<~EOF
@@ -1713,6 +1715,7 @@ describe "users", :users do
             {
               "username" => new_name,
               "email" => "#{username}@chef.io",
+              "disabled" => false,
               "first_name" => username,
               "last_name" => username,
               "display_name" => username,
@@ -1843,6 +1846,7 @@ describe "users", :users do
             {
               "username" => username,
               "email" => "#{username}@chef.io",
+              "disabled" => false,
               "first_name" => username,
               "last_name" => username,
               "display_name" => username,

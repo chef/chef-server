@@ -842,6 +842,7 @@ describe "opscode-account user association", :association do
           "email" => "#{username}@chef.io",
           "username" => username,
           "public_key" => public_key_regex,
+          "disabled" => false,
         }
       end
 
