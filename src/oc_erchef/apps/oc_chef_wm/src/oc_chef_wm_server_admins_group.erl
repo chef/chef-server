@@ -101,9 +101,8 @@ forbidden(Req, State) ->
             %% Superuser (pivotal) is allowed
             {false, Req, State};
         false ->
-            %% All other users are forbidden
-            Message = chef_wm_util:error_message_envelope(
-                <<"Access to server-admins group is restricted to superuser only">>),
+            %% All other users are forbidden - return simple error string not array
+            Message = {[{<<"error">>, <<"Access to server-admins group is restricted to superuser only">>}]},
             Req1 = chef_wm_util:set_json_body(Req, Message),
             {{halt, 403}, Req1, State#base_state{log_msg = server_admins_forbidden}}
     end.
