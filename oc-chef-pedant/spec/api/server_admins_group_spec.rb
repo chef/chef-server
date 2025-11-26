@@ -5,13 +5,13 @@ describe "GET /groups/server-admins", :server_admins do
   let(:request_url) { "#{platform.server}/groups/server-admins" }
   
   def dump_erchef_logs
-    log_file = "/var/log/opscode/oc_erchef/current"
+    log_file = "/tmp/erchef.log"
     if File.exist?(log_file)
       puts "\n" + "="*80
       puts "ERCHEF LOGS (last 100 lines with DEBUG):"
       puts "="*80
       # Get last 100 lines and filter for DEBUG
-      logs = `sudo tail -100 #{log_file} 2>/dev/null | grep DEBUG`
+      logs = `tail -100 #{log_file} | grep -i "DEBUG"`
       puts logs
       puts "="*80 + "\n"
     else
@@ -63,7 +63,7 @@ describe "GET /groups/server-admins", :server_admins do
       puts "DEBUG: GET /groups/server-admins Response"
       puts "="*80
       puts "Status: #{response.code}"
-      puts "Headers: #{response.to_hash.inspect}"
+      puts "Headers: #{response.headers.inspect}"
       puts "\nRaw Body:"
       puts response.body
       puts "\n" + "-"*80
