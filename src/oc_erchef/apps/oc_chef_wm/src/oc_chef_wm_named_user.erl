@@ -262,9 +262,20 @@ finalize_update_body(Req, _State, BodyEJ) ->
 
 to_json(Req, #base_state{resource_args = undefined,
                          resource_state = #user_state{chef_user = User},
-                         organization_name = OrgName} = State) ->
+                         organization_name = OrgName,
+                         chef_db_context = DbContext} = State) ->
     EJson = chef_user:assemble_user_ejson(User, OrgName),
-    Json = chef_json:encode(EJson),
+    %% Add organizations list to response
+    #chef_user{id = UserId} = User,
+    EJsonWithOrgs = case chef_db:list(#oc_chef_org_user_association{user_id = UserId}, DbContext) of
+        Orgs when is_list(Orgs) ->
+            OrgNames = [Name || [Name, _FullName, _Guid] <- Orgs],
+            ej:set({<<"organizations">>}, EJson, OrgNames);
+        _Error ->
+            %% If we can't get orgs, just return empty list rather than failing
+            ej:set({<<"organizations">>}, EJson, [])
+    end,
+    Json = chef_json:encode(EJsonWithOrgs),
     {Json, Req, State};
 to_json(Req, #base_state{ resource_args = Args,
                           resource_state = #user_state{chef_user = User },
