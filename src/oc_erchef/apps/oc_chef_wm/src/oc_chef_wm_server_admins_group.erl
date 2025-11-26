@@ -79,16 +79,26 @@ validate_request('GET', Req, State) ->
 auth_info(Req, #base_state{chef_db_context = DbContext,
                            resource_state = GroupState,
                            requestor_id = RequestorId} = State) ->
+    lager:info("DEBUG: server-admins auth_info called with RequestorId=~p", [RequestorId]),
     %% Fetch the global server-admins group
-    case chef_db:fetch(#oc_chef_group{org_id = ?GLOBAL_PLACEHOLDER_ORG_ID,
-                                      name = ?SERVER_ADMINS_GROUP_NAME,
-                                      for_requestor_id = RequestorId}, DbContext) of
+    FetchRecord = #oc_chef_group{org_id = ?GLOBAL_PLACEHOLDER_ORG_ID,
+                                 name = ?SERVER_ADMINS_GROUP_NAME,
+                                 for_requestor_id = RequestorId},
+    lager:info("DEBUG: Fetching server-admins with org_id=~p, name=~p", 
+               [?GLOBAL_PLACEHOLDER_ORG_ID, ?SERVER_ADMINS_GROUP_NAME]),
+    case chef_db:fetch(FetchRecord, DbContext) of
         not_found ->
+            lager:warning("DEBUG: server-admins group not found in database"),
             Message = chef_wm_util:error_message_envelope(
                 <<"Cannot load global server-admins group">>),
             Req1 = chef_wm_util:set_json_body(Req, Message),
             {{halt, 404}, Req1, State#base_state{log_msg = server_admins_group_not_found}};
-        #oc_chef_group{authz_id = AuthzId} = Group ->
+        #oc_chef_group{authz_id = AuthzId, clients = Clients, users = Users, groups = Groups} = Group ->
+            lager:info("DEBUG: server-admins group fetched successfully"),
+            lager:info("DEBUG: Group authz_id=~p", [AuthzId]),
+            lager:info("DEBUG: Group clients=~p", [Clients]),
+            lager:info("DEBUG: Group users=~p", [Users]),
+            lager:info("DEBUG: Group groups=~p", [Groups]),
             GroupState1 = GroupState#group_state{oc_chef_group = Group},
             State1 = State#base_state{resource_state = GroupState1},
             {{group_id, AuthzId}, Req, State1}
@@ -111,9 +121,13 @@ resource_exists(Req, State) ->
     {true, Req, State}.
 
 to_json(Req, #base_state{resource_state = #group_state{oc_chef_group = Group}} = State) ->
+    lager:info("DEBUG: to_json called for server-admins"),
+    lager:info("DEBUG: Group record before assemble: ~p", [Group]),
     %% Use null for OrgName since this is a global group
     Ejson = oc_chef_group:assemble_group_ejson(Group, null),
+    lager:info("DEBUG: Assembled ejson: ~p", [Ejson]),
     Json = chef_json:encode(Ejson),
+    lager:info("DEBUG: Encoded JSON: ~p", [Json]),
     {Json, Req, State}.
 
 malformed_request_message(Any, _Req, _State) ->

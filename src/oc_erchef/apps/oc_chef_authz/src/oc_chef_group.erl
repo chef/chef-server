@@ -290,36 +290,56 @@ fetch_new(#oc_chef_group{org_id = OrgId,
         end,
     fetch_base(Record, FetchMembers, CallbackFun).
 
-fetch(#oc_chef_group{org_id = OrgId, for_requestor_id = RequestorId} = Record, CallbackFun) ->
+fetch(#oc_chef_group{org_id = OrgId, for_requestor_id = RequestorId, name = Name} = Record, CallbackFun) ->
+    lager:info("DEBUG oc_chef_group:fetch - org_id=~p, name=~p, requestor_id=~p", [OrgId, Name, RequestorId]),
     case chef_object_default_callbacks:fetch(Record, CallbackFun) of
         #oc_chef_group{authz_id = GroupAuthzId} = GroupRecord ->
+            lager:info("DEBUG oc_chef_group:fetch - group found in DB, authz_id=~p", [GroupAuthzId]),
             LookupContext = oc_chef_authz_scoped_name:initialize_context(OrgId, CallbackFun),
-            maybe_find_names(fetch_authz_ids(GroupAuthzId, RequestorId), GroupRecord, LookupContext);
+            lager:info("DEBUG oc_chef_group:fetch - initialized context with org_id=~p", [OrgId]),
+            AuthzResult = fetch_authz_ids(GroupAuthzId, RequestorId),
+            lager:info("DEBUG oc_chef_group:fetch - authz result: ~p", [AuthzResult]),
+            maybe_find_names(AuthzResult, GroupRecord, LookupContext);
         not_found ->
+            lager:warning("DEBUG oc_chef_group:fetch - group not found in DB"),
             not_found;
         Other ->
+            lager:warning("DEBUG oc_chef_group:fetch - unexpected result: ~p", [Other]),
             Other
     end.
 
 maybe_find_names(forbidden, _, _) ->
+    lager:warning("DEBUG maybe_find_names - got forbidden from bifrost"),
     forbidden;
 maybe_find_names({ActorAuthzIds, GroupAuthzIds}, GroupRecord, Context) ->
+    lager:info("DEBUG maybe_find_names - ActorAuthzIds=~p, GroupAuthzIds=~p", [ActorAuthzIds, GroupAuthzIds]),
     {ClientNames, Usernames, GroupNames} = oc_chef_authz_scoped_name:convert_ids_to_names(ActorAuthzIds, GroupAuthzIds, Context),
+    lager:info("DEBUG maybe_find_names - After convert: ClientNames=~p, Usernames=~p, GroupNames=~p", 
+               [ClientNames, Usernames, GroupNames]),
     Result = GroupRecord#oc_chef_group{clients = ClientNames,
                                        users =  Usernames,
                                        groups =  GroupNames,
                                        auth_side_actors = ActorAuthzIds,
                                        auth_side_groups = GroupAuthzIds},
+    lager:info("DEBUG maybe_find_names - Final group record: ~p", [Result]),
     Result.
 
 fetch_authz_ids(GroupAuthzId, RequestorId) ->
-    Result = oc_chef_authz_http:request("/groups/" ++ binary_to_list(GroupAuthzId), get, ?DEFAULT_HEADERS, [], RequestorId),
+    Url = "/groups/" ++ binary_to_list(GroupAuthzId),
+    lager:info("DEBUG fetch_authz_ids - calling bifrost: ~s with requestor=~p", [Url, RequestorId]),
+    Result = oc_chef_authz_http:request(Url, get, ?DEFAULT_HEADERS, [], RequestorId),
+    lager:info("DEBUG fetch_authz_ids - bifrost returned: ~p", [Result]),
     case Result of
         {ok, DecodedJson} ->
-            {ej:get({<<"actors">>}, DecodedJson), ej:get({<<"groups">>}, DecodedJson)};
+            Actors = ej:get({<<"actors">>}, DecodedJson),
+            Groups = ej:get({<<"groups">>}, DecodedJson),
+            lager:info("DEBUG fetch_authz_ids - extracted actors=~p, groups=~p", [Actors, Groups]),
+            {Actors, Groups};
         {error, forbidden} ->
+            lager:warning("DEBUG fetch_authz_ids - bifrost returned forbidden"),
             forbidden;
         Other ->
+            lager:warning("DEBUG fetch_authz_ids - unexpected bifrost result: ~p", [Other]),
             Other
     end.
 

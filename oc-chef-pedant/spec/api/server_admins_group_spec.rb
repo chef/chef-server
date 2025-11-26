@@ -4,6 +4,23 @@ describe "GET /groups/server-admins", :server_admins do
   let(:request_method) { :GET }
   let(:request_url) { "#{platform.server}/groups/server-admins" }
   
+  def dump_erchef_logs
+    log_file = "/var/log/opscode/oc_erchef/current"
+    if File.exist?(log_file)
+      puts "\n" + "="*80
+      puts "ERCHEF LOGS (last 100 lines with DEBUG):"
+      puts "="*80
+      # Get last 100 lines and filter for DEBUG
+      logs = `sudo tail -100 #{log_file} 2>/dev/null | grep DEBUG`
+      puts logs
+      puts "="*80 + "\n"
+    else
+      puts "\nWARNING: Could not find erchef log file at #{log_file}\n"
+    end
+  rescue => e
+    puts "\nERROR reading logs: #{e.message}\n"
+  end
+  
   context "as pivotal/superuser" do
     let(:requestor) { platform.superuser }
     
@@ -15,12 +32,43 @@ describe "GET /groups/server-admins", :server_admins do
     end
     
     it "returns JSON with expected group structure" do
+      # Capture logs BEFORE making the request
+      puts "\n" + "="*80
+      puts "MAKING REQUEST TO: #{request_url}"
+      puts "="*80
+      
       response = get(request_url, requestor)
+      
+      # Capture logs AFTER request
+      dump_erchef_logs
+      
       response.should look_like({
         status: 200
       })
       
+      puts "\n" + "="*80
+      puts "DEBUG: GET /groups/server-admins Response"
+      puts "="*80
+      puts "Status: #{response.code}"
+      puts "Headers: #{response.to_hash.inspect}"
+      puts "\nRaw Body:"
+      puts response.body
+      puts "\n" + "-"*80
+      
       parsed = JSON.parse(response)
+      
+      puts "Parsed JSON:"
+      require 'pp'
+      pp parsed
+      puts "\nSpecific fields:"
+      puts "  actors: #{parsed["actors"].inspect}"
+      puts "  users: #{parsed["users"].inspect}"
+      puts "  clients: #{parsed["clients"].inspect}"
+      puts "  groups: #{parsed["groups"].inspect}"
+      puts "  name: #{parsed["name"].inspect}"
+      puts "  groupname: #{parsed["groupname"].inspect}"
+      puts "  orgname: #{parsed["orgname"].inspect}"
+      puts "="*80 + "\n"
       
       # Verify required fields are present
       parsed.should have_key("actors")

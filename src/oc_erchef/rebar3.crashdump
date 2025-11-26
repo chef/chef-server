@@ -1,0 +1,15 @@
+Error: {case_clause,{error,{invalid_option_arg,"--deps_only=false"}}}
+[{rebar_core,process_command,2,
+             [{file,"/home/runner/work/rebar3/rebar3/apps/rebar/src/rebar_core.erl"},
+              {line,118}]},
+ {rebar3,run_aux,2,
+         [{file,"/home/runner/work/rebar3/rebar3/apps/rebar/src/rebar3.erl"},
+          {line,205}]},
+ {rebar3,main,1,
+         [{file,"/home/runner/work/rebar3/rebar3/apps/rebar/src/rebar3.erl"},
+          {line,66}]},
+ {escript,run,2,[{file,"escript.erl"},{line,750}]},
+ {escript,start,1,[{file,"escript.erl"},{line,277}]},
+ {init,start_em,1,[]},
+ {init,do_boot,3,[]}]
+

@@ -126,9 +126,17 @@ names_to_authz_id(Type, Names, MapperContext) ->
 %% Reverse mapping of ids to names
 %%
 convert_ids_to_names(ActorAuthzIds, GroupAuthzIds, Context) ->
+    lager:info("DEBUG convert_ids_to_names - ActorAuthzIds=~p, GroupAuthzIds=~p, Context=~p", 
+               [ActorAuthzIds, GroupAuthzIds, Context]),
     {ClientNames, RemainingAuthzIds} = authz_id_to_names(client, ActorAuthzIds, Context),
+    lager:info("DEBUG convert_ids_to_names - After client lookup: ClientNames=~p, RemainingIds=~p", 
+               [ClientNames, RemainingAuthzIds]),
     {UserNames, DefunctActorAuthzIds} = authz_id_to_names(user, RemainingAuthzIds, Context),
+    lager:info("DEBUG convert_ids_to_names - After user lookup: UserNames=~p, DefunctActors=~p", 
+               [UserNames, DefunctActorAuthzIds]),
     {GroupNames, DefunctGroupAuthzIds} = authz_id_to_names(group, GroupAuthzIds, Context),
+    lager:info("DEBUG convert_ids_to_names - After group lookup: GroupNames=~p, DefunctGroups=~p", 
+               [GroupNames, DefunctGroupAuthzIds]),
     oc_chef_authz_cleanup:add_authz_ids(DefunctActorAuthzIds, DefunctGroupAuthzIds),
     {ClientNames, UserNames, GroupNames}.
 
