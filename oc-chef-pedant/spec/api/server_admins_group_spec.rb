@@ -25,7 +25,20 @@ describe "GET /groups/server-admins", :server_admins do
     let(:requestor) { platform.superuser }
     
     it "returns 200 OK with group membership" do
+      puts "\n" + "="*80
+      puts "TEST: returns 200 OK with group membership"
+      puts "="*80
+      
       response = get(request_url, requestor)
+      
+      dump_erchef_logs
+      
+      puts "\nResponse Status: #{response.code}"
+      puts "Response Body: #{response.body}"
+      parsed = JSON.parse(response)
+      puts "Users field: #{parsed["users"].inspect}"
+      puts "="*80 + "\n"
+      
       response.should look_like({
         status: 200
       })
@@ -133,7 +146,25 @@ describe "GET /groups/server-admins", :server_admins do
     let(:requestor) { platform.admin_client }
     
     it "returns 403 Forbidden" do
+      puts "\n" + "="*80
+      puts "TEST: client returns 403 Forbidden"
+      puts "Requestor type: #{requestor.class}"
+      puts "Requestor: #{requestor.inspect}"
+      puts "="*80
+      
       response = get(request_url, requestor)
+      
+      dump_erchef_logs
+      
+      puts "\nResponse Status: #{response.code}"
+      puts "Response Body: #{response.body}"
+      if response.code.to_i != 403
+        puts "ERROR: Expected 403, got #{response.code}"
+        parsed = JSON.parse(response) rescue nil
+        puts "Parsed response: #{parsed.inspect}" if parsed
+      end
+      puts "="*80 + "\n"
+      
       response.should look_like({
         status: 403
       })
