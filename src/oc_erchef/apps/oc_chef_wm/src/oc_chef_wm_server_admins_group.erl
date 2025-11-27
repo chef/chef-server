@@ -79,38 +79,38 @@ validate_request('GET', Req, State) ->
 auth_info(Req, #base_state{chef_db_context = DbContext,
                            resource_state = GroupState,
                            requestor_id = RequestorId} = State) ->
-    lager:info("DEBUG: server-admins auth_info called with RequestorId=~p", [RequestorId]),
+    io:format("~n*** ERCHEF DEBUG LOG: server-admins auth_info called with RequestorId=~p~n", [RequestorId]),
     %% Fetch the global server-admins group
     FetchRecord = #oc_chef_group{org_id = ?GLOBAL_PLACEHOLDER_ORG_ID,
                                  name = ?SERVER_ADMINS_GROUP_NAME,
                                  for_requestor_id = RequestorId},
-    lager:info("DEBUG: Fetching server-admins with org_id=~p, name=~p", 
+    io:format("*** ERCHEF DEBUG LOG: Fetching server-admins with org_id=~p, name=~p~n", 
                [?GLOBAL_PLACEHOLDER_ORG_ID, ?SERVER_ADMINS_GROUP_NAME]),
     case chef_db:fetch(FetchRecord, DbContext) of
         not_found ->
-            lager:warning("DEBUG: server-admins group not found in database"),
+            io:format("*** ERCHEF DEBUG LOG: server-admins group not found in database~n"),
             Message = chef_wm_util:error_message_envelope(
                 <<"Cannot load global server-admins group">>),
             Req1 = chef_wm_util:set_json_body(Req, Message),
             {{halt, 404}, Req1, State#base_state{log_msg = server_admins_group_not_found}};
         #oc_chef_group{authz_id = AuthzId, clients = Clients, users = Users, groups = Groups} = Group ->
-            lager:info("DEBUG: server-admins group fetched successfully"),
-            lager:info("DEBUG: Group authz_id=~p", [AuthzId]),
-            lager:info("DEBUG: Group clients=~p", [Clients]),
-            lager:info("DEBUG: Group users=~p", [Users]),
-            lager:info("DEBUG: Group groups=~p", [Groups]),
+            io:format("*** ERCHEF DEBUG LOG: server-admins group fetched successfully~n"),
+            io:format("*** ERCHEF DEBUG LOG: Group authz_id=~p~n", [AuthzId]),
+            io:format("*** ERCHEF DEBUG LOG: Group clients=~p~n", [Clients]),
+            io:format("*** ERCHEF DEBUG LOG: Group users=~p~n", [Users]),
+            io:format("*** ERCHEF DEBUG LOG: Group groups=~p~n", [Groups]),
             
             %% Query bifrost directly to see what's actually in the group
-            lager:info("DEBUG: Querying bifrost for server-admins group members"),
+            io:format("*** ERCHEF DEBUG LOG: Querying bifrost for server-admins group members~n"),
             BifrostPath = lists:flatten(io_lib:format("/groups/~s", [AuthzId])),
-            lager:info("DEBUG: Bifrost path: ~s", [BifrostPath]),
+            io:format("*** ERCHEF DEBUG LOG: Bifrost path: ~s~n", [BifrostPath]),
             case oc_chef_authz_http:request(BifrostPath, get, [], [], RequestorId) of
                 {ok, BifrostData} ->
-                    lager:info("DEBUG: Bifrost response: ~p", [BifrostData]),
+                    io:format("*** ERCHEF DEBUG LOG: Bifrost response: ~p~n", [BifrostData]),
                     BifrostActors = ej:get({<<"actors">>}, BifrostData),
-                    lager:info("DEBUG: Bifrost actors field: ~p", [BifrostActors]);
+                    io:format("*** ERCHEF DEBUG LOG: Bifrost actors field: ~p~n", [BifrostActors]);
                 {error, BifrostError} ->
-                    lager:error("DEBUG: Failed to query bifrost: ~p", [BifrostError])
+                    io:format("*** ERCHEF DEBUG LOG: Failed to query bifrost: ~p~n", [BifrostError])
             end,
             
             GroupState1 = GroupState#group_state{oc_chef_group = Group},
@@ -135,13 +135,13 @@ resource_exists(Req, State) ->
     {true, Req, State}.
 
 to_json(Req, #base_state{resource_state = #group_state{oc_chef_group = Group}} = State) ->
-    lager:info("DEBUG: to_json called for server-admins"),
-    lager:info("DEBUG: Group record before assemble: ~p", [Group]),
+    io:format("*** ERCHEF DEBUG LOG: to_json called for server-admins~n"),
+    io:format("*** ERCHEF DEBUG LOG: Group record before assemble: ~p~n", [Group]),
     %% Use null for OrgName since this is a global group
     Ejson = oc_chef_group:assemble_group_ejson(Group, null),
-    lager:info("DEBUG: Assembled ejson: ~p", [Ejson]),
+    io:format("*** ERCHEF DEBUG LOG: Assembled ejson: ~p~n", [Ejson]),
     Json = chef_json:encode(Ejson),
-    lager:info("DEBUG: Encoded JSON: ~p", [Json]),
+    io:format("*** ERCHEF DEBUG LOG: Encoded JSON: ~p~n", [Json]),
     {Json, Req, State}.
 
 malformed_request_message(Any, _Req, _State) ->

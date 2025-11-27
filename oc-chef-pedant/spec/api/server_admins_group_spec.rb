@@ -7,30 +7,9 @@ describe "GET /groups/server-admins", :server_admins do
   let(:request_url) { "#{platform.server}/groups/server-admins" }
   
   def dump_erchef_logs
-    # Try multiple possible log locations
-    log_locations = [
-      "/var/log/opscode/opscode-erchef/erchef.log",
-      "/var/log/opscode/opscode-erchef/current",
-      "/tmp/erchef.log",
-      "/var/opt/opscode/opscode-erchef/sys.log"
-    ]
-    
-    log_file = log_locations.find { |f| File.exist?(f) }
-    
-    if log_file
-      puts "\n" + "="*80
-      puts "ERCHEF LOGS from #{log_file} (last 200 lines with DEBUG or server-admins):"
-      puts "="*80
-      # Get last 200 lines and filter for DEBUG or server-admins mentions
-      logs = `tail -200 #{log_file} | grep -iE "(DEBUG|server-admins)"`
-      puts logs
-      puts "="*80 + "\n"
-    else
-      puts "\nWARNING: Could not find erchef log file in any of these locations:\n"
-      log_locations.each { |loc| puts "  - #{loc}" }
-    end
-  rescue => e
-    puts "\nERROR reading logs: #{e.message}\n"
+    # Erlang debug logs now go to stdout with sentinel '*** ERCHEF DEBUG LOG'
+    # This method is kept for compatibility but is no longer needed
+    puts "\n(Erlang debug logs should appear inline with test output - look for '*** ERCHEF DEBUG LOG')\n"
   end
   
   context "as pivotal/superuser" do
