@@ -99,6 +99,20 @@ auth_info(Req, #base_state{chef_db_context = DbContext,
             lager:info("DEBUG: Group clients=~p", [Clients]),
             lager:info("DEBUG: Group users=~p", [Users]),
             lager:info("DEBUG: Group groups=~p", [Groups]),
+            
+            %% Query bifrost directly to see what's actually in the group
+            lager:info("DEBUG: Querying bifrost for server-admins group members"),
+            BifrostPath = lists:flatten(io_lib:format("/groups/~s", [AuthzId])),
+            lager:info("DEBUG: Bifrost path: ~s", [BifrostPath]),
+            case oc_chef_authz_http:request(BifrostPath, get, [], [], RequestorId) of
+                {ok, BifrostData} ->
+                    lager:info("DEBUG: Bifrost response: ~p", [BifrostData]),
+                    BifrostActors = ej:get({<<"actors">>}, BifrostData),
+                    lager:info("DEBUG: Bifrost actors field: ~p", [BifrostActors]);
+                {error, BifrostError} ->
+                    lager:error("DEBUG: Failed to query bifrost: ~p", [BifrostError])
+            end,
+            
             GroupState1 = GroupState#group_state{oc_chef_group = Group},
             State1 = State#base_state{resource_state = GroupState1},
             {{group_id, AuthzId}, Req, State1}
