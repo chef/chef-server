@@ -26,12 +26,17 @@ describe "GET /groups/server-admins", :server_admins do
   # Test to directly query and manipulate bifrost server-admins group
   context "bifrost server-admins group debugging" do
     it "queries bifrost directly to check group members" do
+      begin
+        require "pg"
+      rescue LoadError
+        skip "pg gem not available - skipping bifrost debugging test"
+      end
+      
       puts "\n" + "="*80
       puts "BIFROST DEBUG: Querying server-admins group directly"
       puts "="*80
       
       # First, get the server-admins authz_id from the database
-      require "pg"
       db_conn_string = "host=localhost port=5432 dbname=opscode_chef user=opscode_chef password=#{ENV['DB_PASSWORD'] || 'opscode_chef'}"
       
       begin
