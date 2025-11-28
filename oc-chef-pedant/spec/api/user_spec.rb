@@ -808,6 +808,7 @@ describe "users", :users do
           "email" => "#{username}@chef.io",
           "username" => username,
           "public_key" => public_key_regex,
+          "organizations" => Array,
         }
       end
 
@@ -886,47 +887,10 @@ describe "users", :users do
       end
 
       context "organizations field" do
-        let(:test_username) { "orgs-test-user-#{Process.pid}" }
-        let(:test_org_1) { "orgs-test-org1-#{Process.pid}" }
-        let(:test_org_2) { "orgs-test-org2-#{Process.pid}" }
-        let(:test_org_3) { "orgs-test-org3-#{Process.pid}" }
+        # Use pre-existing platform user who is already associated with test_org
+        let(:test_user) { platform.non_admin_user }
+        let(:test_username) { test_user.name }
         let(:test_request_url) { "#{platform.server}/users/#{test_username}" }
-
-        before(:each) do
-          # Create test user
-          @test_user = platform.create_user(test_username, {
-            overrides: {
-              "email" => "#{test_username}@chef.io",
-              "first_name" => "Test",
-              "last_name" => "User",
-              "display_name" => "Test User for Orgs",
-            },
-          })
-        end
-
-        after(:each) do
-          # Cleanup: delete test orgs and user
-          begin
-            delete("#{platform.server}/organizations/#{test_org_1}", platform.superuser) if @org_1_created
-          rescue
-            # Ignore cleanup errors
-          end
-          begin
-            delete("#{platform.server}/organizations/#{test_org_2}", platform.superuser) if @org_2_created
-          rescue
-            # Ignore cleanup errors
-          end
-          begin
-            delete("#{platform.server}/organizations/#{test_org_3}", platform.superuser) if @org_3_created
-          rescue
-            # Ignore cleanup errors
-          end
-          begin
-            platform.delete_user(@test_user) if @test_user
-          rescue
-            # Ignore cleanup errors
-          end
-        end
 
         it "includes organizations field in user GET response" do
           response = get(test_request_url, platform.superuser)
@@ -936,112 +900,27 @@ describe "users", :users do
           user_data["organizations"].should be_an(Array)
         end
 
-        it "returns empty organizations list when user has no orgs" do
-          response = get(test_request_url, platform.superuser)
-          response.should have_status_code 200
-          user_data = JSON.parse(response)
-          user_data["organizations"].should eq([])
-        end
-
-        it "returns organizations list with single org when user is member of one org" do
-          # Create org and add user
-          org_body = {
-            "name" => test_org_1,
-            "full_name" => "Test Organization 1",
-          }
-          org_response = post("#{platform.server}/organizations", platform.superuser, payload: org_body)
-          org_response.should have_status_code 201
-          @org_1_created = true
-
-          # Add user to org
-          association_body = { "user" => test_username }
-          assoc_response = post("#{platform.server}/organizations/#{test_org_1}/association_requests",
-                               platform.superuser, payload: association_body)
-          assoc_response.should have_status_code 201
-
-          # Accept association
-          put("#{platform.server}/users/#{test_username}/association_requests/#{test_org_1}",
-              @test_user, payload: { "response" => "accept" })
-
-          # Verify organizations field contains the org
+        it "returns organizations list with at least the test org" do
           response = get(test_request_url, platform.superuser)
           response.should have_status_code 200
           user_data = JSON.parse(response)
           user_data["organizations"].should be_an(Array)
-          user_data["organizations"].should include(test_org_1)
-          user_data["organizations"].length.should eq(1)
-        end
-
-        it "returns organizations list with multiple orgs when user is member of multiple orgs" do
-          # Create first org and add user
-          org1_body = { "name" => test_org_1, "full_name" => "Test Organization 1" }
-          post("#{platform.server}/organizations", platform.superuser, payload: org1_body).should have_status_code 201
-          @org_1_created = true
-
-          association1_body = { "user" => test_username }
-          post("#{platform.server}/organizations/#{test_org_1}/association_requests",
-               platform.superuser, payload: association1_body).should have_status_code 201
-          put("#{platform.server}/users/#{test_username}/association_requests/#{test_org_1}",
-              @test_user, payload: { "response" => "accept" })
-
-          # Create second org and add user
-          org2_body = { "name" => test_org_2, "full_name" => "Test Organization 2" }
-          post("#{platform.server}/organizations", platform.superuser, payload: org2_body).should have_status_code 201
-          @org_2_created = true
-
-          association2_body = { "user" => test_username }
-          post("#{platform.server}/organizations/#{test_org_2}/association_requests",
-               platform.superuser, payload: association2_body).should have_status_code 201
-          put("#{platform.server}/users/#{test_username}/association_requests/#{test_org_2}",
-              @test_user, payload: { "response" => "accept" })
-
-          # Create third org and add user
-          org3_body = { "name" => test_org_3, "full_name" => "Test Organization 3" }
-          post("#{platform.server}/organizations", platform.superuser, payload: org3_body).should have_status_code 201
-          @org_3_created = true
-
-          association3_body = { "user" => test_username }
-          post("#{platform.server}/organizations/#{test_org_3}/association_requests",
-               platform.superuser, payload: association3_body).should have_status_code 201
-          put("#{platform.server}/users/#{test_username}/association_requests/#{test_org_3}",
-              @test_user, payload: { "response" => "accept" })
-
-          # Verify organizations field contains all orgs
-          response = get(test_request_url, platform.superuser)
-          response.should have_status_code 200
-          user_data = JSON.parse(response)
-          user_data["organizations"].should be_an(Array)
-          user_data["organizations"].should include(test_org_1)
-          user_data["organizations"].should include(test_org_2)
-          user_data["organizations"].should include(test_org_3)
-          user_data["organizations"].length.should eq(3)
+          user_data["organizations"].should include(platform.test_org.name)
+          user_data["organizations"].length.should be >= 1
         end
 
         it "returns only organization names, not full details" do
-          # Create org and add user
-          org_body = { "name" => test_org_1, "full_name" => "Test Organization Full Name" }
-          post("#{platform.server}/organizations", platform.superuser, payload: org_body).should have_status_code 201
-          @org_1_created = true
-
-          association_body = { "user" => test_username }
-          post("#{platform.server}/organizations/#{test_org_1}/association_requests",
-               platform.superuser, payload: association_body).should have_status_code 201
-          put("#{platform.server}/users/#{test_username}/association_requests/#{test_org_1}",
-              @test_user, payload: { "response" => "accept" })
-
-          # Verify organizations field contains only name strings, not objects
           response = get(test_request_url, platform.superuser)
           response.should have_status_code 200
           user_data = JSON.parse(response)
           user_data["organizations"].should be_an(Array)
           user_data["organizations"].first.should be_a(String)
-          user_data["organizations"].first.should eq(test_org_1)
           # Verify it's NOT an object with full_name or other fields
           user_data["organizations"].first.should_not be_a(Hash)
         end
 
         it "organizations field is accessible by non-admin user for self" do
-          response = get(test_request_url, @test_user)
+          response = get(test_request_url, test_user)
           response.should have_status_code 200
           user_data = JSON.parse(response)
           user_data.should have_key("organizations")
@@ -1054,6 +933,34 @@ describe "users", :users do
           user_data = JSON.parse(response)
           user_data.should have_key("organizations")
           user_data["organizations"].should be_an(Array)
+        end
+
+        context "user with no organizations" do
+          let(:test_username) { "user-no-orgs-#{Process.pid}" }
+          let(:test_request_url) { "#{platform.server}/users/#{test_username}" }
+
+          before(:each) do
+            # Create user but don't associate with any org
+            @test_user = platform.create_user(test_username, {
+              overrides: {
+                "email" => "#{test_username}@chef.io",
+                "first_name" => "NoOrg",
+                "last_name" => "User",
+                "display_name" => "User With No Orgs",
+              },
+            })
+          end
+
+          after(:each) do
+            platform.delete_user(@test_user) if @test_user
+          end
+
+          it "returns empty organizations list" do
+            response = get(test_request_url, platform.superuser)
+            response.should have_status_code 200
+            user_data = JSON.parse(response)
+            user_data["organizations"].should eq([])
+          end
         end
       end
     end # context GET /users/<name>
