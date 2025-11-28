@@ -808,7 +808,7 @@ describe "users", :users do
           "email" => "#{username}@chef.io",
           "username" => username,
           "public_key" => public_key_regex,
-          "organizations" => Array,
+          "organizations" => [platform.test_org.name],
         }
       end
 
@@ -1055,6 +1055,7 @@ describe "users", :users do
           "last_name" => username,
           "display_name" => "new name",
           "public_key" => public_key_regex,
+          "organizations" => [],
         }
       end
 
@@ -1796,6 +1797,7 @@ describe "users", :users do
               "last_name" => username,
               "display_name" => username,
               "public_key" => public_key_regex,
+              "organizations" => [],
             }
           end
 
@@ -1926,6 +1928,7 @@ describe "users", :users do
               "last_name" => username,
               "display_name" => username,
               "public_key" => public_key_regex,
+              "organizations" => [],
             }
           end
 

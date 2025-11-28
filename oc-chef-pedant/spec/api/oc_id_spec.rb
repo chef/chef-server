@@ -165,6 +165,7 @@ describe "oc_id API", :oc_id do
         "display_name" => "#{username}-display-name",
         "username" => username,
         "public_key" => oc_id_user.signing_key.public_key.to_s + "\n", # What?
+        "organizations" => [],
       }
       get(request_url, platform.superuser).should look_like({
         status: 200,
