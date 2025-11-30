@@ -1,6 +1,7 @@
 require "pedant/rspec/common"
 require "restclient"
 require "json"
+require "securerandom"
 
 describe "GET /groups/server-admins", :server_admins do
   let(:request_method) { :GET }
@@ -92,9 +93,6 @@ describe "GET /groups/server-admins", :server_admins do
       parsed["clients"].should be_kind_of(Array)
       parsed["groups"].should be_kind_of(Array)
       
-      # Pivotal should be in the users list
-      parsed["users"].should include("pivotal")
-      
       # Actors should contain all users and clients
       parsed["actors"].length.should eq(parsed["users"].length + parsed["clients"].length)
     end
@@ -130,6 +128,33 @@ describe "GET /groups/server-admins", :server_admins do
       response.should look_like({
         status: 403
       })
+    end
+  end
+  
+  context "with test member added via chef-server-ctl" do
+    let(:requestor) { platform.superuser }
+    let(:test_username) { "pedant-admin-test-#{SecureRandom.hex(4)}" }
+    
+    before(:each) do
+      @test_user = platform.create_user(test_username)
+      result = system("chef-server-ctl grant-server-admin-permissions #{test_username}")
+      raise "chef-server-ctl grant-server-admin-permissions failed" unless result
+    end
+    
+    after(:each) do
+      system("chef-server-ctl remove-server-admin-permissions #{test_username}") if @test_user
+      platform.delete_user(@test_user) if @test_user
+    end
+    
+    it "includes test user in users array" do
+      response = get(request_url, requestor)
+      response.should look_like({
+        status: 200
+      })
+      
+      parsed = JSON.parse(response)
+      parsed["users"].should include(test_username)
+      parsed["actors"].should include(test_username)
     end
   end
   
