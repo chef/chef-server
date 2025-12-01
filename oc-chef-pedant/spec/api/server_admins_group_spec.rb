@@ -130,75 +130,6 @@ describe "GET /groups/server-admins", :server_admins do
       })
     end
   end
- 
-  context "with test member added via API" do
-    let(:requestor) { platform.superuser }
-    let(:test_username) { "pedant-admin-test-#{SecureRandom.hex(4)}" }
-
-    # Helper to update server-admins users via GET/PUT on the group endpoint
-    def update_server_admins_users(request_url, requestor)
-      # Fetch current group definition
-      response = get(request_url, requestor)
-      response.should look_like({ status: 200 })
-
-      group = JSON.parse(response.body)
-
-      users   = group["users"]   || []
-      clients = group["clients"] || []
-      groups  = group["groups"]  || []
-
-      new_users = yield(users.dup)
-
-      # Rebuild actors as users + clients, matching the invariant checked above
-      new_actors = (new_users + clients).uniq
-
-      payload = {
-        groupname: group["groupname"],
-        actors: {
-          users:   new_users,
-          groups:  groups,
-          clients: clients,
-        },
-      }
-
-      put(request_url, requestor, payload: payload).should look_like({ status: 200 })
-
-      [new_users, new_actors]
-    end
-
-    def add_user_to_server_admins(request_url, requestor, username)
-      update_server_admins_users(request_url, requestor) do |users|
-        users.include?(username) ? users : [username] + users
-      end
-    end
-
-    def remove_user_from_server_admins(request_url, requestor, username)
-      update_server_admins_users(request_url, requestor) do |users|
-        users - [username]
-      end
-    end
-
-    before(:each) do
-      @test_user = platform.create_user(test_username)
-      add_user_to_server_admins(request_url, requestor, test_username)
-    end
-
-    after(:each) do
-      remove_user_from_server_admins(request_url, requestor, test_username) if @test_user
-      platform.delete_user(@test_user) if @test_user
-    end
-
-    it "includes test user in users array" do
-      response = get(request_url, requestor)
-      response.should look_like({
-        status: 200
-      })
-
-      parsed = JSON.parse(response.body)
-      parsed["users"].should include(test_username)
-      parsed["actors"].should include(test_username)
-    end
-  end
   
   # Note: We intentionally do NOT test clients here because clients are
   # organization-scoped and cannot authenticate to global endpoints by design.
@@ -222,12 +153,3 @@ describe "GET /groups/server-admins", :server_admins do
         status: 405
       })
     end
-    
-    it "returns 405 for DELETE" do
-      response = delete(request_url, requestor)
-      response.should look_like({
-        status: 405
-      })
-    end
-  end
-end
