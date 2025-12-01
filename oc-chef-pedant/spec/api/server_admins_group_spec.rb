@@ -135,14 +135,26 @@ describe "GET /groups/server-admins", :server_admins do
     let(:requestor) { platform.superuser }
     let(:test_username) { "pedant-admin-test-#{SecureRandom.hex(4)}" }
     
+    # Helper to run chef-server-ctl with proper environment (unset pedant's restrictive GEM_PATH)
+    def run_chef_server_ctl(command)
+      # Pedant nullifies GEM_PATH to avoid bundler conflicts, but chef-server-ctl needs it
+      # Unset GEM_PATH/GEM_HOME so chef-server-ctl can find its gems
+      env = {
+        "GEM_PATH" => nil,
+        "GEM_HOME" => nil,
+        "BUNDLE_GEMFILE" => nil
+      }
+      system(env, "chef-server-ctl #{command}")
+    end
+    
     before(:each) do
       @test_user = platform.create_user(test_username)
-      result = system("chef-server-ctl grant-server-admin-permissions #{test_username}")
+      result = run_chef_server_ctl("grant-server-admin-permissions #{test_username}")
       raise "chef-server-ctl grant-server-admin-permissions failed" unless result
     end
     
     after(:each) do
-      system("chef-server-ctl remove-server-admin-permissions #{test_username}") if @test_user
+      run_chef_server_ctl("remove-server-admin-permissions #{test_username}") if @test_user
       platform.delete_user(@test_user) if @test_user
     end
     
