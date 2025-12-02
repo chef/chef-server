@@ -184,7 +184,17 @@ ping -c 2 `hostname --fqdn` > ping_-c_2_fqdn.txt
 ping -c 2 `hostname` > ping_-c_2_hostname.txt
 
 # gather everything ohai knows
-/opt/opscode/bin/ohai > "$tmpdir/ohai.txt"
+# Use embedded ruby directly to avoid gem version conflicts (CHEF-26888)
+# The ohai binstub may have hardcoded gem version requirements that conflict
+# with already-loaded gems. By calling ruby directly and requiring ohai's
+# library, we let Ruby resolve gem versions naturally.
+if /opt/opscode/embedded/bin/ruby -rohai -e 'Ohai::System.new.all_plugins; puts Ohai::System.new.to_json' > "$tmpdir/ohai.txt" 2>&1; then
+    : # ohai data gathered successfully
+else
+    echo "Warning: Failed to gather ohai data, trying fallback method" >&2
+    # Fallback: try the original method in case the new approach fails
+    /opt/opscode/bin/ohai > "$tmpdir/ohai.txt" 2>&1 || echo "Failed to gather ohai data" > "$tmpdir/ohai.txt"
+fi
 
 if [[ -e /opt/opscode-manage/bin/opscode-manage-ctl ]]; then
     /opt/opscode-manage/bin/opscode-manage-ctl status > "$tmpdir/opscode-manage-ctl_status.txt"
