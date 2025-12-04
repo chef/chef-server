@@ -204,9 +204,10 @@ def transform_knife_opc_args(args, chef_server_ctl_cmd, _knife_noun, _knife_verb
     end
     
   when "user-list"
-    # Handle --all-info option (not supported in native knife)
+    # Transform knife-opc --all-info/-a flag to native knife --verbose flag
     if transformed.include?("--all-info") || transformed.include?("-a")
       transformed = transformed.reject { |arg| %w[--all-info -a].include?(arg) }
+      transformed << "--verbose"
     end
   end
   

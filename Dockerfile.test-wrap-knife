@@ -1,0 +1,14 @@
+FROM ruby:3.1
+
+# Install dependencies
+RUN gem install mixlib-cli
+
+# Set working directory
+WORKDIR /test
+
+# Copy standalone test script
+COPY test-chef-28245-fix.rb ./
+
+RUN chmod +x test-chef-28245-fix.rb
+
+CMD ["ruby", "./test-chef-28245-fix.rb"]
