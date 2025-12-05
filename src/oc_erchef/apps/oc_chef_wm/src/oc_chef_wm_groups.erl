@@ -23,7 +23,7 @@
          conflict_message/1,
          create_path/2,
          from_json/2,
-         resource_exists/2 ]).
+         resource_exists/2]).
 
 %% chef_wm behavior callbacks
 -behaviour(chef_wm).
@@ -37,6 +37,12 @@
 %% Shared functions
 -export([validate_group_name/1,
          group_name_invalid/2 ]).
+
+%% Username mapping functions for multi-tenancy support
+-export([strip_tenant_id/1,
+         append_tenant_id/2,
+         transform_usernames_for_response/1,
+         transform_usernames_for_request/2]).
 
 init(Config) ->
     oc_chef_wm_base:init(?MODULE, Config).
@@ -60,12 +66,41 @@ validate_request('POST', Req, #base_state{organization_guid = OrgId,
                  = State) ->
     Body = wrq:req_body(Req),
     {ok, Json} = oc_chef_group:parse_binary_json(Body),
+    
+    %% Transform usernames: append tenant IDs to "users" list
+    TenantId = case wrq:get_req_header("x-ops-tenantid", Req) of
+        undefined -> undefined;
+        HeaderValue -> list_to_binary(HeaderValue)
+    end,
+    
+    TransformedJson = case Json of
+        {PropList} ->
+            TransformedProps = lists:map(fun
+                ({<<"actors">>, {ActorProps}}) when is_list(ActorProps) ->
+                    %% Transform nested actors.users only
+                    TransformedActorProps = lists:map(fun
+                        ({<<"users">>, Users}) when is_list(Users) ->
+                            {<<"users">>, transform_usernames_for_request(Users, TenantId)};
+                        ({<<"clients">>, Clients}) ->
+                            {<<"clients">>, Clients};
+                        (Other) ->
+                            Other
+                    end, ActorProps),
+                    {<<"actors">>, {TransformedActorProps}};
+                (Other) ->
+                    Other
+            end, PropList),
+            {TransformedProps};
+        _ ->
+            Json
+    end,
+    
     {Req, State#base_state{superuser_bypasses_checks = true,
                            resource_state = ResourceState#group_state{
                                               oc_chef_group =
                                                   #oc_chef_group{
                                                      org_id = OrgId},
-                                              group_data = Json}}}.
+                                              group_data = TransformedJson}}}.
 
 auth_info(Req, State) ->
     auth_info(wrq:method(Req), Req, State).
@@ -120,3 +155,92 @@ group_name_invalid(Req, State) ->
 %% given to id over groupname if both set.
 fetch_id_name_from_json(GroupJson) ->
     ej:get({<<"id">>}, GroupJson, ej:get({<<"groupname">>}, GroupJson)).
+
+%%====================================================================
+%% Username Mapping Functions for Multi-tenancy Support
+%%====================================================================
+
+%% @doc Strip tenant ID suffix from mapped username, returning legacy username.
+%% Splits on the LAST occurrence of double-underscore followed by UUID.
+%% Returns {ok, LegacyUsername} if tenant suffix found and stripped.
+%% Returns {error, MappedUsername} if no valid tenant suffix (username returned as-is).
+%% Special case: If stripping results in empty binary, returns {error, MappedUsername}.
+%% Caller should log warning when {error, _} is returned.
+-spec strip_tenant_id(binary()) -> {ok, binary()} | {error, binary()}.
+strip_tenant_id(MappedUsername) when is_binary(MappedUsername) ->
+    case binary:split(MappedUsername, <<"__">>, [global]) of
+        [_SinglePart] ->
+            {error, MappedUsername};
+        Parts ->
+            case lists:reverse(Parts) of
+                [PotentialUuid | ReversedUsernameParts] ->
+                    case is_valid_uuid(PotentialUuid) of
+                        true ->
+                            LegacyUsername = join_with_separator(
+                                lists:reverse(ReversedUsernameParts), 
+                                <<"__">>
+                            ),
+                            case LegacyUsername of
+                                <<>> -> {error, MappedUsername};
+                                _ -> {ok, LegacyUsername}
+                            end;
+                        false ->
+                            {error, MappedUsername}
+                    end
+            end
+    end.
+
+%% @doc Append tenant ID to legacy username, creating mapped username.
+%% Returns binary in format "username__tenant-uuid".
+-spec append_tenant_id(binary(), binary()) -> binary().
+append_tenant_id(LegacyUsername, TenantId) 
+  when is_binary(LegacyUsername), is_binary(TenantId) ->
+    <<LegacyUsername/binary, "__", TenantId/binary>>.
+
+%% @doc Transform list of usernames for response (strip tenant IDs).
+%% Logs warning for usernames that cannot be stripped.
+-spec transform_usernames_for_response([binary()]) -> [binary()].
+transform_usernames_for_response(Usernames) when is_list(Usernames) ->
+    lists:map(fun(Username) ->
+        case strip_tenant_id(Username) of
+            {ok, LegacyUsername} ->
+                LegacyUsername;
+            {error, OriginalUsername} ->
+                lager:warning("Username ~p has no tenant suffix, returning as-is", 
+                             [OriginalUsername]),
+                OriginalUsername
+        end
+    end, Usernames).
+
+%% @doc Transform list of usernames for request (append tenant IDs).
+%% If TenantId is undefined, logs warning and returns usernames unchanged.
+-spec transform_usernames_for_request([binary()], binary() | undefined) -> [binary()].
+transform_usernames_for_request(Usernames, undefined) when is_list(Usernames) ->
+    lager:warning("X-Ops-TenantId header missing, usernames not transformed"),
+    Usernames;
+transform_usernames_for_request(Usernames, TenantId) 
+  when is_list(Usernames), is_binary(TenantId) ->
+    lists:map(fun(Username) ->
+        append_tenant_id(Username, TenantId)
+    end, Usernames).
+
+%% @doc Check if binary matches UUID format (8-4-4-4-12 hex digits).
+-spec is_valid_uuid(binary()) -> boolean().
+is_valid_uuid(<<_:8/binary, "-", _:4/binary, "-", _:4/binary, "-", 
+                _:4/binary, "-", _:12/binary>>) ->
+    true;
+is_valid_uuid(_) ->
+    false.
+
+%% @doc Join binary parts with separator.
+-spec join_with_separator([binary()], binary()) -> binary().
+join_with_separator([], _Sep) ->
+    <<>>;
+join_with_separator([Part], _Sep) ->
+    Part;
+join_with_separator([Head | Tail], Sep) ->
+    lists:foldl(
+        fun(Part, Acc) -> <<Acc/binary, Sep/binary, Part/binary>> end,
+        Head,
+        Tail
+    ).

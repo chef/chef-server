@@ -14,6 +14,7 @@
 -export([
          parse_binary_json/1,
          assemble_group_ejson/2,
+         assemble_group_ejson_with_stripped_usernames/2,
          delete/2,
          handle_error_for_update_ops/2,
          create_record/4,
@@ -344,6 +345,25 @@ assemble_group_ejson(#oc_chef_group{name = Name, clients = Clients, users = User
       {<<"name">>, Name},
       {<<"groupname">>, Name}
      ]}.
+
+%% @doc Assemble group ejson while stripping tenant suffixes from usernames only; clients remain unchanged.
+assemble_group_ejson_with_stripped_usernames(#oc_chef_group{name = Name,
+                                                            clients = Clients,
+                                                            users = Users,
+                                                            groups = Groups},
+                                             OrgName) ->
+    StrippedUsers = oc_chef_wm_groups:transform_usernames_for_response(Users),
+    Actors = Clients ++ StrippedUsers,
+    {[
+      {<<"actors">>, Actors},
+      {<<"users">>, StrippedUsers},
+      {<<"clients">>, Clients},
+      {<<"groups">>, Groups},
+      {<<"orgname">>, OrgName},
+      {<<"name">>, Name},
+      {<<"groupname">>, Name}
+     ]}.
+
 
 delete(ObjectRec = #oc_chef_group{last_updated_by = AuthzId, authz_id = GroupAuthzId}, CallbackFun) ->
     case oc_chef_authz:delete_resource(AuthzId, group, GroupAuthzId) of
