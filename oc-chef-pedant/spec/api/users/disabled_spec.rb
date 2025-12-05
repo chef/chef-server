@@ -18,11 +18,16 @@
 require 'pedant/rspec/common'
 
 describe 'Users API', :users do
+  # Generate a random 7-8 digit number (standard pedant pattern)
+  def rand_id
+    rand(10**7...10**8).to_s
+  end
+
   describe 'disabled user functionality' do
     let(:request_method) { :GET }
     let(:request_url) { api_url("/users/#{username}") }
     let(:requestor) { superuser }
-    let(:username) { "pedant-disabled-test-#{Time.now.to_i}" }
+    let(:username) { "pedant-disabled-test-#{rand_id}" }
     let(:user_payload) do
       {
         'username' => username,
@@ -60,6 +65,25 @@ describe 'Users API', :users do
         end
 
         # Verify user was created with disabled=false
+        get("#{platform.server}/users/#{username}", superuser) do |response|
+          response.should look_like({
+            status: 200,
+            body: {
+              'disabled' => false
+            }
+          })
+        end
+      end
+
+      it 'ignores invalid disabled value in POST request (always creates with disabled=false)' do
+        payload_with_invalid_disabled = user_payload.merge('disabled' => 'not-a-boolean')
+        post("#{platform.server}/users", superuser, payload: payload_with_invalid_disabled) do |response|
+          response.should look_like({
+            status: 201
+          })
+        end
+
+        # Verify user was created with disabled=false despite invalid value
         get("#{platform.server}/users/#{username}", superuser) do |response|
           response.should look_like({
             status: 200,
@@ -155,7 +179,7 @@ describe 'Users API', :users do
     end
 
     context 'when user is disabled' do
-      let(:disabled_username) { "pedant-disabled-#{Time.now.to_i}" }
+      let(:disabled_username) { "pedant-disabled-#{rand_id}" }
       let(:disabled_user_payload) do
         {
           'username' => disabled_username,
@@ -171,6 +195,9 @@ describe 'Users API', :users do
       before(:each) do
         # Create user and capture the private key from response
         post("#{platform.server}/users", superuser, payload: disabled_user_payload) do |response|
+          response.should look_like({
+            status: 201
+          })
           @disabled_user_private_key = JSON.parse(response.body)['private_key']
         end
         # Disable the user
