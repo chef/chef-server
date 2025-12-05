@@ -45,19 +45,19 @@ add_command_under_category "install", "general", "Install addon package by name.
 
   if package.nil?
     STDERR.puts "You must supply an addon name. Valid names include: #{KNOWN_ADDONS.join(", ")}."
-    "private_chef" => { "addons" => {
-        "install" => true,
-        "packages" => [package],
-        "path" => install_path,
-        "license_id" => license_id,
-      } } }
-  File.open(attributes_path, "w") do |file|
+    exit 1
+  elsif !KNOWN_ADDONS.include?(package)
+    STDERR.puts "#{package} does not appear to be a valid addon name. Valid names include: #{KNOWN_ADDONS.join(", ")}."
+    exit 1
+  end
+
   attributes_path = "#{base_path}/embedded/cookbooks/install_params.json"
   json_src = { "run_list" => ["recipe[infra-server::add_ons_wrapper]"],
     "private_chef" => { "addons" => {
         "install" => true,
         "packages" => [package],
         "path" => install_path,
+        "license_id" => license_id,
       } } }
   File.open(attributes_path, "w") do |file|
     file.write json_src.to_json
