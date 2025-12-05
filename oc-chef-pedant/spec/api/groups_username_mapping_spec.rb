@@ -1,346 +1,333 @@
 require "pedant/rspec/common"
 
-describe "Groups API Username Mapping for Multi-tenancy", :groups, :username_mapping do
+describe "Groups API Username Mapping for Multi-Tenancy", :groups do
   let(:org) { platform.test_org.name }
   let(:request_url) { api_url("groups") }
-  let(:test_group_name) { "test-username-mapping-group-#{Time.now.to_i}" }
-  let(:tenant_id) { "550e8400-e29b-41d4-a716-446655440000" }
-  
-  # Helper to add X-Ops-TenantId header to request
-  def with_tenant_id_header(requestor, tenant_id)
-    requestor.with_headers({ "x-ops-tenantid" => tenant_id })
-  end
+  let(:test_group) { "username-mapping-test-#{rand(1000000)}" }
+  let(:group_url) { api_url("groups/#{test_group}") }
+
+  # Test data
+  let(:tenant_id) { "test-tenant-12345" }
+  let(:username) { "testuser" }
+  let(:username_with_tenant) { "testuser__test-tenant-12345" }
 
   before :each do
-    # Clean up test group if it exists
-    delete(api_url("groups/#{test_group_name}"), platform.admin_user) rescue nil
+    # Create test group
+    post(request_url, platform.admin_user,
+      payload: { "groupname" => test_group }).should look_like({ status: 201 })
   end
 
   after :each do
     # Clean up test group
-    delete(api_url("groups/#{test_group_name}"), platform.admin_user) rescue nil
+    delete(group_url, platform.admin_user)
   end
 
-  context "POST /groups (create group)" do
-    context "with X-Ops-TenantId header" do
-      let(:legacy_username) { "test-user-legacy" }
-      let(:mapped_username) { "#{legacy_username}__#{tenant_id}" }
-      
-      let(:request_body) {
-        {
-          "groupname" => test_group_name,
-          "actors" => {
-            "users" => [legacy_username],
-            "clients" => ["test-client"],
-            "groups" => []
-          }
-        }
-      }
-
-      it "appends tenant ID to usernames in request but not clients" do
-        # Create group with legacy username in request
-        post(request_url, with_tenant_id_header(platform.admin_user, tenant_id),
-          payload: request_body).should look_like({
-            status: 201,
-            body: {
-              "uri" => "#{request_url}/#{test_group_name}"
-            }
-          })
-
-        # Verify the group was created with mapped username internally
-        # When we GET, it should strip the tenant ID and return legacy username
-        get(api_url("groups/#{test_group_name}"), platform.admin_user).should look_like({
-          status: 200,
-          body: {
-            "groupname" => test_group_name,
-            "name" => test_group_name,
-            "orgname" => org,
-            "users" => [legacy_username],  # Should be stripped back to legacy
-            "clients" => ["test-client"],  # Clients unchanged
-            "actors" => [legacy_username, "test-client"],
-            "groups" => []
-          }
-        })
-      end
-
-      it "handles multiple users with tenant ID appending" do
-        request_body = {
-          "groupname" => test_group_name,
-          "actors" => {
-            "users" => ["user1", "user2", "user3"],
-            "clients" => [],
-            "groups" => []
-          }
-        }
-
-        post(request_url, with_tenant_id_header(platform.admin_user, tenant_id),
-          payload: request_body).should look_like({ status: 201 })
-
-        response = get(api_url("groups/#{test_group_name}"), platform.admin_user)
-        response.should look_like({ status: 200 })
-        
-        parsed = JSON.parse(response)
-        parsed["users"].should match_array(["user1", "user2", "user3"])
-      end
-
-      it "handles empty users list" do
-        request_body = {
-          "groupname" => test_group_name,
-          "actors" => {
-            "users" => [],
-            "clients" => ["test-client"],
-            "groups" => []
-          }
-        }
-
-        post(request_url, with_tenant_id_header(platform.admin_user, tenant_id),
-          payload: request_body).should look_like({ status: 201 })
-
-        get(api_url("groups/#{test_group_name}"), platform.admin_user).should look_like({
-          status: 200,
-          body: {
-            "users" => [],
-            "clients" => ["test-client"]
-          }
-        })
-      end
-    end
-
-    context "without X-Ops-TenantId header" do
-      let(:username) { "test-user-no-header" }
-      
-      let(:request_body) {
-        {
-          "groupname" => test_group_name,
-          "actors" => {
-            "users" => [username],
-            "clients" => [],
-            "groups" => []
-          }
-        }
-      }
-
-      it "creates group with usernames unchanged (no transformation)" do
-        post(request_url, platform.admin_user,
-          payload: request_body).should look_like({ status: 201 })
-
-        get(api_url("groups/#{test_group_name}"), platform.admin_user).should look_like({
-          status: 200,
-          body: {
-            "users" => [username],  # Username unchanged
-            "groupname" => test_group_name
-          }
-        })
-      end
-    end
-  end
-
-  context "PUT /groups/<name> (update group)" do
-    let(:group_url) { api_url("groups/#{test_group_name}") }
-
-    before :each do
-      # Create initial group with one user
-      post(request_url, platform.admin_user,
-        payload: {
-          "groupname" => test_group_name,
-          "actors" => {
-            "users" => ["initial-user"],
-            "clients" => [],
-            "groups" => []
-          }
-        }).should look_like({ status: 201 })
-    end
-
-    context "with X-Ops-TenantId header" do
-      it "appends tenant ID to new usernames in update" do
-        update_body = {
-          "groupname" => test_group_name,
-          "actors" => {
-            "users" => ["updated-user1", "updated-user2"],
-            "clients" => ["test-client"],
-            "groups" => []
-          }
-        }
-
-        put(group_url, with_tenant_id_header(platform.admin_user, tenant_id),
-          payload: update_body).should look_like({ status: 200 })
-
-        # GET should strip tenant IDs from response
-        get(group_url, platform.admin_user).should look_like({
-          status: 200,
-          body: {
-            "users" => ["updated-user1", "updated-user2"],  # Stripped
-            "clients" => ["test-client"],
-            "groupname" => test_group_name
-          }
-        })
-      end
-
-      it "handles removing all users" do
-        update_body = {
-          "groupname" => test_group_name,
-          "actors" => {
-            "users" => [],
-            "clients" => [],
-            "groups" => []
-          }
-        }
-
-        put(group_url, with_tenant_id_header(platform.admin_user, tenant_id),
-          payload: update_body).should look_like({ status: 200 })
-
-        get(group_url, platform.admin_user).should look_like({
-          status: 200,
-          body: {
-            "users" => [],
-            "groupname" => test_group_name
-          }
-        })
-      end
-    end
-
-    context "without X-Ops-TenantId header" do
-      it "updates group with usernames unchanged" do
-        update_body = {
-          "groupname" => test_group_name,
-          "actors" => {
-            "users" => ["new-user-no-header"],
-            "clients" => [],
-            "groups" => []
-          }
-        }
-
-        put(group_url, platform.admin_user,
-          payload: update_body).should look_like({ status: 200 })
-
-        get(group_url, platform.admin_user).should look_like({
-          status: 200,
-          body: {
-            "users" => ["new-user-no-header"],  # Unchanged
-            "groupname" => test_group_name
-          }
-        })
-      end
-    end
-  end
-
-  context "GET /groups/<name> (retrieve group)" do
-    context "when group contains usernames with tenant IDs" do
-      let(:legacy_username) { "legacy-user" }
-      let(:mapped_username) { "#{legacy_username}__#{tenant_id}" }
+  describe "GET /groups/<name>" do
+    context "when X-Ops-TenantId header is present" do
+      let(:request_headers) { { "x-ops-tenantid" => tenant_id } }
 
       before :each do
-        # Create group with mapped username using tenant ID header
-        post(request_url, with_tenant_id_header(platform.admin_user, tenant_id),
+        # Add user with tenant suffix to group
+        put(group_url, platform.admin_user,
           payload: {
-            "groupname" => test_group_name,
+            "groupname" => test_group,
             "actors" => {
-              "users" => [legacy_username],
+              "users" => [username_with_tenant],
               "clients" => [],
               "groups" => []
             }
-          }).should look_like({ status: 201 })
+          }).should look_like({ status: 200 })
       end
 
-      it "strips tenant IDs from usernames in response" do
-        response = get(api_url("groups/#{test_group_name}"), platform.admin_user)
+      it "strips tenant ID from usernames in response" do
+        response = get(group_url, platform.admin_user, headers: request_headers)
         response.should look_like({ status: 200 })
         
-        parsed = JSON.parse(response)
-        parsed["users"].should == [legacy_username]  # Stripped
-        parsed["actors"].should include(legacy_username)
+        parsed = parse(response)
+        parsed["users"].should include(username)
+        parsed["users"].should_not include(username_with_tenant)
+        parsed["actors"].should include(username)
+        parsed["actors"].should_not include(username_with_tenant)
+      end
+    end
+
+    context "when X-Ops-TenantId header is absent" do
+      before :each do
+        # Add user with tenant suffix to group
+        put(group_url, platform.admin_user,
+          payload: {
+            "groupname" => test_group,
+            "actors" => {
+              "users" => [username_with_tenant],
+              "clients" => [],
+              "groups" => []
+            }
+          }).should look_like({ status: 200 })
       end
 
-      it "strips tenant IDs from actors list as well" do
-        response = get(api_url("groups/#{test_group_name}"), platform.admin_user)
+      it "returns usernames with tenant ID unchanged" do
+        response = get(group_url, platform.admin_user)
         response.should look_like({ status: 200 })
         
-        parsed = JSON.parse(response)
-        # actors list should also have stripped usernames
-        parsed["actors"].each do |actor|
-          actor.should_not match(/__[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/)
+        parsed = parse(response)
+        parsed["users"].should include(username_with_tenant)
+        parsed["actors"].should include(username_with_tenant)
+      end
+    end
+  end
+
+  describe "PUT /groups/<name>" do
+    context "when X-Ops-TenantId header is present" do
+      let(:request_headers) { { "x-ops-tenantid" => tenant_id } }
+
+      it "appends tenant ID to usernames in request" do
+        # Update with plain username (no tenant suffix)
+        put(group_url, platform.admin_user,
+          headers: request_headers,
+          payload: {
+            "groupname" => test_group,
+            "actors" => {
+              "users" => [username],
+              "clients" => [],
+              "groups" => []
+            }
+          }).should look_like({ status: 200 })
+
+        # Verify by fetching without header - should show tenant-suffixed username
+        response = get(group_url, platform.admin_user)
+        response.should look_like({ status: 200 })
+        
+        parsed = parse(response)
+        parsed["users"].should include(username_with_tenant)
+        parsed["users"].should_not include(username)
+        parsed["actors"].should include(username_with_tenant)
+        parsed["actors"].should_not include(username)
+      end
+
+      it "returns response with tenant ID stripped" do
+        response = put(group_url, platform.admin_user,
+          headers: request_headers,
+          payload: {
+            "groupname" => test_group,
+            "actors" => {
+              "users" => [username],
+              "clients" => [],
+              "groups" => []
+            }
+          })
+        response.should look_like({ status: 200 })
+
+        parsed = parse(response)
+        parsed["users"].should include(username)
+        parsed["users"].should_not include(username_with_tenant)
+        parsed["actors"].should include(username)
+        parsed["actors"].should_not include(username_with_tenant)
+      end
+    end
+
+    context "when X-Ops-TenantId header is absent" do
+      it "stores usernames as provided without modification" do
+        put(group_url, platform.admin_user,
+          payload: {
+            "groupname" => test_group,
+            "actors" => {
+              "users" => [username_with_tenant],
+              "clients" => [],
+              "groups" => []
+            }
+          }).should look_like({ status: 200 })
+
+        # Verify by fetching
+        response = get(group_url, platform.admin_user)
+        response.should look_like({ status: 200 })
+        
+        parsed = parse(response)
+        parsed["users"].should include(username_with_tenant)
+        parsed["actors"].should include(username_with_tenant)
+      end
+    end
+  end
+
+  describe "POST /groups" do
+    let(:new_test_group) { "username-mapping-new-#{rand(1000000)}" }
+    let(:new_group_url) { api_url("groups/#{new_test_group}") }
+
+    after :each do
+      delete(new_group_url, platform.admin_user) rescue nil
+    end
+
+    context "when X-Ops-TenantId header is present" do
+      let(:request_headers) { { "x-ops-tenantid" => tenant_id } }
+
+      it "appends tenant ID to usernames in request" do
+        response = post(request_url, platform.admin_user,
+          headers: request_headers,
+          payload: {
+            "groupname" => new_test_group,
+            "actors" => {
+              "users" => [username],
+              "clients" => [],
+              "groups" => []
+            }
+          })
+        response.should look_like({ status: 201 })
+
+        # Verify by fetching without header
+        fetch_response = get(new_group_url, platform.admin_user)
+        fetch_response.should look_like({ status: 200 })
+        
+        parsed = parse(fetch_response)
+        parsed["users"].should include(username_with_tenant)
+        parsed["actors"].should include(username_with_tenant)
+      end
+
+      it "returns response with tenant ID stripped" do
+        response = post(request_url, platform.admin_user,
+          headers: request_headers,
+          payload: {
+            "groupname" => new_test_group,
+            "actors" => {
+              "users" => [username],
+              "clients" => [],
+              "groups" => []
+            }
+          })
+        response.should look_like({ status: 201 })
+
+        parsed = parse(response)
+        parsed["users"].should include(username)
+        parsed["users"].should_not include(username_with_tenant)
+        parsed["actors"].should include(username)
+        parsed["actors"].should_not include(username_with_tenant)
+      end
+    end
+
+    context "when X-Ops-TenantId header is absent" do
+      it "stores usernames as provided without modification" do
+        response = post(request_url, platform.admin_user,
+          payload: {
+            "groupname" => new_test_group,
+            "actors" => {
+              "users" => [username_with_tenant],
+              "clients" => [],
+              "groups" => []
+            }
+          })
+        response.should look_like({ status: 201 })
+
+        # Verify by fetching
+        fetch_response = get(new_group_url, platform.admin_user)
+        fetch_response.should look_like({ status: 200 })
+        
+        parsed = parse(fetch_response)
+        parsed["users"].should include(username_with_tenant)
+        parsed["actors"].should include(username_with_tenant)
+      end
+    end
+  end
+
+  describe "Edge cases and validation" do
+    let(:edge_test_group) { "username-mapping-edge-#{rand(1000000)}" }
+    let(:edge_group_url) { api_url("groups/#{edge_test_group}") }
+
+    after :each do
+      delete(edge_group_url, platform.admin_user) rescue nil
+    end
+
+    context "with multiple usernames" do
+      let(:request_headers) { { "x-ops-tenantid" => tenant_id } }
+      let(:usernames) { ["user1", "user2", "user3"] }
+      let(:usernames_with_tenant) { usernames.map { |u| "#{u}__#{tenant_id}" } }
+
+      it "transforms all usernames correctly" do
+        response = post(request_url, platform.admin_user,
+          headers: request_headers,
+          payload: {
+            "groupname" => edge_test_group,
+            "actors" => {
+              "users" => usernames,
+              "clients" => [],
+              "groups" => []
+            }
+          })
+        response.should look_like({ status: 201 })
+
+        # Verify stored with tenant suffixes
+        fetch_response = get(edge_group_url, platform.admin_user)
+        fetch_response.should look_like({ status: 200 })
+        
+        parsed = parse(fetch_response)
+        usernames_with_tenant.each do |un|
+          parsed["users"].should include(un)
+          parsed["actors"].should include(un)
         end
       end
     end
-  end
 
-  context "round-trip username transformation" do
-    let(:original_username) { "roundtrip-user" }
+    context "with different tenant IDs" do
+      let(:tenant_id_1) { "tenant-one" }
+      let(:tenant_id_2) { "tenant-two" }
+      let(:request_headers_1) { { "x-ops-tenantid" => tenant_id_1 } }
+      let(:request_headers_2) { { "x-ops-tenantid" => tenant_id_2 } }
 
-    it "preserves original username through POST with header and GET" do
-      # POST with tenant ID header (appends tenant ID internally)
-      post(request_url, with_tenant_id_header(platform.admin_user, tenant_id),
-        payload: {
-          "groupname" => test_group_name,
-          "actors" => {
-            "users" => [original_username],
-            "clients" => [],
-            "groups" => []
-          }
-        }).should look_like({ status: 201 })
-
-      # GET should return original username (stripped)
-      response = get(api_url("groups/#{test_group_name}"), platform.admin_user)
-      response.should look_like({ status: 200 })
-      
-      parsed = JSON.parse(response)
-      parsed["users"].should == [original_username]
-    end
-
-    it "preserves username through multiple updates" do
-      # Create with header
-      post(request_url, with_tenant_id_header(platform.admin_user, tenant_id),
-        payload: {
-          "groupname" => test_group_name,
-          "actors" => { "users" => ["user1"], "clients" => [], "groups" => [] }
-        }).should look_like({ status: 201 })
-
-      # Update with header (add another user)
-      put(api_url("groups/#{test_group_name}"), with_tenant_id_header(platform.admin_user, tenant_id),
-        payload: {
-          "groupname" => test_group_name,
-          "actors" => { "users" => ["user1", "user2"], "clients" => [], "groups" => [] }
-        }).should look_like({ status: 200 })
-
-      # GET should show both users without tenant IDs
-      response = get(api_url("groups/#{test_group_name}"), platform.admin_user)
-      parsed = JSON.parse(response)
-      parsed["users"].should match_array(["user1", "user2"])
-    end
-  end
-
-  context "edge cases" do
-    context "username already contains double underscores" do
-      let(:complex_username) { "user__with__underscores" }
-
-      it "handles usernames with existing double underscores correctly" do
-        post(request_url, with_tenant_id_header(platform.admin_user, tenant_id),
+      it "uses the correct tenant ID for transformations" do
+        # Create with tenant 1
+        response = post(request_url, platform.admin_user,
+          headers: request_headers_1,
           payload: {
-            "groupname" => test_group_name,
-            "actors" => { "users" => [complex_username], "clients" => [], "groups" => [] }
-          }).should look_like({ status: 201 })
+            "groupname" => edge_test_group,
+            "actors" => {
+              "users" => [username],
+              "clients" => [],
+              "groups" => []
+            }
+          })
+        response.should look_like({ status: 201 })
 
-        response = get(api_url("groups/#{test_group_name}"), platform.admin_user)
-        parsed = JSON.parse(response)
-        # Should preserve the original username structure
-        parsed["users"].should == [complex_username]
+        # Verify stored with tenant-one suffix (no header)
+        fetch_response = get(edge_group_url, platform.admin_user)
+        fetch_response.should look_like({ status: 200 })
+        
+        parsed = parse(fetch_response)
+        parsed["users"].should include("#{username}__#{tenant_id_1}")
+
+        # Fetch with tenant 2 header - should NOT strip since tenant IDs don't match
+        fetch_with_tenant_2 = get(edge_group_url, platform.admin_user,
+          headers: request_headers_2)
+        fetch_with_tenant_2.should look_like({ status: 200 })
+        
+        parsed_2 = parse(fetch_with_tenant_2)
+        # Should still have tenant-one suffix since it won't match tenant-two
+        parsed_2["users"].should include("#{username}__#{tenant_id_1}")
       end
     end
 
-    context "username contains UUID-like patterns" do
-      let(:uuid_like_username) { "user-550e8400-e29b-41d4-a716-446655440000" }
+    context "with mixed users and clients" do
+      let(:request_headers) { { "x-ops-tenantid" => tenant_id } }
+      let(:client_name) { "test-client" }
 
-      it "does not strip UUID patterns that are not tenant suffixes" do
-        post(request_url, platform.admin_user,
+      it "transforms users but not clients" do
+        response = post(request_url, platform.admin_user,
+          headers: request_headers,
           payload: {
-            "groupname" => test_group_name,
-            "actors" => { "users" => [uuid_like_username], "clients" => [], "groups" => [] }
-          }).should look_like({ status: 201 })
+            "groupname" => edge_test_group,
+            "actors" => {
+              "users" => [username],
+              "clients" => [client_name],
+              "groups" => []
+            }
+          })
+        response.should look_like({ status: 201 })
 
-        response = get(api_url("groups/#{test_group_name}"), platform.admin_user)
-        parsed = JSON.parse(response)
-        # Username should remain unchanged (UUID not preceded by __)
-        parsed["users"].should == [uuid_like_username]
+        # Verify: users get tenant suffix, clients don't
+        fetch_response = get(edge_group_url, platform.admin_user)
+        fetch_response.should look_like({ status: 200 })
+        
+        parsed = parse(fetch_response)
+        parsed["users"].should include(username_with_tenant)
+        parsed["clients"].should include(client_name)
+        # clients should NOT have tenant suffix
+        parsed["clients"].should_not include("#{client_name}__#{tenant_id}")
       end
     end
   end
