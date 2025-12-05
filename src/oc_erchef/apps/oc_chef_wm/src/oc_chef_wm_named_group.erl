@@ -68,11 +68,31 @@ validate_request(Method, Req, State = #base_state{organization_guid = OrgId}) wh
 validate_request('PUT', Req, #base_state{organization_guid = OrgId, resource_state = GroupState} = State) ->
     Body = wrq:req_body(Req),
     {ok, Group} = oc_chef_group:parse_binary_json(Body),
+    
+    %% Transform usernames: append tenant IDs to "users" list
+    TenantId = case wrq:get_req_header("x-ops-tenantid", Req) of
+        undefined -> undefined;
+        HeaderValue -> list_to_binary(HeaderValue)
+    end,
+    
+    TransformedGroup = case Group of
+        {PropList} ->
+            TransformedProps = lists:map(fun
+                ({<<"users">>, Users}) when is_list(Users) ->
+                    {<<"users">>, oc_chef_wm_groups:transform_usernames_for_request(Users, TenantId)};
+                (Other) ->
+                    Other
+            end, PropList),
+            {TransformedProps};
+        _ ->
+            Group
+    end,
+    
     {Req, State#base_state{
             superuser_bypasses_checks = true,
             resource_state = GroupState#group_state{
                                oc_chef_group = #oc_chef_group{org_id = OrgId},
-                               group_data = Group}}}.
+                               group_data = TransformedGroup}}}.
 
 auth_info(Req, #base_state{chef_db_context = DbContext,
                            resource_state = GroupState = #group_state{group_data = GroupData},
@@ -120,8 +140,24 @@ to_json(Req, #base_state{
                                              oc_chef_group = Group
                                             }} = State) ->
     Ejson = oc_chef_group:assemble_group_ejson(Group, OrgName),
+    
+    %% Transform usernames: strip tenant IDs from "users" and "actors" lists
+    TransformedEjson = case Ejson of
+        {PropList} ->
+            TransformedProps = lists:map(fun
+                ({<<"users">>, Users}) ->
+                    {<<"users">>, oc_chef_wm_groups:transform_usernames_for_response(Users)};
+                ({<<"actors">>, Actors}) ->
+                    {<<"actors">>, oc_chef_wm_groups:transform_usernames_for_response(Actors)};
+                (Other) ->
+                    Other
+            end, PropList),
+            {TransformedProps};
+        _ ->
+            Ejson
+    end,
 
-    Json = chef_json:encode(Ejson),
+    Json = chef_json:encode(TransformedEjson),
     {Json, Req, State}.
 
 from_json(Req, #base_state{resource_state = #group_state{
