@@ -36,7 +36,8 @@
          delete_resource/2,
          from_json/2,
          resource_exists/2,
-         to_json/2]).
+         to_json/2,
+         finalize_update_body/3]).
 
 %% chef_wm behavior callbacks
 -behaviour(chef_wm).
@@ -68,11 +69,40 @@ validate_request(Method, Req, State = #base_state{organization_guid = OrgId}) wh
 validate_request('PUT', Req, #base_state{organization_guid = OrgId, resource_state = GroupState} = State) ->
     Body = wrq:req_body(Req),
     {ok, Group} = oc_chef_group:parse_binary_json(Body),
+    
+    %% Transform usernames: append tenant IDs to "users" list
+    TenantId = case wrq:get_req_header("x-ops-tenantid", Req) of
+        undefined -> undefined;
+        HeaderValue -> list_to_binary(HeaderValue)
+    end,
+    
+    TransformedGroup = case Group of
+        {PropList} ->
+            TransformedProps = lists:map(fun
+                ({<<"actors">>, {ActorProps}}) when is_list(ActorProps) ->
+                    %% Transform nested actors.users only
+                    TransformedActorProps = lists:map(fun
+                        ({<<"users">>, Users}) when is_list(Users) ->
+                            {<<"users">>, oc_chef_wm_groups:transform_usernames_for_request(Users, TenantId)};
+                        ({<<"clients">>, Clients}) ->
+                            {<<"clients">>, Clients};
+                        (Other) ->
+                            Other
+                    end, ActorProps),
+                    {<<"actors">>, {TransformedActorProps}};
+                (Other) ->
+                    Other
+            end, PropList),
+            {TransformedProps};
+        _ ->
+            Group
+    end,
+    
     {Req, State#base_state{
             superuser_bypasses_checks = true,
             resource_state = GroupState#group_state{
                                oc_chef_group = #oc_chef_group{org_id = OrgId},
-                               group_data = Group}}}.
+                               group_data = TransformedGroup}}}.
 
 auth_info(Req, #base_state{chef_db_context = DbContext,
                            resource_state = GroupState = #group_state{group_data = GroupData},
@@ -119,8 +149,7 @@ to_json(Req, #base_state{
                 resource_state = #group_state{
                                              oc_chef_group = Group
                                             }} = State) ->
-    Ejson = oc_chef_group:assemble_group_ejson(Group, OrgName),
-
+    Ejson = oc_chef_group:assemble_group_ejson_with_stripped_usernames(Group, OrgName),
     Json = chef_json:encode(Ejson),
     {Json, Req, State}.
 
@@ -130,6 +159,13 @@ from_json(Req, #base_state{resource_state = #group_state{
                                               }
                           } = State) ->
     oc_chef_wm_base:update_from_json(Req, State, Group , GroupData).
+
+%% @doc Finalize the PUT response body by transforming usernames
+finalize_update_body(_Req, #base_state{organization_name = OrgName,
+                                        resource_state = #group_state{
+                                          oc_chef_group = Group}}, _ObjectEjson) ->
+    %% Use the Group record from the database and strip tenant IDs from usernames
+    oc_chef_group:assemble_group_ejson_with_stripped_usernames(Group, OrgName).
 
 conflict_message(_Name) ->
     {[{<<"error">>, <<"Group already exists">>}]}.
@@ -144,7 +180,8 @@ delete_resource(Req, #base_state{
                        } = State) ->
     Group = InputGroup#oc_chef_group{last_updated_by = RequestorId},
     ok = oc_chef_wm_base:delete_object(DbContext, Group, RequestorId),
-    Ejson = oc_chef_group:assemble_group_ejson(Group, OrgName),
+    %% Use the Group record from the database and strip tenant IDs from usernames
+    Ejson = oc_chef_group:assemble_group_ejson_with_stripped_usernames(Group, OrgName),
     {true, chef_wm_util:set_json_body(Req, Ejson), State}.
 
 malformed_request_message(Any, _Req, _State) ->
