@@ -20,6 +20,7 @@
 
 -module(oc_chef_group_tests).
 
+-include("oc_chef_types.hrl").
 -include_lib("eunit/include/eunit.hrl").
 
 handle_error_test_() ->
@@ -94,6 +95,34 @@ handle_error_test_() ->
                     ],
                     Expected = {error, error_in_bifrost},
                     ?assertEqual(Expected, oc_chef_group:handle_error_for_update_ops(OpsResults, 1))
+            end
+        }
+    ].
+
+assemble_group_ejson_with_stripped_usernames_test_() ->
+    [
+        { "Strips tenant suffixes from users only (clients unchanged)",
+            fun() ->
+                    TenantId = <<"6e365298-7478-49b9-ba51-38a8c1204af2">>,
+                    Group = #oc_chef_group{
+                        name = <<"test-group">>,
+                        clients = [<<"client1__", TenantId/binary>>],
+                        users = [<<"user1__", TenantId/binary>>],
+                        groups = [<<"nested-group">>]
+                    },
+
+                    {Props} = oc_chef_group:assemble_group_ejson_with_stripped_usernames(Group, <<"org">>),
+
+                    Users = proplists:get_value(<<"users">>, Props),
+                    Clients = proplists:get_value(<<"clients">>, Props),
+                    Actors = proplists:get_value(<<"actors">>, Props),
+
+                    ?assertEqual([<<"user1">>], Users),
+                    ?assertEqual([<<"client1__", TenantId/binary>>], Clients),
+                    ?assert(lists:member(<<"user1">>, Actors)),
+                    ?assert(lists:member(<<"client1__", TenantId/binary>>, Actors)),
+                    ?assertEqual(false, lists:any(fun(V) -> V =:= <<"user1__", TenantId/binary>> end, Actors)),
+                    ?assertEqual(false, lists:any(fun(V) -> V =:= <<"client1">> end, Actors))
             end
         }
     ].
