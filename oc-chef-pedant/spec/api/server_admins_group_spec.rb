@@ -153,3 +153,5 @@ describe "GET /groups/server-admins", :server_admins do
         status: 405
       })
     end
+  end
+end
