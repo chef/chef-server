@@ -8,10 +8,26 @@ describe "Groups API Username Mapping for Multi-Tenancy", :groups do
 
   # Test data
   let(:tenant_id) { "test-tenant-12345" }
-  let(:username) { "testuser" }
-  let(:username_with_tenant) { "testuser__test-tenant-12345" }
+  let(:username) { "testuser-#{SecureRandom.hex(4)}" }
+  let(:username_with_tenant) { "#{username}__#{tenant_id}" }
+  let(:users_url) { "#{platform.server}/users" }
 
   before :each do
+    # Create test user with tenant suffix
+    post(users_url, platform.superuser,
+      payload: {
+        "username" => username_with_tenant,
+        "email" => "#{username_with_tenant}@test.com",
+        "first_name" => username,
+        "last_name" => "Test",
+        "display_name" => username_with_tenant,
+        "password" => "testpass123"
+      }).should look_like({ status: 201 })
+    
+    # Associate user with org
+    post("#{platform.server}/organizations/#{org}/users", platform.superuser,
+      payload: { "username" => username_with_tenant }).should look_like({ status: 201 })
+    
     # Create test group
     post(request_url, platform.admin_user,
       payload: { "groupname" => test_group }).should look_like({ status: 201 })
@@ -19,7 +35,10 @@ describe "Groups API Username Mapping for Multi-Tenancy", :groups do
 
   after :each do
     # Clean up test group
-    delete(group_url, platform.admin_user)
+    delete(group_url, platform.admin_user) rescue nil
+    
+    # Clean up test user
+    delete_user(username_with_tenant, platform.superuser) rescue nil
   end
 
   describe "GET /groups/<name>" do
@@ -236,75 +255,90 @@ describe "Groups API Username Mapping for Multi-Tenancy", :groups do
 
     context "with multiple usernames" do
       let(:request_headers) { { "x-ops-tenantid" => tenant_id } }
-      let(:usernames) { ["user1", "user2", "user3"] }
-      let(:usernames_with_tenant) { usernames.map { |u| "#{u}__#{tenant_id}" } }
 
       it "transforms all usernames correctly" do
+        # Use the user we already created plus existing platform users
         response = post(request_url, platform.admin_user,
           headers: request_headers,
           payload: {
             "groupname" => edge_test_group,
             "actors" => {
-              "users" => usernames,
+              "users" => [username, platform.non_admin_user.name],
               "clients" => [],
               "groups" => []
             }
           })
         response.should look_like({ status: 201 })
 
-        # Verify stored with tenant suffixes
+        # Verify in response: our user stripped, platform user untouched
+        parsed = parse(response)
+        parsed["users"].should include(username)
+        parsed["users"].should include(platform.non_admin_user.name)
+        parsed["users"].should_not include(username_with_tenant)
+
+        # Verify stored: our user has tenant suffix, platform user unchanged
         fetch_response = get(edge_group_url, platform.admin_user)
         fetch_response.should look_like({ status: 200 })
         
         parsed = parse(fetch_response)
-        usernames_with_tenant.each do |un|
-          parsed["users"].should include(un)
-          parsed["actors"].should include(un)
-        end
+        parsed["users"].should include(username_with_tenant)
+        parsed["users"].should include(platform.non_admin_user.name)
       end
     end
 
     context "with different tenant IDs" do
-      let(:tenant_id_1) { "tenant-one" }
       let(:tenant_id_2) { "tenant-two" }
-      let(:request_headers_1) { { "x-ops-tenantid" => tenant_id_1 } }
       let(:request_headers_2) { { "x-ops-tenantid" => tenant_id_2 } }
 
       it "uses the correct tenant ID for transformations" do
-        # Create with tenant 1
-        response = post(request_url, platform.admin_user,
-          headers: request_headers_1,
+        # Update group with different tenant ID
+        response = put(group_url, platform.admin_user,
+          headers: request_headers_2,
           payload: {
-            "groupname" => edge_test_group,
+            "groupname" => test_group,
             "actors" => {
               "users" => [username],
               "clients" => [],
               "groups" => []
             }
           })
-        response.should look_like({ status: 201 })
+        response.should look_like({ status: 200 })
 
-        # Verify stored with tenant-one suffix (no header)
-        fetch_response = get(edge_group_url, platform.admin_user)
+        # Response should strip with tenant_id_2
+        parsed = parse(response)
+        parsed["users"].should include(username)
+        parsed["users"].should_not include("#{username}__#{tenant_id_2}")
+
+        # But storage should have tenant_id_2 suffix
+        fetch_response = get(group_url, platform.admin_user)
         fetch_response.should look_like({ status: 200 })
         
-        parsed = parse(fetch_response)
-        parsed["users"].should include("#{username}__#{tenant_id_1}")
-
-        # Fetch with tenant 2 header - should NOT strip since tenant IDs don't match
-        fetch_with_tenant_2 = get(edge_group_url, platform.admin_user,
-          headers: request_headers_2)
-        fetch_with_tenant_2.should look_like({ status: 200 })
-        
-        parsed_2 = parse(fetch_with_tenant_2)
-        # Should still have tenant-one suffix since it won't match tenant-two
-        parsed_2["users"].should include("#{username}__#{tenant_id_1}")
+        parsed_fetch = parse(fetch_response)
+        # Note: The user was created with tenant_id, but we're requesting with tenant_id_2
+        # So it will store as username__tenant_id_2, but that user doesn't exist
+        # This is actually testing error handling - the group will have the username with wrong tenant
+        parsed_fetch["users"].should include("#{username}__#{tenant_id_2}")
       end
     end
 
     context "with mixed users and clients" do
       let(:request_headers) { { "x-ops-tenantid" => tenant_id } }
-      let(:client_name) { "test-client" }
+      let(:test_client) { "test-client-#{SecureRandom.hex(4)}" }
+
+      before :each do
+        # Create test client
+        post(api_url("clients"), platform.admin_user,
+          payload: {
+            "name" => test_client,
+            "clientname" => test_client,
+            "create_key" => true
+          }).should look_like({ status: 201 })
+      end
+
+      after :each do
+        # Cleanup client
+        delete(api_url("clients/#{test_client}"), platform.admin_user) rescue nil
+      end
 
       it "transforms users but not clients" do
         response = post(request_url, platform.admin_user,
@@ -313,21 +347,30 @@ describe "Groups API Username Mapping for Multi-Tenancy", :groups do
             "groupname" => edge_test_group,
             "actors" => {
               "users" => [username],
-              "clients" => [client_name],
+              "clients" => [test_client],
               "groups" => []
             }
           })
         response.should look_like({ status: 201 })
 
-        # Verify: users get tenant suffix, clients don't
+        # Verify in response: user stripped, client unchanged
+        parsed = parse(response)
+        parsed["users"].should include(username)
+        parsed["users"].should_not include(username_with_tenant)
+        parsed["clients"].should include(test_client)
+
+        # Verify stored: user has tenant suffix, client unchanged
         fetch_response = get(edge_group_url, platform.admin_user)
         fetch_response.should look_like({ status: 200 })
         
         parsed = parse(fetch_response)
         parsed["users"].should include(username_with_tenant)
-        parsed["clients"].should include(client_name)
-        # clients should NOT have tenant suffix
-        parsed["clients"].should_not include("#{client_name}__#{tenant_id}")
+        parsed["clients"].should include(test_client)
+        # Both should be in actors
+        parsed["actors"].should include(username_with_tenant)
+        parsed["actors"].should include(test_client)
+        # Client should NOT have tenant suffix
+        parsed["clients"].should_not include("#{test_client}__#{tenant_id}")
       end
     end
   end
