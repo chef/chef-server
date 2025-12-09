@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.10.87 -->
-## [15.10.87](https://github.com/chef/chef-server/tree/15.10.87) (2025-12-09)
+<!-- latest_release 15.10.88 -->
+## [15.10.88](https://github.com/chef/chef-server/tree/15.10.88) (2025-12-09)
 
 #### Merged Pull Requests
-- CHEF-26888 - Fix gather-logs openssl gem version conflict [#4127](https://github.com/chef/chef-server/pull/4127) ([kalroy](https://github.com/kalroy))
+- CHEF-28294: Fix CVE-2025-61780 - Update rack gem to &gt;= 3.1.18 [#4129](https://github.com/chef/chef-server/pull/4129) ([kalroy](https://github.com/kalroy))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.10.83 -->
 ### Changes since 15.10.83 release
 
 #### Merged Pull Requests
+- CHEF-28294: Fix CVE-2025-61780 - Update rack gem to &gt;= 3.1.18 [#4129](https://github.com/chef/chef-server/pull/4129) ([kalroy](https://github.com/kalroy)) <!-- 15.10.88 -->
 - CHEF-26888 - Fix gather-logs openssl gem version conflict [#4127](https://github.com/chef/chef-server/pull/4127) ([kalroy](https://github.com/kalroy)) <!-- 15.10.87 -->
 - Adding provision for Jira automation [#4125](https://github.com/chef/chef-server/pull/4125) ([talktovikas](https://github.com/talktovikas)) <!-- 15.10.86 -->
 - Drop chef gem dependency from oc-chef-pedant [#4122](https://github.com/chef/chef-server/pull/4122) ([neha-p6](https://github.com/neha-p6)) <!-- 15.10.85 -->
