@@ -29,7 +29,7 @@ gem 'veil', '~> 0.3.11',
     git: "https://github.com/talktovikas/chef_secrets.git",
     branch: "vikas/debug"
 
-gem 'rack', '> 3.0'
+gem 'rack', '>= 3.2.4'
 
 gem 'omniauth-chef', '~> 0.4.1',
     git: "https://github.com/talktovikas/omniauth-chef.git",
