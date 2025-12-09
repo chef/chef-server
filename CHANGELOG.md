@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.10.86 -->
-## [15.10.86](https://github.com/chef/chef-server/tree/15.10.86) (2025-12-02)
+<!-- latest_release 15.10.87 -->
+## [15.10.87](https://github.com/chef/chef-server/tree/15.10.87) (2025-12-09)
 
 #### Merged Pull Requests
-- Adding provision for Jira automation [#4125](https://github.com/chef/chef-server/pull/4125) ([talktovikas](https://github.com/talktovikas))
+- CHEF-26888 - Fix gather-logs openssl gem version conflict [#4127](https://github.com/chef/chef-server/pull/4127) ([kalroy](https://github.com/kalroy))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.10.83 -->
 ### Changes since 15.10.83 release
 
 #### Merged Pull Requests
+- CHEF-26888 - Fix gather-logs openssl gem version conflict [#4127](https://github.com/chef/chef-server/pull/4127) ([kalroy](https://github.com/kalroy)) <!-- 15.10.87 -->
 - Adding provision for Jira automation [#4125](https://github.com/chef/chef-server/pull/4125) ([talktovikas](https://github.com/talktovikas)) <!-- 15.10.86 -->
 - Drop chef gem dependency from oc-chef-pedant [#4122](https://github.com/chef/chef-server/pull/4122) ([neha-p6](https://github.com/neha-p6)) <!-- 15.10.85 -->
 - Copilot Instructions for chef-server [#4118](https://github.com/chef/chef-server/pull/4118) ([jashaik](https://github.com/jashaik)) <!-- 15.10.84 -->
