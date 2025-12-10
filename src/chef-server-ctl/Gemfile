@@ -4,8 +4,9 @@ gemspec
 
 gem "rest-client", git: "https://github.com/chef/rest-client", branch: "jfm/ucrt_update1"
 
-gem "chef", "~> 18.8.46"
+gem "chef", git: "https://github.com/chef/chef", branch: "CHEF-28966-missing-all-users-flag"
 gem "toml" # for habitat-land
 
-gem "knife","~> 18.8.13"
-gem "knife-ec-backup", "~> 3.0.5"
+gem "knife", git: "https://github.com/chef/chef", branch: "CHEF-28966-missing-all-users-flag"
+# Temporarily commented out - incompatible with Chef 19+
+# gem "knife-ec-backup"

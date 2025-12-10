@@ -40,12 +40,13 @@ Gem::Specification.new do |spec|
 
   spec.add_runtime_dependency "appbundler"
 
-  spec.add_runtime_dependency "chef", "~> 18.8.46"
+  spec.add_runtime_dependency "chef" # Using custom branch, version constraint removed
   spec.add_runtime_dependency "knife"
 
   # tools we bundle in the chef-server install and include here so we can have a single Gemfile.lock
   # for the overall chef-server "app"
-  spec.add_runtime_dependency "knife-ec-backup"
+  # Temporarily commented out - incompatible with Chef 19+
+  # spec.add_runtime_dependency "knife-ec-backup"
   spec.add_runtime_dependency "chef_fixie", ">= 1.0.3"
 
   # Used to resolve download urls
