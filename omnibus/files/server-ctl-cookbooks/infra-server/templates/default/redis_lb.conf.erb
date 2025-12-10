@@ -10,6 +10,16 @@ bind <%= @listen%> 0.0.0.0
 bind <%= @listen%>
 <% end %>
 
+
+<% if @password && !@password.to_s.empty? %>
+# Legacy password authentication
+requirepass <%= @password %>
+
+# ACL-based authentication (KeyDB/Valkey 7+)
+# Set password for the default user
+user default on ><%=  @password %> ~* &* +@all
+<% end %>
+
 tcp-keepalive <%= @keepalive %>
 timeout <%= @timeout %>
 loglevel <%= @loglevel %>
