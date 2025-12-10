@@ -7,5 +7,5 @@ gem "rest-client", git: "https://github.com/chef/rest-client", branch: "jfm/ucrt
 gem "chef", "~> 18.8.46"
 gem "toml" # for habitat-land
 
-gem "knife","~> 18.8.13"
+gem "knife","~> 18.8.68"
 gem "knife-ec-backup", "~> 3.0.5"
