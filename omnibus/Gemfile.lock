@@ -13,7 +13,7 @@ GIT
   revision: d6fce7b6c5e6a9ba1f3a21eef2b2be8ee778391f
   branch: main
   specs:
-    omnibus-software (25.10.357)
+    omnibus-software (25.10.358)
       omnibus (>= 9.0.0)
 
 GIT
