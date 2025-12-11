@@ -1,19 +1,52 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release -->
+<!-- latest_release 15.10.88 -->
+## [15.10.88](https://github.com/chef/chef-server/tree/15.10.88) (2025-12-09)
+
+#### Merged Pull Requests
+- CHEF-28294: Fix CVE-2025-61780 - Update rack gem to &gt;= 3.1.18 [#4129](https://github.com/chef/chef-server/pull/4129) ([kalroy](https://github.com/kalroy))
 <!-- latest_release -->
 
-<!-- release_rollup -->
+<!-- release_rollup since=15.10.83 -->
+### Changes since 15.10.83 release
+
+#### Merged Pull Requests
+- CHEF-28294: Fix CVE-2025-61780 - Update rack gem to &gt;= 3.1.18 [#4129](https://github.com/chef/chef-server/pull/4129) ([kalroy](https://github.com/kalroy)) <!-- 15.10.88 -->
+- CHEF-26888 - Fix gather-logs openssl gem version conflict [#4127](https://github.com/chef/chef-server/pull/4127) ([kalroy](https://github.com/kalroy)) <!-- 15.10.87 -->
+- Adding provision for Jira automation [#4125](https://github.com/chef/chef-server/pull/4125) ([talktovikas](https://github.com/talktovikas)) <!-- 15.10.86 -->
+- Drop chef gem dependency from oc-chef-pedant [#4122](https://github.com/chef/chef-server/pull/4122) ([neha-p6](https://github.com/neha-p6)) <!-- 15.10.85 -->
+- Copilot Instructions for chef-server [#4118](https://github.com/chef/chef-server/pull/4118) ([jashaik](https://github.com/jashaik)) <!-- 15.10.84 -->
 <!-- release_rollup -->
 
 <!-- latest_stable_release -->
+## [15.10.83](https://github.com/chef/chef-server/tree/15.10.83) (2025-11-04)
+
+#### Merged Pull Requests
+- Added copilot instructions file [#4092](https://github.com/chef/chef-server/pull/4092) ([jashaik](https://github.com/jashaik))
+- adding coding practices for copilot.md [#4094](https://github.com/chef/chef-server/pull/4094) ([talktovikas](https://github.com/talktovikas))
+- Updating pg version to 13.22. [#4101](https://github.com/chef/chef-server/pull/4101) ([sreepuramsudheer](https://github.com/sreepuramsudheer))
+- Updated omnibus-software for jdk 17 update. [#4096](https://github.com/chef/chef-server/pull/4096) ([sreepuramsudheer](https://github.com/sreepuramsudheer))
+- Fix for fips amazon 2 issue [#4095](https://github.com/chef/chef-server/pull/4095) ([jashaik](https://github.com/jashaik))
+- Updated openresty to 1.27.1.2 [#4103](https://github.com/chef/chef-server/pull/4103) ([jashaik](https://github.com/jashaik))
+- Updated uri gem to 1.0.4 [#4105](https://github.com/chef/chef-server/pull/4105) ([jashaik](https://github.com/jashaik))
+- [CHEF-26124] Fix dependabot issues [#4100](https://github.com/chef/chef-server/pull/4100) ([RoyShravani](https://github.com/RoyShravani))
+- Updated rack to 3.2.3 [#4106](https://github.com/chef/chef-server/pull/4106) ([jashaik](https://github.com/jashaik))
+- removing activesupport direct dependency [#4104](https://github.com/chef/chef-server/pull/4104) ([sreepuramsudheer](https://github.com/sreepuramsudheer))
+- Updated http-accept 2.1.1. [#4107](https://github.com/chef/chef-server/pull/4107) ([sreepuramsudheer](https://github.com/sreepuramsudheer))
+- updating tuxcare version [#4109](https://github.com/chef/chef-server/pull/4109) ([sean-sype-simmons](https://github.com/sean-sype-simmons))
+- Update opensearch cookbook to check when OpenSearch is up [#4085](https://github.com/chef/chef-server/pull/4085) ([kalroy](https://github.com/kalroy))
+- resolving dependabot alerts [#4110](https://github.com/chef/chef-server/pull/4110) ([RoyShravani](https://github.com/RoyShravani))
+- updating notice.txt per instructions [#4113](https://github.com/chef/chef-server/pull/4113) ([sean-sype-simmons](https://github.com/sean-sype-simmons))
+- update activesupport in oc-chef-pedant [#4112](https://github.com/chef/chef-server/pull/4112) ([RoyShravani](https://github.com/RoyShravani))
+- update notice.txt to update Postgres versions correctly [#4116](https://github.com/chef/chef-server/pull/4116) ([kalroy](https://github.com/kalroy))
+<!-- latest_stable_release -->
+
 ## [15.10.66](https://github.com/chef/chef-server/tree/15.10.66) (2025-09-15)
 
 #### Merged Pull Requests
 - Updated sqerl library to accept some cert extensions [#4081](https://github.com/chef/chef-server/pull/4081) ([jashaik](https://github.com/jashaik))
 - updating and removing apt-get updates [#4083](https://github.com/chef/chef-server/pull/4083) ([sean-sype-simmons](https://github.com/sean-sype-simmons))
 - Updated ibrowse version to fix the ssl options passing to ssl:connect [#4084](https://github.com/chef/chef-server/pull/4084) ([jashaik](https://github.com/jashaik))
-<!-- latest_stable_release -->
 
 ## [15.10.63](https://github.com/chef/chef-server/tree/15.10.63) (2025-08-29)
 

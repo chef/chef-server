@@ -27,7 +27,7 @@ class EcPostgres
                                        'dbname' => database)
     rescue => e
       if retries > 0
-        sleep_time = 2**((max_retries - retries))
+        sleep_time = 2**(max_retries - retries)
         retries -= 1
         unless silent
           Chef::Log.warn "Error from postgresql: #{e.message.chomp}. Retrying after #{sleep_time}s. Retries remaining: #{retries + 1}"

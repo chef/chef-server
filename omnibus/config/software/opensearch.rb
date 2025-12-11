@@ -72,8 +72,8 @@ end
 
 version "1.3.20" do
   source url: "https://artifacts.opensearch.org/releases/bundle/opensearch/#{version}/opensearch-#{version}-linux-x64.tar.gz",
-        sha256: "a786fe52b4d25db85cc49f34df6118f19c434b25935f28bd98c0f874ae77ccc3"
-internal_source url: "#{ENV["ARTIFACTORY_REPO_URL"]}/opensearch/#{name}-#{version}.tuxcare.1-linux-x64.tar.gz",
+                  sha256: "a786fe52b4d25db85cc49f34df6118f19c434b25935f28bd98c0f874ae77ccc3"
+internal_source url: "#{ENV["ARTIFACTORY_REPO_URL"]}/opensearch/#{name}-#{version}.tuxcare.1.0.2-linux-x64.tar.gz",
                 authorization: "X-JFrog-Art-Api:#{ENV["ARTIFACTORY_TOKEN"]}"
 end
 

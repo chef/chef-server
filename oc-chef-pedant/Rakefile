@@ -7,6 +7,8 @@ require "openssl"
 CURRENT_GEM_NAME = "oc-chef-pedant".freeze
 CURRENT_GEM_PATH = File.expand_path("..", __dir__)
 
+task default: [:chef_zero_spec]
+
 task :chef_zero_spec do
   populate_secrets_env
   bundle_exec_with_chef("chef-zero", "rake pedant")
@@ -27,7 +29,7 @@ def bundle_exec_with_chef(test_gem, commands)
       # TODO: one of workaround to fix verify pipeline failure
       # Could not found another way to update chef version without releasing new chef-zero  gem
       elsif line =~ /^\s*gem\s*['"]chef['"]\s*,?.*$/ # foodcritic      end
-        line = "gem \"chef\", \"~> 18.8.11\""
+        line = "gem \"chef\", \"~> 18.8.46\""
       elsif line =~ /^\s*gem\s*['"]ohai['"]\s*,?.*$/ # foodcritic      end
         line = "gem \"ohai\", \"~> 18.0\""
       elsif line =~ /\s*gem\s*['"]#{test_gem}['"]/ # foodcritic      end

@@ -197,7 +197,7 @@ class ChefServerDataBootstrap
     rescue RestClient::Exception, Errno::ECONNREFUSED => e
       error = e.respond_to?(:response) ? e.response.chomp : e.message
       if retries > 0
-        sleep_time = 2**((5 - retries))
+        sleep_time = 2**(5 - retries)
         retries -= 1
         Chef::Log.warn "Error from bifrost: #{error}, retrying after #{sleep_time}s. Retries remaining: #{retries}"
         sleep sleep_time

@@ -2,8 +2,9 @@ source 'https://rubygems.org'
 git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
-gem 'rails', '~> 7.1.0'
-gem 'chef', '~> 18.8.11'
+gem 'rails', '7.1.5.2'
+gem "rest-client", git: "https://github.com/chef/rest-client", branch: "jfm/ucrt_update1"
+gem 'chef', '~> 18.8.46'
 gem 'jbuilder', '~> 2.11'
 gem 'jquery-rails'
 gem 'jwt' # For Zendesk SSO
@@ -28,7 +29,7 @@ gem 'veil', '~> 0.3.11',
     git: "https://github.com/talktovikas/chef_secrets.git",
     branch: "vikas/debug"
 
-gem 'rack', '> 3.0'
+gem 'rack', '>= 3.2.4'
 
 gem 'omniauth-chef', '~> 0.4.1',
     git: "https://github.com/talktovikas/omniauth-chef.git",
