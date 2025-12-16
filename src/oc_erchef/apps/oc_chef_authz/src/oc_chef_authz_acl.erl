@@ -291,16 +291,27 @@ fetch_actors(Context, ActorNames) ->
     case oc_chef_authz_scoped_name:names_to_authz_id(actor, ActorNames, Context) of
         {AuthzIds, []} ->
             AuthzIds;
-        {_, [{Error, Names} | _]}
+        {_, [{Error, MappedNames} | _]}
           when Error =:= ill_formed_name orelse
                Error =:= orgname_not_found orelse
                Error =:= not_found ->
+            % Strip tenant IDs before showing error to user
+            Names = strip_tenant_ids_from_list(MappedNames),
             throw({bad_actor, Names});
-        {_, [{inappropriate_scoped_name, Names} | _]} ->
+        {_, [{inappropriate_scoped_name, MappedNames} | _]} ->
+            Names = strip_tenant_ids_from_list(MappedNames),
             throw({inappropriate_scoped_name, Names});
-        {_, [{ambiguous, Names} | _]} ->
+        {_, [{ambiguous, MappedNames} | _]} ->
+            Names = strip_tenant_ids_from_list(MappedNames),
             throw({ambiguous_actor, Names})
     end.
+
+%% @doc Strip tenant IDs from a list of names for error messages
+strip_tenant_ids_from_list(Names) ->
+    [case oc_chef_wm_acl_permission:strip_tenant_id(N) of
+        {ok, Stripped} -> Stripped;
+        {error, _} -> N  % Not mapped, return as-is
+     end || N <- Names].
 
 
 %%
@@ -320,7 +331,9 @@ convert_ids_to_names_in_part([Part | Rest], OrgId, Record, Granular) ->
     GroupIds = ej:get({<<"groups">>}, Members),
     Context = oc_chef_authz_scoped_name:initialize_context(OrgId),
     {ClientNames, UserNames, GroupNames} = oc_chef_authz_scoped_name:convert_ids_to_names(ActorIds, GroupIds, Context),
-    Members1 = part_with_actors(Members, ClientNames, UserNames, Granular),
+    %% Strip tenant IDs from UserNames ONLY (not ClientNames or GroupNames)
+    StrippedUserNames = oc_chef_wm_acl_permission:transform_usernames_for_response(UserNames),
+    Members1 = part_with_actors(Members, ClientNames, StrippedUserNames, Granular),
     Members2 = ej:set({<<"groups">>}, Members1, GroupNames),
     NewRecord = ej:set({Part}, Record, Members2),
     convert_ids_to_names_in_part(Rest, OrgId, NewRecord, Granular).
