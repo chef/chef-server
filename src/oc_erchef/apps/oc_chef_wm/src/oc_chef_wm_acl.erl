@@ -89,6 +89,7 @@ to_json(Req, #base_state{organization_guid = OrgId, resource_state = #acl_state{
         forbidden ->
             {{halt, 403}, Req, State#base_state{log_msg = requestor_access_failed}};
         Ejson ->
+            %% Username transformation already handled in oc_chef_authz_acl:convert_all_ids_to_names
             Json = chef_json:encode(Ejson),
             {Json, Req, State}
     end.

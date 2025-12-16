@@ -182,7 +182,15 @@ fetch_group(#oc_chef_authz_context{reqid = ReqId, server_api_version = ApiVersio
     end.
 
 find_org_actors_by_name(OrgId, ActorNames) ->
-    case sqerl:select(find_org_actors_by_name, [OrgId, ActorNames]) of
+    % Strip tenant IDs for client lookup
+    % Users are looked up with mapped names, clients with stripped names
+    StrippedNames = [case oc_chef_wm_acl_permission:strip_tenant_id(N) of
+                        {ok, Stripped} -> Stripped;
+                        {error, _} -> N  % Not mapped, use original
+                     end || N <- ActorNames],
+    
+    % Pass both arrays: ActorNames (mapped) for users, StrippedNames for clients
+    case sqerl:select(find_org_actors_by_name, [OrgId, ActorNames, StrippedNames]) of
         {ok, L} when is_list(L) ->
             % WIP - change this to a record.
             R = [{proplists:get_value(<<"name_in">>, Row),

@@ -36,6 +36,12 @@
 -export([allowed_methods/2,
          from_json/2]).
 
+%% Username mapping functions for multi-tenancy support
+-export([strip_tenant_id/1,
+         append_tenant_id/2,
+         transform_usernames_for_response/1,
+         transform_usernames_for_request/2]).
+
 %% chef_wm behaviour callbacks
 -behaviour(chef_wm).
 -export([
@@ -71,9 +77,38 @@ validate_request('PUT', Req, #base_state{chef_db_context = DbContext,
     Ace = chef_json:decode_body(Body),
     Part = list_to_binary(wrq:path_info(acl_permission, Req)),
 
+    %% Transform usernames: append tenant IDs to "users" list
+    TenantId = case wrq:get_req_header("x-ops-tenantid", Req) of
+        undefined -> undefined;
+        HeaderValue -> list_to_binary(HeaderValue)
+    end,
+
+    TransformedAce = case Ace of
+        {PropList} ->
+            %% Transform the permission part (create/read/update/delete/grant)
+            TransformedProps = lists:map(fun
+                ({PartKey, {PartProps}}) when PartKey == Part ->
+                    %% Transform nested "users" and "actors" arrays for username mapping
+                    TransformedPartProps = lists:map(fun
+                        ({<<"users">>, Users}) when is_list(Users) ->
+                            {<<"users">>, transform_usernames_for_request(Users, TenantId)};
+                        ({<<"actors">>, Actors}) when is_list(Actors) ->
+                            {<<"actors">>, transform_usernames_for_request(Actors, TenantId)};
+                        (Other) ->
+                            Other
+                    end, PartProps),
+                    {PartKey, {TransformedPartProps}};
+                (Other) ->
+                    Other
+            end, PropList),
+            {TransformedProps};
+        _ ->
+            Ace
+    end,
+
     %% Make sure we have valid json before trying other checks
     %% Throws if invalid json is found
-    check_json_validity(Part, Ace),
+    check_json_validity(Part, TransformedAce),
 
     %% validate_authz_id will populate the ACL AuthzId, which is needed
     %% for checking the ACL constraints; we need to run validate_authz_id
@@ -81,7 +116,7 @@ validate_request('PUT', Req, #base_state{chef_db_context = DbContext,
     {Req1, State1 = #base_state{resource_state = #acl_state{
           authz_id = AuthzId}}} =
                                   oc_chef_wm_acl:validate_authz_id(Req, State,
-                                                                   AclState#acl_state{acl_data = Ace},
+                                                                   AclState#acl_state{acl_data = TransformedAce},
                                                                     Type, OrgId,  DbContext),
 
     %% Check if we're violating any constraints around modifying ACLs
@@ -93,7 +128,7 @@ validate_request('PUT', Req, #base_state{chef_db_context = DbContext,
         %% they know what they are doing. With great power and all.
         {Req1, State1};
       false ->
-        case oc_chef_authz_acl_constraints:check_acl_constraints(OrgId, AuthzId, Type, Part, Ace) of
+        case oc_chef_authz_acl_constraints:check_acl_constraints(OrgId, AuthzId, Type, Part, TransformedAce) of
           ok ->
             {Req1, State1};
           [ Violation | _T ] ->
@@ -205,3 +240,92 @@ update_from_json(#acl_state{type = Type, authz_id = AuthzId, acl_data = Data},
 
 malformed_request_message(Any, _Req, _State) ->
     error({unexpected_malformed_request_message, Any}).
+
+%%====================================================================
+%% Username Mapping Functions for Multi-tenancy Support
+%%====================================================================
+
+%% @doc Strip tenant ID suffix from mapped username, returning legacy username.
+%% Splits on the LAST occurrence of double-underscore followed by UUID.
+%% Returns {ok, LegacyUsername} if tenant suffix found and stripped.
+%% Returns {error, MappedUsername} if no valid tenant suffix (username returned as-is).
+%% Special case: If stripping results in empty binary, returns {error, MappedUsername}.
+%% Caller should log warning when {error, _} is returned.
+-spec strip_tenant_id(binary()) -> {ok, binary()} | {error, binary()}.
+strip_tenant_id(MappedUsername) when is_binary(MappedUsername) ->
+    case binary:split(MappedUsername, <<"__">>, [global]) of
+        [_SinglePart] ->
+            {error, MappedUsername};
+        Parts ->
+            case lists:reverse(Parts) of
+                [PotentialUuid | ReversedUsernameParts] ->
+                    case is_valid_uuid(PotentialUuid) of
+                        true ->
+                            LegacyUsername = join_with_separator(
+                                lists:reverse(ReversedUsernameParts), 
+                                <<"__">>
+                            ),
+                            case LegacyUsername of
+                                <<>> -> {error, MappedUsername};
+                                _ -> {ok, LegacyUsername}
+                            end;
+                        false ->
+                            {error, MappedUsername}
+                    end
+            end
+    end.
+
+%% @doc Append tenant ID to legacy username, creating mapped username.
+%% Returns binary in format "username__tenant-uuid".
+-spec append_tenant_id(binary(), binary()) -> binary().
+append_tenant_id(LegacyUsername, TenantId) 
+  when is_binary(LegacyUsername), is_binary(TenantId) ->
+    <<LegacyUsername/binary, "__", TenantId/binary>>.
+
+%% @doc Transform list of usernames for response (strip tenant IDs).
+%% Logs warning for usernames that cannot be stripped.
+-spec transform_usernames_for_response([binary()]) -> [binary()].
+transform_usernames_for_response(Usernames) when is_list(Usernames) ->
+    lists:map(fun(Username) ->
+        case strip_tenant_id(Username) of
+            {ok, LegacyUsername} ->
+                LegacyUsername;
+            {error, OriginalUsername} ->
+                lager:warning("Username ~p has no tenant suffix, returning as-is", 
+                             [OriginalUsername]),
+                OriginalUsername
+        end
+    end, Usernames).
+
+%% @doc Transform list of usernames for request (append tenant IDs).
+%% If TenantId is undefined, logs warning and returns usernames unchanged.
+-spec transform_usernames_for_request([binary()], binary() | undefined) -> [binary()].
+transform_usernames_for_request(Usernames, undefined) when is_list(Usernames) ->
+    lager:warning("X-Ops-TenantId header missing, usernames not transformed"),
+    Usernames;
+transform_usernames_for_request(Usernames, TenantId) 
+  when is_list(Usernames), is_binary(TenantId) ->
+    lists:map(fun(Username) ->
+        append_tenant_id(Username, TenantId)
+    end, Usernames).
+
+%% @doc Check if binary matches UUID format (8-4-4-4-12 hex digits).
+-spec is_valid_uuid(binary()) -> boolean().
+is_valid_uuid(<<_:8/binary, "-", _:4/binary, "-", _:4/binary, "-", 
+                _:4/binary, "-", _:12/binary>>) ->
+    true;
+is_valid_uuid(_) ->
+    false.
+
+%% @doc Join binary parts with separator.
+-spec join_with_separator([binary()], binary()) -> binary().
+join_with_separator([], _Sep) ->
+    <<>>;
+join_with_separator([Part], _Sep) ->
+    Part;
+join_with_separator([Head | Tail], Sep) ->
+    lists:foldl(
+        fun(Part, Acc) -> <<Acc/binary, Sep/binary, Part/binary>> end,
+        Head,
+        Tail
+    ).
