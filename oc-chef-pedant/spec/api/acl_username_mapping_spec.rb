@@ -124,7 +124,7 @@ describe "ACL API Username Mapping for Multi-Tenancy", :acl, :username_mapping d
     context "when X-Ops-TenantId header is present" do
       it "strips tenant ID from usernames in response" do
         response = get(
-          api_url("/nodes/#{node_name}/_acl/#{acl_permission}"),
+          api_url("/nodes/#{node_name}/_acl"),
           requestor,
           headers: { 'X-Ops-TenantId' => tenant_id }
         )
@@ -142,7 +142,7 @@ describe "ACL API Username Mapping for Multi-Tenancy", :acl, :username_mapping d
 
       it "does not modify clients in response" do
         response = get(
-          api_url("/nodes/#{node_name}/_acl/#{acl_permission}"),
+          api_url("/nodes/#{node_name}/_acl"),
           requestor,
           headers: { 'X-Ops-TenantId' => tenant_id }
         )
@@ -160,7 +160,7 @@ describe "ACL API Username Mapping for Multi-Tenancy", :acl, :username_mapping d
     context "when X-Ops-TenantId header is absent" do
       it "strips tenant ID from usernames in response (always strips)" do
         response = get(
-          api_url("/nodes/#{node_name}/_acl/#{acl_permission}"),
+          api_url("/nodes/#{node_name}/_acl"),
           requestor
         )
         response.should look_like({ status: 200 })
@@ -178,7 +178,7 @@ describe "ACL API Username Mapping for Multi-Tenancy", :acl, :username_mapping d
     context "granular mode (?detail=granular)" do
       it "strips usernames and separates users/clients arrays" do
         response = get(
-          api_url("/nodes/#{node_name}/_acl/#{acl_permission}?detail=granular"),
+          api_url("/nodes/#{node_name}/_acl?detail=granular"),
           requestor,
           headers: { 'X-Ops-TenantId' => tenant_id }
         )
@@ -218,7 +218,7 @@ describe "ACL API Username Mapping for Multi-Tenancy", :acl, :username_mapping d
         requestor,
         payload: {
           read: {
-            actors: [username1, username2],
+            actors: [username],
             groups: []
           }
         },
@@ -311,7 +311,7 @@ describe "ACL API Username Mapping for Multi-Tenancy", :acl, :username_mapping d
 
         # Verify stored state via GET (stripped)
         fetch_response = get(
-          api_url("/nodes/#{node_name}/_acl/#{acl_permission}"),
+          api_url("/nodes/#{node_name}/_acl"),
           requestor,
           headers: { 'X-Ops-TenantId' => tenant_id }
         )
@@ -341,7 +341,7 @@ describe "ACL API Username Mapping for Multi-Tenancy", :acl, :username_mapping d
 
         # PUT response may be empty JSON {}, verify via GET instead
         fetch_response = get(
-          api_url("/nodes/#{node_name}/_acl/#{acl_permission}"),
+          api_url("/nodes/#{node_name}/_acl"),
           requestor,
           headers: { 'X-Ops-TenantId' => tenant_id }
         )
@@ -372,7 +372,7 @@ describe "ACL API Username Mapping for Multi-Tenancy", :acl, :username_mapping d
         response.should look_like({ status: 200 })
 
         fetch_response = get(
-          api_url("/nodes/#{node_name}/_acl/#{acl_permission}"),
+          api_url("/nodes/#{node_name}/_acl"),
           requestor
         )
         fetch_response.should look_like({ status: 200 })
@@ -415,7 +415,7 @@ describe "ACL API Username Mapping for Multi-Tenancy", :acl, :username_mapping d
 
         # Verify stored correctly via GET (standard format response)
         fetch_response = get(
-          api_url("/nodes/#{node_name}/_acl/#{acl_permission}"),
+          api_url("/nodes/#{node_name}/_acl"),
           requestor,
           headers: { 'X-Ops-TenantId' => tenant_id }
         )
@@ -449,7 +449,7 @@ describe "ACL API Username Mapping for Multi-Tenancy", :acl, :username_mapping d
 
         # GET with granular mode
         fetch_response = get(
-          api_url("/nodes/#{node_name}/_acl/#{acl_permission}?detail=granular"),
+          api_url("/nodes/#{node_name}/_acl?detail=granular"),
           requestor,
           headers: { 'X-Ops-TenantId' => tenant_id }
         )
@@ -508,7 +508,7 @@ describe "ACL API Username Mapping for Multi-Tenancy", :acl, :username_mapping d
 
       # Verify both users stripped
       fetch_response = get(
-        api_url("/nodes/#{node_name}/_acl/#{acl_permission}"),
+        api_url("/nodes/#{node_name}/_acl"),
         requestor
       )
       fetch_response.should look_like({ status: 200 })
@@ -544,7 +544,7 @@ describe "ACL API Username Mapping for Multi-Tenancy", :acl, :username_mapping d
 
       # Verify via GET - shows stripped username and no tenant suffix leakage
       fetch_response = get(
-        api_url("/nodes/#{node_name}/_acl/#{acl_permission}"),
+        api_url("/nodes/#{node_name}/_acl"),
         requestor
       )
       fetch_response.should look_like({ status: 200 })
@@ -587,7 +587,7 @@ describe "ACL API Username Mapping for Multi-Tenancy", :acl, :username_mapping d
 
       # Verify: user is stripped, client unchanged
       fetch_response = get(
-        api_url("/nodes/#{node_name}/_acl/#{acl_permission}"),
+        api_url("/nodes/#{node_name}/_acl"),
         requestor
       )
       fetch_response.should look_like({ status: 200 })
@@ -640,7 +640,7 @@ describe "ACL API Username Mapping for Multi-Tenancy", :acl, :username_mapping d
       response.should look_like({ status: 200 })
 
       # Verify
-      fetch_response = get(api_url("/roles/#{role_name}/_acl/read"), requestor)
+      fetch_response = get(api_url("/roles/#{role_name}/_acl"), requestor)
       fetch_response.should look_like({ status: 200 })
       fetch_parsed = parse(fetch_response)
 
@@ -669,7 +669,7 @@ describe "ACL API Username Mapping for Multi-Tenancy", :acl, :username_mapping d
       response.should look_like({ status: 200 })
 
       # Verify
-      fetch_response = get(api_url("/environments/#{env_name}/_acl/read"), requestor)
+      fetch_response = get(api_url("/environments/#{env_name}/_acl"), requestor)
       fetch_response.should look_like({ status: 200 })
       fetch_parsed = parse(fetch_response)
 
