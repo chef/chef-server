@@ -46,7 +46,26 @@ describe "ACL API Username Mapping for Multi-Tenancy", :acl, :username_mapping d
     client_name
   end
 
-  def expect_stripped_users(response_or_parsed, expected_users)
+  # Standard ACL responses use "actors" array (combined users+clients)
+  def expect_stripped_users_in_actors(response_or_parsed, expected_users)
+    parsed = response_or_parsed.is_a?(Hash) ? response_or_parsed : parse(response_or_parsed)
+    expected_users.each do |user|
+      parsed["actors"].should include(user)
+      parsed["actors"].any? { |a| a.start_with?("#{user}__") }.should be_falsey
+    end
+    parsed
+  end
+
+  def expect_actors_include(response_or_parsed, expected_actors)
+    parsed = response_or_parsed.is_a?(Hash) ? response_or_parsed : parse(response_or_parsed)
+    expected_actors.each do |actor|
+      parsed["actors"].should include(actor)
+    end
+    parsed
+  end
+
+  # Granular ACL responses (?detail=granular) use separate "users"/"clients" arrays
+  def expect_stripped_users_granular(response_or_parsed, expected_users)
     parsed = response_or_parsed.is_a?(Hash) ? response_or_parsed : parse(response_or_parsed)
     expected_users.each do |user|
       parsed["users"].should include(user)
@@ -55,7 +74,7 @@ describe "ACL API Username Mapping for Multi-Tenancy", :acl, :username_mapping d
     parsed
   end
 
-  def expect_clients_unchanged(response_or_parsed, expected_clients)
+  def expect_clients_unchanged_granular(response_or_parsed, expected_clients)
     parsed = response_or_parsed.is_a?(Hash) ? response_or_parsed : parse(response_or_parsed)
     expected_clients.each do |client|
       parsed["clients"].should include(client)
@@ -115,8 +134,10 @@ describe "ACL API Username Mapping for Multi-Tenancy", :acl, :username_mapping d
         parsed.should have_key(acl_permission)
         permission_data = parsed[acl_permission]
 
-        expect_stripped_users(permission_data, [username])
-        permission_data["users"].should_not include(username_with_tenant)
+        # Standard response uses "actors" array (combined users+clients)
+        permission_data.should have_key("actors")
+        expect_stripped_users_in_actors(permission_data, [username])
+        permission_data["actors"].should_not include(username_with_tenant)
       end
 
       it "does not modify clients in response" do
@@ -130,7 +151,9 @@ describe "ACL API Username Mapping for Multi-Tenancy", :acl, :username_mapping d
         parsed = parse(response)
         permission_data = parsed[acl_permission]
 
-        expect_clients_unchanged(permission_data, [client_name])
+        # Standard response: actors array includes clients unchanged
+        permission_data.should have_key("actors")
+        expect_actors_include(permission_data, [client_name])
       end
     end
 
@@ -145,8 +168,10 @@ describe "ACL API Username Mapping for Multi-Tenancy", :acl, :username_mapping d
         parsed = parse(response)
         permission_data = parsed[acl_permission]
 
-        expect_stripped_users(permission_data, [username])
-        permission_data["users"].should_not include(username_with_tenant)
+        # Standard response uses "actors" array
+        permission_data.should have_key("actors")
+        expect_stripped_users_in_actors(permission_data, [username])
+        permission_data["actors"].should_not include(username_with_tenant)
       end
     end
 
@@ -167,9 +192,9 @@ describe "ACL API Username Mapping for Multi-Tenancy", :acl, :username_mapping d
         permission_data.should have_key("clients")
         permission_data["actors"].should eq([])
 
-        # Verify stripping and separation
-        expect_stripped_users(permission_data, [username])
-        expect_clients_unchanged(permission_data, [client_name])
+        # Verify stripping and separation in granular mode
+        expect_stripped_users_granular(permission_data, [username])
+        expect_clients_unchanged_granular(permission_data, [client_name])
       end
     end
   end
@@ -218,9 +243,10 @@ describe "ACL API Username Mapping for Multi-Tenancy", :acl, :username_mapping d
       parsed = parse(response)
       %w[create read update delete grant].each do |perm|
         parsed.should have_key(perm)
-        if parsed[perm]["users"].include?(username)
+        parsed[perm].should have_key("actors")
+        if parsed[perm]["actors"].include?(username)
           # Only read has our user, but check all parts for consistency
-          expect_stripped_users(parsed[perm], [username])
+          expect_stripped_users_in_actors(parsed[perm], [username])
         end
       end
     end
@@ -241,8 +267,8 @@ describe "ACL API Username Mapping for Multi-Tenancy", :acl, :username_mapping d
       read_perm.should have_key("clients")
       read_perm["actors"].should eq([]) # Empty in granular mode
       
-      # Verify users stripped, clients unchanged
-      expect_stripped_users(read_perm, [username])
+      # Verify users stripped, clients unchanged in granular mode
+      expect_stripped_users_granular(read_perm, [username])
     end
   end
 
@@ -293,8 +319,10 @@ describe "ACL API Username Mapping for Multi-Tenancy", :acl, :username_mapping d
         fetch_parsed = parse(fetch_response)
         permission_data = fetch_parsed[acl_permission]
 
-        expect_stripped_users(permission_data, [username])
-        permission_data["users"].should_not include(username_with_tenant)
+        # Standard response uses "actors" array
+        permission_data.should have_key("actors")
+        expect_stripped_users_in_actors(permission_data, [username])
+        permission_data["actors"].should_not include(username_with_tenant)
       end
 
       it "returns response with tenant ID stripped" do
@@ -311,11 +339,20 @@ describe "ACL API Username Mapping for Multi-Tenancy", :acl, :username_mapping d
         )
         response.should look_like({ status: 200 })
 
-        parsed = parse(response)
-        permission_data = parsed[acl_permission]
+        # PUT response may be empty JSON {}, verify via GET instead
+        fetch_response = get(
+          api_url("/nodes/#{node_name}/_acl/#{acl_permission}"),
+          requestor,
+          headers: { 'X-Ops-TenantId' => tenant_id }
+        )
+        fetch_response.should look_like({ status: 200 })
+        fetch_parsed = parse(fetch_response)
+        permission_data = fetch_parsed[acl_permission]
 
-        expect_stripped_users(permission_data, [username])
-        permission_data["users"].should_not include(username_with_tenant)
+        # Standard response uses "actors" array
+        permission_data.should have_key("actors")
+        expect_stripped_users_in_actors(permission_data, [username])
+        permission_data["actors"].should_not include(username_with_tenant)
       end
     end
 
@@ -342,7 +379,91 @@ describe "ACL API Username Mapping for Multi-Tenancy", :acl, :username_mapping d
         fetch_parsed = parse(fetch_response)
         permission_data = fetch_parsed[acl_permission]
 
-        expect_stripped_users(permission_data, [username])
+        # Standard response uses "actors" array
+        permission_data.should have_key("actors")
+        expect_stripped_users_in_actors(permission_data, [username])
+      end
+    end
+
+    context "disambiguation format (separate users/clients arrays)" do
+      let(:client_name) { random_name("testclient") }
+
+      before(:each) do
+        create_client!(client_name)
+      end
+
+      after(:each) do
+        delete(api_url("/clients/#{client_name}"), requestor) rescue nil
+      end
+
+      it "transforms users but not clients when using disambiguation format" do
+        # PUT with disambiguation format: separate users/clients arrays, empty actors
+        response = put(
+          api_url("/nodes/#{node_name}/_acl/#{acl_permission}"),
+          requestor,
+          payload: {
+            acl_permission => {
+              users: [username],
+              clients: [client_name],
+              actors: [],
+              groups: []
+            }
+          },
+          headers: { 'X-Ops-TenantId' => tenant_id }
+        )
+        response.should look_like({ status: 200 })
+
+        # Verify stored correctly via GET (standard format response)
+        fetch_response = get(
+          api_url("/nodes/#{node_name}/_acl/#{acl_permission}"),
+          requestor,
+          headers: { 'X-Ops-TenantId' => tenant_id }
+        )
+        fetch_response.should look_like({ status: 200 })
+        fetch_parsed = parse(fetch_response)
+        permission_data = fetch_parsed[acl_permission]
+
+        # Standard response merges users+clients into actors array
+        permission_data.should have_key("actors")
+        expect_stripped_users_in_actors(permission_data, [username])
+        expect_actors_include(permission_data, [client_name])
+        permission_data["actors"].should_not include(username_with_tenant)
+      end
+
+      it "transforms users in disambiguation format with granular response" do
+        # PUT with disambiguation format
+        response = put(
+          api_url("/nodes/#{node_name}/_acl/#{acl_permission}"),
+          requestor,
+          payload: {
+            acl_permission => {
+              users: [username],
+              clients: [client_name],
+              actors: [],
+              groups: []
+            }
+          },
+          headers: { 'X-Ops-TenantId' => tenant_id }
+        )
+        response.should look_like({ status: 200 })
+
+        # GET with granular mode
+        fetch_response = get(
+          api_url("/nodes/#{node_name}/_acl/#{acl_permission}?detail=granular"),
+          requestor,
+          headers: { 'X-Ops-TenantId' => tenant_id }
+        )
+        fetch_response.should look_like({ status: 200 })
+        fetch_parsed = parse(fetch_response)
+        permission_data = fetch_parsed[acl_permission]
+
+        # Granular mode: separate users/clients arrays
+        permission_data.should have_key("users")
+        permission_data.should have_key("clients")
+        permission_data["actors"].should eq([])
+
+        expect_stripped_users_granular(permission_data, [username])
+        expect_clients_unchanged_granular(permission_data, [client_name])
       end
     end
   end
@@ -394,7 +515,9 @@ describe "ACL API Username Mapping for Multi-Tenancy", :acl, :username_mapping d
       fetch_parsed = parse(fetch_response)
       permission_data = fetch_parsed[acl_permission]
 
-      expect_stripped_users(permission_data, [username1, username2])
+      # Standard response uses "actors" array
+      permission_data.should have_key("actors")
+      expect_stripped_users_in_actors(permission_data, [username1, username2])
     end
 
     it "with different tenant IDs does not leak tenant suffixes in responses" do
@@ -428,7 +551,9 @@ describe "ACL API Username Mapping for Multi-Tenancy", :acl, :username_mapping d
       fetch_parsed = parse(fetch_response)
       permission_data = fetch_parsed[acl_permission]
 
-      expect_stripped_users(permission_data, [username])
+      # Standard response uses "actors" array
+      permission_data.should have_key("actors")
+      expect_stripped_users_in_actors(permission_data, [username])
 
       # Cleanup
       delete(api_url("/users/#{username}"), requestor) rescue nil
@@ -469,8 +594,10 @@ describe "ACL API Username Mapping for Multi-Tenancy", :acl, :username_mapping d
       fetch_parsed = parse(fetch_response)
       permission_data = fetch_parsed[acl_permission]
 
-      expect_stripped_users(permission_data, [username])
-      expect_clients_unchanged(permission_data, [client_name])
+      # Standard response: actors array contains both users and clients
+      permission_data.should have_key("actors")
+      expect_stripped_users_in_actors(permission_data, [username])
+      expect_actors_include(permission_data, [client_name])
 
       # Cleanup
       delete(api_url("/users/#{username}"), requestor) rescue nil
