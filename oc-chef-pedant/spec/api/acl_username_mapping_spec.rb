@@ -87,8 +87,7 @@ describe "ACL API Username Mapping for Multi-Tenancy", :acl, :username_mapping d
         requestor,
         payload: {
           acl_permission => {
-            users: [username],
-            clients: [client_name],
+            actors: [username, client_name],
             groups: []
           }
         },
@@ -194,8 +193,7 @@ describe "ACL API Username Mapping for Multi-Tenancy", :acl, :username_mapping d
         requestor,
         payload: {
           read: {
-            users: [username],
-            clients: [],
+            actors: [username1, username2],
             groups: []
           }
         },
@@ -277,8 +275,7 @@ describe "ACL API Username Mapping for Multi-Tenancy", :acl, :username_mapping d
           requestor,
           payload: {
             acl_permission => {
-              users: [username],
-              clients: [],
+              actors: [username],
               groups: []
             }
           },
@@ -306,8 +303,7 @@ describe "ACL API Username Mapping for Multi-Tenancy", :acl, :username_mapping d
           requestor,
           payload: {
             acl_permission => {
-              users: [username],
-              clients: [],
+              actors: [username],
               groups: []
             }
           },
@@ -331,8 +327,7 @@ describe "ACL API Username Mapping for Multi-Tenancy", :acl, :username_mapping d
           requestor,
           payload: {
             acl_permission => {
-              users: [username],
-              clients: [],
+              actors: [username],
               groups: []
             }
           }
@@ -382,8 +377,7 @@ describe "ACL API Username Mapping for Multi-Tenancy", :acl, :username_mapping d
         requestor,
         payload: {
           acl_permission => {
-            users: [username1, username2],
-            clients: [],
+            actors: [username1, username2],
             groups: []
           }
         },
@@ -417,8 +411,7 @@ describe "ACL API Username Mapping for Multi-Tenancy", :acl, :username_mapping d
         requestor,
         payload: {
           acl_permission => {
-            users: [username],
-            clients: [],
+            actors: [username],
             groups: []
           }
         },
@@ -459,8 +452,7 @@ describe "ACL API Username Mapping for Multi-Tenancy", :acl, :username_mapping d
         requestor,
         payload: {
           acl_permission => {
-            users: [username],
-            clients: [client_name],
+            actors: [username, client_name],
             groups: []
           }
         },
@@ -512,8 +504,7 @@ describe "ACL API Username Mapping for Multi-Tenancy", :acl, :username_mapping d
         requestor,
         payload: {
           read: {
-            users: [username],
-            clients: [],
+            actors: [username],
             groups: []
           }
         },
@@ -542,8 +533,7 @@ describe "ACL API Username Mapping for Multi-Tenancy", :acl, :username_mapping d
         requestor,
         payload: {
           read: {
-            users: [username],
-            clients: [],
+            actors: [username],
             groups: []
           }
         },
