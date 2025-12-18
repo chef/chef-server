@@ -678,4 +678,240 @@ describe "ACL API Username Mapping for Multi-Tenancy", :acl, :username_mapping d
       expect_stripped_users_in_actors(fetch_parsed["read"], [username])
     end
   end
+
+  # Test user ACL endpoints
+  describe "username mapping for /users/{name}/_acl endpoints" do
+    let(:test_username) { random_name("testuser") }
+    let(:test_username_with_tenant) { "#{test_username}__#{tenant_id}" }
+    
+    before(:each) do
+      # Create a test user with tenant suffix
+      @test_user = platform.create_user(test_username_with_tenant)
+      platform.associate_user_with_org(org_name, @test_user)
+    end
+
+    after(:each) do
+      platform.delete_user(@test_user) rescue nil
+    end
+
+    context "GET /users/{name}/_acl" do
+      it "strips tenant IDs from usernames in user ACL response" do
+        # Get the user's ACL
+        response = get(
+          "#{platform.server}/users/#{test_username_with_tenant}/_acl",
+          requestor,
+          headers: { 'X-Ops-TenantId' => tenant_id }
+        )
+        response.should look_like({ status: 200 })
+
+        parsed = parse(response)
+        
+        # Check all permissions for username stripping
+        %w[create read update delete grant].each do |perm|
+          parsed.should have_key(perm)
+          permission_data = parsed[perm]
+          permission_data.should have_key("actors")
+          
+          # If our test user appears in actors, it should be stripped
+          if permission_data["actors"].include?(test_username)
+            expect_stripped_users_in_actors(permission_data, [test_username])
+            permission_data["actors"].should_not include(test_username_with_tenant)
+          end
+        end
+      end
+    end
+
+    context "PUT /users/{name}/_acl/{permission}" do
+      let(:other_username) { random_name("otheruser") }
+      let(:other_username_with_tenant) { "#{other_username}__#{tenant_id}" }
+      
+      before(:each) do
+        # Create another user to grant permissions to
+        @other_user = platform.create_user(other_username_with_tenant)
+        platform.associate_user_with_org(org_name, @other_user)
+      end
+
+      after(:each) do
+        platform.delete_user(@other_user) rescue nil
+      end
+
+      it "maps usernames on request and strips on response" do
+        # PUT to grant read permission to other_username (with tenant header)
+        response = put(
+          "#{platform.server}/users/#{test_username_with_tenant}/_acl/read",
+          requestor,
+          payload: {
+            "read" => {
+              "actors" => ["pivotal", other_username],
+              "groups" => []
+            }
+          },
+          headers: { 'X-Ops-TenantId' => tenant_id }
+        )
+        response.should look_like({ status: 200 })
+
+        # Verify the mapping worked by getting the ACL
+        fetch_response = get(
+          "#{platform.server}/users/#{test_username_with_tenant}/_acl",
+          requestor,
+          headers: { 'X-Ops-TenantId' => tenant_id }
+        )
+        fetch_response.should look_like({ status: 200 })
+        
+        fetch_parsed = parse(fetch_response)
+        read_permission = fetch_parsed["read"]
+        
+        # Username should be stripped in response
+        expect_stripped_users_in_actors(read_permission, [other_username])
+        read_permission["actors"].should_not include(other_username_with_tenant)
+      end
+    end
+  end
+
+  # Test organization ACL endpoints
+  describe "username mapping for /organizations/_acl endpoints" do
+    let(:test_username) { random_name("orguser") }
+    let(:test_username_with_tenant) { "#{test_username}__#{tenant_id}" }
+
+    before(:each) do
+      # Create a test user with tenant suffix
+      @test_user = platform.create_user(test_username_with_tenant)
+      platform.associate_user_with_org(org_name, @test_user)
+    end
+
+    after(:each) do
+      platform.delete_user(@test_user) rescue nil
+    end
+
+    context "GET /organizations/_acl" do
+      it "strips tenant IDs from usernames in organization ACL response" do
+        # First, grant our test user some permission on the org
+        put(
+          api_url("organizations/_acl/read"),
+          requestor,
+          payload: {
+            "read" => {
+              "actors" => ["pivotal", test_username],
+              "groups" => ["admins", "users"]
+            }
+          },
+          headers: { 'X-Ops-TenantId' => tenant_id }
+        )
+
+        # Get the organization ACL
+        response = get(
+          api_url("organizations/_acl"),
+          requestor,
+          headers: { 'X-Ops-TenantId' => tenant_id }
+        )
+        response.should look_like({ status: 200 })
+
+        parsed = parse(response)
+        read_permission = parsed["read"]
+        
+        # Username should be stripped in response
+        expect_stripped_users_in_actors(read_permission, [test_username])
+        read_permission["actors"].should_not include(test_username_with_tenant)
+      end
+    end
+
+    context "PUT /organizations/_acl/{permission}" do
+      it "maps usernames on request and strips on response" do
+        # Store original ACL state for restoration
+        original_acl = get(api_url("organizations/_acl"), requestor)
+        original_parsed = parse(original_acl)
+        original_create = original_parsed["create"]
+
+        begin
+          # PUT to grant create permission to test_username (with tenant header)
+          response = put(
+            api_url("organizations/_acl/create"),
+            requestor,
+            payload: {
+              "create" => {
+                "actors" => ["pivotal", test_username],
+                "groups" => ["admins"]
+              }
+            },
+            headers: { 'X-Ops-TenantId' => tenant_id }
+          )
+          response.should look_like({ status: 200 })
+
+          # Verify the mapping worked by getting the ACL
+          fetch_response = get(
+            api_url("organizations/_acl"),
+            requestor,
+            headers: { 'X-Ops-TenantId' => tenant_id }
+          )
+          fetch_response.should look_like({ status: 200 })
+          
+          fetch_parsed = parse(fetch_response)
+          create_permission = fetch_parsed["create"]
+          
+          # Username should be stripped in response
+          expect_stripped_users_in_actors(create_permission, [test_username])
+          create_permission["actors"].should_not include(test_username_with_tenant)
+        ensure
+          # Restore original ACL state
+          put(
+            api_url("organizations/_acl/create"),
+            requestor,
+            payload: { "create" => original_create }
+          )
+        end
+      end
+
+      it "handles mixed users and clients correctly" do
+        let(:client_name) { random_name("orgclient") }
+        
+        # Create client
+        create_client!(client_name)
+        
+        # Store original ACL for restoration
+        original_acl = get(api_url("organizations/_acl"), requestor)
+        original_parsed = parse(original_acl)
+        original_update = original_parsed["update"]
+
+        begin
+          # PUT with both user and client
+          response = put(
+            api_url("organizations/_acl/update"),
+            requestor,
+            payload: {
+              "update" => {
+                "actors" => ["pivotal", test_username, client_name],
+                "groups" => ["admins"]
+              }
+            },
+            headers: { 'X-Ops-TenantId' => tenant_id }
+          )
+          response.should look_like({ status: 200 })
+
+          # Verify via GET
+          fetch_response = get(
+            api_url("organizations/_acl"),
+            requestor,
+            headers: { 'X-Ops-TenantId' => tenant_id }
+          )
+          fetch_response.should look_like({ status: 200 })
+          
+          fetch_parsed = parse(fetch_response)
+          update_permission = fetch_parsed["update"]
+          
+          # User should be stripped, client unchanged
+          expect_stripped_users_in_actors(update_permission, [test_username])
+          expect_actors_include(update_permission, [client_name])
+          update_permission["actors"].should_not include(test_username_with_tenant)
+        ensure
+          # Restore original ACL and cleanup
+          put(
+            api_url("organizations/_acl/update"),
+            requestor,
+            payload: { "update" => original_update }
+          )
+          delete(api_url("/clients/#{client_name}"), requestor) rescue nil
+        end
+      end
+    end
+  end
 end
