@@ -615,10 +615,15 @@ describe "ACL API Username Mapping for Multi-Tenancy", :acl, :username_mapping d
     before(:each) do
       user = platform.create_user(username_with_tenant)
       platform.associate_user_with_org(org_name, user)
+      # Cleanup any leftover resources from previous runs
+      delete(api_url("/roles/#{role_name}"), requestor) rescue nil
+      delete(api_url("/environments/#{env_name}"), requestor) rescue nil
     end
 
     after(:each) do
       delete(api_url("/users/#{username}"), requestor) rescue nil
+      delete(api_url("/roles/#{role_name}"), requestor) rescue nil
+      delete(api_url("/environments/#{env_name}"), requestor) rescue nil
     end
 
     it "works for role ACLs" do
@@ -644,10 +649,7 @@ describe "ACL API Username Mapping for Multi-Tenancy", :acl, :username_mapping d
       fetch_response.should look_like({ status: 200 })
       fetch_parsed = parse(fetch_response)
 
-      expect_stripped_users(fetch_parsed["read"], [username])
-
-      # Cleanup
-      delete(api_url("/roles/#{role_name}"), requestor) rescue nil
+      expect_stripped_users_in_actors(fetch_parsed["read"], [username])
     end
 
     it "works for environment ACLs" do
@@ -673,10 +675,7 @@ describe "ACL API Username Mapping for Multi-Tenancy", :acl, :username_mapping d
       fetch_response.should look_like({ status: 200 })
       fetch_parsed = parse(fetch_response)
 
-      expect_stripped_users(fetch_parsed["read"], [username])
-
-      # Cleanup
-      delete(api_url("/environments/#{env_name}"), requestor) rescue nil
+      expect_stripped_users_in_actors(fetch_parsed["read"], [username])
     end
   end
 end
