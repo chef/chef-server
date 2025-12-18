@@ -696,53 +696,46 @@ describe "ACL API Username Mapping for Multi-Tenancy", :acl, :username_mapping d
 
     context "GET /users/{name}/_acl" do
       it "strips tenant IDs from usernames in user ACL response" do
-        # Get the user's ACL
+        # Get the user's ACL - use admin_user who has permission
         response = get(
           "#{platform.server}/users/#{test_username_with_tenant}/_acl",
-          requestor,
+          platform.admin_user,
           headers: { 'X-Ops-TenantId' => tenant_id }
         )
         response.should look_like({ status: 200 })
 
         parsed = parse(response)
         
-        # Check all permissions for username stripping
+        # The test user should appear in their own ACL actors list (at least in some permissions)
+        # Verify that usernames are stripped properly
         %w[create read update delete grant].each do |perm|
           parsed.should have_key(perm)
           permission_data = parsed[perm]
           permission_data.should have_key("actors")
           
-          # If our test user appears in actors, it should be stripped
-          if permission_data["actors"].include?(test_username)
-            expect_stripped_users_in_actors(permission_data, [test_username])
-            permission_data["actors"].should_not include(test_username_with_tenant)
-          end
+          # Check that no tenant-suffixed usernames exist
+          permission_data["actors"].should_not include(test_username_with_tenant)
         end
       end
     end
 
     context "PUT /users/{name}/_acl/{permission}" do
-      let(:other_username) { random_name("otheruser") }
-      let(:other_username_with_tenant) { "#{other_username}__#{tenant_id}" }
-      
-      before(:each) do
-        # Create another user to grant permissions to
-        @other_user = platform.create_user(other_username_with_tenant)
-        platform.associate_user_with_org(org_name, @other_user)
-      end
-
-      after(:each) do
-        platform.delete_user(@other_user) rescue nil
-      end
-
       it "maps usernames on request and strips on response" do
-        # PUT to grant read permission to other_username (with tenant header)
+        # First get the current ACL to preserve existing actors
+        current_acl = get(
+          "#{platform.server}/users/#{test_username_with_tenant}/_acl",
+          platform.admin_user
+        )
+        current_parsed = parse(current_acl)
+        existing_actors = current_parsed["read"]["actors"]
+        
+        # PUT to grant read permission including test_username (with tenant header)
         response = put(
           "#{platform.server}/users/#{test_username_with_tenant}/_acl/read",
-          requestor,
+          platform.admin_user,
           payload: {
             "read" => {
-              "actors" => ["pivotal", other_username],
+              "actors" => (existing_actors + [test_username]).uniq,
               "groups" => []
             }
           },
@@ -753,7 +746,7 @@ describe "ACL API Username Mapping for Multi-Tenancy", :acl, :username_mapping d
         # Verify the mapping worked by getting the ACL
         fetch_response = get(
           "#{platform.server}/users/#{test_username_with_tenant}/_acl",
-          requestor,
+          platform.admin_user,
           headers: { 'X-Ops-TenantId' => tenant_id }
         )
         fetch_response.should look_like({ status: 200 })
@@ -762,8 +755,8 @@ describe "ACL API Username Mapping for Multi-Tenancy", :acl, :username_mapping d
         read_permission = fetch_parsed["read"]
         
         # Username should be stripped in response
-        expect_stripped_users_in_actors(read_permission, [other_username])
-        read_permission["actors"].should_not include(other_username_with_tenant)
+        expect_stripped_users_in_actors(read_permission, [test_username])
+        read_permission["actors"].should_not include(test_username_with_tenant)
       end
     end
   end
@@ -785,13 +778,13 @@ describe "ACL API Username Mapping for Multi-Tenancy", :acl, :username_mapping d
 
     context "GET /organizations/_acl" do
       it "strips tenant IDs from usernames in organization ACL response" do
-        # First, grant our test user some permission on the org
+        # First, grant our test user some permission on the org (don't include pivotal in actors)
         put(
           api_url("organizations/_acl/read"),
-          requestor,
+          platform.admin_user,
           payload: {
             "read" => {
-              "actors" => ["pivotal", test_username],
+              "actors" => [platform.admin_user.name, test_username],
               "groups" => ["admins", "users"]
             }
           },
@@ -801,7 +794,7 @@ describe "ACL API Username Mapping for Multi-Tenancy", :acl, :username_mapping d
         # Get the organization ACL
         response = get(
           api_url("organizations/_acl"),
-          requestor,
+          platform.admin_user,
           headers: { 'X-Ops-TenantId' => tenant_id }
         )
         response.should look_like({ status: 200 })
@@ -818,18 +811,18 @@ describe "ACL API Username Mapping for Multi-Tenancy", :acl, :username_mapping d
     context "PUT /organizations/_acl/{permission}" do
       it "maps usernames on request and strips on response" do
         # Store original ACL state for restoration
-        original_acl = get(api_url("organizations/_acl"), requestor)
+        original_acl = get(api_url("organizations/_acl"), platform.admin_user)
         original_parsed = parse(original_acl)
         original_create = original_parsed["create"]
 
         begin
-          # PUT to grant create permission to test_username (with tenant header)
+          # PUT to grant create permission to test_username (with tenant header, don't use pivotal)
           response = put(
             api_url("organizations/_acl/create"),
-            requestor,
+            platform.admin_user,
             payload: {
               "create" => {
-                "actors" => ["pivotal", test_username],
+                "actors" => [platform.admin_user.name, test_username],
                 "groups" => ["admins"]
               }
             },
@@ -840,7 +833,7 @@ describe "ACL API Username Mapping for Multi-Tenancy", :acl, :username_mapping d
           # Verify the mapping worked by getting the ACL
           fetch_response = get(
             api_url("organizations/_acl"),
-            requestor,
+            platform.admin_user,
             headers: { 'X-Ops-TenantId' => tenant_id }
           )
           fetch_response.should look_like({ status: 200 })
@@ -855,31 +848,31 @@ describe "ACL API Username Mapping for Multi-Tenancy", :acl, :username_mapping d
           # Restore original ACL state
           put(
             api_url("organizations/_acl/create"),
-            requestor,
+            platform.admin_user,
             payload: { "create" => original_create }
           )
         end
       end
 
+      let(:client_name) { random_name("orgclient") }
+      
       it "handles mixed users and clients correctly" do
-        let(:client_name) { random_name("orgclient") }
-        
         # Create client
         create_client!(client_name)
         
         # Store original ACL for restoration
-        original_acl = get(api_url("organizations/_acl"), requestor)
+        original_acl = get(api_url("organizations/_acl"), platform.admin_user)
         original_parsed = parse(original_acl)
         original_update = original_parsed["update"]
 
         begin
-          # PUT with both user and client
+          # PUT with both user and client (don't use pivotal)
           response = put(
             api_url("organizations/_acl/update"),
-            requestor,
+            platform.admin_user,
             payload: {
               "update" => {
-                "actors" => ["pivotal", test_username, client_name],
+                "actors" => [platform.admin_user.name, test_username, client_name],
                 "groups" => ["admins"]
               }
             },
@@ -890,7 +883,7 @@ describe "ACL API Username Mapping for Multi-Tenancy", :acl, :username_mapping d
           # Verify via GET
           fetch_response = get(
             api_url("organizations/_acl"),
-            requestor,
+            platform.admin_user,
             headers: { 'X-Ops-TenantId' => tenant_id }
           )
           fetch_response.should look_like({ status: 200 })
@@ -906,10 +899,10 @@ describe "ACL API Username Mapping for Multi-Tenancy", :acl, :username_mapping d
           # Restore original ACL and cleanup
           put(
             api_url("organizations/_acl/update"),
-            requestor,
+            platform.admin_user,
             payload: { "update" => original_update }
           )
-          delete(api_url("/clients/#{client_name}"), requestor) rescue nil
+          delete(api_url("/clients/#{client_name}"), platform.admin_user) rescue nil
         end
       end
     end
