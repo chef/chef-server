@@ -73,15 +73,23 @@ template redis_config do
   owner 'root'
   group 'root'
   mode '0644'
-  variables(redis_data.to_hash)
+  variables(redis_data.to_hash.merge(
+    'password' => PrivateChef.credentials.get('redis_lb', 'password')
+  ))
 end
 
 # Define the redis_lb runit service.
 component_runit_service 'redis_lb'
 
-# Restart the redis_lb runit service.
+# Force restart the redis_lb service to apply config changes.
+# We need to stop then start to ensure the new config is loaded.
 runit_service 'redis_lb' do
-  action :restart
+  action :stop
+  only_if { is_data_master? }
+end
+
+runit_service 'redis_lb' do
+  action :start
   retries 10
   retry_delay 1
   only_if { is_data_master? }

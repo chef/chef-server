@@ -296,10 +296,10 @@ Cleansing data in a remote Opensearch instance is not currently supported.
       # opscode-solr4 status is seen as elasticsearch status"
     end
 
-  # Overriding the service_list command to add the keyDB message.
+  # Overriding the service_list command to add the Valkey message.
   def service_list(*args)
     super(*args)
-    log "We are using keydb instead of redis underneath. All the functions are supposed to work the same because keydb is a fork of redis."
+    log "We are using Valkey instead of redis underneath. All the functions are supposed to work the same because Valkey is a fork of redis."
   end
 
     # Overriding reconfigure to skip license checking
@@ -322,7 +322,7 @@ Cleansing data in a remote Opensearch instance is not currently supported.
       mtls_enabled ? run_command(command) : :ok
 
       if status.success?
-        log "We are using keydb instead of redis underneath. All the functions are supposed to work the same because keydb is a fork of redis."
+        log "We are using Valkey instead of redis underneath. All the functions are supposed to work the same because Valkey is a fork of redis."
         log "#{display_name} Reconfigured!"
         exit! 0
       else
