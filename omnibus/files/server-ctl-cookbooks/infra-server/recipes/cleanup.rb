@@ -52,10 +52,10 @@ directory "/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/sv/opscode-chef-mover" 
 end
 
 [
-  '/opt/opscode/sv/elasticsearch',
-  '/opt/opscode/embedded/elasticsearch',
-  '/opt/opscode/service/elasticsearch',
-  '/var/log/opscode/elasticsearch/',
+  "/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/sv/elasticsearch",
+  "/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/embedded/elasticsearch",
+  "/opt/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/service/elasticsearch",
+  "/var/log/#{ChefUtils::Dist::Org::LEGACY_CONF_DIR}/elasticsearch/",
 ].each do |dir_name|
   directory dir_name do
     recursive true
