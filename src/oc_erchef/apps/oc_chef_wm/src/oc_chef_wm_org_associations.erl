@@ -28,7 +28,6 @@
                            malformed_request/2,
                            ping/2,
                            forbidden/2,
-                           is_authorized/2,
                            service_available/2]}]).
 
 -export([allowed_methods/2,
@@ -43,6 +42,7 @@
 -export([auth_info/2,
          init/1,
          init_resource_state/1,
+         is_authorized/2,
          malformed_request_message/3,
          create_path/2,
          request_type/0,
@@ -66,6 +66,13 @@ allowed_methods(Req, State) ->
             ['GET', 'DELETE']
     end,
     {Allowed, Req, State}.
+
+is_authorized(Req, State) ->
+    % To support management of multi-tenant installations by users w/ appropriate permissions
+    % who are not superusers, a user with appropriate ACLs does not need to be a member of
+    % the organization to operate on the organization - that includes the operations of this endpoint,
+    % CRD against org members.
+    chef_wm_base:is_authorized_no_membership(Req, State).
 
 -spec validate_request(chef_wm:http_verb(), wm_req(), chef_wm:base_state()) ->
                               {wm_req(), chef_wm:base_state()}.
@@ -117,14 +124,11 @@ auth_info(Req, #base_state{organization_name = OrgName,
 auth_info(Req, #base_state{requestor_id = RequestorAuthzId,
                            organization_authz_id = OrgAuthzId,
                            resource_state = #association_state{user = User} } = State) ->
-    case wrq:method(Req) of
-        'POST' ->
-            % Only the superuser can force-create an org-user association
-            {superuser_only, Req, State};
-        Method ->
-            {auth_type_for_method(Method, User, OrgAuthzId, RequestorAuthzId), Req, State}
-    end.
+    {auth_type_for_method(wrq:method(req), User, OrgAuthzId, RequestorAuthzId), Req, State}.
 
+auth_type_for_method('POST', #chef_user{ authz_id = UserAuthzId }, OrgAuthzId, RequestorAuthzId) ->
+    %% requestor must have: update permissions in org and read permissions on user
+    [{object, OrgAuthzId, update}, {actor, UserAuthzId, read}];
 auth_type_for_method('DELETE', #chef_user{ authz_id = UserAuthzId }, _OrgAuthzId, UserAuthzId) ->
     %% permissions-wise, user can always disassociate his or her own org association
     %% though we'll have additional safety checks below as well.
