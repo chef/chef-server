@@ -204,10 +204,20 @@ def transform_knife_opc_args(args, chef_server_ctl_cmd, _knife_noun, _knife_verb
     end
     
   when "user-list"
-    # Handle --all-info option (not supported in native knife)
-    if transformed.include?("--all-info") || transformed.include?("-a")
-      transformed = transformed.reject { |arg| %w[--all-info -a].include?(arg) }
-    end
+    # Convert -a to --all-users for consistency
+    # Both should trigger verbose user list output
+    transformed = transformed.map do |arg|
+      next if arg.nil?
+      case arg
+      when "-a"
+        "--all-users"
+      when "--all-info"
+        # Legacy knife-opc flag, map to --all-users
+        "--all-users"
+      else
+        arg
+      end
+    end.compact
   end
   
   transformed
