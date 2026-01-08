@@ -299,6 +299,7 @@ transform_usernames_for_response(Usernames) when is_list(Usernames) ->
 
 %% @doc Transform list of usernames for request (append tenant IDs).
 %% If TenantId is undefined, logs warning and returns usernames unchanged.
+%% Superusers are exempt from tenant mapping as they operate globally.
 -spec transform_usernames_for_request([binary()], binary() | undefined) -> [binary()].
 transform_usernames_for_request(Usernames, undefined) when is_list(Usernames) ->
     lager:warning("X-Ops-TenantId header missing, usernames not transformed"),
@@ -306,7 +307,10 @@ transform_usernames_for_request(Usernames, undefined) when is_list(Usernames) ->
 transform_usernames_for_request(Usernames, TenantId) 
   when is_list(Usernames), is_binary(TenantId) ->
     lists:map(fun(Username) ->
-        append_tenant_id(Username, TenantId)
+        case oc_chef_wm_base:is_superuser(Username) of
+            true -> Username;  % Don't map superusers
+            false -> append_tenant_id(Username, TenantId)
+        end
     end, Usernames).
 
 %% @doc Check if binary matches UUID format (8-4-4-4-12 hex digits).
