@@ -370,3 +370,85 @@ transform_acl_mixed_mapped_unmapped_users_test() ->
     
     %% Mapped user should be stripped, unmapped user unchanged
     ?assertEqual([<<"user1">>, <<"user2">>], Stripped).
+
+%% Test that transform_usernames_for_request exempts superusers from tenant ID mapping
+transform_usernames_for_request_exempts_superusers_test_() ->
+    {foreach,
+     fun() ->
+         %% Setup: Mock the envy module and oc_chef_wm_base
+         meck:new(envy, [unstick, passthrough]),
+         meck:new(oc_chef_wm_base, [passthrough])
+     end,
+     fun(_) ->
+         %% Teardown: Unload mocks
+         meck:unload(envy),
+         meck:unload(oc_chef_wm_base)
+     end,
+     [{"superusers are not mapped but regular users are",
+       fun() ->
+           %% Configure pivotal as a superuser
+           meck:expect(envy, get, fun(oc_chef_wm, superusers, _Default, list) ->
+                                       [<<"pivotal">>];
+                                      (App, Key, Default, _Type) ->
+                                       meck:passthrough([App, Key, Default, list])
+                                   end),
+           
+           %% Test data
+           TenantId = <<"tenant-12345">>,
+           Usernames = [<<"pivotal">>, <<"normaluser">>, <<"anotheruser">>],
+           
+           %% Expected result: pivotal unchanged, others get tenant ID
+           Expected = [<<"pivotal">>,
+                      <<"normaluser__tenant-12345">>,
+                      <<"anotheruser__tenant-12345">>],
+           
+           %% Call the function under test
+           Result = oc_chef_wm_acl_permission:transform_usernames_for_request(Usernames, TenantId),
+           
+           %% Verify the result
+           ?assertEqual(Expected, Result)
+       end},
+      {"all superusers are exempt",
+       fun() ->
+           %% Configure multiple superusers
+           meck:expect(envy, get, fun(oc_chef_wm, superusers, _Default, list) ->
+                                       [<<"pivotal">>, <<"admin">>, <<"root">>];
+                                      (App, Key, Default, _Type) ->
+                                       meck:passthrough([App, Key, Default, list])
+                                   end),
+           
+           %% Test data - all are superusers
+           TenantId = <<"tenant-67890">>,
+           Usernames = [<<"pivotal">>, <<"admin">>, <<"root">>],
+           
+           %% Expected: none should be mapped
+           Expected = [<<"pivotal">>, <<"admin">>, <<"root">>],
+           
+           %% Call and verify
+           Result = oc_chef_wm_acl_permission:transform_usernames_for_request(Usernames, TenantId),
+           ?assertEqual(Expected, Result)
+       end},
+      {"no superusers means all users are mapped",
+       fun() ->
+           %% Configure empty superuser list
+           meck:expect(envy, get, fun(oc_chef_wm, superusers, _Default, list) ->
+                                       [];
+                                      (App, Key, Default, _Type) ->
+                                       meck:passthrough([App, Key, Default, list])
+                                   end),
+           
+           %% Test data - no superusers
+           TenantId = <<"tenant-abcde">>,
+           Usernames = [<<"user1">>, <<"user2">>, <<"user3">>],
+           
+           %% Expected: all should be mapped
+           Expected = [<<"user1__tenant-abcde">>,
+                      <<"user2__tenant-abcde">>,
+                      <<"user3__tenant-abcde">>],
+           
+           %% Call and verify
+           Result = oc_chef_wm_acl_permission:transform_usernames_for_request(Usernames, TenantId),
+           ?assertEqual(Expected, Result)
+       end}
+     ]
+    }.
