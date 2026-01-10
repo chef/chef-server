@@ -728,7 +728,7 @@ describe "ACL API Username Mapping for Multi-Tenancy", :acl, :username_mapping d
           @test_user,
           payload: {
             "read" => {
-              "actors" => ["pivotal", test_username, requestor.name],
+              "actors" => ["pivotal", test_username],
               "groups" => []
             }
           },
