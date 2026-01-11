@@ -78,10 +78,13 @@ validate_request('PUT', Req, #base_state{chef_db_context = DbContext,
     Part = list_to_binary(wrq:path_info(acl_permission, Req)),
 
     %% Transform usernames: append tenant IDs to "users" list
-    TenantId = case wrq:get_req_header("x-ops-tenantid", Req) of
-        undefined -> undefined;
-        HeaderValue -> list_to_binary(HeaderValue)
-    end,
+    %% TESTING ONLY - Hardcoded tenant ID for manual testing
+    TenantId = <<"12345678-1234-1234-1234-123456789012">>,
+    %% Original code (commented for testing):
+    %% TenantId = case wrq:get_req_header("x-ops-tenantid", Req) of
+    %%     undefined -> undefined;
+    %%     HeaderValue -> list_to_binary(HeaderValue)
+    %% end,
 
     TransformedAce = case Ace of
         {PropList} ->
