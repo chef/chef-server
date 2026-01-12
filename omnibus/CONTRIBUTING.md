@@ -4,9 +4,12 @@ In order to facilitate the tedious communication tasks involved in releasing Che
 
 ## Release Notes
 
-The RELEASE_NOTES.md file can be viewed as a higher-level, customer-friendly version of CHANGELOG.md. Significant changes to `opscode-omnibus` and its dependencies should be represented in one of the following three categories:
+Release notes are a higher-level, customer-friendly version of `CHANGELOG.md`. Significant changes to `opscode-omnibus` and its dependencies should be represented in one of the following three categories:
+
 * What's New
 * Bug Fixes
 * Security Fixes
 
 These notes will be included as part the blog post for each release.
+
+Release notes are published from the [chef-web-docs repository](https://github.com/chef/chef-web-docs/blob/main/content/release_notes/server.md).
