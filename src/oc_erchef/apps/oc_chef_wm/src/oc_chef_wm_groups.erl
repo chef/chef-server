@@ -68,13 +68,10 @@ validate_request('POST', Req, #base_state{organization_guid = OrgId,
     {ok, Json} = oc_chef_group:parse_binary_json(Body),
     
     %% Transform usernames: append tenant IDs to "users" list
-    %% TESTING ONLY - Hardcoded tenant ID for manual testing
-    TenantId = <<"12345678-1234-1234-1234-123456789012">>,
-    %% Original code (commented for testing):
-    %% TenantId = case wrq:get_req_header("x-ops-tenantid", Req) of
-    %%     undefined -> undefined;
-    %%     HeaderValue -> list_to_binary(HeaderValue)
-    %% end,
+    TenantId = case wrq:get_req_header("x-ops-tenantid", Req) of
+        undefined -> undefined;
+        HeaderValue -> list_to_binary(HeaderValue)
+    end,
     
     TransformedJson = case Json of
         {PropList} ->
