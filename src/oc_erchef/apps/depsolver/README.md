@@ -71,8 +71,6 @@ License and Authors
 * Author:: Eric Merritt (<ericbmerritt@gmail.com>)
 * Author:: James Casey (<james@chef.io>)
 
-Copyright Chef Software, Inc. All Rights Reserved.
-
 This file is provided to you under the Apache License,
 Version 2.0 (the "License"); you may not use this file
 except in compliance with the License.  You may obtain
