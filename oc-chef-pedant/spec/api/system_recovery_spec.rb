@@ -1,6 +1,6 @@
 #
 # Author:: Tyler Cloke (<tyler@chef.io>)
-# Copyright:: Copyright (c) 2014 Chef, Inc.
+# Copyright:: Copyright © 2014-2025 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
 
 # TODO: there is no LDAP testing here because to
 # accurately simulate the real use case, we would need
