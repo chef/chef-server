@@ -14,7 +14,6 @@
                            malformed_request/2,
                            ping/2,
                            forbidden/2,
-                           is_authorized/2,
                            service_available/2]}]).
 
 -export([allowed_methods/2,
@@ -28,6 +27,7 @@
 -export([auth_info/2,
          init/1,
          init_resource_state/1,
+         is_authorized/2,
          malformed_request_message/3,
          request_type/0,
          validate_request/3]).
@@ -46,6 +46,13 @@ request_type() ->
 
 allowed_methods(Req, State) ->
     {['GET', 'PUT', 'DELETE'], Req, State}.
+
+
+is_authorized(Req, State) ->
+    %% To support management of multi-tenant installations by users w/ appropriate permissions
+    %% who are not the superuser, the user does not need to be a member of the organization
+    %% to operate on the organization.
+    oc_chef_wm_base:is_authorized_no_membership(Req, State).
 
 -spec validate_request(chef_wm:http_verb(), wm_req(), chef_wm:base_state()) ->
                               {wm_req(), chef_wm:base_state()}.
