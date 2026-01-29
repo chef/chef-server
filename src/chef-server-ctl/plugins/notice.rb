@@ -26,7 +26,7 @@ aws-sdk-kms | 1.115.0 | Apache-2.0
 aws-sdk-s3 | 1.201.0 | Apache-2.0
 aws-sdk-secretsmanager | 1.121.0 | Apache-2.0
 bear | 119234548783af19b8ec75c879c5062676b92571 | Apache-2.0
-bookshelf |  | Apache-2.0 
+bookshelf | | Apache-2.0 
 Capture-Tiny | 0.50 | Apache-2.0
 chef | 18.8.46 | Apache-2.0
 chef_authn | 57ae954ab231e4cd24740315eddc932aaf5515fc | Apache-2.0
@@ -213,7 +213,7 @@ uuid | 41c3725fe87a11f7d2e77463dcff72eb11fcdee0 | MIT
 cf | 2bcf00402db9ca5a4790de7f82c8139baaf8856c | BSD-3-Clause
 epgsql | 57ea14d2e4c60df6de1c86a27aa09db9c939b6e7 | BSD-3-Clause
 ffi | 1.16.3 | BSD-3-Clause
-keydb | 6.3.4 | BSD-3-Clause
+valkey | 7.2.11 | BSD-3-Clause
 lhttpc | b8ea2a03b081c65902600e358cbdb17b5f826ffe | BSD-3-Clause
 libedit | 20120601-3.0 | BSD-3-Clause
 recon | f7b6c08e6e9e2219db58bfb012c58c178822e01e | BSD-3-Clause
@@ -463,15 +463,15 @@ Progress Chef Infra Server v15 incorporates
 
 addressable	v2.8.7,
 appbundler	v0.13.4,
-aws-eventstream v1.4.0,
-aws-partitions v1.1174.0,
-aws-sdk-core v3.234.0,
-aws-sdk-kms	v1.115.0,
-aws-sdk-s3	v1.201.0,
-aws-sdk-secretsmanager	v1.121.0,
+aws-eventstream v1.3.0,
+aws-partitions v1.981.0,
+aws-sdk-core v3.209.1,
+aws-sdk-kms	v1.94.0,
+aws-sdk-s3	v1.166.0,
+aws-sdk-secretsmanager	v1.108.0,
 bear	v119234548783af19b8ec75c879c5062676b92571,
 bookshelf,
-Capture-Tiny v0.50,
+Capture-Tiny v0.5,
 chef	v18.8.46,
 chef_authn	v57ae954ab231e4cd24740315eddc932aaf5515fc,
 chef_secrets va690fb9f92718bee1249605ebd6718058f38ab32,
@@ -481,41 +481,42 @@ cheffish v17.1.7,
 chefstyle	v2.2.3,
 chef-telemetry v1.1.1,
 chef-utils	v18.8.46,
-chef-vault	v4.2.5,
+chef-vault	v4.1.11,
 chef-winrm	v2.3.12,
 chef-winrm-elevated v1.2.5,
 chef-winrm-fs v1.3.7,
-chef-zero v15.0.21,
-cookstyle v8.5.0,
+chef-zero v15.0.11,
+cookstyle v7.32.8,
 darklaunch	v33a4f070eede8b7e71fceab1ed1e30ef6ddea3fb,
 efast_xs vc2a6b925ed94ab8a28ff49375782834033919190,
 eini v511a94254d6eecc9331da31cd4fa08ff64b4d2e2,
 ej vf0425c1b8894acddb6e687fe3acbc9c1eafbd3e0,
 envy v0148fb4b7ed0e188511578e98b42d6e7dde0ebd1,
 erlang v26.2.5.14,
-ffi-libarchive v1.1.14,
+ffi-libarchive v1.1.3,
 folsom v38e2cce7c64ce1f0a3a918d90394cfc0a940b1ba,
 folsom_graphite v6898a51a6478767b45b9e568274c9ade7d71908d,
-inspec-core	v5.23.6,
+inspec-core	v5.22.58,
 inspec-core-bin v5.22.58,
 jmespath v1.6.2,
 lager	va140ea935eae9149bb35234bb40f6acf1c69caa1,
 libyajl2 v2.1.0,
 license-acceptance v2.1.13,
-List-MoreUtils v0.430,
+List-MoreUtils v0.43,
+meck	ve48641a20a605174e640ac91a528d443be11c9b9,
 mini_s3 vaa206d4d5a8380aff68629b46c15b87931e5c801,
 mixer	vd5f58392be09f5823ab21aa3664d7be97e9aa3bc,
 mixlib-archive v1.1.7,
 mixlib-authentication v3.0.10,
 mixlib-cli	v2.1.8,
 mixlib-config v3.0.27,
-mixlib-log	v3.1.2.1,
-mixlib-shellout v3.3.9,
+mixlib-log	v3.0.9,
+mixlib-shellout v3.2.8,
 oc_bifrost,	
 oc_erchef,	
 oc_id,	
 oc-chef-pedant,	
-ohai v18.2.6,
+ohai v18.2.4,
 omniauth-chef v0.4.1,
 omnibus-ctl	v4e968f4cf713a545bbb70ee13b8ff7ebd37f7f3e,
 opscoderl_folsom	vd493429f895a904e9fd86d12a68f7075dfa8e227,
@@ -525,15 +526,15 @@ pooler vbf52b40d666625769c5b612545c2de5ae7a42b0d,
 semverse v3.0.2,
 sqerl	vf9de1ba35aababbe31a542a3b72af1e866376e3e,
 stats_hero v4fbca5e2fcb4d464eab458025f7933f5c53f6330,
-train-core v3.13.4,
+train-core v3.12.7,
 train-rest v0.5.0,
-train-winrm	 v0.2.19,
+train-winrm	 v0.2.13,
 uuidtools v2.2.0,
-veil v0.3.11,
+veil v0.3.14,
 webmachine v8e3141994826a731d8d68ceaac45e80a7ff9f7fa,
 websocket-driver	v0.8.0,
 websocket-extensions v0.1.5,
-winrm	v2.3.8,
+winrm	v2.3.9,
 winrm-elevated v1.2.3,
 winrm-fs v1.3.5, and
 wmi-lite v1.0.7.
@@ -1193,7 +1194,7 @@ modification, are permitted provided that the following conditions are met:
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-(p) Progress Chef Infra Server v15 incorporates keydb v6.3.4. Such technology is subject to the following terms and conditions:
+(p) Progress Chef Infra Server v15 incorporates valkey v7.2.11. Such technology is subject to the following terms and conditions:
 Copyright (c) 2006-2020, Salvatore Sanfilippo
 Copyright (C) 2019-2021, John Sully
 Copyright (C) 2020-2021, EQ Alpha Technology Ltd.
@@ -5689,7 +5690,7 @@ ruby-cleanup v1.0.0, server-complete, and server-ctl-cookbooks from Progress Sof
 NOTICE FROM PROGRESS SOFTWARE CORPORATION: Additional notices may be included in the release notes or other documentation that accompanies updates received in connection with support of the Product.
 
 
-Updated 28.Aug.2025
+Updated 28.Jan.2026
 
   NOTICE
   
