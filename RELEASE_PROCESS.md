@@ -38,9 +38,7 @@ Ensure documentation in [docs-site](https://docs.chef.io/) is updated for change
 
 ### Update Release Notes
 
-#### Pending Release Notes In Wiki
-
-https://github.com/chef/chef-server/wiki/Pending-Release-Notes
+Release notes are published from the [chef/chef-web-docs repository](https://github.com/chef/chef-web-docs/blob/main/content/release_notes/server.md).
 
 ### Getting the build to be released into current with a minor/major version bump
 
@@ -237,10 +235,6 @@ https://discourse.chef.io/c/chef-release/9
 
 1. Confirm the existence of the notification in the #chef-server-notify channel.
 1. Confirm that the release appears at https://downloads.chef.io/tools/infra-server.  This usually takes a while.
-1. Confirm that the release notes from Pending Release Notes are automatically posted on discourse.  Sample post:
-https://discourse.chef.io/t/chef-infra-server-14-10-23-released/20438
-1. Confirm that the data for the Pending Release Notes at https://github.com/chef/chef-server/wiki/Pending-Release-Notes is automatically deleted by expeditor, and only the titles remain.  Notify releng at https://github.com/chef/release-engineering/issues if this does not automatically happen on promote.
-1. Confirm that the release notes appear at https://docs.chef.io/release_notes_server/ .  This should happen automatically via expeditor, but if it does not you need to perform the steps manually and create an issue with releng at https://github.com/chef/release-engineering/issues.  For instructions on how to proceed with a manual edit, contact docs-support.
 
 In case of release failure, consult appropriate documentation to assist with troubleshooting and correcting the issue.
 https://expeditor.chef.io/dashboard/?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE2NDYxODMwMTgsImlhdCI6MTY0NjE2ODYxOCwiaXNzIjoiaHR0cHM6Ly9leHBlZGl0b3IuY2hlZi5pbyIsInVzZXJfbG9naW4iOiJQcmFqYWt0YVB1cm9oaXQiLCJ1c2VyX25hbWUiOm51bGwsImFjY2Vzc190b2tlbiI6ImdodV95R3o4MkE5dWg5TzdnVXhOMHhEbXQ5bHU1YXM0YUE0TVZuVjYiLCJhZG1pbiI6dHJ1ZX0.5EZ1GvD_ufWmXPzfosGbs11RXYnHNm7gABgc-TpLgkQ#/
