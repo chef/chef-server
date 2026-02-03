@@ -4,8 +4,6 @@ draft = false
 
 gh_repo = "chef-server"
 
-aliases = ["/server_users.html", "/server_users/"]
-
 [menu]
   [menu.server]
     title = "Server Users"

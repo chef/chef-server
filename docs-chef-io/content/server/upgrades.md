@@ -4,8 +4,6 @@ draft = false
 
 gh_repo = "chef-server"
 
-aliases = ["/upgrade_server.html", "/upgrade_server/", "/upgrades/"]
-
 [menu]
   [menu.server]
     title = "Upgrades"

@@ -4,8 +4,6 @@ draft = false
 
 gh_repo = "chef-server"
 
-aliases = ["/install_server_pre.html", "/install_server_pre/"]
-
 [menu]
   [menu.server]
     title = "Chef Infra Server Prerequisites"

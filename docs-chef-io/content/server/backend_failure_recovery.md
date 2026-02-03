@@ -4,8 +4,6 @@ draft = false
 
 gh_repo = "chef-server"
 
-aliases = ["/backend_failure_recovery.html", "/backend_failure_recovery/"]
-
 [menu]
   [menu.server]
     title = "Backend Failure Recovery"
