@@ -15,6 +15,12 @@ aliases = ["/server_overview.html", "/server_components.html", "/server_overview
     weight = 10
 +++
 
+{{< warning >}}
+
+{{< readfile file="content/server/reusable/md/deprecate_server.md" >}}
+
+{{< /warning >}}
+
 {{< readfile file="content/server/reusable/md/chef_server.md" >}}
 
 The Chef Infra Server API is written in [Erlang](http://www.erlang.org/), which is an excellent language for critical enterprise concerns like concurrency, fault-tolerance, and distributed environments. The Chef Infra Server can scale to the size of any enterprise.

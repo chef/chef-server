@@ -14,6 +14,12 @@ aliases = ["/install_server.html", "/install_server/"]
     weight = 10
 +++
 
+{{< warning >}}
+
+{{< readfile file="content/server/reusable/md/deprecate_server.md" >}}
+
+{{< /warning >}}
+
 There are three configuration scenarios for the Chef Infra Server:
 
 - [Standalone]({{< relref "#standalone" >}}) (everything on a single machine)
