@@ -4,8 +4,6 @@ draft = false
 
 gh_repo = "chef-server"
 
-aliases = ["/server_firewalls_and_ports.html", "/runbook/server_firewalls_and_ports/"]
-
 [menu]
   [menu.server]
     title = "Firewalls & Ports"

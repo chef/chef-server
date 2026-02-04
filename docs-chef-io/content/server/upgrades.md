@@ -4,8 +4,6 @@ draft = false
 
 gh_repo = "chef-server"
 
-aliases = ["/upgrade_server.html", "/upgrade_server/", "/upgrades/"]
-
 [menu]
   [menu.server]
     title = "Upgrades"
@@ -13,6 +11,12 @@ aliases = ["/upgrade_server.html", "/upgrade_server/", "/upgrades/"]
     parent = "server/installation"
     weight = 60
 +++
+
+{{< warning >}}
+
+{{< readfile file="content/server/reusable/md/deprecate_server.md" >}}
+
+{{< /warning >}}
 
 Each new release of Chef Infra Server improves reliability and updates 3rd party components to ensure the security of the server. It is important to keep Chef Infra Server up to date to ensure the secure and reliable operation of Chef Infra in your organization.
 

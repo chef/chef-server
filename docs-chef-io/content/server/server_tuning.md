@@ -4,8 +4,6 @@ draft = false
 
 gh_repo = "chef-server"
 
-aliases = ["/server_tuning.html", "/runbook/server_tuning/"]
-
 [menu]
   [menu.server]
     title = "Tuning"

@@ -4,8 +4,6 @@ draft = false
 
 gh_repo = "chef-server"
 
-aliases = ["/install_server_pre.html", "/install_server_pre/"]
-
 [menu]
   [menu.server]
     title = "Chef Infra Server Prerequisites"
@@ -13,6 +11,12 @@ aliases = ["/install_server_pre.html", "/install_server_pre/"]
     parent = "server/planning"
     weight = 10
 +++
+
+{{< warning >}}
+
+{{< readfile file="content/server/reusable/md/deprecate_server.md" >}}
+
+{{< /warning >}}
 
 The following is a detailed discussion of the prerequisites for every
 installation of the Chef Infra Server. See [Install Chef Infra Server]({{< relref "install_server" >}})

@@ -4,8 +4,6 @@ draft = false
 
 gh_repo = "chef-server"
 
-aliases = ["/install_server.html", "/install_server/"]
-
 [menu]
   [menu.server]
     title = "Install Chef Infra Server"
@@ -13,6 +11,12 @@ aliases = ["/install_server.html", "/install_server/"]
     parent = "server/installation"
     weight = 10
 +++
+
+{{< warning >}}
+
+{{< readfile file="content/server/reusable/md/deprecate_server.md" >}}
+
+{{< /warning >}}
 
 There are three configuration scenarios for the Chef Infra Server:
 

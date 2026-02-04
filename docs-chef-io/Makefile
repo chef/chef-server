@@ -15,7 +15,7 @@ preview_netlify: chef_web_docs
 	pushd chef-web-docs && bash ./scripts/netlify-deploy-preview.sh && popd
 
 serve: chef_web_docs
-	printf "go 1.22\n\nuse .\nuse ../" > chef-web-docs/hugo.work
+	printf "go 1.23\n\nuse .\nuse ../" > chef-web-docs/hugo.work
 	pushd chef-web-docs && make bundle && HUGO_MODULE_WORKSPACE=hugo.work hugo server --buildDrafts --buildFuture --noHTTPCache --ignoreVendorPaths "github.com/chef/chef-server/docs-chef-io" && popd
 
 chef_web_docs:

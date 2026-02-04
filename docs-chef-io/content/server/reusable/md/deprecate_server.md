@@ -1,0 +1,1 @@
+Chef Infra Server is [deprecated](/versions/#deprecated-products-and-versions) and will be end-of-life in November 2026. Contact your Chef account representative for information about upgrading to Chef Declarative State Management (DSM) on Chef 360 Platform.

@@ -4,8 +4,6 @@ draft = false
 
 gh_repo = "chef-server"
 
-aliases = ["/config_rb_backend.html", "/config_rb_backend/"]
-
 [menu]
   [menu.server]
     title = "chef-backend.rb Settings"

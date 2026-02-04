@@ -4,8 +4,6 @@ draft = false
 
 gh_repo = "chef-server"
 
-aliases = ["/install_server_ha.html"]
-
 [menu]
   [menu.server]
     title = "Install High Availability"
