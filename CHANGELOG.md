@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.10.90 -->
-## [15.10.90](https://github.com/chef/chef-server/tree/15.10.90) (2026-01-30)
+<!-- latest_release 15.10.91 -->
+## [15.10.91](https://github.com/chef/chef-server/tree/15.10.91) (2026-02-05)
 
 #### Merged Pull Requests
-- Updated notice to replace KeyDB with Valkey [#4143](https://github.com/chef/chef-server/pull/4143) ([kalroy](https://github.com/kalroy))
+- Update deprecated status message in Server docs [#4145](https://github.com/chef/chef-server/pull/4145) ([IanMadd](https://github.com/IanMadd))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.10.83 -->
 ### Changes since 15.10.83 release
 
 #### Merged Pull Requests
+- Update deprecated status message in Server docs [#4145](https://github.com/chef/chef-server/pull/4145) ([IanMadd](https://github.com/IanMadd)) <!-- 15.10.91 -->
 - Updated notice to replace KeyDB with Valkey [#4143](https://github.com/chef/chef-server/pull/4143) ([kalroy](https://github.com/kalroy)) <!-- 15.10.90 -->
 - Replace KeyDb dependency with Valkey [#4138](https://github.com/chef/chef-server/pull/4138) ([talktovikas](https://github.com/talktovikas)) <!-- 15.10.89 -->
 - CHEF-28294: Fix CVE-2025-61780 - Update rack gem to &gt;= 3.1.18 [#4129](https://github.com/chef/chef-server/pull/4129) ([kalroy](https://github.com/kalroy)) <!-- 15.10.88 -->
