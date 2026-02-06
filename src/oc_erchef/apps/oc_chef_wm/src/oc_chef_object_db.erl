@@ -2,7 +2,7 @@
 %% ex: ts=4 sw=4 et
 %% @author Christopher Maier <cm@chef.io>
 %% @author Seth Falcon <seth@chef.io>
-%% @copyright 2012-2014 Chef Software, Inc.
+%% @Copyright (c) 2014-2025 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
 
 %% @doc Helper functions that tie together operations across chef_db and chef_index
 -module(oc_chef_object_db).

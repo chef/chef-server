@@ -1,7 +1,7 @@
 #
 # Author:: Ho-Sheng Hsiao (<hosh@chef.io>)
 # Author:: Tyler Cloke (<tyler@chef.io>)
-# Copyright:: Copyright (c) 2013 Chef Software, Inc.
+# Copyright:: Copyright (c) 2014-2025 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
 
 require "pedant/rspec/common"
 require "json"

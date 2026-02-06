@@ -2,7 +2,6 @@
 %% ex: ts=4 sw=4 et
 %% @author Mark Anderson <mark@chef.io>
 %% @author Tim Dysinger <dysinger@chef.io>
-%% Copyright 2012-16 Chef, Inc. All Rights Reserved.
 %%
 %% This file is provided to you under the Apache License,
 %% Version 2.0 (the "License"); you may not use this file

@@ -1,5 +1,5 @@
 %% ex: ts=4 sw=4 et
-%% Copyright 2011-2015 Chef Software, Inc. All Rights Reserved.
+%% Copyright (c) 2014-2025 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
 %%
 %% This file is provided to you under the Apache License,
 %% Version 2.0 (the "License"); you may not use this file

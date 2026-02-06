@@ -3,7 +3,7 @@
 %% ex: ts=4 sw=4 et
 %% @author Douglas Triggs <doug@chef.io>
 %% @author Mark Anderson <mark@chef.io>
-%% Copyright Chef Software, Inc.
+%% Copyright (c) 2014-2025 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
 %% This file is provided to you under the Apache License,
 %% Version 2.0 (the "License"); you may not use this file
 %% except in compliance with the License.  You may obtain
