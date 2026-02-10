@@ -1,27 +1,25 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.10.91 -->
-## [15.10.91](https://github.com/chef/chef-server/tree/15.10.91) (2026-02-05)
-
-#### Merged Pull Requests
-- Update deprecated status message in Server docs [#4145](https://github.com/chef/chef-server/pull/4145) ([IanMadd](https://github.com/IanMadd))
+<!-- latest_release -->
 <!-- latest_release -->
 
-<!-- release_rollup since=15.10.83 -->
-### Changes since 15.10.83 release
-
-#### Merged Pull Requests
-- Update deprecated status message in Server docs [#4145](https://github.com/chef/chef-server/pull/4145) ([IanMadd](https://github.com/IanMadd)) <!-- 15.10.91 -->
-- Updated notice to replace KeyDB with Valkey [#4143](https://github.com/chef/chef-server/pull/4143) ([kalroy](https://github.com/kalroy)) <!-- 15.10.90 -->
-- Replace KeyDb dependency with Valkey [#4138](https://github.com/chef/chef-server/pull/4138) ([talktovikas](https://github.com/talktovikas)) <!-- 15.10.89 -->
-- CHEF-28294: Fix CVE-2025-61780 - Update rack gem to &gt;= 3.1.18 [#4129](https://github.com/chef/chef-server/pull/4129) ([kalroy](https://github.com/kalroy)) <!-- 15.10.88 -->
-- CHEF-26888 - Fix gather-logs openssl gem version conflict [#4127](https://github.com/chef/chef-server/pull/4127) ([kalroy](https://github.com/kalroy)) <!-- 15.10.87 -->
-- Adding provision for Jira automation [#4125](https://github.com/chef/chef-server/pull/4125) ([talktovikas](https://github.com/talktovikas)) <!-- 15.10.86 -->
-- Drop chef gem dependency from oc-chef-pedant [#4122](https://github.com/chef/chef-server/pull/4122) ([neha-p6](https://github.com/neha-p6)) <!-- 15.10.85 -->
-- Copilot Instructions for chef-server [#4118](https://github.com/chef/chef-server/pull/4118) ([jashaik](https://github.com/jashaik)) <!-- 15.10.84 -->
+<!-- release_rollup -->
 <!-- release_rollup -->
 
 <!-- latest_stable_release -->
+## [15.10.91](https://github.com/chef/chef-server/tree/15.10.91) (2026-02-10)
+
+#### Merged Pull Requests
+- Copilot Instructions for chef-server [#4118](https://github.com/chef/chef-server/pull/4118) ([jashaik](https://github.com/jashaik))
+- Drop chef gem dependency from oc-chef-pedant [#4122](https://github.com/chef/chef-server/pull/4122) ([neha-p6](https://github.com/neha-p6))
+- Adding provision for Jira automation [#4125](https://github.com/chef/chef-server/pull/4125) ([talktovikas](https://github.com/talktovikas))
+- CHEF-26888 - Fix gather-logs openssl gem version conflict [#4127](https://github.com/chef/chef-server/pull/4127) ([kalroy](https://github.com/kalroy))
+- CHEF-28294: Fix CVE-2025-61780 - Update rack gem to &gt;= 3.1.18 [#4129](https://github.com/chef/chef-server/pull/4129) ([kalroy](https://github.com/kalroy))
+- Replace KeyDb dependency with Valkey [#4138](https://github.com/chef/chef-server/pull/4138) ([talktovikas](https://github.com/talktovikas))
+- Updated notice to replace KeyDB with Valkey [#4143](https://github.com/chef/chef-server/pull/4143) ([kalroy](https://github.com/kalroy))
+- Update deprecated status message in Server docs [#4145](https://github.com/chef/chef-server/pull/4145) ([IanMadd](https://github.com/IanMadd))
+<!-- latest_stable_release -->
+
 ## [15.10.83](https://github.com/chef/chef-server/tree/15.10.83) (2025-11-04)
 
 #### Merged Pull Requests
@@ -42,7 +40,6 @@
 - updating notice.txt per instructions [#4113](https://github.com/chef/chef-server/pull/4113) ([sean-sype-simmons](https://github.com/sean-sype-simmons))
 - update activesupport in oc-chef-pedant [#4112](https://github.com/chef/chef-server/pull/4112) ([RoyShravani](https://github.com/RoyShravani))
 - update notice.txt to update Postgres versions correctly [#4116](https://github.com/chef/chef-server/pull/4116) ([kalroy](https://github.com/kalroy))
-<!-- latest_stable_release -->
 
 ## [15.10.66](https://github.com/chef/chef-server/tree/15.10.66) (2025-09-15)
 
