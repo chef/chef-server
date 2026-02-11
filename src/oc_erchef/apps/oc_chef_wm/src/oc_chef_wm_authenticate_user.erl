@@ -1,7 +1,7 @@
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92 -*-
 %% ex: ts=4 sw=4 et
 %% @author Marc Paradise <marc@chef.io>
-%% @copyright 2014 Chef Software Inc
+%% @Copyright (c) 2014-2025 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
 
 %% @doc Endpoint used by webui for user authentication
 

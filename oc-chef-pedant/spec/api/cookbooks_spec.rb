@@ -3,7 +3,7 @@
 # Author:: James Casey (<james@chef.io>)
 # Author:: Douglas Triggs (<doug@chef.io>)
 # Author:: Ho-Sheng Hsiao (<hosh@chef.io>)
-# Copyright:: Copyright (c) Chef Software, Inc.
+# Copyright:: Copyright (c) 2014-2025 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
 #
 
 require "pp"

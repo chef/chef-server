@@ -1,7 +1,7 @@
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 92 -*-
 %% ex: ts=4 sw=4 et
 %% @author Stephen Delano <stephen@chef.io>
-%% Copyright Chef Software, Inc. All Rights Reserved.
+%% Copyright (c) 2014-2025 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
 
 
 -type chef_authz_type() :: 'actor' |

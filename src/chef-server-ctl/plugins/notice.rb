@@ -1,5 +1,5 @@
 #
-# Copyright:: Copyright (c) Chef Software, Inc.
+# Copyright:: Copyright (c) 2014-2025 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
 #
 # All Rights Reserved
 #
@@ -2772,7 +2772,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 (aj) Progress Chef Infra Server v15 incorporates ffi-yajl v2.6.0.  Such technology is subject to the following terms and conditions:
 
 Copyright (c) 2014 Lamont Granquist
-Copyright (c) 2014 Chef Software, Inc.
+Copyright (c) 2014-2025 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
 Copyright (c) 2008-2011 Brian Lopez - http://github.com/brianmario
 
 Permission is hereby granted, free of charge, to any person obtaining

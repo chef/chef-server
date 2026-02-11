@@ -1,4 +1,4 @@
-# Copyright (c) 2013 Chef Software, Inc.
+# Copyright (c) 2014-2025 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
 # All Rights Reserved
 
 add_command_under_category "cleanup", "general", "Perform post-upgrade removal of now-obsolete data, configuration files, logs, etc.  Add the '--no-op' flag to see what *would* be removed.", 2 do

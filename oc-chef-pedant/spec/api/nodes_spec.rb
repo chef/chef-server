@@ -4,7 +4,7 @@
 #
 # Author:: Mark Anderson (<mark@chef.io>)
 # Author:: Christopher Maier (<cm@chef.io>)
-# Copyright:: Copyright (c) 2011 Chef Software, Inc.
+# Copyright:: Copyright (c) 2014-2025 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
 #
 
 # Considering nodes endpoint to only be implemented in Erlang, since

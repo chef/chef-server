@@ -1,6 +1,6 @@
 #
 # Author:: Ho-Sheng Hsiao (<hosh@chef.io>)
-# Copyright:: Copyright (c) 2013 Chef Software, Inc.
+# Copyright:: Copyright (c) 2014-2025 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
 
 
 describe "Org Creation", :org_creation do

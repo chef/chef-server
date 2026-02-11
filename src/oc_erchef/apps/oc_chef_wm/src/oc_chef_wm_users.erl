@@ -2,7 +2,7 @@
 %% ex: ts=4 sw=4 et
 %% @author Mark Mzyk <mmzyk@chef.io>
 %% @author Marc Paradise <marc@chef.io>
-%% @copyright 2012-2015 Chef Software, Inc.
+%% @Copyright (c) 2014-2025 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
 
 %% @doc Resource module for Chef users endpoint
 

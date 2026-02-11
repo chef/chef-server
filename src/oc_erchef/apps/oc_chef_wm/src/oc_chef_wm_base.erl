@@ -3,7 +3,7 @@
 %% @author Kevin Smith
 %% @author Seth Falcon <seth@chef.io>
 %% @author Marc Paradise <marc@chef.io>
-%% Copyright 2012-2015 Chef Software, Inc.
+%% Copyright (c) 2014-2025 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
 %%
 %% This file is provided to you under the Apache License,
 %% Version 2.0 (the "License"); you may not use this file

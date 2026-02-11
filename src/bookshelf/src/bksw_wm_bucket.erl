@@ -1,4 +1,4 @@
-%% @copyright Chef Software, Inc. All Rights Reserved
+%% @Copyright (c) 2014-2025 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
 %% @author Tim Dysinger <dysinger@chef.io>
 %%
 %% Licensed to the Apache Software Foundation (ASF) under one or more

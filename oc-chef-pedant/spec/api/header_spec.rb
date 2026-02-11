@@ -1,6 +1,6 @@
 #
 # Author:: Douglas Triggs (<doug@chef.io>)
-# Copyright:: Copyright (c) 2014 Chef, Inc.
+# Copyright:: Copyright © 2014-2025 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
 
 describe "Headers", :headers do
   let(:request_url) { api_url("users") }
