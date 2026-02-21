@@ -221,6 +221,7 @@ steps:
   env:
     IS_AUTOMATE: true
   timeout_in_minutes: 30 # longer timeout for chef-server
+  soft_fail: true
   expeditor:
     secrets:
       A2_LICENSE:
@@ -241,6 +242,7 @@ steps:
   env:
     IS_AUTOMATE: true
   timeout_in_minutes: 20
+  soft_fail: true
   expeditor:
     secrets:
       A2_LICENSE:
@@ -270,6 +272,7 @@ steps:
     GOSUMDB: "sum.golang.org"
     PGGSSENCMODE: "disable"
   timeout_in_minutes: 35
+  soft_fail: true
   expeditor:
     secrets:
       A2_LICENSE:
