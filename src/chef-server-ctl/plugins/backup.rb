@@ -54,6 +54,7 @@ add_command_under_category "restore", "general", "Restore the #{ChefUtils::Dist:
   options = OpenStruct.new
   options.agree_to_cleanse = nil
   options.restore_dir = nil
+  options.restore_pg_dump = false  # Default is false (don't restore pg dump)
 
   OptionParser.new do |opts|
     opts.banner = "Usage: #{ChefUtils::Dist::Server::SERVER_CTL} restore $PATH_TO_BACKUP_TARBALL [options]"
@@ -64,6 +65,10 @@ add_command_under_category "restore", "general", "Restore the #{ChefUtils::Dist:
 
     opts.on("-c", "--cleanse", "Agree to cleansing all existing state during a restore. THIS WILL COMPLETELY REMOVE EXISTING #{ChefUtils::Dist::Server::PRODUCT.upcase} DATA") do
       options.agree_to_cleanse = "yes"
+    end
+
+    opts.on("--restore-pg-dump", "Restore PostgreSQL data from pg_dump instead of service data files (default: false)") do
+      options.restore_pg_dump = true
     end
 
     opts.on("--pg-options [string]", "Additional options to pass to PostgreSQL during backups") do |pg_options|
