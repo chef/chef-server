@@ -11,7 +11,7 @@ pkg_deps=(
   core/gcc-libs
   core/ruby3_1/3.1.7
   core/sqitch
-  core/postgresql13-client
+  core/postgresql14-client
   core/gecode3
   core/libffi
   core/glibc

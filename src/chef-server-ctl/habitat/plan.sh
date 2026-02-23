@@ -8,7 +8,7 @@ pkg_deps=(
   core/jq-static
   core/ruby3_1/3.1.7
   core/libffi
-  core/postgresql13-client
+  core/postgresql14-client
   core/gcc-libs
   core/glibc
 )
