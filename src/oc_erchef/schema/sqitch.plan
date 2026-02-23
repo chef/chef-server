@@ -1,4 +1,4 @@
-%syntax-version=1.0.0
+%syntax-version=1.0.0-b2
 %project=enterprise_chef
 %uri=https://github.com/opscode/enterprise-chef-server-schema
 
@@ -86,3 +86,4 @@ keys_update_trigger [keys_update_trigger@users_email_functional_index] 2017-08-2
 @sentinel_public_key_for_users 2017-08-24T14:32:04Z Prajakta Purohit <prajakta@chef.io> # public_key only updated in the keys table
 
 telemetry 2024-08-01T08:37:30Z Sreepuram Sudheer <ssudheer@mcblrssudheer> # Adding telemetry to chef-server.
+kvpair 2026-02-23T04:33:08Z Marc Paradise <marc@chef.io> # Adds a new kvpair table for tracking persistent configuration
