@@ -31,14 +31,14 @@ license_test()->
     {Result, _, _, _, _,_,_} = chef_license_worker:get_license(),
     ?assertEqual(valid_license, Result),
     os:cmd("rm -rf " ++ ?DEFAULT_FILE_PATH),
-    
+
     file:write_file(?DEFAULT_FILE_PATH,get_commercial_license_expired()),
     refresh_license(),
     timer:sleep(100),
     {Result1, _, _, _, _,_,_} = chef_license_worker:get_license(),
     ?assertEqual(commercial_expired, Result1),
     os:cmd("rm -rf " ++ ?DEFAULT_FILE_PATH),
-    
+
     file:write_file(?DEFAULT_FILE_PATH,get_commercial_grace_license()),
     refresh_license(),
     timer:sleep(100),
@@ -62,3 +62,4 @@ license_test()->
 
 refresh_license()->
     erlang:send(chef_license_worker, check_license).
+
