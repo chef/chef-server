@@ -54,7 +54,7 @@ add_command_under_category "restore", "general", "Restore the #{ChefUtils::Dist:
   options = OpenStruct.new
   options.agree_to_cleanse = nil
   options.restore_dir = nil
-  options.restore_pg_dump = false  # Default is false (don't restore pg dump)
+  options.skip_pg_dump = false  # Default is false (restore pg dump)
 
   OptionParser.new do |opts|
     opts.banner = "Usage: #{ChefUtils::Dist::Server::SERVER_CTL} restore $PATH_TO_BACKUP_TARBALL [options]"
@@ -67,8 +67,8 @@ add_command_under_category "restore", "general", "Restore the #{ChefUtils::Dist:
       options.agree_to_cleanse = "yes"
     end
 
-    opts.on("--restore-pg-dump", "Restore PostgreSQL data from pg_dump instead of service data files (default: false)") do
-      options.restore_pg_dump = true
+    opts.on("--skip-pg-dump", "Skip PostgreSQL data from pg_dump (default: false)") do
+      options.skip_pg_dump = true
     end
 
     opts.on("--pg-options [string]", "Additional options to pass to PostgreSQL during backups") do |pg_options|
