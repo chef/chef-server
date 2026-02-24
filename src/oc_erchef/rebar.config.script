@@ -1,0 +1,12 @@
+%% -*- mode: erlang -*-
+%% ex: ts=4 sw=4 ft=erlang
+
+%% Include erl_opts {d, OC_LICENSE_PATH, X} where X is determined based on the OC_LICENSE_PATH environment variable for compile-time resolution of the path.
+%% Special value 'cli' means to use the automate CLI
+%% to obtain license information intead.  This is the default.
+LicensePath = os:getenv("OC_LICENSE_PATH", cli),
+ErlOpts = proplists:get_value(erl_opts, CONFIG, []),
+UpdatedErlOpts = lists:keystore(d, 99, ErlOpts,
+    {d, 'OC_LICENSE_PATH', LicensePath}),
+Config1 = lists:keydelete(erl_opts, 1, CONFIG),
+[{erl_opts, UpdatedErlOpts} | Config1].
