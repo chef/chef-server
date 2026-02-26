@@ -3,16 +3,6 @@
 [![Build Status](https://badge.buildkite.com/ccdefb69f938db51cb23f092e54030aa41608e6472cfe4aa7e.svg)](https://buildkite.com/chef/chef-chef-server-main-omnibus-adhoc)
 [![](https://img.shields.io/badge/Release%20Policy-Cadence%20Release-brightgreen.svg)](https://github.com/chef/chef-server/blob/main/dev-docs/release_cadence.md)
 
-**Umbrella Project**: [Chef Infra Server](https://github.com/chef/chef-oss-practices/blob/main/projects/chef-infra-server.md)
-
-**Project State**: [Active](https://github.com/chef/chef-oss-practices/blob/main/repo-management/repo-states.md#active)
-
-**Issues [Response Time Maximum](https://github.com/chef/chef-oss-practices/blob/main/repo-management/repo-states.md)**: 14 days
-
-**Pull Request [Response Time Maximum](https://github.com/chef/chef-oss-practices/blob/main/repo-management/repo-states.md)**: 14 days
-
-NOTE: we know we have a backlog, and are working through it, but this applies for new requests.
-
 This repository is the central repository for the Chef Infra Server.
 
 If you want to file an issue about Chef Infra Server or contribute a change, you're in the right place.
