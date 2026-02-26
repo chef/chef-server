@@ -3130,6 +3130,7 @@ The response contains the record of the deleted resource and is similar to:
     "ohai_versions": [
     ],
     "gems": [
+       ["foo"]
     ]
   }
 }
@@ -3372,6 +3373,7 @@ The response is similar to:
     "ohai_versions": [
     ],
     "gems": [
+       ["foo"]
     ]
   }
 }
@@ -3454,7 +3456,11 @@ The request body is similar to:
     "groupings": {},
     "replacing": {},
     "description": "Installs/Configures unicorn",
-    "providing": {}
+    "providing": {},
+    "gems": [
+       ["foo"],
+       ["bar", "~1.0.0"]
+    ],
   },
   "libraries": [],
   "templates": [
@@ -3974,6 +3980,10 @@ The response is similar to:
     "platforms": { },
     "groupings": { },
     "recommendations": { },
+    "gems": [
+       ["foo"],
+       ["bar", "~1.0.0"]
+     ],
     "name": "getting-started",
     "description": "description",
     "version": "0.4.0",
@@ -4064,7 +4074,11 @@ with a request body similar to:
     "groupings": {},
     "replacing": {},
     "description": "Installs/Configures unicorn",
-    "providing": {}
+    "providing": {},
+    "gems": [
+       ["foo"],
+       ["bar", "~1.0.0"]
+     ],
   },
   "libraries": [],
   "templates": [
@@ -5394,6 +5408,10 @@ The response is similar to:
       },
       "providing": {
       },
+      "gems": [
+         ["foo"],
+         ["bar", "~1.0.0"]
+      ],
       "replacing": {
       },
       "attributes": {
