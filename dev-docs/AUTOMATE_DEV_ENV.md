@@ -32,4 +32,5 @@ The following are the steps to build and deploy the components.
 2. Build the component `hab pkg build src/chef-server-ctl`
 3. Copy the `hart` file from the results folder of Chef Infra Server project to the results folder of the Automate project.
 4. Enter studio in the root directory of the Automate with the command `hab studio enter`. The automate will take the latest `hart` file copied to teh results folder.
-5. To start the Chef Infra Server inside the Automate, run the command `start_chef_server`
+5. Update the relavent `plant.sh` files (eg:`components/automate-cs-nginx/habitat/plan.sh`) in automate components and rebuild them using `rebuild components/automate-cs-nginx`.
+6. To start the Chef Infra Server inside the Automate, run the command `start_chef_server`.
