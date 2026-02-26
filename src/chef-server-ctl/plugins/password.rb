@@ -1,5 +1,5 @@
 #
-# Copyright:: Copyright (c) Chef Software, Inc.
+# Copyright:: Copyright (c) 2014-2025 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
 #
 # All Rights Reserved
 #

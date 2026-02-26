@@ -1,4 +1,3 @@
-%% @copyright 2015 Chef, Inc. All Rights Reserved
 %% @author Mark Anderson <mark@chef.io>
 %%
 %% Licensed to the Apache Software Foundation (ASF) under one or more

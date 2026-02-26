@@ -3,7 +3,7 @@
 %% @author Christopher Maier <cm@chef.io>
 %% @author Seth Falcon <seth@chef.io>
 %% @author Marc Paradise <marc@chef.io>
-%% @copyright 2011-2014 Chef Software, Inc
+%% @Copyright (c) 2014-2025 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
 -module(oc_chef_wm_routes).
 
 -export([
