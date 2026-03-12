@@ -11,6 +11,10 @@ expeditor:
   defaults:
     buildkite:
       timeout_in_minutes: 90
+  secrets:
+    GITHUB_TOKEN:
+      account: github/chef
+      field: token
 
 steps:
 
@@ -38,10 +42,6 @@ steps:
     - cd /workdir/omnibus; make install
     - make ci
   expeditor:
-    secrets:
-      GITHUB_TOKEN:
-        account: github/chef
-        field: token
     executor:
       docker:
         image: "chefes/a1-buildkite"
