@@ -11,6 +11,10 @@ expeditor:
   defaults:
     buildkite:
       timeout_in_minutes: 90
+  secrets:
+    GITHUB_TOKEN:
+      account: github/chef
+      field: token
 
 steps:
 
@@ -44,6 +48,7 @@ steps:
         environment:
           - LUALIB=~/.luarocks/lib/lua/5.2
           - COMPONENT=omnibus
+          - GITHUB_TOKEN
 
 - label: chef-server-ctl
   command:
