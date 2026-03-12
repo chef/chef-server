@@ -38,12 +38,17 @@ steps:
     - cd /workdir/omnibus; make install
     - make ci
   expeditor:
+    secrets:
+      GITHUB_TOKEN:
+        account: github/chef
+        field: token
     executor:
       docker:
         image: "chefes/a1-buildkite"
         environment:
           - LUALIB=~/.luarocks/lib/lua/5.2
           - COMPONENT=omnibus
+          - GITHUB_TOKEN
 
 - label: chef-server-ctl
   command:
