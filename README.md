@@ -61,7 +61,7 @@ Once the build is complete, the package should be in omnibus/pkg. By default the
 
 ## Habitized Chef Infra Server
 
-The following components now exist as Habitat packages and are available [here](https://bldr.habitat.sh/#/origins/chef-server/packages):
+The following components now exist as Habitat packages and are available [here](https://bldr.habitat.sh/#/origins/chef/packages):
 
 * nginx
 * bookshelf
@@ -75,6 +75,25 @@ To build the packages locally:
 ```shell
 ./habitat_pkgs_build.sh
 ```
+
+### Published Docker Containers
+
+The following containers are published to [Docker Hub](https://hub.docker.com/u/chef) under the `chef` organization:
+
+| Container | Docker Hub |
+|-----------|-----------|
+| `chef-server-nginx` | [hub.docker.com/r/chef/chef-server-nginx](https://hub.docker.com/r/chef/chef-server-nginx) |
+| `bookshelf` | [hub.docker.com/r/chef/bookshelf](https://hub.docker.com/r/chef/bookshelf) |
+| `oc_id` | [hub.docker.com/r/chef/oc_id](https://hub.docker.com/r/chef/oc_id) |
+| `oc_erchef` | [hub.docker.com/r/chef/oc_erchef](https://hub.docker.com/r/chef/oc_erchef) |
+| `oc_bifrost` | [hub.docker.com/r/chef/oc_bifrost](https://hub.docker.com/r/chef/oc_bifrost) |
+| `chef-server-ctl` | [hub.docker.com/r/chef/chef-server-ctl](https://hub.docker.com/r/chef/chef-server-ctl) |
+
+Container images are built by [Habitat Builder](https://bldr.habitat.sh) using the `export_targets = ["docker"]` configuration in `.bldr.toml`. Each component plan (`src/<component>/habitat/plan.sh`) uses `pkg_origin=chef`, which determines the Docker Hub organization name.
+
+When an omnibus package is promoted to the `current`, `stable`, or `LTS-2024` channel, the Expeditor CI pipeline runs `.expeditor/promote_harts_and_containers.sh`, which promotes the corresponding Habitat packages and re-tags the Docker images with the channel name (e.g., `chef/oc_erchef:stable`, `chef/oc_erchef:current`) and updates `latest` when promoted to `stable`.
+
+### Running Chef Infra Server with Docker Compose
 
 A top-level `docker-compose.yml` file exists for running Chef Infra Server from Habitized Docker images:
 
