@@ -95,19 +95,8 @@
     }
 
     location /version {
-      add_header Cache-Control no-store always;
-      add_header Pragma no-cache always;
-      add_header Content-Security-Policy "default-src 'self';";
-      add_header X-Frame-Options DENY;
-      add_header X-Content-Type-Options nosniff;
-      add_header Permissions-Policy "camera=(); payment=(); microphone=(); gyroscope=(); magnetometer=(); midi=(); geolocation=()";
-      add_header Referrer-Policy 'strict-origin';
-      <% if @server_proto == 'https' %>
-      add_header Strict-Transport-Security "max-age=<%= @helper.get_max_age_for_hsts %>; includeSubDomains";
-      <% end %>
-      types { }
-      default_type text/plain;
-      alias /opt/<%= ChefUtils::Dist::Org::LEGACY_CONF_DIR %>/version-manifest.txt;
+      deny all;
+      return 404;
     }
 
     location ~ "^/organizations/([^/]+)/validate" {

@@ -58,9 +58,8 @@
     }
 
     location /version {
-      types { }
-      default_type text/plain;
-      alias {{../pkg.svc_config_path}}/version-manifest.txt;
+      deny all;
+      return 404;
     }
 
     location ~ "^/organizations/([^/]+)/validate" {
