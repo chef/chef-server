@@ -11,10 +11,6 @@ expeditor:
   defaults:
     buildkite:
       timeout_in_minutes: 90
-  secrets:
-    GITHUB_TOKEN:
-      account: github/chef
-      field: token
 
 steps:
 
@@ -41,6 +37,12 @@ steps:
     - gem uninstall bundler -v '>= 2.0.1' -a
     - cd /workdir/omnibus; make install
     - make ci
+
+  secrets:
+    GITHUB_TOKEN:
+      account: github/chef
+      field: token
+
   expeditor:
     executor:
       docker:
