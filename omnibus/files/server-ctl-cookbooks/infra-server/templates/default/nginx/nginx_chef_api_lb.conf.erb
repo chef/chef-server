@@ -107,7 +107,22 @@
       <% end %>
       types { }
       default_type text/plain;
-      alias /opt/<%= ChefUtils::Dist::Org::LEGACY_CONF_DIR %>/version-manifest.txt;
+      content_by_lua_block {
+        local f = io.open("/opt/<%= ChefUtils::Dist::Org::LEGACY_CONF_DIR %>/version-manifest.txt", "r")
+        if f then
+          local first_line = f:read("*l")
+          f:close()
+          if first_line then
+            ngx.say(first_line)
+          else
+            ngx.status = 404
+            ngx.say("Version information not available")
+          end
+        else
+          ngx.status = 404
+          ngx.say("Version information not available")
+        end
+      }
     }
 
     location ~ "^/organizations/([^/]+)/validate" {
