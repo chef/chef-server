@@ -11,6 +11,10 @@ expeditor:
   defaults:
     buildkite:
       timeout_in_minutes: 90
+  secrets:
+    GITHUB_TOKEN:
+      account: github/chef
+      field: token
 
 steps:
 
