@@ -11,6 +11,10 @@ expeditor:
   defaults:
     buildkite:
       timeout_in_minutes: 90
+  secrets:
+    GITHUB_TOKEN:
+      account: github/chef
+      field: token
 
 steps:
 
@@ -33,17 +37,17 @@ steps:
 
 - label: omnibus
   command:
-    - /workdir/scripts/bk_tests/bk_install.sh
     - gem uninstall bundler -v '>= 2.0.1' -a
     - cd /workdir/omnibus; make install
     - make ci
   expeditor:
     executor:
       docker:
-        image: "chefes/a1-buildkite"
+        image: "ruby:3.1-buster"
         environment:
           - LUALIB=~/.luarocks/lib/lua/5.2
           - COMPONENT=omnibus
+          - GITHUB_TOKEN
 
 - label: chef-server-ctl
   command:
