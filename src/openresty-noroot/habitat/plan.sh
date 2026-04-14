@@ -15,6 +15,7 @@ pkg_deps=(
   core/coreutils
   core/gcc-libs
   core/glibc
+  core/libxcrypt
   core/libxml2
   core/libxslt
   core/openssl
