@@ -12,7 +12,7 @@ GEM
     mime-types-data (3.2025.0819)
     netrc (0.11.0)
     openssl (3.3.0)
-    pg (0.21.0)
+    pg (1.5.9)
     rest-client (2.1.0)
       http-accept (>= 1.7.0, < 2.0)
       http-cookie (>= 1.0.2, < 2.0)
@@ -24,7 +24,7 @@ PLATFORMS
 
 DEPENDENCIES
   openssl
-  pg (= 0.21.0)
+  pg (= 1.5.9)
   rest-client (= 2.1.0)
 
 BUNDLED WITH
