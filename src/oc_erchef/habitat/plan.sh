@@ -10,7 +10,7 @@ pkg_deps=(
   core/curl
   core/openssl
   core/gcc-libs
-  core/ruby3_1/3.1.7
+  core/ruby3_1/3.1.6/20260306111218
   core/sqitch
   core/postgresql14-client
   core/gecode3
