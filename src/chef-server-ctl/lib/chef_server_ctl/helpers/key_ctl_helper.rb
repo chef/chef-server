@@ -93,7 +93,7 @@ EOS
       end
 
       def exit_http_fail(err)
-        exit_failure("Error: An unexpected error has occured (the server returned a #{err.response.code}).\nError: Please contact a system admin if the problem persists.")
+        exit_failure("Error: An unexpected error has occurred (the server returned a #{err.response.code}).\nError: Please contact a system admin if the problem persists.")
       end
 
       def get_required_arg!(options, args, usage, field_symbol, field_name, field_number)
