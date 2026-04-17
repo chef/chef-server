@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.10.94 -->
-## [15.10.94](https://github.com/chef/chef-server/tree/15.10.94) (2026-04-13)
+<!-- latest_release 15.10.95 -->
+## [15.10.95](https://github.com/chef/chef-server/tree/15.10.95) (2026-04-17)
 
 #### Merged Pull Requests
-- Removed internal library information in the /version endpoint [#4159](https://github.com/chef/chef-server/pull/4159) ([jashaik](https://github.com/jashaik))
+- CHEF-28521 - Create SECURITY.md file with standard template [#4124](https://github.com/chef/chef-server/pull/4124) ([cgunasree08](https://github.com/cgunasree08))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.10.91 -->
 ### Changes since 15.10.91 release
 
 #### Merged Pull Requests
+- CHEF-28521 - Create SECURITY.md file with standard template [#4124](https://github.com/chef/chef-server/pull/4124) ([cgunasree08](https://github.com/cgunasree08)) <!-- 15.10.95 -->
 - Removed internal library information in the /version endpoint [#4159](https://github.com/chef/chef-server/pull/4159) ([jashaik](https://github.com/jashaik)) <!-- 15.10.94 -->
 - change pg client from 13 to 14 [#4148](https://github.com/chef/chef-server/pull/4148) ([punitmundra](https://github.com/punitmundra)) <!-- 15.10.93 -->
 - Updated soft_fail in the case of chef-server chef-server-only and ha-… [#4150](https://github.com/chef/chef-server/pull/4150) ([jashaik](https://github.com/jashaik)) <!-- 15.10.92 -->
