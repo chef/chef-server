@@ -1,3 +1,0 @@
-source 'https://supermarket.chef.io'
-
-cookbook 'infra-server', path: './infra-server'

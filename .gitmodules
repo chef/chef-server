@@ -1,0 +1,4 @@
+[submodule "omnibus"]
+	path = omnibus
+	url = https://github.com/chef/chef-server-omnibus-config.git
+	branch = poorndm/update-omnibus-private

@@ -1,4 +1,0 @@
-Partybus.configure do |c|
-  c.partybus_migration_directory = "/Users/stephen/opscode/dev/opscode-omnibus/files/upgrades"
-  c.migration_state_file         = "/tmp/partybus-state"
-end
