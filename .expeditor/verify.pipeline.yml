@@ -11,10 +11,6 @@ expeditor:
   defaults:
     buildkite:
       timeout_in_minutes: 90
-  secrets:
-    GITHUB_TOKEN:
-      account: github/chef
-      field: token
 
 steps:
 
@@ -34,21 +30,21 @@ steps:
 #########################################################################
   # Component Tests
 #########################################################################
-
-- label: omnibus
-  command:
-    - /workdir/scripts/bk_tests/bk_install.sh
-    - gem uninstall bundler -v '>= 2.0.1' -a
-    - cd /workdir/omnibus; make install
-    - make ci
-  expeditor:
-    executor:
-      docker:
-        image: "chefes/a1-buildkite"
-        environment:
-          - LUALIB=~/.luarocks/lib/lua/5.2
-          - COMPONENT=omnibus
-          - GITHUB_TOKEN
+# moving this test to chef-server-omnibus-config repo,
+# - label: omnibus
+#   command:
+#     - /workdir/scripts/bk_tests/bk_install.sh
+#     - gem uninstall bundler -v '>= 2.0.1' -a
+#     - cd /workdir/omnibus; make install
+#     - make ci
+#   expeditor:
+#     executor:
+#       docker:
+#         image: "chefes/a1-buildkite"
+#         environment:
+#           - LUALIB=~/.luarocks/lib/lua/5.2
+#           - COMPONENT=omnibus
+#           - GITHUB_TOKEN
 
 - label: chef-server-ctl
   command:
