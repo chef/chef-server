@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.10.95 -->
-## [15.10.95](https://github.com/chef/chef-server/tree/15.10.95) (2026-04-17)
+<!-- latest_release 15.10.96 -->
+## [15.10.96](https://github.com/chef/chef-server/tree/15.10.96) (2026-04-22)
 
 #### Merged Pull Requests
-- CHEF-28521 - Create SECURITY.md file with standard template [#4124](https://github.com/chef/chef-server/pull/4124) ([cgunasree08](https://github.com/cgunasree08))
+- Update Omnibus config [#4154](https://github.com/chef/chef-server/pull/4154) ([poorndm](https://github.com/poorndm))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.10.91 -->
 ### Changes since 15.10.91 release
 
 #### Merged Pull Requests
+- Update Omnibus config [#4154](https://github.com/chef/chef-server/pull/4154) ([poorndm](https://github.com/poorndm)) <!-- 15.10.96 -->
 - CHEF-28521 - Create SECURITY.md file with standard template [#4124](https://github.com/chef/chef-server/pull/4124) ([cgunasree08](https://github.com/cgunasree08)) <!-- 15.10.95 -->
 - Removed internal library information in the /version endpoint [#4159](https://github.com/chef/chef-server/pull/4159) ([jashaik](https://github.com/jashaik)) <!-- 15.10.94 -->
 - change pg client from 13 to 14 [#4148](https://github.com/chef/chef-server/pull/4148) ([punitmundra](https://github.com/punitmundra)) <!-- 15.10.93 -->
