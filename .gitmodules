@@ -1,0 +1,4 @@
+[submodule "omnibus"]
+	path = omnibus1
+	url = https://github.com/chef/chef-server-omnibus-config.git
+	branch = main 
