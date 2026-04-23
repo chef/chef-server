@@ -46,7 +46,7 @@ vm:
   # All settings below apply only to the chef-server vm
   cpus: 4
   memory: 4096
-  packages: [ ntp, curl, wget, htop, uuid-dev, tmux, vim, iotop, zlib1g-dev, liblzma-dev, jq, ripgrep, tree ]
+  packages: [ curl, wget, htop, uuid-dev, tmux, vim, iotop, zlib1g-dev, liblzma-dev, jq, ripgrep, tree ]
   omnibus-autoload: [] # see config.yml for details and to add components
   # Override this in config.yml to set a custom path for your dotfiles
   # that's external to this repository.
