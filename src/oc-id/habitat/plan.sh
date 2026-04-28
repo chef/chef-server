@@ -8,7 +8,7 @@ pkg_deps=(
   core/postgresql14-client
   core/curl
   core/node
-  core/ruby3_1/3.1.6/20260306111218
+  core/ruby3_1/3.1.7
   core/rsync
   core/sed
   core/libffi
