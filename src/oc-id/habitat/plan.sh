@@ -4,7 +4,7 @@ pkg_origin=chef
 pkg_maintainer="The Chef Server Maintainers <support@chef.io>"
 pkg_license=('Apache-2.0')
 pkg_deps=(
-  core/sqitch/1.4.1/20260316082454
+  core/sqitch
   core/postgresql14-client
   core/curl
   core/node
