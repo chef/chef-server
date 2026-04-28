@@ -1,6 +1,5 @@
 origin: chef
 smart_build: false
-refresh_channel: LTS-2024
 studio_secrets:
   HAB_FALLBACK_CHANNEL:
     value: "LTS-2024"
