@@ -9,7 +9,7 @@ pkg_deps=(
   core/coreutils
   core/curl
   core/gcc-libs
-  core/sqitch
+  core/sqitch/1.4.1/20260316082454
   core/postgresql14-client
   )
 pkg_build_deps=(core/make core/git core/gcc)
