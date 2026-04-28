@@ -3,4 +3,6 @@ smart_build: false
 studio_secrets:
   HAB_FALLBACK_CHANNEL:
     value: "LTS-2024"
+  HAB_REFRESH_CHANNEL:
+    value: "LTS-2024"
 
