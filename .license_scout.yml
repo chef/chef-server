@@ -130,6 +130,9 @@ fallbacks:
     - name: em-http-request
       license_id: MIT
       license_content: https://raw.githubusercontent.com/igrigorik/em-http-request/master/README.md
+    - name: fiddle
+      license_id: Ruby
+      license_content: https://raw.githubusercontent.com/ruby/fiddle/master/COPYING
     - name: net-telnet
       license_id: Ruby
       license_content: https://raw.githubusercontent.com/ruby/net-telnet/master/LICENSE.txt
