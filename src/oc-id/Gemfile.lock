@@ -164,7 +164,7 @@ GEM
       rack-test (>= 0.6.3)
       regexp_parser (>= 1.5, < 3.0)
       xpath (~> 3.2)
-    cgi (0.5.0)
+    cgi (0.5.1)
     chef (18.8.46)
       activesupport (>= 4.2.7.1, <= 7.1.5.2)
       addressable
@@ -310,7 +310,7 @@ GEM
       dry-initializer (~> 3.2)
       dry-schema (~> 1.14)
       zeitwerk (~> 2.6)
-    erb (4.0.4)
+    erb (4.0.4.1)
       cgi (>= 0.3.3)
     erubi (1.13.1)
     erubis (2.7.0)
