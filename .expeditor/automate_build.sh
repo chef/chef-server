@@ -16,7 +16,7 @@ export HAB_STUDIO_SECRET_HAB_FALLBACK_CHANNEL="LTS-2024"
 export HAB_FALLBACK_CHANNEL="dev"
 export DEFAULT_AUTOMATE_REPO="https://github.com/chef/automate-private.git"
 
-curl https://raw.githubusercontent.com/habitat-sh/habitat/main/components/hab/install.sh | sudo bash -v 1.6.1245/2025090514090
+curl https://raw.githubusercontent.com/habitat-sh/habitat/main/components/hab/install.sh | sudo bash -s -- -v 1.6.1245/20250905140900
 
 sudo -E hab pkg install core/ruby3_1
 export PATH
