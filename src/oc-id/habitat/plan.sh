@@ -1,3 +1,4 @@
+HAB_REFRESH_CHANNEL="LTS-2024"
 pkg_name=oc_id
 pkg_origin=chef
 pkg_maintainer="The Chef Server Maintainers <support@chef.io>"
