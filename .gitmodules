@@ -1,4 +1,4 @@
 [submodule "omnibus"]
 	path = omnibus
 	url = https://github.com/chef/chef-server-omnibus-config.git
-	branch = main
+	branch = rebuild/CHEF-32135-lbaker-20260430-092319
