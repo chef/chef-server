@@ -45,7 +45,7 @@ jobs:
 
   call-ci-main-pr-check-pipeline:
     needs: read_version
-    uses: chef/common-github-actions/.github/workflows/ci-main-pull-request.yml@sandhi/support-go-work
+    uses: chef/common-github-actions/.github/workflows/ci-main-pull-request.yml@ruby-erlang-fix
     secrets: inherit
     permissions: 
       id-token: write
@@ -61,7 +61,7 @@ jobs:
       version: ${{ needs.read_version.outputs.version }}
       detect-version-source-type: 'none' # options include "none" (do not detect), "file", "github-tag" or "github-release"
       detect-version-source-parameter: '' # use for file name
-      language: 'ruby'  # Go, Ruby, Rust, JavaScript, TypeScript, Python, Java, C#, PHP, other - used for build and SonarQube language setting
+      language: 'ruby-erlang'  # Go, Ruby, Rust, JavaScript, TypeScript, Python, Java, C#, PHP, other - used for build and SonarQube language settings
 
       # complexity-checks
       perform-complexity-checks: true
