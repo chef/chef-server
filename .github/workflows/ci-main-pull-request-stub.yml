@@ -53,7 +53,7 @@ jobs:
 
     with:   
       visibility: ${{ github.event.repository.visibility }}   #  private, public, or internal
-      github-event-name: ${{ github.event_name }}
+      github-event-name: 'push'
       github-branch-name: ${{ github.head_ref || github.ref_name }}
       # go-private-modules: GOPRIVATE for Go private modules, default is 'github.com/progress-platform-services/*
 
