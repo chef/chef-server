@@ -45,7 +45,7 @@ jobs:
 
   call-ci-main-pr-check-pipeline:
     needs: read_version
-    uses: chef/common-github-actions/.github/workflows/ci-main-pull-request.yml@ruby-erlang-fix
+    uses: chef/common-github-actions/.github/workflows/ci-main-pull-request.yml@v1.0.33
     secrets: inherit
     permissions: 
       id-token: write
@@ -53,7 +53,7 @@ jobs:
 
     with:   
       visibility: ${{ github.event.repository.visibility }}   #  private, public, or internal
-      github-event-name: 'push'
+      github-event-name: ${{ github.event_name }}
       github-branch-name: ${{ github.head_ref || github.ref_name }}
       # go-private-modules: GOPRIVATE for Go private modules, default is 'github.com/progress-platform-services/*
 
@@ -61,7 +61,7 @@ jobs:
       version: ${{ needs.read_version.outputs.version }}
       detect-version-source-type: 'none' # options include "none" (do not detect), "file", "github-tag" or "github-release"
       detect-version-source-parameter: '' # use for file name
-      language: 'ruby-erlang'  # Go, Ruby, Rust, JavaScript, TypeScript, Python, Java, C#, PHP, other - used for build and SonarQube language settings
+      language: 'ruby-erlang'  # Go, Ruby, Rust, JavaScript, TypeScript, Python, Java, C#, PHP, other - used for build and SonarQube language setting
 
       # complexity-checks
       perform-complexity-checks: true
