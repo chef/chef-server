@@ -1,3 +1,4 @@
+HAB_REFRESH_CHANNEL="LTS-2024"
 pkg_name=oc_bifrost
 pkg_origin=chef
 pkg_license=('Apache-2.0')

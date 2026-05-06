@@ -1,3 +1,4 @@
+HAB_REFRESH_CHANNEL="LTS-2024"
 pkg_name=openresty-noroot
 pkg_origin=chef
 pkg_version=1.27.1.1
