@@ -64,7 +64,7 @@
   1},
  {<<"sqerl">>,
   {git,"https://github.com/chef/sqerl",
-       {ref,"70a76524220c486045156e632adac934c84bdb33"}},
+       {branch,"shahid/sqerl-erl27.3-pg16.1"}},
   0},
  {<<"stats_hero">>,
   {git,"https://github.com/chef/stats_hero",
