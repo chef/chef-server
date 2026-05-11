@@ -92,7 +92,7 @@ do_install() {
 
   cat > Gemfile << EOF
 source 'https://rubygems.org'
-gem 'chef', '~> 18.8.46'
+gem 'chef', '~> 18.10.17'
 gem 'knife', '~> 18.8.13'
 EOF
 
