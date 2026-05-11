@@ -45,7 +45,7 @@ jobs:
 
   call-ci-main-pr-check-pipeline:
     needs: read_version
-    uses: chef/common-github-actions/.github/workflows/ci-main-pull-request.yml@v1.0.33
+    uses: chef/common-github-actions/.github/workflows/ci-main-pull-request.yml@v1.0.34
     secrets: inherit
     permissions: 
       id-token: write
@@ -91,6 +91,12 @@ jobs:
       perform-grype-scan: true
       grype-fail-on-high: true
       grype-fail-on-critical: true
+      
+      # Wiz CLI Docker image scan
+      perform-wiz-scan: ${{ github.event_name != 'release' }}
+      wiz-fail-build: true
+      wiz-fail-on-critical: true
+      wiz-fail-on-high: true
 
       # perform application build and unit testing, will use custom repository properties when implemented for chef-primary-application, chef-build-profile, and chef-build-language
       build: false
