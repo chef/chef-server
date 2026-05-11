@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.10.98 -->
-## [15.10.98](https://github.com/chef/chef-server/tree/15.10.98) (2026-05-07)
+<!-- latest_release 15.10.99 -->
+## [15.10.99](https://github.com/chef/chef-server/tree/15.10.99) (2026-05-11)
 
 #### Merged Pull Requests
-- Integrating Security Scans for Infra Server [#4165](https://github.com/chef/chef-server/pull/4165) ([VarshiSB](https://github.com/VarshiSB))
+- Chef 32232 [#4166](https://github.com/chef/chef-server/pull/4166) ([jashaik](https://github.com/jashaik))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.10.91 -->
 ### Changes since 15.10.91 release
 
 #### Merged Pull Requests
+- Chef 32232 [#4166](https://github.com/chef/chef-server/pull/4166) ([jashaik](https://github.com/jashaik)) <!-- 15.10.99 -->
 - Integrating Security Scans for Infra Server [#4165](https://github.com/chef/chef-server/pull/4165) ([VarshiSB](https://github.com/VarshiSB)) <!-- 15.10.98 -->
 - Add refresh channel to all habitat plan files [#4172](https://github.com/chef/chef-server/pull/4172) ([mwrock](https://github.com/mwrock)) <!-- 15.10.97 -->
 - Update Omnibus config [#4154](https://github.com/chef/chef-server/pull/4154) ([poorndm](https://github.com/poorndm)) <!-- 15.10.96 -->
