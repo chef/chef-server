@@ -303,7 +303,7 @@ GEM
       tty-prompt (~> 0.21)
       tty-screen (~> 0.6)
       tty-table (~> 0.11)
-    knife-ec-backup (3.0.5)
+    knife-ec-backup (3.0.8)
       chef (~> 18.0)
       knife-tidy
       pg
@@ -534,8 +534,13 @@ DEPENDENCIES
   chef (~> 18.10.17)
   chef-server-ctl!
   chefstyle
+<<<<<<< HEAD
   knife (~> 18.10.18)
   knife-ec-backup (~> 3.0.5)
+=======
+  knife (~> 18.8.68)
+  knife-ec-backup (~> 3.0.8)
+>>>>>>> a19c258c1 (Bump knife-ec-backup 3.0.5 -> 3.0.8)
   rake
   rest-client!
   rspec
