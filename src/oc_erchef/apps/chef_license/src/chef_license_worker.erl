@@ -107,19 +107,28 @@ install_time() ->
 
 % This will continue to be the default behavior - license will only be checked
 % as part of an automate install, when the automate CLI is present.
-get_license_info(_InstallTime, cli) ->
+get_license_info(InstallTime, cli) ->
   os:cmd(?LICENSE_SCAN_CMD ++ ?DEFAULT_FILE_PATH),
-  {ok, Bin} = file:read_file(?DEFAULT_FILE_PATH),
-  {Json} = jiffy:decode(Bin),
-  Json;
+  case file:read_file(?DEFAULT_FILE_PATH) of
+    {ok, Bin} ->
+      case catch jiffy:decode(Bin) of
+        {Json} -> Json;
+        _ ->
+          lager:warning("CLI license check returned invalid JSON, falling back to default license"),
+          make_license_payload(InstallTime, #{})
+      end;
+    {error, Reason} ->
+      lager:warning("CLI license file not found (~p), falling back to default license", [Reason]),
+      make_license_payload(InstallTime, #{})
+  end;
 % This is for the file-based license mode, where we read the license directly from a file path.
 get_license_info(InstallTime, Path) ->
   case load_local_license(InstallTime, Path) of
     {ok, Json} ->
-      io:format("Data: ~p~n", Json),
+      lager:debug("Loaded local license data: ~p", [Json]),
       Json;
     {error, Reason} ->
-      io:format("Failed to load local license going with default: ~p~n", [Reason]),
+      lager:warning("Failed to load local license, falling back to default: ~p", [Reason]),
       make_license_payload(InstallTime, #{})
   end.
 
@@ -202,12 +211,9 @@ check_license(#state{install_time = InstallTime} = State,  ModeOrPath) ->
   JsonStr = case catch get_license_info(InstallTime, ModeOrPath) of
               Result when is_list(Result) -> Result;
               {'EXIT', N} ->
-                io:format("Oopsie, exited license check ~p~n", [N]),
+                lager:error("License check failed with exit: ~p", [N]),
                 <<"">>
             end,
-  R2 = process_license(JsonStr),
-
-  io:format("process_license result: ~p ~p~n", [JsonStr, R2]),
   case process_license(JsonStr) of
     {ok, valid_license, ExpDate, CustomerName, LicenseId} ->
       State#state{license_cache=valid_license, grace_period=undefined, scanned_time = erlang:timestamp(), expiration_date=ExpDate, customer_name=CustomerName, license_id = LicenseId};
