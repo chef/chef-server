@@ -10,34 +10,100 @@ GIT
       mime-types (>= 1.16, < 4.0)
       netrc (~> 0.8)
 
-PATH
-  remote: .
+GIT
+  remote: https://github.com/talktovikas/chef_secrets.git
+  revision: 98c1eea7e8ec67ff10ee9c3057af1e881aa6dd13
+  branch: vikas/debug
   specs:
-    chef-server-ctl (1.1.0)
-      appbundler
-      chef (~> 18.10.17)
-      chef_backup
-      chef_fixie (>= 1.0.3)
-      ffi-yajl (>= 1.2.0)
-      highline (>= 1.6.9, < 3.0)
-      knife
-      knife-ec-backup
-      license-acceptance
-      mixlib-install
-      mixlib-log
-      omnibus-ctl (<= 0.6.10)
-      pg (~> 1.2, >= 1.2.3, < 1.6)
-      redis
-      rest-client
-      uuidtools (~> 2.1, >= 2.1.3)
-      veil
+    veil (0.3.14)
+      bcrypt (~> 3.1)
+      pbkdf2
+
+GIT
+  remote: https://github.com/talktovikas/omniauth-chef.git
+  revision: 65c158d6c406e12cffbdf781e44fbfa5567036fd
+  branch: vikas/chef-upgrade
+  specs:
+    omniauth-chef (0.4.1)
+      chef (~> 18.7, >= 18.7.10)
+      omniauth (~> 2.0, >= 2.0.4)
+
+GIT
+  remote: https://github.com/talktovikas/unicorn-rails.git
+  revision: 28921e6f2f7a1e6dc406b0f1e6b4a51b96542b4e
+  branch: vikas/rack
+  specs:
+    unicorn-rails (2.2.1)
+      rack
+      unicorn
 
 GEM
   remote: https://rubygems.org/
   specs:
-<<<<<<< HEAD
-=======
-    abbrev (0.1.2)
+    actioncable (7.1.5.2)
+      actionpack (= 7.1.5.2)
+      activesupport (= 7.1.5.2)
+      nio4r (~> 2.0)
+      websocket-driver (>= 0.6.1)
+      zeitwerk (~> 2.6)
+    actionmailbox (7.1.5.2)
+      actionpack (= 7.1.5.2)
+      activejob (= 7.1.5.2)
+      activerecord (= 7.1.5.2)
+      activestorage (= 7.1.5.2)
+      activesupport (= 7.1.5.2)
+      mail (>= 2.7.1)
+      net-imap
+      net-pop
+      net-smtp
+    actionmailer (7.1.5.2)
+      actionpack (= 7.1.5.2)
+      actionview (= 7.1.5.2)
+      activejob (= 7.1.5.2)
+      activesupport (= 7.1.5.2)
+      mail (~> 2.5, >= 2.5.4)
+      net-imap
+      net-pop
+      net-smtp
+      rails-dom-testing (~> 2.2)
+    actionpack (7.1.5.2)
+      actionview (= 7.1.5.2)
+      activesupport (= 7.1.5.2)
+      nokogiri (>= 1.8.5)
+      racc
+      rack (>= 2.2.4)
+      rack-session (>= 1.0.1)
+      rack-test (>= 0.6.3)
+      rails-dom-testing (~> 2.2)
+      rails-html-sanitizer (~> 1.6)
+    actiontext (7.1.5.2)
+      actionpack (= 7.1.5.2)
+      activerecord (= 7.1.5.2)
+      activestorage (= 7.1.5.2)
+      activesupport (= 7.1.5.2)
+      globalid (>= 0.6.0)
+      nokogiri (>= 1.8.5)
+    actionview (7.1.5.2)
+      activesupport (= 7.1.5.2)
+      builder (~> 3.1)
+      erubi (~> 1.11)
+      rails-dom-testing (~> 2.2)
+      rails-html-sanitizer (~> 1.6)
+    activejob (7.1.5.2)
+      activesupport (= 7.1.5.2)
+      globalid (>= 0.3.6)
+    activemodel (7.1.5.2)
+      activesupport (= 7.1.5.2)
+    activerecord (7.1.5.2)
+      activemodel (= 7.1.5.2)
+      activesupport (= 7.1.5.2)
+      timeout (>= 0.4.0)
+    activestorage (7.1.5.2)
+      actionpack (= 7.1.5.2)
+      activejob (= 7.1.5.2)
+      activerecord (= 7.1.5.2)
+      activesupport (= 7.1.5.2)
+      marcel (~> 1.0)
     activesupport (7.1.5.2)
       base64
       benchmark (>= 0.3)
@@ -51,12 +117,8 @@ GEM
       mutex_m
       securerandom (>= 0.3)
       tzinfo (~> 2.0)
->>>>>>> 2aefb9d90 (Bump knife 18.8.68 -> 19.0.105)
-    addressable (2.8.8)
-      public_suffix (>= 2.0.2, < 8.0)
-    appbundler (0.13.4)
-      mixlib-cli (>= 1.4, < 3.0)
-      mixlib-shellout (>= 2.0, < 4.0)
+    addressable (2.8.7)
+      public_suffix (>= 2.0.2, < 7.0)
     ast (2.4.3)
     aws-eventstream (1.4.0)
     aws-partitions (1.1246.0)
@@ -81,26 +143,27 @@ GEM
     aws-sigv4 (1.12.1)
       aws-eventstream (~> 1, >= 1.0.2)
     base64 (0.3.0)
-    bcrypt (3.1.20)
-    bcrypt_pbkdf (1.1.2)
-    bcrypt_pbkdf (1.1.2-arm64-darwin)
+    bcrypt (3.1.22)
     benchmark (0.5.0)
-    berkshelf (8.0.22)
-      chef (>= 18.0.0)
-      chef-cleanroom (~> 1.0)
-      chef-config
-      concurrent-ruby (~> 1.0)
-      ffi (>= 1.15.5, <= 1.16.3)
-      minitar (~> 1.0)
-      mixlib-archive (>= 1.1.4, < 2.0)
-      mixlib-config (>= 2.2.5)
-      mixlib-shellout (>= 2.0, < 4.0)
-      octokit (>= 4.0, < 6.0)
-      retryable (>= 2.0, < 4.0)
-      solve (~> 4.0)
-      thor (>= 0.20, < 1.3.0)
-    bigdecimal (3.3.1)
+    better_errors (2.10.1)
+      erubi (>= 1.0.0)
+      rack (>= 0.9.0)
+      rouge (>= 1.0.0)
+    bigdecimal (3.1.3)
+    binding_of_caller (2.0.0)
+      debug_inspector (>= 1.2.0)
     builder (3.3.0)
+    byebug (12.0.0)
+    capybara (3.40.0)
+      addressable
+      matrix
+      mini_mime (>= 0.1.3)
+      nokogiri (~> 1.11)
+      rack (>= 1.6.0)
+      rack-test (>= 0.6.3)
+      regexp_parser (>= 1.5, < 3.0)
+      xpath (~> 3.2)
+    cgi (0.5.1)
     chef (18.10.17)
       addressable
       aws-sdk-s3 (~> 1.91)
@@ -136,12 +199,6 @@ GEM
       uri (~> 1.0.4)
       uuidtools (>= 2.1.5, < 3.0)
       vault (~> 0.18.2)
-<<<<<<< HEAD
-    chef-bin (18.10.17)
-      chef (= 18.10.17)
-=======
->>>>>>> 2aefb9d90 (Bump knife 18.8.68 -> 19.0.105)
-    chef-cleanroom (1.0.5)
     chef-config (18.10.17)
       addressable
       chef-utils (= 18.10.17)
@@ -152,15 +209,6 @@ GEM
     chef-gyoku (1.5.0)
       builder (>= 2.1.2)
       rexml (~> 3.4)
-    chef-licensing (1.4.1)
-      chef-config (>= 15)
-      faraday (>= 1, < 3)
-      faraday-http-cache
-      mixlib-log (~> 3.0)
-      ostruct (~> 0.6.0)
-      pstore (~> 0.1.1)
-      tty-prompt (~> 0.23)
-      tty-spinner (~> 0.9.3)
     chef-telemetry (1.1.1)
       chef-config
       concurrent-ruby (~> 1.0)
@@ -189,7 +237,7 @@ GEM
       erubi (>= 1.7)
       logging (>= 1.6.1, < 3.0)
       rubyzip (~> 2.0)
-    chef-zero (15.0.26)
+    chef-zero (15.1.0)
       ffi-yajl (>= 2.2, < 4.0)
       hashie (>= 2.0, < 6.0)
       mixlib-log (>= 2.0, < 4.0)
@@ -198,85 +246,115 @@ GEM
       unf_ext (~> 0.0.8)
       uuidtools (~> 2.1)
       webrick
-    chef_backup (0.3.0)
-      chef-utils (>= 16.5.54)
-      mixlib-shellout (>= 2.0, < 4.0)
-      pastel
-      tty-prompt (~> 0.21)
-    chef_fixie (1.0.8)
-      chef (>= 16)
-      ffi-yajl (>= 1.2.0)
-      pg (~> 1.2, >= 1.2.3)
-      pry (~> 0.13)
-      sequel (>= 4.11)
-      uuidtools (~> 2.1, >= 2.1.3)
-      veil
-    chefstyle (2.2.3)
-      rubocop (= 1.25.1)
     coderay (1.1.3)
-    concurrent-ruby (1.3.5)
+    coffee-rails (5.0.0)
+      coffee-script (>= 2.2.0)
+      railties (>= 5.2.0)
+    coffee-script (2.4.1)
+      coffee-script-source
+      execjs
+    coffee-script-source (1.12.2)
+    concurrent-ruby (1.3.6)
+    config (4.2.1)
+      deep_merge (~> 1.2, >= 1.2.1)
+      dry-validation (~> 1.0, >= 1.0.0)
     connection_pool (2.5.5)
-    cookstyle (7.32.8)
-      rubocop (= 1.25.1)
+    cookstyle (8.6.10)
+      rubocop (= 1.84.2)
     corefoundation (0.3.13)
       ffi (>= 1.15.0)
+    crass (1.0.6)
     csv (3.3.5)
+    daemons (1.4.1)
     date (3.5.1)
+    debug_inspector (1.2.0)
+    deep_merge (1.2.2)
     diff-lcs (1.5.1)
     domain_name (0.6.20240107)
-<<<<<<< HEAD
-=======
+    doorkeeper (5.9.0)
+      railties (>= 5)
     drb (2.2.3)
-    ed25519 (1.4.0)
->>>>>>> 2aefb9d90 (Bump knife 18.8.68 -> 19.0.105)
+    dry-configurable (1.3.0)
+      dry-core (~> 1.1)
+      zeitwerk (~> 2.6)
+    dry-core (1.1.0)
+      concurrent-ruby (~> 1.0)
+      logger
+      zeitwerk (~> 2.6)
+    dry-inflector (1.2.0)
+    dry-initializer (3.2.0)
+    dry-logic (1.6.0)
+      bigdecimal
+      concurrent-ruby (~> 1.0)
+      dry-core (~> 1.1)
+      zeitwerk (~> 2.6)
+    dry-schema (1.14.1)
+      concurrent-ruby (~> 1.0)
+      dry-configurable (~> 1.0, >= 1.0.1)
+      dry-core (~> 1.1)
+      dry-initializer (~> 3.2)
+      dry-logic (~> 1.5)
+      dry-types (~> 1.8)
+      zeitwerk (~> 2.6)
+    dry-types (1.8.3)
+      bigdecimal (~> 3.0)
+      concurrent-ruby (~> 1.0)
+      dry-core (~> 1.0)
+      dry-inflector (~> 1.0)
+      dry-logic (~> 1.4)
+      zeitwerk (~> 2.6)
+    dry-validation (1.11.1)
+      concurrent-ruby (~> 1.0)
+      dry-core (~> 1.1)
+      dry-initializer (~> 3.2)
+      dry-schema (~> 1.14)
+      zeitwerk (~> 2.6)
+    erb (4.0.4.1)
+      cgi (>= 0.3.3)
     erubi (1.13.1)
     erubis (2.7.0)
-    faraday (1.10.4)
-      faraday-em_http (~> 1.0)
-      faraday-em_synchrony (~> 1.0)
-      faraday-excon (~> 1.1)
-      faraday-httpclient (~> 1.0)
-      faraday-multipart (~> 1.0)
-      faraday-net_http (~> 1.0)
-      faraday-net_http_persistent (~> 1.0)
-      faraday-patron (~> 1.0)
-      faraday-rack (~> 1.0)
-      faraday-retry (~> 1.0)
-      ruby2_keywords (>= 0.0.4)
-    faraday-em_http (1.0.0)
-    faraday-em_synchrony (1.0.1)
-    faraday-excon (1.1.0)
+    eventmachine (1.2.7)
+    execjs (2.10.1)
+    factory_bot (6.6.0)
+      activesupport (>= 6.1.0)
+    factory_bot_rails (6.5.1)
+      factory_bot (~> 6.5)
+      railties (>= 6.1.0)
+    faraday (2.14.1)
+      faraday-net_http (>= 2.0, < 3.5)
+      json
+      logger
     faraday-follow_redirects (0.5.0)
       faraday (>= 1, < 3)
-    faraday-http-cache (2.5.1)
-      faraday (>= 0.8)
-    faraday-httpclient (1.0.1)
-    faraday-multipart (1.1.1)
-      multipart-post (~> 2.0)
-    faraday-net_http (1.0.2)
-    faraday-net_http_persistent (1.2.0)
-    faraday-patron (1.0.0)
-    faraday-rack (1.0.0)
-    faraday-retry (1.0.3)
+    faraday-net_http (3.4.2)
+      net-http (~> 0.5)
     ffi (1.16.3)
     ffi-libarchive (1.1.14)
       ffi (~> 1.0)
-    ffi-yajl (2.6.0)
-      libyajl2 (>= 1.2)
+    ffi-yajl (2.7.7)
+      libyajl2 (>= 2.1)
+      yajl
     fuzzyurl (0.9.0)
+    globalid (1.3.0)
+      activesupport (>= 6.1)
     gssapi (1.3.1)
       ffi (>= 1.0.1)
+    haml (6.4.0)
+      temple (>= 0.8.2)
+      thor
+      tilt
     hashie (5.1.0)
       logger
-    highline (2.1.0)
     http-accept (2.1.1)
-    http-cookie (1.1.0)
+    http-cookie (1.1.6)
       domain_name (~> 0.5)
     httpclient (2.9.0)
       mutex_m
+    i18n (1.14.8)
+      concurrent-ruby (~> 1.0)
     iniparse (1.5.0)
-    inspec-core (5.23.6)
-      addressable (~> 2.4)
+    inspec-core (5.24.7)
+      addressable (< 2.8.8)
       chef-telemetry (~> 1.0, >= 1.0.8)
       cookstyle
       faraday (>= 1, < 3)
@@ -296,108 +374,108 @@ GEM
       sslshake (~> 1.2)
       thor (>= 0.20, < 1.5.0)
       tomlrb (>= 1.2, < 2.1)
-      train-core (~> 3.13, >= 3.13.4)
+      train-core (~> 3.16, >= 3.16.1)
       tty-prompt (~> 0.17)
       tty-table (~> 0.10)
+    io-console (0.8.2)
     ipaddress (0.8.3)
+    irb (1.18.0)
+      pp (>= 0.6.0)
+      prism (>= 1.3.0)
+      rdoc (>= 4.0.0)
+      reline (>= 0.4.2)
+    jbuilder (2.14.1)
+      actionview (>= 7.0.0)
+      activesupport (>= 7.0.0)
     jmespath (1.6.2)
-<<<<<<< HEAD
+    jquery-rails (4.6.1)
+      rails-dom-testing (>= 1, < 3)
+      railties (>= 4.2.0)
+      thor (>= 0.14, < 2.0)
     json (2.19.5)
-    knife (18.10.18)
-=======
-    json (2.17.1)
-    knife (19.0.105)
-      abbrev
->>>>>>> 2aefb9d90 (Bump knife 18.8.68 -> 19.0.105)
-      bcrypt_pbkdf (~> 1.1)
-      chef-licensing (~> 1.2)
-      chef-vault
-      ed25519 (>= 1.2, < 2.0)
-      erubis (~> 2.7)
-      ffi (>= 1.15, < 1.18.0)
-      ffi-yajl (~> 2.2)
-      highline (>= 1.6.9, < 3)
-      license-acceptance (>= 1.0.5, < 3)
-      mixlib-archive (>= 0.4, < 2.0)
-      mixlib-cli (>= 2.1.1, < 3.0)
-      net-ssh (>= 5.1, < 8)
-      net-ssh-multi (~> 1.2, >= 1.2.1)
-      pastel
-      proxifier2 (~> 1.1)
-      train-core (~> 3.13, >= 3.13.4)
-<<<<<<< HEAD
-      train-winrm (~> 0.4.0)
-=======
-      train-winrm (>= 0.2.17)
->>>>>>> 2aefb9d90 (Bump knife 18.8.68 -> 19.0.105)
-      tty-prompt (~> 0.21)
-      tty-screen (~> 0.6)
-      tty-table (~> 0.11)
-    knife-ec-backup (3.0.8)
-      chef (~> 18.0)
-      knife-tidy
-      pg
-      sequel (~> 5.9)
-      veil
-    knife-tidy (2.3.2)
-      syslog (~> 0.3)
+    jwt (3.1.2)
+      base64
+    kgio (2.11.4)
+    language_server-protocol (3.17.0.5)
     libyajl2 (2.1.0)
     license-acceptance (2.1.13)
       pastel (~> 0.7)
       tomlrb (>= 1.2, < 3.0)
       tty-box (~> 0.6)
       tty-prompt (~> 0.20)
+    lint_roller (1.1.0)
     little-plugger (1.1.4)
     logger (1.7.0)
     logging (2.4.0)
       little-plugger (~> 1.1)
       multi_json (~> 1.14)
+    loofah (2.25.1)
+      crass (~> 1.0.2)
+      nokogiri (>= 1.12.0)
+    mail (2.9.0)
+      logger
+      mini_mime (>= 0.1.1)
+      net-imap
+      net-pop
+      net-smtp
+    mailcatcher (0.2.4)
+      eventmachine
+      haml
+      i18n
+      json
+      mail
+      sinatra
+      skinny (>= 0.1.2)
+      sqlite3-ruby
+      thin
+    marcel (1.1.0)
+    matrix (0.4.3)
     method_source (1.1.0)
     mime-types (3.7.0)
       logger
       mime-types-data (~> 3.2025, >= 3.2025.0507)
-    mime-types-data (3.2025.0924)
-    minitar (1.1.0)
+    mime-types-data (3.2026.0414)
+    mini_mime (1.1.5)
+    minitest (5.27.0)
     mixlib-archive (1.3.3)
       mixlib-log
     mixlib-authentication (3.0.10)
     mixlib-cli (2.1.8)
     mixlib-config (3.0.27)
       tomlrb
-    mixlib-install (3.12.30)
-      mixlib-shellout
-      mixlib-versioning
-      thor
     mixlib-log (3.1.2.1)
       ffi (< 1.17.0)
-    mixlib-shellout (3.3.9)
+    mixlib-shellout (3.4.10)
       chef-utils
-    mixlib-versioning (1.2.12)
-    molinillo (0.8.0)
     multi_json (1.19.1)
     multipart-post (2.4.1)
+    mustermann (3.1.1)
     mutex_m (0.3.0)
     net-ftp (0.3.9)
       net-protocol
       time
+    net-http (0.9.1)
+      uri (>= 0.11.1)
+    net-imap (0.5.14)
+      date
+      net-protocol
+    net-pop (0.1.2)
+      net-protocol
     net-protocol (0.2.2)
       timeout
     net-scp (4.1.0)
       net-ssh (>= 2.6.5, < 8.0.0)
     net-sftp (4.0.0)
       net-ssh (>= 5.0.0, < 8.0.0)
+    net-smtp (0.5.1)
+      net-protocol
     net-ssh (7.3.2)
-    net-ssh-gateway (2.0.0)
-      net-ssh (>= 4.0.0)
-    net-ssh-multi (1.2.1)
-      net-ssh (>= 2.6.5)
-      net-ssh-gateway (>= 1.2.0)
     netrc (0.11.0)
+    nio4r (2.7.5)
+    nokogiri (1.18.9-x86_64-linux-gnu)
+      racc (~> 1.4)
     nori (2.7.1)
       bigdecimal
-    octokit (5.6.1)
-      faraday (>= 1, < 3)
-      sawyer (~> 0.9)
     ohai (18.2.8)
       chef-config (>= 14.12, < 19)
       chef-utils (>= 16.0, < 19)
@@ -411,11 +489,13 @@ GEM
       plist (~> 3.1)
       train-core
       wmi-lite (~> 1.0)
-    omnibus-ctl (0.6.10)
-      chef-utils (>= 16.5.54)
-    ostruct (0.6.3)
-    parallel (1.27.0)
-    parser (3.3.10.0)
+    omniauth (2.1.4)
+      hashie (>= 3.4.6)
+      logger
+      rack (>= 2.2.3)
+      rack-protection
+    parallel (1.28.0)
+    parser (3.3.11.1)
       ast (~> 2.4.1)
       racc
     parslet (2.0.0)
@@ -424,26 +504,83 @@ GEM
     pbkdf2 (0.1.0)
     pg (1.5.9)
     plist (3.7.2)
-    prism (1.6.0)
+    pp (0.6.3)
+      prettyprint
+    prettyprint (0.2.0)
+    prism (1.9.0)
     proxifier2 (1.1.0)
     pry (0.15.2)
       coderay (~> 1.1)
       method_source (~> 1.0)
-    pstore (0.1.4)
+    pry-byebug (3.11.0)
+      byebug (~> 12.0)
+      pry (>= 0.13, < 0.16)
+    psych (5.3.1)
+      date
+      stringio
     public_suffix (6.0.2)
     racc (1.8.1)
     rack (3.2.6)
+    rack-protection (4.2.1)
+      base64 (>= 0.1.0)
+      logger (>= 1.6.0)
+      rack (>= 3.0.0, < 4)
+    rack-session (2.1.2)
+      base64 (>= 0.1.0)
+      rack (>= 3.0.0)
+    rack-test (2.2.0)
+      rack (>= 1.3)
     rackup (2.3.1)
       rack (>= 3)
+    rails (7.1.5.2)
+      actioncable (= 7.1.5.2)
+      actionmailbox (= 7.1.5.2)
+      actionmailer (= 7.1.5.2)
+      actionpack (= 7.1.5.2)
+      actiontext (= 7.1.5.2)
+      actionview (= 7.1.5.2)
+      activejob (= 7.1.5.2)
+      activemodel (= 7.1.5.2)
+      activerecord (= 7.1.5.2)
+      activestorage (= 7.1.5.2)
+      activesupport (= 7.1.5.2)
+      bundler (>= 1.15.0)
+      railties (= 7.1.5.2)
+    rails-controller-testing (1.0.5)
+      actionpack (>= 5.0.1.rc1)
+      actionview (>= 5.0.1.rc1)
+      activesupport (>= 5.0.1.rc1)
+    rails-dom-testing (2.3.0)
+      activesupport (>= 5.0.0)
+      minitest
+      nokogiri (>= 1.6)
+    rails-html-sanitizer (1.7.0)
+      loofah (~> 2.25)
+      nokogiri (>= 1.15.7, != 1.16.7, != 1.16.6, != 1.16.5, != 1.16.4, != 1.16.3, != 1.16.2, != 1.16.1, != 1.16.0.rc1, != 1.16.0)
+    railties (7.1.5.2)
+      actionpack (= 7.1.5.2)
+      activesupport (= 7.1.5.2)
+      irb
+      rackup (>= 1.0.0)
+      rake (>= 12.2)
+      thor (~> 1.0, >= 1.2.2)
+      zeitwerk (~> 2.6)
     rainbow (3.1.1)
-    rake (13.3.1)
-    redis (5.4.1)
-      redis-client (>= 0.22.0)
-    redis-client (0.26.2)
-      connection_pool
-    regexp_parser (2.11.3)
-    retryable (3.0.5)
+    raindrops (0.20.1)
+    rake (13.4.2)
+    rb-readline (0.5.5)
+    rdoc (7.2.0)
+      erb
+      psych (>= 4.0.0)
+      tsort
+    regexp_parser (2.12.0)
+    reline (0.6.3)
+      io-console (~> 0.5)
+    responders (3.2.0)
+      actionpack (>= 7.0)
+      railties (>= 7.0)
     rexml (3.4.4)
+    rouge (4.7.0)
     rspec (3.13.2)
       rspec-core (~> 3.13.0)
       rspec-expectations (~> 3.13.0)
@@ -456,52 +593,101 @@ GEM
     rspec-its (2.0.0)
       rspec-core (>= 3.13.0)
       rspec-expectations (>= 3.13.0)
-    rspec-mocks (3.13.7)
+    rspec-mocks (3.13.8)
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.13.0)
-    rspec-support (3.13.6)
-    rubocop (1.25.1)
+    rspec-rails (6.1.5)
+      actionpack (>= 6.1)
+      activesupport (>= 6.1)
+      railties (>= 6.1)
+      rspec-core (~> 3.13)
+      rspec-expectations (~> 3.13)
+      rspec-mocks (~> 3.13)
+      rspec-support (~> 3.13)
+    rspec-support (3.13.7)
+    rubocop (1.84.2)
+      json (~> 2.3)
+      language_server-protocol (~> 3.17.0.2)
+      lint_roller (~> 1.1.0)
       parallel (~> 1.10)
-      parser (>= 3.1.0.0)
+      parser (>= 3.3.0.2)
       rainbow (>= 2.2.2, < 4.0)
-      regexp_parser (>= 1.8, < 3.0)
-      rexml
-      rubocop-ast (>= 1.15.1, < 2.0)
+      regexp_parser (>= 2.9.3, < 3.0)
+      rubocop-ast (>= 1.49.0, < 2.0)
       ruby-progressbar (~> 1.7)
-      unicode-display_width (>= 1.4.0, < 3.0)
-    rubocop-ast (1.48.0)
+      unicode-display_width (>= 2.4.0, < 4.0)
+    rubocop-ast (1.49.1)
       parser (>= 3.3.7.2)
-      prism (~> 1.4)
+      prism (~> 1.7)
     ruby-progressbar (1.13.0)
-    ruby2_keywords (0.0.5)
     rubyntlm (0.6.5)
       base64
     rubyzip (2.4.1)
-    sawyer (0.9.3)
-      addressable (>= 2.3.5)
-      faraday (>= 0.17.3, < 3)
+    sass-rails (6.0.0)
+      sassc-rails (~> 2.1, >= 2.1.1)
+    sassc (2.4.0)
+      ffi (~> 1.9)
+    sassc-rails (2.1.2)
+      railties (>= 4.0.0)
+      sassc (>= 2.0)
+      sprockets (> 3.0)
+      sprockets-rails
+      tilt
+    sdoc (2.6.5)
+      rdoc (>= 5.0)
+    securerandom (0.4.1)
+    selenium-webdriver (4.7.1)
+      rexml (~> 3.2, >= 3.2.5)
+      rubyzip (>= 1.2.2, < 3.0)
+      websocket (~> 1.0)
     semverse (3.0.2)
-    sequel (5.99.0)
-      bigdecimal
+    sinatra (4.2.1)
+      logger (>= 1.6.0)
+      mustermann (~> 3.0)
+      rack (>= 3.0.0, < 4)
+      rack-protection (= 4.2.1)
+      rack-session (>= 2.0.0, < 3)
+      tilt (~> 2.0)
+    skinny (0.2.2)
+      eventmachine (~> 1.0)
+      thin
     socksify (1.8.1)
-    solve (4.0.4)
-      molinillo (~> 0.6)
-      semverse (>= 1.1, < 4.0)
+    spring (4.5.0)
+    spring-commands-rspec (1.0.4)
+      spring (>= 0.9.1)
+    sprockets (4.2.2)
+      concurrent-ruby (~> 1.0)
+      logger
+      rack (>= 2.2.4, < 4)
+    sprockets-rails (3.5.2)
+      actionpack (>= 6.1)
+      activesupport (>= 6.1)
+      sprockets (>= 3.0.0)
+    sqlite3 (2.8.1-x86_64-linux-gnu)
+    sqlite3-ruby (1.3.3)
+      sqlite3 (>= 1.3.3)
     sslshake (1.3.1)
+    stringio (3.2.0)
     strings (0.2.1)
       strings-ansi (~> 0.2)
       unicode-display_width (>= 1.5, < 3.0)
       unicode_utils (~> 1.4)
     strings-ansi (0.2.0)
-    syslog (0.3.0)
+    syslog (0.4.0)
       logger
     syslog-logger (1.6.8)
-    thor (1.2.2)
+    temple (0.10.4)
+    thin (2.0.1)
+      daemons (~> 1.0, >= 1.0.9)
+      eventmachine (~> 1.0, >= 1.0.4)
+      logger
+      rack (>= 1, < 4)
+    thor (1.4.0)
+    tilt (2.7.0)
     time (0.4.2)
       date
+    timecop (0.9.11)
     timeout (0.6.1)
-    toml (0.3.0)
-      parslet (>= 1.8.0, < 3.0.0)
     tomlrb (1.3.0)
     train-core (3.16.3)
       addressable (~> 2.5)
@@ -519,6 +705,7 @@ GEM
       chef-winrm-elevated (>= 1.2.5, < 2.0)
       chef-winrm-fs (>= 1.4.1, < 2.0)
       socksify (~> 1.8)
+    tsort (0.2.0)
     tty-box (0.7.0)
       pastel (~> 0.8)
       strings (~> 0.2.0)
@@ -533,52 +720,84 @@ GEM
       tty-screen (~> 0.8)
       wisper (~> 2.0)
     tty-screen (0.8.2)
-    tty-spinner (0.9.3)
-      tty-cursor (~> 0.7)
     tty-table (0.12.0)
       pastel (~> 0.8)
       strings (~> 0.2.0)
       tty-screen (~> 0.8)
+    turbolinks (5.2.1)
+      turbolinks-source (~> 5.2)
+    turbolinks-source (5.2.0)
+    tzinfo (2.0.6)
+      concurrent-ruby (~> 1.0)
+    tzinfo-data (1.2026.2)
+      tzinfo (>= 1.0.0)
+    uglifier (4.2.1)
+      execjs (>= 0.3.0, < 3)
     unf_ext (0.0.8.2)
     unicode-display_width (2.6.0)
     unicode_utils (1.4.0)
+    unicorn (6.1.0)
+      kgio (~> 2.6)
+      raindrops (~> 0.7)
     uri (1.0.4)
     uuidtools (2.2.0)
     vault (0.18.2)
       aws-sigv4
-    veil (0.3.11)
-      bcrypt (~> 3.1)
-      pbkdf2
     webrick (1.9.2)
+    websocket (1.2.11)
+    websocket-driver (0.8.0)
+      base64
+      websocket-extensions (>= 0.1.0)
+    websocket-extensions (0.1.5)
     wisper (2.0.1)
     wmi-lite (1.0.7)
+    xpath (3.2.0)
+      nokogiri (~> 1.8)
+    yajl (0.3.4)
+    zeitwerk (2.6.18)
 
 PLATFORMS
-  arm64-darwin-21
-  arm64-darwin-23
-  arm64-darwin-24
   x86_64-linux
 
 DEPENDENCIES
-  berkshelf (~> 8.0.22)
+  better_errors
+  bigdecimal (= 3.1.3)
+  binding_of_caller
+  capybara (~> 3.39)
   chef (~> 18.10.17)
-  chef-server-ctl!
-  chefstyle
-<<<<<<< HEAD
-<<<<<<< HEAD
-  knife (~> 18.10.18)
-  knife-ec-backup (~> 3.0.5)
-=======
-  knife (~> 18.8.68)
-=======
-  knife (~> 19.0.105)
->>>>>>> 2aefb9d90 (Bump knife 18.8.68 -> 19.0.105)
-  knife-ec-backup (~> 3.0.8)
->>>>>>> a19c258c1 (Bump knife-ec-backup 3.0.5 -> 3.0.8)
-  rake
+  coffee-rails (~> 5.0)
+  config (~> 4.1)
+  doorkeeper (~> 5.0)
+  factory_bot_rails (~> 6.4)
+  jbuilder (~> 2.11)
+  jquery-rails
+  jwt
+  mailcatcher
+  mixlib-authentication (>= 2.1, < 4)
+  nokogiri (= 1.18.9)
+  omniauth-chef (~> 0.4.1)!
+  pg (>= 0.18, < 1.6)
+  pry-byebug
+  rack (>= 3.2.4)
+  rails (= 7.1.5.2)
+  rails-controller-testing
+  rb-readline (~> 0.5.2)
+  responders (~> 3.0, >= 3.0.1)
   rest-client!
-  rspec
-  toml
+  rspec-rails (~> 6.0)
+  sass-rails (>= 4.0.3)
+  sdoc
+  selenium-webdriver (~> 4.7.1)
+  spring
+  spring-commands-rspec
+  sprockets-rails (>= 3.4.2)
+  thor (~> 1.4)
+  timecop
+  turbolinks (~> 5)
+  tzinfo-data
+  uglifier (~> 4.2)
+  unicorn-rails!
+  veil (~> 0.3.11)!
 
 BUNDLED WITH
    2.3.27
