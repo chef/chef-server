@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.10.102 -->
-## [15.10.102](https://github.com/chef/chef-server/tree/15.10.102) (2026-05-18)
+<!-- latest_release 15.10.103 -->
+## [15.10.103](https://github.com/chef/chef-server/tree/15.10.103) (2026-05-18)
 
 #### Merged Pull Requests
-- [CHEF-29745]  local license check, default off  [#4152](https://github.com/chef/chef-server/pull/4152) ([marcparadise](https://github.com/marcparadise))
+- CHEF-32187: Bump knife 18.8.68 -&gt; 19.0.105 and knife-ec-backup 3.0.5 -&gt; 3.0.8 [#4183](https://github.com/chef/chef-server/pull/4183) ([lbakerchef](https://github.com/lbakerchef))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.10.91 -->
 ### Changes since 15.10.91 release
 
 #### Merged Pull Requests
+- CHEF-32187: Bump knife 18.8.68 -&gt; 19.0.105 and knife-ec-backup 3.0.5 -&gt; 3.0.8 [#4183](https://github.com/chef/chef-server/pull/4183) ([lbakerchef](https://github.com/lbakerchef)) <!-- 15.10.103 -->
 - [CHEF-29745]  local license check, default off  [#4152](https://github.com/chef/chef-server/pull/4152) ([marcparadise](https://github.com/marcparadise)) <!-- 15.10.102 -->
 - CHEF-32186: Bump Chef Infra Client 18.8.46 -&gt; 18.10.17 [#4182](https://github.com/chef/chef-server/pull/4182) ([lbakerchef](https://github.com/lbakerchef)) <!-- 15.10.101 -->
 - Rebuild/chef 32135 lbaker 20260430 092319 [#4175](https://github.com/chef/chef-server/pull/4175) ([lbakerchef](https://github.com/lbakerchef)) <!-- 15.10.100 -->
