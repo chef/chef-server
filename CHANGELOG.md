@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.10.100 -->
-## [15.10.100](https://github.com/chef/chef-server/tree/15.10.100) (2026-05-11)
+<!-- latest_release 15.10.101 -->
+## [15.10.101](https://github.com/chef/chef-server/tree/15.10.101) (2026-05-18)
 
 #### Merged Pull Requests
-- Rebuild/chef 32135 lbaker 20260430 092319 [#4175](https://github.com/chef/chef-server/pull/4175) ([lbakerchef](https://github.com/lbakerchef))
+- CHEF-32186: Bump Chef Infra Client 18.8.46 -&gt; 18.10.17 [#4182](https://github.com/chef/chef-server/pull/4182) ([lbakerchef](https://github.com/lbakerchef))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.10.91 -->
 ### Changes since 15.10.91 release
 
 #### Merged Pull Requests
+- CHEF-32186: Bump Chef Infra Client 18.8.46 -&gt; 18.10.17 [#4182](https://github.com/chef/chef-server/pull/4182) ([lbakerchef](https://github.com/lbakerchef)) <!-- 15.10.101 -->
 - Rebuild/chef 32135 lbaker 20260430 092319 [#4175](https://github.com/chef/chef-server/pull/4175) ([lbakerchef](https://github.com/lbakerchef)) <!-- 15.10.100 -->
 - Chef 32232 [#4166](https://github.com/chef/chef-server/pull/4166) ([jashaik](https://github.com/jashaik)) <!-- 15.10.99 -->
 - Integrating Security Scans for Infra Server [#4165](https://github.com/chef/chef-server/pull/4165) ([VarshiSB](https://github.com/VarshiSB)) <!-- 15.10.98 -->
