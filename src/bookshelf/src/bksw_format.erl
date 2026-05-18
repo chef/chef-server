@@ -25,6 +25,7 @@
 %% API functions
 %%===================================================================
 
+-spec to_date(undefined | {datetime, calendar:datetime()} | calendar:datetime()) -> binary().
 to_date(undefined) ->
     <<"1970-01-01T00:00:00.000Z">>;
 to_date({datetime, Date}) ->
@@ -32,15 +33,24 @@ to_date({datetime, Date}) ->
 to_date(Date) ->
     iso8601:format(Date).
 
+-spec to_base64(binary()) -> string().
 to_base64(Bin) ->
     base64:encode_to_string(Bin).
 
+-spec to_hex(binary()) -> string().
 to_hex(Bin) ->
-      string:to_lower(lists:flatten([io_lib:format("~2.16.0b",
-                                                   [N])
-                                     || <<N>> <= Bin])).
+    lists:flatten([byte_to_hex(B) || <<B>> <= Bin]).
 
+-spec to_etag(binary() | string()) -> string().
 to_etag(Tag) when is_binary(Tag) ->
     to_etag(to_hex(Tag));
 to_etag(Tag) ->
     io_lib:format("\"~s\"", [Tag]).
+
+%%===================================================================
+%% Internal functions
+%%===================================================================
+
+-spec byte_to_hex(0..255) -> string().
+byte_to_hex(Byte) ->
+    io_lib:format("~2.16.0b", [Byte]).
