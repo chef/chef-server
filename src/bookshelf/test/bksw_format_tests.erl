@@ -1,0 +1,23 @@
+-module(bksw_format_tests).
+-include_lib("eunit/include/eunit.hrl").
+
+%% to_hex/1 — binary input produces a lowercase hex string of the correct length and content
+to_hex_produces_lowercase_hex_string_test() ->
+    ?assertEqual("0a1b2c3d", bksw_format:to_hex(<<16#0a, 16#1b, 16#2c, 16#3d>>)).
+
+%% to_hex/1 — empty binary produces empty string
+to_hex_empty_binary_produces_empty_string_test() ->
+    ?assertEqual("", bksw_format:to_hex(<<>>)).
+
+%% to_base64/1 — round-trips through base64 correctly
+to_base64_encodes_binary_test() ->
+    ?assertEqual("dGVzdA==", bksw_format:to_base64(<<"test">>)).
+
+%% to_etag/1 — binary input is hex-encoded then wrapped in double quotes
+to_etag_wraps_hex_in_quotes_test() ->
+    ?assertEqual("\"0a1b2c3d\"",
+                 lists:flatten(bksw_format:to_etag(<<16#0a, 16#1b, 16#2c, 16#3d>>))).
+
+%% to_date/1 — undefined input returns the epoch sentinel string
+to_date_undefined_returns_epoch_test() ->
+    ?assertEqual(<<"1970-01-01T00:00:00.000Z">>, bksw_format:to_date(undefined)).

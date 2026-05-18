@@ -47,27 +47,60 @@ cd src/<service>/
 make all
 ```
 
+> **bookshelf note**: `make all` also runs `elvis` style check and `xref`.
+> On this machine, `make all` may fail with a GCC segfault while compiling
+> the `jiffy` C NIF — a pre-existing system compiler bug unrelated to our code.
+> Use `./rebar3 eunit` directly to run the Erlang-only test path cleanly.
+
 ### Granular steps
 
 ```bash
-rebar3 clean
-rebar3 compile
-rebar3 eunit                            # unit tests
-rebar3 dialyzer                         # type analysis
-rebar3 ct                               # Common Test integration suite
+./rebar3 clean
+./rebar3 compile
+./rebar3 eunit                          # unit tests
+./rebar3 dialyzer                       # type analysis
+make ct                                 # Common Test integration suite (requires PostgreSQL)
+```
+
+> Each service ships its own `rebar3` binary at `src/<service>/rebar3`.
+> Use `./rebar3` rather than a global `rebar3` to ensure the correct version.
+
+### bookshelf — exact verified commands (Exercise 2 baseline)
+
+```bash
+cd src/bookshelf/
+
+./rebar3 eunit                          # run all EUnit tests including bksw_format_tests
+./rebar3 eunit --module bksw_format_tests  # run only the format tests
+./rebar3 dialyzer                       # type checking
+make ct                                 # integration tests (requires PostgreSQL running)
+```
+
+**Verified test output (all passing):**
+
+```
+======================== EUnit ========================
+module 'bksw_format_tests'
+  bksw_format_tests: to_hex_produces_lowercase_hex_string_test...[0.035 s] ok
+  bksw_format_tests: to_hex_empty_binary_produces_empty_string_test...ok
+  bksw_format_tests: to_base64_encodes_binary_test...[0.013 s] ok
+  bksw_format_tests: to_etag_wraps_hex_in_quotes_test...ok
+  bksw_format_tests: to_date_undefined_returns_epoch_test...ok
+  [done in 0.063 s]
+=======================================================
+  All 5 tests passed.
 ```
 
 ### Code style
 
 ```bash
-./scripts/elvis rock                    # from repo root, or:
-rebar3 as lint lint                     # where configured
+../../scripts/elvis rock                # from src/<service>/ directory
 ```
 
 ### Coverage report
 
 ```bash
-rebar3 cover
+./rebar3 cover
 # HTML report appears in _build/test/cover/
 ```
 
@@ -173,8 +206,10 @@ Coverage target: **≥ 85 %** line coverage for all critical modules.
 
 | Symptom | Fix |
 |---|---|
-| `rebar3 compile` fails on missing dep | Run `rebar3 get-deps` then retry |
+| `rebar3 compile` fails on missing dep | Run `./rebar3 get-deps` then retry |
 | CT tests can't connect to PostgreSQL | Ensure pg is running; check `test.config` for DB params |
 | `bundle install` fails with native ext errors | Install OS dev headers (`libpq-dev`, `libxml2-dev`) |
 | Vagrant VM times out on `vagrant up` | Increase VirtualBox RAM; see `dev/Vagrantfile` |
 | Hot-reload not picking up changes | Confirm `dvm load` was run; check symlinks in `/srv/` |
+| `make all` in bookshelf crashes with `cc1: internal compiler error: Segmentation fault` | GCC system bug compiling jiffy C NIF; use `./rebar3 eunit` to run Erlang tests directly |
+| `rebar3: command not found` | Each service ships its own binary; use `./rebar3` from inside `src/<service>/` |

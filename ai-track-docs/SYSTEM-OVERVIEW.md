@@ -96,6 +96,76 @@ permission checks to oc_bifrost.
 
 ---
 
+## Language & Framework Summary (Exercise 1)
+
+| Language | Services | Framework / Build Tool |
+|---|---|---|
+| **Erlang/OTP** | oc_erchef, oc_bifrost, bookshelf | rebar3, webmachine, sqerl, pooler |
+| **Ruby** | chef-server-ctl, oc-id, oc_bifrost schema | Rails 7, Thor, Bundler |
+| **SQL** | All services (schema migrations) | sqitch |
+| **Lua / nginx conf** | nginx, openresty-noroot | OpenResty |
+
+---
+
+## Entry Points
+
+| Service | Entry Point Path | Notes |
+|---|---|---|
+| oc_erchef | `src/oc_erchef/src/oc_erchef.app.src` | Composed of 10 sub-apps: `oc_chef_wm`, `chef_db`, `chef_objects`, `depsolver`, `chef_index`, `chef_telemetry`, `chef_license`, `data_collector`, `oc_chef_authz`, `chef_test` |
+| oc_bifrost | `src/oc_bifrost/apps/bifrost/` | Single OTP app |
+| bookshelf | `src/bookshelf/src/bksw_app.erl` | Entry via `bksw_app` application callback |
+| oc-id | `src/oc-id/` | Rails app; `config/application.rb` is the Rails entry point |
+| chef-server-ctl | `src/chef-server-ctl/chef-server-ctl.gemspec` | Thor-based CLI |
+| nginx | `src/nginx/` | Config templates rendered by omnibus |
+
+---
+
+## Test Approach
+
+| Service tier | Framework | Files | Run command |
+|---|---|---|---|
+| Erlang unit | EUnit (`*_tests.erl`) | 45 files | `rebar3 eunit` |
+| Erlang integration | Common Test (`*_SUITE.erl`) | 19 files | `rebar3 ct` |
+| Ruby | RSpec (`*_spec.rb`) | 47 files | `bundle exec rspec` |
+| End-to-end API | oc-chef-pedant | full suite | `bundle exec rspec` (from `oc-chef-pedant/`) |
+
+All Erlang services have a `Makefile` with a `make all` target that runs clean → compile → eunit → dialyzer.
+
+---
+
+## Chosen Low-Risk Module (Exercise 1)
+
+**`src/bookshelf/src/bksw_format.erl`**
+
+### What it does
+Pure formatting utility for bookshelf responses. Exports four stateless functions:
+
+| Function | Purpose |
+|---|---|
+| `to_date/1` | Formats a datetime tuple as an ISO 8601 string |
+| `to_base64/1` | Base64-encodes a binary |
+| `to_hex/1` | Converts a binary to a lowercase hex string |
+| `to_etag/1` | Wraps a hex digest in ETag quotes (`"abc123"`) |
+
+### Why it is low risk
+
+- **46 lines total** — entire module fits on one screen
+- **Pure functions** — no side effects, no process state, no supervision tree involvement
+- **No auth, no DB, no HTTP** — cannot accidentally break security, data integrity, or API contracts
+- **Self-contained** — zero internal dependencies beyond stdlib (`base64`, `io_lib`, `string`) and the `iso8601` library
+- **Easily testable** — input → output; no infrastructure required to run or verify tests
+- A bug here affects only the *formatting* of dates/ETags in bookshelf HTTP responses — not data loss, not authentication failure, not authorization bypass
+- Referenced in `src/bookshelf/test/bksw_sec_tests.erl`, so there is an existing test harness to extend
+
+### What kinds of changes are safe here
+
+- Adding/improving EUnit tests
+- Improving `to_hex` readability (the current implementation uses a list comprehension with `io_lib:format` — it could be made more idiomatic)
+- Adding a `-spec` type annotation for each exported function
+- Adding a `to_mime_type/1` or similar utility if bookshelf needs it in future exercises
+
+---
+
 ## Further Reading
 
 - [`build-test.md`](./build-test.md) — how to build, run, and test each service
