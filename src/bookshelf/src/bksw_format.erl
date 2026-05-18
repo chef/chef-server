@@ -45,16 +45,20 @@ to_date(Date) ->
     iso8601:format(Date).
 
 %% @doc Base64-encode a binary value, returning a flat string.
+%%
+%% Raises function_clause if Bin is not a binary.
 -spec to_base64(binary()) -> string().
-to_base64(Bin) ->
+to_base64(Bin) when is_binary(Bin) ->
     base64:encode_to_string(Bin).
 
 %% @doc Convert a binary to a lowercase hexadecimal string.
 %%
 %% Each byte is formatted as exactly two hex digits (zero-padded).
 %% Example: <<10, 255>> → "0aff"
+%%
+%% Raises function_clause if Bin is not a binary.
 -spec to_hex(binary()) -> string().
-to_hex(Bin) ->
+to_hex(Bin) when is_binary(Bin) ->
     lists:flatten([byte_to_hex(B) || <<B>> <= Bin]).
 
 %% @doc Wrap a value in HTTP ETag double-quotes.

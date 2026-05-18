@@ -9,9 +9,21 @@ to_hex_produces_lowercase_hex_string_test() ->
 to_hex_empty_binary_produces_empty_string_test() ->
     ?assertEqual("", bksw_format:to_hex(<<>>)).
 
+%% to_hex/1 — non-binary input is rejected at the boundary
+to_hex_rejects_string_input_test() ->
+    ?assertError(function_clause, bksw_format:to_hex("not a binary")).
+
+%% to_hex/1 — non-binary integer input is rejected at the boundary
+to_hex_rejects_integer_input_test() ->
+    ?assertError(function_clause, bksw_format:to_hex(42)).
+
 %% to_base64/1 — round-trips through base64 correctly
 to_base64_encodes_binary_test() ->
     ?assertEqual("dGVzdA==", bksw_format:to_base64(<<"test">>)).
+
+%% to_base64/1 — non-binary input is rejected at the boundary
+to_base64_rejects_string_input_test() ->
+    ?assertError(function_clause, bksw_format:to_base64("not a binary")).
 
 %% to_etag/1 — binary input is hex-encoded then wrapped in double quotes
 to_etag_wraps_hex_in_quotes_test() ->
