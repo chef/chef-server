@@ -33,3 +33,17 @@ to_etag_wraps_hex_in_quotes_test() ->
 %% to_date/1 — undefined input returns the epoch sentinel string
 to_date_undefined_returns_epoch_test() ->
     ?assertEqual(<<"1970-01-01T00:00:00.000Z">>, bksw_format:to_date(undefined)).
+
+%% Toggle ON: hex_encoding_case=uppercase produces uppercase hex digits
+to_hex_uppercase_toggle_produces_uppercase_test() ->
+    application:set_env(bookshelf, hex_encoding_case, uppercase),
+    try
+        ?assertEqual("0A1B2C3D", bksw_format:to_hex(<<16#0a, 16#1b, 16#2c, 16#3d>>))
+    after
+        application:unset_env(bookshelf, hex_encoding_case)
+    end.
+
+%% Toggle OFF: default (no env set) preserves lowercase behavior
+to_hex_default_is_lowercase_when_toggle_unset_test() ->
+    application:unset_env(bookshelf, hex_encoding_case),
+    ?assertEqual("0a1b2c3d", bksw_format:to_hex(<<16#0a, 16#1b, 16#2c, 16#3d>>)).

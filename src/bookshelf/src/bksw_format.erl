@@ -51,15 +51,29 @@ to_date(Date) ->
 to_base64(Bin) when is_binary(Bin) ->
     base64:encode_to_string(Bin).
 
-%% @doc Convert a binary to a lowercase hexadecimal string.
+%% @doc Convert a binary to a hexadecimal string.
 %%
 %% Each byte is formatted as exactly two hex digits (zero-padded).
-%% Example: <<10, 255>> → "0aff"
+%%
+%% The case of hex letters is controlled by the `hex_encoding_case`
+%% bookshelf application environment key:
+%%
+%%   * `lowercase` (default) — "0aff"  (S3-standard; current behavior)
+%%   * `uppercase`           — "0AFF"  (compatibility with tools that require it)
+%%
+%% Toggle at runtime (takes effect on the next call; no restart required):
+%%
+%%   application:set_env(bookshelf, hex_encoding_case, uppercase)
+%%   application:set_env(bookshelf, hex_encoding_case, lowercase)
 %%
 %% Raises function_clause if Bin is not a binary.
 -spec to_hex(binary()) -> string().
 to_hex(Bin) when is_binary(Bin) ->
-    lists:flatten([byte_to_hex(B) || <<B>> <= Bin]).
+    Hex = lists:flatten([byte_to_hex(B) || <<B>> <= Bin]),
+    case application:get_env(bookshelf, hex_encoding_case, lowercase) of
+        uppercase -> string:to_upper(Hex);
+        _         -> Hex
+    end.
 
 %% @doc Wrap a value in HTTP ETag double-quotes.
 %%
