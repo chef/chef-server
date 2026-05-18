@@ -24,6 +24,8 @@ get_trail_license_expired()->
     <<"{\"command\":\"chef-automate license status --result-json /tmp/string3\",\"status\":\"OK\",\"error_code\":0,\"error_description\":\"\",\"error_cause\":\"\",\"error_stack_trace\":\"\",\"error_recovery\":\"\",\"error_type\":\"\",\"result\":{\"set\":true,\"grace_period\":true,\"license_id\":\"6541d90a-2ed0-4d64-9861-c20fc21a3093\",\"customer_name\":\"janshahid.shaik@progress.com\",\"expiration_date\":{\"seconds\":1635689599},\"deployment_id\":\"fa7cce37-d8b3-4542-ad38-2e587a05faec\",\"deployment_type\":\"Standalone\",\"license_type\":\"trail\",\"deployment_at\":{\"seconds\":1727169083}}}">>.
 
 license_test()->
+    meck:new(chef_sql, [non_strict]),
+    meck:expect(chef_sql, select_rows, fun(_) -> not_found end),
     application:start(chef_license),
     file:write_file(?DEFAULT_FILE_PATH,get_commercial_license()),
     refresh_license(),
@@ -58,7 +60,9 @@ license_test()->
     timer:sleep(100),
     {Result4,_, _, _, _ ,_,_} = chef_license_worker:get_license(),
     ?assertEqual(trial_expired_expired, Result4),
-    os:cmd("rm -rf " ++ ?DEFAULT_FILE_PATH).
+    os:cmd("rm -rf " ++ ?DEFAULT_FILE_PATH),
+    application:stop(chef_license),
+    meck:unload(chef_sql).
 
 refresh_license()->
     erlang:send(chef_license_worker, check_license).

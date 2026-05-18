@@ -45,6 +45,12 @@
 -define(OC_LICENSE_PATH, cli).
 -endif.
 
+%% These functions are conditionally reachable depending on the OC_LICENSE_PATH macro value.
+%% When OC_LICENSE_PATH is 'cli' (default), the file-based path functions are not called,
+%% but they are needed when OC_LICENSE_PATH is set to a file path at build time.
+-dialyzer({no_match, [get_license_info/2, make_license_payload/2]}).
+-dialyzer({no_unused, [load_local_license/2, decode_json_payload/2]}).
+
 %%% ======================================
 %%% Exported
 %%% ======================================
@@ -95,7 +101,7 @@ terminate(_Reason, _State) ->
 install_time() ->
   DefaultTime = os:system_time(second),
   case chef_sql:select_rows({value_for_key, [<<"itime">>]}) of
-    [[{<<"value">>, Itime}]]->
+    [[{<<"value">>, Itime}]] ->
       try
         binary_to_integer(Itime)
       catch error:badarg ->
@@ -118,7 +124,7 @@ get_license_info(InstallTime, cli) ->
           make_license_payload(InstallTime, #{})
       end;
     {error, Reason} ->
-      lager:warning("CLI license file not found (~p), falling back to default license", [Reason]),
+      lager:debug("CLI license file not found (~p), falling back to default license", [Reason]),
       make_license_payload(InstallTime, #{})
   end;
 % This is for the file-based license mode, where we read the license directly from a file path.
@@ -144,13 +150,9 @@ load_local_license(InstallTime, Loader) when is_function(Loader) ->
         [_Header, Payload, _Signature] ->
           try base64:decode(Payload, #{ padding => false, mode => urlsafe } ) of
             Decoded ->
-              try jiffy:decode(Decoded, [return_maps]) of
-                J -> {ok, make_license_payload(InstallTime, J)}
-              catch _:Reason ->
-                { error , {invalid_json, Reason } } % %, Decoded } }
-              end
+              decode_json_payload(InstallTime, Decoded)
           catch _:Reason ->
-            { error, { invalid_base64, Reason } } %, Payload } }
+            { error, { invalid_base64, Reason } }
           end;
         _ ->
           { error, { invalid_license_format } }
@@ -160,6 +162,13 @@ load_local_license(InstallTime, Loader) when is_function(Loader) ->
   end;
 load_local_license(InstallTime, Path) ->
   load_local_license( InstallTime, fun() -> file:read_file(Path) end ).
+
+decode_json_payload(InstallTime, Decoded) ->
+  try jiffy:decode(Decoded, [return_maps]) of
+    J -> {ok, make_license_payload(InstallTime, J)}
+  catch _:Reason ->
+    { error, {invalid_json, Reason } }
+  end.
 
 
 %% Generates a license payload using a parsed license.  The generated license is 's compatiable with the
@@ -191,7 +200,7 @@ make_license_payload(InstallTime, _Other) ->
   %% If we don't have the expected fields, we don't have a valid license - so let's make something that looks like one,
   %% but is valid from the install date + 90 days.
   ExpirationTime = InstallTime + (60 * 60 * 24 * 90), % 90 days from install time
-  lager:warning("License payload is missing expected fields, treating as valid license with expiration : ~p", [ExpirationTime]),
+  lager:debug("License payload is missing expected fields, treating as valid license with expiration : ~p", [ExpirationTime]),
   [ {<<"result">>, {[
                     {<<"license_id">>, <<>>},
                     {<<"customer_name">>, <<>>},
