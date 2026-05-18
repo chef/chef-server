@@ -1,0 +1,91 @@
+%%  Chef Server — Component Architecture
+%%  Render with: mmdc -i architecture.mmd -o architecture.svg
+%%  Or paste into https://mermaid.live
+
+graph TB
+    subgraph Clients
+        KC[knife / chef-client]
+        WebUI[Chef Manage / Web UI]
+        OAuth[OAuth2 Consumer]
+    end
+
+    subgraph Ingress
+        NGINX[nginx\nTLS termination\nRouting / rate-limit]
+    end
+
+    subgraph CoreAPI["Core API  (oc_erchef — Erlang/OTP)"]
+        Router[webmachine router]
+        AuthN[mixlib-authn\nRequest signing]
+        Resources[Resource handlers\n/orgs /nodes /cookbooks …]
+        DB_Pool[sqerl + pooler\nPostgreSQL pool]
+    end
+
+    subgraph AuthZ["Authorization  (oc_bifrost — Erlang/OTP)"]
+        BifrostAPI[Bifrost REST API]
+        ACL[(ACL objects\nin PostgreSQL)]
+    end
+
+    subgraph Storage["Cookbook Storage  (bookshelf — Erlang/OTP)"]
+        BShelfAPI[S3-compat API]
+        BlobStore[(Cookbook tarballs\n& checksums on disk)]
+    end
+
+    subgraph Identity["Identity  (oc-id — Ruby on Rails)"]
+        OAuthSrv[OAuth2 server\nDoorkeeper]
+        UserDB[(Users / tokens\nin PostgreSQL)]
+    end
+
+    subgraph DataStore
+        PG[(PostgreSQL\nshared cluster)]
+    end
+
+    subgraph Management
+        CSCtl[chef-server-ctl\nRuby CLI]
+    end
+
+    %% Client → Ingress
+    KC  -->|HTTPS signed req| NGINX
+    WebUI -->|HTTPS| NGINX
+    OAuth -->|OAuth2| NGINX
+
+    %% Ingress → Services
+    NGINX -->|/organizations/*| Router
+    NGINX -->|/id/*| OAuthSrv
+
+    %% erchef internals
+    Router --> AuthN
+    AuthN --> Resources
+    Resources --> DB_Pool
+    DB_Pool --> PG
+
+    %% erchef → bifrost
+    Resources -->|authz check| BifrostAPI
+    BifrostAPI --> ACL
+    ACL --> PG
+
+    %% erchef → bookshelf
+    Resources -->|cookbook blobs| BShelfAPI
+    BShelfAPI --> BlobStore
+
+    %% oc-id internals
+    OAuthSrv --> UserDB
+    UserDB --> PG
+
+    %% Management
+    CSCtl -.->|reconfigure / restart| NGINX
+    CSCtl -.->|reconfigure / restart| Router
+    CSCtl -.->|reconfigure / restart| BifrostAPI
+    CSCtl -.->|reconfigure / restart| OAuthSrv
+
+    %% Styling
+    classDef erlang fill:#7b4ea0,color:#fff,stroke:#5a3070
+    classDef ruby fill:#cc342d,color:#fff,stroke:#992218
+    classDef infra fill:#2e7d32,color:#fff,stroke:#1b5e20
+    classDef data fill:#1565c0,color:#fff,stroke:#0d47a1
+    classDef client fill:#e65100,color:#fff,stroke:#bf360c
+
+    class Router,AuthN,Resources,DB_Pool,BifrostAPI,ACL,BShelfAPI erlang
+    class OAuthSrv,CSCtl ruby
+    class NGINX infra
+    class PG,BlobStore,UserDB data
+    class KC,WebUI,OAuth client
