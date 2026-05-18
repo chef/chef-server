@@ -264,3 +264,5 @@ Coverage target: **≥ 85 %** line coverage for all critical modules.
 | Hot-reload not picking up changes | Confirm `dvm load` was run; check symlinks in `/srv/` |
 | `make all` in bookshelf crashes with `cc1: internal compiler error: Segmentation fault` | GCC system bug compiling jiffy C NIF; use `./rebar3 eunit` to run Erlang tests directly |
 | `rebar3: command not found` | Each service ships its own binary; use `./rebar3` from inside `src/<service>/` |
+
+<!-- ex11: PR #4186 updated with review focus, risks, verification, rollback, commit message proposals -->
