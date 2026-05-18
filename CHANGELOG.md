@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.10.101 -->
-## [15.10.101](https://github.com/chef/chef-server/tree/15.10.101) (2026-05-18)
+<!-- latest_release 15.10.102 -->
+## [15.10.102](https://github.com/chef/chef-server/tree/15.10.102) (2026-05-18)
 
 #### Merged Pull Requests
-- CHEF-32186: Bump Chef Infra Client 18.8.46 -&gt; 18.10.17 [#4182](https://github.com/chef/chef-server/pull/4182) ([lbakerchef](https://github.com/lbakerchef))
+- [CHEF-29745]  local license check, default off  [#4152](https://github.com/chef/chef-server/pull/4152) ([marcparadise](https://github.com/marcparadise))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.10.91 -->
 ### Changes since 15.10.91 release
 
 #### Merged Pull Requests
+- [CHEF-29745]  local license check, default off  [#4152](https://github.com/chef/chef-server/pull/4152) ([marcparadise](https://github.com/marcparadise)) <!-- 15.10.102 -->
 - CHEF-32186: Bump Chef Infra Client 18.8.46 -&gt; 18.10.17 [#4182](https://github.com/chef/chef-server/pull/4182) ([lbakerchef](https://github.com/lbakerchef)) <!-- 15.10.101 -->
 - Rebuild/chef 32135 lbaker 20260430 092319 [#4175](https://github.com/chef/chef-server/pull/4175) ([lbakerchef](https://github.com/lbakerchef)) <!-- 15.10.100 -->
 - Chef 32232 [#4166](https://github.com/chef/chef-server/pull/4166) ([jashaik](https://github.com/jashaik)) <!-- 15.10.99 -->
