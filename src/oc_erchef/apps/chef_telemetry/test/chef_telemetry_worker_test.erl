@@ -29,6 +29,10 @@
     fqdn = []}).
 
 field_value_test() ->
+    meck:new(chef_license, [non_strict]),
+    meck:expect(chef_license, get_license, fun() ->
+        {valid_license, <<"commercial">>, false, 1835689599, undefined, <<"testorg">>, <<"test-license-id">>}
+    end),
     State = #state{fqdn_select = {ok, [[{<<"property">>, <<"FQDN:node1.domain1.com">>}],
                                        [{<<"property">>, <<"FQDN:node2.subdomain2.domain2.com">>}],
                                        [{<<"property">>, <<"FQDN:node3.subdomain3.domain3.co.uk">>}]]},
