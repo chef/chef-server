@@ -189,14 +189,65 @@ hab pkg build src/oc_erchef
 
 ## CI / Quality Gates
 
+### GitHub Actions (`.github/workflows/ci-main-pull-request-stub.yml`)
+
+The repo's GitHub Actions CI runs on PRs to `main`, `develop`, and `release/**`.
+It delegates to a central `chef/common-github-actions` reusable workflow.
+
+**What CI does run:**
+
+| Scan | Tool | Fail threshold |
+|------|------|---------------|
+| Secret scanning | Trufflehog | Any secret found |
+| Dependency CVEs | Trivy + Grype | High / Critical |
+| SAST | BlackDuck Polaris | High / Critical |
+| SCA / SBOM | BlackDuck SCA | Blocker / Critical / Major |
+| Code quality | SonarQube | Configurable |
+
+**What CI does NOT run (as of this writing):**
+
+```yaml
+build: false
+unit-tests: false
+```
+
+Erlang unit tests, dialyzer, elvis, and Ruby specs are **not executed by CI**.
+They must be run locally before pushing. See local script below.
+
+### Local unit test script (bookshelf — Exercise 10)
+
+A reliable local runner is provided that bypasses the GCC/jiffy segfault:
+
+```bash
+# From repo root — run all 8 bksw_format_tests (quiet)
+bash scripts/test-bookshelf-unit.sh
+
+# Verbose EUnit output
+bash scripts/test-bookshelf-unit.sh verbose
+```
+
+**Script**: `scripts/test-bookshelf-unit.sh`  
+**Requirement**: `_build/default/lib/` must be populated (run `./rebar3 compile`
+once from `src/bookshelf/` — it fails on jiffy but fetches all deps first).
+
+### Full local quality check (bookshelf)
+
+```bash
+cd src/bookshelf/
+./rebar3 eunit            # unit tests (or use the script above if GCC segfaults)
+./rebar3 dialyzer         # type analysis
+../../scripts/elvis rock  # style check
+make ct                   # CT integration (requires PostgreSQL)
+```
+
 | Check | Command | Must pass? |
-|---|---|---|
-| Erlang unit tests | `rebar3 eunit` | ✅ |
+|-------|---------|------------|
+| Erlang unit tests | `rebar3 eunit` or `scripts/test-bookshelf-unit.sh` | ✅ |
 | Erlang dialyzer | `rebar3 dialyzer` | ✅ |
-| Erlang CT integration | `rebar3 ct` | ✅ |
+| Erlang CT integration | `rebar3 ct` | ✅ (needs PG) |
 | Ruby specs | `bundle exec rspec` | ✅ |
-| Elvis style | `./scripts/elvis rock` | ✅ |
-| Pedant API tests | `bundle exec rspec` (oc-chef-pedant) | ✅ |
+| Elvis style | `../../scripts/elvis rock` | ✅ |
+| Pedant API tests | `bundle exec rspec` (oc-chef-pedant) | ✅ (needs stack) |
 
 Coverage target: **≥ 85 %** line coverage for all critical modules.
 
