@@ -393,7 +393,7 @@ GEM
       railties (>= 4.2.0)
       thor (>= 0.14, < 2.0)
     json (2.19.5)
-    jwt (3.1.2)
+    jwt (3.2.0)
       base64
     kgio (2.11.4)
     language_server-protocol (3.17.0.5)
@@ -428,7 +428,7 @@ GEM
       skinny (>= 0.1.2)
       sqlite3-ruby
       thin
-    marcel (1.1.0)
+    marcel (1.2.0)
     matrix (0.4.3)
     method_source (1.1.0)
     mime-types (3.7.0)
