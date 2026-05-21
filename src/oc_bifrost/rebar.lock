@@ -52,7 +52,7 @@
   0},
  {<<"opscoderl_wm">>,
   {git,"https://github.com/chef/opscoderl_wm",
-       {ref,"8e0b7bf2e578eb868e49bec29282a99845f751d5"}},
+       {branch,"main"}},
   0},
  {<<"pooler">>,
   {git,"https://github.com/chef/pooler.git",
