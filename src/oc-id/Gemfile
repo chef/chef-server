@@ -7,7 +7,7 @@ gem "rest-client", git: "https://github.com/chef/rest-client", branch: "jfm/ucrt
 gem 'chef', '~> 18.10.17'
 gem 'jbuilder', '~> 2.11'
 gem 'jquery-rails'
-gem 'jwt' # For Zendesk SSO
+gem 'jwt', '>= 3.2.0' # For Zendesk SSO; >= 3.2.0 fixes empty-key HMAC bypass CVE
 gem 'config', '~> 4.1' # Replacement of rails_config gem
 gem 'rb-readline', '~> 0.5.2', require: false
 gem 'sass-rails', '>= 4.0.3'
