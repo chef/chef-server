@@ -107,8 +107,8 @@ install_time() ->
       catch error:badarg ->
         DefaultTime
       end;
-    not_found -> {ok, 0};
-    {error, Reason} -> {error, Reason}
+    not_found -> DefaultTime;
+    {error, _Reason} -> DefaultTime
   end.
 
 % This will continue to be the default behavior - license will only be checked
