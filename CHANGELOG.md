@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.10.106 -->
-## [15.10.106](https://github.com/chef/chef-server/tree/15.10.106) (2026-05-21)
+<!-- latest_release 15.10.107 -->
+## [15.10.107](https://github.com/chef/chef-server/tree/15.10.107) (2026-05-21)
 
 #### Merged Pull Requests
-- Update Rails 7.1.5.2 → 7.1.6 to resolve Dependabot security update failure [#4189](https://github.com/chef/chef-server/pull/4189) ([Copilot](https://github.com/Copilot))
+- Fix JWT CVE: upgrade jwt to 3.2.0 in oc-id and chef-server-ctl [#4193](https://github.com/chef/chef-server/pull/4193) ([jashaik](https://github.com/jashaik))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.10.91 -->
 ### Changes since 15.10.91 release
 
 #### Merged Pull Requests
+- Fix JWT CVE: upgrade jwt to 3.2.0 in oc-id and chef-server-ctl [#4193](https://github.com/chef/chef-server/pull/4193) ([jashaik](https://github.com/jashaik)) <!-- 15.10.107 -->
 - Update Rails 7.1.5.2 → 7.1.6 to resolve Dependabot security update failure [#4189](https://github.com/chef/chef-server/pull/4189) ([Copilot](https://github.com/Copilot)) <!-- 15.10.106 -->
 - Bump addressable to 2.9.0 in chef-server-ctl (CVE fix) [#4192](https://github.com/chef/chef-server/pull/4192) ([jashaik](https://github.com/jashaik)) <!-- 15.10.105 -->
 - Bump addressable from 2.8.7 to 2.9.0 in /src/oc-id [#4178](https://github.com/chef/chef-server/pull/4178) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.10.104 -->
