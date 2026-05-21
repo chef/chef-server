@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.10.105 -->
-## [15.10.105](https://github.com/chef/chef-server/tree/15.10.105) (2026-05-21)
+<!-- latest_release 15.10.106 -->
+## [15.10.106](https://github.com/chef/chef-server/tree/15.10.106) (2026-05-21)
 
 #### Merged Pull Requests
-- Bump addressable to 2.9.0 in chef-server-ctl (CVE fix) [#4192](https://github.com/chef/chef-server/pull/4192) ([jashaik](https://github.com/jashaik))
+- Update Rails 7.1.5.2 → 7.1.6 to resolve Dependabot security update failure [#4189](https://github.com/chef/chef-server/pull/4189) ([Copilot](https://github.com/Copilot))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.10.91 -->
 ### Changes since 15.10.91 release
 
 #### Merged Pull Requests
+- Update Rails 7.1.5.2 → 7.1.6 to resolve Dependabot security update failure [#4189](https://github.com/chef/chef-server/pull/4189) ([Copilot](https://github.com/Copilot)) <!-- 15.10.106 -->
 - Bump addressable to 2.9.0 in chef-server-ctl (CVE fix) [#4192](https://github.com/chef/chef-server/pull/4192) ([jashaik](https://github.com/jashaik)) <!-- 15.10.105 -->
 - Bump addressable from 2.8.7 to 2.9.0 in /src/oc-id [#4178](https://github.com/chef/chef-server/pull/4178) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.10.104 -->
 - CHEF-32187: Bump knife 18.8.68 -&gt; 19.0.105 and knife-ec-backup 3.0.5 -&gt; 3.0.8 [#4183](https://github.com/chef/chef-server/pull/4183) ([lbakerchef](https://github.com/lbakerchef)) <!-- 15.10.103 -->
