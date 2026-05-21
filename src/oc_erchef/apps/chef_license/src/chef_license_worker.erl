@@ -51,7 +51,6 @@
 -dialyzer({no_match, [get_license_info/2, make_license_payload/2]}).
 -dialyzer({no_unused, [load_local_license/2, decode_json_payload/2]}).
 
-
 %%% ======================================
 %%% Exported
 %%% ======================================
@@ -172,7 +171,6 @@ decode_json_payload(InstallTime, Decoded) ->
   end.
 
 
-
 %% Generates a license payload using a parsed license.  The generated license is 's compatiable with the
 %% automate-ctl license status json output object, so that we can use the same processing function for both
 %% the CLI and file-based license modes.
@@ -238,7 +236,6 @@ check_license(#state{install_time = InstallTime} = State,  ModeOrPath) ->
       State#state{license_cache=trial_expired_expired, license_type = <<"trial">>, grace_period=undefined, scanned_time = erlang:timestamp(), expiration_date="", message=get_alert_message(trial_expired, "")};
     {error, _} -> State
   end.
-
 
 
 % missing license: gets treated as a trial that expires at TRACK_INSTALL_DATE + 90 days (configurable at build)
