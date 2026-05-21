@@ -518,7 +518,7 @@ GEM
     psych (5.3.1)
       date
       stringio
-    public_suffix (7.0.5)
+    public_suffix (6.0.1)
     racc (1.8.1)
     rack (3.2.6)
     rack-protection (4.2.1)
@@ -777,6 +777,7 @@ DEPENDENCIES
   nokogiri (= 1.18.9)
   omniauth-chef (~> 0.4.1)!
   pg (>= 0.18, < 1.6)
+  public_suffix (< 7.0)
   pry-byebug
   rack (>= 3.2.4)
   rails (= 7.1.5.2)
