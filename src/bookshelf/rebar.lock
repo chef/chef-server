@@ -88,7 +88,7 @@
   0},
  {<<"opscoderl_wm">>,
   {git,"https://github.com/chef/opscoderl_wm",
-       {ref,"6495dd0f97f64f363db1c05504436834cc1136cd"}},
+       {ref,"8e0b7bf2e578eb868e49bec29282a99845f751d5"}},
   0},
  {<<"pooler">>,
   {git,"https://github.com/chef/pooler.git",

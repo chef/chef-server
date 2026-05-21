@@ -4,6 +4,9 @@ port=9463
 ip_mode="ipv4"
 fips_enabled=false
 
+[log]
+rotation_type="wrap"
+
 [bifrost]
 
 [lager]

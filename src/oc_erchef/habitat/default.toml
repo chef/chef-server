@@ -2,6 +2,9 @@
 ip_mode="ipv4"
 fips_enabled=false
 
+[log]
+rotation_type="wrap"
+
 [lager]
 lager_console_backend="info"
 error_logger_hwm=50
