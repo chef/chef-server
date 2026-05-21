@@ -9,3 +9,5 @@ gem "toml" # for habitat-land
 
 gem "knife","~> 19.0.105"
 gem "knife-ec-backup", "~> 3.0.8"
+
+gem "public_suffix", "< 7.0" # public_suffix 7.0+ requires Ruby >= 3.2; pin for Ruby 3.1 compatibility
