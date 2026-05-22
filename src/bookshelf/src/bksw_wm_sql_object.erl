@@ -198,8 +198,8 @@ maybe_upload(Rq, #context{entry_md = #db_file{} = Obj0}= Ctx0, {ok, DataId}) ->
 maybe_upload(Rq, Ctx, {error, Error}) -> %% Clean up and return useful error
     error_logger:error_msg("maybe_upload error: ~p~n", [Error]),
     {halt, Rq, Ctx};
-maybe_upload(Rq, Ctx, Error) -> %% Clean up and return useful error
-    error_logger:error_msg("maybe_upload unknown response: ~p~n", [Error]),
+maybe_upload(Rq, #context{reqid = ReqId} = Ctx, Error) -> %% Clean up and return useful error
+    lager:error("req_id=~s upload failed with unknown response: ~p", [ReqId, Error]),
     {halt, Rq, Ctx}.
 
 upload(Rq, Ctx) ->
@@ -213,12 +213,13 @@ upload(Rq, Ctx) ->
 send_streamed_body(#context{entry_md = #db_file{chunk_count = ChunkCount, hash_sha512 = ShaExpected},
                             transfer_state = #file_transfer_state{next_chunk = ChunkCount,
                                                                   hash_context_sha512 = ShaSent
-                                                                 } = _TransferState0}) ->
+                                                                 } = _TransferState0,
+                            reqid = ReqId}) ->
     case crypto:hash_final(ShaSent) of
         ShaExpected ->
             ok;
         S ->
-            lager:error("checksum mismatch on download: expected: ~p; sent: ~p", [ShaExpected, S])
+            lager:error("req_id=~s checksum mismatch on download: expected=~p sent=~p", [ReqId, ShaExpected, S])
     end,
     {<<>>, done};
 send_streamed_body(#context{entry_md = #db_file{data_id = DataId} = DbFile,
@@ -324,7 +325,8 @@ write_streamed_body({Data, done}, Rq0,
                     ok = finalize_maybe_create_file(Rq1, Ctx0, File1),
                     {{halt, 204}, Rq1, Ctx1};
                 _ ->
-                    lager:error("Mismatch between Content-MD5 and actual content. Content-MD5: ~p; Actual: ~p", [RequestMd5, HashMd5]),
+                    lager:error("req_id=~s content-md5 mismatch on upload: content-md5=~p actual=~p",
+                                [Ctx1#context.reqid, RequestMd5, HashMd5]),
                     %% Exiting here causes uploads to be abandoned, but the upload_cleanup task will
                     %% eventually clean things up.
                     {{halt, 406}, Rq0, Ctx1}

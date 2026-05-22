@@ -215,6 +215,7 @@ base_end_per_suite(Config) ->
 make_user(Config, Name, AuthzId) ->
     User = chef_object:new_record(chef_user, ?API_MIN_VER, ?OSC_ORG_ID, AuthzId,
                                    {[{<<"username">>, Name},
+                                     %% TEST FIXTURE — not a production credential
                                      {<<"password">>, <<"zuperzecret">>},
                                      {<<"email">>, iolist_to_binary([Name, <<"@somewhere.com">>])},
                                      {<<"public_key">>, ?config(pubkey, Config)},

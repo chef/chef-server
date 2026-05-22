@@ -45,3 +45,20 @@ license-cache
 
 # don't commit berks lock files
 Berksfile.lock
+
+# Secrets & credentials — never commit real key material
+# Note: *.pem files already tracked (habitat templates + test fixtures) are
+# intentional and remain tracked. This rule only blocks NEW untracked .pem files.
+*.pem
+*.key
+*.p12
+*.pfx
+.env
+.env.*
+*.secret
+*.credentials
+private_key*
+*_rsa
+*_dsa
+*_ecdsa
+*_ed25519
