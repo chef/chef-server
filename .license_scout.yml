@@ -38,6 +38,7 @@ allowed_licenses:
   - gnuplot
   - ICU
   - ISC
+  - LGPL-2.1
   - MIT
   - MPL-2.0
   - OpenSSL
