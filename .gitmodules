@@ -1,4 +1,4 @@
 [submodule "omnibus"]
 	path = omnibus
 	url = https://github.com/chef/chef-server-omnibus-config.git
-	branch = poorndm/upgrade-pg
+	branch = CHEF-32272-pg-upgrade 
