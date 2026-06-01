@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.10.108 -->
-## [15.10.108](https://github.com/chef/chef-server/tree/15.10.108) (2026-05-25)
+<!-- latest_release 15.10.109 -->
+## [15.10.109](https://github.com/chef/chef-server/tree/15.10.109) (2026-06-01)
 
 #### Merged Pull Requests
-- fix: patch inspec-core 5.22.x/5.23.x for Parser::AST::Processor::Mixin (reconfigure crash) [#4195](https://github.com/chef/chef-server/pull/4195) ([lbakerchef](https://github.com/lbakerchef))
+- TEST PR  - pg upgrade [#4198](https://github.com/chef/chef-server/pull/4198) ([poorndm](https://github.com/poorndm))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.10.91 -->
 ### Changes since 15.10.91 release
 
 #### Merged Pull Requests
+- TEST PR  - pg upgrade [#4198](https://github.com/chef/chef-server/pull/4198) ([poorndm](https://github.com/poorndm)) <!-- 15.10.109 -->
 - fix: patch inspec-core 5.22.x/5.23.x for Parser::AST::Processor::Mixin (reconfigure crash) [#4195](https://github.com/chef/chef-server/pull/4195) ([lbakerchef](https://github.com/lbakerchef)) <!-- 15.10.108 -->
 - Fix JWT CVE: upgrade jwt to 3.2.0 in oc-id and chef-server-ctl [#4193](https://github.com/chef/chef-server/pull/4193) ([jashaik](https://github.com/jashaik)) <!-- 15.10.107 -->
 - Update Rails 7.1.5.2 → 7.1.6 to resolve Dependabot security update failure [#4189](https://github.com/chef/chef-server/pull/4189) ([Copilot](https://github.com/Copilot)) <!-- 15.10.106 -->
