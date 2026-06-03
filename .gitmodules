@@ -1,4 +1,4 @@
 [submodule "omnibus"]
 	path = omnibus
 	url = https://github.com/chef/chef-server-omnibus-config.git
-	branch = main 
+	branch = vikas/tuxcare
