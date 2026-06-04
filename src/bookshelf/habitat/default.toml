@@ -1,5 +1,8 @@
 port=4321
 
+[log]
+rotation_type="wrap"
+
 [lager]
 lager_console_backend="info"
 
