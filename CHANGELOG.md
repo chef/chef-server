@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.10.110 -->
-## [15.10.110](https://github.com/chef/chef-server/tree/15.10.110) (2026-06-04)
+<!-- latest_release 15.10.111 -->
+## [15.10.111](https://github.com/chef/chef-server/tree/15.10.111) (2026-06-04)
 
 #### Merged Pull Requests
-- CHEF-20751: add log_rotation_type support for habitat configs and bump rebar.lock [#4188](https://github.com/chef/chef-server/pull/4188) ([lbakerchef](https://github.com/lbakerchef))
+- sync for rotate_log_fix. [#4201](https://github.com/chef/chef-server/pull/4201) ([sreepuramsudheer](https://github.com/sreepuramsudheer))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.10.91 -->
 ### Changes since 15.10.91 release
 
 #### Merged Pull Requests
+- sync for rotate_log_fix. [#4201](https://github.com/chef/chef-server/pull/4201) ([sreepuramsudheer](https://github.com/sreepuramsudheer)) <!-- 15.10.111 -->
 - CHEF-20751: add log_rotation_type support for habitat configs and bump rebar.lock [#4188](https://github.com/chef/chef-server/pull/4188) ([lbakerchef](https://github.com/lbakerchef)) <!-- 15.10.110 -->
 - TEST PR  - pg upgrade [#4198](https://github.com/chef/chef-server/pull/4198) ([poorndm](https://github.com/poorndm)) <!-- 15.10.109 -->
 - fix: patch inspec-core 5.22.x/5.23.x for Parser::AST::Processor::Mixin (reconfigure crash) [#4195](https://github.com/chef/chef-server/pull/4195) ([lbakerchef](https://github.com/lbakerchef)) <!-- 15.10.108 -->
