@@ -14,6 +14,7 @@
 # limitations under the License.
 
 require "json"
+require "shellwords"
 
 known_dbs = {
   "opscode_chef" => { "dbname" => "opscode_chef", "config_key" => "opscode-erchef", "hashseed" => "private_chef" },
@@ -34,8 +35,12 @@ add_command_under_category "psql", "Database", "Launches an interactive PostgreS
   service_name = ARGV[1]
   write_arg = "--write"
   options_arg = "--options"
+  psql_options = []
   if ARGV.include?(options_arg)
-    psql_options = " #{ARGV[ARGV.index(options_arg) + 1]}"
+    # Split the user-supplied options string into individual tokens
+    # (honoring shell-style quoting) so each becomes a literal argv
+    # element passed to psql. This avoids handing the string to a shell.
+    psql_options = Shellwords.split(ARGV[ARGV.index(options_arg) + 1].to_s)
   end
 
   known_db_names = known_dbs.keys.sort.join(", ")
@@ -96,6 +101,14 @@ add_command_under_category "psql", "Database", "Launches an interactive PostgreS
   ENV["PGPASSWORD"] = db_password
   ENV["PAGER"] = "less"
   ENV["LESS"] = "-iMSx4 -FX"
-  cmd = "/opt/opscode/embedded/bin/psql --host #{db_host} --username #{db_username} --port #{db_port} --dbname #{db_name}#{psql_options}"
-  exec cmd
+  # Exec psql with an explicit argument vector (no shell). Passing the
+  # command as separate arguments means user-supplied --options tokens are
+  # delivered to psql verbatim and are never interpreted as shell syntax.
+  cmd = ["/opt/opscode/embedded/bin/psql",
+         "--host", db_host.to_s,
+         "--username", db_username.to_s,
+         "--port", db_port.to_s,
+         "--dbname", db_name.to_s,
+         *psql_options]
+  exec(*cmd)
 end
