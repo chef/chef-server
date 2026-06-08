@@ -1,4 +1,4 @@
-The `install` subcommand downloads packages from <https://chefdownload-commercial.chef.io> by default, which requires a valid `license_id`. For systems that are not behind a firewall (and have connectivity to <https://chefdownload-commercial.chef.io>), these packages can be installed as described below. For more information about commercial downloads, see <https://docs.chef.io/download/commercial/>.
+The `install` subcommand downloads packages from <https://chefdownload-commercial.chef.io> by default (requires a valid `license_id`).
 
 1. Install add-ons
 
