@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.10.112 -->
-## [15.10.112](https://github.com/chef/chef-server/tree/15.10.112) (2026-06-16)
+<!-- latest_release 15.10.113 -->
+## [15.10.113](https://github.com/chef/chef-server/tree/15.10.113) (2026-06-16)
 
 #### Merged Pull Requests
-- disabling adhoc nightly build. [#4210](https://github.com/chef/chef-server/pull/4210) ([sreepuramsudheer](https://github.com/sreepuramsudheer))
+- Temporarily disable npm install in raml-docs [#4212](https://github.com/chef/chef-server/pull/4212) ([vkarve-chef](https://github.com/vkarve-chef))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.10.91 -->
 ### Changes since 15.10.91 release
 
 #### Merged Pull Requests
+- Temporarily disable npm install in raml-docs [#4212](https://github.com/chef/chef-server/pull/4212) ([vkarve-chef](https://github.com/vkarve-chef)) <!-- 15.10.113 -->
 - disabling adhoc nightly build. [#4210](https://github.com/chef/chef-server/pull/4210) ([sreepuramsudheer](https://github.com/sreepuramsudheer)) <!-- 15.10.112 -->
 - sync for rotate_log_fix. [#4201](https://github.com/chef/chef-server/pull/4201) ([sreepuramsudheer](https://github.com/sreepuramsudheer)) <!-- 15.10.111 -->
 - CHEF-20751: add log_rotation_type support for habitat configs and bump rebar.lock [#4188](https://github.com/chef/chef-server/pull/4188) ([lbakerchef](https://github.com/lbakerchef)) <!-- 15.10.110 -->
