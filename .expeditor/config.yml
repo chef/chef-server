@@ -27,10 +27,10 @@ github:
 
 # At the given time, trigger the following scheduled workloads
 # https://expeditor.chef.io/docs/patterns/scheduled-action-sets/
-schedules:
-  - name: nightly_build
-    description: "Run a nightly build in the omnibus/adhoc pipeline"
-    cronline: "0 6 * * *"
+# schedules:
+#   - name: nightly_build
+#     description: "Run a nightly build in the omnibus/adhoc pipeline"
+#     cronline: "0 6 * * *"
 
 pipelines:
   - verify
