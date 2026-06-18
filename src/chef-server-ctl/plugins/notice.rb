@@ -411,7 +411,7 @@ cacerts | 2022-10-11 | MPL-2.0
 sslshake | 1.3.1 | MPL-2.0
 vault | 0.18.2 | MPL-2.0
 TermReadKey | 2.38 | Public Domain 
-postgresql13 | 13.22 | Commercial License
+postgresql13 | 13.23 | Commercial License
 postgresql96-bin | 9.6.23 | PostgreSQL
 chef-server-ctl |  | Proprietary
 cleanup | 1.0.0 | Proprietary
@@ -5679,7 +5679,7 @@ If you redistribute modified sources, we would appreciate that you include in th
 2.	Special Notices Regarding Commercially Licensed Third-Party Components incorporated into the Product: 
 
 Progress Chef Infra Server v15 incorporates OpenSearch 1.3.20 licensed from TuxCare.
-Progress Chef Infra Server v15 incorporates PostgreSQL 13.22 licensed from TuxCare.
+Progress Chef Infra Server v15 incorporates PostgreSQL 13.23 licensed from TuxCare.
 
 3.	Special Notices Regarding Progress Product Components incorporated into the Product:
 
