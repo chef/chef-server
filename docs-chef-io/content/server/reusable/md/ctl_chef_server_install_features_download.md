@@ -1,5 +1,4 @@
-The `install` subcommand downloads packages from <https://packages.chef.io> by default.
-For systems that are not behind a firewall (and have connectivity to <https://packages.chef.io>), these packages can be installed as described below.
+The `install` subcommand downloads packages from `chefdownload-commercial.chef.io` by default and requires a valid Progress Chef license ID.
 
 1. Install add-ons
 

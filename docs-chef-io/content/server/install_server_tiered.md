@@ -273,10 +273,7 @@ first downloaded to a local directory, and then installed.
 
 **Use Downloads**
 
-The `install` subcommand downloads packages from
-<https://packages.chef.io/> by default. For systems that are not behind
-a firewall (and have connectivity to <https://packages.chef.io/>), the
-Chef management console package can be installed as described below:
+The `install` subcommand downloads packages from `chefdownload-commercial.chef.io` by default and requires a valid Progress Chef license ID.
 
 Chef Manage
 
