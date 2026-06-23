@@ -139,7 +139,7 @@ This subcommand has the following options:
 
 `--path PATH`
 
-:   Use to specify the location of a local package file. This option is not required when packages are downloaded automatically from <https://chefdownload-commercial.chef.io/> (requires a valid `license_id`).
+: Use to specify the location of a local package file. This option isn't required when packages are downloaded automatically from `chefdownload-commercial.chef.io`, which requires a valid Progress Chef license ID.
 
 ### Use Downloads
 

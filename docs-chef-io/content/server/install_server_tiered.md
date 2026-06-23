@@ -273,7 +273,7 @@ first downloaded to a local directory, and then installed.
 
 **Use Downloads**
 
-The `install` subcommand downloads packages from <https://chefdownload-commercial.chef.io/> by default (requires a valid `license_id`).
+The `install` subcommand downloads packages from `chefdownload-commercial.chef.io` by default and requires a valid Progress Chef license ID.
 
 Chef Manage
 
