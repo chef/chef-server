@@ -118,12 +118,12 @@ auth_info(Req, #base_state{requestor_id = RequestorAuthzId,
                            organization_authz_id = OrgAuthzId,
                            resource_state = #association_state{user = User} } = State) ->
     case wrq:method(Req) of
-        'POST' ->
-            % Only the superuser can force-create an org-user association
-            {superuser_only, Req, State};
         Method ->
             {auth_type_for_method(Method, User, OrgAuthzId, RequestorAuthzId), Req, State}
     end.
+
+auth_type_for_method('POST', #chef_user{authz_id = UserAuthzId }, OrgAuthzId, _RequestorAuthzId) ->
+    [{object, OrgAuthzId, update}, {actor, UserAuthzId, update}];
 
 auth_type_for_method('DELETE', #chef_user{ authz_id = UserAuthzId }, _OrgAuthzId, UserAuthzId) ->
     %% permissions-wise, user can always disassociate his or her own org association
