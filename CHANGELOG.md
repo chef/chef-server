@@ -1,42 +1,40 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.10.114 -->
-## [15.10.114](https://github.com/chef/chef-server/tree/15.10.114) (2026-06-25)
-
-#### Merged Pull Requests
-- Erlang Update [#4216](https://github.com/chef/chef-server/pull/4216) ([talktovikas](https://github.com/talktovikas))
+<!-- latest_release -->
 <!-- latest_release -->
 
-<!-- release_rollup since=15.10.91 -->
-### Changes since 15.10.91 release
-
-#### Merged Pull Requests
-- Erlang Update [#4216](https://github.com/chef/chef-server/pull/4216) ([talktovikas](https://github.com/talktovikas)) <!-- 15.10.114 -->
-- Temporarily disable npm install in raml-docs [#4212](https://github.com/chef/chef-server/pull/4212) ([vkarve-chef](https://github.com/vkarve-chef)) <!-- 15.10.113 -->
-- disabling adhoc nightly build. [#4210](https://github.com/chef/chef-server/pull/4210) ([sreepuramsudheer](https://github.com/sreepuramsudheer)) <!-- 15.10.112 -->
-- sync for rotate_log_fix. [#4201](https://github.com/chef/chef-server/pull/4201) ([sreepuramsudheer](https://github.com/sreepuramsudheer)) <!-- 15.10.111 -->
-- CHEF-20751: add log_rotation_type support for habitat configs and bump rebar.lock [#4188](https://github.com/chef/chef-server/pull/4188) ([lbakerchef](https://github.com/lbakerchef)) <!-- 15.10.110 -->
-- TEST PR  - pg upgrade [#4198](https://github.com/chef/chef-server/pull/4198) ([poorndm](https://github.com/poorndm)) <!-- 15.10.109 -->
-- fix: patch inspec-core 5.22.x/5.23.x for Parser::AST::Processor::Mixin (reconfigure crash) [#4195](https://github.com/chef/chef-server/pull/4195) ([lbakerchef](https://github.com/lbakerchef)) <!-- 15.10.108 -->
-- Fix JWT CVE: upgrade jwt to 3.2.0 in oc-id and chef-server-ctl [#4193](https://github.com/chef/chef-server/pull/4193) ([jashaik](https://github.com/jashaik)) <!-- 15.10.107 -->
-- Update Rails 7.1.5.2 → 7.1.6 to resolve Dependabot security update failure [#4189](https://github.com/chef/chef-server/pull/4189) ([Copilot](https://github.com/Copilot)) <!-- 15.10.106 -->
-- Bump addressable to 2.9.0 in chef-server-ctl (CVE fix) [#4192](https://github.com/chef/chef-server/pull/4192) ([jashaik](https://github.com/jashaik)) <!-- 15.10.105 -->
-- Bump addressable from 2.8.7 to 2.9.0 in /src/oc-id [#4178](https://github.com/chef/chef-server/pull/4178) ([dependabot[bot]](https://github.com/dependabot[bot])) <!-- 15.10.104 -->
-- CHEF-32187: Bump knife 18.8.68 -&gt; 19.0.105 and knife-ec-backup 3.0.5 -&gt; 3.0.8 [#4183](https://github.com/chef/chef-server/pull/4183) ([lbakerchef](https://github.com/lbakerchef)) <!-- 15.10.103 -->
-- [CHEF-29745]  local license check, default off  [#4152](https://github.com/chef/chef-server/pull/4152) ([marcparadise](https://github.com/marcparadise)) <!-- 15.10.102 -->
-- CHEF-32186: Bump Chef Infra Client 18.8.46 -&gt; 18.10.17 [#4182](https://github.com/chef/chef-server/pull/4182) ([lbakerchef](https://github.com/lbakerchef)) <!-- 15.10.101 -->
-- Rebuild/chef 32135 lbaker 20260430 092319 [#4175](https://github.com/chef/chef-server/pull/4175) ([lbakerchef](https://github.com/lbakerchef)) <!-- 15.10.100 -->
-- Chef 32232 [#4166](https://github.com/chef/chef-server/pull/4166) ([jashaik](https://github.com/jashaik)) <!-- 15.10.99 -->
-- Integrating Security Scans for Infra Server [#4165](https://github.com/chef/chef-server/pull/4165) ([VarshiSB](https://github.com/VarshiSB)) <!-- 15.10.98 -->
-- Add refresh channel to all habitat plan files [#4172](https://github.com/chef/chef-server/pull/4172) ([mwrock](https://github.com/mwrock)) <!-- 15.10.97 -->
-- Update Omnibus config [#4154](https://github.com/chef/chef-server/pull/4154) ([poorndm](https://github.com/poorndm)) <!-- 15.10.96 -->
-- CHEF-28521 - Create SECURITY.md file with standard template [#4124](https://github.com/chef/chef-server/pull/4124) ([cgunasree08](https://github.com/cgunasree08)) <!-- 15.10.95 -->
-- Removed internal library information in the /version endpoint [#4159](https://github.com/chef/chef-server/pull/4159) ([jashaik](https://github.com/jashaik)) <!-- 15.10.94 -->
-- change pg client from 13 to 14 [#4148](https://github.com/chef/chef-server/pull/4148) ([punitmundra](https://github.com/punitmundra)) <!-- 15.10.93 -->
-- Updated soft_fail in the case of chef-server chef-server-only and ha-… [#4150](https://github.com/chef/chef-server/pull/4150) ([jashaik](https://github.com/jashaik)) <!-- 15.10.92 -->
+<!-- release_rollup -->
 <!-- release_rollup -->
 
 <!-- latest_stable_release -->
+## [15.10.114](https://github.com/chef/chef-server/tree/15.10.114) (2026-06-25)
+
+#### Merged Pull Requests
+- Updated soft_fail in the case of chef-server chef-server-only and ha-… [#4150](https://github.com/chef/chef-server/pull/4150) ([jashaik](https://github.com/jashaik))
+- change pg client from 13 to 14 [#4148](https://github.com/chef/chef-server/pull/4148) ([punitmundra](https://github.com/punitmundra))
+- Removed internal library information in the /version endpoint [#4159](https://github.com/chef/chef-server/pull/4159) ([jashaik](https://github.com/jashaik))
+- CHEF-28521 - Create SECURITY.md file with standard template [#4124](https://github.com/chef/chef-server/pull/4124) ([cgunasree08](https://github.com/cgunasree08))
+- Update Omnibus config [#4154](https://github.com/chef/chef-server/pull/4154) ([poorndm](https://github.com/poorndm))
+- Add refresh channel to all habitat plan files [#4172](https://github.com/chef/chef-server/pull/4172) ([mwrock](https://github.com/mwrock))
+- Integrating Security Scans for Infra Server [#4165](https://github.com/chef/chef-server/pull/4165) ([VarshiSB](https://github.com/VarshiSB))
+- Chef 32232 [#4166](https://github.com/chef/chef-server/pull/4166) ([jashaik](https://github.com/jashaik))
+- Rebuild/chef 32135 lbaker 20260430 092319 [#4175](https://github.com/chef/chef-server/pull/4175) ([lbakerchef](https://github.com/lbakerchef))
+- CHEF-32186: Bump Chef Infra Client 18.8.46 -&gt; 18.10.17 [#4182](https://github.com/chef/chef-server/pull/4182) ([lbakerchef](https://github.com/lbakerchef))
+- [CHEF-29745]  local license check, default off  [#4152](https://github.com/chef/chef-server/pull/4152) ([marcparadise](https://github.com/marcparadise))
+- CHEF-32187: Bump knife 18.8.68 -&gt; 19.0.105 and knife-ec-backup 3.0.5 -&gt; 3.0.8 [#4183](https://github.com/chef/chef-server/pull/4183) ([lbakerchef](https://github.com/lbakerchef))
+- Bump addressable from 2.8.7 to 2.9.0 in /src/oc-id [#4178](https://github.com/chef/chef-server/pull/4178) ([dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump addressable to 2.9.0 in chef-server-ctl (CVE fix) [#4192](https://github.com/chef/chef-server/pull/4192) ([jashaik](https://github.com/jashaik))
+- Update Rails 7.1.5.2 → 7.1.6 to resolve Dependabot security update failure [#4189](https://github.com/chef/chef-server/pull/4189) ([Copilot](https://github.com/Copilot))
+- Fix JWT CVE: upgrade jwt to 3.2.0 in oc-id and chef-server-ctl [#4193](https://github.com/chef/chef-server/pull/4193) ([jashaik](https://github.com/jashaik))
+- fix: patch inspec-core 5.22.x/5.23.x for Parser::AST::Processor::Mixin (reconfigure crash) [#4195](https://github.com/chef/chef-server/pull/4195) ([lbakerchef](https://github.com/lbakerchef))
+- TEST PR  - pg upgrade [#4198](https://github.com/chef/chef-server/pull/4198) ([poorndm](https://github.com/poorndm))
+- CHEF-20751: add log_rotation_type support for habitat configs and bump rebar.lock [#4188](https://github.com/chef/chef-server/pull/4188) ([lbakerchef](https://github.com/lbakerchef))
+- sync for rotate_log_fix. [#4201](https://github.com/chef/chef-server/pull/4201) ([sreepuramsudheer](https://github.com/sreepuramsudheer))
+- disabling adhoc nightly build. [#4210](https://github.com/chef/chef-server/pull/4210) ([sreepuramsudheer](https://github.com/sreepuramsudheer))
+- Temporarily disable npm install in raml-docs [#4212](https://github.com/chef/chef-server/pull/4212) ([vkarve-chef](https://github.com/vkarve-chef))
+- Erlang Update [#4216](https://github.com/chef/chef-server/pull/4216) ([talktovikas](https://github.com/talktovikas))
+<!-- latest_stable_release -->
+
 ## [15.10.91](https://github.com/chef/chef-server/tree/15.10.91) (2026-02-10)
 
 #### Merged Pull Requests
@@ -48,7 +46,6 @@
 - Replace KeyDb dependency with Valkey [#4138](https://github.com/chef/chef-server/pull/4138) ([talktovikas](https://github.com/talktovikas))
 - Updated notice to replace KeyDB with Valkey [#4143](https://github.com/chef/chef-server/pull/4143) ([kalroy](https://github.com/kalroy))
 - Update deprecated status message in Server docs [#4145](https://github.com/chef/chef-server/pull/4145) ([IanMadd](https://github.com/IanMadd))
-<!-- latest_stable_release -->
 
 ## [15.10.83](https://github.com/chef/chef-server/tree/15.10.83) (2025-11-04)
 
