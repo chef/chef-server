@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.10.113 -->
-## [15.10.113](https://github.com/chef/chef-server/tree/15.10.113) (2026-06-16)
+<!-- latest_release 15.10.114 -->
+## [15.10.114](https://github.com/chef/chef-server/tree/15.10.114) (2026-06-25)
 
 #### Merged Pull Requests
-- Temporarily disable npm install in raml-docs [#4212](https://github.com/chef/chef-server/pull/4212) ([vkarve-chef](https://github.com/vkarve-chef))
+- Erlang Update [#4216](https://github.com/chef/chef-server/pull/4216) ([talktovikas](https://github.com/talktovikas))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.10.91 -->
 ### Changes since 15.10.91 release
 
 #### Merged Pull Requests
+- Erlang Update [#4216](https://github.com/chef/chef-server/pull/4216) ([talktovikas](https://github.com/talktovikas)) <!-- 15.10.114 -->
 - Temporarily disable npm install in raml-docs [#4212](https://github.com/chef/chef-server/pull/4212) ([vkarve-chef](https://github.com/vkarve-chef)) <!-- 15.10.113 -->
 - disabling adhoc nightly build. [#4210](https://github.com/chef/chef-server/pull/4210) ([sreepuramsudheer](https://github.com/sreepuramsudheer)) <!-- 15.10.112 -->
 - sync for rotate_log_fix. [#4201](https://github.com/chef/chef-server/pull/4201) ([sreepuramsudheer](https://github.com/sreepuramsudheer)) <!-- 15.10.111 -->
