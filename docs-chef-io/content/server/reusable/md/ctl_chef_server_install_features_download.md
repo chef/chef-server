@@ -1,4 +1,8 @@
-The `install` subcommand downloads packages from `chefdownload-commercial.chef.io` by default and requires a valid Progress Chef license ID.
+For commercial downloads, use the following URL:
+
+```bash
+https://chefdownload-commercial.chef.io/install.sh?license_id=<LICENSE_ID>
+```
 
 1. Install add-ons
 
