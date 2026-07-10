@@ -279,45 +279,6 @@ For commercial downloads, use the following URL:
 https://chefdownload-commercial.chef.io/install.sh?license_id=<LICENSE_ID>
 ```
 
-Chef Manage
-
-:   Use Chef management console to manage data bags, attributes,
-    run-lists, roles, environments, and cookbooks from a web user
-    interface.
-
-    On each front end server in the Chef Infra Server configuration,
-    run:
-
-    ```bash
-    chef-server-ctl install chef-manage
-    ```
-
-    then:
-
-    ```bash
-    chef-server-ctl reconfigure
-    ```
-
-    and then:
-
-    ```bash
-    chef-manage-ctl reconfigure
-    ```
-
-    To accept the [Chef MLSA]({{< relref "chef_license" >}}):
-
-    ```bash
-    sudo chef-manage-ctl reconfigure --accept-license
-    ```
-
-    This updates the Chef Infra Server and creates the
-    `/etc/opscode-manage/secrets.rb` file. When running the Chef
-    management console 1.11 (or higher), copy the `secrets.rb` file in
-    the `/etc/opscode-manage` directory on one of the frontend servers
-    to the same directory on each of the other frontend servers, and
-    then rerun `chef-manage-ctl reconfigure` so the copied
-    `/etc/opscode-manage/secrets.rb` file gets used correctly.
-
 **Use Local Packages**
 
 {{< readfile file="content/server/reusable/md/ctl_chef_server_install_features_manual.md" >}}
