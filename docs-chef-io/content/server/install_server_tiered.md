@@ -265,24 +265,6 @@ organization:
 1.  {{< readfile file="content/server/reusable/md/ctl_chef_server_user_create_admin.md" >}}
 2.  {{< readfile file="content/server/reusable/md/ctl_chef_server_org_create_summary.md" >}}
 
-## Enable Features
-
-Enable additional features of the Chef Infra Server! The packages may be
-downloaded directly as part of the installation process or they may be
-first downloaded to a local directory, and then installed.
-
-**Use Downloads**
-
-For commercial downloads, use the following URL:
-
-```bash
-https://chefdownload-commercial.chef.io/install.sh?license_id=<LICENSE_ID>
-```
-
-**Use Local Packages**
-
-{{< readfile file="content/server/reusable/md/ctl_chef_server_install_features_manual.md" >}}
-
 ## Reference
 
 The following sections show an example chef-server.rb file and a list of
