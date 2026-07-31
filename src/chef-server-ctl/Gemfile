@@ -1,5 +1,79 @@
 source "https://rubygems.org"
 
+# minimum safe rack/rexml versions, single-sourced from the
+# omnibus-config repo's infra-server cookbook libraries/safe_versions.rb (the
+# same file ruby_gems_cleanup.rb uses). This ensures `bundle install` here
+# refuses to resolve rack/rexml below the versions the cleanup script
+# considers safe, regardless of what chef or its dependencies would
+# otherwise pull in transitively.
+#
+# safe_versions.rb is copied into this same directory by the omnibus build
+# script (config/software/private-chef-ctl.rb in chef-server-omnibus-config)
+# before `bundle install` runs -- it cannot be reached directly via the
+# omnibus/ git submodule here, because Omnibus's `source path:` fetcher only
+# copies this repo's own named source directory into an isolated build
+# folder, never sibling directories like the submodule.
+#
+# Fails open (no floor enforced this run, warning printed) if the file
+# hasn't been copied into place or otherwise can't be reached -- a genuine
+# bug in the file's own content (e.g. a syntax error) is NOT caught here and
+# will surface loudly instead.
+#
+# Bumping a resolved version upward for a non-CVE reason (i.e. the floor
+# itself does not need to rise): temporarily add an exact requirement
+# alongside the floor below (e.g. `">= ...", "= 3.2.10"`), run
+# `bundle update <gem>` to force the resolver to that version, then either
+# revert the line to floor-only and run `bundle install` (not `update` --
+# the lock already satisfies the floor and won't be touched), or keep the
+# exact requirement permanently as a pin (see below).
+#
+# Pinning a version permanently (e.g. holding back a version for
+# compatibility reasons unrelated to security): add the exact version as an
+# additional requirement alongside the floor -- never in place of it, e.g.
+#   gem "rack", ">= #{resolve_safe_version.call(:MINIMUM_SAFE_RACK_VERSION)}", "= 3.2.10" # pinned <reason>, YYYY-MM-DD
+# Losing the resolve_safe_version.call(...) term off a pinned line is the
+# one mistake to avoid: ruby_gems_cleanup.rb's GEM_ROOTS scan reaches this
+# app's own embedded gem path, so if a future CVE raises the floor while a
+# gem here is pinned bare (no floor term), `bundle install` would keep
+# resolving to the now-unsafe pinned version silently, while the cleanup
+# recipe -- reading that same raised floor -- would delete that version's
+# files out from under this app's still-referencing Gemfile.lock at the
+# next reconfigure, breaking it at runtime instead of failing loudly at
+# bundle install/CI time the way a floor-plus-pin combination would.
+begin
+  require_relative 'safe_versions'
+rescue LoadError => e
+  warn "[Gemfile] safe_versions.rb not reachable (#{e.message}) -- no rack/rexml floor enforced this run."
+end
+
+resolve_safe_version = lambda do |const_name|
+  # NOTE: intentionally *not* reopening `module SafeVersions; end` here. Bundler
+  # evaluates this Gemfile via `instance_eval(string, ...)`, which gives a bare
+  # `module SafeVersions; end` its own lexical scope -- separate from the true
+  # top-level `::SafeVersions` that require_relative above defines. Reopening
+  # it that way silently shadows the real module with an empty one, so every
+  # lookup below would always report "not defined" even when the require
+  # succeeded. Referencing `::SafeVersions` explicitly (and guarding with
+  # `defined?`) avoids the shadow entirely.
+  unless defined?(::SafeVersions) && ::SafeVersions.const_defined?(const_name, false)
+    warn "[Gemfile] SafeVersions::#{const_name} is not defined -- defaulting to no floor (>= 0)."
+    next Gem::Version.new('0')
+  end
+
+  value = ::SafeVersions.const_get(const_name, false)
+  if value.nil? || value.to_s.strip.empty?
+    warn "[Gemfile] SafeVersions::#{const_name} is nil/blank -- defaulting to no floor (>= 0)."
+    next Gem::Version.new('0')
+  end
+
+  begin
+    Gem::Version.new(value.to_s)
+  rescue StandardError, ArgumentError => e
+    warn "[Gemfile] SafeVersions::#{const_name} has an invalid value (#{value.inspect}) -- defaulting to no floor (>= 0). (#{e.class}: #{e.message})"
+    Gem::Version.new('0')
+  end
+end
+
 gemspec
 
 gem "rest-client", git: "https://github.com/chef/rest-client", branch: "jfm/ucrt_update1"
@@ -11,3 +85,11 @@ gem "knife","~> 19.0.105"
 gem "knife-ec-backup", "~> 3.0.8"
 
 gem "public_suffix", "< 7.0" # public_suffix 7.0+ requires Ruby >= 3.2; pin for Ruby 3.1 compatibility
+
+# see the SafeVersions setup at the top of this file.
+# Example only -- how to pin an exact version: replace X.Y.Z before uncommenting:
+# gem "rack", ">= #{resolve_safe_version.call(:MINIMUM_SAFE_RACK_VERSION)}", "= X.Y.Z" # pinned <reason>, YYYY-MM-DD
+gem "rack", ">= #{resolve_safe_version.call(:MINIMUM_SAFE_RACK_VERSION)}"
+# Example only -- how to pin an exact version: replace X.Y.Z before uncommenting:
+# gem "rexml", ">= #{resolve_safe_version.call(:MINIMUM_SAFE_REXML_VERSION)}", "= X.Y.Z" # pinned <reason>, YYYY-MM-DD
+gem "rexml", ">= #{resolve_safe_version.call(:MINIMUM_SAFE_REXML_VERSION)}"
