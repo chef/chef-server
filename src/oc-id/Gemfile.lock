@@ -773,16 +773,18 @@ DEPENDENCIES
   jwt (>= 3.2.0)
   mailcatcher
   mixlib-authentication (>= 2.1, < 4)
+  net-imap (>= 0.5.14)
   omniauth-chef (~> 0.4.1)!
   pg (>= 0.18, < 1.6)
   pry-byebug
   public_suffix (< 7.0)
-  rack (>= 3.2.4)
+  rack (>= 3.2.5)
   rails (= 7.2.3.1)
   rails-controller-testing
   rb-readline (~> 0.5.2)
   responders (~> 3.0, >= 3.0.1)
   rest-client!
+  rexml (>= 3.4.2)
   rspec-rails (~> 6.0)
   sass-rails (>= 4.0.3)
   sdoc
