@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.10.115 -->
-## [15.10.115](https://github.com/chef/chef-server/tree/15.10.115) (2026-07-30)
+<!-- latest_release 15.10.116 -->
+## [15.10.116](https://github.com/chef/chef-server/tree/15.10.116) (2026-08-03)
 
 #### Merged Pull Requests
-- Sync omnibus submodule with latest chef-server-omnibus-config main [#4220](https://github.com/chef/chef-server/pull/4220) ([jashaik](https://github.com/jashaik))
+- Update documentation for new commercial licensing API endpoints [#4207](https://github.com/chef/chef-server/pull/4207) ([RitvikPatil777](https://github.com/RitvikPatil777))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.10.114 -->
 ### Changes since 15.10.114 release
 
 #### Merged Pull Requests
+- Update documentation for new commercial licensing API endpoints [#4207](https://github.com/chef/chef-server/pull/4207) ([RitvikPatil777](https://github.com/RitvikPatil777)) <!-- 15.10.116 -->
 - Sync omnibus submodule with latest chef-server-omnibus-config main [#4220](https://github.com/chef/chef-server/pull/4220) ([jashaik](https://github.com/jashaik)) <!-- 15.10.115 -->
 <!-- release_rollup -->
 
