@@ -107,50 +107,6 @@ This subcommand has the following syntax:
 chef-server-ctl notice
 ```
 
-## install
-
-The `install` subcommand is used to install premium features of the Chef
-Infra Server: Chef management console and Chef Infra Client run
-reporting, high availability configurations, and Chef
-Infra Server replication.
-
-{{< warning >}}
-
-The `chef-server-ctl install` command no longer works in the 12.5 (and
-earlier) versions of the Chef Infra Server due to a change in how
-packages are downloaded from Chef.
-
-{{< /warning >}}
-
-**Syntax**
-
-This subcommand has the following syntax:
-
-```bash
-chef-server-ctl install name_of_addon (options)
-```
-
-where `name_of_addon` represents the command line value associated with
-the add-on or premium feature.
-
-**Options**
-
-This subcommand has the following options:
-
-`--path PATH`
-
-:   Use to specify the location of a package. This option is not
-    required when packages are downloaded from
-    <https://packages.chef.io/>.
-
-### Use Downloads
-
-{{< readfile file="content/server/reusable/md/ctl_chef_server_install_features_download.md" >}}
-
-### Use Local Packages
-
-{{< readfile file="content/server/reusable/md/ctl_chef_server_install_features_manual.md" >}}
-
 ## Key Rotation
 
 Use the following commands to manage public and private key rotation for
