@@ -511,6 +511,7 @@ DEPENDENCIES
   chef (~> 18.10.17)
   chef-server-ctl!
   chefstyle
+  concurrent-ruby (>= 1.3.7)
   knife (~> 19.0.105)
   knife-ec-backup (~> 3.0.8)
   public_suffix (< 7.0)
