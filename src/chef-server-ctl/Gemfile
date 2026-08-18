@@ -107,4 +107,4 @@ gem "rexml", ">= #{resolve_safe_version.call(:MINIMUM_SAFE_REXML_VERSION)}"
 # nothing for SafeVersions to keep in sync. Add a SafeVersions constant instead
 # of this bare floor only if a future ticket or test finding creates that
 # second (cleanup) consumer.
-gem "concurrent-ruby", ">= 1.3.7"
+gem "concurrent-ruby", ">= 1.3.8"
