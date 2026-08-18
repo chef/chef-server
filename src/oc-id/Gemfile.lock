@@ -250,7 +250,7 @@ GEM
       coffee-script-source
       execjs
     coffee-script-source (1.12.2)
-    concurrent-ruby (1.3.6)
+    concurrent-ruby (1.3.8)
     config (4.2.1)
       deep_merge (~> 1.2, >= 1.2.1)
       dry-validation (~> 1.0, >= 1.0.0)
@@ -765,6 +765,7 @@ DEPENDENCIES
   capybara (~> 3.39)
   chef (~> 18.10.17)
   coffee-rails (~> 5.0)
+  concurrent-ruby (>= 1.3.8)
   config (~> 4.1)
   doorkeeper (~> 5.0)
   factory_bot_rails (~> 6.4)
