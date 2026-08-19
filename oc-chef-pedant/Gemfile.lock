@@ -153,6 +153,7 @@ DEPENDENCIES
   pry
   pry-byebug
   pry-stack_explorer
+  rack (>= 3.2.5)
   rake
   rest-client!
 
