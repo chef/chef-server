@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.10.117 -->
-## [15.10.117](https://github.com/chef/chef-server/tree/15.10.117) (2026-08-12)
+<!-- latest_release 15.10.118 -->
+## [15.10.118](https://github.com/chef/chef-server/tree/15.10.118) (2026-08-19)
 
 #### Merged Pull Requests
-- CHEF-37239: Sync omnibus submodule to support external PostgreSQL 14 [#4225](https://github.com/chef/chef-server/pull/4225) ([jashaik](https://github.com/jashaik))
+- CHEF-35182 ruby net-imap [#4227](https://github.com/chef/chef-server/pull/4227) ([lbakerchef](https://github.com/lbakerchef))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.10.114 -->
 ### Changes since 15.10.114 release
 
 #### Merged Pull Requests
+- CHEF-35182 ruby net-imap [#4227](https://github.com/chef/chef-server/pull/4227) ([lbakerchef](https://github.com/lbakerchef)) <!-- 15.10.118 -->
 - CHEF-37239: Sync omnibus submodule to support external PostgreSQL 14 [#4225](https://github.com/chef/chef-server/pull/4225) ([jashaik](https://github.com/jashaik)) <!-- 15.10.117 -->
 - Update documentation for new commercial licensing API endpoints [#4207](https://github.com/chef/chef-server/pull/4207) ([RitvikPatil777](https://github.com/RitvikPatil777)) <!-- 15.10.116 -->
 - Sync omnibus submodule with latest chef-server-omnibus-config main [#4220](https://github.com/chef/chef-server/pull/4220) ([jashaik](https://github.com/jashaik)) <!-- 15.10.115 -->
