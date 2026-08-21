@@ -105,17 +105,12 @@ standalone topology to a high availability or tiered topology.
 -   Start with 8 CPU cores and 32GB of RAM, which is equivalent to an
     Amazon EC2 `m3.2xlarge` instance
 
-**UP TO 667 CCRs/Min (Approx. 20,000 nodes):**
 
--   Chef recommends two hosts, one front-end and one back-end
--   The disk requirement for the front-end server is negligible
--   Start with 8 CPU cores and 32GB of RAM for each host, which is
-    equivalent to an Amazon EC2 `m3.2xlarge` instance
-
-**Scaling beyond 20,000 nodes on a single cluster:**
+**Scaling beyond 10,000 nodes:**
 
 -   Additional capacity can be gained by placing the front-end node
-    behind an HTTP load balancer, and then scaling front-end nodes
-    horizontally
--   Chef recommends that Chef professional services be engaged to help
-    with capacity and architectural planning at this size
+    behind an HTTP load balancer, scaling front-end nodes
+    horizontally, and adding a shared Postgres and ElasticSearch backend 
+    cluster
+-   Chef recommends that this is achieved by using the [Chef Backend](https://docs.chef.io/server/install_server_ha/) product 
+-   Chef professional services can be engaged to help with capacity and architectural planning at this size
