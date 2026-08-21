@@ -40,10 +40,25 @@ source "https://rubygems.org"
 # files out from under this app's still-referencing Gemfile.lock at the
 # next reconfigure, breaking it at runtime instead of failing loudly at
 # bundle install/CI time the way a floor-plus-pin combination would.
+# Fallback location of safe_versions.rb inside the checked-out
+# chef-server-omnibus-config git submodule (../omnibus/ from here), used
+# only when the Omnibus production build hasn't copied a local copy into
+# this directory first.
+OMNIBUS_SAFE_VERSIONS_PATH = '../../omnibus/files/server-ctl-cookbooks/infra-server/libraries/safe_versions'.freeze
+
 begin
   require_relative 'safe_versions'
-rescue LoadError => e
-  warn "[Gemfile] safe_versions.rb not reachable (#{e.message}) -- no rack/rexml floor enforced this run."
+rescue LoadError
+  # Not present here unless the Omnibus production build copied it in first
+  # (see config/software/private-chef-ctl.rb in chef-server-omnibus-config).
+  # Outside that build -- the bare Buildkite CI job, or a local dev with git
+  # submodules initialized -- fall back to reading it directly from the
+  # checked-out chef-server-omnibus-config submodule instead.
+  begin
+    require_relative OMNIBUS_SAFE_VERSIONS_PATH
+  rescue LoadError => e
+    warn "[Gemfile] safe_versions.rb not reachable (#{e.message}) -- no rack/rexml floor enforced this run."
+  end
 end
 
 resolve_safe_version = lambda do |const_name|
