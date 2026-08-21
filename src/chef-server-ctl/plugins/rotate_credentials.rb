@@ -221,7 +221,7 @@ end
 
 def restore_secrets_file(backup_file)
   log("Restoring #{backup_file} to #{secrets_file_path}...")
-  FileUtils.cp(secrets_file_path, backup_file)
+  FileUtils.cp(backup_file, secrets_file_path)
 end
 
 def secrets_file_path
