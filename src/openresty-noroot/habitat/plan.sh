@@ -1,7 +1,7 @@
 HAB_REFRESH_CHANNEL="LTS-2024"
 pkg_name=openresty-noroot
 pkg_origin=chef
-pkg_version=1.27.1.1
+pkg_version=1.31.1.1
 pkg_description="Scalable Web Platform by Extending NGINX with Lua"
 pkg_maintainer="The Chef Server Maintainers <support@chef.io>"
 pkg_license=('BSD-2-Clause')
