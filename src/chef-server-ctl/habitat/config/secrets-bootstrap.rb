@@ -86,10 +86,14 @@ def secrets_apply_loop
     puts "Changed Secrets need to be applied."
     File.write("{{pkg.svc_data_path}}/hab-secrets-modified.toml", TOML::Generator.new(new_secrets).body)
     version = Time.now.getutc.to_i
-    cmd = "hab config apply chef-server-ctl.default #{version} {{pkg.svc_data_path}}/hab-secrets-modified.toml"
+    # Invoke hab with an explicit argument vector (no shell) so the value
+    # of HAB_LISTEN_CTL is passed as a literal argument rather than being
+    # interpreted by a shell.
+    cmd = ["hab", "config", "apply", "chef-server-ctl.default", version.to_s,
+           "{{pkg.svc_data_path}}/hab-secrets-modified.toml"]
     sup_listen_ctl = ENV["HAB_LISTEN_CTL"]
-    cmd += " --remote-sup #{sup_listen_ctl}" if sup_listen_ctl
-    system cmd
+    cmd += ["--remote-sup", sup_listen_ctl] if sup_listen_ctl
+    system(*cmd)
   else
     puts "Secrets Unchanged - nothing to do."
   end
