@@ -9,7 +9,7 @@ pkg_source=https://openresty.org/download/openresty-${pkg_version}.tar.gz
 pkg_dirname=openresty-${pkg_version}
 pkg_filename=openresty-${pkg_version}.tar.gz
 pkg_upstream_url=http://openresty.org/
-pkg_shasum=79b071e27bdc143d5f401d0dbf504de4420070d867538c5edc2546d0351fd5c0
+pkg_shasum=65b78baadd3f0984055de89bf13f4a1932e5bfe9c31932037a134ea2b1a0ce42
 pkg_deps=(
   core/bzip2
   core/coreutils
