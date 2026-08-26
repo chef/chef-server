@@ -129,6 +129,13 @@ gem 'rexml', ">= #{resolve_safe_version.call(:MINIMUM_SAFE_REXML_VERSION)}"
 # gem 'net-imap', ">= #{resolve_safe_version.call(:NET_IMAP_FIX_VERSION)}", "= X.Y.Z" # pinned <reason>, YYYY-MM-DD
 gem 'net-imap', ">= #{resolve_safe_version.call(:NET_IMAP_FIX_VERSION)}"
 
+# concurrent-ruby (CHEF-37625 / GHSA-6wx8-w4f5-wwcr, GHSA-h8w8-99g7-qmvj [high],
+# GHSA-wv3x-4vxv-whpp -- Dependabot alerts 376, 379, 382). Bare floor, same
+# reasoning as src/chef-server-ctl/Gemfile's identical line: no
+# ruby_gems_cleanup.rb consumer exists for this gem, so it does not go through
+# resolve_safe_version.call(...)/safe_versions.rb.
+gem 'concurrent-ruby', ">= 1.3.8"
+
 gem 'omniauth-chef', '~> 0.4.1',
     git: "https://github.com/talktovikas/omniauth-chef.git",
     branch: "vikas/chef-upgrade"

@@ -6,3 +6,12 @@ gemspec
 # expects it to be in the path
 gem 'veil'
 gem "rest-client", git: "https://github.com/chef/rest-client", branch: "jfm/ucrt_update1"
+
+# concurrent-ruby (CHEF-37625 / GHSA-6wx8-w4f5-wwcr, GHSA-h8w8-99g7-qmvj [high],
+# GHSA-wv3x-4vxv-whpp -- Dependabot alerts 372, 373, 374). Bare floor -- this
+# Gemfile has no safe_versions.rb/resolve_safe_version indirection at all (this
+# app isn't wired into any omnibus software definition's build step), so a
+# plain floor is the only option and is consistent with the same
+# no-cleanup-recipe-consumer reasoning documented in
+# src/chef-server-ctl/Gemfile's identical line.
+gem "concurrent-ruby", ">= 1.3.8"

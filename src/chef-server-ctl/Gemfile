@@ -108,3 +108,18 @@ gem "rack", ">= #{resolve_safe_version.call(:MINIMUM_SAFE_RACK_VERSION)}"
 # Example only -- how to pin an exact version: replace X.Y.Z before uncommenting:
 # gem "rexml", ">= #{resolve_safe_version.call(:MINIMUM_SAFE_REXML_VERSION)}", "= X.Y.Z" # pinned <reason>, YYYY-MM-DD
 gem "rexml", ">= #{resolve_safe_version.call(:MINIMUM_SAFE_REXML_VERSION)}"
+
+# concurrent-ruby (CHEF-37625 / GHSA-6wx8-w4f5-wwcr, GHSA-h8w8-99g7-qmvj [high],
+# GHSA-wv3x-4vxv-whpp -- Dependabot alerts 377, 380, 383). Declared as a plain,
+# direct floor here -- NOT routed through the SafeVersions/resolve_safe_version
+# mechanism above, unlike rack/rexml. That indirection exists specifically so
+# ruby_gems_cleanup.rb (in chef-server-omnibus-config) and a Gemfile floor for
+# the *same* gem can't drift apart -- it's a single source of truth for two
+# consumers, not a generic place to declare any gem's minimum version. There is
+# no ruby_gems_cleanup.rb entry for concurrent-ruby (no ticket or on-disk test
+# finding has established a stale/vulnerable-version-left-on-disk cleanup need
+# for it, unlike rack/rexml/net-imap), so there is only one consumer here --
+# nothing for SafeVersions to keep in sync. Add a SafeVersions constant instead
+# of this bare floor only if a future ticket or test finding creates that
+# second (cleanup) consumer.
+gem "concurrent-ruby", ">= 1.3.8"
