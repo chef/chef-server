@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.10.119 -->
-## [15.10.119](https://github.com/chef/chef-server/tree/15.10.119) (2026-08-25)
+<!-- latest_release 15.10.120 -->
+## [15.10.120](https://github.com/chef/chef-server/tree/15.10.120) (2026-08-26)
 
 #### Merged Pull Requests
-- Updated NOTICE.TXT as received from legal [#4211](https://github.com/chef/chef-server/pull/4211) ([vkarve-chef](https://github.com/vkarve-chef))
+- CHEF-37669 - [verify pipeline fix] Fall back to omnibus submodule&#39;s safe_versions.rb when not copied into place [#4232](https://github.com/chef/chef-server/pull/4232) ([lbakerchef](https://github.com/lbakerchef))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.10.114 -->
 ### Changes since 15.10.114 release
 
 #### Merged Pull Requests
+- CHEF-37669 - [verify pipeline fix] Fall back to omnibus submodule&#39;s safe_versions.rb when not copied into place [#4232](https://github.com/chef/chef-server/pull/4232) ([lbakerchef](https://github.com/lbakerchef)) <!-- 15.10.120 -->
 - Updated NOTICE.TXT as received from legal [#4211](https://github.com/chef/chef-server/pull/4211) ([vkarve-chef](https://github.com/vkarve-chef)) <!-- 15.10.119 -->
 - CHEF-35182 ruby net-imap [#4227](https://github.com/chef/chef-server/pull/4227) ([lbakerchef](https://github.com/lbakerchef)) <!-- 15.10.118 -->
 - CHEF-37239: Sync omnibus submodule to support external PostgreSQL 14 [#4225](https://github.com/chef/chef-server/pull/4225) ([jashaik](https://github.com/jashaik)) <!-- 15.10.117 -->
