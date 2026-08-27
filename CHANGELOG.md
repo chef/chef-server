@@ -1,30 +1,28 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.10.125 -->
-## [15.10.125](https://github.com/chef/chef-server/tree/15.10.125) (2026-08-27)
-
-#### Merged Pull Requests
-- Omnibus sync. [#4237](https://github.com/chef/chef-server/pull/4237) ([sreepuramsudheer](https://github.com/sreepuramsudheer))
+<!-- latest_release -->
 <!-- latest_release -->
 
-<!-- release_rollup since=15.10.114 -->
-### Changes since 15.10.114 release
-
-#### Merged Pull Requests
-- Omnibus sync. [#4237](https://github.com/chef/chef-server/pull/4237) ([sreepuramsudheer](https://github.com/sreepuramsudheer)) <!-- 15.10.125 -->
-- Shahid/openresty 1.31.1 hab [#4236](https://github.com/chef/chef-server/pull/4236) ([jashaik](https://github.com/jashaik)) <!-- 15.10.124 -->
-- Updated NOTICE.TXT. [#4234](https://github.com/chef/chef-server/pull/4234) ([sreepuramsudheer](https://github.com/sreepuramsudheer)) <!-- 15.10.123 -->
-- Sync omnibus for pg 17 and other. [#4235](https://github.com/chef/chef-server/pull/4235) ([sreepuramsudheer](https://github.com/sreepuramsudheer)) <!-- 15.10.122 -->
-- CHEF-37625 - Add concurrent-ruby &gt;= 1.3.8 floor across chef-server-ctl, oc-id, oc-chef-pedant, oc_bifrost-pedant Gemfiles [#4231](https://github.com/chef/chef-server/pull/4231) ([lbakerchef](https://github.com/lbakerchef)) <!-- 15.10.121 -->
-- CHEF-37669 - [verify pipeline fix] Fall back to omnibus submodule&#39;s safe_versions.rb when not copied into place [#4232](https://github.com/chef/chef-server/pull/4232) ([lbakerchef](https://github.com/lbakerchef)) <!-- 15.10.120 -->
-- Updated NOTICE.TXT as received from legal [#4211](https://github.com/chef/chef-server/pull/4211) ([vkarve-chef](https://github.com/vkarve-chef)) <!-- 15.10.119 -->
-- CHEF-35182 ruby net-imap [#4227](https://github.com/chef/chef-server/pull/4227) ([lbakerchef](https://github.com/lbakerchef)) <!-- 15.10.118 -->
-- CHEF-37239: Sync omnibus submodule to support external PostgreSQL 14 [#4225](https://github.com/chef/chef-server/pull/4225) ([jashaik](https://github.com/jashaik)) <!-- 15.10.117 -->
-- Update documentation for new commercial licensing API endpoints [#4207](https://github.com/chef/chef-server/pull/4207) ([RitvikPatil777](https://github.com/RitvikPatil777)) <!-- 15.10.116 -->
-- Sync omnibus submodule with latest chef-server-omnibus-config main [#4220](https://github.com/chef/chef-server/pull/4220) ([jashaik](https://github.com/jashaik)) <!-- 15.10.115 -->
+<!-- release_rollup -->
 <!-- release_rollup -->
 
 <!-- latest_stable_release -->
+## [15.10.125](https://github.com/chef/chef-server/tree/15.10.125) (2026-08-27)
+
+#### Merged Pull Requests
+- Sync omnibus submodule with latest chef-server-omnibus-config main [#4220](https://github.com/chef/chef-server/pull/4220) ([jashaik](https://github.com/jashaik))
+- Update documentation for new commercial licensing API endpoints [#4207](https://github.com/chef/chef-server/pull/4207) ([RitvikPatil777](https://github.com/RitvikPatil777))
+- CHEF-37239: Sync omnibus submodule to support external PostgreSQL 14 [#4225](https://github.com/chef/chef-server/pull/4225) ([jashaik](https://github.com/jashaik))
+- CHEF-35182 ruby net-imap [#4227](https://github.com/chef/chef-server/pull/4227) ([lbakerchef](https://github.com/lbakerchef))
+- Updated NOTICE.TXT as received from legal [#4211](https://github.com/chef/chef-server/pull/4211) ([vkarve-chef](https://github.com/vkarve-chef))
+- CHEF-37669 - [verify pipeline fix] Fall back to omnibus submodule&#39;s safe_versions.rb when not copied into place [#4232](https://github.com/chef/chef-server/pull/4232) ([lbakerchef](https://github.com/lbakerchef))
+- CHEF-37625 - Add concurrent-ruby &gt;= 1.3.8 floor across chef-server-ctl, oc-id, oc-chef-pedant, oc_bifrost-pedant Gemfiles [#4231](https://github.com/chef/chef-server/pull/4231) ([lbakerchef](https://github.com/lbakerchef))
+- Sync omnibus for pg 17 and other. [#4235](https://github.com/chef/chef-server/pull/4235) ([sreepuramsudheer](https://github.com/sreepuramsudheer))
+- Updated NOTICE.TXT. [#4234](https://github.com/chef/chef-server/pull/4234) ([sreepuramsudheer](https://github.com/sreepuramsudheer))
+- Shahid/openresty 1.31.1 hab [#4236](https://github.com/chef/chef-server/pull/4236) ([jashaik](https://github.com/jashaik))
+- Omnibus sync. [#4237](https://github.com/chef/chef-server/pull/4237) ([sreepuramsudheer](https://github.com/sreepuramsudheer))
+<!-- latest_stable_release -->
+
 ## [15.10.114](https://github.com/chef/chef-server/tree/15.10.114) (2026-06-25)
 
 #### Merged Pull Requests
@@ -51,7 +49,6 @@
 - disabling adhoc nightly build. [#4210](https://github.com/chef/chef-server/pull/4210) ([sreepuramsudheer](https://github.com/sreepuramsudheer))
 - Temporarily disable npm install in raml-docs [#4212](https://github.com/chef/chef-server/pull/4212) ([vkarve-chef](https://github.com/vkarve-chef))
 - Erlang Update [#4216](https://github.com/chef/chef-server/pull/4216) ([talktovikas](https://github.com/talktovikas))
-<!-- latest_stable_release -->
 
 ## [15.10.91](https://github.com/chef/chef-server/tree/15.10.91) (2026-02-10)
 
