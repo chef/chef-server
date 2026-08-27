@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.10.123 -->
-## [15.10.123](https://github.com/chef/chef-server/tree/15.10.123) (2026-08-27)
+<!-- latest_release 15.10.124 -->
+## [15.10.124](https://github.com/chef/chef-server/tree/15.10.124) (2026-08-27)
 
 #### Merged Pull Requests
-- Updated NOTICE.TXT. [#4234](https://github.com/chef/chef-server/pull/4234) ([sreepuramsudheer](https://github.com/sreepuramsudheer))
+- Shahid/openresty 1.31.1 hab [#4236](https://github.com/chef/chef-server/pull/4236) ([jashaik](https://github.com/jashaik))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.10.114 -->
 ### Changes since 15.10.114 release
 
 #### Merged Pull Requests
+- Shahid/openresty 1.31.1 hab [#4236](https://github.com/chef/chef-server/pull/4236) ([jashaik](https://github.com/jashaik)) <!-- 15.10.124 -->
 - Updated NOTICE.TXT. [#4234](https://github.com/chef/chef-server/pull/4234) ([sreepuramsudheer](https://github.com/sreepuramsudheer)) <!-- 15.10.123 -->
 - Sync omnibus for pg 17 and other. [#4235](https://github.com/chef/chef-server/pull/4235) ([sreepuramsudheer](https://github.com/sreepuramsudheer)) <!-- 15.10.122 -->
 - CHEF-37625 - Add concurrent-ruby &gt;= 1.3.8 floor across chef-server-ctl, oc-id, oc-chef-pedant, oc_bifrost-pedant Gemfiles [#4231](https://github.com/chef/chef-server/pull/4231) ([lbakerchef](https://github.com/lbakerchef)) <!-- 15.10.121 -->
