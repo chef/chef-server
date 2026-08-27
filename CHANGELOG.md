@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.10.124 -->
-## [15.10.124](https://github.com/chef/chef-server/tree/15.10.124) (2026-08-27)
+<!-- latest_release 15.10.125 -->
+## [15.10.125](https://github.com/chef/chef-server/tree/15.10.125) (2026-08-27)
 
 #### Merged Pull Requests
-- Shahid/openresty 1.31.1 hab [#4236](https://github.com/chef/chef-server/pull/4236) ([jashaik](https://github.com/jashaik))
+- Omnibus sync. [#4237](https://github.com/chef/chef-server/pull/4237) ([sreepuramsudheer](https://github.com/sreepuramsudheer))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.10.114 -->
 ### Changes since 15.10.114 release
 
 #### Merged Pull Requests
+- Omnibus sync. [#4237](https://github.com/chef/chef-server/pull/4237) ([sreepuramsudheer](https://github.com/sreepuramsudheer)) <!-- 15.10.125 -->
 - Shahid/openresty 1.31.1 hab [#4236](https://github.com/chef/chef-server/pull/4236) ([jashaik](https://github.com/jashaik)) <!-- 15.10.124 -->
 - Updated NOTICE.TXT. [#4234](https://github.com/chef/chef-server/pull/4234) ([sreepuramsudheer](https://github.com/sreepuramsudheer)) <!-- 15.10.123 -->
 - Sync omnibus for pg 17 and other. [#4235](https://github.com/chef/chef-server/pull/4235) ([sreepuramsudheer](https://github.com/sreepuramsudheer)) <!-- 15.10.122 -->
