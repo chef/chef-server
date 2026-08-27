@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.10.122 -->
-## [15.10.122](https://github.com/chef/chef-server/tree/15.10.122) (2026-08-26)
+<!-- latest_release 15.10.123 -->
+## [15.10.123](https://github.com/chef/chef-server/tree/15.10.123) (2026-08-27)
 
 #### Merged Pull Requests
-- Sync omnibus for pg 17 and other. [#4235](https://github.com/chef/chef-server/pull/4235) ([sreepuramsudheer](https://github.com/sreepuramsudheer))
+- Updated NOTICE.TXT. [#4234](https://github.com/chef/chef-server/pull/4234) ([sreepuramsudheer](https://github.com/sreepuramsudheer))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.10.114 -->
 ### Changes since 15.10.114 release
 
 #### Merged Pull Requests
+- Updated NOTICE.TXT. [#4234](https://github.com/chef/chef-server/pull/4234) ([sreepuramsudheer](https://github.com/sreepuramsudheer)) <!-- 15.10.123 -->
 - Sync omnibus for pg 17 and other. [#4235](https://github.com/chef/chef-server/pull/4235) ([sreepuramsudheer](https://github.com/sreepuramsudheer)) <!-- 15.10.122 -->
 - CHEF-37625 - Add concurrent-ruby &gt;= 1.3.8 floor across chef-server-ctl, oc-id, oc-chef-pedant, oc_bifrost-pedant Gemfiles [#4231](https://github.com/chef/chef-server/pull/4231) ([lbakerchef](https://github.com/lbakerchef)) <!-- 15.10.121 -->
 - CHEF-37669 - [verify pipeline fix] Fall back to omnibus submodule&#39;s safe_versions.rb when not copied into place [#4232](https://github.com/chef/chef-server/pull/4232) ([lbakerchef](https://github.com/lbakerchef)) <!-- 15.10.120 -->
