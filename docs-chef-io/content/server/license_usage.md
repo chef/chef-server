@@ -12,6 +12,12 @@ gh_repo = "chef-server"
     weight = 80
 +++
 
+{{< warning >}}
+
+{{< readfile file="content/server/reusable/md/deprecate_server.md" >}}
+
+{{< /warning >}}
+
 Chef Infra Server captures license usage data under the Progress Chef license agreement. This process runs in the background, it doesn't require user approval or intervention, and it can't be disabled. All information is collected and utilized pursuant to the Progress [Privacy Policy](https://www.progress.com/legal/privacy-policy) which is available through the Progress [Privacy Center](https://www.progress.com/legal/privacy-center).
 
 ## Collected data

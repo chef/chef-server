@@ -12,6 +12,12 @@ gh_repo = "chef-server"
     weight = 40
 +++
 
+{{< warning >}}
+
+{{< readfile file="content/server/reusable/md/deprecate_server.md" >}}
+
+{{< /warning >}}
+
 The server configuration file contains a list of all configuration
 options that are available for the Chef Infra Server. Some of these
 values should be modified for large-scale installations.

@@ -11,6 +11,12 @@ gh_repo = "chef-server"
     weight = 20
 +++
 
+{{< warning >}}
+
+{{< readfile file="content/server/reusable/md/deprecate_server.md" >}}
+
+{{< /warning >}}
+
 {{< readfile file="content/server/reusable/md/server_rbac.md" >}}
 
 The Chef Infra Server uses organizations, groups, and users to define

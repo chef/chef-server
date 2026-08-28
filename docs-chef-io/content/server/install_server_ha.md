@@ -14,6 +14,12 @@ gh_repo = "chef-server"
 
 {{< warning >}}
 
+{{< readfile file="content/server/reusable/md/deprecate_server.md" >}}
+
+{{< /warning >}}
+
+{{< warning >}}
+
 {{< readfile file="content/server/reusable/md/EOL_backend.md" >}}
 
 {{< /warning >}}

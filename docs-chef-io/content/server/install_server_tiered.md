@@ -12,6 +12,12 @@ gh_repo = "chef-server"
     weight = 50
 +++
 
+{{< warning >}}
+
+{{< readfile file="content/server/reusable/md/deprecate_server.md" >}}
+
+{{< /warning >}}
+
 {{< note >}}
 
 The Chef Infra Server tiered configuration is deprecated and no longer under active development.

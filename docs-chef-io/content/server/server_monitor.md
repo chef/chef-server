@@ -12,6 +12,12 @@ gh_repo = "chef-server"
     weight = 30
 +++
 
+{{< warning >}}
+
+{{< readfile file="content/server/reusable/md/deprecate_server.md" >}}
+
+{{< /warning >}}
+
 Monitoring the Chef Infra Server involves two types of checks:
 application and system. In addition monitoring the HTTP requests that
 workstations and nodes are making to the Chef Infra Server and per-disk

@@ -11,6 +11,12 @@ gh_repo = "chef-server"
     weight = 20
 +++
 
+{{< warning >}}
+
+{{< readfile file="content/server/reusable/md/deprecate_server.md" >}}
+
+{{< /warning >}}
+
 {{< readfile file="content/server/reusable/md/config_rb_server_summary.md" >}}
 
 ## Settings
