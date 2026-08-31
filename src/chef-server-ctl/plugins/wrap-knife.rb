@@ -117,16 +117,13 @@ cmds.each do |cmd, args|
     auth_args << "-c" << knife_config
     # auth_args << "--config-option" << "ssl_verify_mode=verify_none"
     
-    # Build command args - don't escape config options with = signs
+    # Build command args. Escape every argument before it is interpolated
+    # into the shell command string. Shellwords.escape leaves benign
+    # characters (including "=") untouched, so "key=value" style config
+    # options still pass through unchanged, while shell metacharacters in
+    # any argument are neutralized rather than executed.
     all_args = transformed_args + auth_args
-    escaped_args = all_args.map do |arg|
-      # Don't escape arguments that contain = (like config options)
-      if arg.include?('=')
-        arg
-      else
-        Shellwords.escape(arg)
-      end
-    end.join(" ")
+    escaped_args = all_args.map { |arg| Shellwords.escape(arg) }.join(" ")
     
     knife_command = "#{knife_cmd} #{opc_noun} #{opc_cmd} #{escaped_args}"
     status = run_command(knife_command)
