@@ -123,3 +123,18 @@ gem "rexml", ">= #{resolve_safe_version.call(:MINIMUM_SAFE_REXML_VERSION)}"
 # of this bare floor only if a future ticket or test finding creates that
 # second (cleanup) consumer.
 gem "concurrent-ruby", ">= 1.3.8"
+
+# faraday (CHEF-37252 / GHSA-98m9-hrrm-r99r [high], GHSA-5rv5-xj5j-3484 [low] --
+# Dependabot alerts 385, 345). Declared as a plain, direct floor here -- NOT
+# routed through the SafeVersions/resolve_safe_version mechanism above, unlike
+# rack/rexml. That indirection exists specifically so ruby_gems_cleanup.rb (in
+# chef-server-omnibus-config) and a Gemfile floor for the *same* gem can't drift
+# apart -- it's a single source of truth for two consumers, not a generic place
+# to declare any gem's minimum version. There is no ruby_gems_cleanup.rb entry
+# for faraday (no ticket or on-disk test finding has established a
+# stale/vulnerable-version-left-on-disk cleanup need for it, unlike
+# rack/rexml/net-imap), so there is only one consumer here -- nothing for
+# SafeVersions to keep in sync. Add a SafeVersions constant instead of this bare
+# floor only if a future ticket or test finding creates that second (cleanup)
+# consumer.
+gem "faraday", ">= 2.14.3"
