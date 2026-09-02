@@ -12,6 +12,12 @@ gh_repo = "chef-server"
     weight = 60
 +++
 
+{{< warning >}}
+
+{{< readfile file="content/server/reusable/md/deprecate_server.md" >}}
+
+{{< /warning >}}
+
 The Chef Infra Server has a built in process supervisor, which ensures
 that all of the required services are in the appropriate state at any
 given time. The supervisor starts two processes per service.

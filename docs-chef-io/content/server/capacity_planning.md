@@ -14,6 +14,12 @@ gh_repo = "chef-server"
     weight = 40
 +++
 
+{{< warning >}}
+
+{{< readfile file="content/server/reusable/md/deprecate_server.md" >}}
+
+{{< /warning >}}
+
 This document provides guidance for capacity planning and how to choose
 the right configuration--standalone, high availability, or tiered--for
 the Chef Infra Server. This document provides guidance and not hard/fast

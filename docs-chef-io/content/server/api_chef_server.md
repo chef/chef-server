@@ -12,6 +12,12 @@ gh_repo = "chef-server"
     weight = 30
 +++
 
+{{< warning >}}
+
+{{< readfile file="content/server/reusable/md/deprecate_server.md" >}}
+
+{{< /warning >}}
+
 The Chef Infra Server API is a REST API that provides access to objects on the Chef Infra Server, including nodes, environments, roles, users, organizations, cookbooks (and cookbook versions), and is used to manage an API client list and
 the associated RSA public key-pairs.
 

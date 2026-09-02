@@ -12,6 +12,12 @@ gh_repo = "chef-server"
     weight = 50
 +++
 
+{{< warning >}}
+
+{{< readfile file="content/server/reusable/md/deprecate_server.md" >}}
+
+{{< /warning >}}
+
 This guide covers the security features available in Chef Infra Server.
 
 ## SSL Certificates

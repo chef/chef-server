@@ -12,6 +12,12 @@ gh_repo = "chef-server"
     weight = 10
 +++
 
+{{< warning >}}
+
+{{< readfile file="content/server/reusable/md/deprecate_server.md" >}}
+
+{{< /warning >}}
+
 Periodic backups of Chef Infra Server are essential to managing and maintaining a healthy configuration and ensuring the availability of important data for restoring your system, if required. The backup takes around 4 to 5 minutes for each GB of data on a t3.2xlarge AWS EC2 instance.
 
 ## Requirements

@@ -12,6 +12,12 @@ gh_repo = "chef-server"
     weight = 30
 +++
 
+{{< warning >}}
+
+{{< readfile file="content/server/reusable/md/deprecate_server.md" >}}
+
+{{< /warning >}}
+
 The following tasks are available for user management in Chef Infra
 Server:
 

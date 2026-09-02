@@ -13,6 +13,12 @@ draft = true
 
 +++
 
+{{< warning >}}
+
+{{< readfile file="content/server/reusable/md/deprecate_server.md" >}}
+
+{{< /warning >}}
+
 ## Configuring Mutual TLS (mTLS) for Chef Server
 
 Transport layer security (or “TLS”) provides a mechanism by which a client can be assured that it is talking to a server in a secure fashion. The server provides a certificate and public key which the client can use to encrypt and decrypt traffic to and from the server with.

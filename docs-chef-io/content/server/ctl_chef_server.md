@@ -11,6 +11,12 @@ gh_repo = "chef-server"
     weight = 10
 +++
 
+{{< warning >}}
+
+{{< readfile file="content/server/reusable/md/deprecate_server.md" >}}
+
+{{< /warning >}}
+
 {{< readfile file="content/server/reusable/md/ctl_chef_server_summary.md" >}}
 
 ## Backup / Restore
