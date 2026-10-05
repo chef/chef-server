@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.10.126 -->
-## [15.10.126](https://github.com/chef/chef-server/tree/15.10.126) (2026-09-02)
+<!-- latest_release 15.10.127 -->
+## [15.10.127](https://github.com/chef/chef-server/tree/15.10.127) (2026-10-05)
 
 #### Merged Pull Requests
-- Add deprecation message to all docs pages [#4238](https://github.com/chef/chef-server/pull/4238) ([IanMadd](https://github.com/IanMadd))
+- CHEF-37962 - Add faraday &gt;= 2.14.3 floor to chef-server-ctl and oc-id Gemfiles [#4239](https://github.com/chef/chef-server/pull/4239) ([lbakerchef](https://github.com/lbakerchef))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.10.125 -->
 ### Changes since 15.10.125 release
 
 #### Merged Pull Requests
+- CHEF-37962 - Add faraday &gt;= 2.14.3 floor to chef-server-ctl and oc-id Gemfiles [#4239](https://github.com/chef/chef-server/pull/4239) ([lbakerchef](https://github.com/lbakerchef)) <!-- 15.10.127 -->
 - Add deprecation message to all docs pages [#4238](https://github.com/chef/chef-server/pull/4238) ([IanMadd](https://github.com/IanMadd)) <!-- 15.10.126 -->
 <!-- release_rollup -->
 
