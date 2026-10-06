@@ -19,7 +19,7 @@ class PasswordResetsController < ApplicationController
         flash.now[:notice] = I18n.t("errors.password_resets.completion")
         @status = :ok
       end
-    rescue Net::HTTPServerException => e
+    rescue Net::HTTPClientException => e
       if e.response.code.to_i == 404
         user_not_found
       elsif e.response.code.to_i == 406
@@ -62,7 +62,7 @@ class PasswordResetsController < ApplicationController
           session[:username] = user.username
           redirect_to signin_path
         end
-      rescue Net::HTTPServerException => e
+      rescue Net::HTTPClientException => e
         if e.response.code.to_i == 404
           flash[:notice] = I18n.t("errors.password_resets.completion")
           redirect_to action: 'new'

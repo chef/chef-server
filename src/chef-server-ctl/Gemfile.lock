@@ -515,7 +515,6 @@ DEPENDENCIES
   faraday (>= 2.14.3)
   knife (~> 19.0.105)
   knife-ec-backup (~> 3.0.8)
-  public_suffix (< 7.0)
   rack (>= 3.2.5)
   rake
   rest-client!
@@ -524,4 +523,4 @@ DEPENDENCIES
   toml
 
 BUNDLED WITH
-   2.3.27
+   2.5.22

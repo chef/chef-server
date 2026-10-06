@@ -204,7 +204,7 @@ openresty | 1.27.1.2 | BSD-2-Clause
 pcre | 8.45 | BSD-2-Clause
 quickrand | c7eca718faa0d52c097155263dea6c25067396f7 | BSD-2-Clause
 rexml | 3.4.2 | BSD-2-Clause
-ruby | 3.1.7 | BSD-2-Clause
+ruby | 3.3.1 | BSD-2-Clause
 stringio | 3.1.7 | BSD-2-Clause
 time | 0.4.1 | BSD-2-Clause 
 timeout | 0.4.3 | BSD-2-Clause
@@ -808,7 +808,7 @@ Redistribution and use in source and binary forms, with or without modification,
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS” AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-(c) Progress Chef Infra Server v15 incorporates pg 1.5.9, date v3.3.4, bigdeciml v3.1.8, net-protocol v0.2.2, rxml v3.3.8, ruby v3.1.7, stringio v3.0.1.1, time v0.4.0, timeout v0.4.1, and logger v1.5.3. Such technologies are subject to the following terms and conditions: 
+(c) Progress Chef Infra Server v15 incorporates pg 1.5.9, date v3.3.4, bigdeciml v3.1.8, net-protocol v0.2.2, rxml v3.3.8, ruby v3.3.1, stringio v3.0.1.1, time v0.4.0, timeout v0.4.1, and logger v1.5.3. Such technologies are subject to the following terms and conditions: 
 Copyright (C) 1993-2013 Yukihiro Matsumoto. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without

@@ -62,7 +62,7 @@ class User
     if errors.empty?
       begin
         update_attributes('password' => params[:new_password])
-      rescue Net::HTTPServerException => e
+      rescue Net::HTTPClientException => e
         raise
       end
     end
@@ -84,7 +84,7 @@ class User
     chef.get("users/#{username}/organizations").map do |organizations|
       organizations['organization']
     end
-  rescue Net::HTTPServerException
+  rescue Net::HTTPClientException
 
   end
 
@@ -135,7 +135,7 @@ class User
           end
         end
         new(username: username).get unless username.nil?
-      rescue Net::HTTPServerException
+      rescue Net::HTTPClientException
 
       end
     end
@@ -143,7 +143,7 @@ class User
     def authenticate(username, password)
       begin
         self.find(username) if self.new.chef.post_rest('authenticate_user', { username: username, password: password })
-      rescue Net::HTTPServerException
+      rescue Net::HTTPClientException
 
       end
     end

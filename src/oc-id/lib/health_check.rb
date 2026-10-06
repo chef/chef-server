@@ -91,7 +91,7 @@ class HealthCheck
       yield
     rescue Errno::ETIMEDOUT
       @erchef[:status] = TIMEOUT
-    rescue Net::HTTPServerException => e
+    rescue Net::HTTPClientException => e
       if e.message =~ /401/
         @erchef[:status] = AUTHERROR
       else

@@ -10,7 +10,7 @@ pkg_deps=(
   core/curl
   core/openssl
   core/gcc-libs
-  core/ruby3_1/3.1.7
+  core/ruby3_3/3.3.0
   core/sqitch
   core/postgresql14-client
   core/gecode3
@@ -58,7 +58,7 @@ do_unpack() {
 }
 
 do_setup_environment() {
-  export GEM_HOME="$pkg_prefix/vendor/bundle/ruby/3.1.0"
+  export GEM_HOME="$pkg_prefix/vendor/bundle/ruby/3.3.0"
   build_line "Setting GEM_HOME='$GEM_HOME'"
   export GEM_PATH="$GEM_HOME"
   build_line "Setting GEM_PATH='$GEM_PATH'"
@@ -84,7 +84,7 @@ do_prepare() {
 
 
 do_build() {
-  _ruby_dir="$(pkg_path_for core/ruby3_1)"
+  _ruby_dir="$(pkg_path_for core/ruby3_3)"
   export REL_VERSION=$pkg_version
   export USE_SYSTEM_GECODE=1
   export GEM_HOME="${pkg_path}/vendor/bundle"
@@ -99,13 +99,13 @@ do_build() {
 
 do_install() {
   export HOME="${pkg_prefix}"
-  export GEM_HOME="${pkg_prefix}/vendor/bundle/ruby/3.1.0"
+  export GEM_HOME="${pkg_prefix}/vendor/bundle/ruby/3.3.0"
 
   cp Gemfile_habitat ${pkg_prefix}/Gemfile
   cp Gemfile_habitat.lock ${pkg_prefix}/Gemfile.lock
   # bundle install --gemfile ${pkg_prefix}/Gemfile --path "${pkg_prefix}/vendor/bundle" && bundle config path ${pkg_prefix}/vendor/bundle
 
-  _ruby_dir="$(pkg_path_for core/ruby3_1)"
+  _ruby_dir="$(pkg_path_for core/ruby3_3)"
   export PATH="${_ruby_dir}/bin:${PATH}"
   export GEM_PATH="${_ruby_dir}:${GEM_HOME}"
 

@@ -8,7 +8,7 @@ pkg_deps=(
   core/postgresql14-client
   core/curl
   core/node
-  core/ruby3_1/3.1.7
+  core/ruby3_3/3.3.0
   core/rsync
   core/sed
   core/libffi
@@ -58,7 +58,7 @@ do_unpack() {
 }
 
 do_setup_environment() {
-  export GEM_HOME="${pkg_prefix}/vendor/bundle/ruby/3.1.0"
+  export GEM_HOME="${pkg_prefix}/vendor/bundle/ruby/3.3.0"
   build_line "Setting GEM_HOME='$GEM_HOME'"
   export GEM_PATH="$GEM_HOME"
   build_line "Setting GEM_PATH='$GEM_PATH'"
@@ -100,7 +100,7 @@ do_install() {
   export HOME="${pkg_prefix}/oc_id"
   mkdir $HOME
 
-  export GEM_HOME="${pkg_prefix}/vendor/bundle/ruby/3.1.0"
+  export GEM_HOME="${pkg_prefix}/vendor/bundle/ruby/3.3.0"
   mkdir -p "$GEM_HOME"
 
   # Copy all files except excluded directories using find instead of git

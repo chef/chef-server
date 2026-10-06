@@ -59,7 +59,7 @@ describe PasswordResetsController do
       describe 'chef server returns a 404' do
         before do
           r = Net::HTTPNotFound.new('1.0', '404', 'Not Found')
-          e = Net::HTTPServerException.new('fake exception', r)
+          e = Net::HTTPClientException.new('fake exception', r)
           allow(PasswordResetMailer).to receive(:password_reset).and_raise(e)
           post :create, params: { username: 'jimmy' }
         end
@@ -80,7 +80,7 @@ describe PasswordResetsController do
       describe 'chef server returns a 406' do
         before do
           r = Net::HTTPNotAcceptable.new('1.0', '406', 'Not Acceptable')
-          e = Net::HTTPServerException.new('fake exception', r)
+          e = Net::HTTPClientException.new('fake exception', r)
           allow(PasswordResetMailer).to receive(:password_reset).and_raise(e)
           post :create, params: { username: 'jimmy' }
         end
@@ -222,7 +222,7 @@ describe PasswordResetsController do
           describe 'chef server returns a 404' do
             before do
               r = Net::HTTPNotFound.new('1.0', '404', 'Not Found')
-              e = Net::HTTPServerException.new('fake exception', r)
+              e = Net::HTTPClientException.new('fake exception', r)
               allow(User).to receive(:find).and_raise(e)
               put :update, params: { password: 'haha', signature: signature, expires: expires, username: name, email: email }
             end
@@ -239,7 +239,7 @@ describe PasswordResetsController do
           describe 'chef server returns a 400' do
             before do
               r = Net::HTTPBadRequest.new('1.0', '400', 'Bad Request')
-              e = Net::HTTPServerException.new('fake exception', r)
+              e = Net::HTTPClientException.new('fake exception', r)
               allow(User).to receive(:find).and_raise(e)
               allow(controller).to receive(:error_from_json).and_return({
                 'error' => 'oh no!'

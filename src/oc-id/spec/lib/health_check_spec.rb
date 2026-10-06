@@ -2,13 +2,13 @@ require 'spec_helper'
 
 class ErchefUnauthorizedException < StandardError
   def self.exception
-    Net::HTTPServerException.exception('401 Unauthorized', Net::HTTPServerError)
+    Net::HTTPClientException.exception('401 Unauthorized', Net::HTTPServerError)
   end
 end
 
 class ErchefOtherException < StandardError
   def self.exception
-    Net::HTTPServerException.exception('Other', Net::HTTPServerError)
+    Net::HTTPClientException.exception('Other', Net::HTTPServerError)
   end
 end
 

@@ -7,7 +7,7 @@ pkg_deps=(
   core/coreutils
   core/curl
   core/jq-static
-  core/ruby3_1/3.1.7
+  core/ruby3_3/3.3.0
   core/libffi
   core/postgresql14-client
   core/gcc-libs
@@ -51,7 +51,7 @@ do_unpack() {
 }
 
 do_setup_environment() {
-  export GEM_HOME="${pkg_prefix}/vendor/bundle/ruby/3.1.0"
+  export GEM_HOME="${pkg_prefix}/vendor/bundle/ruby/3.3.0"
   build_line "Setting GEM_HOME='$GEM_HOME'"
   export GEM_PATH="$GEM_HOME"
   build_line "Setting GEM_PATH='$GEM_PATH'"
@@ -63,7 +63,7 @@ do_build() {
 
 do_install() {
   export HOME="${pkg_prefix}"
-  export RUBY_VENDOR="$pkg_prefix/vendor/bundle/ruby/3.1.0"
+  export RUBY_VENDOR="$pkg_prefix/vendor/bundle/ruby/3.3.0"
   mkdir -p "$RUBY_VENDOR"
 
   export GEM_HOME="$RUBY_VENDOR"
@@ -123,7 +123,7 @@ EOF
 
   for i in chef-server-test knife chef-server-ctl; do
       sed -i "s#__PKG_PATH__#${pkg_prefix}#" $wrapper_bin_path/$i
-      sed -i "s#__RUBY_PATH__#$(pkg_path_for core/ruby3_1)#" $wrapper_bin_path/$i
+      sed -i "s#__RUBY_PATH__#$(pkg_path_for core/ruby3_3)#" $wrapper_bin_path/$i
   done
 }
 

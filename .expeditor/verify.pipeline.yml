@@ -99,6 +99,15 @@ steps:
 - label: oc-id
   command:
     - /workdir/scripts/bk_tests/bk_install.sh
+    # oc-id runs on Rails 8.1, which requires Ruby >= 3.2, so the image's
+    # default Ruby (3.1.6) is too old. The chefes/a1-buildkite image ships
+    # 3.1.0, 3.1.6 and 3.4.2 via asdf, so 3.4.2 ($RUBY_NEXT_VERSION) is the
+    # only one that can run Rails 8.1 without compiling a Ruby from source.
+    # Note this is a minor ahead of the 3.3.x we ship (omnibus-software has no
+    # 3.4 definitions and Habitat LTS-2024 has no core/ruby3_4); the suite is
+    # verified against 3.3 as well. If the image ever gains a 3.3.x, prefer it.
+    - asdf local ruby 3.4.2
+    - ruby --version
     - cd /workdir/src/oc-id
     - make install ci
   expeditor:

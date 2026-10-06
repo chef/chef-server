@@ -6,7 +6,7 @@
 override :'omnibus-ctl', version: "main"
 #override :chef, version: "v18.8.46"
 override :ohai, version: "v16.17.0"
-override :ruby, version: "3.1.7"
+override :ruby, version: "3.3.1"
 override :perl, version: "5.34.0"
 override :redis, version: "5.0.14"
 override :runit, version: "2.1.1" #standalone upgrade is failing, Needs to be reverted to 2.1.2 after fixing the umbrella

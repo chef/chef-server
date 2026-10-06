@@ -99,8 +99,6 @@ gem "toml" # for habitat-land
 gem "knife","~> 19.0.105"
 gem "knife-ec-backup", "~> 3.0.8"
 
-gem "public_suffix", "< 7.0" # public_suffix 7.0+ requires Ruby >= 3.2; pin for Ruby 3.1 compatibility
-
 # see the SafeVersions setup at the top of this file.
 # Example only -- how to pin an exact version: replace X.Y.Z before uncommenting:
 # gem "rack", ">= #{resolve_safe_version.call(:MINIMUM_SAFE_RACK_VERSION)}", "= X.Y.Z" # pinned <reason>, YYYY-MM-DD

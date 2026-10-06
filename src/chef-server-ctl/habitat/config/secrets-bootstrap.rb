@@ -1,4 +1,4 @@
-#!{{pkgPathFor "core/ruby3_1"}}/bin/ruby
+#!{{pkgPathFor "core/ruby3_3"}}/bin/ruby
 
 require "toml"
 require "openssl"

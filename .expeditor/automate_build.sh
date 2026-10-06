@@ -18,10 +18,10 @@ export DEFAULT_AUTOMATE_REPO="https://github.com/chef/automate-private.git"
 
 curl https://raw.githubusercontent.com/habitat-sh/habitat/main/components/hab/install.sh | sudo bash
 
-sudo -E hab pkg install core/ruby3_1
+sudo -E hab pkg install core/ruby3_3
 export PATH
-PATH="$(hab pkg path core/ruby3_1)/bin:$PATH"
-sudo -E "$(hab pkg path core/ruby3_1)"/bin/gem install toml
+PATH="$(hab pkg path core/ruby3_3)/bin:$PATH"
+sudo -E "$(hab pkg path core/ruby3_3)"/bin/gem install toml
 
 export JOB_TEMP_ROOT
 JOB_TEMP_ROOT=$(mktemp -d /tmp/job-root-XXXXXX)
