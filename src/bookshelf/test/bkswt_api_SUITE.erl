@@ -702,7 +702,7 @@ random_path() ->
     filename:join(random_binary(), random_binary()).
 
 test_data(Size) ->
-    crypto:random_bytes(Size).
+    crypto:strong_rand_bytes(Size).
 
 test_data_text(Size) ->
     random_string(Size, " abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ\n" ).
