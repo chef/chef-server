@@ -33,7 +33,6 @@ github:
 #     cronline: "0 6 * * *"
 
 pipelines:
-  - verify
   - verify:
       public: true
   - habitat/build
