@@ -2,7 +2,7 @@
 %% ex: ts=4 sw=4 et
 %%%-------------------------------------------------------------------
 %%% @author Oliver Ferrigni <>
-%%% @doc gen_fsm responsible for cleaning up orphaned authz_ids.  These
+%%% @doc gen_statem responsible for cleaning up orphaned authz_ids.  These
 %%% authz ids are detected in oc_chef_group and added to a set of either
 %%% actor or group authz_ids.  On a timer, the authz_ids are deleted
 %%% from authz.
@@ -28,13 +28,7 @@
 
 -module(oc_chef_authz_cleanup).
 
--behaviour(gen_fsm).
-
-%% supress gen_fsm deprecation warning.
-%% gen_fsm is expected to remain in erlang for the foreseeable future as of this time.
-%% https://erlang.org/doc/general_info/deprecations.html
-%% https://erlang.org/doc/general_info/scheduled_for_removal.html
--compile(nowarn_deprecated_function).
+-behaviour(gen_statem).
 
 %% API
 -export([
@@ -47,18 +41,18 @@
          prune/2
         ]).
 
-%% gen_fsm callbacks
+%% gen_statem callbacks
 -export([
          init/1,
-         handle_event/3,
-         handle_sync_event/4,
-         handle_info/3, terminate/3,
-         code_change/4]).
+         callback_mode/0,
+         terminate/3,
+         code_change/4
+        ]).
 
 %% FSM states
 -export([
-         stopped/2,
-         started/2
+         stopped/3,
+         started/3
         ]).
 
 -define(SERVER, ?MODULE).
@@ -72,7 +66,7 @@
 
 %%--------------------------------------------------------------------
 %% @doc
-%% Creates a gen_fsm process which calls Module:init/1 to
+%% Creates a gen_statem process which calls Module:init/1 to
 %% initialize. To ensure a synchronized start-up procedure, this
 %% function does not return until Module:init/1 has returned.
 %%
@@ -80,37 +74,49 @@
 %% @end
 %%--------------------------------------------------------------------
 start_link() ->
-    gen_fsm:start_link({local, ?SERVER}, ?MODULE, [], []).
+    gen_statem:start_link({local, ?SERVER}, ?MODULE, [], []).
 
 -spec add_authz_ids([oc_authz_id()], [oc_authz_id()]) -> ok.
 add_authz_ids(Actors, Groups) ->
-    gen_fsm:send_all_state_event(?MODULE, {add, Actors, Groups}).
+    gen_statem:cast(?MODULE, {add, Actors, Groups}).
 
 -spec get_authz_ids() -> {[oc_authz_id()], [oc_authz_id()]}.
 get_authz_ids() ->
-    gen_fsm:sync_send_all_state_event(?MODULE, get_authz_ids, ?CLEANUP_TIMEOUT).
+    gen_statem:call(?MODULE, get_authz_ids, ?CLEANUP_TIMEOUT).
 
 start() ->
-    gen_fsm:send_event(?MODULE, start).
+    gen_statem:cast(?MODULE, start).
 
 stop() ->
-    gen_fsm:send_event(?MODULE, stop).
+    gen_statem:cast(?MODULE, stop).
 
 prune() ->
-    gen_fsm:send_event(?MODULE, prune).
+    gen_statem:cast(?MODULE, prune).
 %%%===================================================================
-%%% gen_fsm callbacks
+%%% gen_statem callbacks
 %%%===================================================================
 
 %%--------------------------------------------------------------------
 %% @private
 %% @doc
-%% Whenever a gen_fsm is started using gen_fsm:start/[3,4] or
-%% gen_fsm:start_link/[3,4], this function is called by the new
+%% Selects the state function callback mode, so that each state is
+%% handled by a function of the same name (stopped/3, started/3).
+%%
+%% @spec callback_mode() -> state_functions
+%% @end
+%%--------------------------------------------------------------------
+callback_mode() ->
+    state_functions.
+
+%%--------------------------------------------------------------------
+%% @private
+%% @doc
+%% Whenever a gen_statem is started using gen_statem:start/[3,4] or
+%% gen_statem:start_link/[3,4], this function is called by the new
 %% process to initialize.
 %%
-%% @spec init(Args) -> {ok, StateName, State} |
-%%                     {ok, StateName, State, Timeout} |
+%% @spec init(Args) -> {ok, State, Data} |
+%%                     {ok, State, Data, Actions} |
 %%                     ignore |
 %%                     {stop, StopReason}
 %% @end
@@ -118,96 +124,65 @@ prune() ->
 init([]) ->
     {ok, started, create_timer(#state{})}.
 
-stopped(stop, State) ->
-    {next_state, stopped, State};
-stopped(start, State) ->
-    {next_state, started, create_timer(State)};
-stopped({timeout, _Ref, prune}, State) ->
-    {next_state, stopped, State};
-stopped(prune, State) ->
-    {next_state, stopped, process_batch(State)};
-stopped(_Message, State) ->
-    {next_state, stopped, State}.
+stopped(cast, stop, Data) ->
+    {next_state, stopped, Data};
+stopped(cast, start, Data) ->
+    {next_state, started, create_timer(Data)};
+stopped(cast, prune, Data) ->
+    {next_state, stopped, process_batch(Data)};
+stopped(info, {timeout, _Ref, prune}, Data) ->
+    {next_state, stopped, Data};
+stopped(EventType, Event, Data) ->
+    handle_common(EventType, Event, Data).
 
 
-started(stop, State) ->
-    {next_state, stopped, cancel_timer(State)};
-started(start, State) ->
-    {next_state, started, State};
-started({timeout, _Ref, prune}, State) ->
-    {next_state, started, process_batch(State)};
-started(prune, State) ->
-    {next_state, started, process_batch(State)};
-started(_Message, State) ->
-    {next_state, started, State}.
+started(cast, stop, Data) ->
+    {next_state, stopped, cancel_timer(Data)};
+started(cast, start, Data) ->
+    {next_state, started, Data};
+started(cast, prune, Data) ->
+    {next_state, started, process_batch(Data)};
+started(info, {timeout, _Ref, prune}, Data) ->
+    {next_state, started, process_batch(Data)};
+started(EventType, Event, Data) ->
+    handle_common(EventType, Event, Data).
 
 %%--------------------------------------------------------------------
 %% @private
 %% @doc
-%% Whenever a gen_fsm receives an event sent using
-%% gen_fsm:send_all_state_event/2, this function is called to handle
-%% the event.
+%% Events that are handled the same way regardless of the current
+%% state. Under gen_fsm these were spread across handle_event/3
+%% (all state events), handle_sync_event/4 (all state sync events)
+%% and handle_info/3; gen_statem delivers them to the state function
+%% for the current state, so each state function falls through here.
 %%
-%% @spec handle_event(Event, StateName, State) ->
-%%                   {next_state, NextStateName, NextState} |
-%%                   {next_state, NextStateName, NextState, Timeout} |
-%%                   {stop, Reason, NewState}
+%% @spec handle_common(EventType, Event, Data) ->
+%%                   keep_state_and_data |
+%%                   {keep_state, NewData} |
+%%                   {keep_state_and_data, Actions}
 %% @end
 %%--------------------------------------------------------------------
-handle_event({add, Actors, Groups}, StateName, State) ->
-    {next_state, StateName, update_state(Actors, Groups, State)
-    }.
+handle_common(cast, {add, Actors, Groups}, Data) ->
+    {keep_state, update_state(Actors, Groups, Data)};
+handle_common({call, From}, get_authz_ids, Data) ->
+    {keep_state_and_data, [{reply, From, Data#state.authz_ids}]};
+handle_common({call, From}, _Event, _Data) ->
+    {keep_state_and_data, [{reply, From, ok}]};
+handle_common(_EventType, _Event, _Data) ->
+    keep_state_and_data.
 
 %%--------------------------------------------------------------------
 %% @private
 %% @doc
-%% Whenever a gen_fsm receives an event sent using
-%% gen_fsm:sync_send_all_state_event/[2,3], this function is called
-%% to handle the event.
-%%
-%% @spec handle_sync_event(Event, From, StateName, State) ->
-%%                   {next_state, NextStateName, NextState} |
-%%                   {next_state, NextStateName, NextState, Timeout} |
-%%                   {reply, Reply, NextStateName, NextState} |
-%%                   {reply, Reply, NextStateName, NextState, Timeout} |
-%%                   {stop, Reason, NewState} |
-%%                   {stop, Reason, Reply, NewState}
-%% @end
-%%--------------------------------------------------------------------
-handle_sync_event(get_authz_ids, _From, StateName, State) ->
-    {reply, State#state.authz_ids, StateName, State};
-handle_sync_event(_Event, _From, StateName, State) ->
-    Reply = ok,
-    {reply, Reply, StateName, State}.
-
-%%--------------------------------------------------------------------
-%% @private
-%% @doc
-%% This function is called by a gen_fsm when it receives any
-%% message other than a synchronous or asynchronous event
-%% (or a system message).
-%%
-%% @spec handle_info(Info,StateName,State) ->
-%%                   {next_state, NextStateName, NextState} |
-%%                   {next_state, NextStateName, NextState, Timeout} |
-%%                   {stop, Reason, NewState}
-%% @end
-%%--------------------------------------------------------------------
-handle_info(_Info, StateName, State) ->
-    {next_state, StateName, State}.
-
-%%--------------------------------------------------------------------
-%% @private
-%% @doc
-%% This function is called by a gen_fsm when it is about to
+%% This function is called by a gen_statem when it is about to
 %% terminate. It should be the opposite of Module:init/1 and do any
-%% necessary cleaning up. When it returns, the gen_fsm terminates with
+%% necessary cleaning up. When it returns, the gen_statem terminates with
 %% Reason. The return value is ignored.
 %%
-%% @spec terminate(Reason, StateName, State) -> void()
+%% @spec terminate(Reason, State, Data) -> void()
 %% @end
 %%--------------------------------------------------------------------
-terminate(_Reason, _StateName, _State) ->
+terminate(_Reason, _StateName, _Data) ->
     ok.
 
 %%--------------------------------------------------------------------
@@ -215,12 +190,12 @@ terminate(_Reason, _StateName, _State) ->
 %% @doc
 %% Convert process state when code is changed
 %%
-%% @spec code_change(OldVsn, StateName, State, Extra) ->
-%%                   {ok, StateName, NewState}
+%% @spec code_change(OldVsn, State, Data, Extra) ->
+%%                   {ok, State, Data}
 %% @end
 %%--------------------------------------------------------------------
-code_change(_OldVsn, StateName, State, _Extra) ->
-    {ok, StateName, State}.
+code_change(_OldVsn, StateName, Data, _Extra) ->
+    {ok, StateName, Data}.
 
 %%%===================================================================
 %%% Internal functions
@@ -279,10 +254,10 @@ update_state(Actors, Groups, #state{authz_ids = {ActorSet, GroupSet}} = State) -
 
 create_timer(State) ->
     Timeout = envy:get(oc_chef_authz, cleanup_interval, ?DEFAULT_INTERVAL, integer),
-    State#state{timer_ref = gen_fsm:start_timer(Timeout, prune)}.
+    State#state{timer_ref = erlang:start_timer(Timeout, self(), prune)}.
 
 cancel_timer( State = #state{timer_ref = inactive}) ->
     State;
 cancel_timer(State = #state{timer_ref = TimerRef}) ->
-    gen_fsm:cancel_timer(TimerRef),
+    erlang:cancel_timer(TimerRef),
     State#state{timer_ref = inactive}.
