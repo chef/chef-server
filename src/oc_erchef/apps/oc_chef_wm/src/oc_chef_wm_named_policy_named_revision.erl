@@ -21,6 +21,8 @@
 %% /policies/:policy_name/revisions/:revision_id
 -module(oc_chef_wm_named_policy_named_revision).
 
+-include_lib("kernel/include/logger.hrl").
+
 -include("oc_chef_wm.hrl").
 
 %% Webmachine resource callbacks
@@ -113,7 +115,7 @@ to_json(Req, #base_state{chef_db_context = DbContext,
         case chef_db:list_policy_groups_for_policy_revision(DbContext, RevisionID) of
             {error, Why} ->
                 Report = {list_policy_groups_for_policy_revision, {Why}},
-                lager:error("~p", [Report]),
+                ?LOG_ERROR("~p", [Report]),
                 error(Report);
 
             PolicyGroupNames ->

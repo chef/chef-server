@@ -21,8 +21,6 @@
                   chef_objects,
                   compiler,
                   syntax_tools,
-                  goldrush,
-                  lager,
                   eldap,
                   data_collector,
                   chef_license

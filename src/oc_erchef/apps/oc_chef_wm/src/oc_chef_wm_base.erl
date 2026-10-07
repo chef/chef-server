@@ -21,6 +21,8 @@
 
 -module(oc_chef_wm_base).
 
+-include_lib("kernel/include/logger.hrl").
+
 -include("oc_chef_wm.hrl").
 -include_lib("public_key/include/public_key.hrl").
 
@@ -236,7 +238,7 @@ multi_auth_check_to_wm_response({false, {_AuthzObjectType, _AuthzId, Permission}
 multi_auth_check_to_wm_response({Error, {AuthzObjectType, AuthzId, Permission}, Req, State}) ->
     #base_state{requestor_id=RequestorId} = State,
     %% TODO: Extract this logging message, as it is used elsewhere, too
-    lager:error("is_authorized_on_resource failed (~p, ~p, ~p): ~p~n",
+    ?LOG_ERROR("is_authorized_on_resource failed (~p, ~p, ~p): ~p~n",
                            [Permission, {AuthzObjectType, AuthzId}, RequestorId, Error]),
     {{halt, 500}, Req, State#base_state{log_msg={error, is_authorized_on_resource}}}.
 
@@ -436,7 +438,7 @@ check_permission(Perm, AuthzObjectType, AuthzId, Req, #base_state{requestor_id=R
             {Req1, State1} = set_forbidden_msg(Req, State),
             {false, Req1, State1};
         Error ->
-            lager:error("is_authorized_on_resource failed (~p, ~p, ~p, ~p): ~p~n",
+            ?LOG_ERROR("is_authorized_on_resource failed (~p, ~p, ~p, ~p): ~p~n",
                                    [Perm, {AuthzObjectType, AuthzId}, RequestorId, Name, Error]),
             {{halt, 500}, Req, State#base_state{log_msg={error, is_authorized_on_resource}}}
     end.
@@ -553,7 +555,7 @@ spawn_stats_hero_worker(Req, #base_state{resource_mod = Mod,
         {ok, _} ->
             ok;
         {error, Reason} ->
-            lager:error("FAILED stats_hero_worker_sup:new_worker: ~p~n", [Reason]),
+            ?LOG_ERROR("FAILED stats_hero_worker_sup:new_worker: ~p~n", [Reason]),
             ok
     end.
 
@@ -650,7 +652,7 @@ check_cookbook_authz(Cookbooks, _Req, #base_state{reqid = ReqId,
         true -> ok;
         {error, Why} ->
             Report = {check_cookbook_authz, {Why, ReqId}},
-            lager:error("~p", [Report]),
+            ?LOG_ERROR("~p", [Report]),
             error(Report);
         {false, {NoAuthzList, _AuthzList}} ->
             {error, {[{<<"message">>, <<"Read permission is not granted for one or more cookbooks">>},
@@ -819,15 +821,15 @@ finish_request(Req, #base_state{reqid = ReqId,
         end
     catch
         X:Y:Stacktrace ->
-            lager:error("Error: ~p:~p. Stack trace follows.", [X, Y]),
-            lager:error("Stack Trace: ~p",  [Stacktrace]),
+            ?LOG_ERROR("Error: ~p:~p. Stack trace follows.", [X, Y]),
+            ?LOG_ERROR("Stack Trace: ~p",  [Stacktrace]),
             % If a failure occurs anywhere above, the request is completed (and changes
             % potentially made) but our bookkeeping has failed. Let's not crash the request
             % resulting in a 500 - which would indicate that the request should be retried.
             {true, Req, State}
     end;
 finish_request(_Req, Anything) ->
-    lager:error("chef_wm:finish_request/2 did not receive #base_state{}~nGot: ~p~n", [Anything]).
+    ?LOG_ERROR("chef_wm:finish_request/2 did not receive #base_state{}~nGot: ~p~n", [Anything]).
 
 log_action(Req, State) ->
     maybe_notify_data_collector(data_collector:is_enabled(), Req, State).
@@ -900,7 +902,7 @@ malformed_request(Req, #base_state{resource_mod=Mod,
             Req3 = wrq:set_resp_body(chef_json:encode(Msg1), Req),
             {{halt, 400}, Req3, State1#base_state{log_msg = bad_sign_desc}};
         throw:{too_big, Msg} ->
-            lager:info("json too large (~p)", [Msg]),
+            ?LOG_INFO("json too large (~p)", [Msg]),
             Req3 = wrq:set_resp_body(chef_json:encode({[{<<"error">>, Msg}]}), Req),
             {{halt, 413}, Req3, State1#base_state{log_msg = too_big}};
         throw:{acl_constraint_violation, Violation} ->
@@ -1109,7 +1111,7 @@ create_from_json(#wm_reqdata{} = Req,
             % 500 logging sanitizes responses to avoid exposing sensitive data -
             % TODO - parse sql error to get minimal meaningful message,
             % without exposing sensitive data
-            % lager:error("Error in object creation: ~p", [What]),
+            % ?LOG_ERROR("Error in object creation: ~p", [What]),
             {{halt, 500}, Req, State#base_state{log_msg = What}}
     end.
 
@@ -1181,7 +1183,7 @@ update_from_json(#wm_reqdata{} = Req, #base_state{reqid=ReqId,
                     State1 = State#base_state{log_msg = Why},
                     % TODO - parse sql error to get minimal meaningful message,
                     % without exposing sensitive data
-                    % lager:error("Error in object creation: ~p", [Why]),
+                    % ?LOG_ERROR("Error in object creation: ~p", [Why]),
                     {{halt, 500}, Req, State1}
             end
     end.
@@ -1274,7 +1276,7 @@ select_user_or_webui_key(Req, Requestors) ->
                             %% The proplist for webui_pub_key_list has been parsed, so the
                             %% key should exist as an atom
                             throw:badarg:Stacktrace ->
-                                lager:error({"unknown webkey tag", Tag,
+                                ?LOG_ERROR({"unknown webkey tag", Tag,
                                                            Stacktrace}),
                                 %% alternately, we could just use the default key instead of failing;
                                 %% but I prefer noisy errors
@@ -1289,7 +1291,7 @@ select_user_or_webui_key(Req, Requestors) ->
                     PublicKey;
                 {error, unknown_key} ->
                     Msg = io_lib:format("Failed finding key ~w", [WebKeyTag]),
-                    lager:error({no_such_key, Msg, [?MODULE, ?LINE]}),
+                    ?LOG_ERROR({no_such_key, Msg, [?MODULE, ?LINE]}),
                     throw({no_such_key, WebKeyTag})
             end,
             % The query in chef_sql:fetch_actors_by_name (whence we get Requestors) sorts

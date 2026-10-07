@@ -5,6 +5,8 @@
 
 -module(oc_chef_wm_named_organization).
 
+-include_lib("kernel/include/logger.hrl").
+
 -include("oc_chef_wm.hrl").
 
 %% Webmachine resource callbacks
@@ -160,7 +162,7 @@ delete_read_access_group(DbContext, AuthzContext, OrgName, RequestorId) ->
         {not_found, authz_group} ->
             %% Ignoring this error lets us retry the whole deletion process if it fails part
             %% of the way through
-            lager:error("Could not find read access group when deleting org ~s", [OrgName]),
+            ?LOG_ERROR("Could not find read access group when deleting org ~s", [OrgName]),
             ok
     end.
 

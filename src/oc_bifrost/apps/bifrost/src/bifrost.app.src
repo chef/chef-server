@@ -16,7 +16,6 @@
   %% manually in bifrost_app.erl.)
   {applications, [kernel,
                   stdlib,
-                  lager,
                   sasl,
                   stats_hero,
                   ej,

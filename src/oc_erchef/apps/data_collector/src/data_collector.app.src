@@ -28,7 +28,6 @@
     {applications, [
         kernel,
         stdlib,
-        lager,
         chef_secrets,
         opscoderl_httpc
     ]},

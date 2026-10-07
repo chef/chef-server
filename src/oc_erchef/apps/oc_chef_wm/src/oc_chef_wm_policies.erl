@@ -6,6 +6,8 @@
 
 -module(oc_chef_wm_policies).
 
+-include_lib("kernel/include/logger.hrl").
+
 -include("oc_chef_wm.hrl").
 
 %% Webmachine resource callbacks
@@ -73,7 +75,7 @@ to_json(Req, #base_state{chef_db_context = DbContext,
     case chef_db:list_all_policy_revisions_by_orgid(DbContext, OrgId) of
         {error, Why} ->
             Report = {list_all_policy_revisions_by_orgid, {Why, ReqId}},
-            lager:error("~p", [Report]),
+            ?LOG_ERROR("~p", [Report]),
             error(Report);
         AllRevisions ->
             BaseEJSON = build_base_policy_list_ejson(Req, AllRevisions),

@@ -24,6 +24,8 @@
 
 -module(chef_wm_status).
 
+-include_lib("kernel/include/logger.hrl").
+
 -ifdef(TEST).
 -compile(export_all).
 -compile(nowarn_export_all).
@@ -91,7 +93,7 @@ overall_status(Pings) ->
 -spec log_failure(fail | pong, [{binary(), <<_:32>>}]) -> ok.
 log_failure(fail, Pings) ->
     FailureData = {{status, fail}, {upstreams, {Pings}}},
-    lager:error("/_status~n~p~n", [FailureData]),
+    ?LOG_ERROR("/_status~n~p~n", [FailureData]),
     ok;
 log_failure(_, _) ->
     ok.
@@ -164,7 +166,7 @@ gather_health_workers([{{Pid, Ref}, Mod} | Rest] = List, Acc) ->
         %% crash. But to avoid the possibility of blocking with a bare receive, we set the
         %% timeout and return early.
         Timeout ->
-            lager:error({Mod, ping, hard_fail}),
+            ?LOG_ERROR({Mod, ping, hard_fail}),
             [ {?A2B(Mod), <<"fail">>} | Acc ]
     end;
 gather_health_workers([], Acc) ->

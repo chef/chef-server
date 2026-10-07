@@ -22,12 +22,13 @@
 
 -module(oc_chef_wm_containers_SUITE).
 
+-include_lib("kernel/include/logger.hrl").
+
 -include_lib("common_test/include/ct.hrl").
 -include("chef_types.hrl").
 -include("oc_chef_types.hrl").
 -include_lib("eunit/include/eunit.hrl").
 
--compile([{parse_transform, lager_transform}]).
 
 -define(ORG_AUTHZ_ID, <<"10000000000000000000000000000000">>).
 -define(AUTHZ_ID, <<"00000000000000000000000000000001">>).
@@ -74,7 +75,7 @@ delete_all_containers() ->
                  Error ->
                      throw(Error)
              end,
-    lager:info("Delete containers: ~p", [Result]),
+    ?LOG_INFO("Delete containers: ~p", [Result]),
     ok.
 
 list_when_no_containers(_) ->

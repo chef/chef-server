@@ -1,5 +1,7 @@
 -module(bifrost_wm_status_resource).
 
+-include_lib("kernel/include/logger.hrl").
+
 -export([
          allowed_methods/2,
          content_types_provided/2,
@@ -24,6 +26,6 @@ to_json(Req, State) ->
         ok ->
             {<<"{\"status\": \"ok\"}">>, Req, State};
         {error, Reason} ->
-            lager:error(io_lib:format("status check: ~999p~n", [Reason])),
+            ?LOG_ERROR(io_lib:format("status check: ~999p~n", [Reason])),
             {{halt, 500}, Req, State}
     end.

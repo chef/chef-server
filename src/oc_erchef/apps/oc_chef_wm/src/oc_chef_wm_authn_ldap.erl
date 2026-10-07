@@ -19,6 +19,8 @@
 %
 -module(oc_chef_wm_authn_ldap).
 
+-include_lib("kernel/include/logger.hrl").
+
 -export([auth_method/1, authenticate/2]).
 
 -include("chef_types.hrl").
@@ -125,7 +127,7 @@ find_and_authenticate_user(Session, User, Password, Config) ->
             case eldap:simple_bind(Session, CN, Password) of
                 ok -> {UserName, Data};
                 {error, Error} ->
-                    lager:info("ldap authentication failed for ~p: ~p", [User, Error]),
+                    ?LOG_INFO("ldap authentication failed for ~p: ~p", [User, Error]),
                     {error, unauthorized}
             end
     end.
@@ -136,36 +138,36 @@ search_result({error, Reason}) ->
     %% An error response means some kind of failure occurred - no
     %% matching results would not result in an error tuple, but rather
     %% an empty result set.
-    lager:error("LDAP search failed unexpectedly: ~p", [Reason]),
+    ?LOG_ERROR("LDAP search failed unexpectedly: ~p", [Reason]),
     error.
 
 bind(Session, BindDN, BindPassword) ->
     case eldap:simple_bind(Session, BindDN, BindPassword) of
         ok -> ok;
         {error, Error} ->
-            lager:error("Could not bind as ~p, please check chef-server.rb for correct bind_dn, bind_password, host, port and encrpytion values. Error: ~p", [BindDN, Error]),
+            ?LOG_ERROR("Could not bind as ~p, please check chef-server.rb for correct bind_dn, bind_password, host, port and encrpytion values. Error: ~p", [BindDN, Error]),
             {error, Error}
     end.
 
 maybe_encrypt_session(_Encryption, {error, Error}, _Timeout) ->
-    lager:error("Failed to connect to ldap host or an error occurred during connection setup. Please check chef-server.rb for correct host, port, and encryption values: ~p", [Error]),
+    ?LOG_ERROR("Failed to connect to ldap host or an error occurred during connection setup. Please check chef-server.rb for correct host, port, and encryption values: ~p", [Error]),
     error;
 maybe_encrypt_session(start_tls, {ok, Session}, Timeout) ->
     case eldap:start_tls(Session, [{verify, verify_none}], Timeout) of
         ok -> % secure upgrade completed
             {ok, Session};
         {error, tls_already_started} ->
-            lager:warning("start_tls on ldap session ignored request, tls already started"),
+            ?LOG_WARNING("start_tls on ldap session ignored request, tls already started"),
             {ok, Session}; % connection is already secure
         {error, {response, Reason}} ->  % Connection is still good, but is not made secure.
             % Because we're configured to require secure connection,  we'll fail here.
-            lager:error("start_tls on ldap session failed during request phase: ~p", [Reason]),
+            ?LOG_ERROR("start_tls on ldap session failed during request phase: ~p", [Reason]),
             error;
         {error, Other} ->
-            lager:error("start_tls on ldap session failed during upgrade phase: ~p", [Other]),
+            ?LOG_ERROR("start_tls on ldap session failed during upgrade phase: ~p", [Other]),
             error;
         Other ->
-            lager:error("start_tls on ldap session failed because ~p", [Other])
+            ?LOG_ERROR("start_tls on ldap session failed because ~p", [Other])
     end;
 maybe_encrypt_session(_, {ok, Session}, _) ->
     {ok, Session}.
@@ -179,7 +181,7 @@ canonical_username(Username) ->
                  [{return, list}, global])).
 
 result_to_user_ejson(_, UserName, []) ->
-    lager:info("User ~p not found in LDAP", [UserName]),
+    ?LOG_INFO("User ~p not found in LDAP", [UserName]),
     {error, unauthorized};
 result_to_user_ejson(LoginAttr, UserName, [{eldap_entry, CN, DataIn} | _]) ->
     % No guarantees on casing, so let's not make assumptions:

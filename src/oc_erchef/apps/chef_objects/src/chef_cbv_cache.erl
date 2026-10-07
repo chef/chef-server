@@ -21,6 +21,8 @@
 %%
 
 -module(chef_cbv_cache).
+
+-include_lib("kernel/include/logger.hrl").
 -behavior(gen_server).
 
 -define(SERVER, ?MODULE).
@@ -206,7 +208,7 @@ handle_info({expire, Key}, #state{tid = Tid} = State) ->
     ets:delete(Tid, Key),
     {noreply, State};
 handle_info({'EXIT', _From, Reason}, State) ->
-    lager:error("chef_cbv_cache: circuit breaker proc failed because ~p, restarting", [Reason]),
+    ?LOG_ERROR("chef_cbv_cache: circuit breaker proc failed because ~p, restarting", [Reason]),
     spawn_breaker(),
     {noreply, State};
 handle_info(_Info, State) ->
@@ -242,7 +244,7 @@ insert_into_cache(Tid, Key, Value, TTL) ->
         false ->
             % Value already exists.  Given the enforced ordering to prevent more than
             % one caller from trying to put the same key, this should no longer be possible
-            lager:info("chef_cbv_cache: Key ~p already present, ignoring.", [Key])
+            ?LOG_INFO("chef_cbv_cache: Key ~p already present, ignoring.", [Key])
     end.
 
 spawn_breaker() ->

@@ -18,6 +18,8 @@
 
 -module(oc_chef_wm_org_associations).
 
+-include_lib("kernel/include/logger.hrl").
+
 -include("oc_chef_wm.hrl").
 
 %% Webmachine resource callbacks
@@ -216,11 +218,11 @@ deprovision_user(Req, #base_state{organization_name = OrgName,
             EJ = chef_user:assemble_user_ejson(User, OrgName),
             {true, chef_wm_util:set_json_body(Req, EJ), State#base_state{log_msg = {removed, UserName, from, OrgName}}};
         {warning, Warnings} ->
-            lager:error("Warnings in deprovision of ~p from ~p: ~p", [UserName, OrgName, Warnings]),
+            ?LOG_ERROR("Warnings in deprovision of ~p from ~p: ~p", [UserName, OrgName, Warnings]),
             EJ = chef_user:assemble_user_ejson(User, OrgName),
             {true, chef_wm_util:set_json_body(Req, EJ), State#base_state{log_msg = {warning_in_deprovision, Warnings}}};
         {error, Error} ->
-            lager:error("Error in deprovision of ~p from ~p: ~p", [UserName, OrgName, Error]),
+            ?LOG_ERROR("Error in deprovision of ~p from ~p: ~p", [UserName, OrgName, Error]),
             {{halt, 500}, Req, State#base_state{log_msg = {error_in_deprovision, Error}}}
      end.
 

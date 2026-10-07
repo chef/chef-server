@@ -17,6 +17,8 @@
 %% under the License.
 
 -module(chef_reindex).
+
+-include_lib("kernel/include/logger.hrl").
 -compile([warnings_as_errors]).
 
 -ifdef(namespaced_types).
@@ -47,7 +49,7 @@
 -spec reindex(Ctx :: chef_db:db_context(), OrgInfo :: org_info()) ->
                      {ok, list()} | {error, list(), list()}.
 reindex(Ctx, {OrgId, OrgName}=OrgInfo) ->
-    lager:info("reindexing[~s]: reindex requested for ~s", [OrgName, OrgName]),
+    ?LOG_INFO("reindexing[~s]: reindex requested for ~s", [OrgName, OrgName]),
     AllIndexes = fetch_org_indexes(Ctx, OrgId),
     Results = [reindex(Ctx, OrgInfo, Index) || Index <- AllIndexes ],
     {FailedList, MissingList} = lists:unzip(Results),
@@ -55,10 +57,10 @@ reindex(Ctx, {OrgId, OrgName}=OrgInfo) ->
     FlatMissing = lists:flatten(MissingList),
     case FlatFailures of
         [] ->
-            lager:info("reindexing[~s]: reindex complete!", [OrgName]),
+            ?LOG_INFO("reindexing[~s]: reindex complete!", [OrgName]),
             {ok, FlatMissing};
         F ->
-            lager:info("reindexing[~s]: reindex FAILED!", [OrgName]),
+            ?LOG_INFO("reindexing[~s]: reindex FAILED!", [OrgName]),
             {error, F, FlatMissing}
     end.
 
@@ -121,7 +123,7 @@ reindex(Ctx, {OrgId, OrgName}=OrgInfo, Index) ->
     %% Grab all the database IDs to do batch retrieval on
     AllIds = all_ids_from_name_id_dict(NameIdDict),
     BatchSize = envy:get(oc_chef_wm, reindex_batch_size, pos_integer),
-    lager:info("reindexing[~s]: ~p items of type ~p to reindex", [OrgName, length(AllIds), Index]),
+    ?LOG_INFO("reindexing[~s]: ~p items of type ~p to reindex", [OrgName, length(AllIds), Index]),
     batch_reindex(Ctx, AllIds, BatchSize, OrgInfo, Index, NameIdDict).
 
 %% @doc Reindex the objects with the specified `Ids' in the given `Index'.
@@ -141,20 +143,20 @@ reindex_by_id(Ctx, {OrgId, _OrgName} = OrgInfo, Index, Ids) ->
                       Names :: [binary()]) -> {list(), list()}.
 reindex_by_name(Ctx, {OrgId, OrgName} = OrgInfo, Index, Names) ->
     NameIdDict = chef_db:create_name_id_dict(Ctx, Index, OrgId),
-    lager:debug("NameIdDict in reindex_by_name for Org: ~p Index: ~p is ~p ~n", [OrgName, Index, NameIdDict]),
+    ?LOG_DEBUG("NameIdDict in reindex_by_name for Org: ~p Index: ~p is ~p ~n", [OrgName, Index, NameIdDict]),
     {Ids, MissingList} = lists:foldl(
                           fun(Name, {Acc, Missing}) ->
                             case dict:find(Name, NameIdDict) of
                               {ok, Id} ->
                                 {[Id | Acc], Missing};
                               error ->
-                                lager:warning("skipping: no id found for name ~p", [Name]),
+                                ?LOG_WARNING("skipping: no id found for name ~p", [Name]),
                                 %% The lager warning does not print anything on the console
                                 {Acc, [Name | Missing]}
                             end
                           end, {[], []}, Names),
-    lager:debug("Ids that will be reindexed: ~p ~n", [Ids]),
-    lager:debug("Ids that are missing: ~p ~n", [MissingList]),
+    ?LOG_DEBUG("Ids that will be reindexed: ~p ~n", [Ids]),
+    ?LOG_DEBUG("Ids that are missing: ~p ~n", [MissingList]),
     {ok, BatchSize} = application:get_env(oc_chef_wm, reindex_batch_size),
     case MissingList of
         [] ->
@@ -218,7 +220,7 @@ batch_reindex(Ctx, Ids, BatchSize, OrgInfo, Index, NameIdDict) when is_list(Ids)
                     Index :: index(),
                     NameIdDict :: dict()) -> {ok, list()} | {{error, list()}, list()}.
 index_a_batch(Ctx, BatchOfIds, {OrgId, OrgName}, Index, NameIdDict) ->
-    lager:debug("reindexing[~s] indexing batch of ~p ~ss", [OrgName, length(BatchOfIds), Index]),
+    ?LOG_DEBUG("reindexing[~s] indexing batch of ~p ~ss", [OrgName, length(BatchOfIds), Index]),
     SerializedObjects = chef_db:bulk_get(Ctx, OrgName, chef_object_type(Index), BatchOfIds),
     send_to_index_queue(OrgName, OrgId, Index, SerializedObjects, NameIdDict).
 
@@ -265,9 +267,9 @@ log_failures(_OrgName, []) ->
 log_failures(OrgName, [Failure | Rest]) ->
     case Failure of
         {{TypeName, Id, _DbName}, Reason} ->
-            lager:error("reindexing[~s] item ~s[~s] failed to reindex: ~s", [OrgName, TypeName, Id, Reason]);
+            ?LOG_ERROR("reindexing[~s] item ~s[~s] failed to reindex: ~s", [OrgName, TypeName, Id, Reason]);
         Other ->
-            lager:error("reindexing[~s] unexpected reindexing failure: ~w", [OrgName, Other])
+            ?LOG_ERROR("reindexing[~s] unexpected reindexing failure: ~w", [OrgName, Other])
     end,
     log_failures(OrgName, Rest).
 
@@ -307,7 +309,7 @@ stub_records_for_indexing([SO | Rest], NameKey, NameIdDict, Index, OrgId, Existi
                                  StubRec = stub_record(Index, OrgId, ObjectId, ItemName, PreliminaryEJson),
                                  {[{StubRec, PreliminaryEJson} | ExistingAcc], MissingAcc};
                              error ->
-                                 lager:warning("skipping: no id found for name ~p", [ItemName]),
+                                 ?LOG_WARNING("skipping: no id found for name ~p", [ItemName]),
                                  {ExistingAcc, [{Index, ItemName} | MissingAcc]}
                          end,
     stub_records_for_indexing(Rest, NameKey, NameIdDict, Index, OrgId, NewEAcc, NewMAcc).

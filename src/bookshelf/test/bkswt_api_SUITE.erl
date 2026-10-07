@@ -111,11 +111,6 @@ start_bookshelf() ->
     %% it from the ?APPS list so that we don't start/stop on each test.
     application:start(sasl),
 
-    %% we start lager since we depend on it for the release. However,
-    %% we want to keep error_logger on its own so that we continue to
-    %% see messages in common test output.
-    lager_common_test_backend:bounce(error),
-
     case application:ensure_all_started(bookshelf) of
         {ok, Apps} ->
             {ok, Apps};

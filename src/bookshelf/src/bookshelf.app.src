@@ -34,7 +34,6 @@
                     erlsom,
                     mini_s3,
                     inets,
-                    lager,
                     envy,
                     opscoderl_wm,
                     iso8601,

@@ -5,6 +5,8 @@
 
 -module(oc_chef_wm_sup).
 
+-include_lib("kernel/include/logger.hrl").
+
 -behaviour(supervisor).
 
 %% External exports
@@ -76,7 +78,7 @@ load_ibrowse_config() ->
     %% FIXME: location of the ibrowse.config should be itself configurable. Also need to
     %% revisit what's in that config to ensure it is as useful as possible.
     ConfigFile = filename:absname(filename:join(["etc", "ibrowse", "ibrowse.config"])),
-    lager:info("Loading ibrowse configuration from ~s~n", [ConfigFile]),
+    ?LOG_INFO("Loading ibrowse configuration from ~s~n", [ConfigFile]),
     ok = ibrowse:rescan_config(ConfigFile),
     ok.
 
