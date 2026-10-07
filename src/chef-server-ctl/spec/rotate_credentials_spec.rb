@@ -169,6 +169,25 @@ describe "chef-server-ctl rotate credentials" do
     end
   end
 
+  context "restore_secrets_file" do
+    it "copies the backup back over the live secrets file" do
+      allow(subject.ctl).to receive(:restore_secrets_file).and_call_original
+      allow(subject.ctl)
+        .to receive(:secrets_file_path)
+        .and_return("/etc/opscode/private-chef-secrets.json")
+
+      # The restore must copy backup -> live secrets file. Copying in the
+      # other direction would overwrite the only good backup with the
+      # (possibly broken) current secrets, making a failed rotation
+      # unrecoverable.
+      expect(FileUtils)
+        .to receive(:cp)
+        .with("/tmp/backup.json", "/etc/opscode/private-chef-secrets.json")
+
+      subject.ctl.send(:restore_secrets_file, "/tmp/backup.json")
+    end
+  end
+
   context "require_credential_rotation_pre_hook" do
     let(:credential_rotation_required_file) do
       "/tmp/var/opt/opscode/credential_rotation_required"
