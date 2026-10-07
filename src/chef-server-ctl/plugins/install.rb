@@ -7,7 +7,7 @@ KNOWN_ADDONS = %w{
   opscode-reporting
 }
 
-add_command_under_category "install", "general", "Install addon package by name, with optional --path parameter indicating directory containing packages.", 2 do
+add_command_under_category "install", "general", "Install addon package by name. Requires --license-id. Optional --path parameter indicating directory containing packages.", 2 do
   package = ARGV[1]
 
   # Rewrite deprecated package name to current package name if it
@@ -35,6 +35,14 @@ add_command_under_category "install", "general", "Install addon package by name,
     install_path = ARGV[ARGV.index(path_arg) + 1]
   end
 
+  license_arg = "--license-id"
+  if ARGV.include?(license_arg)
+    license_id = ARGV[ARGV.index(license_arg) + 1]
+  else
+    STDERR.puts "You must supply a license ID via --license-id."
+    exit 1
+  end
+
   if package.nil?
     STDERR.puts "You must supply an addon name. Valid names include: #{KNOWN_ADDONS.join(", ")}."
     exit 1
@@ -49,6 +57,7 @@ add_command_under_category "install", "general", "Install addon package by name,
         "install" => true,
         "packages" => [package],
         "path" => install_path,
+        "license_id" => license_id,
       } } }
   File.open(attributes_path, "w") do |file|
     file.write json_src.to_json
