@@ -1,0 +1,203 @@
+{
+  "product": "chef-server",
+  "display_name": "Chef Infra Server",
+  "github_repo": "chef/chef-server",
+  "version_file": "VERSION",
+  "tag_format": "{version}",
+  "changelog": {
+    "path": "CHANGELOG.md",
+    "format": "expeditor"
+  },
+  "jira": {
+    "base_url": "",
+    "key_pattern": "CHEF-\\d+"
+  },
+  "docs": {
+    "release_notes_repo": "chef/chef-web-docs",
+    "release_notes_path": "content/release_notes/server.md",
+    "heading_format": "## {display_name} {version}"
+  },
+  "security": {
+    "grype_dir": "dev-docs/security/grype",
+    "sbom_dir": "dev-docs/security/sbom",
+    "scan_targets": [
+      {
+        "name": "omnibus",
+        "description": "Installed omnibus package tree (most complete view of what ships).",
+        "type": "dir",
+        "default": "/opt/opscode"
+      },
+      {
+        "name": "source",
+        "description": "Repository lockfiles (Gemfile.lock, rebar.lock). Works without a build.",
+        "type": "dir",
+        "default": "."
+      }
+    ]
+  },
+  "classification": {
+    "exclude_labels": [
+      "Aspect: Documentation",
+      "Expeditor: Skip Changelog",
+      "Expeditor: Skip All"
+    ],
+    "exclude_title_patterns": [
+      "^Bump version to ",
+      "(?i)^updated? NOTICE",
+      "(?i)^omnibus sync\\.?$",
+      "(?i)deprecation message to all docs",
+      "(?i)\\[verify pipeline fix\\]",
+      "(?i)^update(d)? documentation\\b"
+    ],
+    "exclude_path_globs_if_only": [
+      "docs-chef-io/**",
+      "dev-docs/**",
+      ".expeditor/**",
+      ".github/**",
+      "NOTICE.TXT",
+      "*.md"
+    ],
+    "label_sections": {
+      "Type: Breaking Change": "upgrade_notes",
+      "Type: Enhancement": "improvements",
+      "Type: Feature": "features",
+      "Type: Bug": "bug_fixes",
+      "Type: Security": "security",
+      "Aspect: Security": "security",
+      "dependencies": "dependency"
+    },
+    "jira_type_sections": {
+      "Epic": "features",
+      "Story": "features",
+      "Feature": "features",
+      "Improvement": "improvements",
+      "Task": "improvements",
+      "Bug": "bug_fixes",
+      "Defect": "bug_fixes",
+      "Vulnerability": "security",
+      "Security": "security"
+    },
+    "title_keyword_sections": {
+      "security": "(?i)\\b(CVE-\\d{4}-\\d+|vulnerab|security|GHSA-)",
+      "bug_fixes": "(?i)\\b(fix(es|ed)?|bug|crash|regression|incorrect)\\b",
+      "dependency": "(?i)(\\b(bump|upgrade|update[sd]?|floor|pin)\\b.*\\b(gem|version|to \\d|>=|from \\d)|\\bsync\\b.*\\b(omnibus|submodule)\\b|\\b(openresty|postgres(ql)?|pg \\d+|opensearch|erlang|otp|ruby|rails|rack|rexml|net-imap|valkey|keydb|openssl|nokogiri|openjre|openjdk|haproxy)\\b)",
+      "features": "(?i)\\b(add(s|ed)? support|new feature|introduc)"
+    },
+    "dependency_files": [
+      "omnibus_overrides.rb",
+      "omnibus",
+      "**/Gemfile",
+      "**/Gemfile.lock",
+      "**/rebar.config",
+      "**/rebar.lock",
+      "**/habitat/plan.sh"
+    ]
+  },
+  "components": [
+    {"name": "OpenResty", "tier": "A", "advisories": "https://openresty.org/en/changelog.html",
+     "sources": [
+       {"type": "version_manifest", "keys": ["openresty"]},
+       {"type": "regex", "file": "src/openresty-noroot/habitat/plan.sh", "pattern": "^pkg_version=\"?([^\"\\s]+)"}
+     ]},
+    {"name": "PostgreSQL (bundled server)", "tier": "A", "advisories": "https://www.postgresql.org/support/security/",
+     "sources": [{"type": "version_manifest", "keys": ["postgresql13", "postgresql13-tuxcare", "postgresql"]}]},
+    {"name": "PostgreSQL client", "tier": "A", "advisories": "https://www.postgresql.org/support/security/",
+     "sources": [
+       {"type": "version_manifest", "keys": ["postgresql14-client", "postgresql14"]},
+       {"type": "regex", "file": "src/oc_erchef/habitat/plan.sh", "pattern": "core/postgresql(\\d+)-client"}
+     ]},
+    {"name": "OpenSearch", "tier": "A", "advisories": "https://github.com/opensearch-project/OpenSearch/security/advisories",
+     "sources": [{"type": "version_manifest", "keys": ["opensearch", "opensearch-tuxcare"]}]},
+    {"name": "OpenJRE", "tier": "A", "advisories": "https://www.oracle.com/security-alerts/",
+     "sources": [{"type": "version_manifest", "keys": ["server-open-jre", "openjdk", "openjre"]}]},
+    {"name": "Valkey", "tier": "A", "advisories": "https://github.com/valkey-io/valkey/security/advisories",
+     "sources": [
+       {"type": "version_manifest", "keys": ["valkey", "keydb"]}
+     ]},
+    {"name": "HAProxy", "tier": "A", "advisories": "https://www.haproxy.org/",
+     "sources": [{"type": "version_manifest", "keys": ["haproxy"]}]},
+
+    {"name": "Erlang/OTP", "tier": "B", "advisories": "https://github.com/erlang/otp/security/advisories",
+     "sources": [
+       {"type": "version_manifest", "keys": ["erlang"]},
+       {"type": "regex", "file": "src/oc_erchef/rebar.config", "pattern": "\\{require_otp_vsn,\\s*\"([^\"]+)\"\\}"}
+     ]},
+    {"name": "Ruby", "tier": "B", "advisories": "https://www.ruby-lang.org/en/security/",
+     "sources": [
+       {"type": "version_manifest", "keys": ["ruby"]},
+       {"type": "regex", "file": "omnibus_overrides.rb", "pattern": "^override :ruby, version: \"([^\"]+)\""}
+     ]},
+    {"name": "OpenSSL (FIPS provider)", "tier": "B", "advisories": "https://openssl-library.org/news/vulnerabilities/",
+     "sources": [
+       {"type": "version_manifest", "keys": ["openssl"]},
+       {"type": "regex", "file": "omnibus_overrides.rb", "pattern": "^override :openssl, fips_version: \"([^\"]+)\""}
+     ]},
+    {"name": "Node.js", "tier": "B", "advisories": "https://nodejs.org/en/blog/vulnerability",
+     "sources": [{"type": "version_manifest", "keys": ["nodejs", "nodejs-binary"]}]},
+    {"name": "Sqitch", "tier": "B",
+     "sources": [
+       {"type": "version_manifest", "keys": ["sqitch"]},
+       {"type": "regex", "file": "omnibus_overrides.rb", "pattern": "^override :sqitch, version: \"([^\"]+)\""}
+     ]},
+    {"name": "Perl", "tier": "B",
+     "sources": [
+       {"type": "version_manifest", "keys": ["perl"]},
+       {"type": "regex", "file": "omnibus_overrides.rb", "pattern": "^override :perl, version: \"([^\"]+)\""}
+     ]},
+
+    {"name": "webmachine", "tier": "C", "sources": [{"type": "rebar_lock", "files": ["src/oc_erchef/rebar.lock", "src/bookshelf/rebar.lock", "src/oc_bifrost/rebar.lock"], "dep": "webmachine"}]},
+    {"name": "mochiweb", "tier": "C", "sources": [{"type": "rebar_lock", "files": ["src/oc_erchef/rebar.lock", "src/bookshelf/rebar.lock", "src/oc_bifrost/rebar.lock"], "dep": "mochiweb"}]},
+    {"name": "epgsql", "tier": "C", "sources": [{"type": "rebar_lock", "files": ["src/oc_erchef/rebar.lock", "src/bookshelf/rebar.lock", "src/oc_bifrost/rebar.lock"], "dep": "epgsql"}]},
+    {"name": "sqerl", "tier": "C", "sources": [{"type": "rebar_lock", "files": ["src/oc_erchef/rebar.lock", "src/bookshelf/rebar.lock", "src/oc_bifrost/rebar.lock"], "dep": "sqerl"}]},
+    {"name": "pooler", "tier": "C", "sources": [{"type": "rebar_lock", "files": ["src/oc_erchef/rebar.lock", "src/bookshelf/rebar.lock", "src/oc_bifrost/rebar.lock"], "dep": "pooler"}]},
+    {"name": "ibrowse", "tier": "C", "sources": [{"type": "rebar_lock", "files": ["src/oc_erchef/rebar.lock", "src/oc_bifrost/rebar.lock"], "dep": "ibrowse"}]},
+    {"name": "lhttpc", "tier": "C", "sources": [{"type": "rebar_lock", "files": ["src/oc_erchef/rebar.lock", "src/bookshelf/rebar.lock"], "dep": "lhttpc"}]},
+    {"name": "jiffy", "tier": "C", "sources": [{"type": "rebar_lock", "files": ["src/oc_erchef/rebar.lock", "src/bookshelf/rebar.lock", "src/oc_bifrost/rebar.lock"], "dep": "jiffy"}]},
+    {"name": "erlcloud", "tier": "C", "sources": [{"type": "rebar_lock", "files": ["src/oc_erchef/rebar.lock", "src/bookshelf/rebar.lock"], "dep": "erlcloud"}]},
+    {"name": "mini_s3", "tier": "C", "sources": [{"type": "rebar_lock", "files": ["src/oc_erchef/rebar.lock"], "dep": "mini_s3"}]},
+    {"name": "chef_authn", "tier": "C", "sources": [{"type": "rebar_lock", "files": ["src/oc_erchef/rebar.lock", "src/bookshelf/rebar.lock", "src/oc_bifrost/rebar.lock"], "dep": "chef_authn"}]},
+    {"name": "bcrypt", "tier": "C", "sources": [{"type": "rebar_lock", "files": ["src/oc_erchef/rebar.lock"], "dep": "bcrypt"}]},
+    {"name": "lager", "tier": "C", "sources": [{"type": "rebar_lock", "files": ["src/oc_erchef/rebar.lock", "src/bookshelf/rebar.lock", "src/oc_bifrost/rebar.lock"], "dep": "lager"}]},
+    {"name": "prometheus", "tier": "C", "sources": [{"type": "rebar_lock", "files": ["src/oc_erchef/rebar.lock", "src/oc_bifrost/rebar.lock"], "dep": "prometheus"}]},
+
+    {"name": "Rails", "tier": "D", "sources": [{"type": "gemfile_lock", "files": ["src/oc-id/Gemfile.lock"], "gem": "rails"}]},
+    {"name": "Rack", "tier": "D", "sources": [{"type": "gemfile_lock", "files": ["src/oc-id/Gemfile.lock", "src/chef-server-ctl/Gemfile.lock"], "gem": "rack"}]},
+    {"name": "Doorkeeper", "tier": "D", "sources": [{"type": "gemfile_lock", "files": ["src/oc-id/Gemfile.lock"], "gem": "doorkeeper"}]},
+    {"name": "OmniAuth", "tier": "D", "sources": [{"type": "gemfile_lock", "files": ["src/oc-id/Gemfile.lock"], "gem": "omniauth"}]},
+    {"name": "JWT", "tier": "D", "sources": [{"type": "gemfile_lock", "files": ["src/oc-id/Gemfile.lock", "src/chef-server-ctl/Gemfile.lock"], "gem": "jwt"}]},
+    {"name": "Nokogiri", "tier": "D", "sources": [
+       {"type": "regex", "file": "omnibus_overrides.rb", "pattern": "^override :nokogiri, version: \"([^\"]+)\""},
+       {"type": "gemfile_lock", "files": ["src/oc-id/Gemfile.lock", "src/chef-server-ctl/Gemfile.lock"], "gem": "nokogiri"}
+     ]},
+    {"name": "pg (Ruby)", "tier": "D", "sources": [{"type": "gemfile_lock", "files": ["src/oc-id/Gemfile.lock", "src/chef-server-ctl/Gemfile.lock"], "gem": "pg"}]},
+    {"name": "Sprockets", "tier": "D", "sources": [{"type": "gemfile_lock", "files": ["src/oc-id/Gemfile.lock"], "gem": "sprockets"}]},
+    {"name": "Chef Infra Client (gem)", "tier": "D", "sources": [{"type": "gemfile_lock", "files": ["src/chef-server-ctl/Gemfile.lock", "src/oc-id/Gemfile.lock"], "gem": "chef"}]},
+    {"name": "knife", "tier": "D", "sources": [{"type": "gemfile_lock", "files": ["src/chef-server-ctl/Gemfile.lock"], "gem": "knife"}]},
+    {"name": "knife-ec-backup", "tier": "D", "sources": [{"type": "gemfile_lock", "files": ["src/chef-server-ctl/Gemfile.lock"], "gem": "knife-ec-backup"}]},
+    {"name": "Ohai", "tier": "D", "sources": [
+       {"type": "regex", "file": "omnibus_overrides.rb", "pattern": "^override :ohai, version: \"v?([^\"]+)\""},
+       {"type": "gemfile_lock", "files": ["src/chef-server-ctl/Gemfile.lock"], "gem": "ohai"}
+     ]},
+    {"name": "chef-zero", "tier": "D", "sources": [{"type": "gemfile_lock", "files": ["src/chef-server-ctl/Gemfile.lock", "src/oc-id/Gemfile.lock"], "gem": "chef-zero"}]},
+    {"name": "Sequel", "tier": "D", "sources": [{"type": "gemfile_lock", "files": ["src/chef-server-ctl/Gemfile.lock"], "gem": "sequel"}]},
+    {"name": "redis (Ruby client)", "tier": "D", "sources": [{"type": "gemfile_lock", "files": ["src/chef-server-ctl/Gemfile.lock"], "gem": "redis"}]},
+    {"name": "net-ssh", "tier": "D", "sources": [{"type": "gemfile_lock", "files": ["src/chef-server-ctl/Gemfile.lock", "src/oc-id/Gemfile.lock"], "gem": "net-ssh"}]},
+    {"name": "mixlib-authentication", "tier": "D", "sources": [{"type": "gemfile_lock", "files": ["src/chef-server-ctl/Gemfile.lock", "src/oc-id/Gemfile.lock"], "gem": "mixlib-authentication"}]},
+    {"name": "veil", "tier": "D", "sources": [{"type": "gemfile_lock", "files": ["src/chef-server-ctl/Gemfile.lock", "src/oc-id/Gemfile.lock"], "gem": "veil"}]},
+    {"name": "aws-sdk-core", "tier": "D", "sources": [{"type": "gemfile_lock", "files": ["src/chef-server-ctl/Gemfile.lock", "src/oc-id/Gemfile.lock"], "gem": "aws-sdk-core"}]},
+    {"name": "REXML", "tier": "D", "sources": [{"type": "gemfile_lock", "files": ["src/oc-id/Gemfile.lock", "src/chef-server-ctl/Gemfile.lock"], "gem": "rexml"}]},
+    {"name": "net-imap", "tier": "D", "sources": [{"type": "gemfile_lock", "files": ["src/oc-id/Gemfile.lock", "src/chef-server-ctl/Gemfile.lock"], "gem": "net-imap"}]},
+    {"name": "addressable", "tier": "D", "sources": [{"type": "gemfile_lock", "files": ["src/oc-id/Gemfile.lock", "src/chef-server-ctl/Gemfile.lock"], "gem": "addressable"}]},
+    {"name": "faraday", "tier": "D", "sources": [{"type": "gemfile_lock", "files": ["src/oc-id/Gemfile.lock", "src/chef-server-ctl/Gemfile.lock"], "gem": "faraday"}]},
+    {"name": "concurrent-ruby", "tier": "D", "sources": [{"type": "gemfile_lock", "files": ["src/oc-id/Gemfile.lock", "src/chef-server-ctl/Gemfile.lock"], "gem": "concurrent-ruby"}]},
+    {"name": "ffi", "tier": "D", "sources": [{"type": "gemfile_lock", "files": ["src/oc-id/Gemfile.lock", "src/chef-server-ctl/Gemfile.lock"], "gem": "ffi"}]},
+    {"name": "json (Ruby)", "tier": "D", "sources": [{"type": "gemfile_lock", "files": ["src/oc-id/Gemfile.lock", "src/chef-server-ctl/Gemfile.lock"], "gem": "json"}]},
+    {"name": "uri", "tier": "D", "sources": [{"type": "gemfile_lock", "files": ["src/oc-id/Gemfile.lock", "src/chef-server-ctl/Gemfile.lock"], "gem": "uri"}]}
+  ],
+  "tiers": {
+    "A": {"title": "Bundled services", "always_list": true},
+    "B": {"title": "Runtimes and platform libraries", "always_list": true},
+    "C": {"title": "Erlang frameworks and libraries", "always_list": false},
+    "D": {"title": "Ruby frameworks and gems", "always_list": false}
+  }
+}
