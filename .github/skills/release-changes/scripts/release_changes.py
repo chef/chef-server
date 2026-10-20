@@ -34,6 +34,8 @@ PR_LINE = re.compile(
 ROLLUP_LINE = re.compile(r"^(?P<line>- .+?) <!-- (?P<version>[\w.\-]+) -->\s*$", re.M)
 SQUASH_SUBJECT = re.compile(r"^(?P<title>.+?) \(#(?P<number>\d+)\)$")
 CVE = re.compile(r"\b(CVE-\d{4}-\d{4,}|GHSA-[\w]{4}-[\w]{4}-[\w]{4})\b", re.I)
+RELEASE_NOTE_SECTION = re.compile(r"^#{2,4}\s*Release Notes?\s*$(?P<body>.*?)(?=^#{1,4}\s|\Z)", re.M | re.S | re.I)
+TEMPLATE_PLACEHOLDER = re.compile(r"^\[.*\]$", re.S)
 HTML_ENTITIES = {"&gt;": ">", "&lt;": "<", "&amp;": "&", "&#39;": "'", "&quot;": '"'}
 
 
@@ -113,6 +115,19 @@ def enrich_from_github(prs, repo):
         pr["branch"] = data.get("headRefName")
 
 
+def extract_release_note(body):
+    """Return the author's "### Release Note" text, "" when it says none, or None if absent/unfilled."""
+    m = RELEASE_NOTE_SECTION.search(body or "")
+    if not m:
+        return None
+    text = re.sub(r"<!--.*?-->", "", m.group("body"), flags=re.S).strip()
+    if not text or TEMPLATE_PLACEHOLDER.match(text):
+        return None
+    if text.lower().rstrip(".") in ("none", "n/a", "na", "no"):
+        return ""
+    return " ".join(text.split())
+
+
 def classify(pr, cfg, jira):
     c = cfg["classification"]
     labels = set(pr.get("labels", []))
@@ -121,6 +136,8 @@ def classify(pr, cfg, jira):
 
     if labels & set(c.get("exclude_labels", [])):
         return "excluded", "label"
+    if pr.get("release_note") == "":
+        return "excluded", "PR release note says none"
     for pat in c.get("exclude_title_patterns", []):
         if re.search(pat, title):
             return "excluded", f"title matches {pat}"
@@ -185,6 +202,9 @@ def main():
         haystack = " ".join([pr["title"], pr.get("branch") or "", pr.get("body") or ""])
         pr["jira"] = sorted(set(key_re.findall(haystack)), key=relnotes.version_key)
         pr["cves"] = sorted({m.upper() for m in CVE.findall(haystack)})
+        note = extract_release_note(pr.get("body"))
+        if note is not None:
+            pr["release_note"] = note
         pr["section"], pr["reason"] = classify(pr, cfg, jira)
 
     sections = {}

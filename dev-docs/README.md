@@ -8,6 +8,7 @@ The goal of these documents is to provide overviews of how various systems work 
  * [FIPS](FIPS.md) - FIPS-mode support
  * [Development Environment Setup and Configuration](../dev/README.md)
  * [Bookshelf](BOOKSHELF.md)
+ * [Security evidence (grype scans, SBOMs)](security/README.md) and [release notes automation](../.github/release-notes/README.md)
 
 
 

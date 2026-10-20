@@ -1,0 +1,2 @@
+# Raw grype output is large and not normalized; never commit it.
+*.raw.json

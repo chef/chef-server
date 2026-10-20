@@ -127,7 +127,7 @@ def render(cfg, changes, inventory, inv_diff, cve_diffs, extras, notes, release_
     for pr in prs:
         override = pr_notes.get(str(pr["number"]), {})
         section = override.get("section") or pr["section"]
-        text = (override.get("text") or clean_title(pr["title"])).rstrip(". ")
+        text = (override.get("text") or pr.get("release_note") or clean_title(pr["title"])).rstrip(". ")
         bullet = f"- {text} ({ref_links(pr, cfg)})"
         if section in buckets:
             buckets[section].append(bullet)
@@ -199,7 +199,7 @@ def render(cfg, changes, inventory, inv_diff, cve_diffs, extras, notes, release_
         out += ["Other dependency updates:" if changed else "Dependency updates:", ""]
         for p in unmatched:
             override = pr_notes.get(str(p["number"]), {})
-            text = (override.get("text") or clean_title(p["title"])).rstrip(". ")
+            text = (override.get("text") or p.get("release_note") or clean_title(p["title"])).rstrip(". ")
             out.append(f"- {text} ({ref_links(p, cfg)})")
         out.append("")
     elif not changed:

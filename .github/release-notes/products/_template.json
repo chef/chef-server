@@ -1,0 +1,67 @@
+{
+  "_comment": "Copy to <product>.json and fill in. See ../README.md. Keys starting with _ are ignored.",
+  "product": "my-product",
+  "display_name": "Chef My Product",
+  "github_repo": "chef/my-product",
+  "version_file": "VERSION",
+  "tag_format": "v{version}",
+  "changelog": {
+    "path": "CHANGELOG.md",
+    "format": "expeditor"
+  },
+  "jira": {
+    "base_url": "",
+    "key_pattern": "CHEF-\\d+"
+  },
+  "docs": {
+    "release_notes_repo": "chef/chef-web-docs",
+    "release_notes_path": "content/release_notes/my_product.md",
+    "heading_format": "## {display_name} {version}"
+  },
+  "security": {
+    "grype_dir": "dev-docs/security/grype",
+    "sbom_dir": "dev-docs/security/sbom",
+    "scan_targets": [
+      {"name": "package", "description": "Installed package tree", "type": "dir", "default": "/opt/my-product"},
+      {"name": "source", "description": "Repository lockfiles", "type": "dir", "default": "."}
+    ]
+  },
+  "classification": {
+    "exclude_labels": ["Aspect: Documentation", "Expeditor: Skip Changelog", "Expeditor: Skip All"],
+    "exclude_title_patterns": ["^Bump version to "],
+    "exclude_path_globs_if_only": [".github/**", ".expeditor/**", "*.md"],
+    "label_sections": {
+      "Type: Breaking Change": "upgrade_notes",
+      "Type: Enhancement": "improvements",
+      "Type: Feature": "features",
+      "Type: Bug": "bug_fixes",
+      "Type: Security": "security",
+      "dependencies": "dependency"
+    },
+    "jira_type_sections": {
+      "Epic": "features", "Story": "features", "Improvement": "improvements", "Task": "improvements",
+      "Bug": "bug_fixes", "Vulnerability": "security"
+    },
+    "title_keyword_sections": {
+      "security": "(?i)\\b(CVE-\\d{4}-\\d+|vulnerab|security|GHSA-)",
+      "bug_fixes": "(?i)\\b(fix(es|ed)?|bug|crash|regression)\\b",
+      "dependency": "(?i)\\b(bump|upgrade|update[sd]?)\\b.*\\b(to \\d|from \\d|version)",
+      "features": "(?i)\\b(add(s|ed)? support|new feature|introduc)"
+    },
+    "dependency_files": ["**/Gemfile.lock", "**/go.sum", "**/package-lock.json", "**/habitat/plan.sh"]
+  },
+  "components": [
+    {"name": "Example service", "tier": "A",
+     "sources": [{"type": "version_manifest", "keys": ["example"]}]},
+    {"name": "Ruby", "tier": "B",
+     "sources": [{"type": "regex", "file": "omnibus_overrides.rb", "pattern": "^override :ruby, version: \"([^\"]+)\""}]},
+    {"name": "Rack", "tier": "D",
+     "sources": [{"type": "gemfile_lock", "files": ["Gemfile.lock"], "gem": "rack"}]}
+  ],
+  "tiers": {
+    "A": {"title": "Bundled services", "always_list": true},
+    "B": {"title": "Runtimes and platform libraries", "always_list": true},
+    "C": {"title": "Frameworks and libraries", "always_list": false},
+    "D": {"title": "Language packages", "always_list": false}
+  }
+}

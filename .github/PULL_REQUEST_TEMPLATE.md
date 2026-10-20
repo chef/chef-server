@@ -7,6 +7,12 @@
 [List any existing issues this PR resolves, or any Discourse or
 StackOverflow discussions that are relevant]
 
+### Release Note
+
+[One customer-facing sentence for the release notes, in past tense (for example
+"Fixed `chef-server-ctl reconfigure` failing when ..."), or "none" if this change
+does not ship to customers. List any CVEs this change resolves.]
+
 ### Check List
 
 - [ ] New functionality includes tests
