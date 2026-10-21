@@ -92,7 +92,7 @@ resolve_safe_version = lambda do |const_name|
 end
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
-gem 'rails', '7.2.3.1'
+gem 'rails', '7.2.3.2'
 gem "rest-client", git: "https://github.com/chef/rest-client", branch: "jfm/ucrt_update1"
 gem 'chef', '~> 18.10.17'
 gem 'jbuilder', '~> 2.11'
