@@ -1,14 +1,14 @@
 GIT
   remote: https://github.com/chef/chef-zero.git
-  revision: aa4c1d5d917a6e521312116da574534da1d61e9e
+  revision: 152addcc31acc0837b57872099b8111612c05013
   branch: main
   specs:
-    chef-zero (15.1.10)
+    chef-zero (15.1.11)
       ffi-yajl (>= 2.2, < 4.0)
       hashie (>= 2.0, < 6.0)
       mixlib-log (>= 2.0, < 4.0)
-      rack (~> 3.1, >= 3.1.16)
-      rackup (~> 2.2, >= 2.2.1)
+      rack (~> 3.2, >= 3.2.6)
+      rackup (~> 2.3, >= 2.3.1)
       uuidtools (>= 2.1, < 4.0)
       webrick
 
@@ -45,12 +45,12 @@ PATH
 GEM
   remote: https://rubygems.org/
   specs:
-    activesupport (7.2.3.1)
+    activesupport (7.2.4)
       base64
       benchmark (>= 0.3)
       bigdecimal
       concurrent-ruby (~> 1.0, >= 1.3.1)
-      connection_pool (>= 2.2.5)
+      connection_pool (>= 2.2.5, < 3)
       drb
       i18n (>= 1.6, < 2)
       logger (>= 1.4.2)
@@ -61,38 +61,39 @@ GEM
       public_suffix (>= 2.0.2, < 8.0)
     base64 (0.3.0)
     benchmark (0.5.0)
-    bigdecimal (4.1.2)
+    bigdecimal (4.1.3)
     binding_of_caller (2.0.0)
       debug_inspector (>= 1.2.0)
-    byebug (11.1.3)
-    chef-utils (19.2.110)
-      concurrent-ruby
+    byebug (13.0.0)
+      reline (>= 0.6.0)
+    chef-utils (19.4.46)
+      concurrent-ruby (>= 1.3.7)
     coderay (1.1.3)
     concurrent-ruby (1.3.8)
     connection_pool (2.5.5)
     debug_inspector (1.2.0)
     diff-lcs (1.6.2)
-    domain_name (0.6.20240107)
+    domain_name (0.7.20261007)
     drb (2.2.3)
     erubis (2.7.0)
     ffi (1.17.4-x86_64-linux-gnu)
-    ffi-yajl (3.0.0)
-      libyajl2 (>= 1.2)
-    hashie (5.1.0)
+    ffi-yajl (3.0.1)
+      libyajl2 (>= 2.1)
+    hashie (5.2.0)
       logger
     http-accept (2.1.1)
     http-cookie (1.1.6)
       domain_name (~> 0.5)
-    i18n (1.14.8)
+    i18n (1.15.2)
       concurrent-ruby (~> 1.0)
-    io-console (0.8.2)
+    io-console (0.9.4)
     libyajl2 (2.1.0)
     logger (1.7.0)
     method_source (1.1.0)
     mime-types (3.7.0)
       logger
       mime-types-data (~> 3.2025, >= 3.2025.0507)
-    mime-types-data (3.2026.0414)
+    mime-types-data (3.2026.1020)
     minitest (5.27.0)
     mixlib-authentication (3.0.10)
     mixlib-config (3.0.27)
@@ -103,22 +104,23 @@ GEM
       chef-utils
     net-http-spy (0.2.1)
     netrc (0.11.0)
-    pry (0.16.0)
+    pry (0.16.1)
       coderay (~> 1.1)
       method_source (~> 1.0)
       reline (>= 0.6.0)
-    pry-byebug (3.8.0)
-      byebug (~> 11.0)
-      pry (~> 0.10)
+    pry-byebug (3.12.0)
+      byebug (~> 13.0)
+      pry (>= 0.13, < 0.17)
     pry-stack_explorer (0.6.3)
       binding_of_caller (>= 1.0)
       pry (~> 0.13)
-    public_suffix (6.0.2)
-    rack (3.2.6)
+    public_suffix (7.0.5)
+    racc (1.8.1)
+    rack (3.2.7)
     rackup (2.3.1)
       rack (>= 3)
     rake (13.4.2)
-    reline (0.6.3)
+    reline (0.7.0)
       io-console (~> 0.5)
     rspec (3.13.2)
       rspec-core (~> 3.13.0)
@@ -135,10 +137,11 @@ GEM
     rspec-rerun (1.1.0)
       rspec (~> 3.0)
     rspec-support (3.13.7)
-    rspec_junit_formatter (0.6.0)
+    rspec_junit_formatter (0.6.2)
       rspec-core (>= 2, < 4, != 2.12.0)
     securerandom (0.4.1)
-    tomlrb (2.0.4)
+    tomlrb (2.0.5)
+      racc (~> 1.4)
     tzinfo (2.0.6)
       concurrent-ruby (~> 1.0)
     uuidtools (2.2.0)
@@ -159,4 +162,4 @@ DEPENDENCIES
   rest-client!
 
 BUNDLED WITH
-   2.3.27
+   2.4.19
