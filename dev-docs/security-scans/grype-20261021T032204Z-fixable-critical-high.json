@@ -1,0 +1,222 @@
+{
+  "scanFile": "grype-20261021T032204Z.json",
+  "commit": "c38d169f0",
+  "branch": "bwl/initial-agents-reports",
+  "grypeVersion": "0.116.0",
+  "dbBuilt": "2026-10-20T06:29:49Z",
+  "packages": [
+    {
+      "package": "activestorage",
+      "ecosystem": "gem",
+      "language": "ruby",
+      "severity": "Critical",
+      "installedVersions": [
+        {
+          "version": "7.2.3.1",
+          "locations": [
+            "src/oc-id/Gemfile.lock"
+          ]
+        }
+      ],
+      "components": [
+        "src"
+      ],
+      "fixVersions": [
+        "7.2.3.2"
+      ],
+      "vulnerabilities": [
+        {
+          "id": "GHSA-xr9x-r78c-5hrm",
+          "severity": "Critical",
+          "cves": [
+            "CVE-2026-66066"
+          ],
+          "fixVersions": [
+            "7.2.3.2"
+          ],
+          "maxCvss": 9.5,
+          "description": "Active Storage has possible arbitrary file read and remote code execution in Active Storage variant processing",
+          "dataSource": "https://github.com/advisories/GHSA-xr9x-r78c-5hrm",
+          "affectsVersions": [
+            "7.2.3.1"
+          ],
+          "advisoryUrls": [
+            "https://github.com/advisories/GHSA-xr9x-r78c-5hrm",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-66066"
+          ]
+        }
+      ]
+    },
+    {
+      "package": "addressable",
+      "ecosystem": "gem",
+      "language": "ruby",
+      "severity": "High",
+      "installedVersions": [
+        {
+          "version": "2.8.7",
+          "locations": [
+            "omnibus/Gemfile.lock"
+          ]
+        }
+      ],
+      "components": [
+        "omnibus"
+      ],
+      "fixVersions": [
+        "2.9.0"
+      ],
+      "vulnerabilities": [
+        {
+          "id": "GHSA-h27x-rffw-24p4",
+          "severity": "High",
+          "cves": [
+            "CVE-2026-35611"
+          ],
+          "fixVersions": [
+            "2.9.0"
+          ],
+          "maxCvss": 7.5,
+          "description": "Addressable has a Regular Expression Denial of Service in Addressable templates",
+          "dataSource": "https://github.com/advisories/GHSA-h27x-rffw-24p4",
+          "affectsVersions": [
+            "2.8.7"
+          ],
+          "advisoryUrls": [
+            "https://github.com/advisories/GHSA-h27x-rffw-24p4",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-35611"
+          ]
+        }
+      ]
+    },
+    {
+      "package": "nokogiri",
+      "ecosystem": "gem",
+      "language": "ruby",
+      "severity": "High",
+      "installedVersions": [
+        {
+          "version": "1.18.9-x86_64-linux-gnu",
+          "locations": [
+            "src/oc-id/Gemfile.lock"
+          ]
+        }
+      ],
+      "components": [
+        "src"
+      ],
+      "fixVersions": [
+        "1.19.3"
+      ],
+      "vulnerabilities": [
+        {
+          "id": "GHSA-c4rq-3m3g-8wgx",
+          "severity": "High",
+          "cves": [
+            "CVE-2026-79770"
+          ],
+          "fixVersions": [
+            "1.19.3"
+          ],
+          "maxCvss": 8.7,
+          "description": "Nokogiri CSS selector tokenizer has regular expression backtracking",
+          "dataSource": "https://github.com/advisories/GHSA-c4rq-3m3g-8wgx",
+          "affectsVersions": [
+            "1.18.9-x86_64-linux-gnu"
+          ],
+          "advisoryUrls": [
+            "https://github.com/advisories/GHSA-c4rq-3m3g-8wgx",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-79770"
+          ]
+        }
+      ]
+    },
+    {
+      "package": "rubyzip",
+      "ecosystem": "gem",
+      "language": "ruby",
+      "severity": "High",
+      "installedVersions": [
+        {
+          "version": "2.4.1",
+          "locations": [
+            "omnibus/Gemfile.lock",
+            "src/chef-server-ctl/Gemfile.lock",
+            "src/oc-id/Gemfile.lock"
+          ]
+        }
+      ],
+      "components": [
+        "omnibus",
+        "src"
+      ],
+      "fixVersions": [
+        "3.4.0"
+      ],
+      "vulnerabilities": [
+        {
+          "id": "GHSA-47m2-wp7j-p9vc",
+          "severity": "High",
+          "cves": [
+            "CVE-2026-85396"
+          ],
+          "fixVersions": [
+            "3.4.0"
+          ],
+          "maxCvss": 8.7,
+          "description": "rubyzip path traversal vulnerability",
+          "dataSource": "https://github.com/advisories/GHSA-47m2-wp7j-p9vc",
+          "affectsVersions": [
+            "2.4.1"
+          ],
+          "advisoryUrls": [
+            "https://github.com/advisories/GHSA-47m2-wp7j-p9vc",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-85396"
+          ]
+        }
+      ]
+    },
+    {
+      "package": "websocket-driver",
+      "ecosystem": "gem",
+      "language": "ruby",
+      "severity": "High",
+      "installedVersions": [
+        {
+          "version": "0.8.0",
+          "locations": [
+            "src/oc-id/Gemfile.lock"
+          ]
+        }
+      ],
+      "components": [
+        "src"
+      ],
+      "fixVersions": [
+        "0.8.2"
+      ],
+      "vulnerabilities": [
+        {
+          "id": "GHSA-2x63-gw47-w4mm",
+          "severity": "High",
+          "cves": [
+            "CVE-2026-61666"
+          ],
+          "fixVersions": [
+            "0.8.2"
+          ],
+          "maxCvss": 8.9,
+          "description": "websocket-driver-ruby: Denial of service via malformed Host header",
+          "dataSource": "https://github.com/advisories/GHSA-2x63-gw47-w4mm",
+          "affectsVersions": [
+            "0.8.0"
+          ],
+          "advisoryUrls": [
+            "https://github.com/advisories/GHSA-2x63-gw47-w4mm",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-61666"
+          ]
+        }
+      ]
+    }
+  ]
+}
