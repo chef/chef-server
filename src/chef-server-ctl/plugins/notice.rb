@@ -48,7 +48,7 @@ efast_xs | c2a6b925ed94ab8a28ff49375782834033919190 | Apache-2.0
 eini | 511a94254d6eecc9331da31cd4fa08ff64b4d2e2 | Apache-2.0
 ej | f0425c1b8894acddb6e687fe3acbc9c1eafbd3e0 | Apache-2.0
 envy | 0148fb4b7ed0e188511578e98b42d6e7dde0ebd1 | Apache-2.0
-erlang | 26.2.5.14 | Apache-2.0
+erlang | 29.1.2 | Apache-2.0
 ffi-libarchive | 1.1.14 | Apache-2.0
 folsom | 38e2cce7c64ce1f0a3a918d90394cfc0a940b1ba | Apache-2.0
 folsom_graphite | 6898a51a6478767b45b9e568274c9ade7d71908d | Apache-2.0
@@ -492,7 +492,7 @@ efast_xs vc2a6b925ed94ab8a28ff49375782834033919190,
 eini v511a94254d6eecc9331da31cd4fa08ff64b4d2e2,
 ej vf0425c1b8894acddb6e687fe3acbc9c1eafbd3e0,
 envy v0148fb4b7ed0e188511578e98b42d6e7dde0ebd1,
-erlang v26.2.5.14,
+erlang v29.1.2,
 ffi-libarchive v1.1.3,
 folsom v38e2cce7c64ce1f0a3a918d90394cfc0a940b1ba,
 folsom_graphite v6898a51a6478767b45b9e568274c9ade7d71908d,
