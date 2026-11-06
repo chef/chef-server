@@ -381,7 +381,7 @@ GEM
     pstore (0.1.4)
     public_suffix (6.0.2)
     racc (1.8.1)
-    rack (3.2.6)
+    rack (3.2.8)
     rackup (2.3.1)
       rack (>= 3)
     rainbow (3.1.1)
@@ -516,7 +516,7 @@ DEPENDENCIES
   knife (~> 19.0.105)
   knife-ec-backup (~> 3.0.8)
   public_suffix (< 7.0)
-  rack (>= 3.2.5)
+  rack (>= 3.2.6)
   rake
   rest-client!
   rexml (>= 3.4.2)
