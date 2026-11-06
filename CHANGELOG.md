@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.10.128 -->
-## [15.10.128](https://github.com/chef/chef-server/tree/15.10.128) (2026-10-29)
+<!-- latest_release 15.10.129 -->
+## [15.10.129](https://github.com/chef/chef-server/tree/15.10.129) (2026-11-06)
 
 #### Merged Pull Requests
-- CHEF-39788 - Update oc-id Rails to 7.2.3.2 [#4253](https://github.com/chef/chef-server/pull/4253) ([lbakerchef](https://github.com/lbakerchef))
+- Updated websocket-driver to 0.8.2. [#4255](https://github.com/chef/chef-server/pull/4255) ([sreepuramsudheer](https://github.com/sreepuramsudheer))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.10.125 -->
 ### Changes since 15.10.125 release
 
 #### Merged Pull Requests
+- Updated websocket-driver to 0.8.2. [#4255](https://github.com/chef/chef-server/pull/4255) ([sreepuramsudheer](https://github.com/sreepuramsudheer)) <!-- 15.10.129 -->
 - CHEF-39788 - Update oc-id Rails to 7.2.3.2 [#4253](https://github.com/chef/chef-server/pull/4253) ([lbakerchef](https://github.com/lbakerchef)) <!-- 15.10.128 -->
 - CHEF-37962 - Add faraday &gt;= 2.14.3 floor to chef-server-ctl and oc-id Gemfiles [#4239](https://github.com/chef/chef-server/pull/4239) ([lbakerchef](https://github.com/lbakerchef)) <!-- 15.10.127 -->
 - Add deprecation message to all docs pages [#4238](https://github.com/chef/chef-server/pull/4238) ([IanMadd](https://github.com/IanMadd)) <!-- 15.10.126 -->
