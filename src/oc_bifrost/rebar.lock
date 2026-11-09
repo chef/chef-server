@@ -36,7 +36,7 @@
   0},
  {<<"meck">>,
   {git,"https://github.com/eproxus/meck",
-       {ref,"06192a984750070ace33b60a492ca27ec9bc6806"}},
+       {ref,"3486bff5884e6db44f033a09f2b98dfd9e60d57e"}},
   1},
  {<<"mixer">>,
   {git,"https://github.com/inaka/mixer",
