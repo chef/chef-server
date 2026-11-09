@@ -68,7 +68,7 @@
   1},
  {<<"meck">>,
   {git,"https://github.com/eproxus/meck",
-       {ref,"e48641a20a605174e640ac91a528d443be11c9b9"}},
+       {ref,"3486bff5884e6db44f033a09f2b98dfd9e60d57e"}},
   0},
  {<<"mini_s3">>,
   {git,"https://github.com/chef/mini_s3",
