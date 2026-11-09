@@ -30,11 +30,11 @@
 
 -behaviour(gen_fsm).
 
-%% supress gen_fsm deprecation warning.
+%% supress gen_fsm deprecation warnings (function calls, and callbacks since OTP 27).
 %% gen_fsm is expected to remain in erlang for the foreseeable future as of this time.
 %% https://erlang.org/doc/general_info/deprecations.html
 %% https://erlang.org/doc/general_info/scheduled_for_removal.html
--compile(nowarn_deprecated_function).
+-compile([nowarn_deprecated_function, nowarn_deprecated_callback]).
 
 %% API
 -export([
