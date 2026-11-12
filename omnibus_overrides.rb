@@ -19,3 +19,4 @@ override :logrotate, version: "3.19.0"
 
 override :nokogiri, version: "1.18.9"
 override :openssl, fips_version: "3.1.2", fips_enabled: true
+override :curl, version: "8.22.0"
