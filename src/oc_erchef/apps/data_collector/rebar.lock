@@ -15,9 +15,9 @@
   0},
  {<<"opscoderl_httpc">>,
   {git,"https://github.com/chef/opscoderl_httpc",
-       {ref,"39291d99bdb6930d82422d51552c068a3325d1ed"}},
+       {ref,"368c2af27f0dca3431bc783c65507d6c79b6d28f"}},
   0},
  {<<"pooler">>,
   {git,"https://github.com/chef/pooler",
-       {branch,"CHEF-11677/CHEF-12498/lbaker"}},
+       {branch,"CHEF-37251/lbaker"}},
   0}].
