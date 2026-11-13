@@ -117,7 +117,11 @@ get_license_info(InstallTime, cli) ->
   os:cmd(?LICENSE_SCAN_CMD ++ ?DEFAULT_FILE_PATH),
   case file:read_file(?DEFAULT_FILE_PATH) of
     {ok, Bin} ->
-      case catch jiffy:decode(Bin) of
+      case try jiffy:decode(Bin)
+           catch
+             throw:Thrown -> Thrown;
+             _:_ -> invalid_json
+           end of
         {Json} -> Json;
         _ ->
           lager:warning("CLI license check returned invalid JSON, falling back to default license"),
@@ -217,7 +221,12 @@ make_license_payload(InstallTime, _Other) ->
 %%% Internal functions
 %%% =====================
 check_license(#state{install_time = InstallTime} = State,  ModeOrPath) ->
-  JsonStr = case catch get_license_info(InstallTime, ModeOrPath) of
+  JsonStr = case try get_license_info(InstallTime, ModeOrPath)
+                 catch
+                   throw:Thrown -> Thrown;
+                   error:Reason:Stack -> {'EXIT', {Reason, Stack}};
+                   exit:Reason -> {'EXIT', Reason}
+                 end of
               Result when is_list(Result) -> Result;
               {'EXIT', N} ->
                 lager:error("License check failed with exit: ~p", [N]),
