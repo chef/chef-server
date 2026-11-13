@@ -143,7 +143,10 @@
   {git,"https://github.com/prometheus-erl/prometheus.erl",
        {ref,"09b95f8e4e4020b6a692c34d146ac028ff4f2b5b"}},
   0},
- {<<"quantile_estimator">>,{pkg,<<"quantile_estimator">>,<<"1.0.2">>},1},
+ {<<"quantile_estimator">>,
+  {git,"https://github.com/odo/quantile_estimator",
+       {ref,"3c4c505246f165e179619ebe6690080210c84830"}},
+  0},
  {<<"quickrand">>,
   {git,"https://github.com/okeuday/quickrand.git",
        {ref,"c7eca718faa0d52c097155263dea6c25067396f7"}},
@@ -172,9 +175,3 @@
   {git,"https://github.com/chef/webmachine",
        {ref,"8e3141994826a731d8d68ceaac45e80a7ff9f7fa"}},
   1}]}.
-[
-{pkg_hash,[
- {<<"quantile_estimator">>, <<"ECD281D40110FDD9BA62685531E4435E0839A52FD1058DA5564F1763E4642EF7">>}]},
-{pkg_hash_ext,[
- {<<"quantile_estimator">>, <<"DB404793D6384995A1AC6DD973E2CEE5BE9FCC128765BDBA53D87C564E296B64">>}]}
-].
