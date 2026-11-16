@@ -21,7 +21,7 @@ describe "/_stats API endpoint", :stats do
     "erlang_vm_ets_limit" => "GAUGE",
     "erlang_vm_statistics_wallclock_time_milliseconds" => "COUNTER",
     "erlang_vm_statistics_runtime_milliseconds" => "COUNTER",
-    "erlang_vm_statistics_run_queues_length_total" => "GAUGE",
+    "erlang_vm_statistics_run_queues_length" => "GAUGE",
     "erlang_vm_statistics_reductions_total" => "COUNTER",
     "erlang_vm_statistics_bytes_output_total" => "COUNTER",
     "erlang_vm_statistics_bytes_received_total" => "COUNTER",
