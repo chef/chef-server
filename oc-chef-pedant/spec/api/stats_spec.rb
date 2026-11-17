@@ -107,13 +107,8 @@ describe "/_stats API endpoint", :stats do
     "chef_elasticsearch_delete_search_db_count" => "COUNTER",
     "chef_elasticsearch_delete_search_db_by_type_count" => "COUNTER",
     "chef_elasticsearch_search_with_scroll_count" => "COUNTER",
-    # These counters have labels and thus prometheus doesn't output
-    # data for them unless we actually increment the counter with a
-    # label. Our tests don't seem to hit these code paths currently.
-    #
-    # "chef_index_http_req_failure_total" => "COUNTER"
+    # Labeled counter not exercised by our tests (see OPTIONAL_TYPE_MAP_*):
     # "chef_elasticsearch_search_with_scroll_resp_count" => "COUNTER",
-    "chef_elasticsearch_search_resp_count" => "COUNTER",
   }.freeze
 
   CHEF_INDEX_TYPE_MAP_OS = {
@@ -121,6 +116,19 @@ describe "/_stats API endpoint", :stats do
     "chef_opensearch_search_count" => "COUNTER",
     "chef_opensearch_delete_search_db_count" => "COUNTER",
     "chef_opensearch_delete_search_db_by_type_count" => "COUNTER",
+  }.freeze
+
+  # Labeled counters only emit samples after they are incremented with a
+  # label, so whether they appear depends on server activity (e.g. a search
+  # having run, or a failed search-index request while OpenSearch starts).
+  # They may be present or absent; when present their type must match.
+  OPTIONAL_TYPE_MAP_ES = {
+    "chef_index_http_req_failure_total" => "COUNTER",
+    "chef_elasticsearch_search_resp_count" => "COUNTER",
+  }.freeze
+
+  OPTIONAL_TYPE_MAP_OS = {
+    "chef_index_http_req_failure_total" => "COUNTER",
     "chef_opensearch_search_resp_count" => "COUNTER",
   }.freeze
 
@@ -164,8 +172,10 @@ describe "/_stats API endpoint", :stats do
 
   if Pedant::Config.search_provider == "opensearch"
     CHEF_INDEX_TYPE_MAP = CHEF_INDEX_TYPE_MAP_COM.merge(CHEF_INDEX_TYPE_MAP_OS)
+    OPTIONAL_TYPE_MAP = OPTIONAL_TYPE_MAP_OS
   else
     CHEF_INDEX_TYPE_MAP = CHEF_INDEX_TYPE_MAP_COM.merge(CHEF_INDEX_TYPE_MAP_ES)
+    OPTIONAL_TYPE_MAP = OPTIONAL_TYPE_MAP_ES
   end
 
   SHARED_TYPE_MAP = ERLANG_RESPONSE_TYPE_MAP.merge(CHEF_INDEX_TYPE_MAP)
@@ -217,7 +227,9 @@ describe "/_stats API endpoint", :stats do
         acc << m[0] if m
         acc
       end
-      expect(names.uniq).to match_array(PROMETHEUS_RESPONSE_TYPE_MAP.keys)
+      required = PROMETHEUS_RESPONSE_TYPE_MAP.keys
+      expect(names.uniq).to include(*required)
+      expect(names.uniq - required - OPTIONAL_TYPE_MAP.keys).to be_empty
     end
 
     RESPONSE_TYPE_MAP.each do |name, type|
@@ -227,6 +239,14 @@ describe "/_stats API endpoint", :stats do
         expect(stat).not_to be_nil
         expect(stat["metrics"]).not_to be_empty
         expect(stat["type"]).to eq(type)
+      end
+    end
+
+    OPTIONAL_TYPE_MAP.each do |name, type|
+      it "returns #{name} typed as #{type} when present" do
+        response = JSON.parse(get(request_url, nil, auth_headers: auth_headers))
+        stat = response.find { |s| s["name"] == name }
+        expect(stat["type"]).to eq(type) if stat
       end
     end
   end
