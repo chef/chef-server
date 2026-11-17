@@ -7,7 +7,7 @@ pkg_deps=(
   core/sqitch
   core/postgresql14-client
   core/curl
-  core/node
+  core/node/24.22.2/20261029125821
   core/ruby3_1/3.1.7
   core/rsync
   core/sed
