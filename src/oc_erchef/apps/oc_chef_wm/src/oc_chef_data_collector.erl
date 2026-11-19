@@ -56,8 +56,8 @@ notify(_Req, _State) ->
 
 -spec req_success(Req :: wm_req()) -> boolean().
 req_success(Req) ->
-    case Code = integer_to_list(wrq:response_code(Req)) of
-        Code = [$2 | _] ->
+    case integer_to_list(wrq:response_code(Req)) of
+        [$2 | _] ->
             true;
         _ ->
             false
