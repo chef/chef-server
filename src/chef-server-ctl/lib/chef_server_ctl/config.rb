@@ -1,5 +1,6 @@
 require "chef_server_ctl/log"
 require "chef-utils/dist"
+require "erb"
 
 # ChefServerCtl::Config is a global configuration class for
 # ChefServerCtl subcommands.
@@ -148,7 +149,15 @@ Patents:       #{ChefUtils::Dist::Org::PATENTS}
       pg_config = @@ctl.running_service_config("postgresql")
       host = pg_config["vip"]
       port = pg_config["port"]
-      "postgresql:///#{db_name}?user=#{db_user}&password=#{db_password}&host=#{host}&port=#{port}"
+      # URL-encode the credentials. A username or password containing
+      # characters that are significant in a libpq connection URI (such as
+      # '&', '?', '#', '/', or spaces) would otherwise break the URI or
+      # inject additional connection parameters. The DB superuser password,
+      # for example, can be set to an arbitrary value via
+      # set-db-superuser-password.
+      user = ERB::Util.url_encode(db_user.to_s)
+      password = ERB::Util.url_encode(db_password.to_s)
+      "postgresql:///#{db_name}?user=#{user}&password=#{password}&host=#{host}&port=#{port}"
     end
 
     def self.ssl_params
