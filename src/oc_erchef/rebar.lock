@@ -152,7 +152,7 @@
   1},
  {<<"sqerl">>,
   {git,"https://github.com/chef/sqerl",
-       {branch,"shahid/sqerl-erl27.3-pg16.1"}},
+       {ref,"bc1fbb57df0ce1c3d7aeb8733c1ffa2b8ebbca2c"}},
   0},
  {<<"stats_hero">>,
   {git,"https://github.com/chef/stats_hero",
