@@ -26,6 +26,8 @@
 
 -module(chef_wm_search).
 
+-include_lib("kernel/include/logger.hrl").
+
 -include("oc_chef_wm.hrl").
 -include("chef_solr.hrl").
 
@@ -188,7 +190,7 @@ filter_permitted_results(ReqId, RequestorId, OrgId, DbContext, {data_bag, BagNam
                 false -> [];
                 true -> Ids;
                 Error ->
-                    lager:error("is_authorized_on_resource failed (~p, ~p, ~p): ~p~n",
+                    ?LOG_ERROR("is_authorized_on_resource failed (~p, ~p, ~p): ~p~n",
                                 [read, {data_bag, BagName}, RequestorId, Error]),
                     {{halt, 500}, ReqId}
             end
@@ -206,7 +208,7 @@ filter_permitted_results(ReqId, RequestorId, _OrgId, DbContext, IndexType, Ids) 
         {false, {_NoAuthzList, AuthzList}} ->
             AuthzList;
         {error, Why} ->
-            lager:error("failed to check permissions due to ~p on ~p~n", [Why, AuthzIds])
+            ?LOG_ERROR("failed to check permissions due to ~p on ~p~n", [Why, AuthzIds])
     end.
 
 %% Return current app config value for batch size, defaulting if absent.

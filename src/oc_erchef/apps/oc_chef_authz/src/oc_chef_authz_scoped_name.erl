@@ -20,6 +20,8 @@
 
 -module(oc_chef_authz_scoped_name).
 
+-include_lib("kernel/include/logger.hrl").
+
 -include("chef_types.hrl").
 -include("oc_chef_types.hrl").
 
@@ -432,7 +434,7 @@ render_names_from_org_id_f(_OrgId, {AnotherOrgId, Names}, Expanded) ->
     %% be robust to that. Thought we will log a warning message to be transparent.
     case org_id_to_name(AnotherOrgId) of
         not_found ->
-            lager:warning("Unable to find organization with id '~p'~n", [AnotherOrgId]),
+            ?LOG_WARNING("Unable to find organization with id '~p'~n", [AnotherOrgId]),
             Expanded;
         OrgName ->
             ENames = [ make_name(OrgName, Name) || Name <- Names ],

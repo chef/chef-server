@@ -21,6 +21,8 @@
 
 -module(oc_chef_wm_policy_groups).
 
+-include_lib("kernel/include/logger.hrl").
+
 -include("oc_chef_wm.hrl").
 
 %% Webmachine resource callbacks
@@ -87,7 +89,7 @@ to_json(Req, #base_state{chef_db_context = DbContext, organization_guid = OrgId,
     case chef_db:find_all_policy_revisions_by_group_and_name(DbContext, OrgId) of
         {error, Why} ->
             Report = {find_all_policy_revisions_by_group_and_name, {Why, ReqId}},
-            lager:error("~p", [Report]),
+            ?LOG_ERROR("~p", [Report]),
             error(Report);
         PolicyGroupRevisionIDs ->
             EJSON = build_nested_list_data(PolicyGroupRevisionIDs, BaseEJSON),

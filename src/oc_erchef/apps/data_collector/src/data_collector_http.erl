@@ -1,5 +1,7 @@
 -module(data_collector_http).
 
+-include_lib("kernel/include/logger.hrl").
+
 -export([
          request/3,
          request/4,
@@ -85,12 +87,12 @@ request_with_caught_errors(Path, Method, Body, Headers) ->
 %%
 -spec create_pool() -> ok.
 create_pool() ->
-    lager:info("Creating Data Collector HTTP pool"),
+    ?LOG_INFO("Creating Data Collector HTTP pool"),
     oc_httpc:add_pool(?MODULE, application:get_all_env()),
     ok.
 
 -spec delete_pool() -> ok.
 delete_pool() ->
-    lager:info("Removing Data Collector HTTP pool"),
+    ?LOG_INFO("Removing Data Collector HTTP pool"),
     oc_httpc:delete_pool(?MODULE),
     ok.

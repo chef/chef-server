@@ -10,7 +10,7 @@
 -include("oc_chef_types.hrl").
 -include_lib("eunit/include/eunit.hrl").
 
-%%-compile([export_all, {parse_transform, lager_transform}]).
+%%-compile([export_all]).
 
 -define(ORG_ID, <<"10000000000000000000000000000001">>).
 -define(ORG_AUTHZ_ID, <<"10000000000000000000000000000002">>).

@@ -17,6 +17,8 @@
 
 -module(chef_index).
 
+-include_lib("kernel/include/logger.hrl").
+
 -export([search/1,
          update/1,
          update/2,
@@ -140,7 +142,7 @@ add_batch_item_with_retries(Item, Failures, Max) ->
             Error;
         Error ->
             Retries = Failures + 1,
-            lager:warning("chef_index:add failed for ~s[~s]: ~p retrying (~p/~p)", [TypeName, Id, Error, Retries, Max]),
+            ?LOG_WARNING("chef_index:add failed for ~s[~s]: ~p retrying (~p/~p)", [TypeName, Id, Error, Retries, Max]),
             wait_before_retry(),
             add_batch_item_with_retries(Item, Retries, Max)
     end.
@@ -153,14 +155,14 @@ wait_before_retry() ->
 wait_before_retry(0, 0) ->
     ok;
 wait_before_retry(Min, Min) ->
-    lager:info("chef_index: waiting ~B ms before retry", [Min]),
+    ?LOG_INFO("chef_index: waiting ~B ms before retry", [Min]),
     timer:sleep(Min);
 wait_before_retry(Min, Max) when Min > Max ->
-    lager:error("chef_index: reindex_sleep_max_ms less than reindex_sleep_min_ms. Sleeping ~B", [Max]),
+    ?LOG_ERROR("chef_index: reindex_sleep_max_ms less than reindex_sleep_min_ms. Sleeping ~B", [Max]),
     timer:sleep(Max);
 wait_before_retry(Min, Max) ->
     RandMinMax = Min + rand:uniform(Max - Min),
-    lager:info("chef_index: waiting ~B ms before retry", [RandMinMax]),
+    ?LOG_INFO("chef_index: waiting ~B ms before retry", [RandMinMax]),
     timer:sleep(RandMinMax).
 
 not_ok(Results) ->

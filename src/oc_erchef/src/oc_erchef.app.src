@@ -35,8 +35,7 @@
                            chef_telemetry,
                            chef_license
                           ]},
-  {applications, [lager,
-                  chef_secrets,
+  {applications, [                  chef_secrets,
                   chef_index,
                   depsolver,
                   bear,

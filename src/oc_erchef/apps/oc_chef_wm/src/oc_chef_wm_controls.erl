@@ -5,6 +5,8 @@
 
 -module(oc_chef_wm_controls).
 
+-include_lib("kernel/include/logger.hrl").
+
 -include("oc_chef_wm.hrl").
 
 %% Webmachine resource callbacks
@@ -71,7 +73,7 @@ validate_request('POST', Req, #base_state{resource_state = ControlState} = State
             {Req, State#base_state{resource_state =
                                      ControlState#control_state{control_data = Data}}};
         #ej_invalid{} = Error ->
-             lager:error(": ~p", [Error]),
+             ?LOG_ERROR(": ~p", [Error]),
              throw(Error)
     end.
 

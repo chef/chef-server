@@ -1,5 +1,7 @@
 -module(oc_chef_data_collector).
 
+-include_lib("kernel/include/logger.hrl").
+
 -include("oc_chef_wm.hrl").
 
 -export([notify/2]).
@@ -39,7 +41,7 @@ notify(Req, #base_state{reqid = ReqId, resource_state = ResourceState, resource_
                     ok ->
                         ok;
                     {error, Error} ->
-                        lager:debug("Data Collector notify failed: ~p", [Error])
+                        ?LOG_DEBUG("Data Collector notify failed: ~p", [Error])
                 end;
             %% If we're here then we've matched a resource that we want to report
             %% but the request has to have failed with a non-successful response
@@ -47,7 +49,7 @@ notify(Req, #base_state{reqid = ReqId, resource_state = ResourceState, resource_
             %% collector we'll skip the resource.
             {ReqMethod, _, _} ->
                 ResCode = wrq:response_code(Req),
-                lager:debug("Data Collector notify skipped for ~p ~p (~p)", [ReqMethod, ResourceState, ResCode]),
+                ?LOG_DEBUG("Data Collector notify skipped for ~p ~p (~p)", [ReqMethod, ResourceState, ResCode]),
                 ok
         end;
 

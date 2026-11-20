@@ -5,6 +5,8 @@
 
 -module(oc_chef_authz_org_creator).
 
+-include_lib("kernel/include/logger.hrl").
+
 -export([
          create_org/2,
          create_org/3
@@ -197,7 +199,7 @@ create_object(ApiVersion, OrgId, RequestorId, Type, [Name | Remaining], Cache) -
         Error ->
             %% Do we clean up created authz stuff here, or save it for
             %% general org deletion routine later?
-            lager:error("Could not create object ~p during creation of org ~s",
+            ?LOG_ERROR("Could not create object ~p during creation of org ~s",
                         [{Type, Name}, OrgId]),
             throw(Error)
     end.
@@ -355,6 +357,6 @@ find(Key, C) ->
     case dict:find(Key, C) of
         {ok, Value} -> Value;
         error ->
-            lager:error("Error processing org creation policy, no definition found for ~p", [Key]),
+            ?LOG_ERROR("Error processing org creation policy, no definition found for ~p", [Key]),
             throw( {error, bad_org_creation_policy})
     end.

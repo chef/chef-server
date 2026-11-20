@@ -218,7 +218,7 @@ send_streamed_body(#context{entry_md = #db_file{chunk_count = ChunkCount, hash_s
         ShaExpected ->
             ok;
         S ->
-            lager:error("checksum mismatch on download: expected: ~p; sent: ~p", [ShaExpected, S])
+            ?LOG_ERROR("checksum mismatch on download: expected: ~p; sent: ~p", [ShaExpected, S])
     end,
     {<<>>, done};
 send_streamed_body(#context{entry_md = #db_file{data_id = DataId} = DbFile,
@@ -324,7 +324,7 @@ write_streamed_body({Data, done}, Rq0,
                     ok = finalize_maybe_create_file(Rq1, Ctx0, File1),
                     {{halt, 204}, Rq1, Ctx1};
                 _ ->
-                    lager:error("Mismatch between Content-MD5 and actual content. Content-MD5: ~p; Actual: ~p", [RequestMd5, HashMd5]),
+                    ?LOG_ERROR("Mismatch between Content-MD5 and actual content. Content-MD5: ~p; Actual: ~p", [RequestMd5, HashMd5]),
                     %% Exiting here causes uploads to be abandoned, but the upload_cleanup task will
                     %% eventually clean things up.
                     {{halt, 406}, Rq0, Ctx1}

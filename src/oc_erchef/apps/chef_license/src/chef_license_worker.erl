@@ -1,5 +1,7 @@
 -module(chef_license_worker).
 
+-include_lib("kernel/include/logger.hrl").
+
 -behaviour(gen_server).
 
 -include("../../../include/chef_types.hrl").
@@ -120,21 +122,21 @@ get_license_info(InstallTime, cli) ->
       case catch jiffy:decode(Bin) of
         {Json} -> Json;
         _ ->
-          lager:warning("CLI license check returned invalid JSON, falling back to default license"),
+          ?LOG_WARNING("CLI license check returned invalid JSON, falling back to default license"),
           make_license_payload(InstallTime, #{})
       end;
     {error, Reason} ->
-      lager:debug("CLI license file not found (~p), falling back to default license", [Reason]),
+      ?LOG_DEBUG("CLI license file not found (~p), falling back to default license", [Reason]),
       make_license_payload(InstallTime, #{})
   end;
 % This is for the file-based license mode, where we read the license directly from a file path.
 get_license_info(InstallTime, Path) ->
   case load_local_license(InstallTime, Path) of
     {ok, Json} ->
-      lager:debug("Loaded local license data: ~p", [Json]),
+      ?LOG_DEBUG("Loaded local license data: ~p", [Json]),
       Json;
     {error, Reason} ->
-      lager:warning("Failed to load local license, falling back to default: ~p", [Reason]),
+      ?LOG_WARNING("Failed to load local license, falling back to default: ~p", [Reason]),
       make_license_payload(InstallTime, #{})
   end.
 
@@ -200,7 +202,7 @@ make_license_payload(InstallTime, _Other) ->
   %% If we don't have the expected fields, we don't have a valid license - so let's make something that looks like one,
   %% but is valid from the install date + 90 days.
   ExpirationTime = InstallTime + (60 * 60 * 24 * 90), % 90 days from install time
-  lager:debug("License payload is missing expected fields, treating as valid license with expiration : ~p", [ExpirationTime]),
+  ?LOG_DEBUG("License payload is missing expected fields, treating as valid license with expiration : ~p", [ExpirationTime]),
   [ {<<"result">>, {[
                     {<<"license_id">>, <<>>},
                     {<<"customer_name">>, <<>>},
@@ -220,7 +222,7 @@ check_license(#state{install_time = InstallTime} = State,  ModeOrPath) ->
   JsonStr = case catch get_license_info(InstallTime, ModeOrPath) of
               Result when is_list(Result) -> Result;
               {'EXIT', N} ->
-                lager:error("License check failed with exit: ~p", [N]),
+                ?LOG_ERROR("License check failed with exit: ~p", [N]),
                 <<"">>
             end,
   case process_license(JsonStr) of

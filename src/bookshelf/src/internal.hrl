@@ -26,17 +26,11 @@
 -define(PGSQL_RETRY_INTERVAL, 5).
 
 %% logging utilities
--compile([{parse_transform, lager_transform}]).
-%% For general info and error logging, we use error_logger and take advantage of lager's
-%% error_logger handler. The main benefit is seeing the logs via sasl instead of lager for
-%% common test. We _could_ take this approach to make lager a soft dependency, but once you
-%% want to add debug-level logging you need direct lager calls.
--define(LOG_INFO(X, Y), error_logger:info_msg(X, Y)).
--define(LOG_INFO(X), error_logger:info_msg(X)).
--define(LOG_ERROR(X, Y), error_logger:error_msg(X, Y)).
--define(LOG_ERROR(X), error_logger:error_msg(X)).
--define(LOG_DEBUG(X, Y), lager:debug(X, Y)).
--define(LOG_DEBUG(X), lager:debug(X)).
+%% OTP's logger provides ?LOG_INFO/?LOG_ERROR/?LOG_DEBUG at the same arities
+%% the lager/error_logger definitions it replaces did, so every existing call
+%% site is unchanged. The macros (rather than logger:Level/2 calls) are what
+%% capture module, function and line -- the job lager's parse transform did.
+-include_lib("kernel/include/logger.hrl").
 
 -include("bksw_obj.hrl").
 

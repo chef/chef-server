@@ -37,7 +37,6 @@ setup(MockedModules) ->
         {ibrowse_options, [{connect_timeout, 10000}]}
     ],
     [application:set_env(data_collector, Name, Value) || {Name, Value} <- Env],
-    lager:start(),
     setup_chef_secrets(),
     application:start(pooler),
     application:start(ibrowse),

@@ -23,6 +23,8 @@
 
 -module(chef_wm_depsolver).
 
+-include_lib("kernel/include/logger.hrl").
+
 %% chef_wm behaviour callbacks
 -include("oc_chef_wm.hrl").
 -behaviour(chef_wm).
@@ -109,7 +111,7 @@ process_post(Req, #base_state{reqid = ReqId,
     EnvConstraints = chef_object_base:depsolver_constraints(Env),
     case chef_db:fetch_all_cookbook_version_dependencies(DbContext, OrgId) of
         {error, Error} ->
-            lager:error("Dependency retrieval failure for org ~p with environment ~p: ~p~n",
+            ?LOG_ERROR("Dependency retrieval failure for org ~p with environment ~p: ~p~n",
                                    [OrgName, EnvName, Error]),
             server_error(Req, State, <<"Dependency retrieval failed">>, dep_retrieval_failure);
         AllVersions ->
@@ -233,7 +235,7 @@ handle_depsolver_results(ok, {error, no_depsolver_workers}, Req, State) ->
             no_depsolver_workers);
 %% log the exception and return a 500
 handle_depsolver_results(ok, {error, exception, Message, Backtrace}, Req, State) ->
-    lager:error([{module, ?MODULE},
+    ?LOG_ERROR([{module, ?MODULE},
                                {error_type, depsolver_ruby_exception},
                                {message, Message},
                                {backtrace, Backtrace}]),
@@ -303,7 +305,7 @@ make_json_list(OrgId, CookbookVersions, URI, ApiVersion) ->
 
 make_json_list(_CookbookVersions, _URI, _ApiVersion, Key, ?CACHE_MAX_RETRIES) ->
     % Waiting is good, but let's not hang the client up forever.
-    lager:info("chef_wm_depsolver:make_json_list ~p - forcing retry after giving up on ~p", [self(), Key]),
+    ?LOG_INFO("chef_wm_depsolver:make_json_list ~p - forcing retry after giving up on ~p", [self(), Key]),
     {error, busy};
 make_json_list(CookbookVersions, URI, ApiVersion, Key, NumAttempts) ->
     case chef_cbv_cache:get(Key) of

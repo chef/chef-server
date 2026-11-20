@@ -21,6 +21,8 @@
 
 -module(bksw_sup).
 
+-include_lib("kernel/include/logger.hrl").
+
 -behaviour(supervisor).
 
 -export([start_link/0]).
@@ -71,9 +73,9 @@ ensure_default_bucket() ->
     DefaultBucket = <<"bookshelf">>,
     case bksw_sql:bucket_exists(DefaultBucket) of
         true ->
-            lager:info("Default bucket ~p already exists.", [DefaultBucket]),
+            ?LOG_INFO("Default bucket ~p already exists.", [DefaultBucket]),
             ok;
         false ->
-            lager:info("Create default bucket ~p.", [DefaultBucket]),
+            ?LOG_INFO("Create default bucket ~p.", [DefaultBucket]),
             bksw_sql:create_bucket(DefaultBucket)
     end.

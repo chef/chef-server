@@ -1,5 +1,7 @@
 -module(bifrost_wm_base).
 
+-include_lib("kernel/include/logger.hrl").
+
 -export([content_types_accepted/2,
          content_types_provided/2,
          create_path/2,
@@ -178,7 +180,7 @@ spawn_stats_hero_worker(Req, #base_state{reqid=ReqId,
             ok;
         {error, Reason} ->
             %% TODO: Need to put this to a separate file
-            lager:error(io_lib:format("FAILED stats_hero_worker_sup:new_worker: ~p~n", [Reason])),
+            ?LOG_ERROR(io_lib:format("FAILED stats_hero_worker_sup:new_worker: ~p~n", [Reason])),
             ok
     end.
 

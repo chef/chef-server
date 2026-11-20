@@ -50,8 +50,6 @@ start_server(Config) ->
     application:set_env(chef_db, couchdb_host, "localhost"),
     application:set_env(chef_db, couchdb_port, 6984),
 
-    application:set_env(lager, error_logger_redirect, false),
-
     %% Set bcrypt rounds to the minimum, speeding up password hashing during
     %% user record creation
     application:set_env(bcrypt, default_log_rounds, 4, [{persistent, true}]),
@@ -141,8 +139,6 @@ needed_apps() ->
      chef_objects,
      compiler,
      syntax_tools,
-     goldrush,
-     lager,
      chef_index,
      oc_chef_authz,
      oc_chef_wm].

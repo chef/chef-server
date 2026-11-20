@@ -16,6 +16,8 @@
 %%
 
 -module(chef_index_batch).
+
+-include_lib("kernel/include/logger.hrl").
 -behaviour(gen_server).
 
 -ifdef(TEST).
@@ -179,7 +181,7 @@ flush(State = #chef_idx_batch_state{item_queue = Queue,
     spawn(
       fun() ->
               prometheus_gauge:inc(chef_index_batch_inflight_flushes_count),
-              lager:debug("Batch posting to ~s ~p documents (~p bytes)", [Provider, length(DocsToAdd), CurrentSize + WrapperSize]),
+              ?LOG_DEBUG("Batch posting to ~s ~p documents (~p bytes)", [Provider, length(DocsToAdd), CurrentSize + WrapperSize]),
               Now = erlang:monotonic_time(),
               Res = chef_index:update(Provider, Doc),
               Now1 = erlang:monotonic_time(),
@@ -238,7 +240,7 @@ handle_call(stats, _From, State = #chef_idx_batch_state{avg_queue_latency = OQL,
             ],
     {reply, Stats, State};
 handle_call(stop, From, State) ->
-    lager:info("Stop requested from ~p", [From]),
+    ?LOG_INFO("Stop requested from ~p", [From]),
     {stop, normal, ok, State};
 handle_call(_Request, _From, State) ->
     Reply = ok,
@@ -257,7 +259,7 @@ collect_process_info() ->
             prometheus_gauge:set(chef_index_batch_memory_size_bytes, MemorySizeBytes),
             prometheus_gauge:set(chef_index_batch_mailbox_size, MailboxSize);
         Other ->
-            lager:warning("unexpected process_info reponse: ~w", [Other])
+            ?LOG_WARNING("unexpected process_info reponse: ~w", [Other])
     end.
 
 

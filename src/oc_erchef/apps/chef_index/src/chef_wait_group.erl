@@ -16,6 +16,8 @@
 %%
 -module(chef_wait_group).
 
+-include_lib("kernel/include/logger.hrl").
+
 -behaviour(gen_server).
 
 %% API Exports
@@ -124,7 +126,7 @@ handle_call(get_state, _From, State) ->
 handle_info({'EXIT', _From, normal}, State) ->
     {noreply, State};
 handle_info({'EXIT', From, Reason}, State) ->
-    lager:error("Worker ~p failed unexpectedly: ~p", [From, Reason]),
+    ?LOG_ERROR("Worker ~p failed unexpectedly: ~p", [From, Reason]),
     State1 = mark_job_failed(From, {worker_failed, Reason}, State),
     case maybe_reply_to_waiter(State1) of
         true ->

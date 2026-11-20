@@ -19,6 +19,8 @@
 %%
 
 -module(bksw_cleanup_task).
+
+-include_lib("kernel/include/logger.hrl").
 -behaviour(gen_server).
 
 -export([start_link/0]).
@@ -79,20 +81,20 @@ code_change(_OldVsn, State, _Extra) ->
 do_delete_cleanup(#state{deleted_cleanup_interval = Interval}) ->
     case sqerl:select(purge_expired, [Interval], first_as_scalar, [purge_expired]) of
         {ok, Count} ->
-            lager:debug("Cleanup task: cleaned up ~p expired file_data elements", [Count]),
+            ?LOG_DEBUG("Cleanup task: cleaned up ~p expired file_data elements", [Count]),
             Count;
         _Error ->
-            lager:debug("Cleanup task: error cleaning up expired file_data elements", []),
+            ?LOG_DEBUG("Cleanup task: error cleaning up expired file_data elements", []),
             0
     end.
 
 do_upload_cleanup(#state{upload_cleanup_interval = Interval}) ->
     case sqerl:select(cleanup_abandoned_uploads, [Interval], first_as_scalar, [cleanup_abandoned_uploads]) of
         {ok, Count} ->
-            lager:debug("Cleanup task: cleaned up ~p expired file_data elements", [Count]),
+            ?LOG_DEBUG("Cleanup task: cleaned up ~p expired file_data elements", [Count]),
             Count;
         _Error ->
-            lager:debug("Cleanup task: error cleaning up expired file_data elements", []),
+            ?LOG_DEBUG("Cleanup task: error cleaning up expired file_data elements", []),
             0
     end.
 
