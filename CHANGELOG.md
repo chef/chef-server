@@ -1,16 +1,17 @@
 # Chef Server Changelog
 <!-- usage documentation: http://expeditor-docs.es.chef.io/configuration/changelog/ -->
-<!-- latest_release 15.10.130 -->
-## [15.10.130](https://github.com/chef/chef-server/tree/15.10.130) (2026-11-12)
+<!-- latest_release 15.10.131 -->
+## [15.10.131](https://github.com/chef/chef-server/tree/15.10.131) (2026-11-23)
 
 #### Merged Pull Requests
-- CHEF-37200: Upgrade Habitat OpenResty to 1.31.8.1 [#4257](https://github.com/chef/chef-server/pull/4257) ([lbakerchef](https://github.com/lbakerchef))
+- Updated the core/node package to core/node/24.22.2/20261029125821 in oc-id [#4261](https://github.com/chef/chef-server/pull/4261) ([jashaik](https://github.com/jashaik))
 <!-- latest_release -->
 
 <!-- release_rollup since=15.10.125 -->
 ### Changes since 15.10.125 release
 
 #### Merged Pull Requests
+- Updated the core/node package to core/node/24.22.2/20261029125821 in oc-id [#4261](https://github.com/chef/chef-server/pull/4261) ([jashaik](https://github.com/jashaik)) <!-- 15.10.131 -->
 - CHEF-37200: Upgrade Habitat OpenResty to 1.31.8.1 [#4257](https://github.com/chef/chef-server/pull/4257) ([lbakerchef](https://github.com/lbakerchef)) <!-- 15.10.130 -->
 - Updated websocket-driver to 0.8.2. [#4255](https://github.com/chef/chef-server/pull/4255) ([sreepuramsudheer](https://github.com/sreepuramsudheer)) <!-- 15.10.129 -->
 - CHEF-39788 - Update oc-id Rails to 7.2.3.2 [#4253](https://github.com/chef/chef-server/pull/4253) ([lbakerchef](https://github.com/lbakerchef)) <!-- 15.10.128 -->
