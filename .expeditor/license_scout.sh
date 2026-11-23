@@ -42,8 +42,8 @@ if [[ "${BUILDKITE:-false}" == "true" ]]; then
   apt-get install -y --allow-downgrades libpq-dev libsqlite3-dev libyaml-dev || \
     (apt-get remove -y libpq5 libpq-dev && apt-get install -y libpq-dev libsqlite3-dev libyaml-dev)
   asdf plugin add erlang
-  asdf install erlang 26.2.5.14
-  asdf local erlang 26.2.5.14
+  asdf install erlang 29.1.2
+  asdf local erlang 29.1.2
   export PATH=/opt/asdf/shims:$PATH
 fi
 
